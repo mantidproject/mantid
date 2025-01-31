@@ -53,14 +53,14 @@ PoldiPeakCollection::PoldiPeakCollection(const CrystalStructure &crystalStructur
   setPeaks(hkls, dValues, structureFactors);
 }
 
-PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
+PoldiPeakCollection_sptr PoldiPeakCollection::clonePeakCollection() {
   PoldiPeakCollection_sptr clone = std::make_shared<PoldiPeakCollection>(m_intensityType);
   clone->setProfileFunctionName(m_profileFunctionName);
   clone->setPointGroup(m_pointGroup);
   clone->setUnitCell(m_unitCell);
 
   for (const auto &peak : m_peaks) {
-    clone->addPeak(peak->clone());
+    clone->addPeak(peak->clonePeak());
   }
 
   return clone;

@@ -55,7 +55,7 @@ protected:
                                                           MantidVec::const_iterator end) const;
 
   std::list<MantidVec::const_iterator>
-  mapPeakPositionsToCorrelationData(std::list<MantidVec::const_iterator> &peakPositions,
+  mapPeakPositionsToCorrelationData(const std::list<MantidVec::const_iterator> &peakPositions,
                                     MantidVec::const_iterator baseDataStart,
                                     MantidVec::const_iterator originalDataStart) const;
 

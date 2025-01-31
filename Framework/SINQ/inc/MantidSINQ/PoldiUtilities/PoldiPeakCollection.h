@@ -39,7 +39,7 @@ public:
 
   virtual ~PoldiPeakCollection() = default;
 
-  PoldiPeakCollection_sptr clone();
+  PoldiPeakCollection_sptr clonePeakCollection();
 
   size_t peakCount() const;
 

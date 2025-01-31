@@ -122,7 +122,7 @@ std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaks(MantidVec::const
     ++iter;
   }
 
-  return std::move(truncatedPeaks);
+  return truncatedPeaks;
 }
 
 /** Actual recursive peak search method
@@ -180,7 +180,7 @@ std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaksRecursive(MantidV
  *data.
  */
 std::list<MantidVec::const_iterator>
-PoldiPeakSearch::mapPeakPositionsToCorrelationData(std::list<MantidVec::const_iterator> &peakPositions,
+PoldiPeakSearch::mapPeakPositionsToCorrelationData(const std::list<MantidVec::const_iterator> &peakPositions,
                                                    MantidVec::const_iterator baseDataStart,
                                                    MantidVec::const_iterator originalDataStart) const {
   std::list<MantidVec::const_iterator> transformedIndices;

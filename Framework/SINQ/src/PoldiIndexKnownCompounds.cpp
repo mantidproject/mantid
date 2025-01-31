@@ -657,7 +657,7 @@ PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(const PoldiPeakCollec
 
   PoldiPeakCollection_sptr sortedPeaks = std::make_shared<PoldiPeakCollection>(peaks->intensityType());
   for (const auto &peak : peakVector) {
-    sortedPeaks->addPeak(peak->clone());
+    sortedPeaks->addPeak(peak->clonePeak());
   }
 
   return sortedPeaks;

@@ -232,7 +232,7 @@ double PoldiInstrumentAdapter::extractPropertyFromRun(const Run &runInformation,
     throw std::runtime_error("Cannot construct instrument without " + propertyName + "-property in log. Aborting.");
   }
 
-  Kernel::Property *property = runInformation.getProperty(propertyName);
+  const Kernel::Property *property = runInformation.getProperty(propertyName);
 
   AbstractDoubleValueExtractor_sptr extractor = getExtractorForProperty(property);
 
