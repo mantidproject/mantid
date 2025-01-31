@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,unused-import
+from pathlib import Path
 import sys
+
 from mantidqt.gui_helper import get_qapplication
 
 try:
@@ -26,15 +28,18 @@ if SNAPRedGUI is not None:
     else:
         parent, flags = None, None
 
-    if not within_mantid:
-        # set the super-awesome color scheme
-        from snapred.meta.Config import Resource
+    # Recent versions of SNAPRed have required stylesheet settings, but it's important to apply these
+    #   only to the SNAPRed GUI and its children.
+    from snapred.meta.Config import Resource
 
-        with Resource.open("style.qss", "r") as styleSheet:
-            app.setStyleSheet(styleSheet.read())
-
-    # turn off tranlucent when running in mantid
+    # turn off translucent background when running in mantid
     s = SNAPRedGUI(parent, window_flags=flags, translucentBackground=(not within_mantid))
+
+    # "workbench_style.qss" may not exist in all versions of SNAPRed.
+    qssFilePath = Resource.getPath("workbench_style.qss" if within_mantid else "style.qss")
+    if Path(qssFilePath).exists():
+        with open(qssFilePath, "r") as styleSheet:
+            s.setStyleSheet(styleSheet.read())
     s.show()
 
     if not within_mantid:
