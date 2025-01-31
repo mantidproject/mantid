@@ -137,7 +137,7 @@ void ScriptEditor::setSettingsGroup(const QString &name) { m_settingsGroup = nam
  * Returns a string containing the settings group to use
  * @return A QString containing the group to use within the QSettings class
  */
-QString ScriptEditor::settingsGroup() const { return m_settingsGroup; }
+const QString &ScriptEditor::settingsGroup() const { return m_settingsGroup; }
 
 /**
  * Read settings saved to persistent store
