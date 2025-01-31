@@ -28,9 +28,6 @@
 
 namespace Mantid {
 namespace NeXus {
-MANTID_DATAHANDLING_DLL int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
-                                               std::vector<std::string> &definition);
-
 /** @class NexusFileIO SaveNexusProcessedHelper.h NeXus/SaveNexusProcessedHelper.h
 
 Utility method for saving NeXus format of Mantid Workspace
