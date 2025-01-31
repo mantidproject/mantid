@@ -1,0 +1,1 @@
+Fix for bug in ``mantid.plots.MantidAxes`` where an exception would occur when a workspace plot, which also had data not tied to a workspace on the same axes, had its workspace renamed.
