@@ -37,12 +37,11 @@ const std::string NULL_STR("NULL");
 } // namespace
 
 /// Empty default constructor
-NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(nullptr), m_filename() {}
+NexusFileIO::NexusFileIO() : m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)
-    : fileID(), m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(prog), m_filename() {}
+    : m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(prog), m_filename() {}
 
 void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 
@@ -107,14 +106,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
       throw Exception::FileError(message, fileName);
     }
 
-    // open the file and copy the handle into the NeXus::File object
-    NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
-    if (status == NXstatus::NX_ERROR) {
-      g_log.error("Unable to open file " + fileName);
-      throw Exception::FileError("Unable to open File:", fileName);
-    }
-
-    auto file = new ::NeXus::File(fileID, true);
+    auto file = new ::NeXus::File(fileName, mode);
 
     m_filehandle = std::shared_ptr<::NeXus::File>(file);
   }

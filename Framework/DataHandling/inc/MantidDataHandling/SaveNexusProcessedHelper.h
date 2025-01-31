@@ -86,7 +86,7 @@ public:
   void resetProgress(Mantid::API::Progress *prog);
 
   /// Nexus file handle
-  NXhandle fileID;
+  std::shared_ptr<::NeXus::File> filehandle() const { return m_filehandle; }
 
 private:
   /// C++ API file handle
