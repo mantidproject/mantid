@@ -125,9 +125,11 @@ Output:
    cal_file = "hrpd_new_072_01_corr.cal"
 
    # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
-   ws = AlignDetectors(InputWorkspace='ws',CalibrationFile=cal_file)
+   ApplyDiffCal(InstrumentWorkspace=ws, CalibrationFile=cal_file)
+   ws = ConvertUnits(InputWorkspace=ws, Target="dSpacing")
+   ApplyDiffCal(InstrumentWorkspace=ws, ClearCalibration=True)  # use uncalibrated DIFC to convert from d-spacing to TOF
    # Focus the data with defined binning parameters
-   ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file, DMin=[0.6,1.0,2.2], DMax=[1.0,1.5,4.0], Delta=0.1)
+   ws = DiffractionFocussing(InputWorkspace=ws,GroupingFileName=cal_file, DMin=[0.6,1.0,2.2], DMax=[1.0,1.5,4.0], Delta=0.1)
 
    print(f"Output has {ws.getNumberHistograms()} spectra with number of bins {len(ws.readY(0))}, {len(ws.readY(1))} and {len(ws.readY(2))}")
 
