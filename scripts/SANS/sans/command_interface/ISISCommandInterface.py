@@ -845,8 +845,7 @@ def WavRangeReduction(
     _ = out_fit_settings
 
     # Set the save state
-    if saveAlgs:
-        output_mode = set_save(save_algorithms=saveAlgs, save_as_zero_error_free=save_as_zero_error_free)
+    output_mode = set_save(save_algorithms=saveAlgs, save_as_zero_error_free=save_as_zero_error_free, output_mode=output_mode)
 
     # Set the provided parameters
     if combineDet is None:
