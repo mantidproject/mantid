@@ -1690,7 +1690,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 /// Empty the list of facilities, deleting the FacilityInfo objects in the
 /// process
 void ConfigServiceImpl::clearFacilities() {
-  for (auto &facility : m_facilities) {
+  for (const auto &facility : m_facilities) {
     delete facility;
   }
   m_facilities.clear();
