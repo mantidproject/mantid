@@ -21,14 +21,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

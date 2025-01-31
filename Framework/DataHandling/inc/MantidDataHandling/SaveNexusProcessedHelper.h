@@ -9,7 +9,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/Run.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace_fwd.h"
