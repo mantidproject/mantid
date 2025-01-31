@@ -11,6 +11,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidNexusCpp/NeXusFile_fwd.h
     inc/MantidNexusCpp/napi.h
     inc/MantidNexusCpp/napi4.h
     inc/MantidNexusCpp/napi5.h

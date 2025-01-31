@@ -15,7 +15,8 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
+// #include "MantidNexusCpp/napi.h"
 
 namespace Mantid {
 
@@ -134,12 +135,12 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   // by default we begin the parse on the first entry (entry0),
   // or from a chosen entryName. This allow to avoid the
   // bogus entries that follows.
-  int datatype;
+  NXnumtype datatype;
   char nxclass[NX_MAXNAMELEN];
   // cppcheck-suppress argumentSize
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
-  if (getnextentry_status == NX_OK) {
-    if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
+  if (getnextentry_status == NXstatus::NX_OK) {
+    if ((NXopengroup(nxfileID, nxname, nxclass)) == NXstatus::NX_OK) {
       std::string emptyStr;
       recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */, useFullPath);
       NXclosegroup(nxfileID);
@@ -164,7 +165,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                                                  const std::string &parent_name, const std::string &parent_class,
                                                  int level, bool useFullPath) {
   // Classes
-  int datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
+  NXnumtype datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
   /// napi.h
   char nxname[NX_MAXNAMELEN];
   nxname[0] = '0';
@@ -176,9 +177,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
     // cppcheck-suppress argumentSize
     const NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
 
-    if (getnextentry_status == NX_OK) {
+    if (getnextentry_status == NXstatus::NX_OK) {
       std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-      if (NXopengroup(nxfileID, nxname, nxclass) == NX_OK) {
+      if (NXopengroup(nxfileID, nxname, nxclass) == NXstatus::NX_OK) {
         if (std::string(nxclass) != "ILL_data_scan_vars" && std::string(nxclass) != "NXill_data_scan_vars") {
           // Go down to one level, if the group is known to nexus
           std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
@@ -189,27 +190,27 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
-      else if (NXopendata(nxfileID, nxname) == NX_OK) {
+      else if (NXopendata(nxfileID, nxname) == NXstatus::NX_OK) {
         if (parent_class != "NXData" && parent_class != "NXMonitor" &&
             std::string(nxname) != "data") { // create a property
           int rank = 0;
           int dims[4] = {0, 0, 0, 0};
-          int type;
+          NXnumtype type;
 
           // Get the value
-          if (NXgetinfo(nxfileID, &rank, dims, &type) == NX_OK) {
+          if (NXgetinfo(nxfileID, &rank, dims, &type) == NXstatus::NX_OK) {
             // Note, we choose to only build properties on small float arrays
             // filter logic is below
             bool build_small_float_array = false; // default
             bool read_property = true;
 
-            if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
+            if ((type == NXnumtype::FLOAT32) || (type == NXnumtype::FLOAT64)) {
               if ((rank == 1) && (dims[0] <= 9)) {
                 build_small_float_array = true;
               } else {
                 read_property = false;
               }
-            } else if (type != NX_CHAR) {
+            } else if (type != NXnumtype::CHAR) {
               if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
                 read_property = false;
               }
@@ -224,9 +225,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
               void *dataBuffer;
               NXmalloc(&dataBuffer, rank, dims, type);
 
-              if (NXgetdata(nxfileID, dataBuffer) == NX_OK) {
+              if (NXgetdata(nxfileID, dataBuffer) == NXstatus::NX_OK) {
 
-                if (type == NX_CHAR) {
+                if (type == NXnumtype::CHAR) {
                   std::string property_value(reinterpret_cast<const char *>(dataBuffer));
                   if (property_name.ends_with("_time")) {
                     // That's a time value! Convert to Mantid standard
@@ -244,30 +245,30 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                     }
                   }
 
-                } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) || (type == NX_INT16) || (type == NX_INT32) ||
-                           (type == NX_UINT16)) {
+                } else if ((type == NXnumtype::FLOAT32) || (type == NXnumtype::FLOAT64) || (type == NXnumtype::INT16) ||
+                           (type == NXnumtype::INT32) || (type == NXnumtype::UINT16)) {
 
                   // Look for "units"
                   NXstatus units_status;
                   char units_sbuf[NX_MAXNAMELEN];
                   int units_len = NX_MAXNAMELEN;
-                  int units_type = NX_CHAR;
+                  NXnumtype units_type = NXnumtype::CHAR;
 
                   units_status = NXgetattr(nxfileID, std::string("units").c_str(), units_sbuf, &units_len, &units_type);
-                  if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
+                  if ((type == NXnumtype::FLOAT32) || (type == NXnumtype::FLOAT64)) {
                     // Mantid numerical properties are double only.
                     double property_double_value = 0.0;
 
                     // Simple case, one value
                     if (dims[0] == 1) {
-                      if (type == NX_FLOAT32) {
+                      if (type == NXnumtype::FLOAT32) {
                         property_double_value = *(reinterpret_cast<float *>(dataBuffer));
-                      } else if (type == NX_FLOAT64) {
+                      } else if (type == NXnumtype::FLOAT64) {
                         property_double_value = *(reinterpret_cast<double *>(dataBuffer));
                       }
                       if (!runDetails.hasProperty(property_name)) {
 
-                        if (units_status != NX_ERROR)
+                        if (units_status != NXstatus::NX_ERROR)
                           runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
                         else
                           runDetails.addProperty(property_name, property_double_value);
@@ -280,16 +281,16 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                       // (see
                       // test above)
                       for (int dim_index = 0; dim_index < dims[0]; dim_index++) {
-                        if (type == NX_FLOAT32) {
+                        if (type == NXnumtype::FLOAT32) {
                           property_double_value = (reinterpret_cast<float *>(dataBuffer))[dim_index];
-                        } else if (type == NX_FLOAT64) {
+                        } else if (type == NXnumtype::FLOAT64) {
                           property_double_value = (reinterpret_cast<double *>(dataBuffer))[dim_index];
                         }
                         std::string indexed_property_name =
                             property_name + std::string("_") + std::to_string(dim_index);
 
                         if (!runDetails.hasProperty(indexed_property_name)) {
-                          if (units_status != NX_ERROR)
+                          if (units_status != NXstatus::NX_ERROR)
                             runDetails.addProperty(indexed_property_name, property_double_value,
                                                    std::string(units_sbuf));
                           else
@@ -305,16 +306,16 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                   } else {
                     // int case
                     int property_int_value = 0;
-                    if (type == NX_INT16) {
+                    if (type == NXnumtype::INT16) {
                       property_int_value = *(reinterpret_cast<short int *>(dataBuffer));
-                    } else if (type == NX_INT32) {
+                    } else if (type == NXnumtype::INT32) {
                       property_int_value = *(reinterpret_cast<int *>(dataBuffer));
-                    } else if (type == NX_UINT16) {
+                    } else if (type == NXnumtype::UINT16) {
                       property_int_value = *(reinterpret_cast<short unsigned int *>(dataBuffer));
                     }
 
                     if (!runDetails.hasProperty(property_name)) {
-                      if (units_status != NX_ERROR)
+                      if (units_status != NXstatus::NX_ERROR)
                         runDetails.addProperty(property_name, property_int_value, std::string(units_sbuf));
                       else
                         runDetails.addProperty(property_name, property_int_value);
@@ -335,7 +336,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
         NXclosedata(nxfileID);
       }
-    } else if (getnextentry_status == NX_EOD) {
+    } else if (getnextentry_status == NXstatus::NX_EOD) {
       has_entry = false; // end of loop
     } else {
       has_entry = false; // end of loop

@@ -1,7 +1,7 @@
-#ifndef NEXUSEXCEPTION_HPP
-#define NEXUSEXCEPTION_HPP 1
+#pragma once
 
 #include "MantidNexusCpp/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile_fwd.h"
 #include <stdexcept>
 #include <string>
 
@@ -26,7 +26,7 @@ public:
    * \param msg the string to pass a the error message
    * \param status
    */
-  Exception(const std::string &msg = "GENERIC ERROR", const int status = 0);
+  Exception(const std::string &msg = "GENERIC ERROR", const NXstatus status = static_cast<NXstatus>(0));
   /**
    * Get the message associated with the exception
    *
@@ -38,14 +38,12 @@ public:
    *
    * \return the status value associated with the exception
    */
-  int status() throw();
+  NXstatus status() throw();
   /** Destructor for exception */
   virtual ~Exception() throw();
 
 private:
   std::string m_what; ///< Error message for the exception
-  int m_status;       ///< Status value for the exception
+  NXstatus m_status;  ///< Status value for the exception
 };
 }; // namespace NeXus
-
-#endif

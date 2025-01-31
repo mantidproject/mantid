@@ -211,7 +211,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
-  if (nxStat != NX_ERROR) {
+  if (nxStat != NXstatus::NX_ERROR) {
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);

@@ -119,7 +119,7 @@ void SaveISISNexus::exec() {
   float flt;
 
   status = NXopen(outputFilename.c_str(), NXACC_CREATE5, &handle);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw std::runtime_error("Cannot open file " + outputFilename + " for writing.");
   }
   NXmakegroup(handle, "raw_data_1", "NXentry");
@@ -263,7 +263,7 @@ void SaveISISNexus::saveIntOpen(const char *name, const void *data, const int si
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
   // for it!  (NXstatus status = NXblah())
-  NXmakedata(handle, name, NX_INT32, 1, dim);
+  NXmakedata(handle, name, NXnumtype::INT32, 1, dim);
   NXopendata(handle, name);
   NXputdata(handle, data);
 }
@@ -279,7 +279,7 @@ void SaveISISNexus::saveCharOpen(const char *name, const void *data, const int s
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
   // for it!  (NXstatus status = NXblah())
-  NXmakedata(handle, name, NX_CHAR, 1, dim);
+  NXmakedata(handle, name, NXnumtype::CHAR, 1, dim);
   NXopendata(handle, name);
   NXputdata(handle, data);
 }
@@ -295,7 +295,7 @@ void SaveISISNexus::saveFloatOpen(const char *name, const void *data, const int 
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
   // for it!  (NXstatus status = NXblah())
-  NXmakedata(handle, name, NX_FLOAT32, 1, dim);
+  NXmakedata(handle, name, NXnumtype::FLOAT32, 1, dim);
   NXopendata(handle, name);
   NXputdata(handle, data);
 }
@@ -325,7 +325,7 @@ int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std:
   int dim[2];
   dim[0] = static_cast<int>(str_vec.size());
   dim[1] = buff_size;
-  NXmakedata(handle, name, NX_CHAR, 2, dim);
+  NXmakedata(handle, name, NXnumtype::CHAR, 2, dim);
   NXopendata(handle, name);
   for (std::size_t i = 0; i < str_vec.size(); ++i) {
     int start[] = {static_cast<int>(i), 0};
@@ -367,14 +367,16 @@ void SaveISISNexus::saveStringOpen(const char *name, const std::string &str) {
 void SaveISISNexus::putAttr(const char *name, const std::string &value) {
   boost::scoped_array<char> buff(new char[value.size()]);
   std::copy(value.begin(), value.end(), buff.get());
-  NXputattr(handle, name, buff.get(), static_cast<int>(value.size()), NX_CHAR);
+  NXputattr(handle, name, buff.get(), static_cast<int>(value.size()), NXnumtype::CHAR);
 }
 
 void SaveISISNexus::putAttr(const char *name, const char *value, const int size) {
-  NXputattr(handle, name, value, size, NX_CHAR);
+  NXputattr(handle, name, value, size, NXnumtype::CHAR);
 }
 
-void SaveISISNexus::putAttr(const char *name, int value, int size) { NXputattr(handle, name, &value, size, NX_INT32); }
+void SaveISISNexus::putAttr(const char *name, int value, int size) {
+  NXputattr(handle, name, &value, size, NXnumtype::INT32);
+}
 
 void SaveISISNexus::toISO8601(std::string &str) {
   static const std::string months[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
@@ -487,7 +489,7 @@ void SaveISISNexus::detector_1() {
   dim[0] = nper;
   dim[1] = nsp - nmon;
   dim[2] = ntc;
-  NXmakedata(handle, "counts", NX_INT32, 3, dim);
+  NXmakedata(handle, "counts", NXnumtype::INT32, 3, dim);
   NXopendata(handle, "counts");
   putAttr("units", "counts");
   putAttr("signal", 1);
@@ -622,7 +624,7 @@ void SaveISISNexus::monitor_i(int i) {
   NXopengroup(handle, ostr.str().c_str(), "NXmonitor");
 
   //  int imon = m_isisRaw->mdet[i]; // spectrum number
-  NXmakedata(handle, "data", NX_INT32, 3, dim);
+  NXmakedata(handle, "data", NXnumtype::INT32, 3, dim);
   NXopendata(handle, "data");
   for (int p = 0; p < numPer; ++p) {
     int start[] = {p, 0, 0};
@@ -800,20 +802,20 @@ void SaveISISNexus::runlog() {
 
   auto time_vec_size = static_cast<int>(time_vec.size());
 
-  write_runlog("period", &time_vec[0], &period_vec[0], NX_INT32, time_vec_size, "none");
-  write_runlog("is_running", &time_vec[0], &is_running_vec[0], NX_INT32, time_vec_size, "none");
-  write_runlog("is_waiting", &time_vec[0], &is_waiting_vec[0], NX_INT32, time_vec_size, "none");
-  write_runlog("good_frames", &time_vec[0], &good_frames_vec[0], NX_INT32, time_vec_size, "frames");
-  write_runlog("raw_frames", &time_vec[0], &raw_frames_vec[0], NX_INT32, time_vec_size, "frames");
-  write_runlog("monitor_sum_1", &time_vec[0], &monitor_sum_1_vec[0], NX_INT32, time_vec_size, "counts");
-  write_runlog("total_counts", &time_vec[0], &total_counts_vec[0], NX_INT32, time_vec_size, "counts");
-  write_runlog("proton_charge", &time_vec[0], &proton_charge_vec[0], NX_FLOAT32, time_vec_size, "uAh");
-  write_runlog("proton_charge_raw", &time_vec[0], &proton_charge_raw_vec[0], NX_FLOAT32, time_vec_size, "uAh");
-  write_runlog("dae_beam_current", &time_vec[0], &dae_beam_current_vec[0], NX_FLOAT32, time_vec_size, "uAh");
-  write_runlog("count_rate", &time_vec[0], &count_rate_vec[0], NX_FLOAT32, time_vec_size, "counts");
-  write_runlog("np_ratio", &time_vec[0], &np_ratio_vec[0], NX_FLOAT32, time_vec_size, "nones");
+  write_runlog("period", &time_vec[0], &period_vec[0], NXnumtype::INT32, time_vec_size, "none");
+  write_runlog("is_running", &time_vec[0], &is_running_vec[0], NXnumtype::INT32, time_vec_size, "none");
+  write_runlog("is_waiting", &time_vec[0], &is_waiting_vec[0], NXnumtype::INT32, time_vec_size, "none");
+  write_runlog("good_frames", &time_vec[0], &good_frames_vec[0], NXnumtype::INT32, time_vec_size, "frames");
+  write_runlog("raw_frames", &time_vec[0], &raw_frames_vec[0], NXnumtype::INT32, time_vec_size, "frames");
+  write_runlog("monitor_sum_1", &time_vec[0], &monitor_sum_1_vec[0], NXnumtype::INT32, time_vec_size, "counts");
+  write_runlog("total_counts", &time_vec[0], &total_counts_vec[0], NXnumtype::INT32, time_vec_size, "counts");
+  write_runlog("proton_charge", &time_vec[0], &proton_charge_vec[0], NXnumtype::FLOAT32, time_vec_size, "uAh");
+  write_runlog("proton_charge_raw", &time_vec[0], &proton_charge_raw_vec[0], NXnumtype::FLOAT32, time_vec_size, "uAh");
+  write_runlog("dae_beam_current", &time_vec[0], &dae_beam_current_vec[0], NXnumtype::FLOAT32, time_vec_size, "uAh");
+  write_runlog("count_rate", &time_vec[0], &count_rate_vec[0], NXnumtype::FLOAT32, time_vec_size, "counts");
+  write_runlog("np_ratio", &time_vec[0], &np_ratio_vec[0], NXnumtype::FLOAT32, time_vec_size, "nones");
 
-  write_runlog("run_status", &time_vec[0], &run_status_vec[0], NX_INT32, time_vec_size, "none");
+  write_runlog("run_status", &time_vec[0], &run_status_vec[0], NXnumtype::INT32, time_vec_size, "none");
 
   // read in ICPevent file and create icp_event log
   std::ifstream icpevent_fil(ICPevent_filename.c_str());
@@ -863,8 +865,8 @@ void SaveISISNexus::runlog() {
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_runlog(const char *name, const void *times, const void *data, const int type, const int size,
-                                 const std::string &units) {
+void SaveISISNexus::write_runlog(const char *name, const void *times, const void *data, const NXnumtype type,
+                                 const int size, const std::string &units) {
   write_logOpen(name, times, data, type, size, units);
   closegroup();
 }
@@ -878,8 +880,8 @@ void SaveISISNexus::write_runlog(const char *name, const void *times, const void
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_logOpen(const char *name, const void *times, const void *data, const int type, const int size,
-                                  const std::string &units) {
+void SaveISISNexus::write_logOpen(const char *name, const void *times, const void *data, const NXnumtype type,
+                                  const int size, const std::string &units) {
   NXmakegroup(handle, name, "NXlog");
   NXopengroup(handle, name, "NXlog");
 
@@ -888,9 +890,9 @@ void SaveISISNexus::write_logOpen(const char *name, const void *times, const voi
   putAttr("units", "seconds");
   close();
 
-  if (type == NX_INT32) {
+  if (type == NXnumtype::INT32) {
     saveIntOpen("value", data, size);
-  } else if (type == NX_FLOAT32) {
+  } else if (type == NXnumtype::FLOAT32) {
     saveFloatOpen("value", data, size);
   }
   putAttr("units", units);
@@ -1028,7 +1030,7 @@ void SaveISISNexus::run_cycle() { saveString("run_cycle", " "); }
 
 void SaveISISNexus::write_rpb() {
   int dim[] = {32, 4};
-  NXmakedata(handle, "CRPB", NX_CHAR, 2, dim);
+  NXmakedata(handle, "CRPB", NXnumtype::CHAR, 2, dim);
   NXopendata(handle, "CRPB");
   NXputdata(handle, &m_isisRaw->rpb);
   NXclosedata(handle);
@@ -1039,7 +1041,7 @@ void SaveISISNexus::write_rpb() {
 
 void SaveISISNexus::write_spb() {
   int dim[] = {64, 4};
-  NXmakedata(handle, "CSPB", NX_CHAR, 2, dim);
+  NXmakedata(handle, "CSPB", NXnumtype::CHAR, 2, dim);
   NXopendata(handle, "CSPB");
   NXputdata(handle, &m_isisRaw->spb);
   NXclosedata(handle);

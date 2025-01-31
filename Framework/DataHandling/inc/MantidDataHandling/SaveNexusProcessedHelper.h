@@ -85,7 +85,7 @@ public:
   template <class T>
   void writeEventListData(std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight,
                           bool writeError) const;
-  void NXwritedata(const char *name, int datatype, int rank, int *dims_array, void const *data,
+  void NXwritedata(const char *name, NXnumtype datatype, int rank, int *dims_array, void const *data,
                    bool compress = false) const;
 
   /// find size of open entry data section
@@ -114,7 +114,7 @@ private:
   API::Progress *m_progress;
   /// Write a simple value plus possible attributes
   template <class TYPE>
-  bool writeNxValue(const std::string &name, const TYPE &value, const int nxType,
+  bool writeNxValue(const std::string &name, const TYPE &value, const NXnumtype nxType,
                     const std::vector<std::string> &attributes, const std::vector<std::string> &avalues) const;
   /// Returns true if the given property is a time series property
   bool isTimeSeries(Kernel::Property *prop) const;
@@ -126,7 +126,7 @@ private:
   template <class T> void writeNumericTimeLog(const Kernel::TimeSeriesProperty<T> *timeSeries) const;
   /// Write a single valued NXLog entry to the Nexus file
   template <class TYPE>
-  bool writeSingleValueNXLog(const std::string &name, const TYPE &value, const int nxType,
+  bool writeSingleValueNXLog(const std::string &name, const TYPE &value, const NXnumtype nxType,
                              const std::vector<std::string> &attributes, const std::vector<std::string> &avalues) const;
   /// write an NXnote with standard fields (but NX_CHAR rather than NX_BINARY
   /// data)
@@ -179,12 +179,12 @@ private:
 
   /// Writes given vector column to the currently open Nexus file
   template <typename VecType, typename ElemType>
-  void writeNexusVectorColumn(const API::Column_const_sptr &col, const std::string &columnName, int nexusType,
+  void writeNexusVectorColumn(const API::Column_const_sptr &col, const std::string &columnName, NXnumtype nexusType,
                               const std::string &interpret_as) const;
 
   /// Save a numeric columns of a TableWorkspace to currently open nexus file.
   template <typename ColumnT, typename NexusT>
-  void writeTableColumn(int type, const std::string &interpret_as, const API::Column &col,
+  void writeTableColumn(NXnumtype type, const std::string &interpret_as, const API::Column &col,
                         const std::string &columnName) const;
 };
 
@@ -200,17 +200,17 @@ private:
  * @returns A boolean indicating success or failure
  */
 template <class TYPE>
-bool NexusFileIO::writeNxValue(const std::string &name, const TYPE &value, const int nxType,
+bool NexusFileIO::writeNxValue(const std::string &name, const TYPE &value, const NXnumtype nxType,
                                const std::vector<std::string> &attributes,
                                const std::vector<std::string> &avalues) const {
   int dimensions[1] = {1};
-  if (NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NX_ERROR)
+  if (NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NXstatus::NX_ERROR)
     return false;
-  if (NXopendata(fileID, name.c_str()) == NX_ERROR)
+  if (NXopendata(fileID, name.c_str()) == NXstatus::NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
     NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
-              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
+              static_cast<int>(avalues[it].size() + 1), NXnumtype::CHAR);
   }
   NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
@@ -229,7 +229,7 @@ bool NexusFileIO::writeNxValue(const std::string &name, const TYPE &value, const
  * @returns A boolean indicating success or failure
  */
 template <>
-inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string &value, const int nxType,
+inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string &value, const NXnumtype nxType,
                                       const std::vector<std::string> &attributes,
                                       const std::vector<std::string> &avalues) const {
   (void)nxType;
@@ -238,12 +238,13 @@ inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string
   if (nxstr.empty())
     nxstr += " ";
   dimensions[0] = static_cast<int>(nxstr.size() + 1);
-  if (NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NX_ERROR)
+  if (NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NXstatus::NX_ERROR)
     return false;
-  if (NXopendata(fileID, name.c_str()) == NX_ERROR)
+  if (NXopendata(fileID, name.c_str()) == NXstatus::NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1), NX_CHAR);
+    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
+              NXnumtype::CHAR);
   }
   NXputdata(fileID, reinterpret_cast<void *>(const_cast<char *>(nxstr.c_str())));
   NXclosedata(fileID);
@@ -262,20 +263,20 @@ inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string
  * @returns A boolean indicating success or failure
  */
 template <class TYPE>
-bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const TYPE &value, const int nxType,
+bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const TYPE &value, const NXnumtype nxType,
                                         const std::vector<std::string> &attributes,
                                         const std::vector<std::string> &avalues) const {
-  if (NXmakegroup(fileID, name.c_str(), "NXlog") == NX_ERROR)
+  if (NXmakegroup(fileID, name.c_str(), "NXlog") == NXstatus::NX_ERROR)
     return false;
   NXopengroup(fileID, name.c_str(), "NXlog");
   int dimensions[1] = {1};
-  if (NXmakedata(fileID, "value", nxType, 1, dimensions) == NX_ERROR)
+  if (NXmakedata(fileID, "value", nxType, 1, dimensions) == NXstatus::NX_ERROR)
     return false;
-  if (NXopendata(fileID, "value") == NX_ERROR)
+  if (NXopendata(fileID, "value") == NXstatus::NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
     NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
-              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
+              static_cast<int>(avalues[it].size() + 1), NXnumtype::CHAR);
   }
   NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
@@ -296,11 +297,11 @@ bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const TYPE &val
  * @returns A boolean indicating success or failure
  */
 template <>
-inline bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const std::string &value, const int nxType,
-                                               const std::vector<std::string> &attributes,
+inline bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const std::string &value,
+                                               const NXnumtype nxType, const std::vector<std::string> &attributes,
                                                const std::vector<std::string> &avalues) const {
   (void)nxType;
-  if (NXmakegroup(fileID, name.c_str(), "NXlog") == NX_ERROR)
+  if (NXmakegroup(fileID, name.c_str(), "NXlog") == NXstatus::NX_ERROR)
     return false;
   NXopengroup(fileID, name.c_str(), "NXlog");
   int dimensions[1] = {0};
@@ -308,13 +309,13 @@ inline bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const st
   if (nxstr.empty())
     nxstr += " ";
   dimensions[0] = static_cast<int>(nxstr.size() + 1); // Allow for null-terminator
-  if (NXmakedata(fileID, "value", NX_CHAR, 1, dimensions) == NX_ERROR)
+  if (NXmakedata(fileID, "value", NXnumtype::CHAR, 1, dimensions) == NXstatus::NX_ERROR)
     return false;
-  if (NXopendata(fileID, "value") == NX_ERROR)
+  if (NXopendata(fileID, "value") == NXstatus::NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
     NXputattr(fileID, attributes[it].c_str(), reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
-              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
+              static_cast<int>(avalues[it].size() + 1), NXnumtype::CHAR);
   }
   NXputdata(fileID, reinterpret_cast<void *>(const_cast<char *>(nxstr.c_str())));
   NXclosedata(fileID);
@@ -352,7 +353,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");
-  if (status == NX_ERROR)
+  if (status == NXstatus::NX_ERROR)
     return;
 
   NXopengroup(fileID, logName.c_str(), "NXlog");

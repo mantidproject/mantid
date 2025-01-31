@@ -250,8 +250,7 @@ void LoadMD::execLoader() {
  * @param ws
  * @param dataType
  */
-void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws,
-                      ::NeXus::NXnumtype dataType) {
+void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
   m_file->openData(name);
   if (m_file->getInfo().type != dataType)
     throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
@@ -307,10 +306,10 @@ void LoadMD::loadHisto() {
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
   // Load each data slab
-  this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
+  this->loadSlab("signal", ws->mutableSignalArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("mask", ws->mutableMaskArray(), ws, NXnumtype::INT8);
 
   m_file->close();
 

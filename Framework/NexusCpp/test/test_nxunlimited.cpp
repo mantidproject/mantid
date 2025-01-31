@@ -43,7 +43,7 @@ int test_unlimited(int file_type, const char *filename) {
   NXopen(filename, file_type, &file_id);
   NXmakegroup(file_id, "entry1", "NXentry");
   NXopengroup(file_id, "entry1", "NXentry");
-  NXmakedata(file_id, "data", NX_FLOAT64, 2, dims);
+  NXmakedata(file_id, "data", NXnumtype::FLOAT64, 2, dims);
   NXopendata(file_id, "data");
   slab_start[1] = 0;
   slab_size[0] = 1;
