@@ -28,25 +28,25 @@ namespace {
 /// Macro to run a function depending on the type of data in the Nexus file
 #define RUN_NEXUSIOHELPER_FUNCTION(Narrow, type, func_name, ...)                                                       \
   switch (type) {                                                                                                      \
-  case ::NeXus::FLOAT32:                                                                                               \
+  case NXnumtype::FLOAT32:                                                                                             \
     return func_name<T, float, Narrow>(__VA_ARGS__);                                                                   \
-  case ::NeXus::FLOAT64:                                                                                               \
+  case NXnumtype::FLOAT64:                                                                                             \
     return func_name<T, double, Narrow>(__VA_ARGS__);                                                                  \
-  case ::NeXus::INT8:                                                                                                  \
+  case NXnumtype::INT8:                                                                                                \
     return func_name<T, int8_t, Narrow>(__VA_ARGS__);                                                                  \
-  case ::NeXus::UINT8:                                                                                                 \
+  case NXnumtype::UINT8:                                                                                               \
     return func_name<T, uint8_t, Narrow>(__VA_ARGS__);                                                                 \
-  case ::NeXus::INT16:                                                                                                 \
+  case NXnumtype::INT16:                                                                                               \
     return func_name<T, int16_t, Narrow>(__VA_ARGS__);                                                                 \
-  case ::NeXus::UINT16:                                                                                                \
+  case NXnumtype::UINT16:                                                                                              \
     return func_name<T, uint16_t, Narrow>(__VA_ARGS__);                                                                \
-  case ::NeXus::INT32:                                                                                                 \
+  case NXnumtype::INT32:                                                                                               \
     return func_name<T, int32_t, Narrow>(__VA_ARGS__);                                                                 \
-  case ::NeXus::UINT32:                                                                                                \
+  case NXnumtype::UINT32:                                                                                              \
     return func_name<T, uint32_t, Narrow>(__VA_ARGS__);                                                                \
-  case ::NeXus::INT64:                                                                                                 \
+  case NXnumtype::INT64:                                                                                               \
     return func_name<T, int64_t, Narrow>(__VA_ARGS__);                                                                 \
-  case ::NeXus::UINT64:                                                                                                \
+  case NXnumtype::UINT64:                                                                                              \
     return func_name<T, uint64_t, Narrow>(__VA_ARGS__);                                                                \
   default:                                                                                                             \
     throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");                                             \

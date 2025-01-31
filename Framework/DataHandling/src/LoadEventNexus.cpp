@@ -543,7 +543,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusF
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == ::NeXus::UINT64) {
+        if (info.type == NXnumtype::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;
@@ -951,7 +951,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       NXhandle nxHandle;
       NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
-      if (nxStat != NX_ERROR) {
+      if (nxStat != NXstatus::NX_ERROR) {
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }

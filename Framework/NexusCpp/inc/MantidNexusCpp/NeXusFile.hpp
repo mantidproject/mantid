@@ -1,7 +1,7 @@
-#ifndef NEXUSFILE_HPP
-#define NEXUSFILE_HPP 1
+#pragma once
 
 #include "MantidNexusCpp/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile_fwd.h"
 #include "MantidNexusCpp/napi.h"
 #include <map>
 #include <string>
@@ -16,35 +16,6 @@
  */
 
 namespace NeXus {
-/**
- * The primitive types published by this API.
- * \li FLOAT32 float.
- * \li FLOAT64 double
- * \li INT8 int8_t
- * \li UINT8 uint8_t
- * \li INT16 int16_t
- * \li UINT16 uint16_t
- * \li INT32 int32_t
- * \li UINT32 uint32_t
- * \li INT64 int8_t if available on the machine
- * \li UINT64 uint8_t if available on the machine
- * \ingroup cpp_types
- */
-enum NXnumtype {
-  FLOAT32 = NX_FLOAT32,
-  FLOAT64 = NX_FLOAT64,
-  INT8 = NX_INT8,
-  UINT8 = NX_UINT8,
-  // BOOLEAN = NX_BOOLEAN, // NX_BOOLEAN is currently broken
-  INT16 = NX_INT16,
-  UINT16 = NX_UINT16,
-  INT32 = NX_INT32,
-  UINT32 = NX_UINT32,
-  INT64 = NX_INT64,
-  UINT64 = NX_UINT64,
-  CHAR = NX_CHAR,
-  BINARY = NX_BINARY
-};
 
 /**
  * The available compression types. These are all ignored in xml files.
@@ -661,8 +632,6 @@ public:
  * This function returns the NXnumtype given a concrete number.
  * \tparam NumT numeric data type of \a number to check
  */
-template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT number = NumT());
+template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT const number = NumT());
 
 }; // namespace NeXus
-
-#endif

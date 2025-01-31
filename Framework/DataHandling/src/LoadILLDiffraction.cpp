@@ -226,7 +226,7 @@ void LoadILLDiffraction::loadMetaData() {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
-  if (nxStat != NX_ERROR) {
+  if (nxStat != NXstatus::NX_ERROR) {
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     NXclose(&nxHandle);
   }

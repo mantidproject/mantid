@@ -274,19 +274,19 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   // Number of data points
   auto nPoints = static_cast<int>(ws->getNPoints());
 
-  file->makeData("signal", ::NeXus::FLOAT64, nPoints, true);
+  file->makeData("signal", NXnumtype::FLOAT64, nPoints, true);
   file->putData(ws->getSignalArray());
   file->closeData();
 
-  file->makeData("errors_squared", ::NeXus::FLOAT64, nPoints, true);
+  file->makeData("errors_squared", NXnumtype::FLOAT64, nPoints, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeData("num_events", ::NeXus::FLOAT64, nPoints, true);
+  file->makeData("num_events", NXnumtype::FLOAT64, nPoints, true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeData("mask", ::NeXus::INT8, nPoints, true);
+  file->makeData("mask", NXnumtype::INT8, nPoints, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

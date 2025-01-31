@@ -43,7 +43,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   array_dims.push_back(4);
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
-  file.makeData("c1_data", NeXus::CHAR, array_dims, true);
+  file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
   file.putData(c1_array);
   file.closeData();
 
@@ -80,7 +80,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   for (size_t i = 0; i < 5 * 4; i++) {
     r8_array.push_back(static_cast<double>(i + 20));
   }
-  file.makeData("r8_data", NeXus::FLOAT64, array_dims, true);
+  file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
   vector<int> slab_start;
   slab_start.push_back(4);
   slab_start.push_back(0);
@@ -219,7 +219,7 @@ int readTest(const string &filename) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
-      if (it->type == NeXus::CHAR) {
+      if (it->type == NXnumtype::CHAR) {
         cout << file.getStrAttr(*it);
       }
       cout << endl;
@@ -232,7 +232,7 @@ int readTest(const string &filename) {
   cout << "Number of group attributes: " << attr_infos.size() << endl;
   for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
-    if (it->type == NeXus::CHAR) {
+    if (it->type == NXnumtype::CHAR) {
       cout << file.getStrAttr(*it);
     }
     cout << endl;
@@ -248,49 +248,49 @@ int readTest(const string &filename) {
       file.openData(it->first);
       info = file.getInfo();
       cout << toString(info.dims) << " = ";
-      if (info.type == NeXus::CHAR) {
+      if (info.type == NXnumtype::CHAR) {
         if (info.dims.size() == 1) {
           cout << file.getStrData();
         } else {
           cout << "2d character array";
         }
-      } else if (info.type == NeXus::FLOAT32) {
+      } else if (info.type == NXnumtype::FLOAT32) {
         vector<float> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::FLOAT64) {
+      } else if (info.type == NXnumtype::FLOAT64) {
         vector<double> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::INT8) {
+      } else if (info.type == NXnumtype::INT8) {
         vector<int8_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::UINT8) {
+      } else if (info.type == NXnumtype::UINT8) {
         vector<uint8_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::INT16) {
+      } else if (info.type == NXnumtype::INT16) {
         vector<int16_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::UINT16) {
+      } else if (info.type == NXnumtype::UINT16) {
         vector<uint16_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         vector<int32_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::UINT32) {
+      } else if (info.type == NXnumtype::UINT32) {
         vector<uint32_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::INT64) {
+      } else if (info.type == NXnumtype::INT64) {
         vector<int64_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == NeXus::UINT64) {
+      } else if (info.type == NXnumtype::UINT64) {
         vector<uint64_t> result;
         file.getData(result);
         cout << toString(result);
