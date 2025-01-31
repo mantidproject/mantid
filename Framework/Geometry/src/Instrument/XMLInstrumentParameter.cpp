@@ -18,6 +18,8 @@
 #include <boost/regex.hpp>
 #include <ctime>
 #include <fstream>
+#include <string>
+#include <string_view>
 #include <utility>
 
 namespace Mantid::Geometry {
@@ -144,9 +146,7 @@ double XMLInstrumentParameter::createParamValue(const TimeSeriesProperty<double>
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    // cppcheck-suppress stlIfStrFind as string::starts_with(), cppcheck's suggested change, does not allow for position
-    // 0 to be anywhere
-    else if (m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10) {
+    else if (m_extractSingleValueAs.starts_with("position 0") == 0 && m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;
       int position;
