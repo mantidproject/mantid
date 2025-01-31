@@ -47,14 +47,17 @@ inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   explicit PolarizationCorrections(PolarizationCorrectionType correctionType,
-                                   boost::optional<std::string> workspace = boost::none);
+                                   boost::optional<std::string> workspace = boost::none,
+                                   std::string const &fredrikzeSpinStateOrder = "");
 
   PolarizationCorrectionType correctionType() const;
   boost::optional<std::string> workspace() const;
+  std::string const &fredrikzeSpinStateOrder() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
   boost::optional<std::string> m_workspace;
+  std::string m_fredrikzeSpinStateOrder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
