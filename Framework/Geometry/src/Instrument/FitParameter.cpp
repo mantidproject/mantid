@@ -49,7 +49,7 @@ std::string FitParameter::getConstraint() const {
       max = std::stod(m_constraintMax);
   }
 
-  if (!(m_constraintMin.empty() && m_constraintMax.empty())) {
+  if (!m_constraintMin.empty() && !m_constraintMax.empty()) {
     constraint << min << " < " << m_name << " < " << max;
   } else if (!m_constraintMin.empty()) {
     constraint << min << " < " << m_name;
