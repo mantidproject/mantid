@@ -23,7 +23,6 @@ class MANTID_CURVEFITTING_DLL CrystalFieldFunction : public API::IFunction {
 public:
   CrystalFieldFunction();
   std::string name() const override { return "CrystalFieldFunction"; }
-  const std::string category() const override { return "General"; }
   size_t getNumberDomains() const override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
   /// Evaluate the function
