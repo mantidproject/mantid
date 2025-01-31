@@ -140,7 +140,7 @@ void LoadIDFFromNexus::exec() {
 std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 
   std::vector<std::filesystem::path> directoryNames = ConfigService::Instance().getInstrumentDirectories();
-  for (auto &directoryName : directoryNames) {
+  for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first appropriate file
     std::filesystem::path iPath(directoryName / "embedded_instrument_corrections"); // Go to correction file subfolder
