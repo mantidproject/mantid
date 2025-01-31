@@ -212,14 +212,14 @@ bool QtAbstractPropertyManager::hasProperty(QtProperty *const prop) const { retu
 
     \sa setToolTip()
 */
-QString QtProperty::toolTip() const { return d_ptr->m_toolTip; }
+const QString &QtProperty::toolTip() const { return d_ptr->m_toolTip; }
 
 /**
     Returns the property's status tip.
 
     \sa setStatusTip()
 */
-QString QtProperty::statusTip() const { return d_ptr->m_statusTip; }
+const QString &QtProperty::statusTip() const { return d_ptr->m_statusTip; }
 
 /**
     Returns the property's "What's This" help text.
@@ -1124,6 +1124,7 @@ const QList<QtBrowserItem *> &QtBrowserItem::children() const { return d_ptr->m_
 /**
     Returns the property browser which owns \e this item.
 */
+
 const QtAbstractPropertyBrowser *QtBrowserItem::browser() const { return d_ptr->m_browser; }
 
 QtBrowserItem::QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent) {

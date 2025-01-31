@@ -109,8 +109,8 @@ public:
 
   QtAbstractPropertyManager *propertyManager() const;
 
-  QString toolTip() const;
-  QString statusTip() const;
+  const QString &toolTip() const;
+  const QString &statusTip() const;
   const QString &whatsThis() const;
   const QString &propertyName() const;
 
