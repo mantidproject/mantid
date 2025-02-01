@@ -568,6 +568,24 @@ void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace, Progress
   outputEL.clearDetectorIDs();
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+
+  // count number of events for the output
+  std::size_t numOutputEvents{0};
+  for (const auto i : m_indices) {
+    if (spectrumInfo.hasDetectors(i)) {
+      // Skip monitors, if the property is set to do so
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
+        continue;
+      // Skip masked detectors
+      if (spectrumInfo.isMasked(i)) {
+        continue;
+      }
+    }
+    numOutputEvents += inputWorkspace->getSpectrum(i).getNumberEvents();
+  }
+
+  outputEL.reserve(numOutputEvents);
+
   // Loop over spectra
   for (const auto i : m_indices) {
     if (spectrumInfo.hasDetectors(i)) {
