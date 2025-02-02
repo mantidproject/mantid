@@ -3,7 +3,6 @@ from mantid.api import (
     DataProcessorAlgorithm,
     MatrixWorkspaceProperty,
     PropertyMode,
-    WorkspaceGroup,
 )
 from mantid.kernel import (
     Direction,
@@ -11,7 +10,6 @@ from mantid.kernel import (
     StringArrayMandatoryValidator,
     StringArrayProperty,
     CompositeValidator,
-    logger,
 )
 
 
@@ -22,21 +20,25 @@ _TRANS_ALG = "ReflectometryISISCreateTransmission"
 _EFF_ALG = "PolarizationEfficienciesWildes"
 _JOIN_ALG = "JoinISISPolarizationEfficiencies"
 
+_EFF_ALG_INPUT_DICT = {"f1": None, "f2": None, "p1": None, "p2": None}
+_EFF_ALG_INPUT_DICT_DIAG = {"out_phi": None, "rho": None, "alpha": None, "pp": None, "ap": None}
+
 
 @dataclass
 class PropData:
     name: str = ""
+    alias: str = ""
     default: Any = None
     alg: str = ""
     mag: bool = None
 
 
 class Prop:
-    NON_MAG_INPUT_RUNS = PropData(name="NonMagInputRuns", default=[], alg=_TRANS_ALG, mag=False)
+    NON_MAG_INPUT_RUNS = PropData(name="NonMagInputRuns", alias="InputRuns", default=[], alg=_TRANS_ALG, mag=False)
     BACK_SUB_ROI = PropData(name="BackgroundProcessingInstructions", alg=_TRANS_ALG, mag=False)
     TRANS_ROI = PropData(name="ProcessingInstructions", alg=_TRANS_ALG, mag=False)
 
-    MAG_INPUT_RUNS = PropData(name="MagInputRuns", default=[], alg=_TRANS_ALG, mag=True)
+    MAG_INPUT_RUNS = PropData(name="MagInputRuns", alias="InputRuns", default=[], alg=_TRANS_ALG, mag=True)
     MAG_BACK_SUB_ROI = PropData(name="MagBackgroundProcessingInstructions", alg=_TRANS_ALG, mag=True)
     MAG_TRANS_ROI = PropData(name="MagProcessingInstructions", alg=_TRANS_ALG, mag=True)
 
@@ -45,9 +47,15 @@ class Prop:
     MON_WAV_MIN = PropData(name="MonitorIntegrationWavelengthMin", alg=_TRANS_ALG)
     MON_WAV_MAX = PropData(name="MonitorIntegrationWavelengthMax", alg=_TRANS_ALG)
 
-    FLIPPERS = PropData(name="Flippers", default=["00", "01", "10", "11"], alg=_EFF_ALG)
+    FLIPPERS = PropData(name="Flippers", alg=_EFF_ALG)
     INPUT_POL_EFF = PropData(name="InputPolarizerEfficiency", alg=_EFF_ALG)
     INPUT_AN_EFF = PropData(name="InputAnalyserEfficiency", alg=_EFF_ALG)
+    INCLUDE_DIAG_OUT = PropData(name="IncludeDiagnosticOutputs", alg=_EFF_ALG)
+    OUT_PHI = PropData(name="OutputPhi", alg=_EFF_ALG)
+    OUT_RHO = PropData(name="OutputRho", alg=_EFF_ALG)
+    OUT_ALPHA = PropData(name="OutputAlpha", alg=_EFF_ALG)
+    OUT_TWO_P_MINUS_ONE = PropData(name="OutputTwoPMinusOne", alg=_EFF_ALG)
+    OUT_TWO_A_MINUS_ONE = PropData(name="OutputTwoAMinusOne", alg=_EFF_ALG)
 
     OUTPUT_WS = PropData(name="OutputWorkspace")
 
@@ -94,7 +102,7 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             doc="A list of magnetic input run numbers. Multiple runs will be summed after loading",
         )
         self.copyProperties(
-            self._TRANS_ALG,
+            _TRANS_ALG,
             [
                 Prop.TRANS_ROI.name,
                 Prop.I0_MON_IDX.name,
@@ -108,17 +116,19 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             MatrixWorkspaceProperty(Prop.MAG_BACK_SUB_ROI.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
             doc="The workspace to be used for the flood correction. If this property is not set then no flood correction is performed.",
         )
-        self.declareProperty(
-            StringArrayProperty(Prop.FLIPPERS.name, values=Prop.FLIPPERS.default),
-            doc="Flipper configurations of the input group workspace",
-        )
-        self.declareProperty(
-            MatrixWorkspaceProperty(Prop.INPUT_POL_EFF.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Workspace containing the known wavelength-dependent efficiency for the polarizer.",
-        )
-        self.declareProperty(
-            MatrixWorkspaceProperty(Prop.INPUT_AN_EFF.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Workspace containing the known wavelength-dependent efficiency for the analyser.",
+        self.copyProperties(
+            _EFF_ALG,
+            [
+                Prop.FLIPPERS.name,
+                Prop.INPUT_POL_EFF.name,
+                Prop.INPUT_AN_EFF.name,
+                Prop.INCLUDE_DIAG_OUT.name,
+                Prop.OUT_PHI.name,
+                Prop.OUT_RHO.name,
+                Prop.OUT_ALPHA.name,
+                Prop.OUT_TWO_A_MINUS_ONE.name,
+                Prop.OUT_TWO_P_MINUS_ONE.name,
+            ],
         )
 
     def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict:
@@ -126,57 +136,29 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         for prop_str in [a for a in dir(Prop) if not a.startswith("__")]:
             prop = getattr(Prop, prop_str)
             if prop.alg == alg_name and (prop.mag == mag or prop.mag is None):
-                args.update({prop.name, self.getProperty(prop.name).value})
+                key = prop.name if not prop.alias else prop.alias
+                args.update({key: self.getProperty(prop.name).value})
         return args
 
     def PyExec(self):
-        input_workspace = self.getProperty(Prop.NON_MAG_INPUT_RUNS.name).value
-        trans_output = self._run_algorithm(input_workspace, _TRANS_ALG, Prop.NON_MAG_INPUT_RUNS.name, self._populate_args_dict(_TRANS_ALG))
-
-        input_workspace_mag = self.getProperty(Prop.MAG_INPUT_RUNS.name).value
         eff_args = {}
-        if input_workspace_mag:
-            trans_output_mag = self._run_algorithm(
-                input_workspace_mag, _TRANS_ALG, Prop.MAG_INPUT_RUNS.name, self._populate_args_dict(_TRANS_ALG, mag=True)
-            )
-            eff_args.update({"InputNonMagWorkspace", trans_output_mag})
+        trans_output = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG))
+        eff_args.update({"InputNonMagWorkspace": trans_output})
+        if self.getProperty(Prop.MAG_INPUT_RUNS.name).value:
+            trans_output_mag = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True))
+            eff_args.update({"InputMagWorkspace": trans_output_mag})
         eff_args.update(self._populate_args_dict(_EFF_ALG))
-        eff_output = self._run_algorithm(trans_output, _EFF_ALG, Prop.NON_MAG_INPUT_RUNS.name, eff_args)
-        print(eff_output)  # to keep ruff happy
+        eff_output = _EFF_ALG_INPUT_DICT
+        if self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value:
+            eff_output.update(_EFF_ALG_INPUT_DICT_DIAG)
+        eff_output.update(dict(zip(_EFF_ALG_INPUT_DICT.keys(), self._run_algorithm(_EFF_ALG, eff_args))))
+        join_output = self._run_algorithm(_JOIN_ALG, eff_output)
+        self.setProperty(Prop.OUTPUT_WS, join_output)
 
-        # Join WS
-
-        # self.setProperty(Prop.OUTPUT_WS, ws)
-        print("test")
-
-    def _run_algorithm_impl(self, input_ws, input_ws_prop_name, output_ws, alg_name: str, args: dict):
-        args.update({input_ws_prop_name: input_ws, "OutputWorkspace": output_ws})
+    def _run_algorithm(self, alg_name: str, args: dict, output_ws_name: str = "OutputWorkspace"):
         alg = self.createChildAlgorithm(alg_name, **args)
-        alg.setRethrows(True)
         alg.execute()
-        return alg.getProperty("OutputWorkspace").value
-
-    def _run_algorithm(self, workspace, input_ws_prop_name: str, alg_name: str, args: dict, output_ws_name=None):
-        """Run the specified algorithm as a child algorithm using the arguments provided.
-        The input and output workspace properties are both set to be the provided workspace,
-        unless otherwise specified."""
-
-        # If the input run loads as a workspace group, then using the default workspace group handling of other Mantid algorithms
-        # prevents us retrieving an output workspace group from this algorithm when it is run as a child (unless we store things
-        # in the ADS). See issue #38473.
-        # To avoid this, when we have a workspace group we loop through it, run each algorithm against the child
-        # workspaces individually and then collect them into a group again at the end
-        if isinstance(workspace, WorkspaceGroup):
-            output_grp = WorkspaceGroup()
-            for child_ws in workspace:
-                if output_ws_name:
-                    # enable output workspace name as a list?
-                    logger.notice(f"output workspace name {output_ws_name} not used as input was a workspace group")
-                output_grp.addWorkspace(self._run_alg_impl(child_ws, input_ws_prop_name, child_ws, alg_name, args))
-            return output_grp
-        else:
-            output_ws_name = workspace if not output_ws_name else output_ws_name
-            return self._run_alg_impl(workspace, input_ws_prop_name, output_ws_name, alg_name, args)
+        return alg.getProperty(output_ws_name).value
 
 
 AlgorithmFactory.subscribe(CalculateISISPolarizationEfficiencies)

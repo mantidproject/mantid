@@ -19,7 +19,6 @@ set(PYTHON_PLUGINS
     algorithms/BinWidthAtX.py
     algorithms/CalculateEfficiencyCorrection.py
     algorithms/CalculateFlux.py
-    algorithms/CalculateISISPolarizationEfficiencies.py
     algorithms/CalculateSampleTransmission.py
     algorithms/CheckForSampleLogs.py
     algorithms/CleanFileCache.py
@@ -219,6 +218,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/BayesStretch2.py
     algorithms/WorkflowAlgorithms/quickBayesHelper.py
+    algorithms/WorkflowAlgorithms/CalculateISISPolarizationEfficiencies.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
