@@ -70,7 +70,7 @@ int LoadNXSPE::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
   using string_map_t = std::map<std::string, std::string>;
   try {
-    ::NeXus::File file = ::NeXus::File(descriptor.getFilename());
+    ::NeXus::File file = ::NeXus::File(descriptor.filename());
     string_map_t entries = file.getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
       if (it->second == "NXentry") {

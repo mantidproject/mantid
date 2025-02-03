@@ -18,7 +18,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -94,7 +94,7 @@ protected:
 // the instantiation and linking did not behave consistently across platforms.
 
 extern template class LoadEMU<Kernel::FileDescriptor>;
-extern template class LoadEMU<Kernel::NexusDescriptor>;
+extern template class LoadEMU<Kernel::NexusHDF5Descriptor>;
 
 /** LoadEMUTar : Loads a merged ANSTO EMU Hdf and event file into a workspace.
 
@@ -154,14 +154,14 @@ Optional Properties:
 </UL>
 
 */
-class MANTID_DATAHANDLING_DLL LoadEMUHdf : public LoadEMU<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEMUHdf : public LoadEMU<Kernel::NexusHDF5Descriptor> {
 public:
   int version() const override;
   const std::vector<std::string> seeAlso() const override;
   const std::string category() const override;
   const std::string name() const override;
   const std::string summary() const override;
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 private:
   void exec() override;

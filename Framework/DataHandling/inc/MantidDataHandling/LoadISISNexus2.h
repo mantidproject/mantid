@@ -15,7 +15,7 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
