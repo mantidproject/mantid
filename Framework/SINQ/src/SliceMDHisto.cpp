@@ -92,7 +92,7 @@ void SliceMDHisto::exec() {
 
 void SliceMDHisto::cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
                            const Mantid::API::IMDHistoWorkspace_sptr &outWS, Mantid::coord_t *sourceDim,
-                           Mantid::coord_t *targetDim, std::vector<int> &start, std::vector<int> &end,
+                           Mantid::coord_t *targetDim, const std::vector<int> &start, const std::vector<int> &end,
                            unsigned int dim) {
   int length;
 

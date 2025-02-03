@@ -106,7 +106,7 @@ public:
 
   void setIgnorePatterns(const std::string &patterns) override;
 
-  std::string ignorePatterns() override final;
+  std::string ignorePatterns() final;
 
   int setAutoUpdate(const std::string &input_path, bool option = true) override;
 

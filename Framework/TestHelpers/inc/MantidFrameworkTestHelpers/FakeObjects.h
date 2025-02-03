@@ -142,13 +142,12 @@ public:
   size_t blocksize() const override {
     if (m_vec.empty()) {
       return 0;
-    } else {
-      size_t numY = m_vec[0].dataY().size();
-      if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.dataY().size() != numY; })) {
-        throw std::logic_error("non-constant number of bins");
-      }
-      return numY;
     }
+    size_t numY = m_vec[0].dataY().size();
+    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.dataY().size() != numY; })) {
+      throw std::logic_error("non-constant number of bins");
+    }
+    return numY;
   }
 
   std::size_t getNumberBins(const std::size_t &index) const override {

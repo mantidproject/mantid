@@ -113,9 +113,10 @@ std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaks(MantidVec::const
    */
   rawPeaks.sort(&PoldiPeakSearch::vectorElementGreaterThan);
 
-  auto usedPeakCount = std::next(rawPeaks.begin(), std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size())));
+  size_t usedPeakCount = std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size()));
+  auto lastPeakIter = std::next(rawPeaks.begin(), usedPeakCount);
 
-  return std::list<MantidVec::const_iterator>(rawPeaks.begin(), usedPeakCount);
+  return std::list<MantidVec::const_iterator>(rawPeaks.begin(), lastPeakIter);
 }
 
 /** Actual recursive peak search method
