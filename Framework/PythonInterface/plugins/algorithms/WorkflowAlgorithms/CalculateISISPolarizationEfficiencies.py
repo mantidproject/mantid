@@ -20,14 +20,15 @@ _TRANS_ALG = "ReflectometryISISCreateTransmission"
 _EFF_ALG = "PolarizationEfficienciesWildes"
 _JOIN_ALG = "JoinISISPolarizationEfficiencies"
 
-_EFF_ALG_INPUT_DICT = {"f1": None, "f2": None, "p1": None, "p2": None}
-_EFF_ALG_INPUT_DICT_DIAG = {"out_phi": None, "rho": None, "alpha": None, "pp": None, "ap": None}
 
-
-@dataclass
-class PropData:
+@dataclass(frozen=True)
+class DataName:
     name: str = ""
     alias: str = ""
+
+
+@dataclass(frozen=True)
+class PropData(DataName):
     default: Any = None
     alg: str = ""
     mag: bool = None
@@ -57,7 +58,23 @@ class Prop:
     OUT_TWO_P_MINUS_ONE = PropData(name="OutputTwoPMinusOne", alg=_EFF_ALG)
     OUT_TWO_A_MINUS_ONE = PropData(name="OutputTwoAMinusOne", alg=_EFF_ALG)
 
-    OUTPUT_WS = PropData(name="OutputWorkspace")
+    OUT_WS = PropData(name="OutputWorkspace")
+
+
+class NonPropData:
+    OUT_FP_EFF = DataName(name="OutputFpEfficiency", alias="F1")
+    OUT_FA_EFF = DataName(name="OutputFaEfficiency", alias="F2")
+    OUT_POL_EFF = DataName(name="OutputPolarizerEfficiency", alias="P1")
+    OUT_AN_EFF = DataName(name="OutputAnalyserEfficiency", alias="P2")
+    OUT_PHI = DataName(name="OutputPhi", alias="OutputPhi")
+    OUT_RHO = DataName(name="OutputRho", alias="OutputRho")
+    OUT_AL = DataName(name="OutputAlpha", alias="OutputAlpha")
+    OUT_2P = DataName(name="OutputTwoPMinusOne", alias="OutputTwoPMinusOne")
+    OUT_2A = DataName(name="OutputTwoAMinusOne", alias="OutputTwoAMinusOne")
+
+
+_EFF_ALG_OUTPUT = [NonPropData.OUT_FP_EFF, NonPropData.OUT_FA_EFF, NonPropData.OUT_POL_EFF, NonPropData.OUT_AN_EFF]
+_EFF_ALG_OUTPUT_DIAG = [NonPropData.OUT_PHI, NonPropData.OUT_RHO, NonPropData.OUT_AL, NonPropData.OUT_2P, NonPropData.OUT_2A]
 
 
 class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
@@ -130,6 +147,10 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
                 Prop.OUT_TWO_P_MINUS_ONE.name,
             ],
         )
+        self.declareProperty(
+            MatrixWorkspaceProperty(Prop.OUT_WS.name, "calc_pol_eff_out", direction=Direction.Output, optional=PropertyMode.Optional),
+            doc="The name of the workspace to be output as a result of the algorithm.",
+        )
 
     def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict:
         args = {}
@@ -142,23 +163,28 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
 
     def PyExec(self):
         eff_args = {}
-        trans_output = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG))
-        eff_args.update({"InputNonMagWorkspace": trans_output})
+        trans_output = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG), ["OutputWorkspace"])
+        eff_args.update({"InputNonMagWorkspace": trans_output, "OutputFpEfficiency": "fp_eff", "OutputFaEfficiency": "fa_eff"})
         if self.getProperty(Prop.MAG_INPUT_RUNS.name).value:
-            trans_output_mag = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True))
+            trans_output_mag = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True), ["OutputWorkspace"])
             eff_args.update({"InputMagWorkspace": trans_output_mag})
         eff_args.update(self._populate_args_dict(_EFF_ALG))
-        eff_output = _EFF_ALG_INPUT_DICT
+        eff_output = {key: None for key in _EFF_ALG_OUTPUT}
         if self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value:
-            eff_output.update(_EFF_ALG_INPUT_DICT_DIAG)
-        eff_output.update(dict(zip(_EFF_ALG_INPUT_DICT.keys(), self._run_algorithm(_EFF_ALG, eff_args))))
-        join_output = self._run_algorithm(_JOIN_ALG, eff_output)
-        self.setProperty(Prop.OUTPUT_WS, join_output)
+            eff_output.update({key: None for key in _EFF_ALG_OUTPUT_DIAG})
+        eff_output.update(
+            dict(zip([x.alias for x in eff_output.keys()], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output.keys()])))
+        )
+        join_output = self._run_algorithm(_JOIN_ALG, {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"])
+        self.setProperty(Prop.OUT_WS.name, join_output[0])
 
-    def _run_algorithm(self, alg_name: str, args: dict, output_ws_name: str = "OutputWorkspace"):
+    def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
         alg = self.createChildAlgorithm(alg_name, **args)
         alg.execute()
-        return alg.getProperty(output_ws_name).value
+        result = []
+        for key in output_properties:
+            result.append(alg.getProperty(key).value)
+        return result
 
 
 AlgorithmFactory.subscribe(CalculateISISPolarizationEfficiencies)
