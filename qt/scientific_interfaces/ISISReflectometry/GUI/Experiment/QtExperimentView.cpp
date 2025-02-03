@@ -331,7 +331,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_polCorrEfficienciesLineEdit, "PolarizationEfficiencies", alg);
-  registerSettingWidget(*m_ui.polCorrFredrikzeSpinStateEdit, "FredrikzePolarizationEfficienciesSpinStateOrder", alg);
+  registerSettingWidget(*m_ui.polCorrFredrikzeSpinStateEdit, "FredrikzePolarizationSpinStateOrder", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);

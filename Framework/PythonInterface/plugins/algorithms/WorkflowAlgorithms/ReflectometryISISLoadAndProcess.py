@@ -279,7 +279,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             Direction.Input,
         )
         self.declareProperty(
-            "FredrikzePolarizationEfficienciesSpinStateOrder",
+            "FredrikzePolarizationSpinStateOrder",
             "",
             "The spin state order of the workspaces in the workspace group to be passed to "
             'PolarizationCorrectionsFredrikze. See the "Spin State Configurations" -> '
@@ -647,6 +647,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
+        alg.setProperty("FredrikzePolarizationSpinStateOrder", self.getPropertyValue("FredrikzePolarizationSpinStateOrder"))
         alg.execute()
         return alg
 
