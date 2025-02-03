@@ -133,15 +133,15 @@ private:
 template <typename T>
 bool IUserInputValidator::checkWorkspaceType(QString const &workspaceName, QString const &inputType,
                                              QString const &validType, bool silent) {
-  if (checkWorkspaceExists(workspaceName, silent)) {
-    if (!MantidWidgets::WorkspaceUtils::getADSWorkspace<T>(workspaceName.toStdString())) {
-      addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
-                      silent);
-      return false;
-    }
-    return true;
+  if (!checkWorkspaceExists(workspaceName, silent)) {
+    return false;
   }
-  return false;
+
+  if (!MantidWidgets::WorkspaceUtils::getADSWorkspace<T>(workspaceName.toStdString())) {
+    addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".", silent);
+    return false;
+  }
+  return true;
 }
 
 } // namespace CustomInterfaces
