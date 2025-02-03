@@ -451,9 +451,9 @@ void File::putAttr(const char *name, const char *value) {
   this->putAttr(s_name, s_value);
 }
 
-void File::putAttr(const std::string &name, const string &value) {
+void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
   string my_value(value);
-  if (my_value.empty())
+  if (my_value.empty() && empty_add_space)
     my_value = " "; // Make a default "space" to avoid errors.
   AttrInfo info;
   info.name = name;
