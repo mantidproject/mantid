@@ -26,6 +26,8 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 
@@ -717,8 +719,8 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
  * @param type : used to discrimante between TOF and Kinetic
  * @return the next ws index after all the tubes in the given detector bank
  */
-size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning, size_t firstIndex,
-                                      const MultichannelType type) {
+size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt const &data, const std::vector<double> &timeBinning,
+                                      size_t firstIndex, const MultichannelType type) {
 
   int numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTube);
@@ -996,11 +998,11 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
  */
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-  if (nxStat != NXstatus::NX_ERROR) {
+  try {
+    ::NeXus::File nxHandle(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
-    NXclose(&nxHandle);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << filename << "\" in read mode: " << e.what() << "\n";
   }
 }
 
