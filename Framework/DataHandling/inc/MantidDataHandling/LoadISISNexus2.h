@@ -56,7 +56,7 @@ multi-period file)
 
 @author Roman Tolchenov, Tessella plc
 */
-class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   /// Default constructor
   LoadISISNexus2();
@@ -71,7 +71,7 @@ public:
   const std::string summary() const override { return "Loads a file in ISIS NeXus format."; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
   /// Spectra block descriptor
   struct SpectraBlock {

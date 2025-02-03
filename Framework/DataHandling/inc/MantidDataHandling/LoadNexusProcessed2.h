@@ -11,7 +11,7 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidIndexing/SpectrumNumber.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include <string>
 #include <unordered_map>
 
