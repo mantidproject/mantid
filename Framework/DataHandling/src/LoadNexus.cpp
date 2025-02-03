@@ -15,11 +15,12 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cmath>
 #include <memory>
@@ -35,6 +36,10 @@ DECLARE_ALGORITHM(LoadNexus)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+namespace {
+const std::string NULL_STR("NULL");
+}
 
 /// Empty default constructor
 LoadNexus::LoadNexus() : Algorithm(), m_filename() {}
@@ -84,7 +89,7 @@ void LoadNexus::exec() {
   // documentation of this algorithm.
 
   std::vector<std::string> entryName, definition;
-  int count = Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);
+  int count = getNexusEntryTypes(m_filename, entryName, definition);
   if (count <= -1) {
     g_log.error("Error reading file " + m_filename);
     throw Exception::FileError("Unable to read data in File:", m_filename);
@@ -256,6 +261,74 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
       setProperty(propName, wkspace);
     }
   }
+}
+
+/** Get all the Nexus entry types for a file
+ *
+ * Try to open named Nexus file and return all entries plus the definition found
+ *for each.
+ * If definition not found, try and return "analysis" field (Muon V1 files)
+ * Closes file on exit.
+ *
+ * @param fileName :: file to open
+ * @param entryName :: vector that gets filled with strings with entry names
+ * @param definition :: vector that gets filled with the "definition" or
+ *"analysis" string.
+ * @return count of entries if OK, -1 failed to open file.
+ */
+int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
+                                  std::vector<std::string> &definition) {
+  std::unique_ptr<::NeXus::File> fileH;
+
+  try {
+    fileH = std::make_unique<::NeXus::File>(fileName);
+  } catch (::NeXus::Exception &) {
+    return -1;
+  }
+  entryName.clear();
+  definition.clear();
+
+  //
+  // Loop through all entries looking for the definition section in each (or
+  // analysis for MuonV1)
+  //
+  std::vector<std::string> entryList;
+
+  std::pair<std::string, std::string> entry;
+  while (true) {
+    entry = fileH->getNextEntry();
+    if (entry.first == NULL_STR && entry.second == NULL_STR)
+      break;
+
+    if (entry.second == "NXentry")
+      entryList.emplace_back(entry.first);
+  }
+
+  // for each entry found, look for "analysis" or "definition" text data fields
+  // and return value plus entry name
+
+  for (auto &item : entryList) {
+    fileH->openGroup(item, "NXentry");
+    // loop through field names in this entry
+    while (true) {
+      entry = fileH->getNextEntry();
+      if (entry.first == NULL_STR && entry.second == NULL_STR)
+        break;
+      // if a data field
+      if (entry.second == "SDS") {
+        // if one of the two names we are looking for
+        if (entry.first == "definition" || entry.first == "analysis") {
+          std::string value;
+          fileH->readData(entry.first, value);
+          definition.emplace_back(value);
+          entryName.emplace_back(item);
+        }
+      }
+    }
+    fileH->closeGroup();
+  }
+
+  return (static_cast<int>(entryName.size()));
 }
 
 } // namespace Mantid::DataHandling
