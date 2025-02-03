@@ -38,7 +38,14 @@ public:
    * Returns a copy of the current file name
    * @return
    */
-  const std::string &getFilename() const noexcept;
+  const std::string &filename() const noexcept;
+
+  /**
+   * Access the file extension. Defined as the string after and including the
+   * last period character
+   * @returns A reference to a const string containing the file extension
+   */
+  inline const std::string &extension() const { return m_extension; }
 
   /**
    * Returns a const reference of the internal map holding all entries in the
@@ -77,6 +84,8 @@ private:
 
   /** NeXus HDF5 file name */
   std::string m_filename;
+  /// Extension
+  std::string m_extension;
 
   /**
    * All entries metadata

@@ -39,7 +39,8 @@ public:
 
     Mantid::Kernel::NexusHDF5Descriptor nexusHDF5Descriptor(filename);
 
-    TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
+    TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.filename());
+    TS_ASSERT_EQUALS(".h5", nexusHDF5Descriptor.extension());
 
     TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/instrument/bank39/total_counts", "SDS"), true);
 

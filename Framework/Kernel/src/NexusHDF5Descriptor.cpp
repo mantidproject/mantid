@@ -12,8 +12,9 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include <H5Cpp.h>
 
-#include <cstdlib>   // malloc, calloc
-#include <cstring>   // strcpy
+#include <cstdlib> // malloc, calloc
+#include <cstring> // strcpy
+#include <filesystem>
 #include <stdexcept> // std::invalid_argument
 #include <utility>
 
@@ -70,10 +71,11 @@ bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
 }
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
-    : m_filename(std::move(filename)), m_allEntries(initAllEntries()) {}
+    : m_filename(std::move(filename)), m_extension(std::filesystem::path(filename).extension().string()),
+      m_allEntries(initAllEntries()) {}
 
 // PUBLIC
-const std::string &NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }
+const std::string &NexusHDF5Descriptor::filename() const noexcept { return m_filename; }
 
 const std::map<std::string, std::set<std::string>> &NexusHDF5Descriptor::getAllEntries() const noexcept {
   return m_allEntries;
