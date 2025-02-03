@@ -81,6 +81,8 @@ NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
 // PUBLIC
 const std::string &NexusHDF5Descriptor::filename() const noexcept { return m_filename; }
 
+bool NexusHDF5Descriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
+
 const std::map<std::string, std::set<std::string>> &NexusHDF5Descriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
@@ -98,6 +100,12 @@ std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries
   }
 
   H5::Group groupID = fileID.openGroup("/");
+
+  // get root attributes
+  for (int i = 0; i < groupID.getNumAttrs(); ++i) {
+    H5::Attribute attr = groupID.openAttribute(i);
+    m_rootAttrs.insert(attr.getName());
+  }
 
   std::map<std::string, std::set<std::string>> allEntries;
   // scan file recursively starting with root group "/"
@@ -124,6 +132,15 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName, const std::strin
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
   return std::any_of(m_allEntries.rbegin(), m_allEntries.rend(),
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
+}
+
+std::vector<std::string> NexusHDF5Descriptor::allPathsOfType(const std::string &type) const {
+  std::vector<std::string> result;
+  if (auto itClass = m_allEntries.find(type); itClass != m_allEntries.end()) {
+    result.assign(itClass->second.begin(), itClass->second.end());
+  }
+
+  return result;
 }
 
 bool NexusHDF5Descriptor::classTypeExists(const std::string &classType) const {
