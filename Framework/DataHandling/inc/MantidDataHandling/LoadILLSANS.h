@@ -70,7 +70,7 @@ private:
                               const MultichannelType type = MultichannelType::TOF);
   size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
                                      const std::vector<double> &binning);
-  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
+  size_t loadDataFromTubes(NeXus::NXInt const &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);

@@ -565,7 +565,6 @@ uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:5
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSS.cpp:449
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:254
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLSANS.cpp:720
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:277
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:286
