@@ -144,6 +144,45 @@ void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runD
   }
 }
 
+namespace {
+template <typename NumericType>
+void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, const std::string &property_name,
+                        API::Run &runDetails) {
+  if (!runDetails.hasProperty(property_name)) {
+    g_log.warning() << "Property " << property_name << " was set twice. Please check the Nexus file and your inputs.";
+  }
+  // this assumes all values are rank==1
+
+  // Look for "units"
+  std::string units; // empty string
+  if (filehandle.hasAttr("units"))
+    filehandle.getAttr("units", units);
+
+  // read the field
+  std::vector<NumericType> data_vec;
+  data_vec.reserve(nxinfo.dims.front());
+  filehandle.getDataCoerce(data_vec);
+
+  // create the property on the run objects
+  const auto dim1size = data_vec.size();
+  if (dim1size == 1) {
+    if (units.empty())
+      runDetails.addProperty(property_name, data_vec.front());
+    else
+      runDetails.addProperty(property_name, data_vec.front(), units);
+  } else {
+    // create a bunch of little properties
+    for (size_t index = 0; index < dim1size; ++index) {
+      const auto property_name_indexed = property_name + "_" + std::to_string(index);
+      if (units.empty())
+        runDetails.addProperty(property_name_indexed, data_vec[index]);
+      else
+        runDetails.addProperty(property_name_indexed, data_vec[index], units);
+    }
+  }
+}
+} // namespace
+
 /**
  * Recursively add properties from a nexus file to
  * the workspace run.
@@ -170,31 +209,32 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API:
         const auto nxinfo = filehandle.getInfo(); // get information about the open data
         const auto rank = nxinfo.dims.size();
 
-        const bool isFloat((nxinfo.type == NXnumtype::FLOAT32) || (nxinfo.type == NXnumtype::FLOAT64));
-        const bool isInt((nxinfo.type == NXnumtype::INT16) || (nxinfo.type == NXnumtype::INT32) ||
-                         (nxinfo.type == NXnumtype::UINT16));
-
         // Note, we choose to only build properties on small float arrays filter logic is below
-        bool build_small_float_array = false; // default
-        bool read_property = true;
-        if (nxinfo.type == NXnumtype::CHAR) {
-          read_property = (rank == 1);
-        } else if (isFloat) {
-          if ((rank == 1) && (nxinfo.dims[0] <= 9)) {
-            build_small_float_array = true;
-          } else {
-            read_property = false;
-          }
-        } else {
-          // only read scalars
-          read_property = !((rank > 1) || (nxinfo.dims.front() > 1));
+        bool read_property = (rank == 1);
+        switch (nxinfo.type) {
+        case (NXnumtype::CHAR):
+          break; // everything is fine
+        case (NXnumtype::FLOAT32):
+        case (NXnumtype::FLOAT64):
+          // some 1d float arrays may be loaded
+          read_property = (nxinfo.dims[0] <= 9);
+          break;
+        case (NXnumtype::INT16):
+        case (NXnumtype::INT32):
+        case (NXnumtype::UINT16):
+          // only read scalar values for everything else - e.g. integers
+          read_property = (nxinfo.dims.front() == 1);
+          break;
+        default:
+          read_property = false;
         }
 
         if (read_property) {
           // generate a name for the property
-          std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
+          const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
 
-          if (nxinfo.type == NXnumtype::CHAR) {
+          switch (nxinfo.type) {
+          case (NXnumtype::CHAR): {
             std::string property_value = filehandle.getStrData();
             if (property_name.ends_with("_time")) {
               // That's a time value! Convert to Mantid standard
@@ -211,66 +251,22 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API:
                                 << " was set twice. Please check the Nexus file and your inputs.\n";
               }
             }
-          } else if (isFloat || isInt) {
-            // Look for "units"
-            std::string units; // empty string
-            if (filehandle.hasAttr("units"))
-              filehandle.getAttr("units", units);
-
-            if (isFloat) {
-              if ((rank == 1) && (nxinfo.dims[0] == 1)) {
-                // read the field
-                std::vector<double> data_vec;
-                data_vec.reserve(nxinfo.dims[0]);
-                filehandle.getDataCoerce(data_vec);
-                // create the property
-                if (!runDetails.hasProperty(property_name)) {
-                  if (units.empty())
-                    runDetails.addProperty(property_name, data_vec.front());
-                  else
-                    runDetails.addProperty(property_name, data_vec.front(), units);
-                } else {
-                  g_log.warning() << "Property " << property_name
-                                  << " was set twice. Please check the Nexus file and your inputs.";
-                }
-              } else if (build_small_float_array) {
-                // unpack the 1-d array into separate values
-                const auto dim1size = static_cast<size_t>(nxinfo.dims.front());
-                // read the field
-                std::vector<double> data_vec;
-                data_vec.reserve(dim1size);
-                filehandle.getDataCoerce(data_vec);
-                // create a bunch of little properties
-                for (size_t index = 0; index < dim1size; ++index) {
-                  const auto property_name_indexed = property_name + "_" + std::to_string(index);
-                  if (units.empty())
-                    runDetails.addProperty(property_name_indexed, data_vec[index]);
-                  else
-                    runDetails.addProperty(property_name_indexed, data_vec[index], units);
-                }
-              }
-              // fall through is to do nothing
-
-            } else if (isInt) {
-              // read the field
-              std::vector<int> data_vec;
-              data_vec.reserve(nxinfo.dims[0]);
-              filehandle.getDataCoerce(data_vec);
-
-              if (runDetails.hasProperty(property_name)) {
-                g_log.warning() << "Property " << property_name
-                                << " was set twice. Please check the Nexus file and your inputs.\n";
-              } else {
-                if (units.empty())
-                  runDetails.addProperty(property_name, data_vec.front());
-                else
-                  runDetails.addProperty(property_name, data_vec.front(), units);
-              }
-            } else {
-              std::stringstream msg;
-              msg << "Encountered unknown type: " << nxinfo.type;
-              throw std::runtime_error(msg.str());
-            }
+            break;
+          }
+          case (NXnumtype::FLOAT32):
+          case (NXnumtype::FLOAT64):
+            addNumericProperty<double>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          case (NXnumtype::INT16):
+          case (NXnumtype::INT32):
+          case (NXnumtype::UINT16):
+            addNumericProperty<int>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          default:
+            std::stringstream msg;
+            msg << "Encountered unknown type: " << nxinfo.type;
+            throw std::runtime_error(msg.str());
+            break;
           }
         }
         filehandle.closeData();
@@ -281,8 +277,8 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API:
         filehandle.openGroup(nxname, nxclass);
 
         const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-        std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
-        std::string p_nxclass(nxclass);
+        const std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
+        const std::string p_nxclass(nxclass);
 
         recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
 
