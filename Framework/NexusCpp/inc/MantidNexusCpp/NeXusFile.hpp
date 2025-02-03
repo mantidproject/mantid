@@ -396,7 +396,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(const std::string &name, const std::string &value);
+  void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
 
   /**
    * \copydoc NeXus::File::putSlab(void* data, std::vector<int64_t>& start,
