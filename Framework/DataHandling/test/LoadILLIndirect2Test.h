@@ -61,7 +61,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setPropertyValue("Filename", file);
-    Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusHDF5Descriptor descr(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 

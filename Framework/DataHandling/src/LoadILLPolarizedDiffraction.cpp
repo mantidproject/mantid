@@ -49,13 +49,13 @@ constexpr size_t TOF_MODE_ON = 1;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLPolarizedDiffraction::confidence(NexusDescriptor &descriptor) const {
+int LoadILLPolarizedDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/D7")) {
+  if (descriptor.isEntry("/entry0/D7")) {
     return 80;
   } else {
     return 0;
@@ -79,7 +79,7 @@ const std::string LoadILLPolarizedDiffraction::summary() const {
 /**
  * Constructor
  */
-LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction() : IFileLoader<NexusDescriptor>() {}
+LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction() : IFileLoader<NexusHDF5Descriptor>() {}
 
 /**
  * Initialize the algorithm's properties.
