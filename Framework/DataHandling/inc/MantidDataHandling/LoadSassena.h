@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 
 #include <H5Cpp.h>
 
@@ -42,7 +42,7 @@ class LoadDataSet
 };
 */
 
-class MANTID_DATAHANDLING_DLL LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadSassena : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }
@@ -55,7 +55,7 @@ public:
   const std::string category() const override { return "DataHandling\\Sassena"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 protected:
   /// Add a workspace to the group and register in the analysis data service

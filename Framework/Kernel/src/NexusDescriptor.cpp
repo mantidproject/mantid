@@ -131,12 +131,6 @@ NexusDescriptor::~NexusDescriptor() = default;
 const std::pair<std::string, std::string> &NexusDescriptor::firstEntryNameType() const { return m_firstEntryNameType; }
 
 /**
- * @param name The name of an attribute
- * @return True if the attribute exists, false otherwise
- */
-bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
-
-/**
  * @param path A string giving a path using UNIX-style path separators (/), e.g.
  * /raw_data_1, /entry/bank1
  * @return True if the path exists in the file, false otherwise
@@ -228,12 +222,6 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
                                std::map<std::string, std::string> &pmap, int level) {
   if (!rootPath.empty()) {
     pmap.emplace(rootPath, className);
-  }
-  if (level == 0) {
-    auto attrInfos = file.getAttrInfos();
-    for (auto &attrInfo : attrInfos) {
-      m_rootAttrs.insert(attrInfo.name);
-    }
   }
 
   auto dirents = file.getEntries();

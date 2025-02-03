@@ -79,8 +79,6 @@ public:
 
   /// Returns the name & type of the first entry in the file
   const std::pair<std::string, std::string> &firstEntryNameType() const;
-  /// Query if the given attribute exists on the root node
-  bool hasRootAttr(const std::string &name) const;
   /// Query if a path exists
   bool pathExists(const std::string &path) const;
   /// Query if a path exists of a given type
