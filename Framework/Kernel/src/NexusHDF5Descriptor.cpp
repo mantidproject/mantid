@@ -26,7 +26,8 @@ namespace Mantid::Kernel {
 /// PRIVATE
 namespace {
 
-void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &allEntries) {
+void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &allEntries,
+              std::pair<std::string, std::string> &firstEntryNameType, size_t level) {
 
   /**
    * Return the NX_class attribute associate with objectName group entry
@@ -54,9 +55,12 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 
     H5G_obj_t type = groupID.getObjTypeByIdx(i);
     H5std_string memberName = groupID.getObjnameByIdx(i);
+
     if (type == H5G_GROUP) {
       H5::Group subGroupID = groupID.openGroup(memberName);
-      getGroup(subGroupID, allEntries);
+      if (level == 0)
+        firstEntryNameType = std::make_pair(memberName, lf_getNxClassAttribute(subGroupID));
+      getGroup(subGroupID, allEntries, firstEntryNameType, level + 1);
     } else if (type == H5G_DATASET) {
       const std::string absoluteEntryName = groupNameStr + "/" + memberName;
       allEntries["SDS"].insert(absoluteEntryName);
@@ -72,7 +76,7 @@ bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(filename).extension().string()),
-      m_allEntries(initAllEntries()) {}
+      m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
 const std::string &NexusHDF5Descriptor::filename() const noexcept { return m_filename; }
@@ -97,7 +101,7 @@ std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries
 
   std::map<std::string, std::set<std::string>> allEntries;
   // scan file recursively starting with root group "/"
-  getGroup(groupID, allEntries);
+  getGroup(groupID, allEntries, m_firstEntryNameType, 0);
 
   // rely on move semantics
   return allEntries;
@@ -120,6 +124,10 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName, const std::strin
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
   return std::any_of(m_allEntries.rbegin(), m_allEntries.rend(),
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
+}
+
+bool NexusHDF5Descriptor::classTypeExists(const std::string &classType) const {
+  return m_allEntries.contains(classType);
 }
 
 } // namespace Mantid::Kernel

@@ -38,19 +38,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setPropertyValue("Filename", "REF_L_32035.nxs");
-    Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusHDF5Descriptor descr(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
 
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    Mantid::Kernel::NexusDescriptor descr2(alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusHDF5Descriptor descr2(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr2), 20);
 
     alg.setPropertyValue("Filename", "argus0026577.nxs");
-    Mantid::Kernel::NexusDescriptor descr3(alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusHDF5Descriptor descr3(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr3), 0);
 
     alg.setPropertyValue("Filename", "PG3_733.nxs");
-    Mantid::Kernel::NexusDescriptor descr4(alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusHDF5Descriptor descr4(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr4), 0);
   }
 
