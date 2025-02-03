@@ -30,7 +30,7 @@ using namespace Mantid::Kernel;
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadQKK)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -38,9 +38,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadQKK::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   const auto &firstEntryName = descriptor.firstEntryNameType().first;
-  if (descriptor.pathExists("/" + firstEntryName + "/data/hmm_xy"))
+  if (descriptor.isEntry("/" + firstEntryName + "/data/hmm_xy"))
     return 80;
   else
     return 0;

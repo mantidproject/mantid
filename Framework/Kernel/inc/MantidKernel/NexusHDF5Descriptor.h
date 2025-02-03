@@ -47,6 +47,9 @@ public:
    */
   inline const std::string &extension() const { return m_extension; }
 
+  /// Returns the name & type of the first entry in the file
+  const std::pair<std::string, std::string> &firstEntryNameType() const { return m_firstEntryNameType; };
+
   /**
    * Returns a const reference of the internal map holding all entries in the
    * NeXus HDF5 file
@@ -75,6 +78,9 @@ public:
    */
   bool isEntry(const std::string &entryName) const noexcept;
 
+  /// Query if a given type exists somewhere in the file
+  bool classTypeExists(const std::string &classType) const;
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
@@ -86,6 +92,8 @@ private:
   std::string m_filename;
   /// Extension
   std::string m_extension;
+  /// First entry name/type
+  std::pair<std::string, std::string> m_firstEntryNameType;
 
   /**
    * All entries metadata
