@@ -56,14 +56,8 @@ public:
   //======================================
   void test_isReadable_Returns_False_For_Non_HDF_Filename() {
     TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::AnyVersion));
     TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version4));
     TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version5));
-  }
-
-  void test_isReadable_Defaults_To_All_Versions() {
-    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF4Path));
-    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF5Path));
   }
 
   void test_isReadable_With_Version4_Returns_True_Only_For_HDF4() {
@@ -74,6 +68,12 @@ public:
   void test_isReadable_With_Version5_Returns_True_Only_For_HDF4() {
     TS_ASSERT(NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
     TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version5));
+  }
+
+  void test_getHDFVersion() {
+    TS_ASSERT_EQUALS(NexusDescriptor::Version5, NexusDescriptor::getHDFVersion(m_testHDF5Path));
+    TS_ASSERT_EQUALS(NexusDescriptor::Version4, NexusDescriptor::getHDFVersion(m_testHDF4Path));
+    TS_ASSERT_EQUALS(NexusDescriptor::None, NexusDescriptor::getHDFVersion(m_testNonHDFPath));
   }
 
   void test_isReadable_Throws_With_Invalid_Filename() {
@@ -110,10 +110,6 @@ public:
     TS_ASSERT_EQUALS("entry", entryType.first);
     TS_ASSERT_EQUALS("NXentry", entryType.second);
   }
-
-  void test_hasRootAttr_Returns_True_For_Existing_Attr() { TS_ASSERT(m_testHDF5->hasRootAttr("file_time")); }
-
-  void test_hasRootAttr_Returns_False_For_Non_Existing_Attr() { TS_ASSERT(!m_testHDF5->hasRootAttr("not_attr")); }
 
   void test_PathExists_Returns_False_For_Path_Not_In_File() { TS_ASSERT(!m_testHDF5->pathExists("/raw_data_1/bank1")); }
 

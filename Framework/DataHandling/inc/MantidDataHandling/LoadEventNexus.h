@@ -480,7 +480,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
   std::string instFilename;
 
   const bool isNexus = (descriptor == nullptr) ? LoadGeometry::isNexus(nexusfilename)
-                                               : LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries());
+                                               : LoadGeometry::isNexus(descriptor->getAllEntries());
 
   // Check if the geometry can be loaded directly from the Nexus file
   if (isNexus) {

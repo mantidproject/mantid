@@ -75,8 +75,7 @@ bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
 }
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
-    : m_filename(std::move(filename)), m_extension(std::filesystem::path(filename).extension().string()),
-      m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
+    : m_filename(std::move(filename)), m_extension(), m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
 const std::string &NexusHDF5Descriptor::filename() const noexcept { return m_filename; }
@@ -89,14 +88,17 @@ const std::map<std::string, std::set<std::string>> &NexusHDF5Descriptor::getAllE
 
 // PRIVATE
 std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries() {
+  m_extension = std::filesystem::path(m_filename).extension().string();
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+
+  std::map<std::string, std::set<std::string>> allEntries;
 
   H5::H5File fileID;
   try {
     fileID = H5::H5File(m_filename, H5F_ACC_RDONLY, H5::FileCreatPropList::DEFAULT, access_plist);
   } catch (const H5::FileIException &) {
-    throw std::invalid_argument("ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " + m_filename + "\n");
+    return allEntries;
   }
 
   H5::Group groupID = fileID.openGroup("/");
@@ -107,7 +109,6 @@ std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries
     m_rootAttrs.insert(attr.getName());
   }
 
-  std::map<std::string, std::set<std::string>> allEntries;
   // scan file recursively starting with root group "/"
   getGroup(groupID, allEntries, m_firstEntryNameType, 0);
 

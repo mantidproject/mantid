@@ -59,12 +59,39 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   // Number of bytes read doesn't matter as if it is not enough then the memory
   // simply won't match
   // as the buffer has been "zeroed"
-  if (version == NexusDescriptor::Version5 || version == NexusDescriptor::AnyVersion) {
+  if (version == NexusDescriptor::Version5) {
     result = (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature, NexusDescriptor::HDF5SignatureSize) == 0);
   }
-  if (!result && (version == NexusDescriptor::Version4 || version == NexusDescriptor::AnyVersion)) {
+  if (!result && (version == NexusDescriptor::Version4)) {
     result = (std::memcmp(&buffer, &NexusDescriptor::HDFMagic, NexusDescriptor::HDFMagicSize) == 0);
   }
+
+  // Return file stream to start of file
+  std::rewind(fileHandle);
+  return result;
+}
+
+NexusDescriptor::Version HDFversion(FILE *fileHandle) {
+  if (!fileHandle)
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
+
+  // HDF4 check requires 4 bytes,  HDF5 check requires 8 bytes
+  // Use same buffer and waste a few bytes if only checking HDF4
+  unsigned char buffer[8] = {'0', '0', '0', '0', '0', '0', '0', '0'};
+  if (NexusDescriptor::HDF5SignatureSize !=
+      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char), NexusDescriptor::HDF5SignatureSize, fileHandle)) {
+    throw std::runtime_error("Error while reading file");
+  }
+
+  NexusDescriptor::Version result = NexusDescriptor::None;
+
+  // Number of bytes read doesn't matter as if it is not enough then the memory
+  // simply won't match
+  // as the buffer has been "zeroed"
+  if (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature, NexusDescriptor::HDF5SignatureSize) == 0)
+    result = NexusDescriptor::Version5;
+  else if (std::memcmp(&buffer, &NexusDescriptor::HDFMagic, NexusDescriptor::HDFMagicSize) == 0)
+    result = NexusDescriptor::Version4;
 
   // Return file stream to start of file
   std::rewind(fileHandle);
@@ -89,6 +116,16 @@ bool NexusDescriptor::isReadable(const std::string &filename, const Version vers
     throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Unable to open file '" + filename + "'");
   }
   const bool result = isHDFHandle(fd, version); // use anonymous helper
+  fclose(fd);
+  return result;
+}
+
+NexusDescriptor::Version NexusDescriptor::getHDFVersion(const std::string &filename) {
+  FILE *fd = fopen(filename.c_str(), "rb");
+  if (!fd) {
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Unable to open file '" + filename + "'");
+  }
+  const Version result = HDFversion(fd); // use anonymous helper
   fclose(fd);
   return result;
 }
