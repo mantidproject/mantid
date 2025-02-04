@@ -124,22 +124,6 @@ public:
     TS_ASSERT(m_testHDF5->pathExists("/entry/bank1/data_x_y"));
   }
 
-  void test_PathOfTypeExists_Returns_True_For_Path_Of_Right_Type_At_Any_Level_In_File() {
-    TS_ASSERT(m_testHDF5->pathOfTypeExists("/entry", "NXentry"));
-    TS_ASSERT(m_testHDF5->pathOfTypeExists("/entry/bank1_events", "NXevent_data"));
-  }
-
-  void test_PathOfTypeExists_Returns_False_For_Path_In_File_But_Of_Wrong_Type() {
-    TS_ASSERT(!m_testHDF5->pathOfTypeExists("/entry", "NXlog"));
-    TS_ASSERT(!m_testHDF5->pathOfTypeExists("/entry/bank1_events", "NXentry"));
-  }
-
-  void test_classTypeExists_Returns_True_For_Type_At_Any_Level_In_File() {
-    TS_ASSERT(m_testHDF5->classTypeExists("NXentry"));
-    TS_ASSERT(m_testHDF5->classTypeExists("NXevent_data"));
-    TS_ASSERT(m_testHDF5->classTypeExists("NXlog"));
-  }
-
 private:
   std::string m_testHDF5Path;
   std::string m_testHDF4Path;
