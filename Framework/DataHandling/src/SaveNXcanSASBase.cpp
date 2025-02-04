@@ -20,8 +20,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 
-#include <Poco/File.h>
 #include <algorithm>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
@@ -50,13 +50,13 @@ std::string validateGroupWithProperties(const Workspace_sptr &ws) {
     auto const &groupItems = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)->getAllItems();
     if (std::any_of(groupItems.cbegin(), groupItems.cend(),
                     [](auto const &childWs) { return !checkValidMatrixWorkspace(childWs); })) {
-      return "Workspace must have common bins or Momentum transfer units";
+      return "Workspace must have common bins and Momentum transfer units";
     }
     return "";
   }
 
   if (!checkValidMatrixWorkspace(ws)) {
-    return "Workspace must have common bins or Momentum transfer units";
+    return "Workspace must have common bins and Momentum transfer units";
   }
   return "";
 }
@@ -297,8 +297,8 @@ void SaveNXcanSASBase::addData(H5::Group &group, const Mantid::API::MatrixWorksp
 void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace,
                                                const std::string &filename) {
   // Prepare file
-  if (Poco::File(filename).exists()) {
-    Poco::File(filename).remove();
+  if (auto const &path = std::filesystem::path(filename); !path.empty()) {
+    std::filesystem::remove(path);
   }
   H5::H5File file(filename, H5F_ACC_EXCL);
 
