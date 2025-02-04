@@ -7,9 +7,11 @@
 #pragma once
 
 #include "GUI/Batch/RowProcessingAlgorithm.h"
+#include "GUI/Preview/ROIType.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/Group.h"
+#include "Reduction/ProcessingInstructions.h"
 
 #include <memory>
 #include <string>
@@ -74,6 +76,8 @@ public:
   virtual std::string instrumentName() const = 0;
 
   virtual bool hasROIDetectorIDsForPreviewRow() const = 0;
+  virtual std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const = 0;
+  virtual boost::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

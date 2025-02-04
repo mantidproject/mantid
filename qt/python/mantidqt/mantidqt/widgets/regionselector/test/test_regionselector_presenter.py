@@ -18,7 +18,7 @@ class RegionSelectorTest(unittest.TestCase):
         self.patched_deps = self._ws_info_patcher.start()
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
         self.mock_view = MagicMock()
-        self.mock_view._data_view.ax._get_aspect_ratio.return_value = 1
+        self.mock_view.data_view.ax._get_aspect_ratio.return_value = 1
 
     def tearDown(self) -> None:
         self._ws_info_patcher.stop()
@@ -308,7 +308,67 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         region_selector.cancel_drawing_region()
 
-    def _mock_selectors(self, selector_one_type="signal", selector_two_type="signal"):
+    def test_display_rectangular_region_creates_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        # The expected extents should be within the axes x and y limits
+        expected_extents = (4000, 6000, 100, 300)
+        region_type = "test"
+
+        region_selector.display_rectangular_region(region_type, "black", "/", expected_extents[2], expected_extents[3])
+
+        self.assertEqual(1, len(region_selector._selectors))
+        self._check_rectangular_region(region_selector._selectors[0], region_type, expected_extents)
+
+    def test_display_rectangular_region_y1_out_of_bounds_does_not_add_selector(self):
+        y_limits = (200, 500)
+        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
+
+        region_selector.display_rectangular_region("test", "black", "/", y_limits[0] - 50, y_limits[1])
+
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_display_rectangular_region_y2_out_of_bounds_does_not_add_selector(self):
+        y_limits = (200, 500)
+        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
+
+        region_selector.display_rectangular_region("test", "black", "/", y_limits[0], y_limits[1] + 50)
+
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_display_rectangular_region_does_not_add_duplicate_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        # The expected extents should be within the axes x and y limits
+        expected_extents = (4000, 6000, 100, 300)
+        region_type = "test"
+        color = "black"
+        hatch = "/"
+
+        region_selector.display_rectangular_region(region_type, color, hatch, expected_extents[2], expected_extents[3])
+        self.assertEqual(1, len(region_selector._selectors))
+        region_selector.display_rectangular_region(region_type, color, hatch, expected_extents[2], expected_extents[3])
+
+        self.assertEqual(1, len(region_selector._selectors))
+        self._check_rectangular_region(region_selector._selectors[0], region_type, expected_extents)
+
+    def test_display_rectangular_region_adds_second_different_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        # The expected extents should be within the axes x and y limits
+        expected_x_values = (4000, 6000)
+        first_y_values = (100, 200)
+        second_y_values = (300, 400)
+        region_type = "test"
+        color = "black"
+        hatch = "/"
+
+        region_selector.display_rectangular_region(region_type, color, hatch, first_y_values[0], first_y_values[1])
+        region_selector.display_rectangular_region(region_type, color, hatch, second_y_values[0], second_y_values[1])
+
+        self.assertEqual(2, len(region_selector._selectors))
+        for i, expected_y_values in enumerate([first_y_values, second_y_values]):
+            self._check_rectangular_region(region_selector._selectors[i], region_type, expected_x_values + expected_y_values)
+
+    @staticmethod
+    def _mock_selectors(selector_one_type="signal", selector_two_type="signal"):
         selector_one, selector_two = Mock(), Mock()
         selector_one.region_type = Mock(return_value=selector_one_type)
         selector_two.region_type = Mock(return_value=selector_two_type)
@@ -321,6 +381,21 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector._selectors.append(selector_two)
 
         return region_selector, selector_one, selector_two
+
+    @staticmethod
+    def _mock_view_with_axes_limits(x_limits: tuple[float, float], y_limits: tuple[float, float]):
+        mock_view = Mock()
+        mock_view.data_view.ax.get_xbound.return_value = mock_view.data_view.ax.get_xlim.return_value = x_limits
+        mock_view.data_view.ax.get_ybound.return_value = mock_view.data_view.ax.get_ylim.return_value = y_limits
+        mock_view.data_view.ax._get_aspect_ratio.return_value = 1
+        return mock_view
+
+    def _check_rectangular_region(
+        self, selector: RegionSelector, expected_region_type: str, expected_extents: tuple[float, float, float, float], is_active=False
+    ):
+        self.assertEqual(is_active, selector.active)
+        self.assertEqual(expected_region_type, selector.region_type())
+        self.assertTupleEqual(expected_extents, selector.extents)
 
 
 if __name__ == "__main__":
