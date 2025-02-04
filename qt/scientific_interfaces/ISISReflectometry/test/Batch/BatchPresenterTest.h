@@ -64,8 +64,9 @@ public:
 
   void testInitInstrumentListUpdatesRunsPresenter() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, initInstrumentList(_)).Times(1);
-    presenter->initInstrumentList();
+    std::string const selectedInstrument = "INTER";
+    EXPECT_CALL(*m_runsPresenter, initInstrumentList(selectedInstrument)).Times(1).WillOnce(Return(selectedInstrument));
+    TS_ASSERT_EQUALS(presenter->initInstrumentList(selectedInstrument), selectedInstrument);
   }
 
   void testMainPresenterUpdatedWhenChangeInstrumentRequested() {
