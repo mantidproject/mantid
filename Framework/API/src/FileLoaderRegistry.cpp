@@ -117,27 +117,15 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
-  if (NexusDescriptor::isReadable(filename)) {
-    m_log.debug() << filename << " looks like a Nexus file. Checking registered Nexus loaders\n";
 
-    // a large subset of NeXus files are actually HDF5 based
-    if (NexusHDF5Descriptor::isReadable(filename)) {
-      try {
-        bestLoader =
-            searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, m_names[NexusHDF5], m_log);
-      } catch (const std::invalid_argument &e) {
-        m_log.debug() << "Error in looking for HDF5 based NeXus files: " << e.what() << '\n';
-      }
-    }
-
-    // try generic nexus loaders
-    if (!bestLoader) {
-      bestLoader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
-    }
-  } else {
-    m_log.debug() << "Checking registered non-HDF loaders\n";
+  auto HDFversion = NexusDescriptor::getHDFVersion(filename);
+  if (HDFversion == NexusDescriptor::Version5)
+    bestLoader =
+        searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, m_names[NexusHDF5], m_log);
+  else if (HDFversion == NexusDescriptor::Version4)
+    bestLoader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
+  else
     bestLoader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(filename, m_names[Generic], m_log);
-  }
 
   if (!bestLoader) {
     throw Kernel::Exception::NotFoundError(filename, "Unable to find loader");
