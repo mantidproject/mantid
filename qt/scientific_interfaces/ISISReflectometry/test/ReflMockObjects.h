@@ -64,7 +64,7 @@ public:
 class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
-  MOCK_METHOD1(initInstrumentList, void(const std::string &));
+  MOCK_METHOD1(initInstrumentList, std::string(const std::string &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
@@ -111,7 +111,7 @@ public:
 class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD1(initInstrumentList, void(const std::string &));
+  MOCK_METHOD1(initInstrumentList, std::string(const std::string &));
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
   MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));

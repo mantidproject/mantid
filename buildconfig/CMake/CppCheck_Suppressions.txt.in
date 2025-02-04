@@ -766,7 +766,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/G
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Preview/PreviewModel.h:31
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/IRunsView.h:66
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/QtCatalogSearcher.h:32
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/RunsPresenter.cpp:545
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/IRunsTableView.h:31
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:510
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:749

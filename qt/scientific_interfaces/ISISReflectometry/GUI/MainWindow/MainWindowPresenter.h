@@ -112,6 +112,7 @@ private:
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
   void onInstrumentChanged();
+  void processInstrumentSelection(std::string const &selectedInstrument, IBatchPresenter *batchPresenter = nullptr);
 
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();
