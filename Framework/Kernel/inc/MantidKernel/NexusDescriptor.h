@@ -83,14 +83,6 @@ public:
   const std::pair<std::string, std::string> &firstEntryNameType() const;
   /// Query if a path exists
   bool pathExists(const std::string &path) const;
-  /// Query if a path exists of a given type
-  bool pathOfTypeExists(const std::string &path, const std::string &type) const;
-  /// return the path of a given type
-  std::string pathOfType(const std::string &type) const;
-  /// return a vector of all paths of a given type
-  std::vector<std::string> allPathsOfType(const std::string &type) const;
-  /// Query if a given type exists somewhere in the file
-  bool classTypeExists(const std::string &classType) const;
 
 private:
   /// Initialize object with filename

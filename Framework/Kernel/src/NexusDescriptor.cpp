@@ -176,58 +176,6 @@ bool NexusDescriptor::pathExists(const std::string &path) const {
   return (m_pathsToTypes.find(path) != m_pathsToTypes.end());
 }
 
-/**
- * @param path A string giving a path using UNIX-style path separators (/), e.g.
- * /raw_data_1, /entry/bank1
- * @param type A string specifying the required type
- * @return True if the path exists in the file, false otherwise
- */
-bool NexusDescriptor::pathOfTypeExists(const std::string &path, const std::string &type) const {
-  auto it = m_pathsToTypes.find(path);
-  if (it != m_pathsToTypes.end()) {
-    return (it->second == type);
-  } else
-    return false;
-}
-
-/**
- * @param type A string specifying the required type
- * @return path A string giving a path using UNIX-style path separators (/),
- * e.g. /raw_data_1, /entry/bank1
- */
-std::string NexusDescriptor::pathOfType(const std::string &type) const {
-  const auto it = std::find_if(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
-                               [&type](const auto &typeMap) { return type == typeMap.second; });
-  if (it != m_pathsToTypes.cend()) {
-    return it->first;
-  }
-  return "";
-}
-
-/**
- * @param type A string specifying the required type
- * @return path A vector of strings giving paths using UNIX-style path
- * separators (/), e.g. /raw_data_1, /entry/bank1
- */
-std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type) const {
-  auto iend = m_pathsToTypes.end();
-  std::vector<std::string> retval;
-  for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
-    if (type == it->second)
-      retval.push_back(it->first);
-  }
-  return retval;
-}
-
-/**
- * @param classType A string name giving a class type
- * @return True if the type exists in the file, false otherwise
- */
-bool NexusDescriptor::classTypeExists(const std::string &classType) const {
-  return std::any_of(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
-                     [&classType](const auto typeMap) { return classType == typeMap.second; });
-}
-
 //---------------------------------------------------------------------------------------------------------------------------
 // NexusDescriptor private methods
 //---------------------------------------------------------------------------------------------------------------------------
