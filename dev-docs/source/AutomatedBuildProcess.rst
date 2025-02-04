@@ -26,8 +26,8 @@ The status for each build will be either pending, success or failed.
 To see the details of a particular build in Jenkins click on Details
 next to the status. To restart a build, if it failed with a spurious
 error not related to your code changes, then you can restart that
-particular build by selecting Rebuild in Jenkins. Then press rebuild
-again on the next screen while not changing any of the parameters. If
+particular build by selecting Rebuild in Jenkins. Then press "Rebuild"
+on the next screen while not changing any of the parameters. If
 you don't have permission to restart builds in Jenkins you will have
 to ask someone who does.
 
@@ -48,23 +48,13 @@ The pull request builder we are using is called `Leeroy
 You can find a list of all the pull request Jenkins jobs at `here
 <http://builds.mantidproject.org/view/Pull%20Requests/>`_.
 
-Main Pipeline
-^^^^^^^^^^^^^
+Nightly Pipelines
+^^^^^^^^^^^^^^^^^
 
-The `main pipeline <http://builds.mantidproject.org/view/Main%20Pipeline/>`_
-is a series of jobs that periodically run against code on the ``main`` branch.
-Their purpose is to provide reasonable assurance that the code currently in
-``main`` is usable in its current state.
+The nightly pipelines are Jenkins jobs responsible for building Mantid packages
+and deploying them to the Mantid conda channel. They build both nightly and release versions.
+You can find them in `this page <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_.
 
-The main tasks carried out by the pipeline are, for each supported platform:
-
-* Build Mantid and installers (``main_clean-PLATFORM``)
-* Run automated testing (``main_clean-PLATFORM``,
-  ``main_systemtests-PLATFORM``)
-* Deploy installers to nightly download locations (``main_deploy``)
-
-The pipeline view in Jenkins shows the order of dependency between these jobs.
-
-The most upstream jobs (i.e. ``main_clean-PLATFORM``) are triggered to start
-at midnight UTC assuming there were changes pushed to the ``main`` branch
-since the last time they ran.
+The `build_packages_from_branch <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_
+is a Jenkins job based on these nightly jobs that allows you to manually build packages
+from an upstream branch in the Mantid repository.
