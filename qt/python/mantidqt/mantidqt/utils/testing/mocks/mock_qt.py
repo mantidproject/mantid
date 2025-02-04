@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from mantidqt.utils.testing.strict_mock import StrictMock
 
 try:
@@ -119,6 +119,7 @@ class MockQButton(object):
     def __init__(self):
         self.mock_clicked_signal = MockQtSignal()
         self.clicked = Mock(return_value=self.mock_clicked_signal)
+        self.setEnabled = MagicMock()
 
 
 class MockQWidget(object):

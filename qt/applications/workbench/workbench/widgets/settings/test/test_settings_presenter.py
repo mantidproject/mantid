@@ -17,6 +17,7 @@ class FakeMVP(object):
         self._view = MockQWidget()
         self.update_properties = MagicMock()
         self.get_view = MagicMock(return_value=self._view)
+        self.unsaved_changes_signal = MagicMock()
 
 
 class FakeSectionsListWidget:
@@ -100,10 +101,33 @@ class SettingsPresenterTest(TestCase):
         self.presenter.action_apply_button_pushed()
         self.presenter.view.notify_changes_need_restart.assert_called_once_with(settings_needing_restart)
 
-    def test_action_apply_button_pushed(self):
+    def test_update_apply_button(self):
+        for changes in ({}, {"a": "change"}):
+            self.mock_view.apply_button.setEnabled.reset_mock()
+            self.mock_model.unsaved_changes.return_value = changes
+            self.presenter.update_apply_button()
+            self.mock_view.apply_button.setEnabled.assert_called_once_with(changes != {})
+
+    def test_changes_updated(self):
+        self.mock_view.apply_button.setEnabled.reset_mock()
+        self.presenter.changes_updated(False)
+        self.mock_view.apply_button.setEnabled.assert_called_once_with(False)
+        self.mock_view.apply_button.setEnabled.reset_mock()
+        self.presenter.changes_updated(True)
+        self.mock_view.apply_button.setEnabled.assert_called_once_with(True)
+
+    def test_presenter_signals_setup(self):
+        self.mock_view.general_settings.unsaved_changes_signal.connect.assert_called_once_with(self.presenter.changes_updated)
+        self.mock_view.plot_settings.unsaved_changes_signal.connect.assert_called_once_with(self.presenter.changes_updated)
+        self.mock_view.fitting_settings.unsaved_changes_signal.connect.assert_called_once_with(self.presenter.changes_updated)
+        self.mock_view.categories_settings.unsaved_changes_signal.connect.assert_called_once_with(self.presenter.changes_updated)
+
+    @patch("workbench.widgets.settings.presenter.SettingsPresenter.update_apply_button")
+    def test_action_apply_button_pushed(self, update_apply_mock: MagicMock):
         self.presenter.action_apply_button_pushed()
         self.mock_model.apply_all_settings.assert_called_once()
         self.mock_parent.config_updated.assert_called_once()
+        update_apply_mock.assert_called_once()
 
     @patch("workbench.widgets.settings.presenter.SettingsPresenter.view_closing")
     def test_action_okay_button_pushed(self, mock_view_closing: MagicMock):
