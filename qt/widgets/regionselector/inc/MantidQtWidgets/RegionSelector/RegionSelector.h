@@ -32,6 +32,8 @@ public:
   void deselectAllSelectors() override;
   Selection getRegion(const std::string &regionType) override;
   void cancelDrawingRegion() override;
+  void displayRectangularRegion(const std::string &regionType, const std::string &color, const std::string &hatch,
+                                const size_t y1, const size_t y2) override;
 
 private:
   Common::Python::Object getView() const;
