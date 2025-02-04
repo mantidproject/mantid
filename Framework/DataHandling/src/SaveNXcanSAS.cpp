@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/NXcanSASHelper.h"
 
 using namespace Mantid::API;
 
@@ -36,13 +37,10 @@ bool SaveNXcanSAS::processGroups() {
 
 void SaveNXcanSAS::processAllWorkspaces() {
   m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3 * m_workspaces.size());
-  auto const &&baseFilename = getPropertyValue("Filename");
-  auto const addDigit = [&](int index) {
-    return m_workspaces.size() > 1 ? (index < 10 ? "0" + std::to_string(index) : std::to_string(index)) : "";
-  };
-
+  auto baseFilename = getPropertyValue("Filename");
   for (auto wksIndex = 0; wksIndex < static_cast<int>(m_workspaces.size()); wksIndex++) {
-    saveSingleWorkspaceFile(m_workspaces.at(wksIndex), baseFilename + addDigit(wksIndex));
+    saveSingleWorkspaceFile(m_workspaces.at(wksIndex),
+                            NXcanSAS::prepareFilename(baseFilename, wksIndex, m_workspaces.size() > 1));
   }
 }
 
