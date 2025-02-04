@@ -57,23 +57,16 @@ struct TCPStreamEventHeader {
   GNU_DIAG_OFF("tautological-compare")
   bool isValid() const {
     return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
-           majorVersion() == TCPStreamEventHeader::major_version &&
-           // This is already suppressed for gcc on Linux
-           // cppcheck-suppress unsignedPositive
-           minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
+           majorVersion() == TCPStreamEventHeader::major_version;
   }
   GNU_DIAG_ON("tautological-compare")
 
   static const uint32_t major_version = 1; ///< starts at 1, then incremented whenever layout of this or further
   /// packets changes in a non backward compatible way
-  static const uint32_t minor_version = 0; ///< reset to 0 in major version change, then incremented whenever
-  /// layout of this or further packets changes in a backward compatible
-  /// way
   static const uint32_t current_version = (major_version << 16); ///< starts at 1, then incremented
   /// whenever layout of this or
   /// further packets changes
   uint32_t majorVersion() const { return version >> 16; }
-  uint32_t minorVersion() const { return version & 0xffff; }
 };
 
 /// header for initial data packet send on initial connection and on a state
