@@ -33,6 +33,10 @@ using namespace std;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMonteCarloWorkspace)
 
+// TODO: 1. Support workspaces with more than 1 Spectrum
+//       2. Support Event Workspaces
+//       3. Add Parallel processing
+
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
