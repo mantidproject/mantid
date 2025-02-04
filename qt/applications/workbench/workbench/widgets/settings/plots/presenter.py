@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.plots.utility import get_colormap_names
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
+from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
 from workbench.widgets.settings.plots.view import PlotsSettingsView
+from workbench.widgets.settings.plots.model import PlotsSettingsModel
 from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 
@@ -15,7 +17,7 @@ from qtpy.QtCore import Qt
 import sys
 
 
-class PlotSettings(object):
+class PlotSettings(SettingsPresenterBase):
     AXES_SCALE = ["Linear", "Log"]
     AXES_Y_POSITION = ["Left", "Right"]
     AXES_X_POSITION = ["Bottom", "Top"]
@@ -32,10 +34,9 @@ class PlotSettings(object):
         "upper center",
     ]
 
-    def __init__(self, parent, model, view=None):
+    def __init__(self, parent, model: "PlotsSettingsModel", view=None):
+        super().__init__(parent, model)
         self._view = view if view else PlotsSettingsView(parent, self)
-        self._model = model
-        self.parent = parent
         self.add_filters()
         self.add_list_items()
         self.load_general_setting_values()
@@ -298,15 +299,19 @@ class PlotSettings(object):
 
     def action_normalization_changed(self, state):
         self._model.set_normalize_by_bin_width("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_title_changed(self, state):
         self._model.set_show_title("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_enable_grid_changed(self, state):
         self._model.set_enable_grid("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_minor_ticks_changed(self, state):
         self._model.set_show_minor_ticks("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
         self._view.show_minor_gridlines.setEnabled(state == Qt.Checked)
 
         if not self._view.show_minor_gridlines.isEnabled():
@@ -314,84 +319,111 @@ class PlotSettings(object):
 
     def action_show_minor_gridlines_changed(self, state):
         self._model.set_show_minor_gridlines("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_font_combo_changed(self, font_name):
         self._model.set_plot_font(font_name)
+        self.notify_changes()
 
     def action_show_legend_changed(self, state):
         self._model.set_show_legend("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_default_x_axes_changed(self, axes_scale):
         self._model.set_x_axes_scale(axes_scale)
+        self.notify_changes()
 
     def action_default_y_axes_changed(self, axes_scale):
         self._model.set_y_axes_scale(axes_scale)
+        self.notify_changes()
 
     def action_axes_line_width_changed(self, width):
         self._model.set_axes_line_width(str(width))
+        self.notify_changes()
 
     def action_show_ticks_left_changed(self, state):
         self._model.set_show_ticks_left("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_ticks_bottom_changed(self, state):
         self._model.set_show_ticks_bottom("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_ticks_right_changed(self, state):
         self._model.set_show_ticks_right("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_ticks_top_changed(self, state):
         self._model.set_show_ticks_top("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_labels_left_changed(self, state):
         self._model.set_show_labels_left("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_labels_bottom_changed(self, state):
         self._model.set_show_labels_bottom("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_labels_right_changed(self, state):
         self._model.set_show_labels_right("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_show_labels_top_changed(self, state):
         self._model.set_show_labels_top("On" if state == Qt.Checked else "Off")
+        self.notify_changes()
 
     def action_major_ticks_length_changed(self, value):
         self._model.set_major_ticks_length(str(value))
+        self.notify_changes()
 
     def action_major_ticks_width_changed(self, value):
         self._model.set_major_ticks_width(str(value))
+        self.notify_changes()
 
     def action_major_ticks_direction_changed(self, direction):
         self._model.set_major_ticks_direction(direction)
+        self.notify_changes()
 
     def action_minor_ticks_length_changed(self, value):
         self._model.set_minor_ticks_length(str(value))
+        self.notify_changes()
 
     def action_minor_ticks_width_changed(self, value):
         self._model.set_minor_ticks_width(str(value))
+        self.notify_changes()
 
     def action_minor_ticks_direction_changed(self, direction):
         self._model.set_minor_ticks_direction(direction)
+        self.notify_changes()
 
     def action_line_style_changed(self, style):
         self._model.set_line_style(style)
+        self.notify_changes()
 
     def action_draw_style_changed(self, style):
         self._model.set_draw_style(style)
+        self.notify_changes()
 
     def action_line_width_changed(self, value):
         self._model.set_line_width(str(value))
+        self.notify_changes()
 
     def action_x_min_changed(self, value):
         self._model.set_x_min(str(value))
+        self.notify_changes()
 
     def action_x_max_changed(self, value):
         self._model.set_x_max(str(value))
+        self.notify_changes()
 
     def action_y_min_changed(self, value):
         self._model.set_y_min(str(value))
+        self.notify_changes()
 
     def action_y_max_changed(self, value):
         self._model.set_y_max(str(value))
+        self.notify_changes()
 
     def action_x_min_box_changed(self, state):
         self._view.x_min.setEnabled(state)
@@ -423,30 +455,39 @@ class PlotSettings(object):
 
     def action_marker_style_changed(self, style):
         self._model.set_marker_style(style)
+        self.notify_changes()
 
     def action_marker_size_changed(self, value):
         self._model.set_marker_size(str(value))
+        self.notify_changes()
 
     def action_error_width_changed(self, value):
         self._model.set_error_width(str(value))
+        self.notify_changes()
 
     def action_capsize_changed(self, value):
         self._model.set_capsize(str(value))
+        self.notify_changes()
 
     def action_cap_thickness_changed(self, value):
         self._model.set_cap_thickness(str(value))
+        self.notify_changes()
 
     def action_error_every_changed(self, value):
         self._model.set_error_every(str(value))
+        self.notify_changes()
 
     def action_legend_location_changed(self, location):
         self._model.set_legend_location(str(location))
+        self.notify_changes()
 
     def action_legend_size_changed(self, value):
         self._model.set_legend_font_size(str(value))
+        self.notify_changes()
 
     def action_colorbar_scale_changed(self, value):
         self._model.set_colorbar_scale(value)
+        self.notify_changes()
 
     def action_default_colormap_changed(self):
         colormap = self._view.default_colormap_combo_box.currentText()
@@ -454,6 +495,7 @@ class PlotSettings(object):
             colormap += "_r"
 
         self._model.set_color_map(colormap)
+        self.notify_changes()
 
     def populate_font_combo_box(self):
         fonts = self._model.get_font_names()

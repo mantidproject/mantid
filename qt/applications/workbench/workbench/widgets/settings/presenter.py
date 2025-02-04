@@ -58,6 +58,11 @@ class SettingsPresenter(object):
         self.view.container.addWidget(self.plot_settings.get_view())
         self.view.container.addWidget(self.fitting_settings.get_view())
 
+        self.plot_settings.unsaved_changes_signal.connect(self.changes_updated)
+        self.categories_settings.unsaved_changes_signal.connect(self.changes_updated)
+        self.general_settings.unsaved_changes_signal.connect(self.changes_updated)
+        self.fitting_settings.unsaved_changes_signal.connect(self.changes_updated)
+
         self.view.okay_button.clicked.connect(self.action_okay_button_pushed)
         self.view.apply_button.clicked.connect(self.action_apply_button_pushed)
 
@@ -67,6 +72,8 @@ class SettingsPresenter(object):
 
         self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.FONT.value))
         self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.PROMPT_ON_DELETING_WORKSPACE.value))
+
+        self.update_apply_button()
 
     def show(self, modal=True):
         if modal:
@@ -90,6 +97,14 @@ class SettingsPresenter(object):
         self.model.apply_all_settings()
         self.parent.config_updated()
         self.view.notify_changes_need_restart(changes_that_need_restart)
+        self.update_apply_button()
+
+    def changes_updated(self, unsaved_changes: bool):
+        self.view.apply_button.setEnabled(unsaved_changes)
+
+    def update_apply_button(self):
+        unsaved_changes = self.model.unsaved_changes() != {}
+        self.view.apply_button.setEnabled(unsaved_changes)
 
     def action_section_changed(self, new_section_pos):
         """

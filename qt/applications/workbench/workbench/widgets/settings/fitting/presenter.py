@@ -4,16 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
+from workbench.widgets.settings.fitting.fitting_settings_model import FittingSettingsModel
 from workbench.widgets.settings.fitting.view import FittingSettingsView
 from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 
 from qtpy.QtCore import Qt
 
 
-class FittingSettings(object):
-    def __init__(self, parent, model, view=None):
+class FittingSettings(SettingsPresenterBase):
+    def __init__(self, parent, model: FittingSettingsModel, view=None):
+        super().__init__(parent, model)
         self._view = view if view else FittingSettingsView(parent, self)
-        self.parent = parent
         self._model = model
         self.add_filters()
         self.add_items_to_combo_boxes()
@@ -77,9 +79,10 @@ class FittingSettings(object):
     def action_auto_background_changed(self, item_name):
         if item_name == "None":
             self._model.set_auto_background("")
-            return
-        background_string = item_name + " " + self._view.background_args.text()
-        self._model.set_auto_background(background_string)
+        else:
+            background_string = item_name + " " + self._view.background_args.text()
+            self._model.set_auto_background(background_string)
+        self.notify_changes()
 
     def action_background_args_changed(self):
         if self._view.auto_bkg.currentText() == "None":
@@ -87,15 +90,19 @@ class FittingSettings(object):
         else:
             background_string = self._view.auto_bkg.currentText() + " " + self._view.background_args.text()
             self._model.set_auto_background(background_string)
+        self.notify_changes()
 
     def action_default_peak_changed(self, item_name):
         self._model.set_default_peak(item_name)
+        self.notify_changes()
 
     def action_find_peaks_fwhm_changed(self, value):
         self._model.set_fwhm(str(value))
+        self.notify_changes()
 
     def action_find_peaks_tolerance_changed(self, value):
         self._model.set_tolerance(str(value))
+        self.notify_changes()
 
     def update_properties(self):
         self.load_current_setting_values()
