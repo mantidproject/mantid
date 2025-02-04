@@ -15,6 +15,7 @@ from mantid.kernel import (
 
 from dataclasses import dataclass
 from typing import Any
+from copy import copy
 
 _TRANS_ALG = "ReflectometryISISCreateTransmission"
 _EFF_ALG = "PolarizationEfficienciesWildes"
@@ -40,8 +41,10 @@ class Prop:
     TRANS_ROI = PropData(name="ProcessingInstructions", alg=_TRANS_ALG, mag=False)
 
     MAG_INPUT_RUNS = PropData(name="MagInputRuns", alias="InputRuns", default=[], alg=_TRANS_ALG, mag=True)
-    MAG_BACK_SUB_ROI = PropData(name="MagBackgroundProcessingInstructions", alg=_TRANS_ALG, mag=True)
-    MAG_TRANS_ROI = PropData(name="MagProcessingInstructions", alg=_TRANS_ALG, mag=True)
+    MAG_BACK_SUB_ROI = PropData(
+        name="MagBackgroundProcessingInstructions", alias="BackgroundProcessingInstructions", alg=_TRANS_ALG, mag=True
+    )
+    MAG_TRANS_ROI = PropData(name="MagProcessingInstructions", alias="ProcessingInstructions", alg=_TRANS_ALG, mag=True)
 
     FLOOD_WS = PropData(name="FloodWorkspace", alg=_TRANS_ALG)
     I0_MON_IDX = PropData(name="I0MonitorIndex", alg=_TRANS_ALG)
@@ -74,7 +77,8 @@ class NonPropData:
 
 
 _EFF_ALG_OUTPUT = [NonPropData.OUT_FP_EFF, NonPropData.OUT_FA_EFF, NonPropData.OUT_POL_EFF, NonPropData.OUT_AN_EFF]
-_EFF_ALG_OUTPUT_DIAG = [NonPropData.OUT_PHI, NonPropData.OUT_RHO, NonPropData.OUT_AL, NonPropData.OUT_2P, NonPropData.OUT_2A]
+_EFF_ALG_OUTPUT_DIAG = [NonPropData.OUT_PHI, NonPropData.OUT_RHO, NonPropData.OUT_AL]
+_EFF_ALG_OUTPUT_DIAG_MAG = [NonPropData.OUT_2P, NonPropData.OUT_2A]
 
 
 class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
@@ -130,6 +134,10 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             ],
         )
         self.declareProperty(
+            MatrixWorkspaceProperty(Prop.MAG_TRANS_ROI.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Grouping pattern of magnetic spectrum numbers to yield only the detectors of interest. See group detectors for syntax.",
+        )
+        self.declareProperty(
             MatrixWorkspaceProperty(Prop.MAG_BACK_SUB_ROI.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
             doc="The workspace to be used for the flood correction. If this property is not set then no flood correction is performed.",
         )
@@ -165,16 +173,20 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         eff_args = {}
         trans_output = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG), ["OutputWorkspace"])
         eff_args.update({"InputNonMagWorkspace": trans_output, "OutputFpEfficiency": "fp_eff", "OutputFaEfficiency": "fa_eff"})
-        if self.getProperty(Prop.MAG_INPUT_RUNS.name).value:
+        mag_runs_input = bool(self.getProperty(Prop.MAG_INPUT_RUNS.name).value)
+        if mag_runs_input:
             trans_output_mag = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True), ["OutputWorkspace"])
-            eff_args.update({"InputMagWorkspace": trans_output_mag})
+            eff_args.update(
+                {"InputMagWorkspace": trans_output_mag, "OutputPolarizerEfficiency": "p_eff", "OutputAnalyserEfficiency": "a_eff"}
+            )
         eff_args.update(self._populate_args_dict(_EFF_ALG))
         eff_output = {key: None for key in _EFF_ALG_OUTPUT}
         if self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value:
-            eff_output.update({key: None for key in _EFF_ALG_OUTPUT_DIAG})
-        eff_output.update(
-            dict(zip([x.alias for x in eff_output.keys()], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output.keys()])))
-        )
+            eff_alg_output_diag = copy(_EFF_ALG_OUTPUT_DIAG)
+            if mag_runs_input:
+                eff_alg_output_diag.extend(_EFF_ALG_OUTPUT_DIAG_MAG)
+            eff_output.update({key: None for key in eff_alg_output_diag})
+        eff_output.update(dict(zip([x.alias for x in eff_output], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output]))))
         join_output = self._run_algorithm(_JOIN_ALG, {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"])
         self.setProperty(Prop.OUT_WS.name, join_output[0])
 
