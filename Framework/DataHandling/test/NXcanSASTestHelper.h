@@ -16,9 +16,9 @@
 
 namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
-  NXcanSASTestParameters() { filename = Poco::TemporaryFile::tempName() + ".h5"; }
+  NXcanSASTestParameters() {}
 
-  std::string filename;
+  std::string filename{Poco::TemporaryFile::tempName() + ".h5"};
   std::vector<std::string> expectedGroupSuffices{"00", "01"};
   int size{10};
   double value{10.23};
