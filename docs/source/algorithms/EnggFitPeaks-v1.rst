@@ -39,10 +39,6 @@ spectrum) and has a log entry named "difc", where the GSAS DIFC
 parameter is expected. Otherwise the conversion of units is done as in
 the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
 
-
-Otherwise the conversion of units is done as in
-the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
-
 .. seealso:: :ref:`EnggFitTOFFromPeaks <algm-EnggFitTOFFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type

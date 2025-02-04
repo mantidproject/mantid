@@ -593,9 +593,10 @@ reasonable calibration constant for each of the spectra in your data.
 The easiest way to do this is to apply the calibration to your
 calibration data and check that the bragg peaks align as expected.
 
-1. Load the calibration data using :ref:`Load <algm-Load>`
-2. Run :ref:`ConvertUnits <algm-ConvertUnits>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``.
-3. Plot the workspace as a Color Fill plot, in the spectrum view, or a few spectra in a line plot.
+1. Load the instrument data using :ref:`Load <algm-Load>`
+2. Apply the calibration to the workspace using :ref:`ApplyDiffCal <algm-ApplyDiffCal>` (the calibration can be provided using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``).
+3. Run :ref:`ConvertUnits <algm-ConvertUnits>`, to convert the data to d-spacing using the calibration.
+4. Plot the workspace as a Color Fill plot, in the spectrum view, or a few spectra in a line plot.
 
 Further insight can be gained by comparing the grouped (after aligning
 and focussing the data) spectra from a previous calibration or convert
