@@ -17,7 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 namespace {
 // Create a histogram from a workspace and return it
@@ -237,7 +237,8 @@ void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws) {
 }
 
 void removeFile(const std::string &filename) {
-  if (Poco::File(filename).exists())
-    Poco::File(filename).remove();
+  if (auto const &path = std::filesystem::path(filename); !path.empty()) {
+    std::filesystem::remove(path);
+  }
 }
 } // namespace NXcanSASTestHelper
