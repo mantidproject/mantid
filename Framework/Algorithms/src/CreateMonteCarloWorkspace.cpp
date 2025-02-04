@@ -117,8 +117,8 @@ std::vector<double> CreateMonteCarloWorkspace::computeNormalizedCDF(const Mantid
  *  If userMCEvents > 0, use that directly; otherwise use the integral of the input data.
  */
 int CreateMonteCarloWorkspace::integrateYData(const Mantid::HistogramData::HistogramY &yData) {
-  double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
-  int iterations = static_cast<int>(std::round(total_counts));
+  double totalCounts = std::accumulate(yData.begin(), yData.end(), 0.0);
+  int iterations = static_cast<int>(std::round(totalCounts));
 
   if (iterations == 0) {
     g_log.warning("Total counts in the input workspace round to 0. No Monte Carlo events will be generated.");
