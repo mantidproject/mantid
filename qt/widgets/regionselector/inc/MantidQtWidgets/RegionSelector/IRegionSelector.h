@@ -27,5 +27,7 @@ public:
   virtual void deselectAllSelectors() = 0;
   virtual Selection getRegion(const std::string &regionType) = 0;
   virtual void cancelDrawingRegion() = 0;
+  virtual void displayRectangularRegion(const std::string &regionType, const std::string &color,
+                                        const std::string &hatch, const double y1, const double y2) = 0;
 };
 } // namespace MantidQt::Widgets

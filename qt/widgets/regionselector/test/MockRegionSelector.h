@@ -20,5 +20,9 @@ public:
   MOCK_METHOD(void, deselectAllSelectors, (), (override));
   MOCK_METHOD(Selection, getRegion, (const std::string &regionType), (override));
   MOCK_METHOD(void, cancelDrawingRegion, (), (override));
+  MOCK_METHOD(void, displayRectangularRegion,
+              (std::string const &regionType, std::string const &color, std::string const &hatch, double const y1,
+               double const y2),
+              (override));
 };
 } // namespace MantidQt::Widgets

@@ -107,14 +107,16 @@ private:
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+  bool m_plotExistingROIs = false;
 
   void updateWidgetEnabledState();
   void updateSelectedRegionInModelFromView();
+  void updateRegionSelectorWorkspace();
 
   void plotInstView();
   void plotRegionSelector();
   void plotLinePlot();
-  void runSumBanks();
+  void runSumBanks(bool const addExistingROIsToPlot);
   void runReduction();
   void clearRegionSelector();
   void clearReductionPlot();
