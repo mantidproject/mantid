@@ -670,7 +670,6 @@ public:
   void RemoveFallbackVTPFile(InstrumentDefinitionParser &parser) {
     std::filesystem::path vtpPath(parser.createVTPFileName());
     std::filesystem::path fallbackPath(ConfigService::Instance().getTempDir());
-    std::filesystem::create_directory(fallbackPath);
     fallbackPath.replace_filename(vtpPath.filename().string());
     std::string fp = fallbackPath.string();
     Poco::File fallbackFile(fallbackPath.string());
