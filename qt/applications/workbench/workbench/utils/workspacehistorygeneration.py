@@ -38,7 +38,6 @@ ALGS_TO_IGNORE = [
     "SaveGSASInstrumentFile",
     "SaveGSS",
     "SaveHKL",
-    "SaveISISNexus",
     "SaveIsawDetCal",
     "SaveIsawPeaks",
     "SaveIsawQvector",
