@@ -24,7 +24,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -65,9 +65,9 @@ void LoadTOFRawNexus::init() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
-  if (descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
+  if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)

@@ -30,20 +30,6 @@ namespace Kernel {
    for faster querying later.
  */
 class MANTID_KERNEL_DLL NexusDescriptor {
-public:
-  /// Enumerate HDF possible versions
-  enum Version { Version4, Version5, AnyVersion };
-
-  static const size_t HDFMagicSize;
-  /// HDF cookie that is stored in the first 4 bytes of the file.
-  static const unsigned char HDFMagic[4];
-  /// Size of HDF5 signature
-  static size_t HDF5SignatureSize;
-  /// signature identifying a HDF5 file.
-  static const unsigned char HDF5Signature[8];
-
-  /// Returns true if the file is considered to store data in a hierarchy
-  static bool isReadable(const std::string &filename, const Version version = AnyVersion);
 
 public:
   /// Constructor accepting a filename
@@ -79,18 +65,8 @@ public:
 
   /// Returns the name & type of the first entry in the file
   const std::pair<std::string, std::string> &firstEntryNameType() const;
-  /// Query if the given attribute exists on the root node
-  bool hasRootAttr(const std::string &name) const;
   /// Query if a path exists
   bool pathExists(const std::string &path) const;
-  /// Query if a path exists of a given type
-  bool pathOfTypeExists(const std::string &path, const std::string &type) const;
-  /// return the path of a given type
-  std::string pathOfType(const std::string &type) const;
-  /// return a vector of all paths of a given type
-  std::vector<std::string> allPathsOfType(const std::string &type) const;
-  /// Query if a given type exists somewhere in the file
-  bool classTypeExists(const std::string &classType) const;
 
 private:
   /// Initialize object with filename

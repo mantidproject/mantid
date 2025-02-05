@@ -37,7 +37,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -69,12 +69,12 @@ const std::string LoadILLSANS::summary() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLSANS::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   // fields existent only at the ILL for SANS machines
-  if (descriptor.pathExists("/entry0/mode") &&
-      ((descriptor.pathExists("/entry0/reactor_power") && descriptor.pathExists("/entry0/instrument_name")) ||
-       (descriptor.pathExists("/entry0/instrument/name") && descriptor.pathExists("/entry0/acquisition_mode") &&
-        !descriptor.pathExists("/entry0/instrument/Detector")))) // serves to remove the TOF instruments
+  if (descriptor.isEntry("/entry0/mode") &&
+      ((descriptor.isEntry("/entry0/reactor_power") && descriptor.isEntry("/entry0/instrument_name")) ||
+       (descriptor.isEntry("/entry0/instrument/name") && descriptor.isEntry("/entry0/acquisition_mode") &&
+        !descriptor.isEntry("/entry0/instrument/Detector")))) // serves to remove the TOF instruments
   {
     return 80;
   } else {

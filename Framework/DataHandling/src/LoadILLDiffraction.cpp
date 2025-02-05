@@ -58,16 +58,16 @@ constexpr double WAVE_TO_E = 81.8;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
+int LoadILLDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B, Tx field eliminates SALSA
   // the third one is to recognize IN5/PANTHER/SHARP scan mode
-  if ((descriptor.pathExists("/entry0/instrument/2theta") && !descriptor.pathExists("/entry0/instrument/Tx")) ||
-      descriptor.pathExists("/entry0/instrument/Canne")) {
+  if ((descriptor.isEntry("/entry0/instrument/2theta") && !descriptor.isEntry("/entry0/instrument/Tx")) ||
+      descriptor.isEntry("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -90,7 +90,7 @@ const std::string LoadILLDiffraction::summary() const { return "Loads ILL diffra
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B", "D4C", "IN5", "PANTHER", "SHARP"}) {}
+    : IFileLoader<NexusHDF5Descriptor>(), m_instNames({"D20", "D2B", "D1B", "D4C", "IN5", "PANTHER", "SHARP"}) {}
 /**
  * Initialize the algorithm's properties.
  */

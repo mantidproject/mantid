@@ -67,7 +67,7 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
 
-  ::NeXus::File file(descriptor.getFilename());
+  ::NeXus::File file(descriptor.filename());
   file.openPath(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {
