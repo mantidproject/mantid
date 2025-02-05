@@ -65,7 +65,19 @@ std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, 
     return defaultValue;
 }
 
+std::string getInstrumentDirectory(ConfigServiceImpl const *const self) {
+  return self->getInstrumentDirectory().string();
+}
+
 std::string getPropertiesDir(ConfigServiceImpl const *const self) { return self->getPropertiesDir().string(); }
+
+std::vector<std::string> getInstrumentDirectories(ConfigServiceImpl const *const self) {
+  const auto &instrumentDirectories = self->getInstrumentDirectories();
+  std::vector<std::string> instrumentDirectoryStrings(instrumentDirectories.size());
+  std::transform(instrumentDirectories.cbegin(), instrumentDirectories.cend(), instrumentDirectoryStrings.begin(),
+                 [](const auto &p) { return p.string(); });
+  return instrumentDirectoryStrings;
+}
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
@@ -100,10 +112,9 @@ void export_ConfigService() {
            "Returns the directory containing the Mantid.properties file.")
       .def("getUserPropertiesDir", &ConfigServiceImpl::getUserPropertiesDir, arg("self"),
            "Returns the directory to use to write out Mantid information")
-      .def("getInstrumentDirectory", &ConfigServiceImpl::getInstrumentDirectory, arg("self"),
+      .def("getInstrumentDirectory", &getInstrumentDirectory, arg("self"),
            "Returns the directory used for the instrument definitions")
-      .def("getInstrumentDirectories", &ConfigServiceImpl::getInstrumentDirectories, arg("self"),
-           return_value_policy<reference_existing_object>(),
+      .def("getInstrumentDirectories", &getInstrumentDirectories, arg("self"),
            "Returns the list of directories searched for the instrument "
            "definitions")
       .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, arg("self"), "Returns the default facility")
