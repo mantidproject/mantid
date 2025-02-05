@@ -325,6 +325,7 @@ set(TEST_FILES
     MDWSDescriptionTest.h
     MDWSTransfTest.h
     MagneticFormFactorCorrectionMDTest.h
+    DebyeWallerFactorCorrectionMDTest.h
     MaskMDTest.h
     MergeMDFilesTest.h
     MergeMDTest.h
