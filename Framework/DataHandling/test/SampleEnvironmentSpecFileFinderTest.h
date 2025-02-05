@@ -28,11 +28,11 @@ public:
   SampleEnvironmentSpecFileFinderTest() {
     // Setup a temporary directory structure for testing
     std::filesystem::path testDirec = std::filesystem::temp_directory_path() / "SampleEnvironmentSpecFileFinderTest";
-    std::filesystem::create_directory(testDirec);
+    testDirec.remove_filename();
     m_testRoot = testDirec;
     testDirec /= m_facilityName;
     testDirec /= m_instName;
-    std::filesystem::create_directory(testDirec);
+    std::filesystem::create_directories(testDirec);
 
     // Write test files
     const std::string xml = "<environmentspec>"
