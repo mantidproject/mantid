@@ -117,8 +117,8 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
-  auto HDFversion = NexusDescriptor::getHDFVersion(filename);
-  if (HDFversion == NexusDescriptor::Version5) {
+  auto HDFversion = NexusHDF5Descriptor::getHDFVersion(filename);
+  if (HDFversion == NexusHDF5Descriptor::Version5) {
     std::pair<IAlgorithm_sptr, int> HDF5result =
         searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, m_names[NexusHDF5], m_log);
 
@@ -129,7 +129,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
       bestLoader = HDF5result.first;
     else
       bestLoader = HDF4result.first;
-  } else if (HDFversion == NexusDescriptor::Version4)
+  } else if (HDFversion == NexusHDF5Descriptor::Version4)
     bestLoader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log).first;
   else
     bestLoader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(filename, m_names[Generic], m_log).first;
@@ -165,7 +165,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
   std::multimap<std::string, int> names{{algorithmName, -1}};
   IAlgorithm_sptr loader;
   if (nexus) {
-    if (NexusDescriptor::isReadable(filename)) {
+    if (NexusHDF5Descriptor::isReadable(filename, NexusHDF5Descriptor::Version4)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
     }
   } else if (nexusHDF5) {

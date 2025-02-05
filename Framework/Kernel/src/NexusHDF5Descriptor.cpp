@@ -7,10 +7,8 @@
 
 #include "MantidKernel/NexusHDF5Descriptor.h"
 
-#include <boost/multi_index/detail/index_matcher.hpp>
-
-#include "MantidKernel/NexusDescriptor.h"
 #include <H5Cpp.h>
+#include <boost/multi_index/detail/index_matcher.hpp>
 
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
@@ -25,6 +23,46 @@ namespace Mantid::Kernel {
 /// hdf5 specific functions, stay in anonymous namespace to make hdf5 linking
 /// PRIVATE
 namespace {
+
+/// Size of HDF magic number
+const size_t HDFMagicSize = 4;
+/// HDF cookie that is stored in the first 4 bytes of the file.
+const unsigned char HDFMagic[4] = {'\016', '\003', '\023', '\001'}; // From HDF4::hfile.h
+
+/// Size of HDF5 signature
+const size_t HDF5SignatureSize = 8;
+/// signature identifying a HDF5 file.
+const unsigned char HDF5Signature[8] = {137, 'H', 'D', 'F', '\r', '\n', '\032', '\n'};
+//---------------------------------------------------------------------------------------------------------------------------
+// Anonymous helper methods to use isReadable methods to use an open file handle
+//---------------------------------------------------------------------------------------------------------------------------
+
+NexusHDF5Descriptor::Version HDFversion(FILE *fileHandle) {
+  if (!fileHandle)
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
+
+  // HDF4 check requires 4 bytes,  HDF5 check requires 8 bytes
+  // Use same buffer and waste a few bytes if only checking HDF4
+  unsigned char buffer[8] = {'0', '0', '0', '0', '0', '0', '0', '0'};
+  if (HDF5SignatureSize !=
+      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char), HDF5SignatureSize, fileHandle)) {
+    throw std::runtime_error("Error while reading file");
+  }
+
+  NexusHDF5Descriptor::Version result = NexusHDF5Descriptor::None;
+
+  // Number of bytes read doesn't matter as if it is not enough then the memory
+  // simply won't match
+  // as the buffer has been "zeroed"
+  if (std::memcmp(&buffer, &HDF5Signature, HDF5SignatureSize) == 0)
+    result = NexusHDF5Descriptor::Version5;
+  else if (std::memcmp(&buffer, &HDFMagic, HDFMagicSize) == 0)
+    result = NexusHDF5Descriptor::Version4;
+
+  // Return file stream to start of file
+  std::rewind(fileHandle);
+  return result;
+}
 
 void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &allEntries,
               std::pair<std::string, std::string> &firstEntryNameType, size_t level) {
@@ -69,9 +107,29 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 }
 } // namespace
 
-bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
-  // use existing function to do the work
-  return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
+//---------------------------------------------------------------------------------------------------------------------------
+// static NexusHDF5Descriptor methods
+//---------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Checks for the HDF signatures and returns true if one of them is found
+ * @param filename A string filename to check
+ * @param version One of the NexusHDF5Descriptor::Version enumerations specifying
+ * the required version
+ * @return True if the file is considered hierarchical, false otherwise
+ */
+bool NexusHDF5Descriptor::isReadable(const std::string &filename, const NexusHDF5Descriptor::Version version) {
+  return getHDFVersion(filename) == version;
+}
+
+NexusHDF5Descriptor::Version NexusHDF5Descriptor::getHDFVersion(const std::string &filename) {
+  FILE *fd = fopen(filename.c_str(), "rb");
+  if (!fd) {
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Unable to open file '" + filename + "'");
+  }
+  const NexusHDF5Descriptor::Version result = HDFversion(fd); // use anonymous helper
+  fclose(fd);
+  return result;
 }
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)

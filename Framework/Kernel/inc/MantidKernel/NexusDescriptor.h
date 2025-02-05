@@ -30,22 +30,6 @@ namespace Kernel {
    for faster querying later.
  */
 class MANTID_KERNEL_DLL NexusDescriptor {
-public:
-  /// Enumerate HDF possible versions
-  enum Version { Version4, Version5, None };
-
-  static const size_t HDFMagicSize;
-  /// HDF cookie that is stored in the first 4 bytes of the file.
-  static const unsigned char HDFMagic[4];
-  /// Size of HDF5 signature
-  static size_t HDF5SignatureSize;
-  /// signature identifying a HDF5 file.
-  static const unsigned char HDF5Signature[8];
-
-  /// Returns true if the file is considered to store data in a hierarchy
-  static bool isReadable(const std::string &filename, const Version version = Version4);
-  /// Returns version of HDF file
-  static Version getHDFVersion(const std::string &filename);
 
 public:
   /// Constructor accepting a filename
