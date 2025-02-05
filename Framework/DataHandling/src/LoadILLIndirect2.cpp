@@ -19,7 +19,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -178,7 +179,7 @@ std::string LoadILLIndirect2::getDataPath(const NeXus::NXEntry &entry) {
  * Load Data details (number of tubes, channels, etc)
  * @param entry First entry of nexus file
  */
-void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
+void LoadILLIndirect2::loadDataDetails(const NeXus::NXEntry &entry) {
 
   // read in the data
   auto data = LoadHelper::getIntDataset(entry, getDataPath(entry));
@@ -251,7 +252,7 @@ void LoadILLIndirect2::initWorkSpace() {
  * Load data found in nexus file in general, indirect mode.
  * @param entry :: The Nexus entry
  */
-void LoadILLIndirect2::loadDataIntoWorkspace(NeXus::NXEntry &entry) {
+void LoadILLIndirect2::loadDataIntoWorkspace(const NeXus::NXEntry &entry) {
 
   // First, let's create common X-axis
   std::vector<double> xAxis(m_numberOfChannels + 1);
@@ -334,17 +335,17 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
  * @param nexusfilename
  */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfilename) {
-
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  NXhandle nxfileID;
-  NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
-  if (stat == NX_ERROR) {
-    g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
+
+  try {
+    ::NeXus::File nxfileID(nexusfilename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "convertNexusToProperties: Error loading  \"" << nexusfilename << "\" in read mode: " << e.what()
+                  << "\n";
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   runDetails.addProperty("Facility", std::string("ILL"));
-  NXclose(&nxfileID);
 }
 
 /**

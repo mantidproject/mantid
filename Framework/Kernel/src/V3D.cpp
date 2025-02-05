@@ -402,7 +402,7 @@ std::istream &operator>>(std::istream &IX, V3D &A)
  * @param name :: name of the data to create
  */
 void V3D::saveNexus(::NeXus::File *file, const std::string &name) const {
-  file->makeData(name, ::NeXus::FLOAT64, 3, true);
+  file->makeData(name, NXnumtype::FLOAT64, 3, true);
   file->putData(m_pt.data());
   file->closeData();
 }

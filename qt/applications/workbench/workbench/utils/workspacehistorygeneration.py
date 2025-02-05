@@ -66,7 +66,6 @@ ALGS_TO_IGNORE = [
     "SaveSESANS",
     "SaveSPE",
     "SaveTBL",
-    "SaveToSNSHistogramNexus",
     "SaveVTK",
     "SaveVulcanGSS",
     "SaveYDA",

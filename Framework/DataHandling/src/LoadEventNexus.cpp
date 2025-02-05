@@ -34,6 +34,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidNexus/NexusIOHelper.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <H5Cpp.h>
 #include <boost/format.hpp>
@@ -543,7 +545,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusF
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == ::NeXus::UINT64) {
+        if (info.type == NXnumtype::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;
@@ -947,13 +949,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       }
     } else {
       prog->doReport("Loading all logs");
-      // Open NeXus file
-      NXhandle nxHandle;
-      NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
-
-      if (nxStat != NX_ERROR) {
+      try {
+        // Open NeXus file
+        ::NeXus::File nxHandle(m_filename, NXACC_READ);
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
-        NXclose(&nxHandle);
+      } catch (const ::NeXus::Exception &e) {
+        g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
       }
     }
   } else {

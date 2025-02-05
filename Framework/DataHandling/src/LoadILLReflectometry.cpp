@@ -29,6 +29,8 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace {
 
@@ -499,13 +501,15 @@ void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vect
  */
 void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   const std::string filename{getPropertyValue("Filename")};
-  NXhandle nxfileID;
-  NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
-  if (stat == NX_ERROR)
-    throw Kernel::Exception::FileError("Unable to open File:", filename);
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  NXclose(&nxfileID);
+
+  try {
+    ::NeXus::File nxfileID(filename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const ::NeXus::Exception &) {
+    throw Kernel::Exception::FileError("Unable to open File:", filename);
+  }
+
   if (m_instrument == Supported::FIGARO) {
     auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
     // log data below should be a boolean, but boolean is broken in NeXus so it cannot be saved properly

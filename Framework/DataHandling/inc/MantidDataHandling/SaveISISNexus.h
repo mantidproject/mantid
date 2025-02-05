@@ -118,10 +118,10 @@ private:
   /// Write runlog
   void runlog();
   /// write one run log
-  void write_runlog(const char *name, const void *times, const void *data, const int type, const int size,
+  void write_runlog(const char *name, const void *times, const void *data, const NXnumtype type, const int size,
                     const std::string &units);
   /// write NXlog
-  void write_logOpen(const char *name, const void *times, const void *data, const int type, const int size,
+  void write_logOpen(const char *name, const void *times, const void *data, const NXnumtype type, const int size,
                      const std::string &units);
   /// Write selog
   void selog();

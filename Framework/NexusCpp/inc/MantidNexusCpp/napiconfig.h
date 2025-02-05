@@ -1,5 +1,4 @@
-#ifndef NAPICONFIG_H
-#define NAPICONFIG_H
+#pragma once
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,5 +34,3 @@
  * if they exist; otherwise include an appropriate header
  */
 #include <stdint.h>
-
-#endif /* NAPICONFIG_H */

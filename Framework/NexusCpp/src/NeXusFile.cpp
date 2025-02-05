@@ -46,67 +46,34 @@ static vector<int64_t> toInt64(const vector<int> &small_v) {
 namespace NeXus {
 
 // catch for undefined types
-template <typename NumT> NXnumtype getType(NumT number) {
+template <typename NumT> NXnumtype getType(NumT const number) {
   stringstream msg;
   msg << "NeXus::getType() does not know type of " << typeid(number).name();
   throw Exception(msg.str());
 }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(char number) {
-  (void)number; // Avoid compiler warning
-  return CHAR;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(char const) { return NXnumtype::CHAR; }
 
 // template specialisations for types we know
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(float number) {
-  (void)number; // Avoid compiler warning
-  return FLOAT32;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(float const) { return NXnumtype::FLOAT32; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(double number) {
-  (void)number; // Avoid compiler warning
-  return FLOAT64;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(double const) { return NXnumtype::FLOAT64; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int8_t number) {
-  (void)number; // Avoid compiler warning
-  return INT8;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int8_t const) { return NXnumtype::INT8; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint8_t number) {
-  (void)number; // Avoid compiler warning
-  return UINT8;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint8_t const) { return NXnumtype::UINT8; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int16_t number) {
-  (void)number; // Avoid compiler warning
-  return INT16;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int16_t const) { return NXnumtype::INT16; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint16_t number) {
-  (void)number; // Avoid compiler warning
-  return UINT16;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint16_t const) { return NXnumtype::UINT16; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int32_t number) {
-  (void)number; // Avoid compiler warning
-  return INT32;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int32_t const) { return NXnumtype::INT32; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint32_t number) {
-  (void)number; // Avoid compiler warning
-  return UINT32;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint32_t const) { return NXnumtype::UINT32; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int64_t number) {
-  (void)number; // Avoid compiler warning
-  return INT64;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(int64_t const) { return NXnumtype::INT64; }
 
-template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint64_t number) {
-  (void)number; // Avoid compiler warning
-  return UINT64;
-}
+template <> MANTID_NEXUSCPP_DLL NXnumtype getType(uint64_t const) { return NXnumtype::UINT64; }
 
 } // namespace NeXus
 
@@ -126,29 +93,6 @@ static int check_double_too_small[sizeof(double) - 8 + ARRAY_OFFSET]; // error i
 static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char > 1 byte
 */
 
-namespace {
-
-static void inner_malloc(void *&data, const std::vector<int64_t> &dims, NXnumtype type) {
-  const auto rank = dims.size();
-  int64_t c_dims[NX_MAXRANK];
-  for (size_t i = 0; i < rank; i++) {
-    c_dims[i] = dims[i];
-  }
-  NXstatus status = NXmalloc64(&data, static_cast<int>(rank), c_dims, type);
-  if (status != NX_OK) {
-    throw Exception("NXmalloc failed", status);
-  }
-}
-
-static void inner_free(void *&data) {
-  NXstatus status = NXfree(&data);
-  if (status != NX_OK) {
-    throw Exception("NXfree failed", status);
-  }
-}
-
-} // end of anonymous namespace
-
 namespace NeXus {
 File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {}
 
@@ -166,7 +110,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   }
 
   NXstatus status = NXopen(filename.c_str(), access, &(this->m_file_id));
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopen(" << filename << ", " << access << ") failed";
     throw Exception(msg.str(), status);
@@ -177,7 +121,7 @@ File::~File() {
   if (m_close_handle && m_file_id != NULL) {
     NXstatus status = NXclose(&(this->m_file_id));
     this->m_file_id = NULL;
-    if (status != NX_OK) {
+    if (status != NXstatus::NX_OK) {
       stringstream msg;
       msg << "NXclose failed with status: " << status << "\n";
       NXReportError(const_cast<char *>(msg.str().c_str()));
@@ -189,7 +133,7 @@ void File::close() {
   if (this->m_file_id != NULL) {
     NXstatus status = NXclose(&(this->m_file_id));
     this->m_file_id = NULL;
-    if (status != NX_OK) {
+    if (status != NXstatus::NX_OK) {
       throw Exception("NXclose failed", status);
     }
   }
@@ -197,7 +141,7 @@ void File::close() {
 
 void File::flush() {
   NXstatus status = NXflush(&(this->m_file_id));
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXflush failed", status);
   }
 }
@@ -210,7 +154,7 @@ void File::makeGroup(const string &name, const string &class_name, bool open_gro
     throw Exception("Supplied empty class name to makeGroup");
   }
   NXstatus status = NXmakegroup(this->m_file_id, name.c_str(), class_name.c_str());
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXmakegroup(" << name << ", " << class_name << ") failed";
     throw Exception(msg.str(), status);
@@ -228,7 +172,7 @@ void File::openGroup(const string &name, const string &class_name) {
     throw Exception("Supplied empty class name to openGroup");
   }
   NXstatus status = NXopengroup(this->m_file_id, name.c_str(), class_name.c_str());
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopengroup(" << name << ", " << class_name << ") failed";
     throw Exception(msg.str(), status);
@@ -240,21 +184,9 @@ void File::openPath(const string &path) {
     throw Exception("Supplied empty path to openPath");
   }
   NXstatus status = NXopenpath(this->m_file_id, path.c_str());
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopenpath(" << path << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-void File::openGroupPath(const string &path) {
-  if (path.empty()) {
-    throw Exception("Supplied empty path to openGroupPath");
-  }
-  NXstatus status = NXopengrouppath(this->m_file_id, path.c_str());
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXopengrouppath(" << path << ") failed";
     throw Exception(msg.str(), status);
   }
 }
@@ -264,7 +196,7 @@ std::string File::getPath() {
 
   memset(cPath, 0, sizeof(cPath));
   NXstatus status = NXgetpath(this->m_file_id, cPath, sizeof(cPath) - 1);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXgetpath() failed";
     throw Exception(msg.str(), status);
@@ -274,7 +206,7 @@ std::string File::getPath() {
 
 void File::closeGroup() {
   NXstatus status = NXclosegroup(this->m_file_id);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXclosegroup failed", status);
   }
 }
@@ -293,10 +225,10 @@ void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &d
   }
 
   // do the work
-  NXstatus status = NXmakedata64(this->m_file_id, name.c_str(), static_cast<int>(type), static_cast<int>(dims.size()),
+  NXstatus status = NXmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
                                  const_cast<int64_t *>(&(dims[0])));
   // report errors
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXmakedata(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ") failed";
     throw Exception(msg.str(), status);
@@ -327,7 +259,7 @@ void File::writeData(const string &name, const string &value) {
     my_value = " ";
   vector<int> dims;
   dims.push_back(static_cast<int>(my_value.size()));
-  this->makeData(name, CHAR, dims, true);
+  this->makeData(name, NXnumtype::CHAR, dims, true);
 
   this->putData(&(my_value[0]));
 
@@ -421,14 +353,14 @@ void File::makeCompData(const string &name, const NXnumtype type, const vector<i
   // do the work
   int i_type = static_cast<int>(type);
   int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), i_type, static_cast<int>(dims.size()),
+  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
                                      const_cast<int64_t *>(&(dims[0])), i_comp, const_cast<int64_t *>(&(bufsize[0])));
 
   // report errors
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
-    msg << "NXcompmakedata64(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
-        << ", " << toString(bufsize) << ") failed";
+    msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", "
+        << comp << ", " << toString(bufsize) << ") failed";
     throw Exception(msg.str(), status);
   }
   if (open_data) {
@@ -455,14 +387,14 @@ void File::openData(const string &name) {
     throw Exception("Supplied empty name to openData");
   }
   NXstatus status = NXopendata(this->m_file_id, name.c_str());
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXopendata(" + name + ") failed", status);
   }
 }
 
 void File::closeData() {
   NXstatus status = NXclosedata(this->m_file_id);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXclosedata() failed", status);
   }
 }
@@ -472,7 +404,7 @@ void File::putData(const void *data) {
     throw Exception("Data specified as null in putData");
   }
   NXstatus status = NXputdata(this->m_file_id, const_cast<void *>(data));
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXputdata(void *) failed", status);
   }
 }
@@ -491,72 +423,10 @@ void File::putAttr(const AttrInfo &info, const void *data) {
   if (info.name.empty()) {
     throw Exception("Supplied empty name to putAttr");
   }
-  NXstatus status =
-      NXputattr(this->m_file_id, info.name.c_str(), data, static_cast<int>(info.length), static_cast<int>(info.type));
-  if (status != NX_OK) {
+  NXstatus status = NXputattr(this->m_file_id, info.name.c_str(), data, static_cast<int>(info.length), info.type);
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-void File::putAttr(const std::string &name, const std::vector<std::string> &array) {
-  if (name == NULL_STR) {
-    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
-  }
-  if (name.empty()) {
-    throw Exception("Supplied empty name to putAttr");
-  }
-
-  size_t maxLength = 0;
-  for (std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it) {
-    if (maxLength < it->size()) {
-      maxLength = it->size();
-    }
-  }
-
-  // fill data
-  std::string data(maxLength * array.size(), '\0');
-  std::size_t pos = 0;
-  for (std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it, pos += maxLength) {
-    if (!(it->empty())) {
-      data.replace(pos, it->size(), *it);
-    }
-  }
-
-  // set rank and dim
-  const int rank = 2;
-  const int dim[rank] = {static_cast<int>(array.size()), static_cast<int>(maxLength)};
-
-  // write data
-  NXstatus status = NXputattra(this->m_file_id, name.c_str(), data.c_str(), rank, dim, CHAR);
-
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXputattra(" << name << ", data, " << rank << ", [" << dim[0] << ", " << dim[1] << "], CHAR) failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-template <typename NumT> void File::putAttr(const std::string &name, const std::vector<NumT> &array) {
-  if (name == NULL_STR) {
-    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
-  }
-  if (name.empty()) {
-    throw Exception("Supplied empty name to putAttr");
-  }
-
-  // set rank and dim
-  const int rank = 1;
-  int dim[rank] = {static_cast<int>(array.size())};
-
-  // write data
-  NXnumtype type = getType<NumT>();
-  NXstatus status = NXputattra(this->m_file_id, name.c_str(), &(array[0]), rank, dim, type);
-
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXputattra(" << name << ", data, " << rank << ", [" << dim[0] << "], " << type << ") failed";
     throw Exception(msg.str(), status);
   }
 }
@@ -581,14 +451,14 @@ void File::putAttr(const char *name, const char *value) {
   this->putAttr(s_name, s_value);
 }
 
-void File::putAttr(const std::string &name, const string &value) {
+void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
   string my_value(value);
-  if (my_value.empty())
+  if (my_value.empty() && empty_add_space)
     my_value = " "; // Make a default "space" to avoid errors.
   AttrInfo info;
   info.name = name;
   info.length = static_cast<unsigned int>(my_value.size());
-  info.type = CHAR;
+  info.type = NXnumtype::CHAR;
   this->putAttr(info, &(my_value[0]));
 }
 
@@ -614,7 +484,7 @@ void File::putSlab(const void *data, const vector<int64_t> &start, const vector<
     throw Exception(msg.str());
   }
   NXstatus status = NXputslab64(this->m_file_id, data, &(start[0]), &(size[0]));
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXputslab64(data, " << toString(start) << ", " << toString(size) << ") failed";
     throw Exception(msg.str(), status);
@@ -649,7 +519,7 @@ template <typename NumT> void File::putSlab(const vector<NumT> &data, int64_t st
 NXlink File::getDataID() {
   NXlink link;
   NXstatus status = NXgetdataID(this->m_file_id, &link);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetdataID failed", status);
   }
   return link;
@@ -657,7 +527,7 @@ NXlink File::getDataID() {
 
 bool File::isDataSetOpen() {
   NXlink id;
-  if (NXgetdataID(this->m_file_id, &id) == NX_ERROR) {
+  if (NXgetdataID(this->m_file_id, &id) == NXstatus::NX_ERROR) {
     return false;
   } else {
     return true;
@@ -667,25 +537,8 @@ bool File::isDataSetOpen() {
 
 void File::makeLink(NXlink &link) {
   NXstatus status = NXmakelink(this->m_file_id, &link);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXmakelink failed", status);
-  }
-}
-
-void File::makeNamedLink(const string &name, NXlink &link) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to makeNamedLink");
-  }
-  NXstatus status = NXmakenamedlink(this->m_file_id, name.c_str(), &link);
-  if (status != NX_OK) {
-    throw Exception("NXmakenamedlink(" + name + ", link)", status);
-  }
-}
-
-void File::openSourceGroup() {
-  NXstatus status = NXopensourcegroup(this->m_file_id);
-  if (status != NX_OK) {
-    throw Exception("NXopensourcegroup failed");
   }
 }
 
@@ -694,36 +547,9 @@ void File::getData(void *data) {
     throw Exception("Supplied null pointer to getData");
   }
   NXstatus status = NXgetdata(this->m_file_id, data);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetdata failed", status);
   }
-}
-
-template <typename NumT> std::vector<NumT> *File::getData() {
-  Info info = this->getInfo();
-  if (info.type != getType<NumT>()) {
-    throw Exception("NXgetdata failed - invalid vector type");
-  }
-
-  // determine the number of elements
-  int64_t length = 1;
-  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); ++it) {
-    length *= *it;
-  }
-
-  // allocate memory to put the data into
-  void *temp;
-  inner_malloc(temp, info.dims, info.type);
-
-  // fetch the data
-  this->getData(temp);
-
-  // put it in the vector
-  vector<NumT> *result =
-      new vector<NumT>(static_cast<NumT *>(temp), static_cast<NumT *>(temp) + static_cast<size_t>(length));
-
-  inner_free(temp);
-  return result;
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -747,27 +573,27 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
 
 void File::getDataCoerce(vector<int> &data) {
   Info info = this->getInfo();
-  if (info.type == INT8) {
+  if (info.type == NXnumtype::INT8) {
     vector<int8_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT8) {
+  } else if (info.type == NXnumtype::UINT8) {
     vector<uint8_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == INT16) {
+  } else if (info.type == NXnumtype::INT16) {
     vector<int16_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT16) {
+  } else if (info.type == NXnumtype::UINT16) {
     vector<uint16_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == INT32) {
+  } else if (info.type == NXnumtype::INT32) {
     vector<int32_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT32) {
+  } else if (info.type == NXnumtype::UINT32) {
     vector<uint32_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
@@ -778,35 +604,35 @@ void File::getDataCoerce(vector<int> &data) {
 
 void File::getDataCoerce(vector<double> &data) {
   Info info = this->getInfo();
-  if (info.type == INT8) {
+  if (info.type == NXnumtype::INT8) {
     vector<int8_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT8) {
+  } else if (info.type == NXnumtype::UINT8) {
     vector<uint8_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == INT16) {
+  } else if (info.type == NXnumtype::INT16) {
     vector<int16_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT16) {
+  } else if (info.type == NXnumtype::UINT16) {
     vector<uint16_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == INT32) {
+  } else if (info.type == NXnumtype::INT32) {
     vector<int32_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == UINT32) {
+  } else if (info.type == NXnumtype::UINT32) {
     vector<uint32_t> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == FLOAT32) {
+  } else if (info.type == NXnumtype::FLOAT32) {
     vector<float> result;
     this->getData(result);
     data.assign(result.begin(), result.end());
-  } else if (info.type == FLOAT64) {
+  } else if (info.type == NXnumtype::FLOAT64) {
     this->getData(data);
   } else {
     throw Exception("NexusFile::getDataCoerce(): Could not coerce to double.");
@@ -837,12 +663,12 @@ void File::readData(const std::string &dataName, std::string &data) {
 bool File::isDataInt() {
   Info info = this->getInfo();
   switch (info.type) {
-  case INT8:
-  case UINT8:
-  case INT16:
-  case UINT16:
-  case INT32:
-  case UINT32:
+  case NXnumtype::INT8:
+  case NXnumtype::UINT8:
+  case NXnumtype::INT16:
+  case NXnumtype::UINT16:
+  case NXnumtype::INT32:
+  case NXnumtype::UINT32:
     return true;
   default:
     return false;
@@ -852,7 +678,7 @@ bool File::isDataInt() {
 string File::getStrData() {
   string res;
   Info info = this->getInfo();
-  if (info.type != NX_CHAR) {
+  if (info.type != NXnumtype::CHAR) {
     stringstream msg;
     msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
     throw Exception(msg.str());
@@ -877,10 +703,10 @@ string File::getStrData() {
 Info File::getInfo() {
   // vector<int> & dims, NXnumtype & type) {
   int64_t dims[NX_MAXRANK];
-  int type;
+  NXnumtype type;
   int rank;
   NXstatus status = NXgetinfo64(this->m_file_id, &rank, dims, &type);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetinfo failed", status);
   }
   Info info;
@@ -893,16 +719,15 @@ Info File::getInfo() {
 
 pair<string, string> File::getNextEntry() {
   // set up temporary variables to get the information
-  char name[NX_MAXNAMELEN];
-  char class_name[NX_MAXNAMELEN];
-  int datatype;
+  NXname name, class_name;
+  NXnumtype datatype;
 
   NXstatus status = NXgetnextentry(this->m_file_id, name, class_name, &datatype);
-  if (status == NX_OK) {
+  if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
     return pair<string, string>(str_name, str_class);
-  } else if (status == NX_EOD) {
+  } else if (status == NXstatus::NX_EOD) {
     return pair<string, string>(NULL_STR, NULL_STR); // TODO return the correct thing
   } else {
     throw Exception("NXgetnextentry failed", status);
@@ -949,22 +774,22 @@ void File::getSlab(void *data, const vector<int64_t> &start, const vector<int64_
   }
 
   NXstatus status = NXgetslab64(this->m_file_id, data, &(start[0]), &(size[0]));
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetslab failed", status);
   }
 }
 
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
-  char name[NX_MAXNAMELEN];
-  int type;
+  NXname name;
+  NXnumtype type;
 
   int rank;
   int dim[NX_MAXRANK];
   NXstatus status = NXgetnextattra(this->m_file_id, name, &rank, dim, &type);
-  if (status == NX_OK) {
+  if (status == NXstatus::NX_OK) {
     AttrInfo info;
-    info.type = static_cast<NXnumtype>(type);
+    info.type = type;
     info.name = string(name);
 
     // scalar value
@@ -980,7 +805,7 @@ AttrInfo File::getNextAttr() {
     }
 
     // string array (2 dim char array)
-    if (rank == 2 && type == NX_CHAR) {
+    if (rank == 2 && type == NXnumtype::CHAR) {
       info.length = 1;
       for (int d = 0; d < rank; ++d) {
         info.dims.push_back(dim[d]);
@@ -991,9 +816,9 @@ AttrInfo File::getNextAttr() {
 
     // TODO - AttrInfo cannot handle more complex ranks/dimensions, we need to throw an error
     std::cerr << "ERROR iterating through attributes found array attribute not understood by this api" << std::endl;
-    throw Exception("getNextAttr failed", NX_ERROR);
+    throw Exception("getNextAttr failed", NXstatus::NX_ERROR);
 
-  } else if (status == NX_EOD) {
+  } else if (status == NXstatus::NX_EOD) {
     AttrInfo info;
     info.name = NULL_STR;
     info.length = 0;
@@ -1007,12 +832,12 @@ AttrInfo File::getNextAttr() {
 void File::getAttr(const AttrInfo &info, void *data, int length) {
   char name[NX_MAXNAMELEN];
   strcpy(name, info.name.c_str());
-  int type = info.type;
+  NXnumtype type = info.type;
   if (length < 0) {
     length = static_cast<int>(info.length);
   }
   NXstatus status = NXgetattr(this->m_file_id, name, data, &length, &type);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetattr(" + info.name + ") failed", status);
   }
   if (type != info.type) {
@@ -1021,7 +846,7 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
     throw Exception(msg.str());
   }
   // char attributes are always NULL terminated and so may change length
-  if (static_cast<unsigned>(length) != info.length && type != NX_CHAR) {
+  if (static_cast<unsigned>(length) != info.length && type != NXnumtype::CHAR) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
     throw Exception(msg.str());
@@ -1052,9 +877,9 @@ template <typename NumT> void File::getAttr(const std::string &name, NumT &value
 
 string File::getStrAttr(const AttrInfo &info) {
   string res;
-  if (info.type != CHAR) {
+  if (info.type != NXnumtype::CHAR) {
     stringstream msg;
-    msg << "getStrAttr only works with strings (type=" << CHAR << ") found type=" << info.type;
+    msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
     throw Exception(msg.str());
   }
   char *value = new char[info.length + 1];
@@ -1072,48 +897,6 @@ string File::getStrAttr(const AttrInfo &info) {
   delete[] value;
 
   return res;
-}
-
-void File::getAttr(const std::string &name, std::vector<std::string> &array) {
-  if (name == NULL_STR) {
-    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
-  }
-  if (name.empty()) {
-    throw Exception("Supplied empty name to getAttr");
-  }
-
-  // get attrInfo
-  char attr_name[128];
-  strcpy(attr_name, name.c_str());
-
-  int type;
-  int rank;
-  int dim[NX_MAXRANK];
-  if (NXgetattrainfo(this->m_file_id, attr_name, &rank, dim, &type) != NX_OK) {
-    throw Exception("Attribute \"" + name + "\" not found");
-  }
-
-  if (rank != 2 || type != NX_CHAR) {
-    throw Exception("Attribute is not an array of strings");
-  }
-
-  // read data
-  std::string sep(", ");
-  char *char_data = new char[static_cast<size_t>(dim[0]) * (static_cast<size_t>(dim[1]) + sep.size())];
-  if (NXgetattra(this->m_file_id, attr_name, char_data) != NX_OK)
-    throw Exception("Could not iterate to next attribute");
-
-  // split data to strings
-  std::string data(char_data);
-
-  std::size_t start = 0;
-  std::size_t end = data.find(sep, start);
-  while (end != std::string::npos) {
-    array.push_back(data.substr(start, (end - start)));
-    start = end + sep.size();
-    end = data.find(sep, start);
-  }
-  array.push_back(data.substr(start));
 }
 
 vector<AttrInfo> File::getAttrInfos() {
@@ -1147,141 +930,31 @@ bool File::hasAttr(const std::string &name) {
 NXlink File::getGroupID() {
   NXlink link;
   NXstatus status = NXgetgroupID(this->m_file_id, &link);
-  if (status != NX_OK) {
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXgetgroupID failed", status);
   }
   return link;
 }
 
-bool File::sameID(NXlink &first, NXlink &second) {
-  NXstatus status = NXsameID(this->m_file_id, &first, &second);
-  return (status == NX_OK);
-}
-
-void File::printLink(NXlink &link) {
-  NXstatus status = NXIprintlink(this->m_file_id, &link);
-  if (status != NX_OK) {
-    throw Exception("NXprintlink failed");
-  }
-}
-
 void File::initGroupDir() {
-  int status = NXinitgroupdir(this->m_file_id);
-  if (status != NX_OK) {
+  NXstatus status = NXinitgroupdir(this->m_file_id);
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXinitgroupdir failed", status);
   }
 }
 
 void File::initAttrDir() {
-  int status = NXinitattrdir(this->m_file_id);
-  if (status != NX_OK) {
+  NXstatus status = NXinitattrdir(this->m_file_id);
+  if (status != NXstatus::NX_OK) {
     throw Exception("NXinitattrdir failed", status);
   }
 }
 
-string File::inquireFile(const int buff_length) {
-  string filename;
-  char *c_filename = new char[static_cast<size_t>(buff_length)];
-  NXstatus status = NXinquirefile(this->m_file_id, c_filename, buff_length);
-  if (status != NX_OK) {
-    delete[] c_filename;
-    stringstream msg;
-    msg << "NXinquirefile(" << buff_length << ") failed";
-    throw Exception(msg.str(), status);
-  }
-  filename = c_filename;
-  delete[] c_filename;
-  return filename;
-}
-
-string File::isExternalGroup(const string &name, const string &type, const unsigned buff_length) {
-  string url;
-  if (name.empty()) {
-    throw Exception("Supplied empty name to isExternalGroup");
-  }
-  if (type.empty()) {
-    throw Exception("Supplied empty type to isExternalGroup");
-  }
-  char *c_url = new char[buff_length];
-  NXstatus status =
-      NXisexternalgroup(this->m_file_id, name.c_str(), type.c_str(), c_url, static_cast<int>(buff_length));
-  if (status != NX_OK) {
-    delete[] c_url;
-    stringstream msg;
-    msg << "NXisexternalgroup(" << type << ", " << buff_length << ")";
-    throw Exception(msg.str(), static_cast<int>(buff_length));
-  }
-  url = c_url;
-  delete[] c_url;
-  return url;
-}
-
-void File::linkExternal(const string &name, const string &type, const string &url) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to linkExternal");
-  }
-  if (type.empty()) {
-    throw Exception("Supplied empty type to linkExternal");
-  }
-  if (url.empty()) {
-    throw Exception("Supplied empty url to linkExternal");
-  }
-  NXstatus status = NXlinkexternal(this->m_file_id, name.c_str(), type.c_str(), url.c_str());
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXlinkexternal(" << name << ", " << type << ", " << url << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-const string File::makeCurrentPath(const string &currpath, const string &subpath) {
-  std::ostringstream temp;
-  temp << currpath << "/" << subpath;
-  return temp.str();
-}
-
-void File::walkFileForTypeMap(const string &path, const string &class_name, TypeMap &tmap) {
-  if (!path.empty()) {
-    tmap.insert(std::make_pair(class_name, path));
-  }
-  map<string, string> dirents = this->getEntries();
-  map<string, string>::iterator pos;
-  for (pos = dirents.begin(); pos != dirents.end(); ++pos) {
-    if (pos->second == "SDS") {
-      tmap.insert(std::make_pair(pos->second, this->makeCurrentPath(path, pos->first)));
-    } else if (pos->second == "CDF0.0") {
-      // Do nothing with this
-      ;
-    } else {
-      this->openGroup(pos->first, pos->second);
-      this->walkFileForTypeMap(this->makeCurrentPath(path, pos->first), pos->second, tmap);
-    }
-  }
-  this->closeGroup();
-}
-
-TypeMap *File::getTypeMap() {
-  TypeMap *tmap = new TypeMap();
-  // Ensure that we're at the top of the file.
-  this->openPath("/");
-  this->walkFileForTypeMap("", "", *tmap);
-  return tmap;
-}
-
-template <typename NumT> void File::malloc(NumT *&data, const Info &info) {
-  if (getType<NumT>() != info.type) {
-    throw Exception("Type mismatch in malloc()");
-  }
-  // cppcheck-suppress cstyleCast
-  inner_malloc((void *&)data, info.dims, info.type);
-}
-
-template <typename NumT> void File::free(NumT *&data) {
-  // cppcheck-suppress cstyleCast
-  inner_free((void *&)data);
-}
-
 } // namespace NeXus
+
+// methods to help with debugging
+std::ostream &operator<<(std::ostream &stm, const NXstatus status) { return stm << static_cast<int>(status); }
+std::ostream &operator<<(std::ostream &stm, const NXnumtype type) { return stm << static_cast<int>(type); }
 
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
@@ -1297,17 +970,6 @@ template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const uint32
 template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const int64_t value);
 template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const uint64_t value);
 template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const char value);
-
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<float> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<double> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<int8_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<uint8_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<int16_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<uint16_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<int32_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<uint32_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<int64_t> &array);
-template MANTID_NEXUSCPP_DLL void File::putAttr(const string &name, const std::vector<uint64_t> &array);
 
 template MANTID_NEXUSCPP_DLL float File::getAttr(const AttrInfo &info);
 template MANTID_NEXUSCPP_DLL double File::getAttr(const AttrInfo &info);
@@ -1525,18 +1187,6 @@ template MANTID_NEXUSCPP_DLL void File::writeCompData(const string &name, const 
                                                       const vector<int64_t> &dims, const NXcompression comp,
                                                       const vector<int64_t> &bufsize);
 
-template MANTID_NEXUSCPP_DLL vector<float> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<double> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int8_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint8_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int16_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint16_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int32_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint32_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int64_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint64_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<char> *File::getData();
-
 template MANTID_NEXUSCPP_DLL void File::getData(vector<float> &data);
 template MANTID_NEXUSCPP_DLL void File::getData(vector<double> &data);
 template MANTID_NEXUSCPP_DLL void File::getData(vector<int8_t> &data);
@@ -1606,11 +1256,3 @@ template MANTID_NEXUSCPP_DLL void File::putSlab(const std::vector<uint64_t> &dat
 
 template MANTID_NEXUSCPP_DLL void File::getAttr(const std::string &name, double &value);
 template MANTID_NEXUSCPP_DLL void File::getAttr(const std::string &name, int &value);
-
-template MANTID_NEXUSCPP_DLL void File::malloc(int *&data, const Info &info);
-template MANTID_NEXUSCPP_DLL void File::malloc(float *&data, const Info &info);
-template MANTID_NEXUSCPP_DLL void File::malloc(double *&data, const Info &info);
-
-template MANTID_NEXUSCPP_DLL void File::free(int *&data);
-template MANTID_NEXUSCPP_DLL void File::free(float *&data);
-template MANTID_NEXUSCPP_DLL void File::free(double *&data);

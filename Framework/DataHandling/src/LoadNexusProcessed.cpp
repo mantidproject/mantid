@@ -815,31 +815,32 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
 
     if (info.rank == 1) {
-      if (info.type == NX_FLOAT64) {
+      if (info.type == NXnumtype::FLOAT64) {
         loadNumericColumn<double, double>(nx_tw, dataSetName, workspace, "double");
-      } else if (info.type == NX_INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         loadNumericColumn<int, int32_t>(nx_tw, dataSetName, workspace, "int");
-      } else if (info.type == NX_UINT32) {
+      } else if (info.type == NXnumtype::UINT32) {
         loadNumericColumn<uint32_t, uint32_t>(nx_tw, dataSetName, workspace, "uint");
-      } else if (info.type == NX_INT64) {
+      } else if (info.type == NXnumtype::INT64) {
         loadNumericColumn<int64_t, int64_t>(nx_tw, dataSetName, workspace, "long64");
-      } else if (info.type == NX_UINT64) {
+      } else if (info.type == NXnumtype::UINT64) {
         loadNumericColumn<size_t, uint64_t>(nx_tw, dataSetName, workspace, "size_t");
-      } else if (info.type == NX_FLOAT32) {
+      } else if (info.type == NXnumtype::FLOAT32) {
         loadNumericColumn<float, float>(nx_tw, dataSetName, workspace, "float");
-      } else if (info.type == NX_UINT8) {
+      } else if (info.type == NXnumtype::UINT8) {
         loadNumericColumn<bool, bool>(nx_tw, dataSetName, workspace, "bool");
       } else {
-        throw std::logic_error("Column with Nexus data type " + std::to_string(info.type) + " cannot be loaded.");
+        throw std::logic_error("Column with Nexus data type " + std::to_string(static_cast<int>(info.type)) +
+                               " cannot be loaded.");
       }
     } else if (info.rank == 2) {
-      if (info.type == NX_CHAR) {
+      if (info.type == NXnumtype::CHAR) {
         NXChar data = nx_tw.openNXChar(dataSetName);
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
@@ -856,9 +857,9 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
             boost::trim_right(cellContents);
           }
         }
-      } else if (info.type == NX_INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         loadVectorColumn<int>(nx_tw, dataSetName, workspace, "vector_int");
-      } else if (info.type == NX_FLOAT64) {
+      } else if (info.type == NXnumtype::FLOAT64) {
         auto data = nx_tw.openNXDouble(dataSetName);
         if (data.attributes("interpret_as") == "V3D") {
           loadV3DColumn(data, workspace);
@@ -969,7 +970,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
@@ -980,7 +981,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     // determine number of peaks
     // here we assume that a peaks_table has always one column of doubles
 
-    if (info.type == NX_FLOAT64) {
+    if (info.type == NXnumtype::FLOAT64) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
@@ -1247,7 +1248,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
@@ -1258,7 +1259,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     // determine number of peaks
     // here we assume that a peaks_table has always one column of doubles
 
-    if (info.type == NX_FLOAT64) {
+    if (info.type == NXnumtype::FLOAT64) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
@@ -2143,7 +2144,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
-  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
+  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NXstatus::NX_ERROR) {
     return;
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");

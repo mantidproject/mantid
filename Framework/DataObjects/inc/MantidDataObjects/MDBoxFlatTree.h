@@ -133,7 +133,7 @@ public:
 };
 
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
                 const std::string &tag);
 } // namespace DataObjects
 } // namespace Mantid

@@ -274,7 +274,7 @@ void CoordTransformAffine::apply(const coord_t *inputVector, coord_t *outVector)
   // For each output dimension
   for (size_t out = 0; out < outD; ++out) {
     // Cache the row pointer to make the matrix access a bit faster
-    coord_t *rawMatrixRow = m_rawMatrix[out];
+    const coord_t *rawMatrixRow = m_rawMatrix[out];
     coord_t outVal = 0.0;
     size_t in;
     for (in = 0; in < inD; ++in)
@@ -354,7 +354,7 @@ CoordTransformAffine *CoordTransformAffine::combineTransformations(CoordTransfor
   auto *firstAff = dynamic_cast<CoordTransformAffine *>(first);
   bool ownFirstAff(false);
   if (!firstAff) {
-    auto *firstAl = dynamic_cast<CoordTransformAligned *>(first);
+    const auto *firstAl = dynamic_cast<CoordTransformAligned *>(first);
     if (!firstAl)
       throw std::runtime_error("CoordTransformAffine::combineTransformations(): first transform "
                                "must be either CoordTransformAffine or CoordTransformAligned.");
@@ -365,7 +365,7 @@ CoordTransformAffine *CoordTransformAffine::combineTransformations(CoordTransfor
   auto *secondAff = dynamic_cast<CoordTransformAffine *>(second);
   bool ownSecondAff(false);
   if (!secondAff) {
-    auto *secondAl = dynamic_cast<CoordTransformAligned *>(second);
+    const auto *secondAl = dynamic_cast<CoordTransformAligned *>(second);
     if (!secondAl)
       throw std::runtime_error("CoordTransformAffine::combineTransformations(): second transform "
                                "must be either CoordTransformAffine or CoordTransformAligned.");
