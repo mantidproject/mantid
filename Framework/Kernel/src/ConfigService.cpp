@@ -463,10 +463,9 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   } else {
     converted = dir;
   }
+
   converted = std::filesystem::path(converted).string();
-  if (std::filesystem::path(converted).extension() == "") {
-    std::filesystem::create_directory(converted);
-  }
+
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445.
   // Ticket #2460 prompts a review of our path handling in the config service.
@@ -1232,7 +1231,6 @@ std::string ConfigServiceImpl::getAppDataDir() {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   std::string appdata = converter.to_bytes(w_appdata);
   std::filesystem::path path(appdata);
-  std::filesystem::create_directory(path);
   path /= vendorName;
   path /= applicationName;
   return path.string();
@@ -1386,7 +1384,7 @@ std::string ConfigServiceImpl::getUserPropertiesDir() const {
   std::filesystem::path datadir(m_pSysConfig->getString("system.homeDir"));
   datadir.append(".mantid");
   // Create the directory if it doesn't already exist
-  std::filesystem::create_directory(datadir);
+  std::filesystem::create_directories(datadir);
   return datadir.string() + "/";
 #endif
 }
@@ -1464,7 +1462,9 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   std::filesystem::path dirPath;
   try {
     dirPath = std::filesystem::path(path);
-    std::filesystem::create_directory(dirPath);
+    if (!std::filesystem::is_directory(path)) {
+      dirPath.remove_filename();
+    }
   } catch (std::filesystem::filesystem_error &) {
     return;
   }
@@ -1508,7 +1508,6 @@ const std::filesystem::path ConfigServiceImpl::getVTPFileDirectory() {
   }
 
   std::filesystem::path path(getAppDataDir());
-  std::filesystem::create_directory(path);
   path /= "instrument";
   path /= "geometryCache";
   return path;
@@ -1527,7 +1526,6 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
   m_instrumentDirs.clear();
 
   std::filesystem::path path(getAppDataDir());
-  std::filesystem::create_directory(path);
   path /= "instrument";
   addDirectoryifExists(path, m_instrumentDirs);
 
