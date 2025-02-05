@@ -33,51 +33,19 @@ public:
       if (std::filesystem::exists(hdf5Path))
         m_testHDF5Path = hdf5Path.string();
 
-      const auto hdf4Path = std::filesystem::path(dataPath) / "argus0026287.nxs";
-      if (std::filesystem::exists(hdf4Path))
-        m_testHDF4Path = hdf4Path.string();
-
       const auto nonhdf5Path = std::filesystem::path(dataPath) / "CSP79590.raw";
       if (std::filesystem::exists(nonhdf5Path))
         m_testNonHDFPath = nonhdf5Path.string();
 
-      if (!m_testHDF5Path.empty() && !m_testHDF4Path.empty() && !m_testNonHDFPath.empty())
+      if (!m_testHDF5Path.empty() && !m_testNonHDFPath.empty())
         break;
     }
-    if (m_testHDF5Path.empty() || m_testHDF4Path.empty() || m_testNonHDFPath.empty()) {
+    if (m_testHDF5Path.empty() || m_testNonHDFPath.empty()) {
       throw std::runtime_error("Unable to find test files for FileDescriptorTest. "
                                "The AutoTestData directory needs to be in the search path");
     }
 
     m_testHDF5 = std::make_shared<NexusDescriptor>(m_testHDF5Path);
-  }
-
-  //=================================== Static isReadable methods
-  //======================================
-  void test_isReadable_Returns_False_For_Non_HDF_Filename() {
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version4));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version5));
-  }
-
-  void test_isReadable_With_Version4_Returns_True_Only_For_HDF4() {
-    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version4));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version4));
-  }
-
-  void test_isReadable_With_Version5_Returns_True_Only_For_HDF4() {
-    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
-    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version5));
-  }
-
-  void test_getHDFVersion() {
-    TS_ASSERT_EQUALS(NexusDescriptor::Version5, NexusDescriptor::getHDFVersion(m_testHDF5Path));
-    TS_ASSERT_EQUALS(NexusDescriptor::Version4, NexusDescriptor::getHDFVersion(m_testHDF4Path));
-    TS_ASSERT_EQUALS(NexusDescriptor::None, NexusDescriptor::getHDFVersion(m_testNonHDFPath));
-  }
-
-  void test_isReadable_Throws_With_Invalid_Filename() {
-    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""), const std::invalid_argument &);
   }
 
   //=================================== NexusDescriptor methods
@@ -126,7 +94,6 @@ public:
 
 private:
   std::string m_testHDF5Path;
-  std::string m_testHDF4Path;
   std::string m_testNonHDFPath;
   std::shared_ptr<NexusDescriptor> m_testHDF5;
 };
