@@ -30,7 +30,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
 
 namespace {
-constexpr std::string NX_CANSAS_EXTENSION = ".h5";
+constexpr std::string_view NX_CANSAS_EXTENSION = ".h5";
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
