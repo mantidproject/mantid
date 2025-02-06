@@ -10,7 +10,7 @@
 Description
 -----------
 
-Scales the the signal and error of MD events by the inverse of Debye-Waller Factor :math:`exp(<u>^2 \times <q>^2)` where :math:`<u^2>` is
+Scales the the signal and error of MD events by the inverse of Debye-Waller Factor :math:`exp(<q>^2 \times <u^2>)` where :math:`<u^2>` is
 the `Mean squared displacement`.
 
 `Mean squared displacement` must be a positive float number.
