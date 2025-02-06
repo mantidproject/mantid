@@ -35,7 +35,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -59,16 +59,16 @@ const std::string LoadILLIndirect2::category() const { return "DataHandling\\Nex
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLIndirect2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength")               // ILL
-      && descriptor.pathExists("/entry0/experiment_identifier") // ILL
-      && descriptor.pathExists("/entry0/mode")                  // ILL
-      && ((descriptor.pathExists("/entry0/instrument/Doppler/mirror_sense") &&
-           descriptor.pathExists("/entry0/dataSD/SingleD_data")) // IN16B new
-          || (descriptor.pathExists("/entry0/instrument/Doppler/doppler_frequency") &&
-              descriptor.pathExists("/entry0/dataSD/dataSD")) // IN16B old
+  if (descriptor.isEntry("/entry0/wavelength")               // ILL
+      && descriptor.isEntry("/entry0/experiment_identifier") // ILL
+      && descriptor.isEntry("/entry0/mode")                  // ILL
+      && ((descriptor.isEntry("/entry0/instrument/Doppler/mirror_sense") &&
+           descriptor.isEntry("/entry0/dataSD/SingleD_data")) // IN16B new
+          || (descriptor.isEntry("/entry0/instrument/Doppler/doppler_frequency") &&
+              descriptor.isEntry("/entry0/dataSD/dataSD")) // IN16B old
           )) {
     return 80;
   } else {

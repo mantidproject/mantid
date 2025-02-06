@@ -35,7 +35,7 @@ using HistogramData::BinEdges;
 using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMLZ)
 
 /** Constructor
  */
@@ -98,10 +98,9 @@ void LoadMLZ::exec() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMLZ::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   // fields existent only at the MLZ
-  if (descriptor.pathExists("/Scan/wavelength") && descriptor.pathExists("/Scan/title") &&
-      descriptor.pathExists("/Scan/mode")) {
+  if (descriptor.isEntry("/Scan/wavelength") && descriptor.isEntry("/Scan/title") && descriptor.isEntry("/Scan/mode")) {
     return 80;
   } else {
     return 0;

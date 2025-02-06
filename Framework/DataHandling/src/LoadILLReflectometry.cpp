@@ -145,7 +145,7 @@ using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -153,14 +153,14 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLReflectometry::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLReflectometry::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
-       descriptor.pathExists("/entry0/theta"))        // ILL FIGARO
-      && descriptor.pathExists("/entry0/experiment_identifier") && descriptor.pathExists("/entry0/mode") &&
-      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
-       descriptor.pathExists("/entry0/instrument/Theta"))            // ILL FIGARO
+  if ((descriptor.isEntry("/entry0/wavelength") || // ILL D17
+       descriptor.isEntry("/entry0/theta"))        // ILL FIGARO
+      && descriptor.isEntry("/entry0/experiment_identifier") && descriptor.isEntry("/entry0/mode") &&
+      (descriptor.isEntry("/entry0/instrument/VirtualChopper") || // ILL D17
+       descriptor.isEntry("/entry0/instrument/Theta"))            // ILL FIGARO
   )
     return 80;
   else

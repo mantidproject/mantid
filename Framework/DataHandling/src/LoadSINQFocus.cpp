@@ -29,7 +29,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -60,10 +60,10 @@ const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadSINQFocus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the SINQ (to date Loader only valid for focus)
-  if (descriptor.pathExists("/entry1/FOCUS/SINQ")) {
+  if (descriptor.isEntry("/entry1/FOCUS/SINQ")) {
     return 80;
   } else {
     return 0;

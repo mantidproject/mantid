@@ -11,6 +11,8 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -18,6 +20,14 @@ namespace Kernel {
 class MANTID_KERNEL_DLL NexusHDF5Descriptor {
 
 public:
+  /// Enumerate HDF possible versions
+  enum Version { Version4, Version5, None };
+
+  /// Returns true if the file is considered to store data in a hierarchy
+  static bool isReadable(const std::string &filename, const Version version = Version5);
+  /// Returns version of HDF file
+  static Version getHDFVersion(const std::string &filename);
+
   /**
    * Unique constructor
    * @param filename input HDF5 Nexus file name
@@ -31,14 +41,24 @@ public:
    */
   ~NexusHDF5Descriptor() = default;
 
-  /// Returns true if the file is considered to store data in a hierarchy
-  static bool isReadable(const std::string &filename);
-
   /**
    * Returns a copy of the current file name
    * @return
    */
-  std::string getFilename() const noexcept;
+  const std::string &filename() const noexcept;
+
+  /**
+   * Access the file extension. Defined as the string after and including the
+   * last period character
+   * @returns A reference to a const string containing the file extension
+   */
+  inline const std::string &extension() const { return m_extension; }
+
+  /// Returns the name & type of the first entry in the file
+  const std::pair<std::string, std::string> &firstEntryNameType() const { return m_firstEntryNameType; };
+
+  /// Query if the given attribute exists on the root node
+  bool hasRootAttr(const std::string &name) const;
 
   /**
    * Returns a const reference of the internal map holding all entries in the
@@ -68,6 +88,16 @@ public:
    */
   bool isEntry(const std::string &entryName) const noexcept;
 
+  /**
+   * @param type A string specifying the required type
+   * @return path A vector of strings giving paths using UNIX-style path
+   * separators (/), e.g. /raw_data_1, /entry/bank1
+   */
+  std::vector<std::string> allPathsOfType(const std::string &type) const;
+
+  /// Query if a given type exists somewhere in the file
+  bool classTypeExists(const std::string &classType) const;
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
@@ -77,6 +107,12 @@ private:
 
   /** NeXus HDF5 file name */
   std::string m_filename;
+  /// Extension
+  std::string m_extension;
+  /// First entry name/type
+  std::pair<std::string, std::string> m_firstEntryNameType;
+  /// Root attributes
+  std::unordered_set<std::string> m_rootAttrs;
 
   /**
    * All entries metadata

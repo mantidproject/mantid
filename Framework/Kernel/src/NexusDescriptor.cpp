@@ -14,84 +14,6 @@
 #include <string>
 
 namespace Mantid::Kernel {
-//---------------------------------------------------------------------------------------------------------------------------
-// static NexusDescriptor constants
-//---------------------------------------------------------------------------------------------------------------------------
-/// Size of HDF magic number
-const size_t NexusDescriptor::HDFMagicSize = 4;
-/// HDF cookie that is stored in the first 4 bytes of the file.
-const unsigned char NexusDescriptor::HDFMagic[4] = {'\016', '\003', '\023', '\001'}; // From HDF4::hfile.h
-
-/// Size of HDF5 signature
-size_t NexusDescriptor::HDF5SignatureSize = 8;
-/// signature identifying a HDF5 file.
-const unsigned char NexusDescriptor::HDF5Signature[8] = {137, 'H', 'D', 'F', '\r', '\n', '\032', '\n'};
-
-namespace {
-//---------------------------------------------------------------------------------------------------------------------------
-// Anonymous helper methods to use isReadable methods to use an open file handle
-//---------------------------------------------------------------------------------------------------------------------------
-
-/**
- * Currently simply checks for the HDF signatures and returns true if one of
- * them is found
- * @param fileHandle A file handled opened and pointing at the start of the
- * file. On return the
- * fileHandle is left at the start of the file
- * @param version One of the NexusDescriptor::Version enumerations specifying
- * the required version
- * @return True if the file is considered hierarchical, false otherwise
- */
-bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
-  if (!fileHandle)
-    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
-
-  bool result(false);
-
-  // HDF4 check requires 4 bytes,  HDF5 check requires 8 bytes
-  // Use same buffer and waste a few bytes if only checking HDF4
-  unsigned char buffer[8] = {'0', '0', '0', '0', '0', '0', '0', '0'};
-  if (NexusDescriptor::HDF5SignatureSize !=
-      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char), NexusDescriptor::HDF5SignatureSize, fileHandle)) {
-    throw std::runtime_error("Error while reading file");
-  }
-
-  // Number of bytes read doesn't matter as if it is not enough then the memory
-  // simply won't match
-  // as the buffer has been "zeroed"
-  if (version == NexusDescriptor::Version5 || version == NexusDescriptor::AnyVersion) {
-    result = (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature, NexusDescriptor::HDF5SignatureSize) == 0);
-  }
-  if (!result && (version == NexusDescriptor::Version4 || version == NexusDescriptor::AnyVersion)) {
-    result = (std::memcmp(&buffer, &NexusDescriptor::HDFMagic, NexusDescriptor::HDFMagicSize) == 0);
-  }
-
-  // Return file stream to start of file
-  std::rewind(fileHandle);
-  return result;
-}
-} // namespace
-
-//---------------------------------------------------------------------------------------------------------------------------
-// static NexusDescriptor methods
-//---------------------------------------------------------------------------------------------------------------------------
-
-/**
- * Checks for the HDF signatures and returns true if one of them is found
- * @param filename A string filename to check
- * @param version One of the NexusDescriptor::Version enumerations specifying
- * the required version
- * @return True if the file is considered hierarchical, false otherwise
- */
-bool NexusDescriptor::isReadable(const std::string &filename, const Version version) {
-  FILE *fd = fopen(filename.c_str(), "rb");
-  if (!fd) {
-    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Unable to open file '" + filename + "'");
-  }
-  const bool result = isHDFHandle(fd, version); // use anonymous helper
-  fclose(fd);
-  return result;
-}
 
 //---------------------------------------------------------------------------------------------------------------------------
 // NexusDescriptor public methods
@@ -131,70 +53,12 @@ NexusDescriptor::~NexusDescriptor() = default;
 const std::pair<std::string, std::string> &NexusDescriptor::firstEntryNameType() const { return m_firstEntryNameType; }
 
 /**
- * @param name The name of an attribute
- * @return True if the attribute exists, false otherwise
- */
-bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
-
-/**
  * @param path A string giving a path using UNIX-style path separators (/), e.g.
  * /raw_data_1, /entry/bank1
  * @return True if the path exists in the file, false otherwise
  */
 bool NexusDescriptor::pathExists(const std::string &path) const {
   return (m_pathsToTypes.find(path) != m_pathsToTypes.end());
-}
-
-/**
- * @param path A string giving a path using UNIX-style path separators (/), e.g.
- * /raw_data_1, /entry/bank1
- * @param type A string specifying the required type
- * @return True if the path exists in the file, false otherwise
- */
-bool NexusDescriptor::pathOfTypeExists(const std::string &path, const std::string &type) const {
-  auto it = m_pathsToTypes.find(path);
-  if (it != m_pathsToTypes.end()) {
-    return (it->second == type);
-  } else
-    return false;
-}
-
-/**
- * @param type A string specifying the required type
- * @return path A string giving a path using UNIX-style path separators (/),
- * e.g. /raw_data_1, /entry/bank1
- */
-std::string NexusDescriptor::pathOfType(const std::string &type) const {
-  const auto it = std::find_if(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
-                               [&type](const auto &typeMap) { return type == typeMap.second; });
-  if (it != m_pathsToTypes.cend()) {
-    return it->first;
-  }
-  return "";
-}
-
-/**
- * @param type A string specifying the required type
- * @return path A vector of strings giving paths using UNIX-style path
- * separators (/), e.g. /raw_data_1, /entry/bank1
- */
-std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type) const {
-  auto iend = m_pathsToTypes.end();
-  std::vector<std::string> retval;
-  for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
-    if (type == it->second)
-      retval.push_back(it->first);
-  }
-  return retval;
-}
-
-/**
- * @param classType A string name giving a class type
- * @return True if the type exists in the file, false otherwise
- */
-bool NexusDescriptor::classTypeExists(const std::string &classType) const {
-  return std::any_of(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
-                     [&classType](const auto typeMap) { return classType == typeMap.second; });
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -228,12 +92,6 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
                                std::map<std::string, std::string> &pmap, int level) {
   if (!rootPath.empty()) {
     pmap.emplace(rootPath, className);
-  }
-  if (level == 0) {
-    auto attrInfos = file.getAttrInfos();
-    for (auto &attrInfo : attrInfos) {
-      m_rootAttrs.insert(attrInfo.name);
-    }
   }
 
   auto dirents = file.getEntries();
