@@ -80,7 +80,6 @@ set(SRC_FILES
     src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
     src/LoadIsawDetCal.cpp
-    src/LoadLLB.cpp
     src/LoadLog.cpp
     src/LoadMLZ.cpp
     src/LoadMappingTable.cpp
@@ -302,7 +301,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
     inc/MantidDataHandling/LoadIsawDetCal.h
-    inc/MantidDataHandling/LoadLLB.h
     inc/MantidDataHandling/LoadLog.h
     inc/MantidDataHandling/LoadMLZ.h
     inc/MantidDataHandling/LoadMappingTable.h
@@ -517,7 +515,6 @@ set(TEST_FILES
     LoadInstrumentFromRawTest.h
     LoadInstrumentTest.h
     LoadIsawDetCalTest.h
-    LoadLLBTest.h
     LoadLogTest.h
     LoadMLZTest.h
     LoadMappingTableTest.h
