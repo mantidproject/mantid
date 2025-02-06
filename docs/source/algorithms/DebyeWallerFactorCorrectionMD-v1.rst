@@ -48,7 +48,7 @@ Usage
 
 Output:
 
-.. testoutput:: MagneticFormFactorCorrectionMDExample
+.. testoutput:: DebyWallerFactorCorrectionMDExample
 
   Input signal:     [1000, 1000, 1000, 1000, 1000, 1000]
   Corrected signal: [1082, 1167, 1289, 1462, 1699, 2024]
