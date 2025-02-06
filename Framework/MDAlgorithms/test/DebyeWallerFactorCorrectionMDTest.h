@@ -64,8 +64,8 @@ public:
     for (size_t i = 0; i < output_events.size(); ++i) {
       const double q = static_cast<double>(i + 1);
       const double q2 = q * q;
-      TS_ASSERT_DELTA(output_events[i][0], exp(0.1 * q2), 1e-5); // signal
-      TS_ASSERT_DELTA(output_events[i][1], exp(0.1 * q2), 1e-5); // error
+      TS_ASSERT_DELTA(output_events[i][0], exp(0.1 * q2 / 3.0), 1e-5); // signal
+      TS_ASSERT_DELTA(output_events[i][1], exp(0.1 * q2 / 3.0), 1e-5); // error
       TS_ASSERT_EQUALS(output_events[i][2], q);
     }
   }
@@ -110,12 +110,12 @@ public:
 
     for (size_t i = 0; i < output_events.size(); ++i) {
       const double q = static_cast<double>(i + 1);
-      const double q2 = 3 * q * q;                                // q2 in single crystal mode is qx^2 + qy^2 +qz^2
-      TS_ASSERT_DELTA(output_events[i][0], exp(0.15 * q2), 1e-3); // signal
-      TS_ASSERT_DELTA(output_events[i][1], exp(0.15 * q2), 1e-3); // error
-      TS_ASSERT_EQUALS(output_events[i][2], q);                   // center x
-      TS_ASSERT_EQUALS(output_events[i][3], q);                   // center y
-      TS_ASSERT_EQUALS(output_events[i][4], q);                   // center z
+      const double q2 = 3 * q * q; // q2 in single crystal mode is qx^2 + qy^2 +qz^2
+      TS_ASSERT_DELTA(output_events[i][0], exp(0.15 * q2 / 3.0), 1e-3); // signal
+      TS_ASSERT_DELTA(output_events[i][1], exp(0.15 * q2 / 3.0), 1e-3); // error
+      TS_ASSERT_EQUALS(output_events[i][2], q);                         // center x
+      TS_ASSERT_EQUALS(output_events[i][3], q);                         // center y
+      TS_ASSERT_EQUALS(output_events[i][4], q);                         // center z
     }
   }
 };
