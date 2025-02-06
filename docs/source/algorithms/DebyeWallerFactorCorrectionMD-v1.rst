@@ -36,7 +36,7 @@ Usage
   FakeMDEventData(ws, UniformParams=-6000)
 
   # Run the algorithm
-  wsOut = DebyeWallerFactorCorrectionMD(ws, Mean squared displacement = 0.15)
+  wsOut = DebyeWallerFactorCorrectionMD(ws, 0.15)
 
   # Bin the result so that it can be printed
   wsOut = BinMD(wsOut, AlignedDim0='|Q|,1,4,6')
