@@ -43,9 +43,7 @@ void DebyeWallerFactorCorrectionMD::init() {
   mustBePositive->setLower(0.0);
   declareProperty(std::make_unique<PropertyWithValue<double>>("Mean squared displacement", EMPTY_DBL(),
                                                               std::move(mustBePositive), Direction::Input),
-                  "Optional: To only include events before the provided stop "
-                  "time, in seconds (relative to the start of the run). if left empty, it will take run end time or "
-                  "last pulse time as default.");
+                  "Mandatory: Mean squared displacement <u^2>. Often obtained from Rietveld refinement.");
 }
 
 // //----------------------------------------------------------------------------------------------
@@ -56,7 +54,7 @@ void DebyeWallerFactorCorrectionMD::exec() { QTransform::exec(); }
 // implement correction method
 double DebyeWallerFactorCorrectionMD::correction(const double q2) const {
   const double u2 = getProperty("Mean squared displacement");
-  const double inverse_DWF = exp(u2 * q2);
+  const double inverse_DWF = exp(u2 * q2 / 3.0);
   return inverse_DWF;
 }
 
