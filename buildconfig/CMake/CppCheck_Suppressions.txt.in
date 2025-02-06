@@ -568,9 +568,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIn
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:277
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:286
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:114
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:156
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:272
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:448
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:431
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonStrategy.cpp:119
