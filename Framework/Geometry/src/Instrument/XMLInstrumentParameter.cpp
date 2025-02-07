@@ -146,7 +146,7 @@ double XMLInstrumentParameter::createParamValue(const TimeSeriesProperty<double>
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    else if (m_extractSingleValueAs.starts_with("position 0") == 0 && m_extractSingleValueAs.size() >= 10) {
+    else if (m_extractSingleValueAs.starts_with("position") && m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;
       int position;
