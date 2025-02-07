@@ -86,7 +86,7 @@ private:
   /// Group detectors
   void groupDetectors(API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
-  double getLogValue(API::MatrixWorkspace &ws);
+  double getLogValue(const API::MatrixWorkspace &ws);
   /// Populate output workspace with results
   void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots, const std::string &units);
   /// get log units

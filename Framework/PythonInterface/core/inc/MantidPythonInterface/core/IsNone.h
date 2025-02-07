@@ -23,7 +23,7 @@ namespace PythonInterface {
  * @param ptr A * to a raw PyObject
  * @returns true if the given object is of type None
  */
-inline bool isNone(PyObject *ptr) { return (ptr == Py_None); }
+inline bool isNone(const PyObject *ptr) { return (ptr == Py_None); }
 
 /**
  * @param obj A const reference to boost python object wrapper
