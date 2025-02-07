@@ -103,7 +103,7 @@ void LoadMuonNexus2::exec() {
 
   LegacyNexus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
   spectrum_index.load();
-  m_numberOfSpectra = spectrum_index.dim0();
+  m_numberOfSpectra = static_cast<specnum_t>(spectrum_index.dim0());
 
   // Load detector mapping
   const auto &detMapping = loadDetectorMapping(spectrum_index);
@@ -113,7 +113,7 @@ void LoadMuonNexus2::exec() {
 
   NXFloat raw_time = dataGroup.openNXFloat("raw_time");
   raw_time.load();
-  int nBins = raw_time.dim0();
+  int64_t nBins = raw_time.dim0();
   std::vector<double> timeBins;
   timeBins.assign(raw_time(), raw_time() + nBins);
   timeBins.emplace_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
@@ -424,7 +424,7 @@ int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const 
  */
 std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
-  const int nSpectra = spectrumIndex.dim0();
+  const int nSpectra = static_cast<int>(spectrumIndex.dim0());
 
   // Find and open the data group
   NXRoot root(getPropertyValue("Filename"));
@@ -453,7 +453,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::L
       const auto detIndex = dataGroup.openNXInt("detector_index");
       const auto detCount = dataGroup.openNXInt("detector_count");
       const auto detList = dataGroup.openNXInt("detector_list");
-      const int nDet = detIndex.dim0();
+      const int nDet = static_cast<int>(detIndex.dim0());
       for (int i = 0; i < nDet; ++i) {
         const int start = detIndex[i];
         const int nDetectors = detCount[i];

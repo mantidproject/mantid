@@ -279,13 +279,13 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
 void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
                                     int &numberOfPixelsPerTube) {
   if (m_isD16Omega) {
-    numberOfChannels = data.dim0();
-    numberOfTubes = data.dim1();
-    numberOfPixelsPerTube = data.dim2();
+    numberOfChannels = static_cast<int>(data.dim0());
+    numberOfTubes = static_cast<int>(data.dim1());
+    numberOfPixelsPerTube = static_cast<int>(data.dim2());
   } else {
-    numberOfPixelsPerTube = data.dim1();
-    numberOfChannels = data.dim2();
-    numberOfTubes = data.dim0();
+    numberOfPixelsPerTube = static_cast<int>(data.dim1());
+    numberOfChannels = static_cast<int>(data.dim2());
+    numberOfTubes = static_cast<int>(data.dim0());
   }
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
@@ -1067,10 +1067,10 @@ std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std
   auto scannedValues = LoadHelper::getDoubleDataset(entry, path);
   scannedValues.load();
 
-  const int nBins = scannedValues.dim1();
+  const int64_t nBins = scannedValues.dim1();
   std::vector<double> binning(nBins, 0);
 
-  for (int i = 0; i < nBins; ++i) {
+  for (int64_t i = 0; i < nBins; ++i) {
     // for D16, we are only interested in the first line, which contains the omega values
     binning[i] = scannedValues(0, i);
   }
@@ -1087,12 +1087,12 @@ std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std
  */
 std::vector<double> LoadILLSANS::getVariableTimeBinning(const NXEntry &entry, const std::string &path, const NXInt &sum,
                                                         const NXFloat &times) const {
-  const int nBins = sum.dim0();
+  const int64_t nBins = sum.dim0();
   std::vector<double> binCenters;
   binCenters.reserve(nBins);
   NXFloat distance = entry.openNXFloat(path);
   distance.load();
-  for (int bin = 0; bin < nBins; ++bin) {
+  for (int64_t bin = 0; bin < nBins; ++bin) {
     // sum is in nanoseconds, times is in microseconds
     const double tof = sum[bin] * 1E-9 - times[bin] * 1E-6 / 2.;
     // velocity in m/s

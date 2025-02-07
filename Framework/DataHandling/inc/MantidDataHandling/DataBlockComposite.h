@@ -98,7 +98,7 @@ void DLLExport populateDataBlockCompositeWithContainer(DataBlockComposite &dataB
     void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, int numberOfPeriods,
                     size_t numberOfChannels, specnum_t previousValue, specnum_t startValue) {
       auto numberOfSpectra = previousValue - startValue + 1;
-      DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
+      DataBlock dataBlock(static_cast<int>(numberOfPeriods), numberOfSpectra, numberOfChannels);
       dataBlock.setMinSpectrumID(startValue);
       dataBlock.setMaxSpectrumID(previousValue);
       dataBlockComposite.addDataBlock(dataBlock);
