@@ -21,7 +21,6 @@
 #include "MantidNexus/H5Util.h"
 
 #include <algorithm>
-#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
@@ -295,12 +294,12 @@ void SaveNXcanSASBase::addData(H5::Group &group, const Mantid::API::MatrixWorksp
 }
 
 void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace,
-                                               const std::string &filename) {
+                                               const std::filesystem::path &path) {
   // Prepare file
-  if (auto const &path = std::filesystem::path(filename); !path.empty()) {
+  if (!path.empty()) {
     std::filesystem::remove(path);
   }
-  H5::H5File file(filename, H5F_ACC_EXCL);
+  H5::H5File file(path.string(), H5F_ACC_EXCL);
 
   const std::string suffix("01");
   m_progress->report("Adding a new entry.");

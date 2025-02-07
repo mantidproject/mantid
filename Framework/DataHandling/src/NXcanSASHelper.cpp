@@ -30,7 +30,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
 
 namespace {
-constexpr std::string_view NX_CANSAS_EXTENSION = ".h5";
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
@@ -253,15 +252,22 @@ public:
 } // namespace
 
 namespace Mantid::DataHandling::NXcanSAS {
+constexpr std::string_view NX_CANSAS_EXTENSION = ".h5";
 
-std::string prepareFilename(std::string &baseFilename, int index, bool isGroup) {
-  if (auto const &extPos = baseFilename.find(NX_CANSAS_EXTENSION); extPos != std::string::npos) {
-    baseFilename.resize(extPos);
+std::filesystem::path prepareFilename(const std::string &baseFilename, int index, bool isGroup) {
+  auto path = std::filesystem::path(baseFilename);
+  if (!isGroup) {
+    // return early if it doesn't need to add digits
+    return path.replace_extension(NX_CANSAS_EXTENSION);
   }
-  auto const addDigit = [&](int index) {
-    return isGroup ? (index < 10 ? "0" + std::to_string(index) : std::to_string(index)) : "";
-  };
-  return baseFilename + addDigit(index) + ".h5";
+
+  auto const addDigit = [&](int index) { return index < 10 ? "0" + std::to_string(index) : std::to_string(index); };
+  // remove extension if it has any
+  path.replace_extension("");
+  // add digit for groups
+  path += addDigit(index);
+  // add correct extension and return path
+  return path.replace_extension(NX_CANSAS_EXTENSION);
 }
 
 /**

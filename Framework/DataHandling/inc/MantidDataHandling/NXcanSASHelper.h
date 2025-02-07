@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <H5Cpp.h>
+#include <filesystem>
 
 namespace Mantid {
 namespace DataHandling {
@@ -18,7 +19,8 @@ namespace NXcanSAS {
 enum class WorkspaceDimensionality;
 
 std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
-std::string MANTID_DATAHANDLING_DLL prepareFilename(std::string &baseFilename, int index, bool isGroup = false);
+std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename, int index,
+                                                              bool isGroup = false);
 void MANTID_DATAHANDLING_DLL addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
                                           const std::vector<std::string> &detectorNames);
 void MANTID_DATAHANDLING_DLL addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
