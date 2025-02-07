@@ -120,6 +120,10 @@ template <typename ElementType> PyObject *cloneND(const ElementType *carray, con
  * @param dims :: The length of the arrays in each dimension
  * @return
  */
+// cppcheck-suppress constParameterPointer
+// Suppressed because one of the cloneND overloads calls
+// PyArray_NewFromDescrclasses inside NumpyFunctions::func_PyArray_NewFromDescr, which
+// requires the dim parameter to be non-const.
 template <> PyObject *cloneND(const std::string *carray, const int ndims, Py_intptr_t *dims) {
   boost::python::list pystrs;
   const std::string *iter = carray;
