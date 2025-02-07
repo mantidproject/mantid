@@ -13,6 +13,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::API::FileFinder;
@@ -174,7 +175,7 @@ public:
   }
 
   void testDirectoryPasses() {
-    std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
+    std::filesystem::path TestDir(ConfigService::Instance().getDirectoryOfExecutable() / "MyTestFolder");
     Poco::File dir(TestDir);
     dir.createDirectory();
 

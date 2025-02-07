@@ -149,17 +149,17 @@ public:
   /// Returns the username
   std::string getUsername();
   /// Returns the current directory
-  std::string getCurrentDir();
+  std::filesystem::path getCurrentDir();
   /// Returns the current directory
-  std::string getCurrentDir() const;
+  std::filesystem::path getCurrentDir() const;
   /// Returns the system's temp directory
-  std::string getTempDir();
+  std::filesystem::path getTempDir();
   /// Returns the system's appdata directory
-  std::string getAppDataDir();
+  std::filesystem::path getAppDataDir() const;
   // Return the executable path
-  std::string getDirectoryOfExecutable() const;
+  std::filesystem::path getDirectoryOfExecutable() const;
   // Return the full path to the executable
-  std::string getPathToExecutable() const;
+  std::filesystem::path getPathToExecutable() const;
   // Check if the path is on a network drive
   bool isNetworkDrive([[maybe_unused]] const std::string &path);
   //@}
@@ -168,14 +168,16 @@ public:
   const std::filesystem::path &getPropertiesDir() const;
   /// Returns a directory to use to write out Mantid information. Needs to be
   /// writable
-  std::string getUserPropertiesDir() const;
+  std::filesystem::path getUserPropertiesDir() const;
 
   /** @name Search paths handling */
   //@{
   /// Get the list of search paths
-  const std::vector<std::string> &getDataSearchDirs() const;
-  /// Set a list of search paths via a vector
+  const std::vector<std::filesystem::path> &getDataSearchDirs() const;
+  /// Set a list of search paths via a vector of strings
   void setDataSearchDirs(const std::vector<std::string> &searchDirs);
+  /// Set a list of search paths via a vector of paths
+  void setDataSearchDirs(const std::vector<std::filesystem::path> &searchDirs);
   /// Set a list of search paths via a string
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
@@ -254,7 +256,7 @@ private:
   /// Create the storage of the instrument directories
   void cacheInstrumentPaths();
   /// Returns true if the path is in the data search list
-  bool isInDataSearchList(const std::string &path) const;
+  bool isInDataSearchList(const std::filesystem::path &path) const;
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
@@ -266,6 +268,8 @@ private:
                             std::vector<std::filesystem::path> &directoryList);
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const;
+
+  std::vector<std::string> pathVectorAsStrings(const std::vector<std::filesystem::path> &paths) const;
 
   /// the POCO file config object
   Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_pConf;
@@ -284,7 +288,7 @@ private:
   /// The filename of the Mantid user properties file
   const std::string m_user_properties_file_name;
   /// Store a list of data search paths
-  std::vector<std::string> m_dataSearchDirs;
+  std::vector<std::filesystem::path> m_dataSearchDirs;
   /// Store a list of instrument directory paths
   std::vector<std::filesystem::path> m_instrumentDirs;
 
