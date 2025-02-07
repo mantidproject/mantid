@@ -53,5 +53,6 @@ New features
 Bugfixes
 ############
 - Corrected logic in the all-face centred reflection condition that would cause an occasional crash in :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>`.
+- :ref:`SaveINS<algm-SaveINS-v1>` now saves only the minimum required records to file.
 
 :ref:`Release 6.12.0 <v6.12.0>`
