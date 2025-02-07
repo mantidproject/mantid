@@ -127,7 +127,7 @@ private:
                                            const double &progressStart, const double &progressRange);
   API::MatrixWorkspace_sptr loadNonEventEntry(Mantid::NeXus::NXData &wksp_cls, Mantid::NeXus::NXDouble &xbins,
                                               const double &progressStart, const double &progressRange,
-                                              const Mantid::NeXus::NXEntry &mtd_entry, const int xlength,
+                                              const Mantid::NeXus::NXEntry &mtd_entry, const int64_t xlength,
                                               std::string &workspaceType);
 
   /// Read the data from the sample group
@@ -154,13 +154,13 @@ private:
   /// bins have already been cached
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data, Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea, Mantid::NeXus::NXDouble &xErrors,
-                 bool hasXErrors, int blocksize, int nchannels, int &hist, int &wsIndex,
+                 bool hasXErrors, int64_t blocksize, int64_t nchannels, int &hist, int &wsIndex,
                  const API::MatrixWorkspace_sptr &local_workspace);
   /// Load a block of data into the workspace
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data, Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea, Mantid::NeXus::NXDouble &xErrors,
-                 bool hasXErrors, Mantid::NeXus::NXDouble &xbins, int blocksize, int nchannels, int &hist, int &wsIndex,
-                 const API::MatrixWorkspace_sptr &local_workspace);
+                 bool hasXErrors, Mantid::NeXus::NXDouble &xbins, int64_t blocksize, int64_t nchannels, int &hist,
+                 int &wsIndex, const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
   void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const Mantid::NeXus::NXData &data);

@@ -359,8 +359,8 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension.
  * @throws out_of_range error if requested on an object of rank 0
  */
-int NXDataSet::dim0() const {
-  if (m_info.rank == 0UL) {
+int64_t NXDataSet::dim0() const {
+  if (m_info.rank == 0) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
   return static_cast<int>(m_info.dims[0]);
@@ -371,8 +371,8 @@ int NXDataSet::dim0() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 2
  */
-int NXDataSet::dim1() const {
-  if (m_info.rank < 2UL) {
+int64_t NXDataSet::dim1() const {
+  if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
   return static_cast<int>(m_info.dims[1]);
@@ -383,7 +383,7 @@ int NXDataSet::dim1() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 3
  */
-int NXDataSet::dim2() const {
+int64_t NXDataSet::dim2() const {
   if (m_info.rank < 3UL) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
@@ -395,7 +395,7 @@ int NXDataSet::dim2() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 4
  */
-int NXDataSet::dim3() const {
+int64_t NXDataSet::dim3() const {
   if (m_info.rank < 4UL) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
