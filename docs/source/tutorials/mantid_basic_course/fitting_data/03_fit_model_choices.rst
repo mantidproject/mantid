@@ -35,8 +35,7 @@ Fitting is not limited to peaks. You can
 select any other function from our list via right-click "Add other
 function".
 
-Load `EMU00020884` and plot spectrum number 6. Add the other function : `ExpDecay`
-Run the Fit and inspect the results. You may need to edit the fitting range (StartX and EndX) to get a good fit!
+Load `EMU00020884` and plot spectrum number 6. Adjust the "EndX" value to 9, and use the Zoom tool to focus on the fitting area. Right-click on the graph and select "Add other function" Type `ExpDecay` and press "OK". Then, edit the parameters of "f0-ExpDecay" by setting Height to 40000 and Lifetime to 1.5. Finally, click "Fit" You should see an exponential decay fit similar to the image below.
 
 .. figure:: /images/AddOtherFunctionOptionEMUDecayOnly.png
    :alt: AddOtherFunctionOption Fit for Only ExpDecay
