@@ -3079,7 +3079,7 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssem
   if (pNL->length() == 0) {
     return pType->getAttribute("name");
   } else if (pNL->length() == 1) {
-    auto const *pElem = static_cast<Element *>(pNL->item(0));
+    const auto *pElem = static_cast<Element *>(pNL->item(0));
     return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
   } else {
     throw Exception::InstrumentDefinitionError(
