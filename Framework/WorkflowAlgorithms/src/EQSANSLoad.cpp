@@ -125,7 +125,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   if (Poco::File(sns_folder).exists())
     Kernel::ConfigService::Instance().appendDataSearchDir(sns_folder);
 
-  const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+  const auto &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
 
   int max_run_number = 0;
   std::string config_file;
