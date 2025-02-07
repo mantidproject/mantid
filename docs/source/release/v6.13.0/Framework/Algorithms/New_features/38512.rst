@@ -1,0 +1,1 @@
+- New algorithm :ref:`algm-DebyeWallerFactorCorrectionMD` to scale the MDEvents by the inverse of Debye-Waller form factor.
