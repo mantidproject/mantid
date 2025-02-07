@@ -2321,7 +2321,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       unsigned long numberPoint = pNLpoint->length();
 
       for (unsigned long j = 0; j < numberPoint; j++) {
-        auto const *pPoint = static_cast<Element *>(pNLpoint->item(j));
+        const auto *pPoint = static_cast<Element *>(pNLpoint->item(j));
         double x = attrToDouble(pPoint, "x");
         double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
