@@ -284,13 +284,15 @@ Output:
   Counts
   Elephants
 
+.. _MatrixWorkspace_Plotting:
+
 Plotting
 ^^^^^^^^
-.. _MatrixWorkspace_Plotting:
 
 You can specify the type of plot to be used when plotting a Matrix Workspace. The following plot types are available:
 ``plot``, ``marker``, ``errorbar_x``, ``errorbar_y``, ``errorbar_xy``, with ``plot`` as the default.
-Changing the plot type will affect the way the data is displayed and can be changed in the following way:
+Changing the plot type will affect the way the data is displayed. An example of the different plot types can be seen in :ref:`mantid.plots`.
+Below is a simple example changing the plot type, a full example is available in the :ref:`plotting gallery<MarkerWS_Example>` page.
 
 .. testsetup:: MatrixWorkspacePlotType
 
