@@ -51,7 +51,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mean squared displacement", 0.1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MeanSquaredDisplacement", 0.1));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     Mantid::API::IMDEventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -100,7 +100,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mean squared displacement", "0.15"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MeanSquaredDisplacement", "0.15"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     Mantid::API::IMDEventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");

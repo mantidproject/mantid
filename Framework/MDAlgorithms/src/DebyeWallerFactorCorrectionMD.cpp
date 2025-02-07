@@ -41,7 +41,7 @@ void DebyeWallerFactorCorrectionMD::init() {
   QTransform::init();
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>("Mean squared displacement", EMPTY_DBL(),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MeanSquaredDisplacement", EMPTY_DBL(),
                                                               std::move(mustBePositive), Direction::Input),
                   "Mandatory: Mean squared displacement <u^2>. Often obtained from Rietveld refinement.");
 }
@@ -53,7 +53,7 @@ void DebyeWallerFactorCorrectionMD::exec() { QTransform::exec(); }
 
 // implement correction method
 double DebyeWallerFactorCorrectionMD::correction(const double q2) const {
-  const double u2 = getProperty("Mean squared displacement");
+  const double u2 = getProperty("MeanSquaredDisplacement");
   const double inverse_DWF = exp(u2 * q2 / 3.0);
   return inverse_DWF;
 }
