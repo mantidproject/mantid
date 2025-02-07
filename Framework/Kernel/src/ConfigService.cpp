@@ -93,18 +93,18 @@ const std::string PATH_DELIMITERS = ";,";
  * @param path The path to split.
  * @returns vector containing the split path.
  */
-std::vector<std::string> splitPath(const std::string &path) {
-  std::vector<std::string> splitted;
+std::vector<std::filesystem::path> splitPath(const std::string &path) {
+  std::vector<std::filesystem::path> splitted;
 
   if (path.find_first_of(PATH_DELIMITERS) == std::string::npos) { // don't bother tokenizing
-    splitted.emplace_back(path);
+    splitted.emplace_back(std::filesystem::path(path));
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM + Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
     Mantid::Kernel::StringTokenizer tokenizer(path, PATH_DELIMITERS, options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
-        splitted.emplace_back(*itr);
+        splitted.emplace_back(std::filesystem::path(*itr));
       }
     }
   }
@@ -343,7 +343,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename, const bool appen
 
     // check if we have failed to open the file
     if ((!good) || (temp.empty())) {
-      if (filename == getUserPropertiesDir() + m_user_properties_file_name) {
+      if (filename == (getUserPropertiesDir() / m_user_properties_file_name).string()) {
         // write out a fresh file
         createUserPropertiesFile();
       } else {
@@ -495,15 +495,9 @@ void ConfigServiceImpl::cacheDataSearchPaths() {
  *  @param path :: the absolute path name to search for
  *  @return true if the path was found
  */
-bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
-  // the path produced by poco will have \ on windows, but the searchdirs will
-  // always have /
-  std::string correctedPath = path;
-  replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
-
+bool ConfigServiceImpl::isInDataSearchList(const std::filesystem::path &path) const {
   using std::placeholders::_1;
-  auto it = std::find_if(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(),
-                         std::bind(std::equal_to<std::string>(), _1, correctedPath));
+  auto it = std::find(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(), path);
   return (it != m_dataSearchDirs.end());
 }
 
@@ -513,7 +507,7 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
  */
 void ConfigServiceImpl::createUserPropertiesFile() const {
   try {
-    std::fstream filestr((getUserPropertiesDir() + m_user_properties_file_name).c_str(), std::fstream::out);
+    std::fstream filestr((getUserPropertiesDir() / m_user_properties_file_name).string().c_str(), std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
                "installation.\n";
@@ -991,7 +985,9 @@ std::string ConfigServiceImpl::getLocalFilename() const {
  * Return the full filename of the user properties file
  * @returns A string containing the full path to the user file
  */
-std::string ConfigServiceImpl::getUserFilename() const { return getUserPropertiesDir() + m_user_properties_file_name; }
+std::string ConfigServiceImpl::getUserFilename() const {
+  return (getUserPropertiesDir() / m_user_properties_file_name).string();
+}
 
 /** Searches for the string within the environment variables and returns the
  *  value as a string.
@@ -1206,26 +1202,32 @@ std::string ConfigServiceImpl::getUsername() {
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() { return m_pSysConfig->getString("system.currentDir"); }
+std::filesystem::path ConfigServiceImpl::getCurrentDir() {
+  return std::filesystem::path(m_pSysConfig->getString("system.currentDir"));
+}
 
 /** Gets the absolute path of the current directory containing the dll. Const
  *version.
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() const { return m_pSysConfig->getString("system.currentDir"); }
+std::filesystem::path ConfigServiceImpl::getCurrentDir() const {
+  return std::filesystem::path(m_pSysConfig->getString("system.currentDir"));
+}
 
 /** Gets the absolute path of the temp directory
  *
  * @returns The absolute path of the temp directory
  */
-std::string ConfigServiceImpl::getTempDir() { return m_pSysConfig->getString("system.tempDir"); }
+std::filesystem::path ConfigServiceImpl::getTempDir() {
+  return std::filesystem::path(m_pSysConfig->getString("system.tempDir"));
+}
 
 /** Gets the absolute path of the appdata directory
  *
  * @returns The absolute path of the appdata directory
  */
-std::string ConfigServiceImpl::getAppDataDir() {
+std::filesystem::path ConfigServiceImpl::getAppDataDir() const {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
   const std::string vendorName = "mantidproject";
@@ -1235,11 +1237,11 @@ std::string ConfigServiceImpl::getAppDataDir() {
   std::filesystem::path path(appdata);
   path /= vendorName;
   path /= applicationName;
-  return path.string();
+  return path;
 #else // linux and mac
   std::filesystem::path path(std::getenv("HOME"));
   path /= "." + applicationName;
-  return path.string();
+  return path;
 #endif
 }
 
@@ -1248,8 +1250,8 @@ std::string ConfigServiceImpl::getAppDataDir() {
  * @returns A string containing the path of the directory
  * containing the executable, including a trailing slash
  */
-std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
-  return std::filesystem::path(getPathToExecutable()).parent_path().string();
+std::filesystem::path ConfigServiceImpl::getDirectoryOfExecutable() const {
+  return getPathToExecutable().parent_path();
 }
 
 /**
@@ -1257,7 +1259,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
  * in)
  * @returns A string containing the full path the executable
  */
-std::string ConfigServiceImpl::getPathToExecutable() const {
+std::filesystem::path ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
   char pBuf[LEN];
@@ -1281,7 +1283,7 @@ std::string ConfigServiceImpl::getPathToExecutable() const {
     pBuf[bytes] = '\0';
     execpath = std::string(pBuf);
   }
-  return execpath;
+  return std::filesystem::path(execpath);
 }
 
 /**
@@ -1379,15 +1381,15 @@ const std::filesystem::path &ConfigServiceImpl::getPropertiesDir() const { retur
  * so that filenames can more easily be concatenated with this
  * @return the directory that Mantid should use for writing files
  */
-std::string ConfigServiceImpl::getUserPropertiesDir() const {
+std::filesystem::path ConfigServiceImpl::getUserPropertiesDir() const {
 #ifdef _WIN32
-  return m_strBaseDir.string();
+  return m_strBaseDir;
 #else
   std::filesystem::path datadir(m_pSysConfig->getString("system.homeDir"));
   datadir.append(".mantid");
   // Create the directory if it doesn't already exist
   std::filesystem::create_directories(datadir);
-  return datadir.string() + "/";
+  return datadir;
 #endif
 }
 
@@ -1395,15 +1397,23 @@ std::string ConfigServiceImpl::getUserPropertiesDir() const {
  * Return the list of search paths
  * @returns A vector of strings containing the defined search directories
  */
-const std::vector<std::string> &ConfigServiceImpl::getDataSearchDirs() const { return m_dataSearchDirs; }
+const std::vector<std::filesystem::path> &ConfigServiceImpl::getDataSearchDirs() const { return m_dataSearchDirs; }
 
 /**
- * Set a list of search paths via a vector
+ * Set a list of search paths via a vector of strings
  * @param searchDirs :: A list of search directories
  */
 void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::string> &searchDirs) {
   std::string searchPaths = boost::join(searchDirs, ";");
   setDataSearchDirs(searchPaths);
+}
+
+/**
+ * Set a list of search paths via a vector of paths
+ * @param searchDirs :: A list of search directories
+ */
+void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::filesystem::path> &searchDirs) {
+  setDataSearchDirs(pathVectorAsStrings(searchDirs));
 }
 
 /**
@@ -1443,7 +1453,7 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
       newDirPath /= subDirPath;
       // only add new path if it isn't already there
       if (std::find(newDataDirs.begin(), newDataDirs.end(), newDirPath.string()) == newDataDirs.end())
-        newDataDirs.emplace_back(newDirPath.string());
+        newDataDirs.emplace_back(newDirPath);
     } catch (std::filesystem::filesystem_error &) {
       continue;
     }
@@ -1470,11 +1480,19 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   } catch (std::filesystem::filesystem_error &) {
     return;
   }
-  if (!isInDataSearchList(dirPath.string())) {
-    auto newSearchString = Strings::join(std::begin(m_dataSearchDirs), std::end(m_dataSearchDirs), ";");
+  if (!isInDataSearchList(dirPath)) {
+    auto dataSearchDirectoryStrings = pathVectorAsStrings(m_dataSearchDirs);
+    auto newSearchString =
+        Strings::join(std::begin(dataSearchDirectoryStrings), std::end(dataSearchDirectoryStrings), ";");
     newSearchString.append(";" + path);
     setString("datasearch.directories", newSearchString);
   }
+}
+
+std::vector<std::string> ConfigServiceImpl::pathVectorAsStrings(const std::vector<std::filesystem::path> &paths) const {
+  std::vector<std::string> directoriesAsStrings(paths.size());
+  std::transform(paths.cbegin(), paths.cend(), directoriesAsStrings.begin(), [](const auto &p) { return p.string(); });
+  return directoriesAsStrings;
 }
 
 /**

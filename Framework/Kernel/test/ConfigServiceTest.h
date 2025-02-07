@@ -218,13 +218,15 @@ public:
     TS_ASSERT_LESS_THAN(0, username.length());
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); // check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersionReadable().length());
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(
+        0, ConfigService::Instance().getCurrentDir().string().length()); // check that the string is not empty
     //        TS_ASSERT_LESS_THAN(0,
     //        ConfigService::Instance().getHomeDir().length()); //check that the
     //        string is not empty
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0,
+                        ConfigService::Instance().getTempDir().string().length()); // check that the string is not empty
 
-    std::string appdataDir = ConfigService::Instance().getAppDataDir();
+    std::string appdataDir = ConfigService::Instance().getAppDataDir().string();
     TS_ASSERT_LESS_THAN(0, appdataDir.length());
 #ifdef _WIN32
     std::string::size_type index = appdataDir.find("\\AppData\\Roaming\\mantidproject\\mantid");
@@ -336,7 +338,8 @@ public:
   }
 
   void testSaveConfigCleanFile() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     const std::string filename("user.settings");
@@ -384,7 +387,8 @@ public:
     writer << "mantid.legs = " << value << "\n";
     writer.close();
 
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
     ConfigService::Instance().setString("mantid.legs", value);
     ConfigService::Instance().updateConfig(propfile, false, false);
@@ -407,7 +411,8 @@ public:
     } catch (Poco::Exception &) {
     }
 
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     settings.updateConfig(propfile);
     settings.setString("mantid.legs", "15");
 
@@ -592,7 +597,8 @@ public:
   }
 
   void testGetKeysWithValidInput() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all subkeys with the given root key
@@ -605,7 +611,8 @@ public:
   }
 
   void testGetKeysWithZeroSubKeys() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("mantid.legs");
@@ -615,7 +622,8 @@ public:
   }
 
   void testGetKeysWithEmptyPrefix() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all *root* keys, i.e. unique keys left of the first period
@@ -634,7 +642,8 @@ public:
   }
 
   void testRemovingProperty() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     std::string rootName = "mantid.legs";

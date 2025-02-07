@@ -773,7 +773,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // Remove wild cards.
   extensions.erase(std::remove_if(extensions.begin(), extensions.end(), containsWildCard), extensions.end());
 
-  const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+  const auto &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
 
   // Before we try any globbing, make sure we exhaust all reasonable attempts at
   // constructing the possible filename.
@@ -785,7 +785,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     for (const auto &filename : filenames) {
       for (const auto &searchPath : searchPaths) {
         try {
-          const Poco::Path filePath(searchPath, filename + extension);
+          const Poco::Path filePath(searchPath.string(), filename + extension);
           const Poco::File file(filePath);
           if (file.exists())
             return API::Result<std::string>(filePath.toString());

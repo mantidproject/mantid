@@ -13,7 +13,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/AccumulateMD.h"
 #include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::MDAlgorithms::AccumulateMD;
@@ -62,11 +61,11 @@ public:
     std::vector<double> efix(1, 0.0);
 
     // Add absolute path to a file which doesn't exist
-    Poco::Path filepath =
-        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(), "ACCUMULATEMDTEST_NONEXISTENTFILE");
+    std::filesystem::path filepath =
+        Mantid::Kernel::ConfigService::Instance().getTempDir() / "ACCUMULATEMDTEST_NONEXISTENTFILE";
 
     // Create vector of data_sources to filter
-    std::vector<std::string> data_sources{filepath.toString()};
+    std::vector<std::string> data_sources{filepath.string()};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 
@@ -123,12 +122,12 @@ public:
     std::vector<double> efix(1, 0.0);
 
     // Create a temporary file to find
-    Poco::Path filepath =
-        Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(), "ACCUMULATEMDTEST_EXISTENTFILE");
+    std::filesystem::path filepath =
+        Mantid::Kernel::ConfigService::Instance().getTempDir() / "ACCUMULATEMDTEST_EXISTENTFILE";
     Poco::File existent_file(filepath);
     existent_file.createFile();
     // Create vector of data_sources to filter
-    std::vector<std::string> data_sources{filepath.toString()};
+    std::vector<std::string> data_sources{filepath.string()};
 
     Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs, efix);
 

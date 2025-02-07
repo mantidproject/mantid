@@ -105,7 +105,7 @@ public:
     ConfigService::Instance().updateFacilities(m_facFile.path());
     ConfigService::Instance().setString("datacachesearch.directory", "");
     // Update entire config to set search data directories
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "Mantid.properties";
+    const std::filesystem::path propfile = ConfigService::Instance().getDirectoryOfExecutable() / "Mantid.properties";
     ConfigService::Instance().updateConfig(propfile);
   }
 
