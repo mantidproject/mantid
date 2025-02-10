@@ -80,7 +80,7 @@ typedef struct __NexusFile5 {
   char name_ref[1024];
   char name_tmp[1024];
   char iAccess[2];
-} NexusFile5, *pNexusFile5;
+} LgcyNexusFile5, *pLgcyNexusFile5;
 
 /* forward declaration of NX5closegroup in order to get rid of a nasty warning */
 
@@ -88,18 +88,18 @@ NXstatus NX5closegroup(NXhandle fid);
 
 /*-------------------------------------------------------------------*/
 
-static pNexusFile5 NXI5assert(NXhandle fid) {
-  pNexusFile5 pRes;
+static pLgcyNexusFile5 NXI5assert(NXhandle fid) {
+  pLgcyNexusFile5 pRes;
 
   assert(fid != NULL);
-  pRes = static_cast<pNexusFile5>(fid);
+  pRes = static_cast<pLgcyNexusFile5>(fid);
   assert(pRes->iNXID == NX5SIGNATURE);
   return pRes;
 }
 
 /*--------------------------------------------------------------------*/
 
-static void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
+static void NXI5KillDir(pLgcyNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 
 static herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
@@ -185,10 +185,10 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 
 /*--------------------------------------------------------------------*/
 
-static void NXI5KillAttDir(pNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
+static void NXI5KillAttDir(pLgcyNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
 
 /*---------------------------------------------------------------------*/
-static void buildCurrentPath(pNexusFile5 self, char *pathBuffer, // cppcheck-suppress constParameterPointer
+static void buildCurrentPath(pLgcyNexusFile5 self, char *pathBuffer, // cppcheck-suppress constParameterPointer
                              int pathBufferLen) {
 
   memset(pathBuffer, 0, static_cast<size_t>(pathBufferLen));
@@ -213,15 +213,15 @@ static void buildCurrentPath(pNexusFile5 self, char *pathBuffer, // cppcheck-sup
    --------------------------------------------------------------------- */
 
 NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
-  pNexusFile5 pNew = NULL, pOrig = NULL;
+  pLgcyNexusFile5 pNew = NULL, pOrig = NULL;
   *pNewHandle = NULL;
-  pOrig = static_cast<pNexusFile5>(pOrigHandle);
-  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
+  pOrig = static_cast<pLgcyNexusFile5>(pOrigHandle);
+  pNew = static_cast<pLgcyNexusFile5>(malloc(sizeof(LgcyNexusFile5)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
     return NXstatus::NX_ERROR;
   }
-  memset(pNew, 0, sizeof(NexusFile5));
+  memset(pNew, 0, sizeof(LgcyNexusFile5));
   pNew->iFID = H5Freopen(pOrig->iFID);
   if (pNew->iFID <= 0) {
     NXReportError("cannot clone file");
@@ -239,12 +239,12 @@ NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
  * private functions used in NX5open
  */
 
-pNexusFile5 create_file_struct() {
-  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
+pLgcyNexusFile5 create_file_struct() {
+  pLgcyNexusFile5 pNew = static_cast<pLgcyNexusFile5>(malloc(sizeof(LgcyNexusFile5)));
   if (!pNew) {
     NXReportError("ERROR: not enough memory to create file structure");
   } else {
-    memset(pNew, 0, sizeof(NexusFile5));
+    memset(pNew, 0, sizeof(LgcyNexusFile5));
   }
 
   return pNew;
@@ -339,7 +339,7 @@ herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
 
 NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   hid_t root_id;
-  pNexusFile5 pNew = NULL;
+  pLgcyNexusFile5 pNew = NULL;
   char pBuffer[512];
   char *time_buffer = NULL;
   char version_nr[10];
@@ -473,7 +473,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 /* ------------------------------------------------------------------------- */
 
 NXstatus NX5close(NXhandle *fid) {
-  pNexusFile5 pFile = NULL;
+  pLgcyNexusFile5 pFile = NULL;
   herr_t iRet;
 
   pFile = NXI5assert(*fid);
@@ -519,7 +519,7 @@ NXstatus NX5close(NXhandle *fid) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t iVID;
   hid_t attr1, aid1, aid2;
   std::string pBuffer;
@@ -574,7 +574,7 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
 
 NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t attr1, atype, iVID;
   herr_t iRet;
   char pBuffer[NX_MAXPATHLEN + 12]; // no idea what the 12 is about
@@ -648,7 +648,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5closegroup(NXhandle fid) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
   /* first catch the trivial case: we are at root and cannot get
@@ -727,7 +727,7 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
                            int compress_type, int64_t const chunk_size[]) {
   hid_t datatype1, dataspace, iNew;
   hid_t type, cparms = -1;
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   char pBuffer[256];
   size_t byte_zahl = 0;
   hsize_t chunkdims[H5S_MAX_RANK];
@@ -917,7 +917,7 @@ NXstatus NX5compress(NXhandle fid, int compress_type) {
 /* --------------------------------------------------------------------- */
 
 NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
   /* clear pending attribute directories first */
@@ -956,7 +956,7 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
 /* ----------------------------------------------------------------- */
 
 NXstatus NX5closedata(NXhandle fid) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   herr_t iRet;
 
   pFile = NXI5assert(fid);
@@ -974,7 +974,7 @@ NXstatus NX5closedata(NXhandle fid) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5putdata(NXhandle fid, const void *data) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   herr_t iRet;
   int64_t myStart[H5S_MAX_RANK];
   int64_t mySize[H5S_MAX_RANK];
@@ -1017,7 +1017,7 @@ NXstatus NX5putdata(NXhandle fid, const void *data) {
 }
 
 /*------------------------------------------------------------------*/
-static hid_t getAttVID(pNexusFile5 pFile) {
+static hid_t getAttVID(pLgcyNexusFile5 pFile) {
   hid_t vid;
   if (pFile->iCurrentG == 0 && pFile->iCurrentD == 0) {
     /* global attribute */
@@ -1033,7 +1033,7 @@ static hid_t getAttVID(pNexusFile5 pFile) {
 }
 
 /*---------------------------------------------------------------*/
-static void killAttVID(const pNexusFile5 pFile, hid_t vid) {
+static void killAttVID(const pLgcyNexusFile5 pFile, hid_t vid) {
   if (pFile->iCurrentG == 0 && pFile->iCurrentD == 0) {
     H5Gclose(vid);
   }
@@ -1042,7 +1042,7 @@ static void killAttVID(const pNexusFile5 pFile, hid_t vid) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t attr1, aid1, aid2;
   hid_t type;
   herr_t iRet = 0;
@@ -1093,7 +1093,7 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5putslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int iRet, rank;
   hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
@@ -1190,7 +1190,7 @@ NXstatus NX5putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int datalen;
   NXnumtype type = NXnumtype::CHAR;
 
