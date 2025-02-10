@@ -4,13 +4,12 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-            name="SNAP" valid-from   ="2025-01-31 10:00:00"
-                        valid-to     ="2100-01-31 23:59:59"
+            name="SNAP" valid-from   ="2018-05-01 00:00:01"
+                        valid-to     ="2025-01-31 09:59:59"
 		        last-modified="2025-02-07 16:26:00">
   <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
   <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
   <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
-  <!-- Modified to include 3rd monitor 202050207-->
   <!--DEFAULTS-->
   <defaults>
     <length unit="metre"/>
@@ -36,10 +35,21 @@
   <type name="sample-position" is="SamplePos"/>
 
   <!--MONITORS-->
+  <idlist idname="Downstream_monitor">
+    <id val="-2"/>
+  </idlist>
+  <component type="Downstream_monitor" idlist="Downstream_monitor">
+    <properties />
+    <location  />
+  </component>
+  <type is="monitor" name="Downstream_monitor">
+   <component type="monitor">
+    <location x="0.0" y="0.0" z="0.3" name="monitor2" />
+   </component>
+  </type>
+
   <idlist idname="monitors">
     <id val="-1"/>
-    <id val="-2"/>
-    <id val="-3"/>
   </idlist>
   <component type="monitors" idlist="monitors">
     <location/>
@@ -48,12 +58,6 @@
     <component type="monitor">
       <location x="0.0" y="0.0" z="-3.0" name="monitor1"/>
     </component>
-   <component type="monitor">
-    <location x="0.0" y="0.0" z="1.95" name="monitor2" />
-   </component>
-   <component type="monitor">
-    <location x="0.0" y="0.0" z="1.9" name="monitor3" />
-   </component>
   </type>
 
   <!--DETECTORS-->
