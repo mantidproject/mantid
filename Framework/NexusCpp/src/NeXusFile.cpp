@@ -752,7 +752,7 @@ pair<string, string> File::getNextEntry() {
     string str_class(class_name);
     return pair<string, string>(str_name, str_class);
   } else if (status == NXstatus::NX_EOD) {
-    return pair<string, string>(NULL_STR, NULL_STR); // TODO return the correct thing
+    return EOD_ENTRY;
   } else {
     throw Exception("NXgetnextentry failed", status);
   }
@@ -770,7 +770,7 @@ void File::getEntries(Entries &result) {
   Entry temp;
   while (true) {
     temp = this->getNextEntry();
-    if (temp.first == NULL_STR && temp.second == NULL_STR) { // TODO this needs to be changed when getNextEntry is fixed
+    if (temp == EOD_ENTRY) {
       break;
     } else {
       result.insert(temp);

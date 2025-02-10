@@ -133,19 +133,6 @@ void NXObject::getAttributes() {
 
 NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(parent.m_fileID, &parent, name) { clear(); }
 
-NXClassInfo NXClass::getNextEntry() {
-  NXClassInfo res;
-  try {
-    auto entry = m_fileID->getNextEntry();
-    res.stat = NXstatus::NX_OK;
-    res.nxname = entry.first;
-    res.nxclass = entry.second;
-  } catch (::NeXus::Exception const &e) {
-    res.stat = e.status();
-  }
-  return res;
-}
-
 void NXClass::readAllInfo() {
   clear();
   for (auto const &entry : m_fileID->getEntries()) {
