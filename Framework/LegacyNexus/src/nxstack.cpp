@@ -34,41 +34,41 @@
 ---------------------------------------------------------------------*/
 
 typedef struct {
-  pHDF4Function pDriver;
+  pLgcyFunction pDriver;
   NXlink closeID;
   char filename[1024];
-} fileHDF4StackEntry;
+} fileLgcyStackEntry;
 
-typedef struct __fileHDF4Stack {
+typedef struct __fileLgcyStack {
   int fileStackPointer;
-  fileHDF4StackEntry fileStack[MAXEXTERNALDEPTH];
+  fileLgcyStackEntry fileStack[MAXEXTERNALDEPTH];
   int pathPointer;
   char pathStack[NXMAXSTACK][NX_MAXNAMELEN];
-} fileHDF4Stack;
+} fileLgcyStack;
 
 /*---------------------------------------------------------------------*/
-pFileHDF4Stack makeFileStack() {
-  pFileHDF4Stack pNew = NULL;
+pFileLgcyStack makeFileStack() {
+  pFileLgcyStack pNew = NULL;
 
-  pNew = static_cast<pFileHDF4Stack>(malloc(sizeof(fileHDF4Stack)));
+  pNew = static_cast<pFileLgcyStack>(malloc(sizeof(fileLgcyStack)));
   if (pNew == NULL) {
     return NULL;
   }
-  memset(pNew, 0, sizeof(fileHDF4Stack));
+  memset(pNew, 0, sizeof(fileLgcyStack));
   pNew->fileStackPointer = -1;
   pNew->pathPointer = -1;
   return pNew;
 }
 /*---------------------------------------------------------------------*/
-void killFileStack(pFileHDF4Stack self) {
+void killFileStack(pFileLgcyStack self) {
   if (self != NULL) {
     free(self);
   }
 }
 /*---------------------------------------------------------------------*/
-int getFileStackSize() { return sizeof(fileHDF4Stack); }
+int getFileStackSize() { return sizeof(fileLgcyStack); }
 /*----------------------------------------------------------------------*/
-void pushFileStack(pFileHDF4Stack self, pHDF4Function pDriv, const char *file) {
+void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *file) {
   size_t length;
 
   self->fileStackPointer++;
@@ -81,40 +81,40 @@ void pushFileStack(pFileHDF4Stack self, pHDF4Function pDriv, const char *file) {
   memcpy(&self->fileStack[self->fileStackPointer].filename, file, length);
 }
 /*----------------------------------------------------------------------*/
-void popFileStack(pFileHDF4Stack self) {
+void popFileStack(pFileLgcyStack self) {
   self->fileStackPointer--;
   if (self->fileStackPointer < -1) {
     self->fileStackPointer = -1;
   }
 }
 /*----------------------------------------------------------------------*/
-pHDF4Function peekFileOnStack(pFileHDF4Stack self) { return self->fileStack[self->fileStackPointer].pDriver; }
+pLgcyFunction peekFileOnStack(pFileLgcyStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
 /*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileHDF4Stack self) { return self->fileStack[self->fileStackPointer].filename; }
+char *peekFilenameOnStack(pFileLgcyStack self) { return self->fileStack[self->fileStackPointer].filename; }
 /*----------------------------------------------------------------------*/
-void peekIDOnStack(pFileHDF4Stack self, NXlink *id) {
+void peekIDOnStack(pFileLgcyStack self, NXlink *id) {
   memcpy(id, &self->fileStack[self->fileStackPointer].closeID, sizeof(NXlink));
 }
 /*---------------------------------------------------------------------*/
-void setCloseID(pFileHDF4Stack self, const NXlink &id) {
+void setCloseID(pFileLgcyStack self, const NXlink &id) {
   memcpy(&self->fileStack[self->fileStackPointer].closeID, &id, sizeof(NXlink));
 }
 /*----------------------------------------------------------------------*/
-int fileStackDepth(pFileHDF4Stack self) { return self->fileStackPointer; }
+int fileStackDepth(pFileLgcyStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
-void pushPath(pFileHDF4Stack self, const char *name) {
+void pushPath(pFileLgcyStack self, const char *name) {
   self->pathPointer++;
   strncpy(self->pathStack[self->pathPointer], name, NX_MAXNAMELEN - 1);
 }
 /*-----------------------------------------------------------------------*/
-void popPath(pFileHDF4Stack self) {
+void popPath(pFileLgcyStack self) {
   self->pathPointer--;
   if (self->pathPointer < -1) {
     self->pathPointer = -1;
   }
 }
 /*-----------------------------------------------------------------------*/
-int buildPath(pFileHDF4Stack self, char *path, int pathlen) {
+int buildPath(pFileLgcyStack self, char *path, int pathlen) {
   int i;
   size_t totalPathLength;
   char *totalPath;
