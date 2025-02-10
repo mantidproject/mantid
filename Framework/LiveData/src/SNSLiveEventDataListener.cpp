@@ -179,22 +179,21 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// before continuing the current 'live' data.  Use 0 to indicate no
 /// historical data.
 void SNSLiveEventDataListener::start(const Types::Core::DateAndTime startTime) {
-  // Save the startTime and kick off the background thread
-  // (Can't really do anything else until we send the hello packet and the SMS
-  // sends us back the various metadata packets
+  // Save the startTime and kick off the background thread (Can't really do anything else until we send the hello packet
+  // and the SMS sends us back the various metadata packets)
   m_startTime = startTime;
 
   if (m_startTime.totalNanoseconds() == 1000000000) {
     // 1 billion nanoseconds - ie: 1 second past the EPOCH
-    // Start live listener sends us this when it wants to start processing
-    // at the start of the previous run (and it doesn't know when the previous
-    // run started).  This value for a start time will cause the SMS to replay
-    // all of its historical data and it will be up to us to filter out
-    // everything before the start of the previous run.
-    // See the description of the 'Client Hello' packet in the SNS DAS design
-    // doc for more details
+    // Start live listener sends us this when it wants to start processing at the start of the previous run (and it
+    // doesn't know when the previous run started).  This value for a start time will cause the SMS to replay all of its
+    // historical data and it will be up to us to filter out everything before the start of the previous run. See the
+    // description of the 'Client Hello' packet in the SNS DAS design doc for more details
     m_filterUntilRunStart = true;
   }
+  // make sure all monitors are considered ok
+  m_badMonitors.clear();
+
   m_thread.start(*this);
 }
 
@@ -235,7 +234,7 @@ void SNSLiveEventDataListener::run() {
 
     while (!m_stopThread) // loop until the foreground thread tells us to stop
     {
-
+      // cppcheck-suppress knownConditionTrueFalse
       while (m_pauseNetRead && !m_stopThread) {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
@@ -243,6 +242,7 @@ void SNSLiveEventDataListener::run() {
         Poco::Thread::sleep(100); // 100 milliseconds
       }
 
+      // cppcheck-suppress knownConditionTrueFalse
       if (m_stopThread) {
         // it's possible that a stop request came in while we were sleeping...
         break;
@@ -441,24 +441,23 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
 
 /// Parse a beam monitor event packet
 
-/// Overrides the default function defined in ADARA::Parser and processes
-/// data from ADARA::BeamMonitorPkt packets.  Parsed events are counted and
-/// the counts are accumulated in the temporary workspace until the forground
-/// thread retrieves them.
-/// @see extractData()
-/// @param pkt The packet to be parsed
-/// @return Returns false if there were no problems.  Returns true if there
-/// was an error and packet parsing should be interrupted
+/** Overrides the default function defined in ADARA::Parser and processes data from ADARA::BeamMonitorPkt packets.
+ * Parsed events are counted and the counts are accumulated in the temporary workspace until the forground thread
+ * retrieves them.
+ *
+ * @see extractData()
+ * @param pkt The packet to be parsed
+ * @return Returns false if there were no problems.  Returns true if there was an error and packet parsing should be
+ * interrupted
+ */
 bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
-  // Check to see if we should process this packet (depending on what
-  // the user selected for start up options, the SMS might be replaying
-  // historical data that we don't care about).
+  // Check to see if we should process this packet (depending on what the user selected for start up options, the SMS
+  // might be replaying historical data that we don't care about).
   if (ignorePacket(pkt)) {
     return false;
   }
 
-  // We'll likely be modifying m_eventBuffer (specifically,
-  // m_eventBuffer->m_monitorWorkspace), so lock the mutex
+  // We'll likely be modifying m_eventBuffer (specifically, m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (!m_eventBuffer->monitorWorkspace())
@@ -468,21 +467,18 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   const auto pktTime = timeFromPacket(pkt);
 
   while (pkt.nextSection()) {
-    unsigned monitorID = pkt.getSectionMonitorID();
+    const detid_t monitorID = static_cast<detid_t>(pkt.getSectionMonitorID());
 
     if (monitorID > 5) {
-      // Currently, we only handle monitors 0-5.  At the present time, that's
-      // sufficient.
+      // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
       g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
-                    << " is actually valid, then an appropriate "
-                       "entry must be made to the "
-                    << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
+                    << " is actually valid, then an appropriate entry must be made to the ADDABLE list at the top of "
+                       "Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
       monName += static_cast<char>(monitorID + 48); // The +48 converts to the ASCII character
       monName += "_counts";
-      // Note: The monitor name must exactly match one of the entries in the
-      // ADDABLE list at the top of Run.cpp!
+      // Note: The monitor name must exactly match one of the entries in the ADDABLE list at the top of Run.cpp!
 
       int events = pkt.getSectionEventCount();
       if (m_eventBuffer->run().hasProperty(monName)) {
@@ -495,19 +491,20 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
       // Update the property value (overwriting the old value if there was one)
       m_eventBuffer->mutableRun().addProperty<int>(monName, events, true);
 
-      auto it = m_monitorIndexMap.find(
-          // cppcheck-suppress signConversion
-          -1 * monitorID); // Monitor IDs are negated in Mantid IDFs
+      const auto it = m_monitorIndexMap.find(-1 * monitorID); // Monitor IDs are negated in Mantid IDFs
       if (it != m_monitorIndexMap.end()) {
         bool risingEdge;
         uint32_t cycle, tof;
         while (pkt.nextEvent(risingEdge, cycle, tof)) {
-          // Add the event. Note that they're in units of 100 ns in the packet,
-          // need to change to microseconds.
+          // Add the event. Note that they're in units of 100 ns in the packet, need to change to microseconds.
           monitorBuffer->getSpectrum(it->second).addEventQuickly(Types::Event::TofEvent(tof / 10.0, pktTime));
         }
       } else {
-        g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
+        // only notify about the first bad monitor id
+        if (!m_badMonitors.contains(monitorID)) {
+          m_badMonitors.insert(monitorID);
+          g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
+        }
       }
     }
   }
