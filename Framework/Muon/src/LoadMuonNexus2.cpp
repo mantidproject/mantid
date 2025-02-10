@@ -84,7 +84,7 @@ void LoadMuonNexus2::exec() {
   }
 
   // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
+  const Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
   std::shared_ptr<Instrument> instrument;
