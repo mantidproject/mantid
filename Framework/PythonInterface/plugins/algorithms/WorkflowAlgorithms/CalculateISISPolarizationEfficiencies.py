@@ -10,6 +10,7 @@ from mantid.kernel import (
     StringArrayMandatoryValidator,
     StringArrayProperty,
     CompositeValidator,
+    StringPropertyWithValue,
 )
 
 
@@ -134,7 +135,7 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             ],
         )
         self.declareProperty(
-            MatrixWorkspaceProperty(Prop.MAG_TRANS_ROI.name, "", direction=Direction.Input, optional=PropertyMode.Optional),
+            StringPropertyWithValue(Prop.MAG_TRANS_ROI.name, ""),
             doc="Grouping pattern of magnetic spectrum numbers to yield only the detectors of interest. See group detectors for syntax.",
         )
         self.declareProperty(
@@ -181,7 +182,8 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             )
         eff_args.update(self._populate_args_dict(_EFF_ALG))
         eff_output = {key: None for key in _EFF_ALG_OUTPUT}
-        if self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value:
+        include_diag_out = self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value
+        if include_diag_out:
             eff_alg_output_diag = copy(_EFF_ALG_OUTPUT_DIAG)
             if mag_runs_input:
                 eff_alg_output_diag.extend(_EFF_ALG_OUTPUT_DIAG_MAG)
@@ -189,6 +191,9 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         eff_output.update(dict(zip([x.alias for x in eff_output], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output]))))
         join_output = self._run_algorithm(_JOIN_ALG, {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"])
         self.setProperty(Prop.OUT_WS.name, join_output[0])
+        if include_diag_out:
+            for key in eff_alg_output_diag:
+                self.setProperty(key.name, eff_output[key.alias])
 
     def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
         alg = self.createChildAlgorithm(alg_name, **args)
