@@ -89,7 +89,7 @@ public:
     doDivideWithMaskedTest(true);
   }
 
-  void testDivideSetDistributionTrue()
+  void testDivideForceIsDistributionTrue()
   {
     if (DO_DIVIDE) {
       MatrixWorkspace_sptr numerator = WorkspaceCreationHelper::create2DWorkspace(10, 2);
