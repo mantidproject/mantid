@@ -59,7 +59,7 @@
 
 extern void *NXpData;
 
-typedef struct __NexusFile5 {
+typedef struct __LgcyNexusFile5 {
   struct iStack5 {
     char irefn[1024];
     hid_t iVref;
@@ -1225,7 +1225,7 @@ NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
+static NXstatus NX5settargetattribute(pLgcyNexusFile5 pFile, NXlink *sLink) {
   hid_t dataID, aid2, aid1, attID;
   char name[] = "target";
 
@@ -1271,7 +1271,7 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
 /*---------------------------------------------------------------------*/
 
 NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   char linkTarget[NX_MAXPATHLEN];
 
   pFile = NXI5assert(fid);
@@ -1301,7 +1301,7 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   char linkTarget[NX_MAXPATHLEN];
   char *itemName = NULL;
 
@@ -1342,7 +1342,7 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
 /*----------------------------------------------------------------------*/
 
 NXstatus NX5flush(NXhandle *pHandle) {
-  pNexusFile5 pFile = NULL;
+  pLgcyNexusFile5 pFile = NULL;
   herr_t iRet;
 
   pFile = NXI5assert(*pHandle);
@@ -1415,7 +1415,7 @@ herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, voi
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getgroupinfo_recurse(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t atype, attr_id, grp;
 
   pFile = NXI5assert(fid);
@@ -1469,7 +1469,7 @@ static int countObjectsInGroup(hid_t loc_id) {
 
 /*----------------------------------------------------------------------------*/
 NXstatus NX5getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t atype, attr_id, gid;
 
   pFile = NXI5assert(fid);
@@ -1617,7 +1617,7 @@ static hid_t h5MemType(hid_t atype) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t grp, attr1, type, atype;
   herr_t iRet;
   hsize_t idx;
@@ -1754,7 +1754,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getdata(NXhandle fid, void *data) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int iStart[H5S_MAX_RANK], status;
   hid_t memtype_id;
   H5T_class_t tclass;
@@ -1839,7 +1839,7 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int i, iRank, mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
@@ -1895,7 +1895,7 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
   hsize_t mStart[H5S_MAX_RANK];
@@ -2025,7 +2025,7 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   hid_t vid, iNew;
   hsize_t dims[H5S_MAX_RANK], totalsize;
   herr_t iRet;
@@ -2081,7 +2081,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int idx;
   hid_t vid;
   H5O_info1_t oinfo;
@@ -2110,7 +2110,7 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
 
 /*-------------------------------------------------------------------------*/
 NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   NXnumtype type = NXnumtype::CHAR;
 
   pFile = NXI5assert(fileid);
@@ -2140,7 +2140,7 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
 NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *externalfile, const char *remotetarget) {
   hid_t openwhere;
 
-  const pNexusFile5 pFile = NXI5assert(fileid);
+  const pLgcyNexusFile5 pFile = NXI5assert(fileid);
 
   if (pFile->iCurrentG <= 0) {
     openwhere = pFile->iFID;
@@ -2161,7 +2161,7 @@ NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *ex
 NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int filenamelen) {
   hid_t openthing;
 
-  const pNexusFile5 pFile = NXI5assert(fileid);
+  const pLgcyNexusFile5 pFile = NXI5assert(fileid);
   if (pFile->iCurrentD > 0) {
     openthing = pFile->iCurrentD;
   } else if (pFile->iCurrentG > 0) {
@@ -2181,7 +2181,7 @@ NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int fil
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5nativeisexternallink(NXhandle fileid, const char *name, char *url, const int urllen) {
-  pNexusFile5 pFile; // cppcheck-suppress constVariablePointer
+  pLgcyNexusFile5 pFile; // cppcheck-suppress constVariablePointer
   herr_t ret;
   H5L_info_t link_buff;
   char linkval_buff[NX_MAXPATHLEN];
@@ -2239,7 +2239,7 @@ NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecon
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5initattrdir(NXhandle fid) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
   NXI5KillAttDir(pFile);
@@ -2249,7 +2249,7 @@ NXstatus NX5initattrdir(NXhandle fid) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5initgroupdir(NXhandle fid) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
 
   pFile = NXI5assert(fid);
   NXI5KillDir(pFile);
@@ -2261,7 +2261,7 @@ NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const i
                      const NXnumtype iType) {
   hid_t datatype1, dataspace;
   hid_t type;
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int i;
   hid_t vid, iATT;
   herr_t iRet;
@@ -2333,7 +2333,7 @@ NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const i
 
 /*------------------------------------------------------------------------*/
 NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   herr_t iRet;
   char *iname = NULL;
   hid_t vid;
@@ -2390,7 +2390,7 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
 }
 /*------------------------------------------------------------------------*/
 NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int iStart[H5S_MAX_RANK], status;
   hid_t vid;
   hid_t memtype_id, filespace, datatype;
@@ -2479,7 +2479,7 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
 }
 /*------------------------------------------------------------------------*/
 NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFile5 pFile;
+  pLgcyNexusFile5 pFile;
   int iRet, mType;
   hid_t vid;
   hid_t filespace, attrt, memtype;

@@ -43,7 +43,7 @@
 
 extern void *NXpData;
 
-typedef struct __NexusFile {
+typedef struct __LgcyNexusFile {
   struct iStack {
     int32 *iRefDir;
     int32 *iTagDir;
@@ -60,7 +60,7 @@ typedef struct __NexusFile {
   int iNXID;
   int iStackPtr;
   char iAccess[2];
-} NexusFile, *pLgcyNexusFile;
+} LgcyNexusFile, *pLgcyNexusFile;
 
 /*-------------------------------------------------------------------*/
 
@@ -399,12 +399,12 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     am1 = DFACC_RDWR;
   }
   /* get memory */
-  pNew = static_cast<pLgcyNexusFile>(malloc(sizeof(NexusFile)));
+  pNew = static_cast<pLgcyNexusFile>(malloc(sizeof(LgcyNexusFile)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
     return NXstatus::NX_ERROR;
   }
-  memset(pNew, 0, sizeof(NexusFile));
+  memset(pNew, 0, sizeof(LgcyNexusFile));
 
 #if WRITE_OLD_IDENT /* not used at moment */
                     /*
