@@ -43,7 +43,7 @@
 
 extern void *NXpData;
 
-typedef struct __NexusFile {
+typedef struct __LgcyNexusFile {
   struct iStack {
     int32 *iRefDir;
     int32 *iTagDir;
@@ -60,7 +60,7 @@ typedef struct __NexusFile {
   int iNXID;
   int iStackPtr;
   char iAccess[2];
-} NexusFile, *pNexusFile;
+} LgcyNexusFile, *pLgcyNexusFile;
 
 /*-------------------------------------------------------------------*/
 
@@ -81,16 +81,16 @@ static int nxToHDF4Type(NXnumtype type) {
 
 /*-------------------------------------------------------------------*/
 
-static pNexusFile NXIassert(NXhandle fid) {
-  pNexusFile pRes;
+static pLgcyNexusFile NXIassert(NXhandle fid) {
+  pLgcyNexusFile pRes;
 
   assert(fid != NULL);
-  pRes = static_cast<pNexusFile>(fid);
+  pRes = static_cast<pLgcyNexusFile>(fid);
   assert(pRes->iNXID == NXSIGNATURE);
   return pRes;
 }
 /*----------------------------------------------------------------------*/
-static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass) {
+static int findNapiClass(pLgcyNexusFile pFile, int groupRef, NXname nxclass) {
   NXname classText;
   int32 tags[2], attID, linkID, groupID;
 
@@ -123,7 +123,7 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass) {
 }
 /* --------------------------------------------------------------------- */
 
-static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass) {
+static int32 NXIFindVgroup(pLgcyNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass) {
   int const NX_EOD = static_cast<int>(NXstatus::NX_EOD);
   int32 iNew, iRef, iTag;
   int iN, i;
@@ -188,7 +188,7 @@ static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass
 
 static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
   int const NX_EOD = static_cast<int>(NXstatus::NX_EOD);
-  pNexusFile self;
+  pLgcyNexusFile self;
   int32 iNew, iRet, iTag, iRef;
   int32 i, iN, iA, iD1, iD2;
   NXname pNam;
@@ -241,7 +241,7 @@ static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
 
 /*----------------------------------------------------------------------*/
 
-static NXstatus NXIInitDir(pNexusFile self) {
+static NXstatus NXIInitDir(pLgcyNexusFile self) {
   int32 iTag, iRef;
   int iStackPtr;
 
@@ -283,7 +283,7 @@ static NXstatus NXIInitDir(pNexusFile self) {
 
 /*----------------------------------------------------------------------*/
 
-static void NXIKillDir(pNexusFile self) {
+static void NXIKillDir(pLgcyNexusFile self) {
   if (self->iStack[self->iStackPtr].iRefDir) {
     free(self->iStack[self->iStackPtr].iRefDir);
     self->iStack[self->iStackPtr].iRefDir = NULL;
@@ -298,7 +298,7 @@ static void NXIKillDir(pNexusFile self) {
 
 /*-------------------------------------------------------------------------*/
 
-static NXstatus NXIInitAttDir(pNexusFile pFile) {
+static NXstatus NXIInitAttDir(pLgcyNexusFile pFile) {
   int iRet;
   int32 iData, iAtt, iRank, iType;
   int32 iDim[H4_MAX_VAR_DIMS];
@@ -328,7 +328,7 @@ static NXstatus NXIInitAttDir(pNexusFile pFile) {
 
 /* --------------------------------------------------------------------- */
 
-static void NXIKillAttDir(pNexusFile self) {
+static void NXIKillAttDir(pLgcyNexusFile self) {
   if (self->iAtt.iRefDir) {
     free(self->iAtt.iRefDir);
     self->iAtt.iRefDir = NULL;
@@ -341,7 +341,7 @@ static void NXIKillAttDir(pNexusFile self) {
   self->iAtt.iNDir = 0;
 }
 /*------------------------------------------------------------------*/
-static void NXIbuildPath(pNexusFile pFile, char *buffer, int bufLen) {
+static void NXIbuildPath(pLgcyNexusFile pFile, char *buffer, int bufLen) {
   int i;
   int32 groupID, iA, iD1, iD2, iDim[H4_MAX_VAR_DIMS];
   NXname pText;
@@ -377,7 +377,7 @@ static void NXIbuildPath(pNexusFile pFile, char *buffer, int bufLen) {
  ---------------------------------------------------------------------*/
 
 NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
-  pNexusFile pNew = NULL;
+  pLgcyNexusFile pNew = NULL;
   char pBuffer[512];
   char *time_puffer = NULL;
   char HDF_VERSION[64];
@@ -399,12 +399,12 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     am1 = DFACC_RDWR;
   }
   /* get memory */
-  pNew = static_cast<pNexusFile>(malloc(sizeof(NexusFile)));
+  pNew = static_cast<pLgcyNexusFile>(malloc(sizeof(LgcyNexusFile)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
     return NXstatus::NX_ERROR;
   }
-  memset(pNew, 0, sizeof(NexusFile));
+  memset(pNew, 0, sizeof(LgcyNexusFile));
 
 #if WRITE_OLD_IDENT /* not used at moment */
                     /*
@@ -526,7 +526,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NX4close(NXhandle *fid) {
-  pNexusFile pFile = NULL;
+  pLgcyNexusFile pFile = NULL;
   int iRet;
 
   pFile = NXIassert(*fid);
@@ -561,7 +561,7 @@ NXstatus NX4close(NXhandle *fid) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iNew, iRet;
   char pBuffer[256];
 
@@ -601,7 +601,7 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
 /*------------------------------------------------------------------------*/
 NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iRef;
 
   pFile = NXIassert(fid);
@@ -630,7 +630,7 @@ NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4closegroup(NXhandle fid) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
 
   pFile = NXIassert(fid);
 
@@ -659,7 +659,7 @@ NXstatus NX4closegroup(NXhandle fid) {
 /* --------------------------------------------------------------------- */
 
 NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iNew;
   char pBuffer[256];
   int i, iRet, type;
@@ -740,7 +740,7 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int ra
 NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                            int compress_type, int64_t const chunk_size[]) {
   UNUSED_ARG(chunk_size);
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iNew, iRet, type;
   char pBuffer[256];
   int i, compress_level;
@@ -855,7 +855,7 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
 /* --------------------------------------------------------------------- */
 
 NXstatus NX4compress(NXhandle fid, int compress_type) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iRank, iAtt, iType;
   int32 iSize[H4_MAX_VAR_DIMS];
   comp_coder_t compress_typei = COMP_CODE_NONE;
@@ -911,7 +911,7 @@ NXstatus NX4compress(NXhandle fid, int compress_type) {
 /* --------------------------------------------------------------------- */
 
 NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iNew, attID, tags[2];
   pFile = NXIassert(fid);
 
@@ -957,7 +957,7 @@ NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
 /* ----------------------------------------------------------------- */
 
 NXstatus NX4closedata(NXhandle fid) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   pFile = NXIassert(fid);
 
   if (pFile->iCurrentSDS != 0) {
@@ -978,7 +978,7 @@ NXstatus NX4closedata(NXhandle fid) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4putdata(NXhandle fid, const void *data) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iStart[H4_MAX_VAR_DIMS], iSize[H4_MAX_VAR_DIMS], iStride[H4_MAX_VAR_DIMS];
   NXname pBuffer;
   int32 iRank, iAtt, iType;
@@ -1015,7 +1015,7 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int iRet, type;
 
   pFile = NXIassert(fid);
@@ -1046,7 +1046,7 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4putslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int iRet;
   int32 iStride[H4_MAX_VAR_DIMS];
   int32 myStart[H4_MAX_VAR_DIMS], mySize[H4_MAX_VAR_DIMS];
@@ -1084,7 +1084,7 @@ NXstatus NX4putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int datalen;
   NXnumtype type = NXnumtype::CHAR;
 
@@ -1112,7 +1112,7 @@ NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 dataID, type = DFNT_CHAR8;
   char name[] = "target";
 
@@ -1138,7 +1138,7 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 dataID, type = DFNT_CHAR8, rank = 1;
   NXnumtype dataType = NXnumtype::CHAR, attType = NXnumtype::INT32;
   char name[] = "target";
@@ -1190,7 +1190,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
   char *pFileName, *pCopy = NULL;
   int access, dummy, i, iStack;
   NXstatus iRet;
-  pNexusFile pFile = NULL;
+  pLgcyNexusFile pFile = NULL;
   NXaccess ac;
   int *iRefs = NULL;
 
@@ -1263,7 +1263,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int iStackPtr, iCurDir;
   int32 iTemp, iD1, iD2, iA;
   int32 iDim[H4_MAX_VAR_DIMS];
@@ -1340,7 +1340,7 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getdata(NXhandle fid, void *data) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iStart[H4_MAX_VAR_DIMS], iSize[H4_MAX_VAR_DIMS];
   NXname pBuffer;
   int32 iRank, iAtt, iType;
@@ -1363,7 +1363,7 @@ NXstatus NX4getdata(NXhandle fid, void *data) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   NXname pBuffer;
   int32 iAtt, myDim[H4_MAX_VAR_DIMS], i, iRank, mType;
 
@@ -1389,7 +1389,7 @@ NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 myStart[H4_MAX_VAR_DIMS], mySize[H4_MAX_VAR_DIMS];
   int32 i, iRank, iType, iAtt;
   NXname pBuffer;
@@ -1415,7 +1415,7 @@ NXstatus NX4getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *iType) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   NXstatus iRet;
   int32 iPType, iCount, count;
 
@@ -1458,7 +1458,7 @@ NXstatus NX4getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int32 iNew, iType32, count;
   void *pData = NULL;
   int32 iLen, iRet;
@@ -1545,7 +1545,7 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getattrinfo(NXhandle fid, int *iN) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   int iRet;
   int32 iData, iAtt, iRank, iType;
   int32 iDim[H4_MAX_VAR_DIMS];
@@ -1575,7 +1575,7 @@ NXstatus NX4getattrinfo(NXhandle fid, int *iN) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getgroupID(NXhandle fileid, NXlink *sRes) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
 
   pFile = NXIassert(fileid);
 
@@ -1596,7 +1596,7 @@ NXstatus NX4getgroupID(NXhandle fileid, NXlink *sRes) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
 
   pFile = NXIassert(fid);
   /* check if there is a group open */
@@ -1626,7 +1626,7 @@ NXstatus NX4sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecon
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4initattrdir(NXhandle fid) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   NXstatus iRet;
 
   pFile = NXIassert(fid);
@@ -1640,7 +1640,7 @@ NXstatus NX4initattrdir(NXhandle fid) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4initgroupdir(NXhandle fid) {
-  pNexusFile pFile;
+  pLgcyNexusFile pFile;
   NXstatus iRet;
 
   pFile = NXIassert(fid);
