@@ -16,7 +16,6 @@ from mantid.kernel import (
 
 from dataclasses import dataclass
 from typing import Any
-from copy import copy
 
 _TRANS_ALG = "ReflectometryISISCreateTransmission"
 _EFF_ALG = "PolarizationEfficienciesWildes"
@@ -171,29 +170,54 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         return args
 
     def PyExec(self):
-        eff_args = {}
+        # Set class member variables and perform post-start validation
+        self._initialize()
+
+        # Create transmission workspaces
         trans_output = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG), ["OutputWorkspace"])
-        eff_args.update({"InputNonMagWorkspace": trans_output, "OutputFpEfficiency": "fp_eff", "OutputFaEfficiency": "fa_eff"})
-        mag_runs_input = bool(self.getProperty(Prop.MAG_INPUT_RUNS.name).value)
-        if mag_runs_input:
-            trans_output_mag = self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True), ["OutputWorkspace"])
+        trans_output_mag = (
+            self._run_algorithm(_TRANS_ALG, self._populate_args_dict(_TRANS_ALG, mag=True), ["OutputWorkspace"])
+            if self.m_mag_runs_input
+            else None
+        )
+
+        # Calculate Wildes efficiencies
+        eff_args = self._generate_eff_args(trans_output, trans_output_mag)
+        eff_output = self._generate_eff_output_dict()
+        eff_output.update(dict(zip([x.alias for x in eff_output], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output]))))
+
+        # Join and output efficiencies
+        join_output = self._run_algorithm(_JOIN_ALG, {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"])
+        self._set_output_properties(join_output[0], eff_output)
+
+    def _initialize(self):
+        self.m_mag_runs_input = bool(self.getProperty(Prop.MAG_INPUT_RUNS.name).value)
+        self.m_eff_alg_output_diag = []
+        if self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value:
+            self.m_eff_alg_output_diag = _EFF_ALG_OUTPUT_DIAG + (_EFF_ALG_OUTPUT_DIAG_MAG if self.m_mag_runs_input else [])
+        self._validate_processing_instructions()
+
+    def _validate_processing_instructions(self):
+        pass
+
+    def _set_output_properties(self, join_ws, eff_output):
+        self.setProperty(Prop.OUT_WS.name, join_ws)
+        for key in self.m_eff_alg_output_diag:
+            self.setProperty(key.name, eff_output[key.alias])
+
+    def _generate_eff_args(self, trans_output, trans_output_mag):
+        eff_args = {"InputNonMagWorkspace": trans_output, "OutputFpEfficiency": "fp_eff", "OutputFaEfficiency": "fa_eff"}
+        if trans_output_mag:
             eff_args.update(
                 {"InputMagWorkspace": trans_output_mag, "OutputPolarizerEfficiency": "p_eff", "OutputAnalyserEfficiency": "a_eff"}
             )
         eff_args.update(self._populate_args_dict(_EFF_ALG))
-        eff_output = {key: None for key in _EFF_ALG_OUTPUT}
-        include_diag_out = self.getProperty(Prop.INCLUDE_DIAG_OUT.name).value
-        if include_diag_out:
-            eff_alg_output_diag = copy(_EFF_ALG_OUTPUT_DIAG)
-            if mag_runs_input:
-                eff_alg_output_diag.extend(_EFF_ALG_OUTPUT_DIAG_MAG)
-            eff_output.update({key: None for key in eff_alg_output_diag})
-        eff_output.update(dict(zip([x.alias for x in eff_output], self._run_algorithm(_EFF_ALG, eff_args, [x.name for x in eff_output]))))
-        join_output = self._run_algorithm(_JOIN_ALG, {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"])
-        self.setProperty(Prop.OUT_WS.name, join_output[0])
-        if include_diag_out:
-            for key in eff_alg_output_diag:
-                self.setProperty(key.name, eff_output[key.alias])
+        return eff_args
+
+    def _generate_eff_output_dict(self):
+        alg_output_list = _EFF_ALG_OUTPUT + self.m_eff_alg_output_diag
+        eff_output = {key: None for key in alg_output_list}
+        return eff_output
 
     def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
         alg = self.createChildAlgorithm(alg_name, **args)
