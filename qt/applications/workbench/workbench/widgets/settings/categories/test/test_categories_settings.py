@@ -129,13 +129,11 @@ class CategoriesSettingsTest(unittest.TestCase):
         self.mock_model.set_hidden_algorithms.assert_called_once_with(";".join(hidden_algorithim_string))
         notify_changes_mock.assert_called_once()
 
-    @patch("workbench.widgets.settings.categories.presenter.CategoriesSettings.parent")
-    def test_interface_state_correct_when_created(self, mock_parent: MagicMock):
+    def test_interface_state_correct_when_created(self):
         mock_main_window = MockMainWindow()
-        mock_parent.return_value = mock_main_window
         hidden_interfaces = "Indirect; Muon; Reflectometry"
         self.mock_model.get_hidden_interfaces.return_value = hidden_interfaces
-        CategoriesSettings(None, view=self.mock_view, model=self.mock_model)
+        CategoriesSettings(mock_main_window, view=self.mock_view, model=self.mock_model)
 
         expected_calls = []
         for category in mock_main_window.interface_list:

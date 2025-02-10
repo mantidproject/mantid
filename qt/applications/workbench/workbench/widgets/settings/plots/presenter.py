@@ -35,7 +35,8 @@ class PlotSettings(SettingsPresenterBase):
     ]
 
     def __init__(self, parent, model: "PlotsSettingsModel", view=None):
-        super().__init__(parent, model)
+        super().__init__(model)
+        self.parent = parent
         self._view = view if view else PlotsSettingsView(parent, self)
         self.add_filters()
         self.add_list_items()

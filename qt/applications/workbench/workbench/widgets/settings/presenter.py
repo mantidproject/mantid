@@ -58,10 +58,10 @@ class SettingsPresenter(object):
         self.view.container.addWidget(self.plot_settings.get_view())
         self.view.container.addWidget(self.fitting_settings.get_view())
 
-        self.plot_settings.unsaved_changes_signal.connect(self.changes_updated)
-        self.categories_settings.unsaved_changes_signal.connect(self.changes_updated)
-        self.general_settings.unsaved_changes_signal.connect(self.changes_updated)
-        self.fitting_settings.unsaved_changes_signal.connect(self.changes_updated)
+        self.plot_settings.subscribe_parent_presenter(self)
+        self.categories_settings.subscribe_parent_presenter(self)
+        self.general_settings.subscribe_parent_presenter(self)
+        self.fitting_settings.subscribe_parent_presenter(self)
 
         self.view.okay_button.clicked.connect(self.action_okay_button_pushed)
         self.view.apply_button.clicked.connect(self.action_apply_button_pushed)

@@ -27,7 +27,8 @@ class GeneralSettings(SettingsPresenterBase):
     WINDOW_BEHAVIOUR = ["On top", "Floating"]
 
     def __init__(self, parent, model: GeneralSettingsModel, view=None, settings_presenter=None):
-        super().__init__(parent, model)
+        super().__init__(model)
+        self.parent = parent
         self._view = view if view else GeneralSettingsView(parent, self)
         self.settings_presenter = settings_presenter
         self.load_current_setting_values()
@@ -234,19 +235,19 @@ class GeneralSettings(SettingsPresenterBase):
         filename = self._view.new_layout_name.text()
         if filename != "":
             layout_dict = self.get_layout_dict()
-            layout_dict[filename] = self.parent().saveState(SAVE_STATE_VERSION)
+            layout_dict[filename] = self.parent.saveState(SAVE_STATE_VERSION)
             self._model.set_user_layout(layout_dict)
             self.notify_changes()
             self._view.new_layout_name.clear()
             self.fill_layout_display()
-            self.parent().populate_layout_menu()
+            self.parent.populate_layout_menu()
 
     def load_layout(self):
         item = self._view.layout_display.currentItem()
         if hasattr(item, "text"):
             layout = item.text()
             layout_dict = self.get_layout_dict()
-            self.parent().restoreState(layout_dict[layout], SAVE_STATE_VERSION)
+            self.parent.restoreState(layout_dict[layout], SAVE_STATE_VERSION)
 
     def delete_layout(self):
         item = self._view.layout_display.currentItem()
@@ -257,7 +258,7 @@ class GeneralSettings(SettingsPresenterBase):
             self._model.set_user_layout(layout_dict)
             self.notify_changes()
             self.fill_layout_display()
-            self.parent().populate_layout_menu()
+            self.parent.populate_layout_menu()
 
     def focus_layout_box(self):
         # scroll the settings to the layout box. High yMargin ensures the box is always at the top of the window.

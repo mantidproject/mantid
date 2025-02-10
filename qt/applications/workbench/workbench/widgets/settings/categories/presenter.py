@@ -21,7 +21,8 @@ class CategoriesSettings(SettingsPresenterBase):
     """
 
     def __init__(self, parent, model: CategoriesSettingsModel, view=None):
-        super().__init__(parent, model)
+        super().__init__(model)
+        self.parent = parent
         self._view = view if view else CategoriesSettingsView(parent, self)
         self._view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
         self._view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
@@ -83,8 +84,8 @@ class CategoriesSettings(SettingsPresenterBase):
     def set_interface_tree_categories(self):
         widget = self._view.interface_tree_widget
         interfaces = []
-        if self.parent():
-            interfaces = self.parent().interface_list
+        if self.parent:
+            interfaces = self.parent.interface_list
         hidden_interfaces = self._model.get_hidden_interfaces().split(";")
         interface_map = {}
         for interface in interfaces:

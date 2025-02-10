@@ -69,7 +69,6 @@ class MockGeneralSettingsModel:
 class GeneralSettingsTest(unittest.TestCase):
     MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.general.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
     NOTIFY_CHANGES_PATH = "workbench.widgets.settings.general.presenter.GeneralSettings.notify_changes"
-    PARENT_FUNCTION_PATH = "workbench.widgets.settings.general.presenter.GeneralSettings.parent"
 
     def setUp(self) -> None:
         self.mock_model = MockGeneralSettingsModel()
@@ -77,8 +76,9 @@ class GeneralSettingsTest(unittest.TestCase):
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
+    @patch(NOTIFY_CHANGES_PATH)
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
-    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter, _):
         presenter = GeneralSettings(None, model=GeneralSettingsModel())
 
         calls = [
@@ -414,14 +414,13 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     @patch(NOTIFY_CHANGES_PATH)
-    @patch(PARENT_FUNCTION_PATH)
-    def test_save_layout(self, mock_parent_function: MagicMock, mock_notify_changes: MagicMock, _):
+    def test_save_layout(self, mock_notify_changes: MagicMock, _):
         mock_view = Mock()
         presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
-        mock_parent = MagicMock()
+        mock_parent = Mock()
         mock_parent.saveState.return_value = "value"
-        mock_parent_function.return_value = mock_parent
+        presenter.parent = mock_parent
 
         test_dict = {"a": 1}
         self.mock_model.get_user_layout.return_value = test_dict
@@ -439,14 +438,13 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_parent.populate_layout_menu.assert_called_once_with()
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
-    @patch(PARENT_FUNCTION_PATH)
-    def test_load_layout(self, mock_parent_function: MagicMock, _):
+    def test_load_layout(self, _):
         mock_view = Mock()
         presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         self.mock_model.get_user_layout.reset_mock()
         # setup parent
-        mock_parent = MagicMock()
-        mock_parent_function.return_value = mock_parent
+        mock_parent = Mock()
+        presenter.parent = mock_parent
         # setup item selection
         list_item = Mock()
         list_item.text.return_value = "a"
@@ -462,13 +460,12 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     @patch(NOTIFY_CHANGES_PATH)
-    @patch(PARENT_FUNCTION_PATH)
-    def test_delete_layout(self, mock_parent_function: MagicMock, mock_notify_changes: MagicMock, _):
+    def test_delete_layout(self, mock_notify_changes: MagicMock, _):
         mock_view = Mock()
         presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
-        mock_parent = MagicMock()
-        mock_parent_function.return_value = mock_parent
+        mock_parent = Mock()
+        presenter.parent = mock_parent
         # setup item selection
         list_item = Mock()
         list_item.text.return_value = "a"
