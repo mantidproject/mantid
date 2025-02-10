@@ -1441,7 +1441,8 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     return;
   }
 
-  if (!std::filesystem::is_directory(subDirPath) || !subDirPath.is_relative()) {
+  if ((std::filesystem::exists(subDirPath) && !std::filesystem::is_directory(subDirPath)) ||
+      !subDirPath.is_relative()) {
     return;
   }
 
