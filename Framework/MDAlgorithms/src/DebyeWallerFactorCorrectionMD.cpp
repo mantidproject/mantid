@@ -31,7 +31,7 @@ const std::string DebyeWallerFactorCorrectionMD::category() const { return "MDAl
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string DebyeWallerFactorCorrectionMD::summary() const {
-  return "Apply Debye-Waller factor correction to MD events by dividing signal with exp(-q2 * u2)";
+  return "Apply Debye-Waller factor correction to MD events by dividing signal with exp(-q2 * u2 / 3)";
 }
 const std::vector<std::string> DebyeWallerFactorCorrectionMD::seeAlso() const { return {"DebyWallerFactorCorrection"}; }
 // //----------------------------------------------------------------------------------------------
