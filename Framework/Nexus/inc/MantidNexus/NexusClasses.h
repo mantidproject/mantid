@@ -175,11 +175,11 @@ public:
    */
   virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
-    (void)blocksize;
-    (void)i;
-    (void)j;
-    (void)k;
-    (void)l;
+    UNUSED_ARG(blocksize);
+    UNUSED_ARG(i);
+    UNUSED_ARG(j);
+    UNUSED_ARG(k);
+    UNUSED_ARG(l);
   };
 
 protected:
@@ -498,10 +498,6 @@ public:
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-  /**  Returns the class information about the next entry (class or dataset) in
-   * this class.
-   */
-  NXClassInfo getNextEntry();
   /// Creates a new object in the NeXus file at path path.
   // virtual void make(const std::string& path) = 0;
   /// Resets the current position for getNextEntry() to the beginning
