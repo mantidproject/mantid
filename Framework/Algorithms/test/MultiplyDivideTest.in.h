@@ -21,6 +21,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
+#include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -86,6 +87,46 @@ public:
   void testDivideWithMaskedSpectraProducesZeroesWhenReplacingInputWorkspace()
   {
     doDivideWithMaskedTest(true);
+  }
+
+  void testDivideSetDistributionTrue()
+  {
+    if (DO_DIVIDE) {
+      MatrixWorkspace_sptr numerator = WorkspaceCreationHelper::create2DWorkspace(10, 2);
+      MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::createWorkspaceSingleValue(1.0);
+
+      Divide alg;
+      alg.initialize();
+      alg.setChild(true);
+      alg.setProperty("LHSWorkspace", numerator);
+      alg.setProperty("RHSWorkspace", denominator);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.setProperty("isDistribution", OptionalBool(true));
+      alg.execute();
+
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+      TS_ASSERT_EQUALS(outWS->isDistribution(), true);
+    }
+  }
+  void testDivideForceIsDistributionFalse()
+  {
+    if (DO_DIVIDE) {
+
+      MatrixWorkspace_sptr numerator = WorkspaceCreationHelper::createWorkspaceSingleValue(10.0);
+      MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::createWorkspaceSingleValue(1.0);
+
+      Divide alg;
+      alg.initialize();
+      alg.setChild(true);
+      alg.setProperty("LHSWorkspace", numerator);
+      alg.setProperty("RHSWorkspace", denominator);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.setProperty("isDistribution", OptionalBool(false));
+      alg.execute();
+
+      MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+      TS_ASSERT_EQUALS(outWS->isDistribution(), false);
+    }
   }
 
   void testCompoundAssignment()
