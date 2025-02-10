@@ -851,8 +851,6 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscr
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:452
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:49
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:58
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/SNSLiveEventDataListener.cpp:239
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/SNSLiveEventDataListener.cpp:246
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h:166
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h:27
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/InvalidParameter.h:35
