@@ -818,14 +818,6 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Export
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:80
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:113
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ConfigService.cpp:73
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/FacilityInfo.cpp:46
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:46
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:102
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Property.cpp:102
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Quat.cpp:55
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Statistics.cpp:109
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/TimeSeriesProperty.cpp:134
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/WorkspaceCreationHelper/WorkspaceCreationHelperModule.cpp:35
