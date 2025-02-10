@@ -104,14 +104,10 @@ File::File(const char *filename, const NXaccess access) : m_filename(filename), 
 }
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_file_id(f.m_file_id), m_close_handle(f.m_close_handle) {
-  this->initOpenFile(m_filename, m_access);
-}
+    : m_filename(f.m_filename), m_access(f.m_access), m_file_id(f.m_file_id), m_close_handle(false) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(pf->m_close_handle) {
-  this->initOpenFile(m_filename, m_access);
-}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
