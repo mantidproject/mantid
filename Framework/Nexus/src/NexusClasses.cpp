@@ -166,7 +166,7 @@ bool NXClass::isValid(const std::string &path) const {
     m_fileID->openGroupPath(path);
     m_fileID->closeGroup();
     return true;
-  } catch (::NeXus::Exception const &e) {
+  } catch (::NeXus::Exception const &) {
     return false;
   }
 }
@@ -202,7 +202,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
 void NXClass::close() {
   try {
     m_fileID->closeGroup();
-  } catch (::NeXus::Exception const &e) {
+  } catch (::NeXus::Exception const &) {
     throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close path " +
                              m_path + ")");
   }
