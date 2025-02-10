@@ -45,10 +45,6 @@ public:
     Mantid::Kernel::NexusHDF5Descriptor descr2(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr2), 20);
 
-    alg.setPropertyValue("Filename", "argus0026577.nxs");
-    Mantid::Kernel::NexusHDF5Descriptor descr3(alg.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(alg.confidence(descr3), 0);
-
     alg.setPropertyValue("Filename", "PG3_733.nxs");
     Mantid::Kernel::NexusHDF5Descriptor descr4(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr4), 0);

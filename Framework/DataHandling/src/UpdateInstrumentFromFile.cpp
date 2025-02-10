@@ -20,6 +20,7 @@
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
+#include <H5Cpp.h>
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -88,7 +89,7 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (NexusHDF5Descriptor::isReadable(filename)) {
+  if (H5::H5File::isHdf5(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
 
