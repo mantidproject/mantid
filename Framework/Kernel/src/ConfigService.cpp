@@ -185,7 +185,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Assert that the appdata and the instrument subdirectory exists
   std::filesystem::path path(getAppDataDir());
   path /= "instrument";
-  Poco::File file(path);
+  Poco::File file(path.string());
   // createDirectories will fail gracefully if it is already present - but will
   // throw an error if it cannot create the directory
   try {
@@ -195,7 +195,7 @@ ConfigServiceImpl::ConfigServiceImpl()
                   << "]. Mantid will not be able to update instrument definitions.\n"
                   << fe.what() << '\n';
   }
-  Poco::File vtpDir(getVTPFileDirectory());
+  Poco::File vtpDir(getVTPFileDirectory().string());
   try {
     vtpDir.createDirectories();
   } catch (Poco::FileException &fe) {
@@ -241,14 +241,14 @@ void ConfigServiceImpl::setBaseDirectory() {
 
   // First directory: the current working
   m_strBaseDir = std::filesystem::current_path();
-  f = Poco::File(m_strBaseDir / m_properties_file_name);
+  f = Poco::File((m_strBaseDir / m_properties_file_name).string());
   if (f.exists())
     return;
 
   // Check the executable directory to see if it includes a mantid.properties
   // file
   m_strBaseDir = getDirectoryOfExecutable();
-  f = Poco::File(m_strBaseDir / m_properties_file_name);
+  f = Poco::File((m_strBaseDir / m_properties_file_name).string());
   if (f.exists())
     return;
 
@@ -265,7 +265,7 @@ void ConfigServiceImpl::setBaseDirectory() {
 #else
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
 #endif
-    f = Poco::File(m_strBaseDir / m_properties_file_name);
+    f = Poco::File((m_strBaseDir / m_properties_file_name).string());
     if (f.exists())
       return;
   }
@@ -274,7 +274,7 @@ void ConfigServiceImpl::setBaseDirectory() {
   // Finally, on OSX check if we're in the package directory and the .properties
   // file just happens to be two directories up
   auto path = std::filesystem::path(getDirectoryOfExecutable());
-  m_strBaseDir = path.parent().parent().parent().string();
+  m_strBaseDir = path.parent_path().parent_path().parent_path().string();
 #endif
 }
 
@@ -430,7 +430,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
     auto splitted = splitPath(dir);
     auto iend = splitted.cend();
     for (auto itr = splitted.begin(); itr != iend;) {
-      std::string absolute = makeAbsolute(*itr, key);
+      std::string absolute = makeAbsolute((*itr).string(), key);
       if (absolute.empty()) {
         ++itr;
       } else {
@@ -1908,7 +1908,7 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
       }
 #ifdef _WIN32
     } else {
-      std::filesystem::path path(searchPath, fName);
+      std::filesystem::path path(searchPath / fName);
       if (std::filesystem::exists(path) && !(ignoreDirs && std::filesystem::is_directory(path))) {
         return path.string();
       }
