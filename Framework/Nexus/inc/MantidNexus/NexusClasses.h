@@ -27,7 +27,6 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-// TODO change to int64_t
 typedef int64_t nxdimsize_t;
 typedef std::array<nxdimsize_t, 4> NXDimArray;
 

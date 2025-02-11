@@ -13,6 +13,8 @@
 #include <memory>
 #include <utility>
 
+using ::NeXus::dimsize_t;
+
 namespace Mantid::NeXus {
 
 static NXDimArray nxdimArray(::NeXus::DimVector xd) {
