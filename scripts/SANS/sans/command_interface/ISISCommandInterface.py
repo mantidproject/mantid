@@ -9,6 +9,7 @@ import os
 import re
 
 import types
+from typing import Union, Dict
 
 from SANSadd2 import add_runs
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -44,12 +45,10 @@ from sans.common.general_functions import (
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
 DefaultTrans = True
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CommandInterfaceStateDirector global instance
@@ -503,15 +502,45 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     director.add_command(centre_command)
 
 
-def set_save(save_algorithms, save_as_zero_error_free):
+def set_save(
+    save_algorithms: Union[None, Dict] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
+) -> OutputMode:
     """
-    Mainly internally used by BatchMode. Provides the save settings.
+    Mainly used internally by WavRangeReduction. Prepares the save state on the director.
 
-    @param save_algorithms: A list of SaveType enums.
+    @param save_algorithms: A dict containing the name of the save algorithms as keys and extension as values.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
+    @param output_mode: Decides if output_mode publishes to ads and saves to file or only one of the two when save_algorithms are valid
+    @return The OutputMode enum: PUBLISH_TO_ADS, SAVE_TO_FILE, BOTH
     """
-    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algorithms, save_as_zero_error_free])
+
+    if not save_algorithms:
+        return OutputMode.PUBLISH_TO_ADS
+
+    # Set up the save algorithms
+    save_algs = []
+    if save_algorithms:
+        for key in save_algorithms.keys():
+            match key:
+                case "SaveRKH":
+                    save_algs.append(SaveType.RKH)
+                case "SaveNexus":
+                    save_algs.append(SaveType.NEXUS)
+                case "SaveNistQxy":
+                    save_algs.append(SaveType.NIST_QXY)
+                case "SaveCanSAS" | "SaveCanSAS1D":
+                    save_algs.append(SaveType.CAN_SAS)
+                case "SaveCSV":
+                    save_algs.append(SaveType.CSV)
+                case "SaveNXCanSAS":
+                    save_algs.append(SaveType.NX_CAN_SAS)
+                case _:
+                    raise RuntimeError(f"The save format {key} is not known")
+
+    save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algs, save_as_zero_error_free])
     director.add_command(save_command)
+
+    return output_mode.BOTH if (output_mode == OutputMode.PUBLISH_TO_ADS) else output_mode
 
 
 # --------------------------
@@ -775,6 +804,8 @@ def WavRangeReduction(
     output_name=None,
     output_mode=OutputMode.PUBLISH_TO_ADS,
     use_reduction_mode_as_suffix=False,
+    saveAlgs=None,
+    save_as_zero_error_free=False,
 ):
     """
     Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -798,6 +829,9 @@ def WavRangeReduction(
                                               current detector
                                               before running this method. If front apply rescale+shift)
     @param resetSetup: if true reset setup at the end
+    @param saveAlgs: A dictionary  containing the names of the algorithms to save the data  as keys with extension
+                     as values (ex: saveAlgs={'SaveRKH': 'txt'}), it raises error if the algorithm name is not valid.
+    @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
     @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order
                              to remember the 'scale and fit' of the fitting algorithm.
     @param output_name: name of the output workspace/file, if none is specified then one is generated internally.
@@ -809,6 +843,9 @@ def WavRangeReduction(
     print_message("WavRangeReduction(" + str(wav_start) + ", " + str(wav_end) + ", " + str(full_trans_wav) + ")")
     _ = resetSetup
     _ = out_fit_settings
+
+    # Set the save state
+    output_mode = set_save(save_algorithms=saveAlgs, save_as_zero_error_free=save_as_zero_error_free, output_mode=output_mode)
 
     # Set the provided parameters
     if combineDet is None:
@@ -866,9 +903,9 @@ def WavRangeReduction(
     return output_workspace_base_name
 
 
-def BatchReduce(  # noqa
+def BatchReduce(
     filename,
-    format,
+    format=None,
     plotresults=False,
     saveAlgs=None,
     verbose=False,
@@ -876,22 +913,22 @@ def BatchReduce(  # noqa
     reducer=None,
     combineDet=None,
     save_as_zero_error_free=False,
+    output_mode=OutputMode.PUBLISH_TO_ADS,
 ):
     """
     @param filename: the CSV file with the list of runs to analyse
     @param format: type of file to load, nxs for Nexus, etc.
     @param plotresults: if true and this function is run from mantid a graph will be created for the results of each reduction
-    @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
-        Pass a tuple of strings to save to multiple file formats
+    @param saveAlgs: A dictionary  containing the names of the algorithms to save the data  as keys with extension
+                     as values (ex: saveAlgs={'SaveRKH': 'txt'}), it raises error if the algorithm name is not valid.
     @param verbose: set to true to write more information to the log (default=False)
     @param centreit: do centre finding (default=False)
     @param reducer: if to use the command line (default) or GUI reducer object
     @param combineDet: that will be forward to WavRangeReduction (rear, front, both, merged, None)
     @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
-    @return final_setings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
+    @param output_mode: the way the data should be put out: Can be PublishToADS, SaveToFile or Both
+    @return final_settings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
     """
-    if saveAlgs is None:
-        saveAlgs = {"SaveRKH": "txt"}
 
     # From the old interface
     _ = format
@@ -902,29 +939,6 @@ def BatchReduce(  # noqa
         raise RuntimeError("The beam centre finder is currently not supported.")
     if plotresults:
         raise RuntimeError("Plotting the results is currently not supported.")
-
-    # Set up the save algorithms
-    save_algs = []
-
-    if saveAlgs:
-        for key, _ in list(saveAlgs.items()):
-            if key == "SaveRKH":
-                save_algs.append(SaveType.RKH)
-            elif key == "SaveNexus":
-                save_algs.append(SaveType.NEXUS)
-            elif key == "SaveNistQxy":
-                save_algs.append(SaveType.NIST_QXY)
-            elif key == "SaveCanSAS" or key == "SaveCanSAS1D":
-                save_algs.append(SaveType.CAN_SAS)
-            elif key == "SaveCSV":
-                save_algs.append(SaveType.CSV)
-            elif key == "SaveNXcanSAS":
-                save_algs.append(SaveType.NX_CAN_SAS)
-            else:
-                raise RuntimeError("The save format {0} is not known.".format(key))
-        output_mode = OutputMode.BOTH
-    else:
-        output_mode = OutputMode.PUBLISH_TO_ADS
 
     # Get the information from the csv file
     batch_csv_parser = BatchCsvParser()
@@ -977,16 +991,14 @@ def BatchReduce(  # noqa
         # suffix that the user can set already -- was there previously, so we have to provide that)
         use_reduction_mode_as_suffix = combineDet is not None
 
-        # Apply save options
-        if save_algs:
-            set_save(save_algorithms=save_algs, save_as_zero_error_free=save_as_zero_error_free)
-
         # Run the reduction for a single
         reduced_workspace_name = WavRangeReduction(
             combineDet=combineDet,
             output_name=output_name,
             output_mode=output_mode,
             use_reduction_mode_as_suffix=use_reduction_mode_as_suffix,
+            saveAlgs=saveAlgs,
+            save_as_zero_error_free=save_as_zero_error_free,
         )
 
         # Remove the settings which were very specific for this single reduction which are:
