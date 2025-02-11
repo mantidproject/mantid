@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include <Poco/TemporaryFile.h>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -18,7 +18,7 @@ namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
   NXcanSASTestParameters() {}
 
-  std::string filename{Poco::TemporaryFile::tempName() + ".h5"};
+  std::string filename{std::filesystem::temp_directory_path().string() + "testFile.h5"};
   std::vector<std::string> expectedGroupSuffices{"00", "01"};
   int size{10};
   double value{10.23};
