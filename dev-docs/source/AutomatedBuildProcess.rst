@@ -23,12 +23,12 @@ The status for each build will be either pending, success or failed.
 
 .. image:: images/BuildStatuses.png
 
-To see the details of a particular build in Jenkins click on Details
+To see the details of a particular build in Jenkins, click on Details
 next to the status. To restart a build, if it failed with a spurious
 error not related to your code changes, then you can restart that
 particular build by selecting Rebuild in Jenkins. Then press "Rebuild"
 on the next screen while not changing any of the parameters. If
-you don't have permission to restart builds in Jenkins you will have
+you don't have permission to restart builds in Jenkins, you will have
 to ask someone who does.
 
 .. image:: images/RestartBuild.png
@@ -53,8 +53,9 @@ Nightly Pipelines
 
 The nightly pipelines are Jenkins jobs responsible for building Mantid packages
 and deploying them to the Mantid conda channel. They build both nightly and release versions.
-You can find them in `this page <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_.
+You can find them on `this page <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_.
 
 The `build_packages_from_branch <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_
 is a Jenkins job based on these nightly jobs that allows you to manually build packages
-from an upstream branch in the Mantid repository.
+from an upstream branch in the Mantid repository. For the full guide on how to use the
+job, please follow `this link <https://developer.mantidproject.org/Packaging.html#build-packages-from-branch-using-jenkins>`_.
