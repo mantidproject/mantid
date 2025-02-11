@@ -488,6 +488,7 @@ target_link_libraries(
   PUBLIC Mantid::Types
          Mantid::Json
          Mantid::NexusCpp
+         Mantid::LegacyNexus
          Eigen3::Eigen
          TBB::tbb
          Poco::Foundation
