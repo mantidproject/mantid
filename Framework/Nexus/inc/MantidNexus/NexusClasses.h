@@ -147,7 +147,7 @@ public:
   /// Returns the number of elements along the third dimension
   ::NeXus::dimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
-  int64_t dim3() const;
+  ::NeXus::dimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h

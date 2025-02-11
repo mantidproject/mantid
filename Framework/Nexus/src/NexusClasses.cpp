@@ -361,7 +361,7 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension.
  * @throws out_of_range error if requested on an object of rank 0
  */
-::NeXus::dimsize_t NXDataSet::dim0() const {
+dimsize_t NXDataSet::dim0() const {
   if (m_info.rank == 0) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
@@ -373,7 +373,7 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 2
  */
-::NeXus::dimsize_t NXDataSet::dim1() const {
+dimsize_t NXDataSet::dim1() const {
   if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
@@ -385,7 +385,7 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 3
  */
-::NeXus::dimsize_t NXDataSet::dim2() const {
+dimsize_t NXDataSet::dim2() const {
   if (m_info.rank < 3UL) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
@@ -397,7 +397,7 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 4
  */
-::NeXus::dimsize_t NXDataSet::dim3() const {
+dimsize_t NXDataSet::dim3() const {
   if (m_info.rank < 4UL) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
@@ -426,8 +426,8 @@ void NXDataSet::getData(void *data) {
  *   @throw runtime_error if the operation fails.
  */
 void NXDataSet::getSlab(void *data, NXDimArray const &start, NXDimArray const &size) {
-  std::vector<::NeXus::dimsize_t> vstart(start.cbegin(), start.cend());
-  std::vector<::NeXus::dimsize_t> vsize(size.cbegin(), size.cend());
+  ::NeXus::DimSizeVector vstart(start.cbegin(), start.cend());
+  ::NeXus::DimSizeVector vsize(size.cbegin(), size.cend());
   m_fileID->openData(name());
   m_fileID->getSlab(data, vstart, vsize);
   m_fileID->closeData();
