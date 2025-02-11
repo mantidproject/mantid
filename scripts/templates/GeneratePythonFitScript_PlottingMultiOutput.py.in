@@ -15,7 +15,7 @@ for i, workspace_name in enumerate(output_workspaces):
     axes[0, i].legend()
 
     axes[1, i].errorbar(workspace, "ko", wkspIndex=2, markersize=2)
-    axes[1, i].set_ylabel("Difference")
+    axes[1, i].set_ylabel("Difference", labelpad=1)
     axes[1, i].tick_params(axis="both", direction="in")
 
 fig.subplots_adjust(hspace=0, wspace=0.4)
