@@ -20,7 +20,7 @@ New features
 
 Bugfixes
 ############
-- In :ref:`ISIS Powder Diffraction Scripts <isis-powder-diffraction-ref>`, ``create_vanadium`` now works without setting the sample material and geometry/shape (this information is retrieved from the advanced config files for each instrument). 
+- In :ref:`ISIS Powder Diffraction Scripts <isis-powder-diffraction-ref>`, ``create_vanadium`` now works without setting the sample material and geometry/shape (this information is retrieved from the advanced config files for each instrument).
 - :ref:`InterpolateBackground <algm-InterpolateBackground>` now works as expected.
 
 
