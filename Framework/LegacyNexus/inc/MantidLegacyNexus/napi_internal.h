@@ -87,7 +87,7 @@ typedef struct {
   int stripFlag;
   int checkNameSyntax;
   NXaccess access_mode;
-} HDF4Function, *pHDF4Function;
+} LgcyFunction, *pLgcyFunction;
 /*---------------------*/
 extern long nx_cacheSize;
 
