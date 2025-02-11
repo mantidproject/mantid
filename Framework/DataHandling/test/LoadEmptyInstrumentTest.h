@@ -53,7 +53,7 @@ public:
 
   // Helper method to create the IDF File.
   ScopedFile createIDFFileObject(const std::string &idf_filename, const std::string &idf_file_contents) {
-    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/";
+    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir.string());
   }

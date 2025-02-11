@@ -260,7 +260,7 @@ void LoadIDFFromNexus::LoadParameters(::NeXus::File *nxfile, const MatrixWorkspa
     for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first appropriate file
-      const std::filesystem::path paramFile = directoryName / instrumentName / "_Parameters.xml";
+      const std::filesystem::path paramFile = directoryName / (instrumentName + "_Parameters.xml");
 
       // Attempt to load specified file, if successful, use file and stop
       // search.

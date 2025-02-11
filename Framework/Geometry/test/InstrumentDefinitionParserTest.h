@@ -95,7 +95,7 @@ private:
     const std::string vtp_file_contents = "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" "
                                           "version=\"1.0\"><PolyData/></VTKFile>";
 
-    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/";
+    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "unit_testing/";
     std::filesystem::path vtp_dir = ConfigService::Instance().getVTPFileDirectory();
     if (!put_vtp_next_to_IDF) {
       vtp_dir = std::filesystem::path(ConfigService::Instance().getTempDir());
@@ -108,7 +108,7 @@ private:
 
   // Helper method to create the IDF File.
   ScopedFile createIDFFileObject(const std::string &idf_filename, const std::string &idf_file_contents) {
-    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/";
+    const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -121,7 +121,7 @@ public:
 
   void test_extract_ref_info() {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -142,7 +142,7 @@ public:
 
   void test_extract_ref_info_theta_sign() {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING6.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING6.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -161,7 +161,7 @@ public:
   void test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
     std::filesystem::path filenameNoExt =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING";
     std::string filename = filenameNoExt.string() + ".xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
@@ -447,7 +447,7 @@ public:
                                           // Definition File
   {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING2.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING2.xml";
     std::string xmlText = Strings::loadFile(filename.string());
     std::shared_ptr<const Instrument> i;
 
@@ -491,7 +491,7 @@ public:
 
   void test_parse_RectangularDetector() {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename.string());
     std::shared_ptr<const Instrument> i;
 
@@ -543,7 +543,7 @@ public:
   // testing through Loading IDF_for_UNIT_TESTING5.xml method adjust()
   void testAdjust() {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING5.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING5.xml";
     std::string xmlText = Strings::loadFile(filename.string());
     std::shared_ptr<const Instrument> i;
 
@@ -801,7 +801,7 @@ public:
 
   Instrument_sptr loadInstrLocations(const std::string &locations, detid_t numDetectors, bool rethrow = false) {
     std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_locations_test.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_locations_test.xml";
 
     std::string contents = Strings::loadFile(filename.string());
 
@@ -994,7 +994,7 @@ public:
       : m_instrumentDirectoryPath(ConfigService::Instance().getInstrumentDirectory()) {}
 
   void testLoadingAndParsing() {
-    const std::filesystem::path filename = m_instrumentDirectoryPath / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+    const std::filesystem::path filename = m_instrumentDirectoryPath / "unit_testing/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
     std::shared_ptr<const Instrument> instrument;
@@ -1009,7 +1009,7 @@ public:
   }
 
   void test_load_wish() {
-    const auto definition = m_instrumentDirectoryPath / "/WISH_Definition_10Panels.xml";
+    const auto definition = m_instrumentDirectoryPath / "WISH_Definition_10Panels.xml";
     std::string contents = Strings::loadFile(definition.string());
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto wishInstrument = parser.parseXML(nullptr);
@@ -1018,7 +1018,7 @@ public:
   }
 
   void test_load_sans2d() {
-    const auto definition = m_instrumentDirectoryPath / "/SANS2D_Definition_Tubes.xml";
+    const auto definition = m_instrumentDirectoryPath / "SANS2D_Definition_Tubes.xml";
     std::string contents = Strings::loadFile(definition.string());
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto sansInstrument = parser.parseXML(nullptr);

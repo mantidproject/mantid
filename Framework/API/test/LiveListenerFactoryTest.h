@@ -11,7 +11,6 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Instantiator.h"
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 #include <utility>
@@ -59,9 +58,10 @@ public:
 
   void setUp() override {
     auto &config = Kernel::ConfigService::Instance();
-    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory()).resolve("unit_testing/UnitTestFacilities.xml");
+    std::filesystem::path testFile =
+        std::filesystem::absolute(config.getInstrumentDirectory() / "unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
-    config.updateFacilities(testFile.toString());
+    config.updateFacilities(testFile.string());
   }
 
   void tearDown() override {

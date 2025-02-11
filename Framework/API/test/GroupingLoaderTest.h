@@ -10,7 +10,6 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::API::Grouping;
@@ -27,13 +26,11 @@ public:
   GroupingLoaderTest() {
     using Mantid::Kernel::ConfigService;
 
-    auto dataPaths = ConfigService::Instance().getDataSearchDirs();
+    const auto &dataPaths = ConfigService::Instance().getDataSearchDirs();
 
     // Find the path of AutoTestData
-    for (auto &dataPath : dataPaths) {
-      Poco::Path path(dataPath);
-
-      if (path.directory(path.depth() - 1) == "UnitTest") {
+    for (const auto &dataPath : dataPaths) {
+      if (dataPath.filename() == "UnitTest") {
         m_testDataDir = dataPath;
         break;
       }
@@ -50,7 +47,7 @@ public:
   void test_loadGroupingFromXML() {
     Grouping g;
 
-    TS_ASSERT_THROWS_NOTHING(GroupingLoader::loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
+    TS_ASSERT_THROWS_NOTHING(GroupingLoader::loadGroupingFromXML(m_testDataDir / "MUSRGrouping.xml", g));
 
     TS_ASSERT_EQUALS(g.groupNames.size(), 2);
     TS_ASSERT_EQUALS(g.groupNames[0], "fwd");
@@ -75,6 +72,6 @@ public:
   }
 
 private:
-  std::string m_testDataDir;
-  std::string m_tmpDir;
+  std::filesystem::path m_testDataDir;
+  std::filesystem::path m_tmpDir;
 };
