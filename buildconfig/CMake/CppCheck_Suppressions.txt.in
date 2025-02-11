@@ -498,7 +498,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiH
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/InstrumentInfo.h:47
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/UsageService.h:63
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1698
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:111
