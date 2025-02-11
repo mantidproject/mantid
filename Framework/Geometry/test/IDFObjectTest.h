@@ -32,7 +32,7 @@ public:
 
   void testExists() {
     const std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT(obj.exists());
   }
@@ -49,22 +49,23 @@ public:
   }
 
   void testGetParentDirectory() {
-    const std::filesystem::path expectedDir = ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/";
-    std::string filename = expectedDir.string() + "IDF_for_UNIT_TESTING.xml";
+    const std::filesystem::path expectedDir = ConfigService::Instance().getInstrumentDirectory() / "unit_testing";
+    const std::string filename = (expectedDir / "IDF_for_UNIT_TESTING.xml").string();
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(expectedDir.string(), obj.getParentDirectory().toString());
+    const std::filesystem::path parentDirectory(obj.getParentDirectory().toString());
+    TS_ASSERT(std::filesystem::equivalent(expectedDir, parentDirectory));
   }
 
   void testGetFullPath() {
     const std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(filename.string(), obj.getFileFullPath().toString());
   }
 
   void testGetExtension() {
     const std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(".xml", obj.getExtension());
   }
@@ -72,16 +73,15 @@ public:
   void testGetFileNameOnly() {
     const std::string filenameonly = "IDF_for_UNIT_TESTING.xml";
     const std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/" / filenameonly;
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing" / filenameonly;
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(filenameonly, obj.getFileNameOnly());
   }
 
   void testGetMangledName() {
-    const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory().string() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
-
-    std::filesystem::path path(filename);
+    std::filesystem::path path(ConfigService::Instance().getInstrumentDirectory() /
+                               "unit_testing/IDF_for_UNIT_TESTING.xml");
+    const std::string filename = path.string();
 
     using Poco::DigestEngine;
     using Poco::DigestOutputStream;
@@ -122,7 +122,7 @@ public:
 
   void testGetFileFullPathStr() {
     const std::filesystem::path filename =
-        ConfigService::Instance().getInstrumentDirectory() / "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename.string());
     TS_ASSERT_EQUALS(filename.string(), obj.getFileFullPathStr());
   }

@@ -101,11 +101,8 @@ void LoadParameterFile::exec() {
       // First see if the file exists
       Poco::File ipfFile(filename);
       if (!ipfFile.exists()) {
-        Poco::Path filePath(filename);
-        filename = Poco::Path(Kernel::ConfigService::Instance().getInstrumentDirectory())
-                       .makeDirectory()
-                       .setFileName(filePath.getFileName())
-                       .toString();
+        std::filesystem::path filePath(filename);
+        filename = (Kernel::ConfigService::Instance().getInstrumentDirectory() / filePath.filename()).string();
       }
       g_log.information() << "Parsing from XML file: " << filename << '\n';
       pDoc = pParser.parse(filename);

@@ -310,9 +310,9 @@ public:
   void testAppendProperties() {
 
     // This should clear out all old properties
-    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
-    const std::string propfile = propfilePath + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);
+    const std::filesystem::path propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
+    const std::filesystem::path propfile = propfilePath / "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile.string());
     // this should return an empty string
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
     // this should pass
@@ -320,7 +320,7 @@ public:
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
     // This should append a new properties file properties
-    ConfigService::Instance().updateConfig(propfilePath + "MantidTest.user.properties", true);
+    ConfigService::Instance().updateConfig((propfilePath / "MantidTest.user.properties").string(), true);
     // this should now be valid
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "5");
     // this should have been overridden
@@ -632,9 +632,9 @@ public:
   }
 
   void testGetAllKeys() {
-    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
-    const std::string propfile = propfilePath + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);
+    const std::filesystem::path propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
+    const std::filesystem::path propfile = propfilePath / "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile.string());
 
     std::vector<std::string> keys = ConfigService::Instance().keys();
 
