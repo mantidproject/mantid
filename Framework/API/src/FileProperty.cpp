@@ -14,8 +14,8 @@
 #include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
+#include <filesystem>
 #include <iterator>
 #include <memory>
 
@@ -112,20 +112,22 @@ std::string expandUser(const std::string &filepath) {
  * @param path :: The path to the directory, which can include file stem
  * @returns A string indicating a problem if one occurred
  */
-std::string createDirectory(const std::string &path) {
-  Poco::Path stempath(path);
-  if (stempath.isFile()) {
-    stempath.makeParent();
+std::string createDirectory(const std::filesystem::path &path) {
+  std::filesystem::path stempath(path);
+  // If the path exists and it's a directory, then use that, otherwise we're pointing to
+  // a file and need the parent path
+  if (!(std::filesystem::exists(stempath) && std::filesystem::is_directory(stempath))) {
+    stempath = stempath.parent_path();
   }
 
-  if (!stempath.toString().empty()) {
+  if (!stempath.string().empty()) {
     Poco::File stem(stempath);
     if (!stem.exists()) {
       try {
         stem.createDirectories();
       } catch (Poco::Exception &e) {
         std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.toString() << "\": " << e.what();
+        msg << "Failed to create directory \"" << stempath.string() << "\": " << e.what();
         return msg.str();
       }
     }
@@ -228,9 +230,10 @@ std::string FileProperty::setValue(const std::string &propValue) {
   // If this looks like an absolute path then don't do any searching but make
   // sure the
   // directory exists for a Save property
-  if (Poco::Path(strippedValue).isAbsolute()) {
+  std::filesystem::path strippedValuePath(strippedValue);
+  if (strippedValuePath.is_absolute()) {
     if (isSaveProperty()) {
-      std::string error = createDirectory(strippedValue);
+      const std::string error = createDirectory(strippedValuePath);
       if (!error.empty())
         return error;
     }
@@ -370,24 +373,20 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   std::string errorMsg;
   // We have a relative save path so just prepend the path that is in the
   // 'defaultsave.directory'
-  // Note that this catches the Poco::NotFoundException and returns an empty
-  // string in that case
-  std::string save_path = ConfigService::Instance().getString("defaultsave.directory");
-  Poco::Path save_dir;
+  std::filesystem::path save_path(ConfigService::Instance().getString("defaultsave.directory"));
+  std::filesystem::path save_dir;
   if (save_path.empty()) {
-    save_dir = Poco::Path(propValue).parent();
-    // If we only have a stem filename, parent() will make save_dir empty and
-    // then Poco::File throws
-    if (save_dir.toString().empty()) {
-      save_dir = Poco::Path::current();
+    save_dir = std::filesystem::path(propValue).parent_path();
+    if (save_dir.empty()) {
+      save_dir = std::filesystem::current_path();
     }
   } else {
-    save_dir = Poco::Path(save_path).makeDirectory();
+    save_dir = save_path;
   }
-  errorMsg = createDirectory(save_dir.toString());
+  errorMsg = createDirectory(save_dir);
   if (errorMsg.empty()) {
-    std::string fullpath = save_dir.resolve(propValue).toString();
-    errorMsg = PropertyWithValue<std::string>::setValue(fullpath);
+    std::filesystem::path fullpath = std::filesystem::absolute(save_dir / propValue);
+    errorMsg = PropertyWithValue<std::string>::setValue(fullpath.string());
   }
   return errorMsg;
 }
