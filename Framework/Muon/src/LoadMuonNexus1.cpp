@@ -897,7 +897,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus1::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/analysis"))

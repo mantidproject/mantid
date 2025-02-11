@@ -371,7 +371,7 @@ void LoadMuonNexus2::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/definition"))
