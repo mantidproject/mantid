@@ -877,7 +877,7 @@ class ISISInstrument(BaseInstrument):
             value = ws_instrument.getNumberParameter(param_name)
         else:
             raise RuntimeError(
-                "ISISInstrument: An Instrument Parameter File value of unknown type" "is trying to be copied. Cannot handle this currently."
+                "ISISInstrument: An Instrument Parameter File value of unknown type is trying to be copied. Cannot handle this currently."
             )
         SetInstrumentParameter(
             Workspace=calibration_workspace,

@@ -216,8 +216,7 @@ class PEARLTransfit(PythonAlgorithm):
         if not isCalib:
             if "S_fit_Parameters" not in mtd:
                 self.log().warning(
-                    "No calibration files found. Please run this algorithm will 'Calibration' ticked to "
-                    "generate the calibration workspace."
+                    "No calibration files found. Please run this algorithm will 'Calibration' ticked to generate the calibration workspace."
                 )
                 return
 
@@ -331,7 +330,7 @@ class PEARLTransfit(PythonAlgorithm):
             # ----------------------------------------------------------
             if 8 * Teff < 3 * TD:
                 self.log().information(
-                    "The effective temperature is currently too far below the Debye temperature to" "give an accurate measure."
+                    "The effective temperature is currently too far below the Debye temperature to give an accurate measure."
                 )
                 Tactual = Teff
                 Terror = errTeff

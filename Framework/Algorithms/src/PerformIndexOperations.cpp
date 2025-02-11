@@ -37,6 +37,7 @@ public:
       conjoinWorkspaceAlg->initialize();
       conjoinWorkspaceAlg->setProperty("InputWorkspace1", toAppend);
       conjoinWorkspaceAlg->setProperty("InputWorkspace2", current);
+      conjoinWorkspaceAlg->setProperty("CheckMatchingBins", false);
       conjoinWorkspaceAlg->execute();
       MatrixWorkspace_sptr outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
       return outWS;
@@ -118,6 +119,7 @@ public:
         conjoinWorkspaceAlg->initialize();
         conjoinWorkspaceAlg->setProperty("InputWorkspace1", outWS);
         conjoinWorkspaceAlg->setProperty("InputWorkspace2", subRange);
+        conjoinWorkspaceAlg->setProperty("CheckMatchingBins", false);
         conjoinWorkspaceAlg->execute();
         outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
       }

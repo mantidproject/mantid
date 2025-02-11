@@ -133,7 +133,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:, c]):
                 raise Exception(
-                    "More than 0.001 difference between UB matrices: Q (lab frame):\n" "%s\nQ (sample frame):\n%s" % (originalUB, newUB)
+                    "More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (originalUB, newUB)
                 )
 
         # repeat but use LeanElasticPeaks
@@ -175,7 +175,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:, c]):
                 raise Exception(
-                    "More than 0.001 difference between UB matrices: Q (lab frame):\n" "%s\nQ (sample frame):\n%s" % (originalUB, newUB)
+                    "More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (originalUB, newUB)
                 )
 
     def doValidation(self):

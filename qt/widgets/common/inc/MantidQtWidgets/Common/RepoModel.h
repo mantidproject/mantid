@@ -195,6 +195,8 @@ public:
   QString filePath(const QModelIndex &index);
   QString author(const QModelIndex &index);
 
+  Mantid::API::ScriptRepository_sptr getRepoPtr() { return repo_ptr; };
+
 signals:
   void executingThread(bool /*_t1*/);
 

@@ -87,7 +87,7 @@ public:
   int getRow() const override;
   void setRow(int row);
 
-  std::string getBankName() const;
+  const std::string &getBankName() const;
   void setBankName(std::string bankName);
 
   bool findDetector();
@@ -100,7 +100,7 @@ public:
 
   void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                        std::optional<double> detectorDistance = std::nullopt) override;
-  void setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> detectorDistance = std::nullopt) override;
+  void setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> detectorDistance = std::nullopt) final;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;

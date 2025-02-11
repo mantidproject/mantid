@@ -233,69 +233,62 @@ private:
 
   void checkNXTomoStructure() {
     // Checks the structure of the file - not interested in the data content
-    NXhandle fileHandle;
-    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
+    ::NeXus::File nxFile(m_outputFile);
 
-    TS_ASSERT(status != NX_ERROR);
-
-    if (status != NX_ERROR) {
-      ::NeXus::File nxFile(fileHandle);
-
-      // Check for entry1/tomo_entry/control { and data dataset within }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/control"));
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-
-      // Check for entry1/tomo_entry/data { and data / rotation_angle dataset
-      // links within }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/data"));
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("rotation_angle"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-
-      // Check for entry1/tomo_entry/instrument/detector { data and image_key
-      // dataset link within }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/instrument/detector"));
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("image_key"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-
-      // Check for entry1/tomo_entry/instrument/sample { and rotation_angle
-      // dataset link within }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/sample"));
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("rotation_angle"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-
-      // Check for entry1/log_info { and run_title dataset link within }
-      TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/log_info"));
-      TS_ASSERT_THROWS_NOTHING(nxFile.openData("run_title"));
-      try {
-        nxFile.closeData();
-      } catch (...) {
-      }
-
-      nxFile.close();
+    // Check for entry1/tomo_entry/control { and data dataset within }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/control"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
     }
+
+    // Check for entry1/tomo_entry/data { and data / rotation_angle dataset
+    // links within }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/data"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("rotation_angle"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+
+    // Check for entry1/tomo_entry/instrument/detector { data and image_key
+    // dataset link within }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/instrument/detector"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("image_key"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+
+    // Check for entry1/tomo_entry/instrument/sample { and rotation_angle
+    // dataset link within }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/sample"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("rotation_angle"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+
+    // Check for entry1/log_info { and run_title dataset link within }
+    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/log_info"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openData("run_title"));
+    try {
+      nxFile.closeData();
+    } catch (...) {
+    }
+
+    nxFile.close();
   }
 
   void checksOnNXTomoFormat(int wsCount) {
@@ -315,75 +308,64 @@ private:
   void checkNXTomoDimensions(int wsCount) {
     // Check that the dimensions for the datasets are correct for the number of
     // workspaces
-    NXhandle fileHandle;
-    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
-      ::NeXus::File nxFile(fileHandle);
+    ::NeXus::File nxFile(m_outputFile);
 
-      nxFile.openPath("/entry1/tomo_entry/data");
-      nxFile.openData("data");
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[1], m_axisSize);
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[2], m_axisSize);
-      nxFile.closeData();
-      nxFile.openData("rotation_angle");
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
-      nxFile.closeData();
+    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openData("data");
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[1], m_axisSize);
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[2], m_axisSize);
+    nxFile.closeData();
+    nxFile.openData("rotation_angle");
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
+    nxFile.closeData();
 
-      nxFile.openPath("/entry1/tomo_entry/instrument/detector");
-      nxFile.openData("image_key");
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
-      nxFile.closeData();
+    nxFile.openPath("/entry1/tomo_entry/instrument/detector");
+    nxFile.openData("image_key");
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
+    nxFile.closeData();
 
-      nxFile.openPath("/entry1/log_info");
-      nxFile.openData("run_title");
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
-      nxFile.closeData();
+    nxFile.openPath("/entry1/log_info");
+    nxFile.openData("run_title");
+    TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
+    nxFile.closeData();
 
-      nxFile.close();
-    }
+    nxFile.close();
   }
 
   void checkNXTomoRotations(int wsCount) {
     // Check that the rotation values are correct for the rotation dataset for
     // the number of workspaces
-    NXhandle fileHandle;
-    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
-      ::NeXus::File nxFile(fileHandle);
 
-      nxFile.openPath("/entry1/tomo_entry/data");
-      nxFile.openData("rotation_angle");
-      std::vector<double> data;
-      nxFile.getData(data);
-      for (int i = 0; i < wsCount; ++i)
-        TS_ASSERT_EQUALS(data[i], static_cast<double>((1 + i) * 5));
+    ::NeXus::File nxFile(m_outputFile);
 
-      nxFile.closeData();
+    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openData("rotation_angle");
+    std::vector<double> data;
+    nxFile.getData(data);
+    for (int i = 0; i < wsCount; ++i)
+      TS_ASSERT_EQUALS(data[i], static_cast<double>((1 + i) * 5));
 
-      nxFile.close();
-    }
+    nxFile.closeData();
+
+    nxFile.close();
   }
 
   void checkNXTomoData(int wsCount) {
     // Checks the first {wsCount} data entries are correct - All test data is
     // value 2.0
-    NXhandle fileHandle;
-    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
-      ::NeXus::File nxFile(fileHandle);
+    ::NeXus::File nxFile(m_outputFile);
 
-      nxFile.openPath("/entry1/tomo_entry/data");
-      nxFile.openData("data");
-      std::vector<double> data;
-      nxFile.getData(data);
-      for (int i = 0; i < wsCount; ++i)
-        TS_ASSERT_EQUALS(data[i], 2.0);
+    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openData("data");
+    std::vector<double> data;
+    nxFile.getData(data);
+    for (int i = 0; i < wsCount; ++i)
+      TS_ASSERT_EQUALS(data[i], 2.0);
 
-      nxFile.closeData();
+    nxFile.closeData();
 
-      nxFile.close();
-    }
+    nxFile.close();
   }
 
 private:

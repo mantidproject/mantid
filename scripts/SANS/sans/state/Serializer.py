@@ -44,7 +44,7 @@ class SerializerImpl(json.JSONEncoder):
             return {tag: o.value}
 
         if isinstance(o, tuple) and hasattr(o, "_fields"):
-            raise ValueError("A NamedTuple was passed to the JSON encoder, this is not supported as" " it will be deserialized to a list")
+            raise ValueError("A NamedTuple was passed to the JSON encoder, this is not supported as it will be deserialized to a list")
 
         return json.JSONEncoder.default(self, o)
 

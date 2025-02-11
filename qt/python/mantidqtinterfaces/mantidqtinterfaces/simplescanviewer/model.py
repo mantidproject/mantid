@@ -49,9 +49,7 @@ class SimpleScanViewerModel:
         try:
             SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=output, NormaliseBy="None")
         except RuntimeError:
-            logger.error(
-                "Cannot process file. Please check the provided file can be processed as a scan. " "See error above for more info."
-            )
+            logger.error("Cannot process file. Please check the provided file can be processed as a scan. See error above for more info.")
             return False
         return True
 

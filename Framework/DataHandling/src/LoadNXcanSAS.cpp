@@ -483,15 +483,7 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
   else if (lambda.size() == workspace->blocksize() + 1)
     workspace->setBinEdges(0, std::move(lambda));
   else {
-#if defined(H5_USE_18_API)
     const std::string objectName{transmission.getObjName()};
-#else
-    const size_t nchars = H5Iget_name(transmission.getId(), nullptr, 0);
-    std::string objectName;
-    objectName.resize(nchars);
-    H5Iget_name(transmission.getId(), objectName.data(),
-                nchars + 1); // +1 for null terminator
-#endif
     throw std::runtime_error("Unexpected array size for lambda in transmission group '" + objectName +
                              "'. Expected length=" + std::to_string(workspace->blocksize()) +
                              ", found length=" + std::to_string(lambda.size()));
@@ -504,12 +496,12 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNXcanSAS)
 
 /// constructor
 LoadNXcanSAS::LoadNXcanSAS() = default;
 
-int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadNXcanSAS::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   if (extn != ".nxs" && extn != ".h5") {
     return 0;
@@ -517,7 +509,7 @@ int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   int confidence(0);
 
-  ::NeXus::File &file = descriptor.data();
+  ::NeXus::File file(descriptor.filename());
   // Check if there is an entry root/SASentry/definition->NXcanSAS
   try {
     bool foundDefinition = findDefinition(file);

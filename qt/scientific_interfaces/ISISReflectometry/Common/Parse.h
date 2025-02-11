@@ -7,27 +7,27 @@
 #pragma once
 #include "DllConfig.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseNonNegativeDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseNonNegativeDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseNonNegativeNonZeroDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseNonNegativeNonZeroDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int> parseInt(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<int> parseInt(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int> parseNonNegativeInt(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<int> parseNonNegativeInt(std::string string);
 
 bool MANTIDQT_ISISREFLECTOMETRY_DLL isEntirelyWhitespace(std::string const &string);
 
 template <typename ParseItemFunction>
-boost::optional<std::vector<typename std::invoke_result<ParseItemFunction, std::string const &>::type::value_type>>
+std::optional<std::vector<typename std::invoke_result<ParseItemFunction, std::string const &>::type::value_type>>
 parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
   using ParsedItem = typename std::invoke_result<ParseItemFunction, std::string const &>::type::value_type;
   if (!commaSeparatedValues.empty()) {
@@ -37,10 +37,10 @@ parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
     parsedItems.reserve(items.size());
     for (auto const &item : items) {
       auto maybeParsedItem = parseItem(item);
-      if (maybeParsedItem.is_initialized())
-        parsedItems.emplace_back(maybeParsedItem.get());
+      if (maybeParsedItem.has_value())
+        parsedItems.emplace_back(maybeParsedItem.value());
       else
-        return boost::none;
+        return std::nullopt;
     }
     return parsedItems;
   } else {

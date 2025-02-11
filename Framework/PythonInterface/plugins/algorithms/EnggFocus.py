@@ -133,8 +133,9 @@ class EnggFocus(PythonAlgorithm):
             len_max = len(max_list)
             if len_min != len_max:
                 issues["MaskBinsXMins"] = (
-                    "The number of minimum and maximum values must match. Got "
-                    "{0} and {1} for the minimum and maximum, respectively".format(len_min, len_max)
+                    "The number of minimum and maximum values must match. Got {0} and {1} for the minimum and maximum, respectively".format(
+                        len_min, len_max
+                    )
                 )
 
         return issues

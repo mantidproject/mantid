@@ -414,7 +414,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, False, True])
-        mock_logger.assert_called_once_with("You are overlaying distribution and " "non-distribution data!")
+        mock_logger.assert_called_once_with("You are overlaying distribution and non-distribution data!")
 
     def test_check_axes_distribution_consistency_all_normalized(self):
         mock_logger = self._run_check_axes_distribution_consistency([True, True, True])

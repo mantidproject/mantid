@@ -164,7 +164,7 @@ def pyexec_setup(remove_temp, new_options):
 
 
 class BASISPowderDiffraction(DataProcessorAlgorithm):
-    _mask_file = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/" "BASIS_Mask_default_diff.xml"
+    _mask_file = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/BASIS_Mask_default_diff.xml"
     # Consider only events with these wavelengths
     _wavelength_bands = {"311": [3.07, 3.60], "111": [6.05, 6.60], "333": [2.02, 2.20]}
     _diff_bank_numbers = list(range(5, 14))

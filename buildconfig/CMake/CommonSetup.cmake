@@ -102,11 +102,10 @@ if(BUILD_MANTIDFRAMEWORK)
 
   find_package(
     HDF5 MODULE
-    COMPONENTS C CXX HL
+    COMPONENTS C CXX
     REQUIRED
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
 
 if(ENABLE_WORKBENCH)
@@ -151,9 +150,11 @@ endif()
 include(ClangTidy)
 
 # ######################################################################################################################
-# Setup cppcheck
+# Setup cppcheck - temporarily exclude from Windows because 2.16 isn't available yet
 # ######################################################################################################################
-include(CppCheckSetup)
+if(NOT WIN32)
+  include(CppCheckSetup)
+endif()
 
 # ######################################################################################################################
 # Set up the unit tests target

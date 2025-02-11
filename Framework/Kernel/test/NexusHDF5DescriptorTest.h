@@ -15,6 +15,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+using Mantid::Kernel::NexusHDF5Descriptor;
+
 namespace {
 std::string getFullPath(const std::string &filename) {
   using Mantid::Kernel::ConfigService;
@@ -39,7 +41,8 @@ public:
 
     Mantid::Kernel::NexusHDF5Descriptor nexusHDF5Descriptor(filename);
 
-    TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
+    TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.filename());
+    TS_ASSERT_EQUALS(".h5", nexusHDF5Descriptor.extension());
 
     TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/instrument/bank39/total_counts", "SDS"), true);
 
@@ -72,5 +75,22 @@ public:
     nEntries += lf_TestSet("SDS", 2567);
 
     TS_ASSERT_EQUALS(nEntries, 2923);
+
+    // test firstEntryNameType
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.firstEntryNameType().first, "entry");
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.firstEntryNameType().second, "NXentry");
+
+    // test classTypeExists
+    TS_ASSERT(nexusHDF5Descriptor.classTypeExists("NXentry"));
+    TS_ASSERT(!nexusHDF5Descriptor.classTypeExists("NOT_TYPE"));
+
+    // test allPathsOfType
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.allPathsOfType("NXentry").size(), 1);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.allPathsOfType("NXmonitor").size(), 3);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.allPathsOfType("SDS").size(), 2567);
+
+    // test hasRootAttr
+    TS_ASSERT(nexusHDF5Descriptor.hasRootAttr("file_name"));
+    TS_ASSERT(!nexusHDF5Descriptor.hasRootAttr("not_attr"));
   }
 };

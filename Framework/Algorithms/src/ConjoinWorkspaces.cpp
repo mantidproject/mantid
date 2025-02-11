@@ -35,6 +35,8 @@ void ConjoinWorkspaces::init() {
                   "The label to set the Y axis to");
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisUnit", "", Direction::Input),
                   "The unit to set the Y axis to");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CheckMatchingBins", true, Direction::Input),
+                  "If true, the algorithm will check that the two input workspaces have matching bins.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -54,8 +56,18 @@ void ConjoinWorkspaces::exec() {
   if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
     const std::string message("Only one of the input workspaces are of type "
                               "EventWorkspace; please use matching workspace "
-                              "types (both EventWorkspace's or both "
-                              "Workspace2D's).");
+                              "types (both EventWorkspace or both "
+                              "Workspace2D).");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  // Check whether bins match
+  bool checkBins = getProperty("CheckMatchingBins");
+  if (checkBins && !checkBinning(ws1, ws2)) {
+    const std::string message("The bins do not match in the input workspaces. "
+                              "Consider using RebinToWorkspace to preprocess "
+                              "the workspaces before conjoining them.");
     g_log.error(message);
     throw std::invalid_argument(message);
   }
@@ -75,6 +87,24 @@ void ConjoinWorkspaces::exec() {
 
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Checks whether the binning is consistent between two workspaces
+ *  @param ws1 :: The first input workspace
+ *  @param ws2 :: The second input workspace
+ *  @return :: true if both workspaces have consistent binning.
+ */
+bool ConjoinWorkspaces::checkBinning(const API::MatrixWorkspace_const_sptr &ws1,
+                                     const API::MatrixWorkspace_const_sptr &ws2) const {
+  if (ws1->isRaggedWorkspace() || ws2->isRaggedWorkspace()) {
+    return false;
+  }
+
+  // If neither workspace is ragged, we only need to check the first specrum.
+  // Otherwise the matchingBins() function requires the two workspaces to have
+  // the same number of spectra.
+  return WorkspaceHelpers::matchingBins(ws1, ws2, true);
 }
 
 //----------------------------------------------------------------------------------------------

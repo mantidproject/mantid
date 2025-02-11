@@ -122,7 +122,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
   }
   validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
 
-  if (!WorkspaceHelpers::matchingBins(*depWs, *mtWs, true)) {
+  if (!WorkspaceHelpers::matchingBins(depWs, mtWs, true)) {
     result[PropNames::DEP_WORKSPACE] = "The bins in the " + std::string(PropNames::DEP_WORKSPACE) + " and " +
                                        PropNames::MT_WORKSPACE + " do not match.";
   }

@@ -50,9 +50,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
-        return (
-            "Performs quasi-elastic neutron scattering (QENS) multiple file reduction " "for ILL indirect geometry data, instrument IN16B."
-        )
+        return "Performs quasi-elastic neutron scattering (QENS) multiple file reduction for ILL indirect geometry data, instrument IN16B."
 
     def seeAlso(self):
         return ["IndirectILLReductionFWS", "IndirectILLEnergyTransfer"]
@@ -80,7 +78,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         self.declareProperty(
             MultipleFileProperty("AlignmentRun", action=FileAction.OptionalLoad, extensions=["nxs"]),
-            doc="Run number(s) of vanadium run(s) used for " "peak alignment for UnmirrorOption=[5, 7]",
+            doc="Run number(s) of vanadium run(s) used for peak alignment for UnmirrorOption=[5, 7]",
         )
 
         self.declareProperty(name="SumRuns", defaultValue=False, doc="Whether to sum all the input runs.")
@@ -88,7 +86,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self.declareProperty(
             name="CropDeadMonitorChannels",
             defaultValue=False,
-            doc="Whether or not to exclude the first and last few channels " "with 0 monitor count in the energy transfer formula.",
+            doc="Whether or not to exclude the first and last few channels with 0 monitor count in the energy transfer formula.",
         )
 
         self.declareProperty(
@@ -186,9 +184,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self.getPropertyValue("CalibrationRun"):
             range = self.getProperty("CalibrationPeakRange").value
             if len(range) != 2:
-                issues["CalibrationPeakRange"] = "Please provide valid calibration range " "(comma separated 2 energy values)."
+                issues["CalibrationPeakRange"] = "Please provide valid calibration range (comma separated 2 energy values)."
             elif range[0] >= range[1]:
-                issues["CalibrationPeakRange"] = "Please provide valid calibration range. " "Start energy is bigger than end energy."
+                issues["CalibrationPeakRange"] = "Please provide valid calibration range. Start energy is bigger than end energy."
 
         if self.getPropertyValue("CalibrationBackgroundRun") and not self.getPropertyValue("CalibrationRun"):
             issues["CalibrationRun"] = "Calibration run is required when calibration background is given."
@@ -238,7 +236,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             self._sample_file = self._sample_file.replace(",", "+")
 
         # Nexus metadata criteria for QENS type of data
-        self._criteria = "$/entry0/instrument/Doppler/maximum_delta_energy$ != 0. and " "$/entry0/instrument/Doppler/velocity_profile$ == 0"
+        self._criteria = "$/entry0/instrument/Doppler/maximum_delta_energy$ != 0. and $/entry0/instrument/Doppler/velocity_profile$ == 0"
 
         # empty list to store all final workspaces to group
         self._ws_list = []
@@ -272,7 +270,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
         if not files:
-            raise RuntimeError("None of the {0} runs are of QENS type." "Check the files or reduction type.".format(label))
+            raise RuntimeError("None of the {0} runs are of QENS type. Check the files or reduction type.".format(label))
         else:
             self.log().information("Filtered {0} runs are: {1} \\n".format(label, files.replace(",", "\\n")))
 

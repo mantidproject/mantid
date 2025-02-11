@@ -173,7 +173,7 @@ void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
 //------------------------------------------------------------------------------------------------
 /** Saves all of the workspace history to a "process" field
  * in an open NXS file.
- * Code taken from NexusFileIO.cpp on May 14, 2012.
+ * Code taken from SaveNexusProcessedHelper.cpp on May 14, 2012.
  *
  * @param file :: previously opened NXS file.
  */

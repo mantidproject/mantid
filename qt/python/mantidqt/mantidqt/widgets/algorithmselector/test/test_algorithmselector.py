@@ -63,7 +63,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True, True))
 
 
-createDialogFromName_func_name = "mantidqt.interfacemanager.InterfaceManager." "createDialogFromName"
+createDialogFromName_func_name = "mantidqt.interfacemanager.InterfaceManager.createDialogFromName"
 
 
 @patch.object(AlgorithmFactoryImpl, "getDescriptors", mock_get_algorithm_descriptors)
@@ -115,7 +115,7 @@ class WidgetTest(unittest.TestCase):
 
     def test_search_box_selection_filter_mode_on_qt5(self):
         if not qtpy.PYQT5:
-            self.skipTest("Versions below Qt5 do not support the following functionality, " "and the default Qt behaviour is used")
+            self.skipTest("Versions below Qt5 do not support the following functionality, and the default Qt behaviour is used")
         else:
             widget = AlgorithmSelectorWidget()
             self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)

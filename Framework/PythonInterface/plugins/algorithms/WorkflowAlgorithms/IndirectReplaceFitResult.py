@@ -97,17 +97,17 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         return "Workflow\\DataHandling;Inelastic\\Indirect"
 
     def summary(self):
-        return "Replaces a fit result within the Input Workspace with the corresponding fit result found in the " "Single Fit Workspace."
+        return "Replaces a fit result within the Input Workspace with the corresponding fit result found in the Single Fit Workspace."
 
     def PyInit(self):
         self.declareProperty(
             MatrixWorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc="The result workspace containing the poor fit value which needs replacing. It's name " "must end with _Result.",
+            doc="The result workspace containing the poor fit value which needs replacing. It's name must end with _Result.",
         )
 
         self.declareProperty(
             MatrixWorkspaceProperty("SingleFitWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
-            doc="The result workspace containing the result data from a single fit. It's name must " "end with _Result.",
+            doc="The result workspace containing the result data from a single fit. It's name must end with _Result.",
         )
 
         self.declareProperty(
@@ -126,10 +126,10 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         single_fit_workspace = self.getProperty("SingleFitWorkspace").value
 
         if not string_ends_with(input_name, self._allowed_extension):
-            issues["InputWorkspace"] = "The input workspace must have a name ending in " "{0}".format(self._allowed_extension)
+            issues["InputWorkspace"] = "The input workspace must have a name ending in {0}".format(self._allowed_extension)
 
         if not string_ends_with(single_fit_name, self._allowed_extension):
-            issues["SingleFitWorkspace"] = "This workspace must have a name ending in " "{0}".format(self._allowed_extension)
+            issues["SingleFitWorkspace"] = "This workspace must have a name ending in {0}".format(self._allowed_extension)
 
         if not output_name:
             issues["OutputWorkspace"] = "No OutputWorkspace name was provided."
@@ -142,7 +142,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             if not input_x_axis.isNumeric():
                 issues["InputWorkspace"] = "The input workspace must have a numeric x axis."
             if len(input_workspace.readY(0)) < 2:
-                issues["InputWorkspace"] = "The input workspace must contain result data from a fit involving 2 or " "more spectra."
+                issues["InputWorkspace"] = "The input workspace must contain result data from a fit involving 2 or more spectra."
             if not input_y_axis.isText():
                 issues["InputWorkspace"] = "The input workspace must have a text y axis."
 
@@ -160,7 +160,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
         if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
             if fit_parameter_missing(single_fit_workspace, input_workspace, ["Chi_squared"]):
-                issues["InputWorkspace"] = "The fit parameters in the input workspace and single fit workspace do " "not match."
+                issues["InputWorkspace"] = "The fit parameters in the input workspace and single fit workspace do not match."
 
         return issues
 

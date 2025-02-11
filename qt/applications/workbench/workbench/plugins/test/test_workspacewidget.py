@@ -32,8 +32,8 @@ from mantid.plots.utility import MantidAxType
 mpl.use("Agg")
 
 ALGORITHM_HISTORY_WINDOW_TYPE = "AlgorithmHistoryWindow"
-ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." "algorithmhistorywindow." + ALGORITHM_HISTORY_WINDOW_TYPE
-MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." "presenter.MatrixWorkspaceDisplay"
+ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget.algorithmhistorywindow." + ALGORITHM_HISTORY_WINDOW_TYPE
+MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix.presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
 SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE
@@ -52,7 +52,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         # Create ragged workspace
         ws2d_ragged = CreateWorkspace(DataX=[10, 20, 30], DataY=[1, 2, 3], NSpec=1, OutputWorkspace="Ragged")
         temp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
-        ConjoinWorkspaces(ws2d_ragged, temp, CheckOverlapping=False)
+        ConjoinWorkspaces(ws2d_ragged, temp, CheckOverlapping=False, CheckMatchingBins=False)
         ws2d_ragged = AnalysisDataService.retrieve("Ragged")
 
         cls.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]

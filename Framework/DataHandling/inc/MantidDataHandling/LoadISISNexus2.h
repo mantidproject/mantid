@@ -15,7 +15,7 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
@@ -56,7 +56,7 @@ multi-period file)
 
 @author Roman Tolchenov, Tessella plc
 */
-class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   /// Default constructor
   LoadISISNexus2();
@@ -64,14 +64,14 @@ public:
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus", "SaveISISNexus"}; }
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Loads a file in ISIS NeXus format."; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
   /// Spectra block descriptor
   struct SpectraBlock {

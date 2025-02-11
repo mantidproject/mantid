@@ -59,5 +59,5 @@ def get_save_builder(data_info):
         return StateSaveBuilder()
     else:
         raise NotImplementedError(
-            "StateSaveBuilder: Could not find any valid save builder for the " "specified StateData object {0}".format(str(data_info))
+            "StateSaveBuilder: Could not find any valid save builder for the specified StateData object {0}".format(str(data_info))
         )

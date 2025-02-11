@@ -412,7 +412,7 @@ def purge_table(
     workspace_name = str(workspace)
     assert AnalysisDataService.doesExist(workspace_name), f"Input workspace {workspace_name} does not exists"
     # validate the input calibraton table
-    message = f"Cannot process table {calibration_table}. Pass the name of an existing TableWorkspace" " or a TableWorkspace handle"
+    message = f"Cannot process table {calibration_table}. Pass the name of an existing TableWorkspace or a TableWorkspace handle"
     assert isinstance(calibration_table, (str, TableWorkspace)), message
     assert AnalysisDataService.doesExist(str(calibration_table)), f"Input table {calibration_table} does not exists"
     if output_table is not None:

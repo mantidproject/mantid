@@ -135,7 +135,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             and self.refine_gamma_y_checkbox.isChecked()
         ):
             self.checkboxes_invalid.show()
-            self.checkboxes_invalid.setToolTip("Refining the Microstrain with Sigma-1 and Gamma(Y)" " may not be advisable.")
+            self.checkboxes_invalid.setToolTip("Refining the Microstrain with Sigma-1 and Gamma(Y) may not be advisable.")
         else:
             self.checkboxes_invalid.hide()
             self.checkboxes_invalid.setToolTip("")

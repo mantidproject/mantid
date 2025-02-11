@@ -128,9 +128,8 @@ variable_help = {
             "tt35_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
             "TT35. This file must be located in the top level of the calibration folder.",
         },
-        "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating "
-        "the current normalisation",
-        "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor " "workspace",
+        "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating the current normalisation",
+        "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor workspace",
         "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
         "processing takes place. This is to crop from 40,000 microseconds in the "
         "raw data to 20,000 microseconds worth of data",
@@ -139,7 +138,7 @@ variable_help = {
         "be less than the values specified for raw_data_tof_cropping.",
         "monitor_spline_coefficient": "The coefficient to use whilst calculating a spline from the monitor."
         "workspace. This is used to normalise the workspace current.",
-        "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during " "a vanadium calibration.",
+        "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during a vanadium calibration.",
     },
     "general_params": {
         "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
@@ -148,8 +147,8 @@ variable_help = {
         "create_cal_rebin_1_params": "The parameters for the first rebin step used to create a calibration file",
         "create_cal_rebin_2_params": "The parameters for the second rebin step used to create a calibration file",
         "cross_corr_reference_spectra": "The Workspace Index of the spectra to correlate all other spectra against",
-        "cross_corr_ws_index_min": "The workspace index of the first member of the range of spectra to cross-correlate " "against",
-        "cross_corr_ws_index_max": "The workspace index of the last member of the range of spectra to cross-correlate " "against",
+        "cross_corr_ws_index_min": "The workspace index of the first member of the range of spectra to cross-correlate against",
+        "cross_corr_ws_index_max": "The workspace index of the last member of the range of spectra to cross-correlate against",
         "cross_corr_x_min": "The starting point of the region to be cross correlated",
         "cross_corr_x_max": "The ending point of the region to be cross correlated",
         "get_det_offsets_step": "Step size used to bin d-spacing data in GetDetectorOffsets",

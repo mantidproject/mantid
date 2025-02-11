@@ -13,6 +13,7 @@
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/variant.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -43,11 +44,11 @@ public:
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
-  boost::optional<size_t> const &lookupIndex() const;
+  std::optional<size_t> const &lookupIndex() const;
 
   void setOutputNames(std::vector<std::string> const &outputNames) override;
   void setOutputQRange(RangeInQ qRange);
-  void setLookupIndex(boost::optional<size_t> lookupIndex);
+  void setLookupIndex(std::optional<size_t> lookupIndex);
   void resetOutputs() override;
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
@@ -75,7 +76,7 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
-  boost::optional<size_t> m_lookupIndex;
+  std::optional<size_t> m_lookupIndex;
   mutable IGroup *m_parent;
   friend class Encoder;
 

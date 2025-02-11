@@ -60,7 +60,7 @@ class RecentlyClosedScriptsMenu(QMenu):
             QMessageBox().warning(
                 None,
                 "That script no longer exists!",
-                "Are all network drives properly mounted? or are there any network connectivity " "problems?",
+                "Are all network drives properly mounted? or are there any network connectivity problems?",
                 QMessageBox.Ok,
             )
 

@@ -83,7 +83,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self.declareProperty(
             "GenerateVirtualInstrument",
             True,
-            "If True, then the geometry of all the detectors will be written " "to DetectorTableWorkspace",
+            "If True, then the geometry of all the detectors will be written to DetectorTableWorkspace",
         )
 
         default_num_dets = 256 * 256

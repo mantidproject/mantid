@@ -161,7 +161,7 @@ void DetermineChunking::exec() {
             // Get total number of events for each bank
             file.openGroup(entry_name, entry_class);
             file.openData("total_counts");
-            if (file.getInfo().type == NX_UINT64) {
+            if (file.getInfo().type == NXnumtype::UINT64) {
               std::vector<uint64_t> bank_events;
               file.getData(bank_events);
               total_events += bank_events[0];

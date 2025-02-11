@@ -15,6 +15,8 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace {
 /// An array containing the supported instrument names
@@ -28,7 +30,7 @@ using namespace API;
 using namespace NeXus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -38,17 +40,17 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLTOF2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
-       descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
-                                                                                         // LoadILLIndirect
-       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
-                                                                                         // LoadILLReflectometry
-       && !descriptor.pathExists("/entry0/instrument/Tx"))                               // This eliminates SALSA data
-      || (descriptor.pathExists("/entry0/data_scan") &&
-          descriptor.pathExists("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
+  if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
+       descriptor.isEntry("/entry0/mode") && !descriptor.isEntry("/entry0/dataSD") // This one is for
+                                                                                   // LoadILLIndirect
+       && !descriptor.isEntry("/entry0/instrument/VirtualChopper")                 // This one is for
+                                                                                   // LoadILLReflectometry
+       && !descriptor.isEntry("/entry0/instrument/Tx"))                            // This eliminates SALSA data
+      || (descriptor.isEntry("/entry0/data_scan") &&
+          descriptor.isEntry("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
   ) {
     return 80;
   } else {
@@ -56,7 +58,7 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {}
+LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusHDF5Descriptor>() {}
 
 /**
  * Initialises the algorithm
@@ -261,16 +263,14 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   // Open NeXus file
-  NXhandle nxfileID;
-  NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
-
-  g_log.debug() << "Starting parsing properties from : " << filename << '\n';
-  if (stat == NX_ERROR) {
+  try {
+    ::NeXus::File nxfileID(filename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const ::NeXus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  NXclose(&nxfileID);
+
   runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }

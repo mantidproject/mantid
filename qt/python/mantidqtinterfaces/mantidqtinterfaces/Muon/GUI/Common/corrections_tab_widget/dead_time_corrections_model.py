@@ -88,7 +88,7 @@ class DeadTimeCorrectionsModel:
         if len(column_names) != 2:
             return f"Expected 2 columns, found {str(max(0, len(column_names)))} columns."
         if column_names[0] != "spectrum" or column_names[1] != DEAD_TIME_TABLE_KEY:
-            return f"Columns have incorrect names. Column 1 should be 'spectrum' and column 2 should be " f"'{DEAD_TIME_TABLE_KEY}'."
+            return f"Columns have incorrect names. Column 1 should be 'spectrum' and column 2 should be '{DEAD_TIME_TABLE_KEY}'."
         number_of_rows = table.rowCount()
         number_of_histograms = self._data_context.current_workspace.getNumberHistograms()
         if number_of_rows != number_of_histograms:

@@ -71,7 +71,7 @@ class InelasticEMUauReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs,\n" " eg [cycle::] 7333-7341,7345",
+            doc="Comma separated range of sample runs,\n eg [cycle::] 7333-7341,7345",
         )
 
         self.declareProperty(
@@ -137,7 +137,7 @@ class InelasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="KeepIntermediateWorkspaces",
             defaultValue=False,
-            doc="Whether to keep the intermediate sample and calibration\n" "workspaces for diagnostic checks.",
+            doc="Whether to keep the intermediate sample and calibration workspaces for diagnostic checks.",
         )
 
         self.declareProperty(

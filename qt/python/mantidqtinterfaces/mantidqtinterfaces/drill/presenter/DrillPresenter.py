@@ -273,7 +273,7 @@ class DrillPresenter:
         else:
             result = self.model.process(rows)
         if not result:
-            QMessageBox.warning(self.view, "Error", "Please check the " "parameters value before processing.")
+            QMessageBox.warning(self.view, "Error", "Please check the parameters value before processing.")
             self.view.set_disabled(False)
 
     def stopProcessing(self):
@@ -445,7 +445,7 @@ class DrillPresenter:
         q = QMessageBox.question(
             self.view,
             "DrILL: Unsaved data",
-            "You have " "unsaved modifications, do you want to save " "them before?",
+            "You have unsaved modifications, do you want to save them before?",
             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
         )
         if q == QMessageBox.Yes:

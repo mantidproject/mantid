@@ -231,7 +231,7 @@ class PhaseTableView(QtWidgets.QWidget):
 
     def enter_phase_table_name(self):
         name, ok = QtWidgets.QInputDialog.getText(
-            self, "Phase Table Name", "Enter the name of the new Phase table \n" "(leave blank to use the default name):"
+            self, "Phase Table Name", "Enter the name of the new Phase table \n(leave blank to use the default name):"
         )
         if ok:
             return name

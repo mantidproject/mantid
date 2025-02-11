@@ -60,7 +60,7 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         approx_comp = abs((ref - val) / ref) < epsilon
         if not approx_comp:
-            print("Failed approximate comparison between value {0} and reference value " "{1}, with epsilon {2}".format(val, ref, epsilon))
+            print("Failed approximate comparison between value {0} and reference value {1}, with epsilon {2}".format(val, ref, epsilon))
 
         return approx_comp
 
@@ -189,7 +189,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2], OutFittedPeaksTable=peaksTblName)
             self.assertEqual(test_fit_peaks_table.rowCount(), 1)
         except RuntimeError as rex:
-            print("Failed (as expected) to fit the first peak (too far off the initial " "guess), with RuntimeError: {0}".format(str(rex)))
+            print("Failed (as expected) to fit the first peak (too far off the initial guess), with RuntimeError: {0}".format(str(rex)))
 
     def test_2peaks_runs_ok(self):
         """

@@ -11,7 +11,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -57,8 +57,7 @@ private:
 
   void loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws,
-                ::NeXus::NXnumtype dataType);
+  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws, NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();

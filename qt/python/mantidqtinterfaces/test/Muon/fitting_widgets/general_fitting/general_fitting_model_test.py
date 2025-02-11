@@ -221,7 +221,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(
             str(self.model.simultaneous_fit_function),
-            "composite=MultiDomainFunction,NumDeriv=true;" "name=FlatBackground,A0=0,$domains=i;" "name=FlatBackground,A0=5,$domains=i",
+            "composite=MultiDomainFunction,NumDeriv=true;name=FlatBackground,A0=0,$domains=i;name=FlatBackground,A0=5,$domains=i",
         )
 
     def test_that_update_attribute_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):
@@ -266,7 +266,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=0")
 
     @mock.patch(
-        "mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel." "_get_selected_runs"
+        "mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._get_selected_runs"
     )
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self, mock_get_runs):
         self.model.simultaneous_fit_by = "Run"
@@ -472,7 +472,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(
             str(self.model.simultaneous_fit_function),
-            "composite=MultiDomainFunction,NumDeriv=true;" "name=FlatBackground,A0=1,$domains=i;" "name=FlatBackground,A0=5,$domains=i",
+            "composite=MultiDomainFunction,NumDeriv=true;name=FlatBackground,A0=1,$domains=i;name=FlatBackground,A0=5,$domains=i",
         )
 
     def test_that_the_currently_selected_function_is_copied_for_when_a_larger_number_of_new_datasets_are_loaded(self):

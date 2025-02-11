@@ -1131,7 +1131,7 @@ class RunDescriptor(PropDescriptor):
                         RunDescriptor._logger(message, "warning")
                     raise RuntimeError(message)
                 else:
-                    message = "*** Cannot find run-file with extension {0}.\n" "    Found file {1} instead".format(old_ext, file_name)
+                    message = "*** Cannot find run-file with extension {0}.\n    Found file {1} instead".format(old_ext, file_name)
                     RunDescriptor._logger(message, "notice")
                 self._run_file_path = os.path.dirname(fname)
                 self._fext = fex
@@ -1252,8 +1252,9 @@ class RunDescriptor(PropDescriptor):
                     ws_calibration = FileFinder.getFullPath(ws_calibration)
                     if len(ws_calibration) == 0:
                         raise RuntimeError(
-                            "Can not find defined in run {0} calibration file {1}\n"
-                            "Define det_cal_file reduction parameter properly".format(loaded_ws.name(), test_name)
+                            "Can not find defined in run {0} calibration file {1}\nDefine det_cal_file reduction parameter properly".format(
+                                loaded_ws.name(), test_name
+                            )
                         )
                     RunDescriptor._logger(
                         "*** load_data: Calibrating data using workspace defined calibration file: {0}".format(ws_calibration), "notice"
@@ -1345,7 +1346,7 @@ class RunDescriptor(PropDescriptor):
         mon_ws_name = mon_ws.name()
         if not homo_binning:
             Rebin(InputWorkspace=mon_ws_name, OutputWorkspace=mon_ws_name, Params=bins, PreserveEvents="0")
-        ConjoinWorkspaces(InputWorkspace1=mon_ws_name, InputWorkspace2="tmp_mon")
+        ConjoinWorkspaces(InputWorkspace1=mon_ws_name, InputWorkspace2="tmp_mon", CheckMatchingBins=False)
         mon_ws = mtd[mon_ws_name]
 
         if "tmp_mon" in mtd:

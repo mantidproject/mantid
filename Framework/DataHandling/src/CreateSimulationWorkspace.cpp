@@ -268,21 +268,18 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filena
   } catch (::NeXus::Exception &) {
     throw std::runtime_error("Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
-  using NXIntArray = std::unique_ptr<std::vector<int32_t>>;
+  using NXIntArray = std::vector<int32_t>;
 
-  nxsFile.openData("NDET");
-  NXIntArray ndets(nxsFile.getData<int32_t>());
-  nxsFile.closeData();
+  NXIntArray ndets;
+  nxsFile.readData("NDET", ndets);
 
-  nxsFile.openData("SPEC");
-  NXIntArray specTable(nxsFile.getData<int32_t>());
-  nxsFile.closeData();
+  NXIntArray specTable;
+  nxsFile.readData("SPEC", specTable);
 
-  nxsFile.openData("UDET");
-  NXIntArray udetTable(nxsFile.getData<int32_t>());
-  nxsFile.closeData();
+  NXIntArray udetTable;
+  nxsFile.readData("UDET", udetTable);
 
-  createGroupingsFromTables(specTable->data(), udetTable->data(), (*ndets)[0]);
+  createGroupingsFromTables(specTable.data(), udetTable.data(), ndets[0]);
 }
 
 /**

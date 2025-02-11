@@ -37,7 +37,7 @@ class PyChopInstrument(DirectInstrument):
             logger = get_logger(logger=logger)
             assert isinstance(logger, Logger)
 
-            logger.notice(f"Using default chopper frequency for instrument {self._name}: " f"{chopper_frequency} Hz")
+            logger.notice(f"Using default chopper frequency for instrument {self._name}: {chopper_frequency} Hz")
 
         return chopper_frequency
 

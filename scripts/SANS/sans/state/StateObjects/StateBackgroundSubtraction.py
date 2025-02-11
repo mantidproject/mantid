@@ -39,9 +39,7 @@ class StateBackgroundSubtraction(metaclass=JsonSerializable):
             is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError(
-                "StateBackgroundSubtraction: The provided inputs are illegal. " "Please see: {}".format(json.dumps(is_invalid))
-            )
+            raise ValueError("StateBackgroundSubtraction: The provided inputs are illegal. Please see: {}".format(json.dumps(is_invalid)))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

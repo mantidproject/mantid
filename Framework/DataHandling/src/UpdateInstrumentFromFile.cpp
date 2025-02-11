@@ -15,11 +15,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
+#include <H5Cpp.h>
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -88,20 +89,16 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (NexusDescriptor::isReadable(filename)) {
+  if (H5::H5File::isHdf5(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
 
     // we open and close the HDF5 file.
-    // there is an issue with how HDF5 files are opened (only one at a time)
-    // swap the order of descriptors
     boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(new Kernel::NexusHDF5Descriptor(filename));
 
-    boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(new Kernel::NexusDescriptor(filename));
-
-    if (isisNexus.confidence(*descriptor) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
-      auto &nxFile = descriptor->data();
-      const auto &rootEntry = descriptor->firstEntryNameType();
+    if (isisNexus.confidence(*descriptorNexusHDF5) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
+      const auto &rootEntry = descriptorNexusHDF5->firstEntryNameType();
+      ::NeXus::File nxFile(filename);
       nxFile.openGroup(rootEntry.first, rootEntry.second);
       updateFromNeXus(nxFile);
       return;

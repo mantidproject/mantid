@@ -18,6 +18,7 @@
 #include <algorithm>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 const QString DEFAULT_LOG("run_number");
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "MUSR"};
@@ -25,12 +26,16 @@ const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "M
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
+    : m_widget(widget), m_watcher(new QFileSystemWatcher(widget)), m_timer(new QTimer(widget)),
+      m_periodInfo(std::make_shared<MuonPeriodInfo>()), m_selectedLog(DEFAULT_LOG), m_numPeriods(0), m_presenter() {}
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
 
+void ALCDataLoadingView::subscribePresenter(IALCDataLoadingPresenter *presenter) { m_presenter = presenter; }
+
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
+
   initInstruments();
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
@@ -39,15 +44,6 @@ void ALCDataLoadingView::initialize() {
   enableRunsAutoAdd(false);
   enableAlpha(false);
   showAlphaMessage(false);
-  connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), SIGNAL(runsEditingSignal()));
-  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsEditingFinishedSignal()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
-  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), SIGNAL(manageDirectoriesClicked()));
-  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
-  connect(m_ui.periodInfo, SIGNAL(clicked()), SIGNAL(periodInfoClicked()));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -76,6 +72,27 @@ void ALCDataLoadingView::initialize() {
   m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
 
   m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
+
+  // Set up connections
+  connect(m_ui.help, &QPushButton::clicked, this, &ALCDataLoadingView::help);
+  connect(m_ui.load, &QPushButton::clicked, this, &ALCDataLoadingView::notifyLoadClicked);
+  connect(m_ui.instrument, &QComboBox::currentTextChanged, this, &ALCDataLoadingView::instrumentChanged);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::fileTextChanged, this,
+          &ALCDataLoadingView::notifyRunsEditingChanged);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::findingFiles, this,
+          &ALCDataLoadingView::notifyRunsEditingFinished);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::fileFindingFinished, this,
+          &ALCDataLoadingView::notifyRunsFoundFinished);
+  connect(m_ui.manageDirectoriesButton, &QPushButton::clicked, this, &ALCDataLoadingView::openManageDirectories);
+  connect(m_ui.periodInfo, &QPushButton::clicked, this, &ALCDataLoadingView::notifyPeriodInfoClicked);
+  connect(m_ui.runsAutoAdd, &QAbstractButton::toggled, this, &ALCDataLoadingView::runsAutoAddToggled);
+
+  // Watcher to check if directory to load data from changes
+  // Need to connect using function pointers because directoryChanged() is somehow not recognised as a signal
+  connect(m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->setDirectoryChanged(true); });
+
+  // Timer to send timeout() signal intermitently
+  connect(m_timer, &QTimer::timeout, this, &ALCDataLoadingView::notifyTimerEvent);
 }
 
 /**
@@ -318,7 +335,7 @@ void ALCDataLoadingView::enableAll() {
 }
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
-  emit instrumentChangedSignal(instrument.toStdString());
+  m_presenter->handleInstrumentChanged(instrument.toStdString());
   if (!m_ui.runs->getText().isEmpty()) {
     m_ui.runs->findFiles(); // Re-search for files with new instrument
   }
@@ -346,7 +363,7 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
 
 void ALCDataLoadingView::setFileExtensions(const std::vector<std::string> &extensions) {
   QStringList exts;
-  for (std::string value : extensions) {
+  for (const std::string &value : extensions) {
     exts << QString::fromStdString(value);
   }
   m_ui.runs->setFileExtensions(exts);
@@ -373,14 +390,16 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
     setLoadStatus("Auto Add", "orange");
-    emit autoAddToggledSignal(true);
+    handleStartWatching(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
     setLoadStatus("Waiting", "orange");
-    emit autoAddToggledSignal(false);
+    handleStartWatching(false);
   }
 }
+
+void ALCDataLoadingView::notifyTimerEvent() { m_presenter->handleTimerEvent(); }
 
 void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
@@ -420,5 +439,44 @@ std::string ALCDataLoadingView::getAlphaValue() const {
 }
 
 void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
+
+std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> ALCDataLoadingView::getPeriodInfo() { return m_periodInfo; }
+
+QFileSystemWatcher *ALCDataLoadingView::getFileSystemWatcher() { return m_watcher; }
+
+QTimer *ALCDataLoadingView::getTimer() { return m_timer; }
+
+void ALCDataLoadingView::handleStartWatching(bool watch) {
+  if (watch) {
+    // Get path to watch and add to watcher
+    const auto path = getPath();
+    m_watcher->addPath(QString::fromStdString(path));
+    // start a timer that executes every second
+    getTimer()->start(1000);
+
+  } else {
+    // Check if watcher has a directory, then remove all
+    if (!m_watcher->directories().empty()) {
+      m_watcher->removePaths(m_watcher->directories());
+    }
+    // Stop timer
+    getTimer()->stop();
+
+    m_presenter->handleWatcherStopped();
+  }
+}
+// Slots for calling presenter to handle different events
+
+void ALCDataLoadingView::notifyLoadClicked() { m_presenter->handleLoadRequested(); }
+
+void ALCDataLoadingView::notifyRunsEditingChanged() { m_presenter->handleRunsEditing(); }
+
+void ALCDataLoadingView::notifyRunsEditingFinished() { m_presenter->handleRunsEditingFinished(); }
+
+void ALCDataLoadingView::notifyRunsFoundFinished() { m_presenter->handleRunsFound(); }
+
+void ALCDataLoadingView::openManageDirectories() { MantidQt::API::ManageUserDirectories::openManageUserDirectories(); }
+
+void ALCDataLoadingView::notifyPeriodInfoClicked() { m_presenter->handlePeriodInfoClicked(); }
 
 } // namespace MantidQt::CustomInterfaces

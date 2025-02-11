@@ -64,7 +64,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             "PeakRadius",
             defaultValue=1.0,
             validator=positive_val,
-            doc="Fixed radius around each peak position in which to integrate" " (same units as input workspace) ",
+            doc="Fixed radius around each peak position in which to integrate (same units as input workspace) ",
         )
 
         self.declareProperty(
@@ -117,7 +117,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             if not (isinstance(workspace, MultipleExperimentInfos)):
                 issues["InputWorkspace"] = "Workspace need to be a MDEventWorkspace"
             elif workspace.getSpecialCoordinateSystem().name != "QSample":
-                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
+                issues["InputWorkspace"] = "Input workspace expected to be in QSample, workspace is in '{}'".format(
                     workspace.getSpecialCoordinateSystem().name
                 )
             elif workspace.getNumDims() != 3:

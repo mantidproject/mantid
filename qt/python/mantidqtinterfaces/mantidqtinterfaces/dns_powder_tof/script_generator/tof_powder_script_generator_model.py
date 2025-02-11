@@ -57,8 +57,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _error_in_input(self):
         if not self._validate_tof_options():
             return (
-                "Binning makes no sense. Make sure that dE and q steps are "
-                "greater than zero, as well as q_max > q_min and dE_max > dE_min."
+                "Binning makes no sense. Make sure that dE and q steps are greater than zero, as well as q_max > q_min and dE_max > dE_min."
             )
         if not self._validate_nb_vana_banks():
             return "Vanadium correction option is chosen, but the number of selected vanadium scans is either 0 or greater than 1."
@@ -124,11 +123,11 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return [""]
 
     def _get_load_data_lines(self):
-        lines = ['load_data(sample_data["' f'{self._sample_data.get_sample_filename()}"], ' '"raw_data1", params)']
+        lines = [f'load_data(sample_data["{self._sample_data.get_sample_filename()}"], "raw_data1", params)']
         if self._bg_cor:
-            lines += ['load_data(standard_data["' f'{self._standard_data.get_empty_scan_name()}"], ' '"raw_ec", params)']
+            lines += [f'load_data(standard_data["{self._standard_data.get_empty_scan_name()}"], "raw_ec", params)']
         if self._vana_cor:
-            lines += ['load_data(standard_data["' f'{self._standard_data.get_vana_scan_name()}"], ' f'"raw_vanadium", params)']
+            lines += [f'load_data(standard_data["{self._standard_data.get_vana_scan_name()}"], "raw_vanadium", params)']
         lines += [""]
         return lines
 
@@ -182,7 +181,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             lines = ["# get list of bad detectors"]
             lines += self._get_bad_det_lines()
             lines += [
-                'print("Following detectors will be masked: ",' "badDetectors)",
+                'print("Following detectors will be masked: ",badDetectors)',
                 "MaskDetectors(data1, DetectorList=badDetectors)",
                 "",
             ]

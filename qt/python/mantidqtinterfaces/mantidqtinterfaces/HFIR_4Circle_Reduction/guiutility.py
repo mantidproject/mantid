@@ -26,7 +26,7 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     :return: numpy.ndarray, len(shape) == 2
     """
     # check
-    assert isinstance(matrix_str, str), "Input matrix (string) %s is not a string but of type %s." "" % (
+    assert isinstance(matrix_str, str), "Input matrix (string) %s is not a string but of type %s." % (
         str(matrix_str),
         matrix_str.__class__.__name__,
     )
@@ -57,7 +57,7 @@ def import_scans_text_file(file_name):
     :return:
     """
     # check inputs
-    assert isinstance(file_name, str), "File name {0} must be a string but not of type {1}." "".format(file_name, type(file_name))
+    assert isinstance(file_name, str), "File name {0} must be a string but not of type {1}.".format(file_name, type(file_name))
     if os.path.exists(file_name) is False:
         raise RuntimeError("File {0} does not exist.".format(file_name))
 
@@ -178,7 +178,7 @@ def parse_float_array(array_str):
     :param array_str:
     :return: boolean, list of floats/error message
     """
-    assert isinstance(array_str, str), "Input array {0} for parsing must be of type string but not a {1}." "".format(
+    assert isinstance(array_str, str), "Input array {0} for parsing must be of type string but not a {1}.".format(
         array_str, type(array_str)
     )
     array_str = array_str.replace(",", " ")
@@ -311,7 +311,7 @@ def parse_float_editors(line_edits, allow_blank=False):
         return True, float_list[0]
     else:
         # Final check
-        assert len(line_edits) == len(float_list), "Number of input line edits %d is not same as " "number of output floats %d." % (
+        assert len(line_edits) == len(float_list), "Number of input line edits %d is not same as number of output floats %d." % (
             len(line_edits),
             len(float_list),
         )
@@ -356,7 +356,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
                 int_value = int(str_value)
             except ValueError as value_err:
                 # compose error message
-                error_message += "Unable to parse a line edit {0} with value '{1}' to an integer due to {2}" "".format(
+                error_message += "Unable to parse a line edit {0} with value '{1}' to an integer due to {2}".format(
                     line_edit.objectName(), str_value, value_err
                 )
             else:

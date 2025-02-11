@@ -5,6 +5,7 @@ set(SRC_FILES
     ALCBaselineModellingView.cpp
     ALCDataLoadingPresenter.cpp
     ALCDataLoadingView.cpp
+    ALCDataLoadingModel.cpp
     ALCInterface.cpp
     ALCLatestFileFinder.cpp
     ALCPeakFittingModel.cpp
@@ -16,14 +17,11 @@ set(SRC_FILES
 set(MOC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
-    ALCDataLoadingPresenter.h
     ALCInterface.h
-    ALCPeakFittingPresenter.h
+    ALCDataLoadingView.h
     IALCBaselineModellingView.h
     IALCBaselineModellingModel.h
-    IALCDataLoadingView.h
     IALCPeakFittingView.h
-    IALCPeakFittingModel.h
     MuonAnalysisHelper.h
 )
 
@@ -32,6 +30,7 @@ set(INC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
     ALCDataLoadingPresenter.h
+    ALCDataLoadingModel.h
     ALCDataLoadingView.h
     ALCInterface.h
     ALCLatestFileFinder.h
@@ -41,9 +40,16 @@ set(INC_FILES
     DllConfig.h
     IALCBaselineModellingModel.h
     IALCBaselineModellingView.h
+    IALCBaselineModellingPresenter.h
+    IALCBaselineModellingPresenterSubscriber.h
     IALCDataLoadingView.h
+    IALCDataLoadingModel.h
+    IALCDataLoadingPresenter.h
+    IALCDataLoadingPresenterSubscriber.h
     IALCPeakFittingModel.h
     IALCPeakFittingView.h
+    IALCPeakFittingModelSubscriber.h
+    IALCPeakFittingViewSubscriber.h
 )
 
 set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui ALCPeakFittingView.ui)

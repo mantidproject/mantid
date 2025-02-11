@@ -556,7 +556,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     @staticmethod
     def _on_help_button_clicked():
-        InterfaceManager().showHelpPage("qthelp://org.sphinx.mantidproject/doc/" "interfaces/isis_sans/ISIS%20SANS.html")
+        InterfaceManager().showHelpPage("qthelp://org.sphinx.mantidproject/doc/interfaces/isis_sans/ISIS%20SANS.html")
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
@@ -1518,7 +1518,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         minimum = spin_box.minimum()
         maximum = spin_box.maximum()
         if value < minimum or value > maximum:
-            raise ValueError("The value for the polynomial order {} has " "to be in the range of {} and {}".format(value, minimum, maximum))
+            raise ValueError("The value for the polynomial order {} has to be in the range of {} and {}".format(value, minimum, maximum))
         spin_box.setValue(value)
 
     @property

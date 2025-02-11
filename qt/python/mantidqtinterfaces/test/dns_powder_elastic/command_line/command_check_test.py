@@ -24,7 +24,7 @@ class CommandLineReaderTest(unittest.TestCase):
         self.assertIsInstance(self.colire, ObjectDict)
         self.assertEqual(self.colire.files, [])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check." "CommandLineReader._parse_file_command")
+    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check.CommandLineReader._parse_file_command")
     def test_read(self, mock_parse):
         # sc elastic
         mock_parse.return_value = ["786359", "788058", "100"]
@@ -51,16 +51,16 @@ class CommandLineReaderTest(unittest.TestCase):
         # new format with less arguments
         mock_parse.return_value = ["786357", "788059", "101"]
 
-        cla = (
-            "-new 786357 788059 101" " 4p1K_map.d_dat -dx 3.54 -dy 6.13 -nx" " 1,1,0 -ny 1,-1,0 -cz standards_rc47_v4.zip" " -v -fr 0.0"
-        ).split(" ")
+        cla = ("-new 786357 788059 101 4p1K_map.d_dat -dx 3.54 -dy 6.13 -nx 1,1,0 -ny 1,-1,0 -cz standards_rc47_v4.zip -v -fr 0.0").split(
+            " "
+        )
         self.colire.read(cla)
         self.assertEqual(self.colire.omega_offset, "101")
         self.assertTrue(self.colire.files[0]["path"])
         self.assertEqual(self.colire.files[0]["ffnmb"], "786357")
         self.assertEqual(self.colire.files[0]["lfnmb"], "788059")
         # test rest, not a valid command, but does not matter here
-        cla = ("-powder -files p164260000 0 2 786359 788058" " 4p1K_map.d_dat -xyz -sep-nonmag -tof").split(" ")
+        cla = ("-powder -files p164260000 0 2 786359 788058 4p1K_map.d_dat -xyz -sep-nonmag -tof").split(" ")
         self.colire.read(cla)
         self.assertTrue(self.colire.powder)
         self.assertTrue(self.colire.separation_xyz)
@@ -73,7 +73,7 @@ class CommandLineReaderTest(unittest.TestCase):
         test_v = self.colire._parse_old_filenumbers("23", "p151", "0_1", "a")
         self.assertEqual(test_v, ["1", "0"])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check." "CommandLineReader._parse_old_filenumbers")
+    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check.CommandLineReader._parse_old_filenumbers")
     @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check.os.path.isfile")
     def test__get_fixpart_fnb(self, mock_isfile, mock_parse):
         # function can fail if the file number is used in the
@@ -87,7 +87,7 @@ class CommandLineReaderTest(unittest.TestCase):
         test_v = self.colire._get_fix_part_fnb("54858", "p123_2", "3.d_dat", "b")
         self.assertEqual(test_v, ["1", "2"])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check." "CommandLineReader._get_fix_part_fnb")
+    @patch("mantidqtinterfaces.dns_powder_elastic.command_line.command_check.CommandLineReader._get_fix_part_fnb")
     def test__parse_file_command(self, mock_get_fix_fnb):
         mock_get_fix_fnb.return_value = ["00002", "1"]
         cla = "-files p164260002 100 2 786359 788058 14p1K_map.d_dat".split(" ")

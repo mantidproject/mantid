@@ -197,7 +197,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.setWindowModified.assert_called()
 
     @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.RundexSettings")
-    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter" ".DrillSettingsPresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillSettingsPresenter")
     def test_settingsWindow(self, mSettingsPresenter, mRundexSettings):
         mRundexSettings.SETTINGS = {"a1": ["param1", "param2"], "a2": ["param3"]}
         self.model.getAcquisitionMode.return_value = "a1"

@@ -136,7 +136,7 @@ class MatchPeaks(PythonAlgorithm):
                 issues["InputWorkspace2"] = "When InputWorkspace3 is given, InputWorkspace2 is also required."
             else:
                 if input3.isDistribution() and not input2.isDistribution():
-                    issues["InputWorkspace3"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
+                    issues["InputWorkspace3"] = "InputWorkspace2 and InputWorkspace3 must be either point data or histogram data"
                 elif input3.blocksize() != input2.blocksize():
                     issues["InputWorkspace3"] = "Incompatible number of bins"
                 elif input3.getNumberHistograms() != input2.getNumberHistograms():
@@ -146,7 +146,7 @@ class MatchPeaks(PythonAlgorithm):
 
         if input2:
             if input1.isDistribution() and not input2.isDistribution():
-                issues["InputWorkspace2"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
+                issues["InputWorkspace2"] = "InputWorkspace2 and InputWorkspace3 must be either point data or histogram data"
             elif input1.blocksize() != input2.blocksize():
                 issues["InputWorkspace2"] = "Incompatible number of bins"
             elif input1.getNumberHistograms() != input2.getNumberHistograms():
@@ -274,7 +274,7 @@ class MatchPeaks(PythonAlgorithm):
                     logger.debug("Fit outside the trusted range, take the maximum position")
                 else:
                     # do not shift
-                    logger.debug("Both the fit and the max are outside the trusted range. " "Do not shift the spectrum.")
+                    logger.debug("Both the fit and the max are outside the trusted range. Do not shift the spectrum.")
 
             elif abs(max_pos - mid_bin) < tolerance:
                 # fit not reliable, take the maximum if within acceptance
@@ -283,7 +283,7 @@ class MatchPeaks(PythonAlgorithm):
 
             else:
                 # do not shift
-                logger.debug("Both the fit and the max are outside the trusted range. " "Do not shift the spectrum.")
+                logger.debug("Both the fit and the max are outside the trusted range. Do not shift the spectrum.")
 
             logger.debug("Spectrum {0} will be shifted to bin {1}".format(i, peak_bin[i]))
 

@@ -327,7 +327,7 @@ class MantidAxes(Axes):
     def artists_workspace_has_errors(self, artist):
         """Check if the given artist's workspace has errors"""
         if artist not in self.get_tracked_artists():
-            raise ValueError("Artist '{}' is not tracked and so does not have " "an associated workspace.".format(artist))
+            raise ValueError("Artist '{}' is not tracked and so does not have an associated workspace.".format(artist))
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         if artist.axes.creation_args[0].get("axis", None) == MantidAxType.BIN:
             if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
@@ -1199,7 +1199,7 @@ class MantidAxes(Axes):
                 # that they can use the update_waterfall function to do this.
                 if x_offset != self.waterfall_x_offset or y_offset != self.waterfall_y_offset:
                     logger.information(
-                        "If your plot is already a waterfall plot you can use update_waterfall(x, y) to" " change its offset values."
+                        "If your plot is already a waterfall plot you can use update_waterfall(x, y) to change its offset values."
                     )
                 else:
                     # Nothing needs to be changed.
@@ -1211,7 +1211,7 @@ class MantidAxes(Axes):
                 datafunctions.set_initial_dimensions(self)
         else:
             if bool(x_offset) or bool(y_offset) or fill:
-                raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or " "set fill to true.")
+                raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or set fill to true.")
 
             if not self.is_waterfall():
                 # Nothing needs to be changed.

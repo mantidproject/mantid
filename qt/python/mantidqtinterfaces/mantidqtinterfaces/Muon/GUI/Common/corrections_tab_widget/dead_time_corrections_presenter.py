@@ -145,7 +145,7 @@ class DeadTimeCorrectionsPresenter:
             name = load_dead_time_from_filename(filename)
         except Exception:
             self._corrections_presenter.warning_popup(
-                "The file provided has an unexpected format. The file should be " "of the same instrument and cycle as the raw data."
+                "The file provided has an unexpected format. The file should be of the same instrument and cycle as the raw data."
             )
             return None
 

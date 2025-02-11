@@ -119,9 +119,7 @@ class SettingsDiagnosticPresenter(object):
         # Check if it exists
         path_dir = os.path.dirname(save_location)
         if not path_dir:
-            self.gui_logger.warning(
-                "The provided save location for the SANS state does not seem to exist. " "Please provide a validate path"
-            )
+            self.gui_logger.warning("The provided save location for the SANS state does not seem to exist. Please provide a validate path")
             return
 
         file_name, _ = os.path.splitext(save_location)

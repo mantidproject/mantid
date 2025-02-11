@@ -16,7 +16,7 @@
 #include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
 #include "Reduction/PreviewRow.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -81,7 +81,7 @@ private:
   BackgroundSubtraction backgroundSubtractionFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
-  boost::optional<RangeInLambda> transmissionRunRangeFromView();
+  std::optional<RangeInLambda> transmissionRunRangeFromView();
   std::string transmissionStitchParamsFromView();
   TransmissionStitchOptions transmissionStitchOptionsFromView();
 

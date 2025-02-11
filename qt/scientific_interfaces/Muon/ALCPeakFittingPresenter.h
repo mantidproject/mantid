@@ -11,39 +11,33 @@
 #include "DllConfig.h"
 
 #include "IALCPeakFittingModel.h"
+#include "IALCPeakFittingModelSubscriber.h"
 #include "IALCPeakFittingView.h"
+#include "IALCPeakFittingViewSubscriber.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 /** ALCPeakFittingPresenter : Presenter for Peak Fitting step of ALC interface.
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingPresenter : public IALCPeakFittingModelSubscriber,
+                                                           public IALCPeakFittingViewSubscriber {
 
 public:
   ALCPeakFittingPresenter(IALCPeakFittingView *view, IALCPeakFittingModel *model);
 
   void initialize();
 
-private slots:
-  /// Fit the data using the peaks from the view, and update them
-  void fit();
+  // IALCPeakFittingModelSubscriber Overrides
+  void dataChanged() const override;
+  void fittedPeaksChanged() const override;
+  void errorInModel(std::string const &message) const override;
 
-  /// Executed when user selects a function in a Function Browser
-  void onCurrentFunctionChanged();
-
-  /// Executed when Peak Picker if moved/resized
-  void onPeakPickerChanged();
-
-  /// Executed when user changes parameter in Function Browser
-  void onParameterChanged(std::string const &funcIndex);
-
-  void onFittedPeaksChanged();
-  void onDataChanged();
-
-  /// Executed when user clicks "Plot guess"
-  void onPlotGuessClicked();
+  // IALCPeakFittingViewSubscriber Overrides
+  void onFitRequested() override;
+  void onCurrentFunctionChanged() override;
+  void onPeakPickerChanged() override;
+  void onParameterChanged(std::string const &functionIndex, std::string const &parameter) override;
+  void onPlotGuessClicked() override;
 
 private:
   /// Plot guess on graph
@@ -62,5 +56,4 @@ private:
   bool m_guessPlotted;
 };
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

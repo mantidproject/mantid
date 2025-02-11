@@ -124,7 +124,7 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
             try:
                 os.rmdir(folder)
             except OSError as exc:
-                warnings.warn('Could not remove folder at "{}"\n' "Error message:\n{}".format(folder, exc))
+                warnings.warn('Could not remove folder at "{}"\nError message:\n{}'.format(folder, exc))
 
     def test_generate_out_file_paths_standard_inst_prefix(self):
         mock_inst, run_details, out_dir = self._setup_for_generate_out_file_paths(

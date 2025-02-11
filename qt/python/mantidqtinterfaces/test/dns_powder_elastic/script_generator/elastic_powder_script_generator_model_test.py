@@ -239,9 +239,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         )
         self.assertEqual(
             test_v[1],
-            "from mantidqtinterfaces.dns_powder_elastic.scripts."
-            "md_powder_elastic import "
-            "vanadium_correction, flipping_ratio_correction",
+            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import vanadium_correction, flipping_ratio_correction",
         )
         self.assertEqual(
             test_v[2],
@@ -336,9 +334,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         test_v = self.model._get_vana_correction_string()
         self.assertEqual(
             test_v,
-            "    vanadium_correction(workspace, binning, vana_set=sta"
-            "ndard_data['vana'], ignore_vana_fields=True, sum_vana_sf_nsf=Tr"
-            "ue)",
+            "    vanadium_correction(workspace, binning, vana_set=standard_data['vana'], ignore_vana_fields=True, sum_vana_sf_nsf=True)",
         )
 
     def test_get_sample_corrections_lines(self):

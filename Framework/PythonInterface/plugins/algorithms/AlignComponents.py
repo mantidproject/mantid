@@ -233,7 +233,7 @@ class AlignComponents(PythonAlgorithm):
             name="EulerConvention",
             defaultValue="YZX",
             validator=StringListValidator(eulerConventions),
-            doc="Euler angles convention used when calculating and displaying angles," "eg XYZ corresponding to alpha beta gamma.",
+            doc="Euler angles convention used when calculating and displaying angles, eg XYZ corresponding to alpha beta gamma.",
         )
 
         # alpha rotation
