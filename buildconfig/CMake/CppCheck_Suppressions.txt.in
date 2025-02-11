@@ -395,16 +395,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIn
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:277
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:286
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:448
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:431
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonStrategy.cpp:119
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:452
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:224
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:225
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:230
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:231
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:232
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:234
