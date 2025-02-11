@@ -9,7 +9,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/LegacyNexusDescriptor.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -90,7 +90,7 @@ private:
     static void check(LoaderFormat format) {
       switch (format) {
       case Nexus:
-        if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
+        if (!std::is_base_of<IFileLoader<Kernel::LegacyNexusDescriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
                                    "' registered as Nexus loader but it does not "
                                    "inherit from "
