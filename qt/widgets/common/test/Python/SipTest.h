@@ -24,7 +24,7 @@ public:
     // to ensure the built copy of mantid gets picked up
     const MantidQt::Widgets::Common::Python::Object siteModule{
         MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("site"))};
-    siteModule.attr("addsitedir")(Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+    siteModule.attr("addsitedir")(Mantid::Kernel::ConfigService::Instance().getPropertiesDir().string());
     TS_ASSERT(Py_IsInitialized());
   }
 

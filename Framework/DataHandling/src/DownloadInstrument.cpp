@@ -14,7 +14,6 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
-#include <Poco/Path.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -34,6 +33,7 @@
 #include <json/json.h>
 
 // std
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::DataHandling {
@@ -149,13 +149,11 @@ std::string getDownloadUrl(Json::Value &contents) {
 DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path installPath(instrumentDirs.back());
-  installPath.makeDirectory();
-  Poco::Path localPath(instrumentDirs[0]);
-  localPath.makeDirectory();
+  std::filesystem::path installPath(instrumentDirs.back());
+  std::filesystem::path localPath(instrumentDirs[0]);
 
   // get the date of the local github.json file if it exists
-  Poco::Path gitHubJson(localPath, "github.json");
+  std::filesystem::path gitHubJson(localPath / "github.json");
   Poco::File gitHubJsonFile(gitHubJson);
   Poco::DateTime gitHubJsonDate(1900, 1, 1);
   bool forceUpdate = this->getProperty("ForceUpdate");
@@ -178,7 +176,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   StringToStringMap fileMap;
   try {
-    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(), headers);
+    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.string(), headers);
   } catch (Exception::InternetError &ex) {
     if (ex.errorCode() == static_cast<int>(InternetHelper::HTTPStatus::NOT_MODIFIED)) {
       // No changes since last time
@@ -189,27 +187,27 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
 
   // update local repo files
-  Poco::Path installRepoFile(localPath, "install.json");
-  StringToStringMap installShas = getFileShas(installPath.toString());
-  Poco::Path localRepoFile(localPath, "local.json");
-  StringToStringMap localShas = getFileShas(localPath.toString());
+  std::filesystem::path installRepoFile(localPath / "install.json");
+  StringToStringMap installShas = getFileShas(installPath.string());
+  std::filesystem::path localRepoFile(localPath / "local.json");
+  StringToStringMap localShas = getFileShas(localPath.string());
 
   // verify repo info was downloaded correctly
   if (gitHubJsonFile.getSize() == 0) {
     std::stringstream msg;
-    msg << "Encountered empty file \"" << gitHubJson.toString() << "\" while determining what to download";
+    msg << "Encountered empty file \"" << gitHubJson.string() << "\" while determining what to download";
     throw std::runtime_error(msg.str());
   }
 
   // Parse the server JSON response
   ::Json::CharReaderBuilder readerBuilder;
   Json::Value serverContents;
-  Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
+  Poco::FileStream fileStream(gitHubJson.string(), std::ios::in);
 
   std::string errors;
   Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);
   if (errors.size() != 0) {
-    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
+    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.string() + "\"");
   }
   fileStream.close();
 
@@ -218,8 +216,8 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   for (auto &serverElement : serverContents) {
     std::string elementName = serverElement.get("name", "").asString();
     repoFilenames.insert(elementName);
-    Poco::Path filePath(localPath, elementName);
-    if (filePath.getExtension() != "xml")
+    std::filesystem::path filePath(localPath / elementName);
+    if (!filePath.extension().string().ends_with("xml"))
       continue;
     std::string sha = serverElement.get("sha", "").asString();
     std::string downloadUrl = getDownloadUrl(serverElement);
@@ -232,18 +230,18 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
       fileMap.emplace(downloadUrl,
-                      filePath.toString());                                     // ACTION - DOWNLOAD to localPath
+                      filePath.string());                                       // ACTION - DOWNLOAD to localPath
     } else if ((!localSha.empty()) && (sha == installSha) && (sha != localSha)) // matches install, but different local
     {
-      fileMap.emplace(downloadUrl, filePath.toString()); // ACTION - DOWNLOAD to
-                                                         // localPath and
-                                                         // overwrite
+      fileMap.emplace(downloadUrl, filePath.string()); // ACTION - DOWNLOAD to
+                                                       // localPath and
+                                                       // overwrite
     }
   }
 
   // remove any .xml files from the local appdata directory that are not present
   // in the remote instrument repo
-  removeOrphanedFiles(localPath.toString(), repoFilenames);
+  removeOrphanedFiles(localPath.string(), repoFilenames);
 
   return fileMap;
 }

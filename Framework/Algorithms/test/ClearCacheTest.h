@@ -14,7 +14,6 @@
 
 #include "MantidAlgorithms/ClearCache.h"
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <filesystem>
 
@@ -35,21 +34,19 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    Poco::Path localDownloadPath(m_originalInstDir[0]);
-    localDownloadPath.pushDirectory(TEST_SUFFIX);
-    m_localInstDir = localDownloadPath.toString();
+    std::filesystem::path localDownloadPath = m_originalInstDir[0] / TEST_SUFFIX;
+    m_localInstDir = localDownloadPath;
     createDirectory(localDownloadPath);
     testDirectories[0] = m_localInstDir;
 
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(testDirectories);
 
     // create a geometryCache subdirectory
-    Poco::Path GeomPath = localDownloadPath;
-    GeomPath.pushDirectory("geometryCache");
+    std::filesystem::path GeomPath = localDownloadPath / "geometryCache";
     createDirectory(GeomPath);
   }
 
-  void createDirectory(const Poco::Path &path) {
+  void createDirectory(const std::filesystem::path &path) {
     Poco::File file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
@@ -112,10 +109,12 @@ public:
     ClearCache alg;
 
     auto instrumentDirs = ConfigService::Instance().getInstrumentDirectories();
-    Poco::Path localPath(instrumentDirs[0]);
-    localPath.makeDirectory();
+    std::filesystem::path localPath(instrumentDirs[0]);
+    if (std::filesystem::exists(localPath) && !std::filesystem::is_directory(localPath)) {
+      localPath = localPath.parent_path();
+    }
     // create a file in the directory
-    Poco::File testFile(localPath.append("test_exec_DownloadInstrument_Cache.xml"));
+    Poco::File testFile(localPath / "test_exec_DownloadInstrument_Cache.xml");
     testFile.createFile();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -133,12 +132,13 @@ public:
     ClearCache alg;
 
     auto instrumentDirs = ConfigService::Instance().getInstrumentDirectories();
-    Poco::Path localPath(instrumentDirs[0]);
-    localPath.makeDirectory();
-    Poco::Path GeomPath(localPath);
-    GeomPath.append("geometryCache").makeDirectory();
+    std::filesystem::path localPath(instrumentDirs[0]);
+    if (std::filesystem::exists(localPath) && !std::filesystem::is_directory(localPath)) {
+      localPath = localPath.parent_path();
+    }
+
     // create a file in the directory
-    Poco::File testFile(GeomPath.append("test_exec_Geometry_Cache.vtp"));
+    Poco::File testFile(localPath / "geometryCache" / "test_exec_Geometry_Cache.vtp");
     testFile.createFile();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

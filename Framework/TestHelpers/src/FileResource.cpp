@@ -22,7 +22,7 @@ FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debu
     m_full_path = temp_full_path;
 
   } else {
-    throw std::invalid_argument("failed to load temp directory: " + temp_dir.generic_string());
+    throw std::invalid_argument("failed to load temp directory: " + temp_dir.string());
   }
 
   // if the file already exists and was not cleaned up, remove it
@@ -40,7 +40,7 @@ bool FileResource::exists() {
 }
 
 void FileResource::setDebugMode(bool mode) { m_debugMode = mode; }
-std::string FileResource::fullPath() const { return m_full_path.generic_string(); }
+std::string FileResource::fullPath() const { return m_full_path.string(); }
 
 FileResource::~FileResource() {
 

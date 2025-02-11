@@ -161,8 +161,7 @@ public:
 
   void test_execOrphanedFile() {
     // add an orphaned file
-    std::filesystem::path orphanedFilePath(m_localInstDir);
-    orphanedFilePath.replace_filename("Orphaned_Should_not_be_here.xml");
+    std::filesystem::path orphanedFilePath(m_localInstDir / "Orphaned_Should_not_be_here.xml");
 
     std::ofstream file;
     file.open(orphanedFilePath.string().c_str());

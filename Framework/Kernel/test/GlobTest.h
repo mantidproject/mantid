@@ -32,7 +32,7 @@ public:
   }
 
   void test_Glob() {
-    std::string pattern = base.string() + "Framework/*/CMakeLists.*t";
+    const auto pattern = base / "Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -41,7 +41,7 @@ public:
     size_t matches = 0;
     for (const auto &file : files) {
       std::filesystem::path path(file);
-      std::string project = path.filename().string();
+      std::string project = path.parent_path().filename().string();
       if (project == "API")
         ++matches;
       if (project == "Algorithms")
@@ -58,7 +58,7 @@ public:
   }
 
   void test_no_match() {
-    std::string pattern = base.string() + "Doesnotexist/*/CMakeLists.*t";
+    const auto pattern = base / "Doesnotexist/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -100,7 +100,7 @@ public:
   }
 
   void test_double_dots_in_pattern() {
-    std::string pattern = base.string() + "Framework/*/CMakeLists.*t";
+    const auto pattern = base / "Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -109,7 +109,7 @@ public:
     size_t matches = 0;
     for (const auto &file : files) {
       std::filesystem::path path(file);
-      std::string project = path.filename().string();
+      std::string project = path.parent_path().filename().string();
       if (project == "API")
         ++matches;
       if (project == "Algorithms")
