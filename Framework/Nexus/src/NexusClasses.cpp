@@ -13,11 +13,13 @@
 #include <memory>
 #include <utility>
 
+using ::NeXus::dimsize_t;
+
 namespace Mantid::NeXus {
 
 static NXDimArray dimArray(::NeXus::DimVector xd) {
-  return NXDimArray({static_cast<DimSize>(xd[0]), static_cast<DimSize>(xd[1]), static_cast<DimSize>(xd[2]),
-                     static_cast<DimSize>(xd[3])});
+  return NXDimArray({static_cast<dimsize_t>(xd[0]), static_cast<dimsize_t>(xd[1]), static_cast<dimsize_t>(xd[2]),
+                     static_cast<dimsize_t>(xd[3])});
 }
 
 NXInfo::NXInfo(::NeXus::Info const &info, std::string const &name)
@@ -359,7 +361,7 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension.
  * @throws out_of_range error if requested on an object of rank 0
  */
-int64_t NXDataSet::dim0() const {
+::NeXus::dimsize_t NXDataSet::dim0() const {
   if (m_info.rank == 0) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
@@ -371,7 +373,7 @@ int64_t NXDataSet::dim0() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 2
  */
-int64_t NXDataSet::dim1() const {
+::NeXus::dimsize_t NXDataSet::dim1() const {
   if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
@@ -383,7 +385,7 @@ int64_t NXDataSet::dim1() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 3
  */
-int64_t NXDataSet::dim2() const {
+::NeXus::dimsize_t NXDataSet::dim2() const {
   if (m_info.rank < 3UL) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
@@ -395,7 +397,7 @@ int64_t NXDataSet::dim2() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 4
  */
-int64_t NXDataSet::dim3() const {
+::NeXus::dimsize_t NXDataSet::dim3() const {
   if (m_info.rank < 4UL) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
@@ -424,8 +426,8 @@ void NXDataSet::getData(void *data) {
  *   @throw runtime_error if the operation fails.
  */
 void NXDataSet::getSlab(void *data, NXDimArray const &start, NXDimArray const &size) {
-  std::vector<::NeXus::DimSize> vstart(start.cbegin(), start.cend());
-  std::vector<::NeXus::DimSize> vsize(size.cbegin(), size.cend());
+  std::vector<::NeXus::dimsize_t> vstart(start.cbegin(), start.cend());
+  std::vector<::NeXus::dimsize_t> vsize(size.cbegin(), size.cend());
   m_fileID->openData(name());
   m_fileID->getSlab(data, vstart, vsize);
   m_fileID->closeData();

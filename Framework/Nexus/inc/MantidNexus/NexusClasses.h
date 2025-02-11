@@ -27,8 +27,7 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-typedef ::NeXus::DimSize DimSize;
-typedef std::array<DimSize, 4> NXDimArray;
+typedef std::array<::NeXus::dimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
  *  such as the dimensions and the type
@@ -140,13 +139,13 @@ public:
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
   std::size_t rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  DimSize dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
+  ::NeXus::dimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
-  int64_t dim0() const;
+  ::NeXus::dimsize_t dim0() const;
   /// Returns the number of elements along the second dimension
-  int64_t dim1() const;
+  ::NeXus::dimsize_t dim1() const;
   /// Returns the number of elements along the third dimension
-  int64_t dim2() const;
+  ::NeXus::dimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
   int64_t dim3() const;
   /// Returns the name of the data set
@@ -293,7 +292,7 @@ public:
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    DimSize n = 0, id(i), jd(j), kd(l), ld(l);
+    ::NeXus::dimsize_t n = 0, id(i), jd(j), kd(l), ld(l);
     NXDimArray start;
     if (rank() == 4) {
       if (i < 0) // load all data
@@ -370,7 +369,7 @@ public:
       } else if (k < 0) {
         if (id >= dim0() || jd >= dim1())
           rangeError();
-        DimSize m = blocksize;
+        ::NeXus::dimsize_t m = blocksize;
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
@@ -400,7 +399,7 @@ public:
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
-        DimSize m = blocksize;
+        ::NeXus::dimsize_t m = blocksize;
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;
