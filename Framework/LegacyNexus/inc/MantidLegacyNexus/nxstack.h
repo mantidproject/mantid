@@ -30,24 +30,24 @@
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi_internal.h"
 
-typedef struct __fileHDF4Stack *pFileHDF4Stack;
+typedef struct __fileLgcyStack *pFileLgcyStack;
 
 #define MAXEXTERNALDEPTH 16
 
-pFileHDF4Stack makeFileStack();
-void killFileStack(pFileHDF4Stack self);
+pFileLgcyStack makeFileStack();
+void killFileStack(pFileLgcyStack self);
 int getFileStackSize();
 
-void pushFileStack(pFileHDF4Stack self, pHDF4Function pDriv, const char *filename);
-void popFileStack(pFileHDF4Stack self);
+void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *filename);
+void popFileStack(pFileLgcyStack self);
 
-pHDF4Function peekFileOnStack(pFileHDF4Stack self);
-char *peekFilenameOnStack(pFileHDF4Stack self);
-void peekIDOnStack(pFileHDF4Stack self, NXlink *id);
-void setCloseID(pFileHDF4Stack self, const NXlink &id);
+pLgcyFunction peekFileOnStack(pFileLgcyStack self);
+char *peekFilenameOnStack(pFileLgcyStack self);
+void peekIDOnStack(pFileLgcyStack self, NXlink *id);
+void setCloseID(pFileLgcyStack self, const NXlink &id);
 
-int fileStackDepth(pFileHDF4Stack self);
+int fileStackDepth(pFileLgcyStack self);
 
-void pushPath(pFileHDF4Stack self, const char *name);
-void popPath(pFileHDF4Stack self);
-int buildPath(pFileHDF4Stack self, char *path, int pathlen);
+void pushPath(pFileLgcyStack self, const char *name);
+void popPath(pFileLgcyStack self);
+int buildPath(pFileLgcyStack self, char *path, int pathlen);
