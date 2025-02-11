@@ -29,22 +29,22 @@ namespace Kernel {
     On construction the simple details about the layout of the file are cached
    for faster querying later.
  */
-class MANTID_KERNEL_DLL NexusDescriptor {
+class MANTID_KERNEL_DLL LegacyNexusDescriptor {
 
 public:
   /// Constructor accepting a filename
-  NexusDescriptor(const std::string &filename);
+  LegacyNexusDescriptor(const std::string &filename);
   /// Destructor
-  ~NexusDescriptor();
+  ~LegacyNexusDescriptor();
 
   /// Disable default constructor
-  NexusDescriptor() = delete;
+  LegacyNexusDescriptor() = delete;
 
   /// Disable copy operator
-  NexusDescriptor(const NexusDescriptor &) = delete;
+  LegacyNexusDescriptor(const LegacyNexusDescriptor &) = delete;
 
   /// Disable assignment operator
-  NexusDescriptor &operator=(const NexusDescriptor &) = delete;
+  LegacyNexusDescriptor &operator=(const LegacyNexusDescriptor &) = delete;
 
   /**
    * Access the filename
