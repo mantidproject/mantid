@@ -276,16 +276,16 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
  * @param numberOfTubes
  * @param numberOfPixelsPerTube
  */
-void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
-                                    int &numberOfPixelsPerTube) {
+void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, size_t &numberOfChannels, size_t &numberOfTubes,
+                                    size_t &numberOfPixelsPerTube) {
   if (m_isD16Omega) {
-    numberOfChannels = static_cast<int>(data.dim0());
-    numberOfTubes = static_cast<int>(data.dim1());
-    numberOfPixelsPerTube = static_cast<int>(data.dim2());
+    numberOfChannels = static_cast<size_t>(data.dim0());
+    numberOfTubes = static_cast<size_t>(data.dim1());
+    numberOfPixelsPerTube = static_cast<size_t>(data.dim2());
   } else {
-    numberOfPixelsPerTube = static_cast<int>(data.dim1());
-    numberOfChannels = static_cast<int>(data.dim2());
-    numberOfTubes = static_cast<int>(data.dim0());
+    numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+    numberOfChannels = static_cast<size_t>(data.dim2());
+    numberOfTubes = static_cast<size_t>(data.dim0());
   }
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
@@ -360,7 +360,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
     }
   }
 
-  int numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
+  size_t numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTubes);
 
   // For these monochromatic instruments, one bin is "TOF" mode, and more than that is a scan
@@ -408,7 +408,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
                           dataLeft.dim0() * dataLeft.dim1()) +
       m_numberOfMonitors;
 
-  int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
+  size_t numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(dataCenter, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
 
   MultichannelType type = (numberOfChannels != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
@@ -418,8 +418,8 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   // we need to adjust the default binning after loadmetadata
   if (numberOfChannels != 1) {
     std::vector<double> frames(numberOfChannels, 0);
-    for (int i = 0; i < numberOfChannels; ++i) {
-      frames[i] = i;
+    for (size_t i = 0; i < numberOfChannels; ++i) {
+      frames[i] = static_cast<double>(i);
     }
     m_defaultBinning.resize(numberOfChannels);
     std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
@@ -464,7 +464,7 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
       static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) +
       m_numberOfMonitors;
 
-  int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
+  size_t numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(data1_data, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
 
   MultichannelType type = (numberOfChannels != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
@@ -475,8 +475,8 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
   // we need to adjust the default binning after loadmetadata
   if (numberOfChannels != 1) {
     std::vector<double> frames(numberOfChannels, 0);
-    for (int i = 0; i < numberOfChannels; ++i) {
-      frames[i] = i;
+    for (size_t i = 0; i < numberOfChannels; ++i) {
+      frames[i] = static_cast<double>(i);
     }
     m_defaultBinning.resize(numberOfChannels);
     std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
@@ -723,7 +723,7 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
 size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt const &data, const std::vector<double> &timeBinning,
                                       size_t firstIndex, const MultichannelType type) {
 
-  int numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
+  size_t numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTube);
 
   bool pointData = true;
