@@ -21,8 +21,8 @@ void Divide::init() {
                   "division by 0 occurs. Set this "
                   "value to false if one does not "
                   "want this message appearing ");
-  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>("isDistribution", OptionalBool::Unset),
-                  "Set the isDistribution property of the output workspace,"
+  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>("IsDistribution", OptionalBool::Unset),
+                  "Set the IsDistribution property of the output workspace,"
                   "or leave empty for the default algorithm behavior.");
 }
 
@@ -103,9 +103,9 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
   }
 
   // override `isDistribution` if user provided
-  if (this->getPropertyValue("isDistribution") == OptionalBool::StrTrue)
+  if (this->getPropertyValue("IsDistribution") == OptionalBool::StrTrue)
     out->setDistribution(true);
-  else if (this->getPropertyValue("isDistribution") == OptionalBool::StrFalse)
+  else if (this->getPropertyValue("IsDistribution") == OptionalBool::StrFalse)
     out->setDistribution(false);
 }
 

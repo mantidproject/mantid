@@ -101,7 +101,7 @@ public:
       alg.setProperty("LHSWorkspace", numerator);
       alg.setProperty("RHSWorkspace", denominator);
       alg.setPropertyValue("OutputWorkspace", "dummy");
-      alg.setProperty("isDistribution", OptionalBool(true));
+      alg.setProperty("IsDistribution", OptionalBool(true));
       alg.execute();
 
       MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -121,7 +121,7 @@ public:
       alg.setProperty("LHSWorkspace", numerator);
       alg.setProperty("RHSWorkspace", denominator);
       alg.setPropertyValue("OutputWorkspace", "dummy");
-      alg.setProperty("isDistribution", OptionalBool(false));
+      alg.setProperty("IsDistribution", OptionalBool(false));
       alg.execute();
 
       MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");

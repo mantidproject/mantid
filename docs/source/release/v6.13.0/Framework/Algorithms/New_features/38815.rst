@@ -1,1 +1,1 @@
-- `Divide` now has an optional argument, `isDistribution`, to force the output distribution type.
+- `Divide` now has an optional argument, `IsDistribution`, to force the output distribution type.
