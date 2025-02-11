@@ -33,6 +33,9 @@
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
+// must be after MantidNexusCpp/NeXusFile.hpp
+#include "MantidLegacyNexus/NeXusFile.hpp"
+
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -93,7 +96,7 @@ void LoadMuonNexus1::exec() {
   NXEntry entry = root.openEntry("run/histogram_data_1");
   try {
     NXInfo info = entry.getDataSetInfo("time_zero");
-    if (info.stat != NXstatus::NX_ERROR) {
+    if (info.stat != ::NXstatus::NX_ERROR) {
       double dum = root.getFloat("run/histogram_data_1/time_zero");
       setProperty("TimeZero", dum);
     }
@@ -104,14 +107,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string firstGoodBin = counts.attributes("first_good_bin");
-    if (!firstGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
+    if (!firstGoodBin.empty() && infoResolution.stat != ::NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NXnumtype::FLOAT32:
+      case ::NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NXnumtype::INT32:
+      case ::NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -131,14 +134,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string lastGoodBin = counts.attributes("last_good_bin");
-    if (!lastGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
+    if (!lastGoodBin.empty() && infoResolution.stat != ::NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NXnumtype::FLOAT32:
+      case ::NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NXnumtype::INT32:
+      case ::NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -388,7 +391,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
   NXEntry detector = root.openEntry("run/instrument/detector");
 
   NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
-  if (infoDeadTimes.stat != NXstatus::NX_ERROR) {
+  if (infoDeadTimes.stat != ::NXstatus::NX_ERROR) {
     NXFloat deadTimesData = detector.openNXFloat("deadtimes");
     deadTimesData.load();
 
@@ -485,7 +488,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
-  if (infoGrouping.stat != NXstatus::NX_ERROR) {
+  if (infoGrouping.stat != ::NXstatus::NX_ERROR) {
     NXInt groupingData = dataEntry.openNXInt("grouping");
     groupingData.load();
 
@@ -812,7 +815,7 @@ void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWork
 void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
 
   // Get handle to nexus file
-  ::NeXus::File handle(m_filename, NXACC_READ);
+  ::NeXus::File handle(m_filename, ::NXACC_READ);
 
   // For single-period datasets, read /run/instrument/beam/frames_good
   if (nperiods == 1) {

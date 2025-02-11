@@ -26,6 +26,9 @@
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
+// must be after MantidNexusCpp/NeXusFile.hpp
+#include "MantidLegacyNexus/NeXusFile.hpp"
+
 #include <Poco/Path.h>
 #include <cmath>
 #include <limits>
