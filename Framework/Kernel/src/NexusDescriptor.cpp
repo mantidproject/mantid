@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -37,7 +37,7 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
   try {
     // this is very expesive as it walk the entire file
     initialize(filename);
-  } catch (::NeXus::Exception &e) {
+  } catch (Mantid::LegacyNexus::Exception &e) {
     throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename +
                                 "' does not look like a HDF file.\n Error was: " + e.what());
   }
@@ -68,7 +68,7 @@ void NexusDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
   m_extension = std::filesystem::path(filename).extension().string();
 
-  m_file = std::make_unique<::NeXus::File>(this->filename());
+  m_file = std::make_unique<Mantid::LegacyNexus::File>(this->filename());
 
   m_file->openPath("/");
   m_rootAttrs.clear();
@@ -84,8 +84,8 @@ void NexusDescriptor::initialize(const std::string &filename) {
  * @param pmap [Out] An output map filled with mappings of path->type
  * @param level An integer defining the current level in the file
  */
-void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath, const std::string &className,
-                               std::map<std::string, std::string> &pmap, int level) {
+void NexusDescriptor::walkFile(Mantid::LegacyNexus::File &file, const std::string &rootPath,
+                               const std::string &className, std::map<std::string, std::string> &pmap, int level) {
   if (!rootPath.empty()) {
     pmap.emplace(rootPath, className);
   }
