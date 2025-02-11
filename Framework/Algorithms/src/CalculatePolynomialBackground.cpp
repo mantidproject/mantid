@@ -171,7 +171,7 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @return a vector of final fitted parameters
  */
 std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &function,
-                               Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
+                               const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
                                const std::vector<double> &ranges, const std::string &costFunction,
                                const std::string &minimizer) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
