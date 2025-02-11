@@ -75,6 +75,9 @@ class NonPropData:
     OUT_2P = DataName(name="OutputTwoPMinusOne", alias="OutputTwoPMinusOne")
     OUT_2A = DataName(name="OutputTwoAMinusOne", alias="OutputTwoAMinusOne")
 
+    IN_NON_MAG_WS = DataName(name="InputNonMagWorkspace")
+    IN_MAG_WS = DataName(name="InputMagWorkspace")
+
 
 _EFF_ALG_OUTPUT = [NonPropData.OUT_FP_EFF, NonPropData.OUT_FA_EFF, NonPropData.OUT_POL_EFF, NonPropData.OUT_AN_EFF]
 _EFF_ALG_OUTPUT_DIAG = [NonPropData.OUT_PHI, NonPropData.OUT_RHO, NonPropData.OUT_AL]
@@ -96,11 +99,14 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return "Create a transmission workspace for ISIS reflectometry data, including optional flood and background corrections."
+        return (
+            "A wrapper algorithm around `ReflectometryISISCreateTransmission`, `PolarizationEfficienciesWildes`"
+            " and `JoinISISPolarizationEfficiencies`."
+        )
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return [self._FLOOD_ALG, self._BACK_SUB_ALG, self._TRANS_WS_ALG]
+        return [_TRANS_ALG, _EFF_ALG, _JOIN_ALG]
 
     @staticmethod
     def _create_input_run_validator() -> CompositeValidator:
@@ -160,15 +166,6 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             doc="The name of the workspace to be output as a result of the algorithm.",
         )
 
-    def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict:
-        args = {}
-        for prop_str in [a for a in dir(Prop) if not a.startswith("__")]:
-            prop = getattr(Prop, prop_str)
-            if prop.alg == alg_name and (prop.mag == mag or prop.mag is None):
-                key = prop.name if not prop.alias else prop.alias
-                args.update({key: self.getProperty(prop.name).value})
-        return args
-
     def PyExec(self):
         # Set class member variables and perform post-start validation
         self._initialize()
@@ -200,16 +197,36 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
     def _validate_processing_instructions(self):
         pass
 
-    def _set_output_properties(self, join_ws, eff_output):
-        self.setProperty(Prop.OUT_WS.name, join_ws)
-        for key in self.m_eff_alg_output_diag:
-            self.setProperty(key.name, eff_output[key.alias])
+    def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict:
+        args = {}
+        for prop_str in [a for a in vars(Prop)]:
+            prop = getattr(Prop, prop_str)
+            if prop.alg == alg_name and (prop.mag == mag or prop.mag is None):
+                key = prop.name if not prop.alias else prop.alias
+                args.update({key: self.getProperty(prop.name).value})
+        return args
+
+    def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
+        alg = self.createChildAlgorithm(alg_name, **args)
+        alg.execute()
+        result = []
+        for key in output_properties:
+            result.append(alg.getProperty(key).value)
+        return result
 
     def _generate_eff_args(self, trans_output, trans_output_mag):
-        eff_args = {"InputNonMagWorkspace": trans_output, "OutputFpEfficiency": "fp_eff", "OutputFaEfficiency": "fa_eff"}
+        eff_args = {
+            NonPropData.IN_NON_MAG_WS.name: trans_output,
+            NonPropData.OUT_FP_EFF.name: NonPropData.OUT_FP_EFF.alias,
+            NonPropData.OUT_FA_EFF.name: NonPropData.OUT_FA_EFF.alias,
+        }
         if trans_output_mag:
             eff_args.update(
-                {"InputMagWorkspace": trans_output_mag, "OutputPolarizerEfficiency": "p_eff", "OutputAnalyserEfficiency": "a_eff"}
+                {
+                    NonPropData.IN_MAG_WS.name: trans_output_mag,
+                    NonPropData.OUT_POL_EFF.name: NonPropData.OUT_POL_EFF.alias,
+                    NonPropData.OUT_AN_EFF.name: NonPropData.OUT_POL_EFF.name,
+                }
             )
         eff_args.update(self._populate_args_dict(_EFF_ALG))
         return eff_args
@@ -219,13 +236,10 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         eff_output = {key: None for key in alg_output_list}
         return eff_output
 
-    def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
-        alg = self.createChildAlgorithm(alg_name, **args)
-        alg.execute()
-        result = []
-        for key in output_properties:
-            result.append(alg.getProperty(key).value)
-        return result
+    def _set_output_properties(self, join_ws, eff_output):
+        self.setProperty(Prop.OUT_WS.name, join_ws)
+        for key in self.m_eff_alg_output_diag:
+            self.setProperty(key.name, eff_output[key.alias])
 
 
 AlgorithmFactory.subscribe(CalculateISISPolarizationEfficiencies)
