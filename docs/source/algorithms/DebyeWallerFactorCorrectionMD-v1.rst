@@ -10,12 +10,12 @@
 Description
 -----------
 
-Scales the the signal and error of MD events by the inverse of Debye-Waller Factor :math:`exp(<q>^2 \times <u^2>)/3` where :math:`<u^2>` is
+Scales the the signal and error of MD events by the inverse of Debye-Waller Factor :math:`\exp(q^2 <u^2>/3)` where :math:`<u^2>` is
 the `MeanSquaredDisplacement`.
 
 `MeanSquaredDisplacement` must be a positive float number.
 
-Input workspace must be in Q with either 1 dimension of \|Q\| or 3 Q_sample/Q_lab dimensions.
+Input workspace must contain momentum transfer information, with either one dimension of \|Q\| or three Q_sample/Q_lab dimensions.
 It is assumed that the Q dimensions come first follow by any number of other dimensions.
 
 
