@@ -7,8 +7,34 @@
 
 #include "MantidNexusCpp/DllConfig.h"
 #include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
 
 typedef const char CONSTCHAR;
+
+/*
+ * Any new NXaccess_mode options should be numbered in 2^n format
+ * (8, 16, 32, etc) so that they can be bit masked and tested easily.
+ *
+ * To test older non bit masked options (values below 8) use e.g.
+ *
+ *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
+ *
+ * To test new (>=8) options just use normal bit masking e.g.
+ *
+ *       if ( mode & NXACC_NOSTRIP )
+ *
+ */
+constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
+
+constexpr int NX_UNLIMITED = -1;
+
+constexpr int NX_MAXRANK = 32;
+constexpr int NX_MAXNAMELEN = 64;
+constexpr int NX_MAXPATHLEN = 1024;
+
+constexpr int NXMAXSTACK = 50;
 
 typedef void *NXhandle; /* really a pointer to a NexusFile structure */
 typedef char NXname[128];
@@ -51,6 +77,13 @@ typedef struct {
   char targetPath[1024]; /* path to item to link */
   int linkType;          /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
+
+/* Map NeXus compression methods to HDF compression methods */
+constexpr int NX_CHUNK = 0;
+constexpr int NX_COMP_NONE = 100;
+constexpr int NX_COMP_LZW = 200;
+constexpr int NX_COMP_RLE = 300;
+constexpr int NX_COMP_HUF = 400;
 
 /**
  * Special codes for NeXus file status.
@@ -134,3 +167,58 @@ enum class NXnumtype : const int {
 
 MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXstatus status);
 MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype type);
+
+// forward declare
+namespace NeXus {
+
+// TODO change to std::size_t
+typedef std::int64_t DimSize;
+// TODO replace all instances with DimArray
+typedef std::vector<DimSize> DimVector; ///< usef specifically for the dims array
+// typedef std::array<DimSize, 4> DimArray;
+//  TODO this is probably the same as DimVector
+typedef std::vector<DimSize> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
+
+/**
+ * The available compression types. These are all ignored in xml files.
+ * \li NONE no compression
+ * \li LZW Lossless Lempel Ziv Welch compression (recommended)
+ * \li RLE Run length encoding (only HDF-4)
+ * \li HUF Huffmann encoding (only HDF-4)
+ * \ingroup cpp_types
+ */
+enum NXcompression { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, RLE = NX_COMP_RLE, HUF = NX_COMP_HUF };
+
+typedef std::pair<std::string, std::string> Entry;
+typedef std::map<std::string, std::string> Entries;
+
+/**
+ * Type definition for a type-keyed multimap
+ */
+typedef std::multimap<std::string, std::string> TypeMap;
+
+/**
+ * This structure holds the type and dimensions of a primative field/array.
+ */
+struct Info {
+  /** The primative type for the field. */
+  NXnumtype type;
+  /** The dimensions of the file. */
+  DimVector dims;
+};
+
+/** Information about an attribute. */
+struct AttrInfo {
+  /** The primative type for the attribute. */
+  NXnumtype type;
+  /** The length of the attribute. */
+  unsigned length;
+  /** The name of the attribute. */
+  std::string name;
+  /** The dimensions of the attribute. */
+  DimVector dims;
+};
+
+/** Forward declare of NeXus::File */
+class File;
+} // namespace NeXus
