@@ -18,7 +18,7 @@ namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
   NXcanSASTestParameters() {}
 
-  std::string filename{std::filesystem::temp_directory_path().string() + "testFile.h5"};
+  std::string filename{(std::filesystem::temp_directory_path() / "testFile.h5").string()};
   std::vector<std::string> expectedGroupSuffices{"00", "01"};
   int size{10};
   double value{10.23};
