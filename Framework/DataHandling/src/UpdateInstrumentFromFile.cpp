@@ -89,7 +89,7 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (H5::H5File::isHdf5(filename)) {
+  if (NexusHDF5Descriptor::isReadable(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
 

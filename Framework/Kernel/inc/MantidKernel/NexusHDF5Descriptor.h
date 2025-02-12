@@ -20,6 +20,14 @@ namespace Kernel {
 class MANTID_KERNEL_DLL NexusHDF5Descriptor {
 
 public:
+  /// Enumerate HDF possible versions
+  enum Version { Version4, Version5, None };
+
+  /// Returns true if the file is considered to store data in a hierarchy
+  static bool isReadable(const std::string &filename, const Version version = Version5);
+  /// Returns version of HDF file
+  static Version getHDFVersion(const std::string &filename);
+
   /**
    * Unique constructor
    * @param filename input HDF5 Nexus file name

@@ -174,17 +174,13 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
   std::multimap<std::string, int> names{{algorithmName, -1}};
   IAlgorithm_sptr loader;
   if (nexus) {
-    try {
+    if (NexusHDF5Descriptor::isReadable(filename, NexusHDF5Descriptor::Version4)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
-    } catch (std::exception const &e) {
-      m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
     }
   } else if (nexusHDF5) {
     if (H5::H5File::isHdf5(filename)) {
-      try {
+      if (NexusHDF5Descriptor::isReadable(filename, NexusHDF5Descriptor::Version4)) {
         loader = searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, names, m_log).first;
-      } catch (const std::invalid_argument &e) {
-        m_log.debug() << "Error in looking for HDF5 based NeXus files: " << e.what() << '\n';
       }
     }
   } else if (nonHDF) {
