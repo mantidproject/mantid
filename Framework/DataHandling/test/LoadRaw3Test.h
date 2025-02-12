@@ -54,7 +54,7 @@ public:
     std::ofstream file(rawFilePath);
     file << "data goes here";
 
-    std::string adsFileName = rawFilePath + ":checksum";
+    std::string adsFileName = rawFilePath.string() + ":checksum";
     std::ofstream adsFile(adsFileName);
     adsFile << "ad0bc56c4c556fa368565000f01e77f7 *fakeRawFile.log" << std::endl;
     adsFile << "d5ace6dc7ac6c4365d48ee1f2906c6f4 *fakeRawFile.nxs" << std::endl;

@@ -33,7 +33,7 @@ public:
   void testExists() {
     const std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
-    IDFObject obj(filename);
+    IDFObject obj(filename.string());
     TS_ASSERT(obj.exists());
   }
 
@@ -59,14 +59,14 @@ public:
   void testGetFullPath() {
     const std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
-    IDFObject obj(filename);
+    IDFObject obj(filename.string());
     TS_ASSERT_EQUALS(filename.string(), obj.getFileFullPath().toString());
   }
 
   void testGetExtension() {
     const std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
-    IDFObject obj(filename);
+    IDFObject obj(filename.string());
     TS_ASSERT_EQUALS(".xml", obj.getExtension());
   }
 
@@ -74,7 +74,7 @@ public:
     const std::string filenameonly = "IDF_for_UNIT_TESTING.xml";
     const std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing" / filenameonly;
-    IDFObject obj(filename);
+    IDFObject obj(filename.string());
     TS_ASSERT_EQUALS(filenameonly, obj.getFileNameOnly());
   }
 

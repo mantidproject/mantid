@@ -47,7 +47,7 @@ public:
   }
 
   void createDirectory(const std::filesystem::path &path) {
-    Poco::File file(path);
+    Poco::File file(path.string());
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
     }
@@ -114,7 +114,7 @@ public:
       localPath = localPath.parent_path();
     }
     // create a file in the directory
-    Poco::File testFile(localPath / "test_exec_DownloadInstrument_Cache.xml");
+    Poco::File testFile((localPath / "test_exec_DownloadInstrument_Cache.xml").string());
     testFile.createFile();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -138,7 +138,7 @@ public:
     }
 
     // create a file in the directory
-    Poco::File testFile(localPath / "geometryCache" / "test_exec_Geometry_Cache.vtp");
+    Poco::File testFile((localPath / "geometryCache" / "test_exec_Geometry_Cache.vtp").string());
     testFile.createFile();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

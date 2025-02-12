@@ -154,7 +154,7 @@ std::string InstrumentFileFinder::lookupIPF(const std::filesystem::path &dir, st
     prefix = filename;
   }
 
-  Poco::Path directoryPath(dir);
+  Poco::Path directoryPath(dir.string());
   directoryPath.makeDirectory();
 
   // Assemble parameter file name
@@ -227,7 +227,7 @@ InstrumentFileFinder::getResourceFilenames(const std::string &prefix, const std:
   for (const auto &directoryName : directoryNames) {
     // Iterate over the directories from user ->etc ->install, and find the
     // first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr) {
+    for (Poco::DirectoryIterator dir_itr(directoryName.string()); dir_itr != end_iter; ++dir_itr) {
 
       const auto &filePath = dir_itr.path();
       if (!filePath.isFile())

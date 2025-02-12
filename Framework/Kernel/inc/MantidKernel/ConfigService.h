@@ -189,7 +189,7 @@ public:
   /// Get instrument search directories
   const std::vector<std::filesystem::path> &getInstrumentDirectories() const;
   /// Get instrument search directory
-  const std::filesystem::path getInstrumentDirectory() const;
+  const std::filesystem::path &getInstrumentDirectory() const;
   /// get the vtp file directory
   const std::filesystem::path getVTPFileDirectory();
   //@}

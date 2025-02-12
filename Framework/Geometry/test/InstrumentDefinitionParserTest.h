@@ -100,8 +100,8 @@ private:
     if (!put_vtp_next_to_IDF) {
       vtp_dir = std::filesystem::path(ConfigService::Instance().getTempDir());
     }
-    ScopedFile idf(idf_file_contents, idf_filename, instrument_dir);
-    ScopedFile vtp(vtp_file_contents, vtp_filename, vtp_dir);
+    ScopedFile idf(idf_file_contents, idf_filename, instrument_dir.string());
+    ScopedFile vtp(vtp_file_contents, vtp_filename, vtp_dir.string());
 
     return IDFEnvironment(idf, vtp, idf_file_contents, instrument_name);
   }
@@ -110,7 +110,7 @@ private:
   ScopedFile createIDFFileObject(const std::string &idf_filename, const std::string &idf_file_contents) {
     const std::filesystem::path instrument_dir = ConfigService::Instance().getInstrumentDirectory() / "unit_testing/";
 
-    return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
+    return ScopedFile(idf_file_contents, idf_filename, instrument_dir.string());
   }
 
 public:
@@ -122,11 +122,11 @@ public:
   void test_extract_ref_info() {
     std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING.xml";
-    std::string xmlText = Strings::loadFile(filename);
+    std::string xmlText = Strings::loadFile(filename.string());
     std::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "For Unit Testing", xmlText);
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
@@ -143,11 +143,11 @@ public:
   void test_extract_ref_info_theta_sign() {
     std::filesystem::path filename =
         ConfigService::Instance().getInstrumentDirectory() / "unit_testing/IDF_for_UNIT_TESTING6.xml";
-    std::string xmlText = Strings::loadFile(filename);
+    std::string xmlText = Strings::loadFile(filename.string());
     std::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "For Unit Testing", xmlText);
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
@@ -452,7 +452,7 @@ public:
     std::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "For Unit Testing2", xmlText);
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     std::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
@@ -496,7 +496,7 @@ public:
     std::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "RectangularUnitTest", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "RectangularUnitTest", xmlText);
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Now the XY detector in bank1
@@ -548,7 +548,7 @@ public:
     std::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "AdjustTest", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "AdjustTest", xmlText);
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // None rotated cuboid
@@ -808,7 +808,7 @@ public:
     boost::replace_first(contents, "%LOCATIONS%", locations);
     boost::replace_first(contents, "%NUM_DETECTORS%", boost::lexical_cast<std::string>(numDetectors));
 
-    InstrumentDefinitionParser parser(filename, "LocationsTestInstrument", contents);
+    InstrumentDefinitionParser parser(filename.string(), "LocationsTestInstrument", contents);
 
     Instrument_sptr instr;
 
@@ -995,10 +995,10 @@ public:
 
   void testLoadingAndParsing() {
     const std::filesystem::path filename = m_instrumentDirectoryPath / "unit_testing/IDF_for_UNIT_TESTING.xml";
-    const std::string xmlText = Strings::loadFile(filename);
+    const std::string xmlText = Strings::loadFile(filename.string());
 
     std::shared_ptr<const Instrument> instrument;
-    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+    InstrumentDefinitionParser parser(filename.string(), "For Unit Testing", xmlText);
     TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(nullptr));
 
     // Clean up VTP file
@@ -1011,7 +1011,7 @@ public:
   void test_load_wish() {
     const auto definition = m_instrumentDirectoryPath / "WISH_Definition_10Panels.xml";
     std::string contents = Strings::loadFile(definition.string());
-    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    InstrumentDefinitionParser parser(definition.string(), "dummy", contents);
     auto wishInstrument = parser.parseXML(nullptr);
     TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
                      778245); // Sanity check
@@ -1020,7 +1020,7 @@ public:
   void test_load_sans2d() {
     const auto definition = m_instrumentDirectoryPath / "SANS2D_Definition_Tubes.xml";
     std::string contents = Strings::loadFile(definition.string());
-    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    InstrumentDefinitionParser parser(definition.string(), "dummy", contents);
     auto sansInstrument = parser.parseXML(nullptr);
     TS_ASSERT_EQUALS(extractDetectorInfo(*sansInstrument)->size(),
                      122888); // Sanity check

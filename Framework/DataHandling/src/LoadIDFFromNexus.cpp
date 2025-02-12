@@ -145,10 +145,10 @@ std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &inst
     // find the first appropriate file
     std::filesystem::path iPath(directoryName / "embedded_instrument_corrections"); // Go to correction file subfolder
     // First see if the directory exists
-    Poco::File ipDir(iPath);
+    Poco::File ipDir(iPath.string());
     if (ipDir.exists() && ipDir.isDirectory()) {
       iPath /= instName + "_Parameter_Corrections.xml"; // Append file name to pathname
-      Poco::File ipFile(iPath);
+      Poco::File ipFile(iPath.string());
       if (ipFile.exists() && ipFile.isFile()) {
         return ipFile.path(); // Return first found
       }
