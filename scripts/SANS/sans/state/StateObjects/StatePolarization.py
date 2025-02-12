@@ -42,13 +42,31 @@ class StateComponent(metaclass=JsonSerializable):
         self.efficiency = None
 
 
+class StateFilter(StateComponent, metaclass=JsonSerializable):
+    cell_length: None | int
+    gas_pressure: None | int
+    initial_polarization: None | str
+
+    def __init__(self):
+        super(StateFilter, self).__init__()
+        # Relevant to He3 filters (Polarisers and Analysers)
+        self.cell_length = None
+        self.gas_pressure = None
+        # Relevant to all polarisers and analysers.
+        self.initial_polarization = None
+
+
 class StatePolarization(metaclass=JsonSerializable):
     flipper_configuration: None | str
     spin_configuration: None | str
     flippers: list[StateComponent]
+    polarizer: None | StateFilter
+    analyzer: None | StateFilter
 
     def __init__(self):
         super(StatePolarization, self).__init__()
         self.flipper_configuration = None
         self.spin_configuration = None
+        self.analyzer = None
+        self.polarizer = None
         self.flippers = []
