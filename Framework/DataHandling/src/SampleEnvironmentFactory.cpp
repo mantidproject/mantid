@@ -153,7 +153,7 @@ SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::find(const std::stri
   // check for the instrument environment, then facility environment
   for (const auto &rel_path : {relpath_instr, relpath_facil}) {
     for (const auto &prefixStr : m_rootDirs) {
-      Path prefix(prefixStr);
+      Path prefix(prefixStr.string());
       // Ensure the path is a directory (note that this does not create it!)
       prefix.makeDirectory();
       File fullpath(Poco::Path(prefix, rel_path));

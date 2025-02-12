@@ -205,7 +205,7 @@ std::string extractIdfFileOnCurrentSystem(const std::string &idf) {
       Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   Poco::DirectoryIterator end_iter;
   for (const auto &directoryName : directoryNames) {
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr) {
+    for (Poco::DirectoryIterator dir_itr(directoryName.string()); dir_itr != end_iter; ++dir_itr) {
       if (Poco::File(dir_itr->path()).isFile()) {
         if (fileName == Poco::Path(dir_itr->path()).getFileName()) {
           return Poco::Path(dir_itr->path()).absolute().toString();

@@ -48,7 +48,8 @@ void load(const std::string &filename, const std::string &groupname, const std::
   auto concurencyNumber = PARALLEL_GET_MAX_THREADS;
   auto numThreads = std::max<int>(concurencyNumber / 2, 1);
   auto numProceses = std::max<int>(concurencyNumber / 2, 1);
-  std::string executableName = Kernel::ConfigService::Instance().getPropertiesDir() / "MantidNexusParallelLoader";
+  std::string executableName =
+      (Kernel::ConfigService::Instance().getPropertiesDir() / "MantidNexusParallelLoader").string();
 
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()), numProceses, numThreads, executableName,
                                  precalcEvents);

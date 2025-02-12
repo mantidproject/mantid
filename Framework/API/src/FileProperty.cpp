@@ -121,7 +121,7 @@ std::string createDirectory(const std::filesystem::path &path) {
   }
 
   if (!stempath.string().empty()) {
-    Poco::File stem(stempath);
+    Poco::File stem(stempath.string());
     if (!stem.exists()) {
       try {
         stem.createDirectories();
