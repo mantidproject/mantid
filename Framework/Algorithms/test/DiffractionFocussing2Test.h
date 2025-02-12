@@ -8,10 +8,11 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAlgorithms/AlignDetectors.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidDataHandling/ApplyDiffCal.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -52,14 +53,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
-    // Have to align because diffraction focussing wants d-spacing
-    Mantid::Algorithms::AlignDetectors align;
-    align.initialize();
-    align.setPropertyValue("InputWorkspace", outputSpace);
-    align.setPropertyValue("OutputWorkspace", outputSpace);
-    align.setPropertyValue("CalibrationFile", "hrpd_new_072_01.cal");
-    TS_ASSERT_THROWS_NOTHING(align.execute());
-    TS_ASSERT(align.isExecuted());
+    Mantid::DataHandling::ApplyDiffCal applyDiffCal;
+    applyDiffCal.setChild(true);
+    applyDiffCal.initialize();
+    applyDiffCal.setPropertyValue("InstrumentWorkspace", outputSpace);
+    applyDiffCal.setPropertyValue("CalibrationFile", "hrpd_new_072_01.cal");
+    TS_ASSERT_THROWS_NOTHING(applyDiffCal.execute());
+    TS_ASSERT(applyDiffCal.isExecuted());
+
+    // Have to convert because diffraction focussing wants d-spacing
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setPropertyValue("InputWorkspace", outputSpace);
+    convert.setPropertyValue("OutputWorkspace", outputSpace);
+    convert.setPropertyValue("Target", "dSpacing");
+    TS_ASSERT_THROWS_NOTHING(convert.execute());
+    TS_ASSERT(convert.isExecuted());
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
     focus.setPropertyValue("OutputWorkspace", "focusedWS");
