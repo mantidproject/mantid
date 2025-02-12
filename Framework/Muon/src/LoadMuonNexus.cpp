@@ -21,13 +21,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/MuonNexusReader.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
-
-// must be after MantidNexusCpp/NeXusFile.hpp
-#include "MantidLegacyNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -39,7 +32,6 @@ namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
-using namespace Mantid::NeXus;
 
 /// Empty default constructor
 LoadMuonNexus::LoadMuonNexus()
