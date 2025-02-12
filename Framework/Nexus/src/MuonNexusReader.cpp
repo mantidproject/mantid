@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
 #include <boost/scoped_array.hpp>
 #include <sstream>
 #include <vector>
@@ -54,7 +54,7 @@ using namespace Mantid;
  *
  * @param handle Object to work on.
  */
-void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
+void MuonNexusReader::openFirstNXentry(Mantid::LegacyNexus::File &handle) {
   std::map<string, string> entries = handle.getEntries();
   const auto entry =
       std::find_if(entries.cbegin(), entries.cend(), [](const auto entry) { return entry.second == NXENTRY; });
@@ -80,7 +80,7 @@ void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readFromFile(const string &filename) {
-  NeXus::File handle(filename, NXACC_READ);
+  Mantid::LegacyNexus::File handle(filename, NXACC_READ);
   openFirstNXentry(handle);
 
   // find all of the NXdata in the entry
@@ -94,7 +94,7 @@ void MuonNexusReader::readFromFile(const string &filename) {
   handle.openGroup(nxdataname.front(), NXDATA);
 
   // reused local variable
-  NeXus::Info info;
+  Mantid::LegacyNexus::Info info;
 
   // open NXdata section
   handle.openData("counts");
@@ -167,7 +167,7 @@ void MuonNexusReader::readFromFile(const string &filename) {
  * - Tag
  * - Total counts per period
  */
-void MuonNexusReader::readPeriodInfo(NeXus::File &handle) {
+void MuonNexusReader::readPeriodInfo(Mantid::LegacyNexus::File &handle) {
   auto parsePeriod = [&handle](const std::string &logName, auto &destAttr) {
     try {
       std::remove_reference_t<decltype(destAttr)> tempAttr;
@@ -238,7 +238,7 @@ void MuonNexusReader::readLogData(const string &filename) {
   // reset the count of logs
   m_nexusLogCount = 0;
 
-  NeXus::File handle(filename, NXACC_READ);
+  Mantid::LegacyNexus::File handle(filename, NXACC_READ);
   openFirstNXentry(handle);
 
   // read nexus fields at this level looking for NXlog and loading these into
@@ -276,7 +276,7 @@ void MuonNexusReader::readLogData(const string &filename) {
   // file will close on leaving the function
 }
 
-bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
+bool MuonNexusReader::readMuonLogData(Mantid::LegacyNexus::File &handle) {
   const string NAME("name");
   const string VALUES("values");
   const string TIME("time");
@@ -288,7 +288,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   // read data values
   try {
     handle.openData(VALUES);
-  } catch (NeXus::Exception &) {
+  } catch (Mantid::LegacyNexus::Exception &) {
     g_log.warning() << "No " << VALUES << " set in " << handle.getPath() << "\n";
     return false;
   }
@@ -298,7 +298,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   bool isNumeric(false);
   std::string units = "";
 
-  NeXus::Info info = handle.getInfo();
+  Mantid::LegacyNexus::Info info = handle.getInfo();
   if (info.type == NXnumtype::FLOAT32 && info.dims.size() == 1) {
     isNumeric = true;
     boost::scoped_array<float> dataVals(new float[info.dims[0]]);
@@ -326,7 +326,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   // read time values
   try {
     handle.openData(TIME);
-  } catch (NeXus::Exception &) {
+  } catch (Mantid::LegacyNexus::Exception &) {
     g_log.warning() << "No " << TIME << " set in " << handle.getPath() << "\n";
     return false;
   }

@@ -28,12 +28,10 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidNexus/MuonNexusReader.h"
-
-// must be after MantidNexus/MuonNexusReader.h which includes MantidNexusCpp/NeXusFile.hpp
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
 #include "MantidNexus/LegacyNexusClasses.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/scoped_array.hpp>

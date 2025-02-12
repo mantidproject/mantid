@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <climits>
@@ -38,8 +38,8 @@ private:
   std::vector<std::string> m_logNames; ///< stores name read from file
   std::vector<std::string> m_logUnits;
 
-  void openFirstNXentry(NeXus::File &handle);
-  bool readMuonLogData(NeXus::File &handle);               ///< method to read the fields of open NXlog section
+  void openFirstNXentry(Mantid::LegacyNexus::File &handle);
+  bool readMuonLogData(Mantid::LegacyNexus::File &handle); ///< method to read the fields of open NXlog section
   std::vector<std::vector<float>> m_logValues,             ///< array of values for i'th NXlog section
       m_logTimes;                                          ///< arrys of times for i'th NXlog section
   std::vector<std::vector<std::string>> m_logStringValues; ///< array of string values for i'th NXlog section
@@ -61,7 +61,7 @@ private:
     boost::posix_time::ptime start(boost::gregorian::date(1970, 1, 1));
     return (t - start).total_seconds();
   }
-  void readPeriodInfo(NeXus::File &handle);
+  void readPeriodInfo(Mantid::LegacyNexus::File &handle);
 
 public:
   /// Default constructor
