@@ -93,7 +93,7 @@ const std::string SaveGDA::summary() const {
 
 int SaveGDA::version() const { return 1; }
 
-const std::vector<std::string> SaveGDA::seeAlso() const { return {"SaveBankScatteringAngles", "AlignDetectors"}; }
+const std::vector<std::string> SaveGDA::seeAlso() const { return {"SaveBankScatteringAngles"}; }
 
 const std::string SaveGDA::category() const { return "DataHandling\\Text;Diffraction\\DataHandling"; }
 

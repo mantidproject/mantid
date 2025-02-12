@@ -34,10 +34,7 @@ the rest of the instrument to. The main algorithm that does this is
 1. :ref:`Load <algm-Load>` the calibration data
 2. Convert the X-Units to d-spacing using :ref:`ConvertUnits
    <algm-ConvertUnits>`. The "offsets" calculated are relative
-   reference spectrum's geometry so using :ref:`AlignDetectors
-   <algm-AlignDetectors>` will violate the assumptions for other
-   algorithms used with time-of-flight powder diffraction and give the
-   wrong results for focused data.
+   reference spectrum's geometry.
 3. Run :ref:`Rebin <algm-Rebin>` to set a common d-spacing bin
    structure across all of the spectra, you will need fine enough bins
    to allow fitting of your peak.  Whatever you choose, make a note of
@@ -596,9 +593,10 @@ reasonable calibration constant for each of the spectra in your data.
 The easiest way to do this is to apply the calibration to your
 calibration data and check that the bragg peaks align as expected.
 
-1. Load the calibration data using :ref:`Load <algm-Load>`
-2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``.
-3. Plot the workspace as a Color Fill plot, in the spectrum view, or a few spectra in a line plot.
+1. Load the instrument data using :ref:`Load <algm-Load>`
+2. Apply the calibration to the workspace using :ref:`ApplyDiffCal <algm-ApplyDiffCal>` (the calibration can be provided using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``).
+3. Run :ref:`ConvertUnits <algm-ConvertUnits>`, to convert the data to d-spacing using the calibration.
+4. Plot the workspace as a Color Fill plot, in the spectrum view, or a few spectra in a line plot.
 
 Further insight can be gained by comparing the grouped (after aligning
 and focussing the data) spectra from a previous calibration or convert
@@ -662,13 +660,13 @@ This can be done using the following code
 
 .. code::
 
-   from mantid.simpleapi import (AlignDetectors, LoadDiffCal, LoadEventNexus, LoadInstrument, Rebin)
+   from mantid.simpleapi import (ApplyDiffCal, ConvertUnits, LoadEventNexus, LoadInstrument, Rebin)
    from Calibration.tofpd import diagnostics
 
    LoadEventNexus(Filename='VULCAN_192227.nxs.h5', OutputWorkspace='ws')
    Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000,-.002,70000))
-   LoadDiffCal(Filename='VULCAN_Calibration_CC_4runs_hybrid.h5', InputWorkspace='ws', WorkspaceName='VULCAN')
-   AlignDetectors(InputWorkspace='ws', OutputWorkspace='ws', CalibrationWorkspace='VULCAN_cal')
+   ApplyDiffCal(InputWorkspace='ws', CalibrationFile='VULCAN_Calibration_CC_4runs_hybrid.h5')
+   ConvertUnits(InputWorkspace='ws', Target="dSpacing")
    diagnostics.plot2d(mtd['ws'], horiz_markers=[8*512*20, 2*8*512*20], xmax=1.3)
 
 Here the expected peak positions are vertical lines, the horizontal lines are boundaries between banks.
