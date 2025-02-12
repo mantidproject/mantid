@@ -708,11 +708,15 @@ void AlgorithmDialog::reject() {
 void AlgorithmDialog::helpClicked() {
   // determine the version to show
   int version(-1); // the latest version
-  if (m_algorithm)
+  if (m_algorithm){
     version = m_algorithm->version();
-
+  }
+  #ifndef DOCS_QTHELP
+    MantidQt::API::InterfaceManager().showAlgorithmHelp(m_algName, version);
+  #else
   // bring up the help window
-  MantidQt::API::InterfaceManager().showAlgorithmHelp(m_algName, version);
+    HelpWindow::showAlgorithm(m_algName, version);
+  #endif
 }
 
 //-------------------------------------------------------------------------------------------------
