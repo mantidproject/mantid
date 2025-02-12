@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-- Remove off-putting error prompt that appears when canceling a MaxEnt calculation in the :ref:`Muon FDA interface <Frequency_Domain_Analysis-ref>`
+- The :ref:`Muon FDA interface <Frequency_Domain_Analysis-ref>` will no longer display an unnecessary error prompt after cancelling a ``MaxEnt`` calculation.
 
 
 Muon Analysis
@@ -19,15 +19,7 @@ Muon Analysis
 
 Bugfixes
 ############
-- On Muon Interfaces, a legend containing a large string of text does not shrink the plot axes for tight layouts.
-
-
-Muon Analysis and Frequency Domain Analysis
--------------------------------------------
-
-Bugfixes
-############
-
+- External plots will no longer be squashed by plot legends.
 
 
 ALC
@@ -35,19 +27,7 @@ ALC
 
 New features
 ############
-+- The :ref:`Muon ALC <MuonALC-ref>` interface can now import data from a matrix workspace which was externally generated (i.e. not previously exported from the Muon ALC interface).
-
-Bugfixes
-############
-
-
-
-Elemental Analysis
-------------------
-
-Bugfixes
-############
-
+- The :ref:`Muon ALC interface<MuonALC-ref>` can now import data from an externally generated matrix workspace (i.e. not previously exported from the Muon ALC interface).
 
 
 Algorithms
