@@ -243,7 +243,7 @@ public:
     TS_ASSERT_LESS_THAN(1, directories.size());
     // the first entry should be the AppDataDir + instrument
     TSM_ASSERT_LESS_THAN("Could not find the appData directory in getInstrumentDirectories()[0]",
-                         directories[0].string().find(ConfigService::Instance().getAppDataDir()),
+                         directories[0].string().find(ConfigService::Instance().getAppDataDir().string()),
                          directories[0].string().size());
     TSM_ASSERT_LESS_THAN("Could not find the 'instrument' directory in "
                          "getInstrumentDirectories()[0]",
@@ -261,7 +261,7 @@ public:
 
     // check all of the directory entries actually exist
     for (auto &directoryPath : directories) {
-      Poco::File directory(directoryPath);
+      Poco::File directory(directoryPath.string());
       TSM_ASSERT(directoryPath.string() + " does not exist", directory.exists());
     }
   }

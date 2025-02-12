@@ -98,7 +98,7 @@ public:
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
   void createDirectory(const std::filesystem::path &path) {
-    Poco::File file(path);
+    Poco::File file(path.string());
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
     }
@@ -169,7 +169,7 @@ public:
 
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.", runDownloadInstrument(), 2);
 
-    Poco::File orphanedFile(orphanedFilePath);
+    Poco::File orphanedFile(orphanedFilePath.string());
     TSM_ASSERT("The orphaned file was not deleted", orphanedFile.exists() == false);
   }
 

@@ -599,7 +599,7 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   const auto &instDirs = config.getInstrumentDirectories();
   std::vector<std::filesystem::path> environDirs(instDirs);
   for (auto &direc : environDirs) {
-    direc = Poco::Path(direc).append("sampleenvironments").toString();
+    direc = Poco::Path(direc.string()).append("sampleenvironments").toString();
   }
   auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));

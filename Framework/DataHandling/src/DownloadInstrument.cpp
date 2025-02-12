@@ -154,7 +154,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // get the date of the local github.json file if it exists
   std::filesystem::path gitHubJson(localPath / "github.json");
-  Poco::File gitHubJsonFile(gitHubJson);
+  Poco::File gitHubJsonFile(gitHubJson.string());
   Poco::DateTime gitHubJsonDate(1900, 1, 1);
   bool forceUpdate = this->getProperty("ForceUpdate");
   if ((!forceUpdate) && gitHubJsonFile.exists() && gitHubJsonFile.isFile()) {

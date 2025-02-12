@@ -443,7 +443,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths, const std::str
     // files
     try {
       auto loadInst = createChildAlgorithm("LoadInstrument");
-      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory().string();
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", std::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
