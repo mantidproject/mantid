@@ -204,8 +204,8 @@ void SaveNexusProcessed::getWSIndexList(std::vector<int> &indices, const MatrixW
 void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
                                 std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile, const bool keepFile,
                                 optional_size_t entryNumber) {
-  // TODO: Remove?
-  NXMEnableErrorReporting();
+  //
+  //
 
   // Retrieve the filename from the properties
   const std::string filename = getPropertyValue("Filename");

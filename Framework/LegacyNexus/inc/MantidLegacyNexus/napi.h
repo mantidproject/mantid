@@ -771,12 +771,6 @@ MANTID_LEGACYNEXUS_DLL void NXMSetError(void *pData, ErrFunc newErr);
 MANTID_LEGACYNEXUS_DLL void NXMSetTError(void *pData, ErrFunc newErr);
 
 /**
- * Retrieve the current error display function
- * \return The current error display function.
- */
-MANTID_LEGACYNEXUS_DLL ErrFunc NXMGetError();
-
-/**
  * Suppress error reports from the NeXus-API
  */
 MANTID_LEGACYNEXUS_DLL void NXMDisableErrorReporting();

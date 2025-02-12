@@ -16,7 +16,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -133,7 +132,6 @@ FrameworkManagerImpl::FrameworkManagerImpl() {
   ConfigService::Instance();
   g_log.notice() << Mantid::welcomeMessage() << '\n';
   loadPlugins();
-  disableNexusOutput();
   setNumOMPThreadsToConfigValue();
 
   g_log.debug() << "FrameworkManager created.\n";
@@ -338,9 +336,6 @@ void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
   // C as the locale.
   setlocale(LC_NUMERIC, "C");
 }
-
-/// Silence NeXus output
-void FrameworkManagerImpl::disableNexusOutput() { NXMSetError(nullptr, NexusErrorFunction); }
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::asynchronousStartupTasks() {
