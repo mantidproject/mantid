@@ -138,7 +138,9 @@ def _calibration_processing(
         InputWorkspace=cross_correlated, GroupingFileName=offset_file, OutputWorkspace=offsets_ws_name, **get_det_offset_params
     )
     rebinned_tof = mantid.ConvertUnits(InputWorkspace=rebinned, Target="TOF")
-    aligned = mantid.AlignDetectors(InputWorkspace=rebinned_tof, CalibrationFile=offset_file)
+    mantid.ApplyDiffCal(InstrumentWorkspace="rebinned_tof", CalibrationFile=offset_file)
+    aligned = mantid.ConvertUnits(InputWorkspace=rebinned_tof, Target="dSpacing")
+    mantid.ApplyDiffCal(InstrumentWorkspace=aligned, ClearCalibration=True)
     grouping_file = os.path.join(calibration_dir, grouping_file_name)
     focused = mantid.DiffractionFocussing(
         InputWorkspace=aligned,
