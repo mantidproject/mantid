@@ -49,11 +49,13 @@ void DebyeWallerFactorCorrectionMD::init() {
 // //----------------------------------------------------------------------------------------------
 // /** Execute the algorithm.
 //  */
-void DebyeWallerFactorCorrectionMD::exec() { QTransform::exec(); }
+void DebyeWallerFactorCorrectionMD::exec() {
+  u2 = getProperty("MeanSquaredDisplacement");
+  QTransform::exec();
+}
 
 // implement correction method
 double DebyeWallerFactorCorrectionMD::correction(const double q2) const {
-  const double u2 = getProperty("MeanSquaredDisplacement");
   const double inverse_DWF = exp(u2 * q2 / 3.0);
   return inverse_DWF;
 }
