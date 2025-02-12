@@ -1516,7 +1516,7 @@ const std::vector<std::filesystem::path> &ConfigServiceImpl::getInstrumentDirect
  * Return the base search directories for XML instrument definition files (IDFs)
  * @returns a last entry of getInstrumentDirectories
  */
-const std::filesystem::path ConfigServiceImpl::getInstrumentDirectory() const { return m_instrumentDirs.back(); }
+const std::filesystem::path &ConfigServiceImpl::getInstrumentDirectory() const { return m_instrumentDirs.back(); }
 /**
  * Return the search directory for vtp files
  * @returns a path

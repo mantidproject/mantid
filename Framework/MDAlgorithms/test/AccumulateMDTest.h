@@ -124,7 +124,7 @@ public:
     // Create a temporary file to find
     std::filesystem::path filepath =
         Mantid::Kernel::ConfigService::Instance().getTempDir() / "ACCUMULATEMDTEST_EXISTENTFILE";
-    Poco::File existent_file(filepath);
+    Poco::File existent_file(filepath.string());
     existent_file.createFile();
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources{filepath.string()};

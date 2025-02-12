@@ -59,7 +59,7 @@ std::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
     const std::string groupingFile = groupingFiles[0];
 
     // Get search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory().string();
 
     loadGroupingFromXML(directoryName + groupingFile, *loadedGrouping);
   } else {

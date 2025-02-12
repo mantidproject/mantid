@@ -58,12 +58,12 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    Poco::File envFile(testDirec / (m_envName + ".xml"));
+    Poco::File envFile((testDirec / (m_envName + ".xml")).string());
     std::ofstream goodStream(envFile.path(), std::ios_base::out);
     goodStream << xml;
     goodStream.close();
     // Bad file
-    envFile = testDirec / (m_badName + ".xml");
+    envFile = (testDirec / (m_badName + ".xml")).string();
     std::ofstream badStream(envFile.path(), std::ios_base::out);
     const std::string wrongContent = "<garbage>";
     badStream << wrongContent;
@@ -72,7 +72,7 @@ public:
 
   ~SampleEnvironmentSpecFileFinderTest() {
     try {
-      Poco::File(m_testRoot).remove(true);
+      Poco::File(m_testRoot.string()).remove(true);
     } catch (...) {
     }
   }

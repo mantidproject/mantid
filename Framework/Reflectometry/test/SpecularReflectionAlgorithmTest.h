@@ -91,24 +91,22 @@ public:
 
     FrameworkManager::Instance();
 
-    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
-    Poco::Path path(instDir);
-    path.append("INTER_Definition.xml");
+    const std::filesystem::path &instDir = ConfigService::Instance().getInstrumentDirectory();
+    std::filesystem::path path(instDir / "INTER_Definition.xml");
 
     auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
+    loadAlg->setProperty("Filename", path.string());
     loadAlg->setPropertyValue("OutputWorkspace", "demo");
     loadAlg->execute();
     pointDetectorWS = loadAlg->getProperty("OutputWorkspace");
 
-    path = Poco::Path(instDir);
-    path.append("POLREF_Definition.xml");
+    path = instDir / "POLREF_Definition.xml";
     loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
+    loadAlg->setProperty("Filename", path.string());
     loadAlg->setPropertyValue("OutputWorkspace", "demo");
     loadAlg->execute();
     linearDetectorWS = loadAlg->getProperty("OutputWorkspace");

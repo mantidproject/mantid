@@ -35,7 +35,7 @@ public:
     config.updateFacilities(testFile.string());
     config.setFacility("TEST");
     // Update instrument search directory
-    config.setString("instrumentDefinition.directory", baseInstDir / "unit_testing");
+    config.setString("instrumentDefinition.directory", (baseInstDir / "unit_testing").string());
   }
 
   void tearDown() override {

@@ -532,7 +532,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
           API::InstrumentFileFinder::getInstrumentFilename(instrument, localWorkspace->getWorkspaceStartDate());
     } catch (Kernel::Exception::NotFoundError &) {
       if (instFilename.empty()) {
-        Poco::Path directory(Kernel::ConfigService::Instance().getInstrumentDirectory());
+        Poco::Path directory(Kernel::ConfigService::Instance().getInstrumentDirectory().string());
         Poco::Path file(instrument + "_Definition.xml");
         Poco::Path fullPath(directory, file);
         instFilename = fullPath.toString();

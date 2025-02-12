@@ -47,7 +47,7 @@ public:
   void test_loadGroupingFromXML() {
     Grouping g;
 
-    TS_ASSERT_THROWS_NOTHING(GroupingLoader::loadGroupingFromXML(m_testDataDir / "MUSRGrouping.xml", g));
+    TS_ASSERT_THROWS_NOTHING(GroupingLoader::loadGroupingFromXML((m_testDataDir / "MUSRGrouping.xml").string(), g));
 
     TS_ASSERT_EQUALS(g.groupNames.size(), 2);
     TS_ASSERT_EQUALS(g.groupNames[0], "fwd");

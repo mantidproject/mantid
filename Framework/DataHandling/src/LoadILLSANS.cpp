@@ -782,7 +782,7 @@ void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const si
  */
 std::string LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
 
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory().string());
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();

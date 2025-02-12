@@ -2554,7 +2554,7 @@ InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeome
   // temporary
   // directory.
   IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(
-      Poco::Path(ConfigService::Instance().getTempDir()).append(this->getMangledName() + ".vtp").toString());
+      Poco::Path(ConfigService::Instance().getTempDir().string()).append(this->getMangledName() + ".vtp").toString());
   CachingOption cachingOption = NoneApplied;
   if (m_cacheFile->exists()) {
     applyCache(m_cacheFile);
@@ -2964,7 +2964,7 @@ const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
   if (!filename.empty()) {
-    Poco::Path path(ConfigService::Instance().getVTPFileDirectory());
+    Poco::Path path(ConfigService::Instance().getVTPFileDirectory().string());
     path.makeDirectory();
     path.append(filename + ".vtp");
     retVal = path.toString();

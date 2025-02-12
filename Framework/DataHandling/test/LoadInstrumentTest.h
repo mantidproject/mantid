@@ -96,7 +96,7 @@ public:
     auto runAlg = [&generateFiles, &loader, &ws2D](const std::string &name, const std::string &expected) {
       auto filePath = generateFiles(name);
 
-      loader.setPropertyValue("Filename", filePath);
+      loader.setPropertyValue("Filename", filePath.string());
       loader.setProperty("RewriteSpectraMap", OptionalBool(true));
       loader.setProperty("Workspace", ws2D);
 

@@ -27,7 +27,7 @@ class ScopedDirectory final {
 public:
   /// Constructor: create directory in temp folder
   ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
-    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
+    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir().string());
     tmpPath.pushDirectory(m_dirName);
     m_directory = Poco::File(tmpPath);
     m_directory.createDirectories();

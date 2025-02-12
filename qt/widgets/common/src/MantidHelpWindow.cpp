@@ -375,7 +375,7 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
  */
 void MantidHelpWindow::determineFileLocs() {
   // determine collection file location
-  string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
+  string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir().string();
 
   this->findCollectionFile(binDir);
   g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";

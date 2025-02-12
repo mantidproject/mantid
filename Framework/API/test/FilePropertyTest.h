@@ -176,14 +176,14 @@ public:
 
   void testDirectoryPasses() {
     std::filesystem::path TestDir(ConfigService::Instance().getDirectoryOfExecutable() / "MyTestFolder");
-    Poco::File dir(TestDir);
+    Poco::File dir(TestDir.string());
     dir.createDirectory();
 
     FileProperty fp("SavePath", "", FileProperty::Directory);
     TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
 
     // The directory exists, so no failure
-    std::string msg = fp.setValue(TestDir);
+    std::string msg = fp.setValue(TestDir.string());
     TS_ASSERT_EQUALS(msg, "");
 
     dir.remove(); // clean up your folder

@@ -73,7 +73,7 @@ void ClearCache::exec() {
 
   // get the instrument directories
   auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path localPath(instrumentDirs[0]);
+  Poco::Path localPath(instrumentDirs[0].string());
   localPath.makeDirectory();
 
   if (clearAlgCache) {

@@ -736,7 +736,7 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
  */
 std::string LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory().string());
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
