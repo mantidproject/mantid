@@ -1,7 +1,7 @@
-set(SRC_FILES src/H5Util.cpp src/MuonNexusReader.cpp src/NexusClasses.cpp)
+set(SRC_FILES src/H5Util.cpp src/MuonNexusReader.cpp src/NexusClasses.cpp src/LegacyNexusClasses.cpp)
 
 set(INC_FILES inc/MantidNexus/H5Util.h inc/MantidNexus/MuonNexusReader.h inc/MantidNexus/NexusClasses.h
-              inc/MantidNexus/NexusIOHelper.h
+              inc/MantidNexus/LegacyNexusClasses.h inc/MantidNexus/NexusIOHelper.h
 )
 
 set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h)
@@ -31,7 +31,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::NexusCpp)
+target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::NexusCpp Mantid::LegacyNexus)
 
 # Add the unit tests directory
 add_subdirectory(test)
