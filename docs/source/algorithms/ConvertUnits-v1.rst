@@ -43,7 +43,7 @@ time-of-flight (TOF) diffraction it is also possible to provide detector offsets
 (from :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`) or diffractometer constants
 (from :ref:`PDCalibration <algm-PDCalibration>`) for the conversion between TOF and d-spacing.
 For more details on diffractometer constants see :ref:`Unit Factory`, for the relation between offsets and diffractometer
-constants see ref:`ConvertDiffCal <algm-ConvertDiffCal>`.
+constants see :ref:`algm-ConvertDiffCal`.
 
 :ref:`ApplyDiffCal <algm-ApplyDiffCal>` is used to apply a detector calibration in the form of a ``CalibrationFile``,
 ``CalibrationWorkspace`` or ``OffsetsWorkspace``. Note this calibration will be used to do the conversion from d-spacing
