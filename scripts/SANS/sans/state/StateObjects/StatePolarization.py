@@ -6,13 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Defines the state of the polarization taking place during the run."""
 
+import json
+
 from sans.state.JsonSerializable import JsonSerializable
+from sans.state.state_functions import validation_message, is_pure_none_or_not_none
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-
-
 class StateComponent(metaclass=JsonSerializable):
     idf_component_name: None | str
     device_name: None | str
@@ -41,6 +43,10 @@ class StateComponent(metaclass=JsonSerializable):
         self.transmission = None
         self.efficiency = None
 
+    def validate(self):
+        # Purposefully passed to indicate where future validation should be implemented.
+        pass
+
 
 class StateFilter(StateComponent, metaclass=JsonSerializable):
     cell_length: None | int
@@ -54,6 +60,10 @@ class StateFilter(StateComponent, metaclass=JsonSerializable):
         self.gas_pressure = None
         # Relevant to all polarisers and analysers.
         self.initial_polarization = None
+
+    def validate(self):
+        # Purposefully passed to indicate where future validation should be implemented.
+        pass
 
 
 class StateField(metaclass=JsonSerializable):
@@ -71,6 +81,36 @@ class StateField(metaclass=JsonSerializable):
         self.sample_direction_a = None
         self.sample_direction_p = None
         self.sample_direction_d = None
+
+    def validate(self):
+        is_invalid = dict()
+        direction = [self.sample_direction_a, self.sample_direction_p, self.sample_direction_d]
+        if self.sample_direction_log is not None:
+            if any(coordinate is not None for coordinate in direction):
+                entry = validation_message(
+                    "Too many sample direction parameters.",
+                    "Either set the sample direction log OR set the a, p, and d values.",
+                    {
+                        "SampleDirectionLog": self.sample_direction_log,
+                        "SampleDirectionA": self.sample_direction_a,
+                        "SampleDirectionP": self.sample_direction_p,
+                        "SampleDirectionD": self.sample_direction_d,
+                    },
+                )
+                is_invalid.update(entry)
+        elif not is_pure_none_or_not_none(direction):
+            entry = validation_message(
+                "Missing field sample direction parameters.",
+                "Set all 3 the sample direction parameters.",
+                {
+                    "SampleDirectionA": self.sample_direction_a,
+                    "SampleDirectionP": self.sample_direction_p,
+                    "SampleDirectionD": self.sample_direction_d,
+                },
+            )
+            is_invalid.update(entry)
+        if is_invalid:
+            raise ValueError(f"StateField: Provided inputs are illegal. Please see: {json.dumps(is_invalid)}")
 
 
 class StatePolarization(metaclass=JsonSerializable):
@@ -91,3 +131,15 @@ class StatePolarization(metaclass=JsonSerializable):
         self.flippers = []
         self.magnetic_field = None
         self.electric_field = None
+
+    def validate(self):
+        if self.analyzer is not None:
+            self.analyzer.validate()
+        if self.polarizer is not None:
+            self.polarizer.validate()
+        if self.magnetic_field is not None:
+            self.magnetic_field.validate()
+        if self.electric_field is not None:
+            self.electric_field.validate()
+        for flipper in self.flippers:
+            flipper.validate()
