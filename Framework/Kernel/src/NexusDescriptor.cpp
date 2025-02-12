@@ -21,12 +21,13 @@ namespace Mantid::Kernel {
 /**
  * Constructs the wrapper
  * @param filename A string pointing to an existing file
+ * @param init Whether or not to initialize the file
  * @throws std::invalid_argument if the file is not identified to be
  * hierarchical. This currently
  * involves simply checking for the signature if a HDF file at the start of the
  * file
  */
-NexusDescriptor::NexusDescriptor(const std::string &filename)
+NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
     : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(), m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
     throw std::invalid_argument("NexusDescriptor() - Empty filename '" + filename + "'");
@@ -34,12 +35,15 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
   if (!std::filesystem::exists(filename)) {
     throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
   }
-  try {
-    // this is very expesive as it walk the entire file
-    initialize(filename);
-  } catch (::NeXus::Exception &e) {
-    throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename +
-                                "' does not look like a HDF file.\n Error was: " + e.what());
+
+  if (init) {
+    try {
+      // this is very expesive as it walk the entire file
+      initialize(filename);
+    } catch (::NeXus::Exception &e) {
+      throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename +
+                                  "' does not look like a HDF file.\n Error was: " + e.what());
+    }
   }
 }
 

@@ -8,7 +8,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/NexusFileLoader.h"
 
-#include <H5Cpp.h>
 #include <Poco/File.h>
 
 namespace Mantid::API {
@@ -118,29 +117,21 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
-
-  if (H5::H5File::isHdf5(filename)) {
+  auto HDFversion = NexusHDF5Descriptor::getHDFVersion(filename);
+  if (HDFversion == NexusHDF5Descriptor::Version5) {
     std::pair<IAlgorithm_sptr, int> HDF5result =
         searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, m_names[NexusHDF5], m_log);
 
     // must also try NexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
     std::pair<IAlgorithm_sptr, int> HDF4result =
         searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
-
     if (HDF5result.second > HDF4result.second)
       bestLoader = HDF5result.first;
     else
       bestLoader = HDF4result.first;
-  } else {
-    try {
-      bestLoader =
-          searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log).first;
-    } catch (std::exception const &e) {
-      m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
-    }
-  }
-
-  if (!bestLoader)
+  } else if (HDFversion == NexusHDF5Descriptor::Version4)
+    bestLoader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log).first;
+  else
     bestLoader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(filename, m_names[Generic], m_log).first;
 
   if (!bestLoader) {
@@ -174,13 +165,11 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
   std::multimap<std::string, int> names{{algorithmName, -1}};
   IAlgorithm_sptr loader;
   if (nexus) {
-    try {
+    if (NexusHDF5Descriptor::isReadable(filename, NexusHDF5Descriptor::Version4)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
-    } catch (std::exception const &e) {
-      m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
     }
   } else if (nexusHDF5) {
-    if (H5::H5File::isHdf5(filename)) {
+    if (NexusHDF5Descriptor::isReadable(filename)) {
       try {
         loader = searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(filename, names, m_log).first;
       } catch (const std::invalid_argument &e) {

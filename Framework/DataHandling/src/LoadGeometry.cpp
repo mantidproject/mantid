@@ -26,7 +26,7 @@ bool LoadGeometry::isNexus(const std::string &filename) {
     return false;
   }
 
-  if (H5::H5File::isHdf5(filename)) {
+  if (Mantid::Kernel::NexusHDF5Descriptor::isReadable(filename)) {
     Mantid::Kernel::NexusHDF5Descriptor descriptor(filename);
     return isNexus(descriptor.getAllEntries());
   }
