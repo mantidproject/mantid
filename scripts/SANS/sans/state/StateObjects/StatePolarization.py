@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -56,12 +56,31 @@ class StateFilter(StateComponent, metaclass=JsonSerializable):
         self.initial_polarization = None
 
 
+class StateField(metaclass=JsonSerializable):
+    sample_strength_log: None | str
+    sample_direction_log: None | str
+
+    sample_direction_a: None | int
+    sample_direction_p: None | int
+    sample_direction_d: None | int
+
+    def __init__(self):
+        super(StateField, self).__init__()
+        self.sample_strength_log = None
+        self.sample_direction_log = None
+        self.sample_direction_a = None
+        self.sample_direction_p = None
+        self.sample_direction_d = None
+
+
 class StatePolarization(metaclass=JsonSerializable):
     flipper_configuration: None | str
     spin_configuration: None | str
     flippers: list[StateComponent]
     polarizer: None | StateFilter
     analyzer: None | StateFilter
+    magnetic_field: None | StateField
+    electric_field: None | StateField
 
     def __init__(self):
         super(StatePolarization, self).__init__()
@@ -70,3 +89,5 @@ class StatePolarization(metaclass=JsonSerializable):
         self.analyzer = None
         self.polarizer = None
         self.flippers = []
+        self.magnetic_field = None
+        self.electric_field = None
