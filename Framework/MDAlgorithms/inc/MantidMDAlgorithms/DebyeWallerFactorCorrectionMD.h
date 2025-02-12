@@ -25,6 +25,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  double u2;
 };
 
 } // namespace MDAlgorithms
