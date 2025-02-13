@@ -72,12 +72,12 @@ void export_IEventList() {
            "Mask out events that have a tof between tofMin and tofMax "
            "(inclusively)")
       .def("maskCondition", &maskCondition, args("self", "mask"), "Mask out events by the condition vector")
-      .def("getTofs", (std::vector<double>(IEventList::*)(void) const) & IEventList::getTofs, args("self"),
+      .def("getTofs", (std::vector<double>(IEventList::*)() const) & IEventList::getTofs, args("self"),
            return_clone_numpy(), "Get a vector of the TOFs of the events")
-      .def("getWeights", (std::vector<double>(IEventList::*)(void) const) & IEventList::getWeights, args("self"),
+      .def("getWeights", (std::vector<double>(IEventList::*)() const) & IEventList::getWeights, args("self"),
            return_clone_numpy(), "Get a vector of the weights of the events")
-      .def("getWeightErrors", (std::vector<double>(IEventList::*)(void) const) & IEventList::getWeightErrors,
-           args("self"), return_clone_numpy(), "Get a vector of the weights of the events")
+      .def("getWeightErrors", (std::vector<double>(IEventList::*)() const) & IEventList::getWeightErrors, args("self"),
+           return_clone_numpy(), "Get a vector of the weights of the events")
       .def("getPulseTimes", &IEventList::getPulseTimes, args("self"), "Get a vector of the pulse times of the events")
       .def("getPulseTimesAsNumpy",
            make_function(&IEventList::getPulseTimes, return_value_policy<Policies::VectorToNumpy>()),

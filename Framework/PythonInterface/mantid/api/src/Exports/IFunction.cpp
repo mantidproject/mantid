@@ -147,6 +147,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType1_Overloads, declareA
 using declareAttributeType2 = void (IFunctionAdapter::*)(const std::string &name,
                                                          const boost::python::object &defaultValue,
                                                          const boost::python::object &validator);
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType2_Overloads, declareAttribute, 3, 3)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
