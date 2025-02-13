@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidNexus/DllConfig.h"
+#include "MantidMuon/DllConfig.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <climits>
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.
-class MANTID_NEXUS_DLL MuonNexusReader {
+class MANTID_MUON_DLL MuonNexusReader {
   /** @class MuonNexusReader MuonNexusReader.h
 
   MuunNexusReader opens a Nexus file and reads certain fields expected for a

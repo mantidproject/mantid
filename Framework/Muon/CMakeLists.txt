@@ -25,6 +25,8 @@ set(SRC_FILES
     src/PlotAsymmetryByLogValue.cpp
     src/RemoveExpDecay.cpp
     src/RRFMuon.cpp
+    src/LegacyNexusClasses.cpp
+    src/MuonNexusReader.cpp
 )
 
 set(INC_FILES
@@ -54,6 +56,8 @@ set(INC_FILES
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
     inc/MantidMuon/RRFMuon.h
+    inc/MantidMuon/LegacyNexusClasses.h
+    inc/MantidMuon/MuonNexusReader.h
 )
 
 set(TEST_FILES
@@ -112,7 +116,7 @@ set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   Muon
   PUBLIC Mantid::API Mantid::Kernel Mantid::Geometry
-  PRIVATE Mantid::DataObjects Mantid::Indexing Mantid::Nexus
+  PRIVATE Mantid::DataObjects Mantid::Indexing
 )
 # Add the unit tests directory
 add_subdirectory(test)

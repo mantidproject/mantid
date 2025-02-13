@@ -25,7 +25,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidNexus/LegacyNexusClasses.h"
+#include "MantidMuon/LegacyNexusClasses.h"
 
 #include <Poco/Path.h>
 #include <cmath>
