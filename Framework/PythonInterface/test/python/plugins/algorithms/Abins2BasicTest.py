@@ -186,6 +186,7 @@ class AbinsBasicTest(unittest.TestCase):
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="C,C,H",
                 OutputWorkspace=self._workspace_name,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_non_unique_atoms(self):
@@ -201,6 +202,7 @@ class AbinsBasicTest(unittest.TestCase):
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="atom_1,atom_2,atom1",
                 OutputWorkspace=self._workspace_name,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_non_existing_atoms(self):
@@ -217,6 +219,7 @@ class AbinsBasicTest(unittest.TestCase):
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="N",
                 OutputWorkspace=self._workspace_name,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_atom_index_limits(self):
