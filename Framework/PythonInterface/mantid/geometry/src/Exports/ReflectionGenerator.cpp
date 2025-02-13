@@ -37,7 +37,7 @@ boost::python::list getUniqueHKLsDefaultFilter(const ReflectionGenerator &self, 
   return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax));
 }
 
-boost::python::list getUniqueHKLsUsingFilter(ReflectionGenerator &self, double dMin, double dMax,
+boost::python::list getUniqueHKLsUsingFilter(const ReflectionGenerator &self, double dMin, double dMax,
                                              ReflectionConditionFilter filter) {
   return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax, self.getReflectionConditionFilter(std::move(filter))));
 }

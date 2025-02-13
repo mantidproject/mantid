@@ -43,7 +43,7 @@ void setProperty(IPropertyManager &self, const std::string &name, const boost::p
     self.setPropertyValue(name, valuecpp());
   } else {
     try {
-      Property *p = self.getProperty(name);
+      const Property *p = self.getProperty(name);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
       entry.set(&self, name, value);
     } catch (std::invalid_argument &e) {
@@ -99,7 +99,8 @@ void declareOrSetProperty(IPropertyManager &self, const std::string &name, const
  * @param propName A property name that will pick up the settings manager
  * @param settingsManager The actual settings object
  */
-void setPropertySettings(IPropertyManager &self, const std::string &propName, IPropertySettings *settingsManager) {
+void setPropertySettings(IPropertyManager &self, const std::string &propName,
+                         const IPropertySettings *settingsManager) {
   self.setPropertySettings(propName, std::unique_ptr<IPropertySettings>(settingsManager->clone()));
 }
 

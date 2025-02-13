@@ -49,7 +49,7 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
 
   // Loop for the number of strings
   // For each string store the number of characters
-  for (auto val : values) {
+  for (auto const &val : values) {
     auto size = val.size();
     stringSizes.emplace_back(size);
   }
