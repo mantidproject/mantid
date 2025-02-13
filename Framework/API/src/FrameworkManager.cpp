@@ -63,15 +63,6 @@ const char *PLUGINS_DIR_KEY = "framework.plugins.directory";
 const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
 } // namespace
 
-/** This is a function called every time NeXuS raises an error.
- * This swallows the errors and outputs nothing.
- */
-// Prevent clang-tidy trying to change the signature for ext. interface
-// NOLINTNEXTLINE(readability-non-const-parameter)
-void NexusErrorFunction(void *, const char *) {
-  // Do nothing.
-}
-
 #ifdef __linux__
 /**
  * Print current backtrace to the given stream
