@@ -738,60 +738,11 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimens
  */
 MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
-/** \typedef void (*ErrFunc)(void *data, const char *text)
- * All NeXus error reporting happens through this special function, the
- * ErrFunc. The NeXus-API allows this error reporting function to be replaced
- * through a user defined implementation. The default error function prints to stderr. User
- * defined ones may pop up dialog boxes or whatever.
- * \param data A pointer to some user defined data structure
- * \param text The text of the error message to display.
- */
-typedef void (*ErrFunc)(void *data, const char *text);
-
 /**
- * Set a global error function.
- * Not threadsafe.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_NEXUSCPP_DLL void NXMSetError(void *pData, ErrFunc newErr);
-
-/**
- * Set an error function for the current thread.
- * When used this overrides anything set in NXMSetError (for the current thread).
- * Use this method in threaded applications.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_NEXUSCPP_DLL void NXMSetTError(void *pData, ErrFunc newErr);
-
-/**
- * Retrieve the current error display function
- * \return The current error display function.
- */
-MANTID_NEXUSCPP_DLL ErrFunc NXMGetError();
-
-/**
- * Suppress error reports from the NeXus-API
- */
-MANTID_NEXUSCPP_DLL void NXMDisableErrorReporting();
-
-/**
- * Enable error reports from the NeXus-API
- */
-MANTID_NEXUSCPP_DLL void NXMEnableErrorReporting();
-
-/**
- * Dispatches the error message to the error function defined by NXMSetTError
+ * Dispatches the error message
  */
 MANTID_NEXUSCPP_DLL void NXReportError(const char *text);
 
-/**
- * Do not use, first parameter should be set by NXMSetTError
- */
-MANTID_NEXUSCPP_DLL void NXIReportError(void *pData, const char *text);
 /* extern void *NXpData; */
 MANTID_NEXUSCPP_DLL char *NXIformatNeXusTime();
 

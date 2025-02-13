@@ -1096,13 +1096,11 @@ NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
   } else {
     sRes->iTag = DFTAG_NDG;
     sRes->iRef = SDidtoref(pFile->iCurrentSDS);
-    NXMDisableErrorReporting();
     datalen = 1024;
     memset(&sRes->targetPath, 0, 1024);
     if (NX4getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       NXIbuildPath(pFile, sRes->targetPath, 1024);
     }
-    NXMEnableErrorReporting();
     return NXstatus::NX_OK;
   }
   sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);
