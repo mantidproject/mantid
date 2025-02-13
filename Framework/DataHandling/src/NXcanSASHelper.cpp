@@ -30,7 +30,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
 
 namespace {
-
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
@@ -253,6 +252,24 @@ public:
 } // namespace
 
 namespace Mantid::DataHandling::NXcanSAS {
+constexpr std::string_view NX_CANSAS_EXTENSION = ".h5";
+
+std::filesystem::path prepareFilename(const std::string &baseFilename, int index, bool isGroup) {
+  auto path = std::filesystem::path(baseFilename);
+  if (!isGroup) {
+    // return early if it doesn't need to add digits
+    return path.replace_extension(NX_CANSAS_EXTENSION);
+  }
+
+  auto const addDigit = [&](int index) { return index < 10 ? "0" + std::to_string(index) : std::to_string(index); };
+  // remove extension if it has any
+  path.replace_extension("");
+  // add digit for groups
+  path += addDigit(index);
+  // add correct extension and return path
+  return path.replace_extension(NX_CANSAS_EXTENSION);
+}
+
 /**
  * This makes out of an input a relaxed name, something conforming to
  * "[A-Za-z_][\w_]*"

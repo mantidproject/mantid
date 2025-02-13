@@ -6,28 +6,69 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/SaveNXcanSASBase.h"
-#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI//WorkspaceGroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
+
+namespace {
+
+bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
+  if (ws->axes() == 0) {
+    return false;
+  }
+  auto const unit = ws->getAxis(0)->unit();
+  return (unit && !unit->unitID().compare(unitToCompareWith));
+}
+
+bool checkValidMatrixWorkspace(const Workspace_sptr &ws) {
+  auto const &ws_input = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  return (ws_input && hasUnit("MomentumTransfer", ws_input) && ws_input->isCommonBins());
+}
+
+std::string validateGroupWithProperties(const Workspace_sptr &ws) {
+  if (!ws) {
+    return "Workspace has to be a valid workspace";
+  }
+
+  if (ws->isGroup()) {
+    auto const &groupItems = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)->getAllItems();
+    if (std::any_of(groupItems.cbegin(), groupItems.cend(),
+                    [](auto const &childWs) { return !checkValidMatrixWorkspace(childWs); })) {
+      return "Workspace must have common bins and Momentum transfer units";
+    }
+    return "";
+  }
+
+  if (!checkValidMatrixWorkspace(ws)) {
+    return "Workspace must have common bins and Momentum transfer units";
+  }
+  return "";
+}
+
+} // namespace
 
 namespace Mantid::DataHandling {
 
 void SaveNXcanSASBase::initStandardProperties() {
   // Standard NXcanSAS properties
-  auto inputWSValidator = std::make_shared<Kernel::CompositeValidator>();
-  inputWSValidator->add<API::WorkspaceUnitValidator>("MomentumTransfer");
-  inputWSValidator->add<API::CommonBinsValidator>();
-  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
-                                                                     inputWSValidator),
+  auto groupValidator = std::make_shared<Kernel::LambdaValidator<Workspace_sptr>>(validateGroupWithProperties);
+  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                                              Kernel::Direction::Input, groupValidator),
                   "The input workspace, which must be in units of Q. Can be a 1D or a 2D workspace.");
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
@@ -87,11 +128,24 @@ void SaveNXcanSASBase::initStandardProperties() {
 }
 
 std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() {
-  // The input should be a Workspace2D
-  Mantid::API::MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
   std::map<std::string, std::string> result;
-  if (!workspace || !std::dynamic_pointer_cast<const Mantid::DataObjects::Workspace2D>(workspace)) {
-    result.emplace("InputWorkspace", "The InputWorkspace must be a Workspace2D.");
+
+  /* If input workspace is a group, check that each group members is a valid 2D Workspace,
+     otherwise check that the input is a valid 2D workspace.*/
+  Mantid::API::Workspace_sptr const workspace = getProperty("InputWorkspace");
+  auto valid2DWorkspace = [](const Workspace_sptr &ws) {
+    return ws && std::dynamic_pointer_cast<const Mantid::DataObjects::Workspace2D>(ws);
+  };
+  if (workspace->isGroup()) {
+    auto const &groupItems = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
+    if (std::any_of(groupItems.cbegin(), groupItems.cend(),
+                    [&](auto const &childWs) { return !valid2DWorkspace(childWs); })) {
+      result.emplace("InputWorkspace", "All input workspaces in the input group must be a Workspace2D.");
+    }
+  } else {
+    if (!valid2DWorkspace(workspace)) {
+      result.emplace("InputWorkspace", "The InputWorkspace must be a Workspace2D.");
+    }
   }
 
   // Transmission data should be 1D
@@ -237,6 +291,28 @@ void SaveNXcanSASBase::addData(H5::Group &group, const Mantid::API::MatrixWorksp
     throw std::runtime_error("SaveNXcanSAS: The provided workspace "
                              "dimensionality is not 1D or 2D.");
   }
+}
+
+void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace,
+                                               const std::filesystem::path &path) {
+  // Prepare file
+  if (!path.empty()) {
+    std::filesystem::remove(path);
+  }
+  H5::H5File file(path.string(), H5F_ACC_EXCL);
+
+  const std::string suffix("01");
+  m_progress->report("Adding a new entry.");
+  auto sasEntry = addSasEntry(file, workspace, suffix);
+
+  // Add metadata for canSAS file: Instrument, Sample, Process
+  m_progress->report("Adding standard metadata");
+  addStandardMetadata(workspace, sasEntry);
+
+  m_progress->report("Adding data.");
+  addData(sasEntry, workspace);
+
+  file.close();
 }
 
 } // namespace Mantid::DataHandling
