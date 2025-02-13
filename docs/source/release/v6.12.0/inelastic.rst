@@ -7,24 +7,16 @@ Inelastic Changes
 
 New Features
 ------------
-- The deprecated Calculate Paalman Pings tab on the Inelastic Corrections interface has been removed after no user feedback from v6.10 and v6.11.
-- Added the ability to load ILL data into the :math:`S(Q, \omega)` tab of the `Inelastic Data Processor <interface-inelastic-data-processor>` interface.
+- The deprecated Calculate Paalman Pings tab on the :ref:`Inelastic Corrections interface <interface-inelastic-corrections>` has been removed after no user feedback from v6.10 and v6.11.
+- The `Inelastic Data Processor <interface-inelastic-data-processor>` interface :math:`S(Q, \omega)` tab can now load ILL data.
 
 
 Bugfixes
 --------
-At :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-processor>` fix (1) the Integration Range updated values, when workspaces are added though `Add Data` button and (2) the plot generation of the workspace ending in elwin_elf.
+- :ref:`Data Processor Interface <interface-inelastic-data-processor>` :ref:`Elwin Tab <elwin>`:
 
-
-Algorithms
-----------
-
-New features
-############
-- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly simulated workspace by sampling from the probability distribution of input data.
-
-Bugfixes
-############
+  - Integration range automatically updates as expected when workspaces are added via the ``Add Data`` button.
+  - Plot generation from workspaces ending with ``elwin_elf`` now works correctly and siplays no overflow warning messages.
 
 
 :ref:`Release 6.12.0 <v6.12.0>`
