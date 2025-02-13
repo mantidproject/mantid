@@ -4,31 +4,34 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pathlib import Path
 import unittest
+from tempfile import TemporaryDirectory
 
 import abins
 from abins.input import VASPLoader
 
 
 class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
-    def tearDown(self):
-        # Remove ref files from .check() calls
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadVASP"])
-
     def test_non_existing_file(self):
-        with self.assertRaises(IOError):
-            bad_vasp_reader = VASPLoader(input_ab_initio_filename="NonExistingFile.txt")
-            bad_vasp_reader.read_vibrational_or_phonon_data()
+        with TemporaryDirectory() as tmpdir:
+            with self.assertRaises(IOError):
+                bad_vasp_reader = VASPLoader(input_ab_initio_filename="NonExistingFile.txt", cache_directory=Path(tmpdir))
+                bad_vasp_reader.read_vibrational_or_phonon_data()
 
-        with self.assertRaises(TypeError):
-            _ = VASPLoader(input_ab_initio_filename=1)
+            with self.assertRaises(TypeError):
+                _ = VASPLoader(input_ab_initio_filename=1, cache_directory=Path(tmpdir))
 
     # Not a real vibration calc; check the appropriate error is raised
     def test_singlepoint_input(self):
         filename = abins.test_helpers.find_file("ethane_singlepoint.xml")
-        bad_vasp_reader = VASPLoader(input_ab_initio_filename=filename)
-        with self.assertRaisesRegexp(ValueError, "Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file\\."):
-            bad_vasp_reader.read_vibrational_or_phonon_data()
+
+        with TemporaryDirectory() as tmpdir:
+            bad_vasp_reader = VASPLoader(input_ab_initio_filename=filename, cache_directory=Path(tmpdir))
+            with self.assertRaisesRegexp(
+                ValueError, "Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file\\."
+            ):
+                bad_vasp_reader.read_vibrational_or_phonon_data()
 
     # IBRION=8 from optimised structure
     def test_xml_dfpt(self):

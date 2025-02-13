@@ -76,7 +76,11 @@ Output: (note that only the fundamental excitations are included)
 .. testcleanup:: Abins2DCastepSimple
 
     import os
-    os.remove("benzene.hdf5")
+    from mantid.kernel import ConfigService
+
+    savedir = ConfigService.getString("defaultsave.directory")
+
+    os.remove(os.path.join(savedir, "benzene.hdf5"))
 
 **Example - using more arguments:**
 
@@ -109,7 +113,11 @@ Output:
 .. testcleanup:: Abins2DExplicitParameters
 
     import os
-    os.remove("benzene.hdf5")
+    from mantid.kernel import ConfigService
+
+    savedir = ConfigService.getString("defaultsave.directory")
+
+    os.remove(os.path.join(savedir, "benzene.hdf5"))
 
 .. categories::
 

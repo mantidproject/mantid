@@ -30,7 +30,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     read_formatted_data() if necessary and caching the results.
     """
 
-    def __init__(self, input_ab_initio_filename: str = None):
+    def __init__(self, input_ab_initio_filename: str = None, cache_directory: Path | None = None):
         """An object for loading phonon data from ab initio output files"""
 
         if not isinstance(input_ab_initio_filename, str):
@@ -38,7 +38,11 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         elif not Path(input_ab_initio_filename).is_file():
             raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
 
-        self._clerk = abins.IO(input_filename=input_ab_initio_filename, group_name=abins.parameters.hdf_groups["ab_initio_data"])
+        self._clerk = abins.IO(
+            input_filename=input_ab_initio_filename,
+            group_name=abins.parameters.hdf_groups["ab_initio_data"],
+            cache_directory=cache_directory,
+        )
 
     @property
     @abstractmethod
