@@ -385,7 +385,7 @@ public:
   uint32_t scanIndex() const { return m_fields[1]; }
   const std::string &comment() const {
     if (!m_comment.length() && (m_fields[0] & 0xffff)) {
-      m_comment.assign((const char *)&m_fields[2], m_fields[0] & 0xffff);
+      m_comment.assign(reinterpret_cast<const char *>(&m_fields[2]), m_fields[0] & 0xffff);
     }
 
     return m_comment;
@@ -483,12 +483,18 @@ public:
       return (0);
   }
 
-  double distance(uint32_t index) const {
-    if (index < beamMonCount())
-      return *reinterpret_cast<const double *>(&m_fields[(index * 6) + 5]);
-    else
-      return (0.0);
+private:
+  double extractDouble(uint32_t index, uint32_t fieldOffset) const {
+    if (index < beamMonCount()) {
+      double value;
+      std::memcpy(&value, &m_fields[(index * 6) + fieldOffset], sizeof(double));
+      return value;
+    } else {
+      return 0.0;
+    }
   }
+
+  double distance(uint32_t index) const { return extractDouble(index, 5); }
 
 private:
   const uint32_t *m_fields;
@@ -511,6 +517,23 @@ public:
   // Throttle Suffix, alphanumeric, no spaces/punctuation...
   static const size_t THROTTLE_SUFFIX_SIZE = 16;
 
+private:
+  std::string extractString(uint32_t index, uint32_t fieldOffset, size_t size) const {
+    const char *start = reinterpret_cast<const char *>(&m_fields[fieldOffset]);
+    return std::string(start, size);
+  }
+
+private:
+  double extractDouble(uint32_t index, uint32_t fieldOffset) const {
+    if (index < detBankSetCount()) {
+      double value;
+      std::memcpy(&value, &m_fields[fieldOffset], sizeof(double));
+      return value;
+    } else {
+      return 0.0;
+    }
+  }
+
   enum Flags {
     EVENT_FORMAT = 0x0001,
     HISTO_FORMAT = 0x0002,
@@ -526,14 +549,8 @@ public:
   }
 
   std::string name(uint32_t index) const {
-    if (index < detBankSetCount()) {
-      char name_c[SET_NAME_SIZE + 1]; // give them an inch...
-      memset((void *)name_c, '\0', SET_NAME_SIZE + 1);
-      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]), SET_NAME_SIZE);
-      return (std::string(name_c));
-    } else {
-      return ("<Out Of Range!>");
-    }
+    return (index < detBankSetCount()) ? extractString(index, m_sectionOffsets[index], SET_NAME_SIZE)
+                                       : "<Out Of Range!>";
   }
 
   uint32_t flags(uint32_t index) const {
@@ -580,25 +597,11 @@ public:
       return (0);
   }
 
-  double throttle(uint32_t index) const {
-    if (index < detBankSetCount()) {
-      return *reinterpret_cast<const double *>(&m_fields[m_after_banks_offset[index] + 3]);
-    } else
-      return (0.0);
-  }
+  double throttle(uint32_t index) const { return extractDouble(index, m_after_banks_offset[index] + 3); }
 
   std::string suffix(uint32_t index) const {
-    if (index < detBankSetCount()) {
-      char suffix_c[THROTTLE_SUFFIX_SIZE + 1]; // give them an inch
-      memset((void *)suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1);
-      strncpy(suffix_c, (const char *)&(m_fields[m_after_banks_offset[index] + 5]), THROTTLE_SUFFIX_SIZE);
-      return (std::string(suffix_c));
-    } else {
-      std::stringstream ss;
-      ss << "out-of-range-";
-      ss << index;
-      return (ss.str());
-    }
+    return (index < detBankSetCount()) ? extractString(index, m_after_banks_offset[index] + 5, THROTTLE_SUFFIX_SIZE)
+                                       : "out-of-range-" + std::to_string(index);
   }
 
 private:
@@ -676,7 +679,11 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const { return *reinterpret_cast<const double *>(&m_fields[3]); }
+  double value() const {
+    double result;
+    std::memcpy(&result, &m_fields[3], sizeof(double));
+    return result;
+  }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
