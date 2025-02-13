@@ -88,8 +88,9 @@ private:
                                                const Mantid::Geometry::Instrument_const_sptr &instrument);
   std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
   std::string findPolarizationCorrectionOption(const std::string &correctionMethod);
+  std::string getFredrikzeInputSpinStateOrder(const std::string &correctionMethod);
   /// Get a polarization efficiencies workspace.
-  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string> getPolarizationEfficiencies();
+  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string> getPolarizationEfficiencies();
   void applyPolarizationCorrection(const std::string &outputIvsLam);
   API::MatrixWorkspace_sptr getFloodWorkspace();
   void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood, const std::string &propertyName);

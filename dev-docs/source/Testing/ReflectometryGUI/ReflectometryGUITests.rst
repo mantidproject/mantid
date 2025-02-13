@@ -90,15 +90,21 @@ Assuming the whole table is processed:
 Polarisation Corrections
 ------------------------
 
-Polarisation corrections settings are under the ``Experiment Settings`` tab in the interface. These should only work with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
+Polarisation corrections settings are under the ``Experiment Settings`` tab in the interface. These should only work
+with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
 
 #. In the Runs tab set the instrument to ``INTER``.
 #. On the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should be greyed out.
 #. Go back to the Runs tab and set the instrument to ``OFFSPEC``.
-#. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the ``Polarization Efficiencies`` combo box should be disabled.
-#. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box should still be disabled.
-#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box should become enabled and show a list of all loaded workspaces.
-#. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
+#. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the
+   ``Polarization Efficiencies`` combo box should be disabled.
+#. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo
+   box should still be disabled.
+#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Fredrikze Input Spin State Order`` and
+   ``Polarization Efficiencies`` combo boxes should become enabled. The latter should show a list of all loaded
+   workspaces.
+#. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now
+   appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
 #. Switch back to the ``ParameterFile`` setting from the ``Polarisation Corrections`` combo box.
 #. Back on the ``Runs`` tab, delete all rows in the table (this can be done by pressing ``Ctrl-A`` and then ``Delete``).
 #. Note that this will leave an empty row. In that row enter run number ``44956`` and angle ``0.4``.
