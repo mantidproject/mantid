@@ -216,6 +216,7 @@ Preview tab
 #. Check that moving and vertically resizing regions triggers a re-run of the reduction (note that changing only the width of the rectangular selectors on the slice viewer plot will **not** trigger a new reduction).
 #. Check that you can delete one of the Background regions by selecting it and pressing the ``Delete`` key on your keyboard.
 #. Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
+#. Click the ``Load`` button to reload the same run. The slice viewer plot should display selectors for the regions of interest that you saved in the previous step. The instrument view plot currently does not do this so should not display any selectors. If you click ``Apply`` without making any changes then the ``ROI Detector IDs`` entry in the Experiment Settings lookup table should be unchanged (i.e. it shouldn't be cleared).
 #. Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
 #. Right-click the workspace and select ``Show History``:
 
