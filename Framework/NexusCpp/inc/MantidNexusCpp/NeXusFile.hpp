@@ -257,7 +257,7 @@ public:
    * \param chunkSize :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const DimSize chunk);
+  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const dimsize_t chunk);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -434,7 +434,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, DimSize start, DimSize size);
+  template <typename NumT> void putSlab(const std::vector<NumT> &data, dimsize_t start, dimsize_t size);
 
   /**
    * \return The id of the data used for linking.

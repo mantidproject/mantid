@@ -172,12 +172,12 @@ MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype 
 namespace NeXus {
 
 // TODO change to std::size_t
-typedef std::int64_t DimSize;
+typedef std::int64_t dimsize_t;
 // TODO replace all instances with DimArray
-typedef std::vector<DimSize> DimVector; ///< usef specifically for the dims array
+typedef std::vector<dimsize_t> DimVector; ///< usef specifically for the dims array
 // typedef std::array<DimSize, 4> DimArray;
 //  TODO this is probably the same as DimVector
-typedef std::vector<DimSize> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
+typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
 
 /**
  * The available compression types. These are all ignored in xml files.

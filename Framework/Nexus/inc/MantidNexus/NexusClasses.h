@@ -27,8 +27,7 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-typedef ::NeXus::DimSize DimSize;
-typedef std::array<DimSize, 4> NXDimArray;
+typedef std::array<::NeXus::dimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
  *  such as the dimensions and the type
@@ -133,24 +132,22 @@ public:
   NXDataSet(NXClass const &parent, std::string const &name);
   /// NX class name. Returns "SDS"
   std::string NX_class() const override { return "SDS"; }
-  /// Opens the data set. Does not read in any data. Call load(...) to load the
-  /// data
+  /// Opens the data set. Does not read in any data. Call load(...) to load the data
   void open();
   /// Opens datasets faster but the parent group must be already open
   void openLocal();
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
   std::size_t rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  DimSize dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
-  // TODO these need to return DimSize -- but inteferes with some other code
+  ::NeXus::dimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
-  int dim0() const;
+  ::NeXus::dimsize_t dim0() const;
   /// Returns the number of elements along the second dimension
-  int dim1() const;
+  ::NeXus::dimsize_t dim1() const;
   /// Returns the number of elements along the third dimension
-  int dim2() const;
+  ::NeXus::dimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
-  int dim3() const;
+  ::NeXus::dimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
@@ -173,7 +170,8 @@ public:
    * rank()-4. i,j,k and l are its indices.
    *            The rank of the data must be 4
    */
-  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
+  virtual void load(int64_t const blocksize = 1, int64_t const i = -1, int64_t const j = -1, int64_t const k = -1,
+                    int64_t const l = -1) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
@@ -288,11 +286,13 @@ public:
    * rank()-4. i,j,k and l are its indeces.
    *            The rank of the data must be 4
    */
-  void load(const int blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
+
+  void load(const int64_t blocksize = 1, int64_t const i = -1, int64_t const j = -1, int64_t const k = -1,
+            int64_t const l = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    DimSize n = 0, id(i), jd(j), kd(l), ld(l);
+    ::NeXus::dimsize_t n = 0, id(i), jd(j), kd(l), ld(l);
     NXDimArray start;
     if (rank() == 4) {
       if (i < 0) // load all data
@@ -369,7 +369,7 @@ public:
       } else if (k < 0) {
         if (id >= dim0() || jd >= dim1())
           rangeError();
-        DimSize m = blocksize;
+        ::NeXus::dimsize_t m = blocksize;
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
@@ -399,7 +399,7 @@ public:
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
-        DimSize m = blocksize;
+        ::NeXus::dimsize_t m = blocksize;
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;

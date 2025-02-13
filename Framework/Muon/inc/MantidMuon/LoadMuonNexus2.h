@@ -69,7 +69,7 @@ private:
                                     int period, int spec);
   void loadLogs(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXEntry &entry, int period);
   void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
-  std::map<int, std::set<int>> loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
+  std::map<specnum_t, std::set<detid_t>> loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
 };
 
 } // namespace Algorithms

@@ -64,8 +64,8 @@ private:
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t, const MultichannelType type = MultichannelType::TOF);
-  void getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
-                         int &numberOfPixelsPerTube);
+  void getDataDimensions(const NeXus::NXInt &data, size_t &numberOfChannels, size_t &numberOfTubes,
+                         size_t &numberOfPixelsPerTube);
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
   size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,

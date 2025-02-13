@@ -389,7 +389,7 @@ void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::ve
   auto xAxis = prepareAxis(entry, convertToTOF);
 
   // The binning for monitors is considered the same as for detectors
-  int spec = 0;
+  int64_t spec = 0;
   std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
 
   auto data = LoadHelper::getIntDataset(entry, "data");
