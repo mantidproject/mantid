@@ -10,8 +10,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexusCpp/napi.h"
 
-#include <array>
 #include <boost/container/vector.hpp>
 #include <map>
 #include <memory>
@@ -27,18 +27,14 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-typedef ::NeXus::DimSize DimSize;
-typedef std::array<DimSize, 4> NXDimArray;
-
 /** Structure for keeping information about a Nexus data set,
  *  such as the dimensions and the type
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
-  NXInfo(::NeXus::Info const &info, std::string const &name);
   std::string nxname; ///< name of the object
-  std::size_t rank;   ///< number of dimensions of the data
-  NXDimArray dims;    ///< sizes along each dimension
+  int rank;           ///< number of dimensions of the data
+  int dims[4];        ///< sizes along each dimension
   NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
   NXstatus stat;      ///< return status
   operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
@@ -47,7 +43,6 @@ struct NXInfo {
 /**  Information about a Nexus class
  */
 struct NXClassInfo {
-  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
   std::string nxname;  ///< name of the object
   std::string nxclass; ///< NX class of the object or "SDS" if a dataset
@@ -69,12 +64,14 @@ const int g_processed_blocksize = 8;
  */
 class MANTID_NEXUS_DLL NXAttributes {
 public:
-  std::size_t n() const { return m_values.size(); }                 ///< number of attributes
-  std::vector<std::string> names() const;                           ///< Returns the list of attribute names
-  std::vector<std::string> values() const;                          ///< Returns the list of attribute values
-  std::string operator()(const std::string &name) const;            ///< returns the value of attribute with name name
-  void set(const std::string &name, const std::string &value);      ///< set the attribute's value
-  template <typename T> void set(const std::string &name, T value); ///< set the attribute's value from type
+  int n() const { return int(m_values.size()); }         ///< number of attributes
+  std::vector<std::string> names() const;                ///< Returns the list of attribute names
+  std::vector<std::string> values() const;               ///< Returns the list of attribute values
+  std::string operator()(const std::string &name) const; ///< returns the value of attribute with name name
+  void set(const std::string &name,
+           const std::string &value); ///< set the attribute's value
+  void set(const std::string &name,
+           double value); ///< set the attribute's value as a double
 private:
   std::map<std::string, std::string> m_values; ///< the list of attributes
 };
@@ -91,7 +88,7 @@ class MANTID_NEXUS_DLL NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(::NeXus::File *fileID, NXClass const *parent, std::string const &name);
+  NXObject(const NXhandle fileID, const NXClass *parent, const std::string &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -105,13 +102,13 @@ public:
   /// Attributes
   NXAttributes attributes;
   /// Nexus file id
-  ::NeXus::File *m_fileID;
+  NXhandle m_fileID;
 
 protected:
   std::string m_path; ///< Keeps the absolute path to the object
   bool m_open;        ///< Set to true if the object has been open
 private:
-  NXObject(); ///< Private default constructor
+  NXObject() : m_fileID(), m_open(false) {} ///< Private default constructor
   void getAttributes();
 };
 
@@ -130,7 +127,7 @@ private:
 class MANTID_NEXUS_DLL NXDataSet : public NXObject {
 public:
   // Constructor
-  NXDataSet(NXClass const &parent, std::string const &name);
+  NXDataSet(const NXClass &parent, const std::string &name);
   /// NX class name. Returns "SDS"
   std::string NX_class() const override { return "SDS"; }
   /// Opens the data set. Does not read in any data. Call load(...) to load the
@@ -139,10 +136,9 @@ public:
   /// Opens datasets faster but the parent group must be already open
   void openLocal();
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
-  std::size_t rank() const { return m_info.rank; }
+  int rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  DimSize dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
-  // TODO these need to return DimSize -- but inteferes with some other code
+  int dims(int i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
   int dim0() const;
   /// Returns the number of elements along the second dimension
@@ -173,18 +169,18 @@ public:
    * rank()-4. i,j,k and l are its indices.
    *            The rank of the data must be 4
    */
-  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
-    // we need the var names for docs build, need below void casts to stop compiler warnings
-    UNUSED_ARG(blocksize);
-    UNUSED_ARG(i);
-    UNUSED_ARG(j);
-    UNUSED_ARG(k);
-    UNUSED_ARG(l);
+  virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) {
+    // Avoid compiler warnings
+    (void)blocksize;
+    (void)i;
+    (void)j;
+    (void)k;
+    (void)l;
   };
 
 protected:
   void getData(void *data);
-  void getSlab(void *data, NXDimArray const &start, NXDimArray const &size);
+  void getSlab(void *data, int start[], int size[]);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -204,7 +200,7 @@ public:
    * containing the dataset.
    *   @param name :: The name of the dataset relative to its parent
    */
-  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0UL) {}
+  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0) {}
   /** Returns a pointer to the internal data buffer.
    *  @throw runtime_error exception if the data have not been loaded /
    * initialized.
@@ -228,15 +224,15 @@ public:
    *  @throw range_error if the index is greater than the buffer size.
    *  @return A reference to the value
    */
-  const T &operator[](std::size_t i) const {
+  const T &operator[](int i) const {
     if (m_data.empty())
       throw std::runtime_error("Attempt to read uninitialized data from " + path());
-    if (i >= m_n)
+    if (i < 0 || i >= m_n)
       rangeError();
     return m_data[i];
   }
 
-  T &operator[](std::size_t i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
+  T &operator[](int i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
   /** Returns a value assuming the data is a two-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -244,10 +240,8 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(std::size_t i, std::size_t j) const { return this->operator[](i * dim1() + j); }
-  T &operator()(std::size_t i, std::size_t j) {
-    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j));
-  }
+  const T &operator()(int i, int j) const { return this->operator[](i * dim1() + j); }
+  T &operator()(int i, int j) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j)); }
   /** Returns a value assuming the data is a tree-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -256,17 +250,13 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(std::size_t i, std::size_t j, std::size_t k) const {
-    return this->operator[]((i * dim1() + j) * dim2() + k);
-  }
-  T &operator()(std::size_t i, std::size_t j, std::size_t k) {
-    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k));
-  }
+  const T &operator()(int i, int j, int k) const { return this->operator[]((i * dim1() + j) * dim2() + k); }
+  T &operator()(int i, int j, int k) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k)); }
 
   /// Returns a the internal buffer
   container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
-  std::size_t size() const { return m_n; }
+  int size() const { return m_n; }
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
    * data are stored as a 1d array.
    *   If the data are loaded in chunks the newly read in data replace the old
@@ -288,21 +278,21 @@ public:
    * rank()-4. i,j,k and l are its indeces.
    *            The rank of the data must be 4
    */
-  void load(const int blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
+  void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    DimSize n = 0, id(i), jd(j), kd(l), ld(l);
-    NXDimArray start;
+    int n = 0;
+    int start[4];
     if (rank() == 4) {
       if (i < 0) // load all data
       {
         n = dim0() * dim1() * dim2() * dim3();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (id >= dim0())
+        if (i >= dim0())
           rangeError();
         n = dim1() * dim2() * dim3();
         start[0] = i;
@@ -314,7 +304,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else if (k < 0) {
-        if (id >= dim0() || jd >= dim1())
+        if (i >= dim0() || j >= dim1())
           rangeError();
         n = dim2() * dim3();
         start[0] = i;
@@ -326,7 +316,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else if (l < 0) {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
+        if (i >= dim0() || j >= dim1() || k >= dim2())
           rangeError();
         n = dim3();
         start[0] = i;
@@ -338,7 +328,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
+        if (i >= dim0() || j >= dim1() || k >= dim2() || l >= dim3())
           rangeError();
         n = dim3();
         start[0] = i;
@@ -353,11 +343,11 @@ public:
     } else if (rank() == 3) {
       if (i < 0) {
         n = dim0() * dim1() * dim2();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (id >= dim0())
+        if (i >= dim0())
           rangeError();
         n = dim1() * dim2();
         start[0] = i;
@@ -367,11 +357,11 @@ public:
         start[2] = 0;
         m_size[2] = dim2();
       } else if (k < 0) {
-        if (id >= dim0() || jd >= dim1())
+        if (i >= dim0() || j >= dim1())
           rangeError();
-        DimSize m = blocksize;
-        if (jd + m > dim1())
-          m = dim1() - jd;
+        int m = blocksize;
+        if (j + m > dim1())
+          m = dim1() - j;
         n = dim2() * m;
         start[0] = i;
         m_size[0] = 1;
@@ -380,7 +370,7 @@ public:
         start[2] = 0;
         m_size[2] = dim2();
       } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
+        if (i >= dim0() || j >= dim1() || k >= dim2())
           rangeError();
         n = 1;
         start[0] = i;
@@ -393,22 +383,22 @@ public:
     } else if (rank() == 2) {
       if (i < 0) {
         n = dim0() * dim1();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (id >= dim0())
+        if (i >= dim0())
           rangeError();
-        DimSize m = blocksize;
-        if (id + m > dim0())
-          m = dim0() - id;
+        int m = blocksize;
+        if (i + m > dim0())
+          m = dim0() - i;
         n = dim1() * m;
         start[0] = i;
         m_size[0] = m;
         start[1] = 0;
         m_size[1] = dim1();
       } else {
-        if (id >= dim0() || jd >= dim1())
+        if (i >= dim0() || j >= dim1())
           rangeError();
         n = 1;
         start[0] = i;
@@ -419,18 +409,18 @@ public:
     } else if (rank() == 1) {
       if (i < 0) {
         n = dim0();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else {
-        if (id >= dim0())
+        if (i >= dim0())
           rangeError();
         n = 1 * blocksize;
         start[0] = i;
         m_size[0] = blocksize;
       }
     }
-    alloc(static_cast<size_t>(n));
+    alloc(n);
     getSlab(m_data.data(), start, m_size);
   }
 
@@ -438,8 +428,8 @@ private:
   /** Allocates memory for the data buffer
    *  @param n :: The number of elements to allocate.
    */
-  void alloc(std::size_t n) {
-    if (n == 0) {
+  void alloc(int n) {
+    if (n <= 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + path());
     }
     try {
@@ -457,8 +447,8 @@ private:
   void rangeError() const { throw std::range_error("Nexus dataset range error"); }
   // We cannot use an STL vector due to the dreaded std::vector<bool>
   container_T<T> m_data; ///< The data buffer
-  NXDimArray m_size;     ///< The sizes of the loaded data
-  std::size_t m_n;       ///< The buffer size
+  int m_size[4];         ///< The sizes of the loaded data
+  int m_n;               ///< The buffer size
 };
 
 /// The integer dataset type
@@ -495,9 +485,13 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXClass(NXClass const &parent, std::string const &name);
+  NXClass(const NXClass &parent, const std::string &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
+  /**  Returns the class information about the next entry (class or dataset) in
+   * this class.
+   */
+  NXClassInfo getNextEntry();
   /// Creates a new object in the NeXus file at path path.
   // virtual void make(const std::string& path) = 0;
   /// Resets the current position for getNextEntry() to the beginning
@@ -662,9 +656,9 @@ private:
       NXChar value(*this, "value");
       value.openLocal();
       value.load();
-      for (int64_t i = 0; i < value.dim0(); i++) {
+      for (int i = 0; i < value.dim0(); i++) {
         auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        for (int64_t j = 0; j < value.dim1(); j++) {
+        for (int j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
             *c = ' ';
@@ -678,7 +672,7 @@ private:
         NXDouble value(*this, "value");
         value.openLocal();
         value.load();
-        for (int64_t i = 0; i < value.dim0(); i++) {
+        for (int i = 0; i < value.dim0(); i++) {
           auto t = start_t + boost::posix_time::seconds(int(times[i]));
           logv->addValue(t, (value[i] == 0 ? false : true));
         }
@@ -708,7 +702,7 @@ private:
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);
     value.load();
-    for (int64_t i = 0; i < value.dim0(); i++) {
+    for (int i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
         auto t = start_t + boost::posix_time::seconds(int(times[i]));
         logv->addValue(t, value[i]);
@@ -716,6 +710,52 @@ private:
     }
     return logv;
   }
+};
+
+/**  Implements NXnote Nexus class.
+ */
+class MANTID_NEXUS_DLL NXNote : public NXClass {
+public:
+  /**  Constructor.
+   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
+   * containing the NXClass.
+   *   @param name :: The name of the NXClass relative to its parent
+   */
+  NXNote(const NXClass &parent, const std::string &name)
+      : NXClass(parent, name), m_author_ok(), m_data_ok(), m_description_ok() {}
+  /// Nexus class id
+  std::string NX_class() const override { return "NXnote"; }
+  /// Returns the note's author
+  std::string author();
+  /// Returns the note's content
+  std::vector<std::string> &data();
+  /// Returns the description string
+  std::string description();
+
+protected:
+  std::string m_author;            ///< author
+  std::vector<std::string> m_data; ///< content
+  std::string m_description;       ///< description
+  bool m_author_ok;                ///< author loaded indicator
+  bool m_data_ok;                  ///< data loaded indicator
+  bool m_description_ok;           ///< description loaded indicator
+};
+
+/**  Implements NXnote Nexus class with binary data.
+ */
+class MANTID_NEXUS_DLL NXBinary : public NXNote {
+public:
+  /**  Constructor.
+   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
+   * containing the NXClass.
+   *   @param name :: The name of the NXClass relative to its parent
+   */
+  NXBinary(const NXClass &parent, const std::string &name) : NXNote(parent, name) {}
+  /// Return the binary data associated with the note
+  std::vector<char> &binary();
+
+private:
+  std::vector<char> m_binary; ///< content
 };
 
 //-------------------- main classes -------------------------------//
@@ -739,6 +779,7 @@ public:
    *   @param name :: The name of the NXNote
    *   @return The note
    */
+  NXNote openNXNote(const std::string &name) { return openNXClass<NXNote>(name); }
 };
 
 /**  Implements NXdata Nexus class.
@@ -803,6 +844,22 @@ public:
   NXFloat openPolarAngle() { return openNXFloat("polar_angle"); }
 };
 
+/**  Implements NXdisk_chopper Nexus class.
+ */
+class MANTID_NEXUS_DLL NXDiskChopper : public NXMainClass {
+public:
+  /**  Constructor.
+   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
+   * containing the NXClass.
+   *   @param name :: The name of the NXClass relative to its parent
+   */
+  NXDiskChopper(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  /// Nexus class id
+  std::string NX_class() const override { return "NXdisk_chopper"; }
+  /// Opens the dataset containing pixel distances
+  NXFloat openRotationSpeed() { return openNXFloat("rotation_speed"); }
+};
+
 /**  Implements NXinstrument Nexus class.
  */
 class MANTID_NEXUS_DLL NXInstrument : public NXMainClass {
@@ -820,6 +877,12 @@ public:
    *   @return The detector
    */
   NXDetector openNXDetector(const std::string &name) { return openNXClass<NXDetector>(name); }
+
+  /**  Opens a NXDetector
+   *   @param name :: The name of the class
+   *   @return The detector
+   */
+  NXDiskChopper openNXDiskChopper(const std::string &name) { return openNXClass<NXDiskChopper>(name); }
 };
 
 /**  Implements NXentry Nexus class.

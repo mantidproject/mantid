@@ -38,7 +38,7 @@ public:
    *
    * \return the status value associated with the exception
    */
-  NXstatus status() const throw();
+  NXstatus status() throw();
   /** Destructor for exception */
   virtual ~Exception() throw();
 

@@ -2,14 +2,11 @@
 
 #include "MantidNexusCpp/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexusCpp/napi.h"
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
-
-namespace {
-static const std::string NULL_STR("NULL");
-}
 
 /**
  * \file NeXusFile.hpp Definition of the NeXus C++ API.
@@ -20,7 +17,42 @@ static const std::string NULL_STR("NULL");
 
 namespace NeXus {
 
-static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
+/**
+ * The available compression types. These are all ignored in xml files.
+ * \li NONE no compression
+ * \li LZW Lossless Lempel Ziv Welch compression (recommended)
+ * \li RLE Run length encoding (only HDF-4)
+ * \li HUF Huffmann encoding (only HDF-4)
+ * \ingroup cpp_types
+ */
+enum NXcompression { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, RLE = NX_COMP_RLE, HUF = NX_COMP_HUF };
+
+/**
+ * Type definition for a type-keyed multimap
+ */
+typedef std::multimap<std::string, std::string> TypeMap;
+
+/**
+ * This structure holds the type and dimensions of a primative field/array.
+ */
+struct Info {
+  /** The primative type for the field. */
+  NXnumtype type;
+  /** The dimensions of the file. */
+  std::vector<int64_t> dims;
+};
+
+/** Information about an attribute. */
+struct AttrInfo {
+  /** The primative type for the attribute. */
+  NXnumtype type;
+  /** The length of the attribute. */
+  unsigned length;
+  /** The name of the attribute. */
+  std::string name;
+  /** The dimensions of the attribute. */
+  std::vector<int> dims;
+};
 
 /**
  * The Object that allows access to the information in the file.
@@ -28,8 +60,6 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  */
 class MANTID_NEXUSCPP_DLL File {
 private:
-  std::string m_filename;
-  NXaccess m_access;
   /** The handle for the C-API. */
   NXhandle m_file_id;
   /** should be close handle on exit */
@@ -39,18 +69,18 @@ public:
   /**
    * \return A pair of the next entry available in a listing.
    */
-  Entry getNextEntry();
+  std::pair<std::string, std::string> getNextEntry();
   /**
    * \return Information about the next attribute.
    */
   AttrInfo getNextAttr();
 
+private:
   /**
    * Initialize the pending group search to start again.
    */
   void initGroupDir();
 
-private:
   /**
    * Initialize the pending attribute search to start again.
    */
@@ -81,25 +111,12 @@ public:
   File(const char *filename, const NXaccess access = NXACC_READ);
 
   /**
-   * Copy constructor
+   * Use an existing handle returned from NXopen()
    *
-   * \param f File to copy over, to complete rule of three
+   * \param handle Handle to connect to
+   * \param close_handle Should the handle be closed on destruction
    */
-  File(File const &f);
-
-  /**
-   * Copy constructor from pointer
-   *
-   * \param pf Pointer to file to copy over
-   */
-  File(File const *const pf);
-
-  /**
-   * Assignment operator, to complete the rule of three
-   *
-   * \param f File to assign
-   */
-  File &operator=(File const &f);
+  File(NXhandle handle, bool close_handle = false);
 
   /** Destructor. This does close the file. */
   ~File();
@@ -138,15 +155,6 @@ public:
   void openPath(const std::string &path);
 
   /**
-   * Open the group in which the NeXus object with the specified path exists.
-   *
-   * \param path A unix like path string to a group or field. The path
-   * string is a list of group names and SDS names separated with a slash,
-   * '/' (i.e. "/entry/sample/name").
-   */
-  void openGroupPath(const std::string &path);
-
-  /**
    * Get the path into the current file
    * \return A unix like path string pointing to the current
    *         position in the file
@@ -160,7 +168,7 @@ public:
 
   /**
    * \copydoc NeXus::File::makeData(const std::string&, NXnumtype,
-   *                              const DimVector&, bool);
+   *                              const std::vector<int64_t>&, bool);
    */
   void makeData(const std::string &name, NXnumtype type, const std::vector<int> &dims, bool open_data = false);
 
@@ -172,7 +180,7 @@ public:
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(const std::string &name, NXnumtype type, const DimVector &dims, bool open_data = false);
+  void makeData(const std::string &name, NXnumtype type, const std::vector<int64_t> &dims, bool open_data = false);
 
   /**
    * Create a 1D data field with the specified information.
@@ -239,7 +247,7 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   template <typename NumT>
-  void writeData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims);
+  void writeData(const std::string &name, const std::vector<NumT> &value, const std::vector<int64_t> &dims);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -257,7 +265,7 @@ public:
    * \param chunkSize :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const DimSize chunk);
+  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const int64_t chunk);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -268,7 +276,8 @@ public:
    * \param chunk :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, DimVector &dims, DimSizeVector &chunk);
+  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, std::vector<int64_t> &dims,
+                           std::vector<int64_t> &chunk);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -287,12 +296,13 @@ public:
    * \param value :: The vector to put into the file.
    * \param dims :: The dimensions of the data.
    */
-  template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value, DimVector &dims);
+  template <typename NumT>
+  void writeUpdatedData(const std::string &name, std::vector<NumT> &value, std::vector<int64_t> &dims);
 
   /**
    * \copydoc makeCompData(const std::string&, const NXnumtype,
-   *                       const DimVector&, const NXcompression,
-   *                       const DimSizeVector&, bool)
+   *                       const std::vector<int64_t>&, const NXcompression,
+   *                       const std::vector<int64_t>&, bool)
    */
   void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int> &dims,
                     const NXcompression comp, const std::vector<int> &bufsize, bool open_data = false);
@@ -307,14 +317,14 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeCompData(const std::string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-                    const DimSizeVector &bufsize, bool open_data = false);
+  void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int64_t> &dims,
+                    const NXcompression comp, const std::vector<int64_t> &bufsize, bool open_data = false);
 
   /**
    * \copydoc writeCompData(const std::string & name,
    *                        const std::vector<NumT> & value,
-   *                        const DimVector & dims, const NXcompression comp,
-   *                        const DimSizeVector & bufsize)
+   *                        const std::vector<int64_t> & dims, const NXcompression comp,
+   *                        const std::vector<int64_t> & bufsize)
    */
   template <typename NumT>
   void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims,
@@ -331,8 +341,8 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   template <typename NumT>
-  void writeCompData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims,
-                     const NXcompression comp, const DimSizeVector &bufsize);
+  void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int64_t> &dims,
+                     const NXcompression comp, const std::vector<int64_t> &bufsize);
 
   /**
    * \param name The name of the data to open.
@@ -389,8 +399,8 @@ public:
   void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
 
   /**
-   * \copydoc NeXus::File::putSlab(void* data, DimSizeVector& start,
-   *                                DimSizeVector& size)
+   * \copydoc NeXus::File::putSlab(void* data, std::vector<int64_t>& start,
+   *                                std::vector<int64_t>& size)
    */
   void putSlab(const void *data, const std::vector<int> &start, const std::vector<int> &size);
 
@@ -401,11 +411,11 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  void putSlab(const void *data, const DimSizeVector &start, const DimSizeVector &size);
+  void putSlab(const void *data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
 
   /**
-   * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, DimSizeVector&,
-   *                               DimSizeVector&)
+   * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, std::vector<int64_t>&,
+   *                               std::vector<int64_t>&)
    */
   template <typename NumT>
   void putSlab(const std::vector<NumT> &data, const std::vector<int> &start, const std::vector<int> &size);
@@ -419,7 +429,7 @@ public:
    * \tparam NumT numeric data type of \a data
    */
   template <typename NumT>
-  void putSlab(const std::vector<NumT> &data, const DimSizeVector &start, const DimSizeVector &size);
+  void putSlab(const std::vector<NumT> &data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
 
   /**
    * \copydoc NeXus::File::putSlab(std::vector<NumT>&, int64_t, int64_t)
@@ -434,7 +444,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, DimSize start, DimSize size);
+  template <typename NumT> void putSlab(const std::vector<NumT> &data, int64_t start, int64_t size);
 
   /**
    * \return The id of the data used for linking.
@@ -531,18 +541,18 @@ public:
   /**
    * Return the entries available in the current place in the file.
    */
-  Entries getEntries();
+  std::map<std::string, std::string> getEntries();
 
   /** Return the entries available in the current place in the file,
    * but avoids the map copy of getEntries().
    *
    * \param result The map that will be filled with the entries
    */
-  void getEntries(Entries &result);
+  void getEntries(std::map<std::string, std::string> &result);
 
   /**
-   * \copydoc NeXus::File::getSlab(void*, const DimSizeVector&,
-   *                               const DimSizeVector&)
+   * \copydoc NeXus::File::getSlab(void*, const std::vector<int64_t>&,
+   *                               const std::vector<int64_t>&)
    */
   void getSlab(void *data, const std::vector<int> &start, const std::vector<int> &size);
 
@@ -554,7 +564,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  void getSlab(void *data, const DimSizeVector &start, const DimSizeVector &size);
+  void getSlab(void *data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
 
   /**
    * \return Information about all attributes on the data that is
@@ -623,18 +633,5 @@ public:
  * \tparam NumT numeric data type of \a number to check
  */
 template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT const number = NumT());
-
-MANTID_NEXUSCPP_DLL void EnableErrorReporting();
-
-MANTID_NEXUSCPP_DLL NXstatus setCache(long newVal);
-
-/**
- * Set a global error function.
- * Not threadsafe.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_NEXUSCPP_DLL void setError(void *pData, void (*newErr)(void *, const char *));
 
 }; // namespace NeXus
