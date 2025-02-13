@@ -10,19 +10,17 @@ Algorithms
 
 New features
 ############
-- A new ``InputSpinStates`` and ``OutputSpinStates`` property has been added to :ref:`algm-PolarizationCorrectionFredrikze` and
-  :ref:`algm-PolarizationEfficiencyCor` to allow the order of the workspaces in the input and output Workspace Groups to be set.
-- add new functions for efficiently calculating absolute and relative differences
-- On Linux the algorithm profiler is now built by default but to enable profiling, the :ref:`properties <Algorithm_Profiling>` must be set.
-- The AlgoTimeRegister class is exposed to python to measure time taken by other algorithms to run.
-- A new property ``UngroupDetectors`` was added to :ref:`ExtractMask <algm-ExtractMask>` allowing the output ``MaskWorkspace`` to expand the spectra to individal detectors.
-- A new property ``AddSpinStateToLog`` was added to :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` to give the option to add the final spin state into the sample log of each child workspace in the output group.
-- A new property ``AddSpinStateToLog`` was added to :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` to give the option to add the final spin state into the sample log of each child workspace in the output group.
-- The algorithm EditInstrumentGeometry now adds detectors to a single detector bank, rather than directly to the ComponentInfo root.
-- Algorithm SaveNexusESS now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.
+- :ref:`algm-PolarizationCorrectionFredrikze` and :ref:`algm-PolarizationEfficiencyCor` now have ``InputSpinStates`` and ``OutputSpinStates`` properties for specifying the spin state order in input and output workspace groups.
+- ``Mantid::Kernel::FloatingPointComparison`` has new functions for efficiently calculating absolute and relative differences.
+- On Linux the algorithm profiler is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- The :ref:`AlgoTimeRegister <AlgoTimeRegister>` class is now exposed to python.
+- :ref:`ExtractMask <algm-ExtractMask>` has a new property ``UngroupDetectors`` to allow the output ``MaskWorkspace`` to expand the spectra to individual detectors.
+- :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` and :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` have a new ``AddSpinStateToLog`` property to add the final spin state into the sample log of each child workspace in the output group.
+- :ref:`EditInstrumentGeometry <algm-EditInstrumentGeometry>` now adds detectors to a single detector bank, rather than directly to the ``ComponentInfo`` root.
+- :ref:`SaveNexusESS <algm-SaveNexusESS>` now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.
 - New algorithm :ref:`algm-MagneticFormFactorCorrectionMD` to scale the MDEvents by the magnetic form factor.
-- :ref:`RebinRagged <algm-RebinRagged>` exposes FullBinsOnly from Rebin Algo.
-- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly simulated workspace by sampling from the probability distribution of input data.
+- :ref:`RebinRagged <algm-RebinRagged>` exposes ``FullBinsOnly`` from the :ref:`Rebin <algm-Rebin>` Algorithm.
+- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly distributed workspace by sampling from the probability distribution of the input workspace.
 
 Bugfixes
 ############
