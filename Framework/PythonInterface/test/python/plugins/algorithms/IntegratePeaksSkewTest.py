@@ -18,7 +18,7 @@ from mantid.simpleapi import (
     SetInstrumentParameter,
     ConvertUnits,
 )
-from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter
+from plugins.algorithms.peakdata_utils import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt, arange, ones, zeros
 import json

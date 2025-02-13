@@ -27,8 +27,15 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.ndimage import distance_transform_edt, maximum_position, label
 from scipy.signal import convolve
-from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
-from plugins.algorithms.FindSXPeaksConvolve import make_kernel, get_kernel_shape
+from plugins.algorithms.peakdata_utils import (
+    InstrumentArrayConverter,
+    get_fwhm_from_back_to_back_params,
+    round_up_to_odd_number,
+    get_bin_width_at_tof,
+    set_peak_intensity,
+    make_kernel,
+    get_kernel_shape,
+)
 from enum import Enum
 from mantid.dataobjects import PeakShapeDetectorBin
 
@@ -547,17 +554,6 @@ def integrate_peak(
     return intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins
 
 
-def round_up_to_odd_number(number):
-    if not number % 2:
-        number += 1
-    return number
-
-
-def get_bin_width_at_tof(ws, ispec, tof):
-    itof = ws.yIndexOfX(tof, ispec)
-    return ws.readX(ispec)[itof + 1] - ws.readX(ispec)[itof]
-
-
 def plot_integration_results(output_file, results, prog_reporter):
     # import inside this function as not allowed to import at point algorithms are registered
     from matplotlib.pyplot import subplots, close
@@ -734,16 +730,6 @@ def optimise_shoebox(y, esq, peak_shape, ipos, nfail_max=2):
                 if not nfailed < nfail_max:
                     break
     return best_ipos, best_peak_shape
-
-
-def set_peak_intensity(pk, intens, sigma, do_lorz_cor):
-    if do_lorz_cor:
-        L = (np.sin(pk.getScattering() / 2) ** 2) / (pk.getWavelength() ** 4)  # at updated peak pos
-    else:
-        L = 1
-    # set peak object intensity
-    pk.setIntensity(L * intens)
-    pk.setSigmaIntensity(L * sigma)
 
 
 # register algorithm with mantid
