@@ -1,6 +1,6 @@
 import os
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWidget
 from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWidget
 from qtpy.QtCore import QUrl
 from qtpy.QtGui import QIcon
 
