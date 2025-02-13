@@ -48,21 +48,21 @@ using namespace NeXus;
 
 namespace {
 enum class CalibFilenameExtensionEnum { H5, HD5, HDF, CAL, enum_count };
-const std::vector<std::string> calibFilenameExtensions{".h5", ".hd5", ".hdf", ".cal"};
+std::vector<std::string> const calibFilenameExtensions{".h5", ".hd5", ".hdf", ".cal"};
 typedef EnumeratedString<CalibFilenameExtensionEnum, &calibFilenameExtensions, &compareStringsCaseInsensitive>
     CalibFilenameExtension;
 
 enum class GroupingFilenameExtensionEnum { XML, H5, HD5, HDF, CAL, enum_count };
-const std::vector<std::string> groupingFilenameExtensions{".xml", ".h5", ".hd5", ".hdf", ".cal"};
+std::vector<std::string> const groupingFilenameExtensions{".xml", ".h5", ".hd5", ".hdf", ".cal"};
 typedef EnumeratedString<GroupingFilenameExtensionEnum, &groupingFilenameExtensions, &compareStringsCaseInsensitive>
     GroupingFilenameExtension;
 
 namespace PropertyNames {
-const std::string CAL_FILE("Filename");
-const std::string GROUP_FILE("GroupFilename");
-const std::string MAKE_CAL("MakeCalWorkspace");
-const std::string MAKE_GRP("MakeGroupingWorkspace");
-const std::string MAKE_MSK("MakeMaskWorkspace");
+std::string const CAL_FILE("Filename");
+std::string const GROUP_FILE("GroupFilename");
+std::string const MAKE_CAL("MakeCalWorkspace");
+std::string const MAKE_GRP("MakeGroupingWorkspace");
+std::string const MAKE_MSK("MakeMaskWorkspace");
 } // namespace PropertyNames
 } // namespace
 
@@ -70,16 +70,16 @@ const std::string MAKE_MSK("MakeMaskWorkspace");
 DECLARE_ALGORITHM(LoadDiffCal)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }
+std::string const LoadDiffCal::name() const { return "LoadDiffCal"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadDiffCal::category() const { return "DataHandling\\Instrument;Diffraction\\DataHandling"; }
+std::string const LoadDiffCal::category() const { return "DataHandling\\Instrument;Diffraction\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadDiffCal::summary() const { return "Loads a calibration file for powder diffraction"; }
+std::string const LoadDiffCal::summary() const { return "Loads a calibration file for powder diffraction"; }
 
 /** Initialize the algorithm's properties.
  */
@@ -123,21 +123,21 @@ void LoadDiffCal::init() {
 
 namespace { // anonymous
 
-void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix, const GroupingWorkspace_sptr &wksp) {
+void setGroupWSProperty(API::Algorithm *alg, std::string const &prefix, GroupingWorkspace_sptr const &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                            "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
                        "Set the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
 }
 
-void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix, const MaskWorkspace_sptr &wksp) {
+void setMaskWSProperty(API::Algorithm *alg, std::string const &prefix, MaskWorkspace_sptr const &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                            "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
                        "Set the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
 }
 
-void setCalWSProperty(API::Algorithm *alg, const std::string &prefix, const ITableWorkspace_sptr &wksp) {
+void setCalWSProperty(API::Algorithm *alg, std::string const &prefix, ITableWorkspace_sptr const &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputCalWorkspace", prefix + "_cal", Direction::Output),
       "Set the output Diffraction Calibration workspace, if any.");
@@ -182,7 +182,7 @@ void LoadDiffCal::getInstrument(H5File &file) {
                       << m_instrument->getFilename() << "\"\n";
 }
 
-void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups) {
+void LoadDiffCal::makeGroupingWorkspace(std::vector<int32_t> const &detids, std::vector<int32_t> const &groups) {
   bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS) {
     g_log.information("Not loading GroupingWorkspace from the calibration file");
@@ -211,7 +211,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, cons
   setGroupWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use) {
+void LoadDiffCal::makeMaskWorkspace(std::vector<int32_t> const &detids, std::vector<int32_t> const &use) {
   bool makeWS = getProperty(PropertyNames::MAKE_MSK);
   if (!makeWS) {
     g_log.information("Not making a MaskWorkspace");
@@ -238,10 +238,10 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const st
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
-                                   const std::vector<double> &difa, const std::vector<double> &tzero,
-                                   const std::vector<int32_t> &dasids, const std::vector<double> &offsets,
-                                   const std::vector<int32_t> &use) {
+void LoadDiffCal::makeCalWorkspace(std::vector<int32_t> const &detids, std::vector<double> const &difc,
+                                   std::vector<double> const &difa, std::vector<double> const &tzero,
+                                   std::vector<int32_t> const &dasids, std::vector<double> const &offsets,
+                                   std::vector<int32_t> const &use) {
   bool makeWS = getProperty(PropertyNames::MAKE_CAL);
   if (!makeWS) {
     g_log.information("Not making a calibration workspace");
@@ -290,14 +290,14 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std
 
     // calculate tof range for information
     Kernel::Units::dSpacing dspacingUnit;
-    const double tofMinRow = dspacingUnit.calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    double const tofMinRow = dspacingUnit.calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow = dspacingUnit.calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      double const tofMaxRow = dspacingUnit.calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {
