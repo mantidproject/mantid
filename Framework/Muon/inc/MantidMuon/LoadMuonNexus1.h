@@ -57,7 +57,7 @@ public:
   LoadMuonNexus1();
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::LegacyNexusDescriptor &descriptor) const override;
 
 protected:
   /// Overwrites Algorithm method
