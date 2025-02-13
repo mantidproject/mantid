@@ -428,7 +428,7 @@ void LoadMask::componentToDetectors(const std::vector<std::string> &componentnam
 void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks, std::vector<detid_t> &detectors) {
   std::stringstream infoss;
   infoss << "Bank IDs to be converted to detectors: \n";
-  for (auto const &singlebank : singlebanks) {
+  for (const auto &singlebank : singlebanks) {
     infoss << "Bank: " << singlebank << '\n';
   }
   g_log.debug(infoss.str());
