@@ -60,6 +60,9 @@ using namespace DataObjects;
 using Types::Core::DateAndTime;
 
 namespace {
+// detnotes the end of iteration for NeXus::getNextEntry
+const std::string NULL_STR("NULL");
+
 const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
 enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
@@ -345,7 +348,7 @@ void LoadEventNexus::setTopEntryName() {
           m_top_entry_name = entry.first;
           break;
         }
-      } else if (entry == ::NeXus::EOD_ENTRY) {
+      } else if (entry.first == NULL_STR && entry.second == NULL_STR) {
         g_log.error() << "Unable to determine name of top level NXentry - assuming "
                          "\"entry\".\n";
         m_top_entry_name = "entry";

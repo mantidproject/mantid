@@ -16,7 +16,7 @@ Exception::Exception(const std::string &msg, const NXstatus status) : std::runti
 
 const char *Exception::what() const throw() { return this->m_what.c_str(); }
 
-NXstatus Exception::status() const throw() { return this->m_status; }
+NXstatus Exception::status() throw() { return this->m_status; }
 
 Exception::~Exception() throw() {}
 
