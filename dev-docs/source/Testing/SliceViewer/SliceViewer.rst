@@ -345,7 +345,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
 27. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
 
-    - In the example below, the x axis label is ``(0.0, -0.24 + 0.97x, 0.93 + 0.25x) in 7.07 Ang^-1``. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)`` which is very close actual peak HKL = ``(0,0,1)``
+    - In the example below, the x axis label is :math:`(0.0, -0.24 + 0.97x, 0.93 + 0.25x) in 7.07 \AA^{-1}`. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)``, which is very close actual peak HKL = ``(0,0,1)``
 
 .. figure:: ../../images/SliceViewer/CutViewer_nonAxisAlignedCut.png
    :class: screenshot
