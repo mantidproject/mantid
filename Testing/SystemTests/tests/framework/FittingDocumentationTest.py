@@ -15,7 +15,6 @@ FIT_FUNCTIONS_WITH_NO_DOCS = [
     "ConvTempCorrection.rst",
     "Example1DFunction.rst",
     "ExamplePeakFunction.rst",
-    "FlatTopPeak.rst",
     "PawleyParameterFunction.rst",
     "PeakParameterFunction.rst",
     "PoldiSpectrumConstantBackground.rst",
