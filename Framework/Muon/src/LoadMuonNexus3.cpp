@@ -47,8 +47,6 @@ namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
 
-LoadMuonNexus3::LoadMuonNexus3() : LoadMuonNexus() {}
-
 /** Executes the right version of the Muon nexus loader
  *  @throw Exception::FileError If the Nexus file cannot be found/opened
  *  @throw std::invalid_argument If the optional properties are set to invalid
@@ -62,15 +60,12 @@ void LoadMuonNexus3::exec() {
   m_loadAlgs.emplace(std::make_shared<LoadMuonNexus2>(), &calculateConfidence);
 
   int maxConfidence{0};
-  int confidence{0};
-  int version{0};
-  std::string algName;
   for (const auto &alg : m_loadAlgs) {
-    confidence = alg.second(filePath, alg.first);
+    int confidence = alg.second(filePath, alg.first);
     if (confidence > maxConfidence) {
       maxConfidence = confidence;
-      algName = alg.first->name();
-      version = alg.first->version();
+      m_algName = alg.first->name();
+      m_version = alg.first->version();
     }
   }
 
@@ -78,11 +73,11 @@ void LoadMuonNexus3::exec() {
     throw Kernel::Exception::FileError("Cannot open the file ", filePath);
   }
 
-  runSelectedAlg(algName, version);
+  runSelectedAlg();
 }
 
-void LoadMuonNexus3::runSelectedAlg(const std::string &algName, const int version) {
-  auto childAlg = createChildAlgorithm(algName, 0, 1, true, version);
+void LoadMuonNexus3::runSelectedAlg() {
+  auto childAlg = createChildAlgorithm(m_algName, 0, 1, true, m_version);
   auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
   loader->copyPropertiesFrom(*this);
   loader->executeAsChildAlg();
