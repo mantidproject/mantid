@@ -389,19 +389,6 @@ void BatchPresenter::notifyPreviewApplyRequested() {
   m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
 }
 
-bool BatchPresenter::hasROIDetectorIDsForPreviewRow() const {
-  auto const &previewRow = m_previewPresenter->getPreviewRow();
-  try {
-    auto const lookupRow = m_model->findLookupRow(previewRow);
-    if (!lookupRow || !lookupRow->roiDetectorIDs().has_value()) {
-      return false;
-    }
-  } catch (MultipleRowsFoundException const &) {
-    return false;
-  }
-  return true;
-}
-
 std::map<ROIType, ProcessingInstructions> BatchPresenter::getMatchingProcessingInstructionsForPreviewRow() const {
   std::map<ROIType, ProcessingInstructions> roiMap;
 
