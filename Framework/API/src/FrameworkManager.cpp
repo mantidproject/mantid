@@ -340,7 +340,7 @@ void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
 }
 
 /// Silence NeXus output
-void FrameworkManagerImpl::disableNexusOutput() { ::NeXus::setError(nullptr, NexusErrorFunction); }
+void FrameworkManagerImpl::disableNexusOutput() { NXMSetError(nullptr, NexusErrorFunction); }
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::asynchronousStartupTasks() {
