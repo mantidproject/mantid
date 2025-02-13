@@ -1,0 +1,1 @@
+-  When a workspace is loaded on the ISIS Reflectometry GUI :ref:`Reduction Preview <refl_preview>` tab, region selectors are now added to the slice viewer plot to display any ROIs from matching experiment settings.
