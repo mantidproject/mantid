@@ -449,8 +449,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   std::unique_ptr<::NeXus::File> filePointer;
   try {
     filePointer = std::make_unique<::NeXus::File>(fname);
-    if (filePointer)
-      filePointer->getEntries();
+    filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
     res = false;
