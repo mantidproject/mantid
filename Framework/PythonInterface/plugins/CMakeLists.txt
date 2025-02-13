@@ -155,9 +155,11 @@ set(PYTHON_PLUGINS
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
     algorithms/PelicanCrystalProcessing.py
+    algorithms/PoldiAutoCorrelation6.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/poldi_utils.py
     algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
