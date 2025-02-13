@@ -1,4 +1,7 @@
 .. _sliceviewer_testing:
+.. only:: html
+
+  :math:`\renewcommand\AA{\mathring{A}}`
 
 SliceViewer Testing
 ===================
@@ -327,7 +330,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
-    - The axes label of the 1D plot should be similar to ``(0.0, 2.0,0.0-1.0x) in 3.14 Ang^-1``
+    - The axes label of the 1D plot should be similar to :math:`(0.0, 2.0,0.0-1.0x) \ in \ 3.14 \AA^{-1}`
     - There should be no peak on the 1D plot
 
 21. Increase the thickness by dragging the left red marker of the cut representation to encompass the peak in the data - check the peak appears in the 1D plot at the right thickness.
@@ -345,7 +348,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
 27. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
 
-    - In the example below, the x axis label is :math:`(0.0, -0.24 + 0.97x, 0.93 + 0.25x) in 7.07 \AA^{-1}`. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)``, which is very close actual peak HKL = ``(0,0,1)``
+    - In the example below, the x axis label is :math:`(0.0, -0.24 + 0.97x, 0.93 + 0.25x) \ in \ 7.07 \AA^{-1}`. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)``, which is very close to actual peak HKL = ``(0,0,1)``
 
 .. figure:: ../../images/SliceViewer/CutViewer_nonAxisAlignedCut.png
    :class: screenshot
