@@ -716,17 +716,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.h:31
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/IGroup.h:19
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/TransmissionStitchOptions.h:34
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:42
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:43
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:47
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:110
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:114
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:149
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:150
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:151
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:158
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:193
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:199
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h:35
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h:50
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h:73
