@@ -1334,7 +1334,7 @@ public:
 
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::logic_error &e, std::string(e.what()),
                             "Invalid value for property Flippers (string) from string \"01,01,10\": When setting value "
-                            "of property \"Flippers\": The value \"01,01,10\" is not in the list of allowed values");
+                            "of property \"Flippers\": Each spin state must only appear once");
   }
 
   void test_error_occurs_when_set_spin_states_used_with_Wildes() {
