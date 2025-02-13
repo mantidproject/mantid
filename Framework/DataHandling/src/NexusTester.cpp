@@ -146,7 +146,7 @@ void NexusTester::exec() {
   if (!LoadFilename.empty()) {
     ::NeXus::File file(LoadFilename, NXACC_READ);
     int HDFCacheSize = getProperty("HDFCacheSize");
-    ::NeXus::setCache(HDFCacheSize);
+    NXsetcache(HDFCacheSize);
     file.openGroup("FakeDataGroup", "NXdata");
     Progress prog(this, 0.0, 1.0, NumChunks);
     CPUTimer tim;

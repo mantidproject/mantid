@@ -187,7 +187,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
-          std::vector<int64_t> const dims = file.getInfo().dims;
+          std::vector<int64_t> dims = file.getInfo().dims;
           file.closeData();
 
           if (!dims.empty()) {
@@ -200,11 +200,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");
-          std::vector<int64_t> const xdim = file.getInfo().dims;
+          std::vector<int64_t> xdim = file.getInfo().dims;
           file.closeData();
 
           file.openData("y_pixel_offset");
-          std::vector<int64_t> const ydim = file.getInfo().dims;
+          std::vector<int64_t> ydim = file.getInfo().dims;
           file.closeData();
 
           if (!xdim.empty() && !ydim.empty()) {
@@ -215,7 +215,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
           file.openData(m_axisField);
-          std::vector<int64_t> const dims = file.getInfo().dims;
+          std::vector<int64_t> dims = file.getInfo().dims;
           // Find the units, if available
           if (file.hasAttr("units"))
             file.getAttr("units", m_xUnits);
