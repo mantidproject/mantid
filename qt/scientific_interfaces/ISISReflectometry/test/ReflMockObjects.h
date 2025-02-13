@@ -107,7 +107,6 @@ public:
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyPreviewApplyRequested, void());
-  MOCK_CONST_METHOD0(hasROIDetectorIDsForPreviewRow, bool());
   MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
   MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, boost::optional<ProcessingInstructions>());
 };

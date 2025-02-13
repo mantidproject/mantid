@@ -548,32 +548,6 @@ public:
     presenter->notifyPreviewApplyRequested();
   }
 
-  void testHasROIDetectorIDsForPreviewRow() {
-    auto const lookupRow = makeLookupRow(boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
-    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, true);
-  }
-
-  void testHasROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
-    auto lookupRow = makeLookupRow(boost::none);
-    lookupRow.setRoiDetectorIDs(boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
-    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, false);
-  }
-
-  void testHasROIDetectorIDsForPreviewRowNoLookupRowFound() {
-    runHasROIDetectorIDsForPreviewRowTest(boost::none, false);
-  }
-
-  void testHasROIDetectorIDsForPreviewRowMultipleLookupRowsFound() {
-    auto mockModel = makeMockModel();
-    auto const previewRow = PreviewRow({"12345"});
-    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).WillOnce(Throw(MultipleRowsFoundException("")));
-    auto presenter = makePresenter(std::move(mockModel));
-    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
-    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), false);
-  }
-
   void testGetMatchingProcessingInstructionsForPreviewRow() {
     auto const lookupRow = makeLookupRow(boost::none);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
@@ -695,12 +669,6 @@ private:
     auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
     TS_ASSERT_EQUALS(result.size(), 2);
     return result;
-  }
-
-  void runHasROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow, bool expectedResult) {
-    auto const previewRow = PreviewRow({"12345"});
-    auto const presenter = makePresenterWithPreviewRowLookup(lookupRow, previewRow);
-    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), expectedResult);
   }
 
   void runGetMatchingROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow,

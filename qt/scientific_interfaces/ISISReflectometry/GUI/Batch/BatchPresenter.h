@@ -95,7 +95,6 @@ public:
   int percentComplete() const override;
   std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
   void notifyPreviewApplyRequested() override;
-  bool hasROIDetectorIDsForPreviewRow() const override;
   std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const override;
   boost::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const override;
 
