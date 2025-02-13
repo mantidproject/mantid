@@ -19,9 +19,8 @@ void export_IPeakFunction() {
   register_ptr_to_python<std::shared_ptr<IPeakFunction>>();
   class_<IPeakFunction, bases<IFunction1D>, std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
-      // suppress c-style cast of IPeakFunction object - think this is desired behaviour
-      // cppcheck-suppress cstyleCast
-      .def("functionLocal", (object(IPeakFunctionAdapter::*)(const object &) const)&IPeakFunctionAdapter::functionLocal,
+      // cppcheck-suppress cstyleCast - cppcheck complains but already using static_cast
+      .def("functionLocal", static_cast<object(IPeakFunctionAdapter::*)(const object &) const>(&IPeakFunctionAdapter::functionLocal),
            (arg("self"), arg("vec_x")),
            "Calculate the values of the function for the given x values. The "
            "output should be stored in the out array")
