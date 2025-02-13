@@ -124,7 +124,7 @@ SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string
  * then forms the path to find the named spec
  * @throws std::invalid_argument if the list is empty
  */
-SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(std::vector<std::string> directories)
+SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(std::vector<std::filesystem::path> directories)
     : m_rootDirs(std::move(directories)) {
   if (m_rootDirs.empty()) {
     throw std::invalid_argument("SampleEnvironmentSpecFileFinder() - Empty directory search list.");
@@ -153,7 +153,7 @@ SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::find(const std::stri
   // check for the instrument environment, then facility environment
   for (const auto &rel_path : {relpath_instr, relpath_facil}) {
     for (const auto &prefixStr : m_rootDirs) {
-      Path prefix(prefixStr);
+      Path prefix(prefixStr.string());
       // Ensure the path is a directory (note that this does not create it!)
       prefix.makeDirectory();
       File fullpath(Poco::Path(prefix, rel_path));

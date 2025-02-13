@@ -499,7 +499,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiH
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/InstrumentInfo.h:47
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/UsageService.h:63
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1698
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:111
@@ -642,7 +641,6 @@ constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geom
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/ReflectionGenerator.cpp:40
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/UnitCell.cpp:175
 iterateByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ArrayProperty.cpp:52
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ConfigService.cpp:73
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/FacilityInfo.cpp:46
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:46
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:102

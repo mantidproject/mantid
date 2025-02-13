@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <cstdio>
+#include <filesystem>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -429,10 +430,11 @@ void LoadBBY::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std
                                        std::map<std::string, std::string> &logStrings,
                                        std::map<std::string, std::string> &allParams) {
   using namespace Poco::XML;
-  std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+  std::filesystem::path idfDirectory(
+      Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory"));
 
   try {
-    std::string parameterFilename = idfDirectory + "BILBY_Parameters.xml";
+    std::string parameterFilename = (idfDirectory / "BILBY_Parameters.xml").string();
     // Set up the DOM parser and parse xml file
     DOMParser pParser;
     Poco::AutoPtr<Poco::XML::Document> pDoc;
