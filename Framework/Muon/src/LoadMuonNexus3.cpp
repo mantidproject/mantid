@@ -59,17 +59,17 @@ void LoadMuonNexus3::exec() {
   m_loadAlgs.emplace(std::make_shared<LoadMuonNexus1>(), &calculateConfidence);
   m_loadAlgs.emplace(std::make_shared<LoadMuonNexus2>(), &calculateConfidence);
 
-  int maxConfidence{0};
+  int maxConfidenceRes{0};
   for (const auto &alg : m_loadAlgs) {
-    int confidence = alg.second(filePath, alg.first);
-    if (confidence > maxConfidence) {
-      maxConfidence = confidence;
+    int confidenceRes = alg.second(filePath, alg.first);
+    if (confidenceRes > maxConfidenceRes) {
+      maxConfidenceRes = confidenceRes;
       m_algName = alg.first->name();
       m_version = alg.first->version();
     }
   }
 
-  if (!maxConfidence) {
+  if (!maxConfidenceRes) {
     throw Kernel::Exception::FileError("Cannot open the file ", filePath);
   }
 
