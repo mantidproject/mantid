@@ -10,61 +10,37 @@ Algorithms
 
 New features
 ############
-- A new ``InputSpinStates`` and ``OutputSpinStates`` property has been added to :ref:`algm-PolarizationCorrectionFredrikze` and
-  :ref:`algm-PolarizationEfficiencyCor` to allow the order of the workspaces in the input and output Workspace Groups to be set.
-- add new functions for efficiently calculating absolute and relative differences
-- On Linux the algorithm profiler is now built by default but to enable profiling, the :ref:`properties <Algorithm_Profiling>` must be set.
-- The AlgoTimeRegister class is exposed to python to measure time taken by other algorithms to run.
-- A new property ``UngroupDetectors`` was added to :ref:`ExtractMask <algm-ExtractMask>` allowing the output ``MaskWorkspace`` to expand the spectra to individal detectors.
-- A new property ``AddSpinStateToLog`` was added to :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` to give the option to add the final spin state into the sample log of each child workspace in the output group.
-- A new property ``AddSpinStateToLog`` was added to :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` to give the option to add the final spin state into the sample log of each child workspace in the output group.
-- The algorithm EditInstrumentGeometry now adds detectors to a single detector bank, rather than directly to the ComponentInfo root.
-- Algorithm SaveNexusESS now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.
+- :ref:`algm-PolarizationCorrectionFredrikze` and :ref:`algm-PolarizationEfficiencyCor` now have ``InputSpinStates`` and ``OutputSpinStates`` properties for specifying the spin state order in input and output workspace groups.
+- ``Mantid::Kernel::FloatingPointComparison`` has new functions for efficiently calculating absolute and relative differences.
+- On Linux the algorithm profiler is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- The :ref:`AlgoTimeRegister <AlgoTimeRegister>` class is now exposed to python.
+- :ref:`ExtractMask <algm-ExtractMask>` has a new property ``UngroupDetectors`` to allow the output ``MaskWorkspace`` to expand the spectra to individual detectors.
+- :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` and :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` have a new ``AddSpinStateToLog`` property to add the final spin state into the sample log of each child workspace in the output group.
+- :ref:`EditInstrumentGeometry <algm-EditInstrumentGeometry>` now adds detectors to a single detector bank, rather than directly to the ``ComponentInfo`` root.
+- :ref:`SaveNexusESS <algm-SaveNexusESS>` now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.
 - New algorithm :ref:`algm-MagneticFormFactorCorrectionMD` to scale the MDEvents by the magnetic form factor.
-- :ref:`RebinRagged <algm-RebinRagged>` exposes FullBinsOnly from Rebin Algo.
-- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly simulated workspace by sampling from the probability distribution of input data.
+- :ref:`RebinRagged <algm-RebinRagged>` exposes ``FullBinsOnly`` from the :ref:`Rebin <algm-Rebin>` Algorithm.
+- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly distributed workspace by sampling from the probability distribution of the input workspace.
+- :ref:`CompareWorkspaces <algm-CompareWorkspaces>` has a new ``NaNsEqual`` boolean property to specify whether ``NaN`` values compare as equal.
 
 Bugfixes
 ############
-- Fixed a segmentation fault in :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` algorithm due to a racing condition in the parallel loop. The issue was first observed as a flaky unit test failure in the CI.
-- :ref:`RemovePromptPulse <algm-RemovePromptPulse>` has been fixed to correctly account for the first pulse.
-- Fixed a bug in :ref:`sample_transmission_calculator` (Interfaces > General > Sample Transmission Calculator) interface to restrict entering commas mixed with decimal point in the double spin boxes for Low, Width and High fields
-- fixes bug in :ref:`CompareWorkspaces <algm-CompareWorkspaces>` that evaluated ``NaN`` values as equal to any floating point (including ``inf`` and finite values).
-- adds new flag NaNsEqual to :ref:`CompareWorkspaces <algm-CompareWorkspaces>` to control how ``NaN`` compares to other ``NaN`` s.
-- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now performs a check and throws an error if input workspace's bins are mismatched. The mismatch check can be disabled setting the ``CheckMatchingBins`` property to ``False``.
-- The following parameter names in :ref:`algm-HeliumAnalyserEfficiency` have been updated for consistency: `GasPressureTimesCellLength` is now `PxD`, `GasPressureTimesCellLengthError` is now `PXDError`, `StartLambda` is now `StartX`, and `EndLambda` is now `EndX`. Any scripts using the old names will need to be updated.
-- fixes a bug in :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` when determining the number of workspaces in a NeXus HDF5 file.  It now counts the number of root-level "NX_class: NXentry" groups. Previously, it simply counted the number of root-level groups, assuming all were of "NX_class: NXentry".
-- Corrects `isDistribution` property of result of division of two ragged workspaces, now `true`
-- Add support for histogram :ref:`ragged workspaces <Ragged_Workspace>` to :ref:`ConvertUnits <algm-ConvertUnits>`. Ragged workspaces with bin centers (Point rather than BinEdges) still generate errors.
-- Fixed bug in:ref:`LoadNGEM <algm-LoadNGEM>` where ``Min/MaxEventsPerFrame`` inputs were not being respected.
-- Fixed a bug in :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` that would cause it to hang when the error bank had zero events.
+- :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` will no longer segfault due to a racing condition in the parallel loop.
+- :ref:`RemovePromptPulse <algm-RemovePromptPulse>` will now correctly account for the first pulse.
+- The :ref:`Sample Transmission Calculator <sample_transmission_calculator>` now restricts entering commas mixed with decimal points in the text boxes for ``Low``, ``Width`` and ``High`` fields.
+- :ref:`CompareWorkspaces <algm-CompareWorkspaces>` will no longer evaluate ``NaN`` values as equal to any floating point (including ``inf`` and finite values).
+- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` will now throw an error if the input workspaces' bins do not match. A new ``CheckMatchingBins`` boolean property can be set to ``False`` to disable this check.
+- Some :ref:`algm-HeliumAnalyserEfficiency` properties have been renamed for consistency (any scripts using the old names will need to be updated):
 
-Deprecated
-############
-
-
-Removed
-############
-
-
-Fit Functions
--------------
-
-New features
-############
-
-
-Bugfixes
-############
-- Fixed logic in FitParameter so that if only a Minimum constraint or only a Maximum constraint is available the string returned will not record a 0 for the unavailable constraint.
-
-Deprecated
-############
-
-
-Removed
-############
-
+  - ``GasPressureTimesCellLength`` is now ``PxD``
+  - ``GasPressureTimesCellLengthError`` is now ``PXDError``
+  - ``StartLambda`` is now ``StartX``
+  - ``EndLambda`` is now ``EndX``
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now correctly determines the number of workspaces in a NeXus HDF5 file. It now counts the number of root-level ``NX_class: NXentry`` groups. Previously, it simply counted the number of root-level groups, assuming all were of ``NX_class: NXentry``.
+- :ref:`Divide <algm-Divide>` will now correctly set the ``isDistribution`` flag to ``true`` when dividing two ragged workspaces.
+- :ref:`ConvertUnits <algm-ConvertUnits>` now supports histogram :ref:`ragged workspaces <Ragged_Workspace>`. Ragged workspaces with bin centers (Point rather than BinEdges) still generate errors.
+- :ref:`LoadNGEM <algm-LoadNGEM>` now respects ``Min/MaxEventsPerFrame`` inputs.
+- :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` no longer hangs when when the error bank has zero events.
 
 
 Data Objects
@@ -72,12 +48,19 @@ Data Objects
 
 New features
 ############
-- ``EnumeratedStringProperty`` which uses ``EnumeratedString`` can be used in C++ based algorithms
+- ``EnumeratedStringProperty``, which uses ``EnumeratedString``, can be used in C++ based algorithms.
 
 Bugfixes
 ############
-- Fixed bug in `TableWorkspace::getMemorySize()` where the calculation was not summing memory correctly, leading to an underestimate of memory use..
-- Fix ``CrystalStructure`` to display deuterium when it is one of the atoms
+- `TableWorkspace::getMemorySize()` now sums memory correctly and returns a more reliable estimate of memory use.
+
+
+Geometry
+--------
+
+Bugfixes
+############
+- ``CrystalStructure`` will now store and display Deuterium as ``D`` rather than ``H``.
 
 
 Python
@@ -85,28 +68,22 @@ Python
 
 New features
 ############
-- Adds `TableWorkspaceNotEmptyValidator`
-- allows for declaring the many :class:`PropertyWithValue <mantid.kernel.FloatPropertyWithValue>` types as output properties from the python API.
-- Added a new testing function :ref:`assert_not_equal <mantid.testing.assert_not_equal>` to make testing inequality between workspaces more convenient.
-- `MatrixWorkspace` now has a `plotType` property
+- A new ``TableWorkspaceNotEmptyValidator``.
+- :class:`PropertyWithValue <mantid.kernel.FloatPropertyWithValue>` types can now be used as output properties from the python API.
+- A new testing function :ref:`assert_not_equal <mantid.testing.assert_not_equal>` to make testing inequality between workspaces more convenient.
 
 Bugfixes
 ############
-Fix for bug in ``mantid.plots.MantidAxes`` where an exception would occur when a workspace plot, which also had data not tied to a workspace on the same axes, had its workspace renamed.
-
+- Renaming a plotted workspace, where the plot also contains a line, will no longer cause an exception.
 
 Dependencies
 ------------------
 
 New features
 ############
-- Updated Matplotlib from version 3.7 to version 3.9. The release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_
-- Updated compiler on Linux to gcc version 13, which should improve performance in some circumstances. The release notes can be found here https://gcc.gnu.org/gcc-13/changes.html
+- Updated Matplotlib from version 3.7 to version 3.9. See release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_.
+- Updated compiler on Linux to gcc version 13, which should improve performance in some circumstances. The release notes can be found here https://gcc.gnu.org/gcc-13/changes.html.
 - Drop support for NumPy version 1. We now build against NumPy v2.0 and support up to v2.1. `Read about the changes <https://numpy.org/news/#numpy-200-released>`_. **Users should note that NumPy 2 introduces some breaking API changes. See the `NumPy 2 Migration Guide <https://numpy.org/devdocs/numpy_2_0_migration_guide.html>`_ for more details**
-
-Bugfixes
-############
-
 
 
 MantidWorkbench
