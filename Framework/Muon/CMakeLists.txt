@@ -71,6 +71,7 @@ set(TEST_FILES
     LoadAndApplyMuonDetectorGroupingTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadMuonNexus3Test.h
     MuonAlgorithmHelperTest.h
     EstimateMuonAsymmetryFromCountsTest.h
     MuonGroupDetectorsTest.h
