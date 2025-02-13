@@ -8,13 +8,13 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 PolarizationCorrections::PolarizationCorrections(PolarizationCorrectionType correctionType,
-                                                 boost::optional<std::string> workspace,
+                                                 std::optional<std::string> workspace,
                                                  std::string const &fredrikzeSpinStateOrder)
     : m_correctionType(correctionType), m_workspace(workspace), m_fredrikzeSpinStateOrder(fredrikzeSpinStateOrder) {}
 
 PolarizationCorrectionType PolarizationCorrections::correctionType() const { return m_correctionType; }
 
-boost::optional<std::string> PolarizationCorrections::workspace() const { return m_workspace; }
+std::optional<std::string> PolarizationCorrections::workspace() const { return m_workspace; }
 
 std::string const &PolarizationCorrections::fredrikzeSpinStateOrder() const { return m_fredrikzeSpinStateOrder; }
 

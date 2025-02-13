@@ -443,7 +443,7 @@ void ExperimentPresenter::updateViewFromModel() {
       polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
   m_view->setPolarizationEfficienciesFilePath("");
   if (m_model.polarizationCorrections().workspace())
-    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
+    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().value());
   m_view->setFredrikzeSpinStateOrder(m_model.polarizationCorrections().fredrikzeSpinStateOrder());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())

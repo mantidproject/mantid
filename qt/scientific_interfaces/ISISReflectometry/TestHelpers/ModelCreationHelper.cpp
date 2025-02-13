@@ -406,7 +406,7 @@ PolarizationCorrections makePolarizationCorrections() {
 
 PolarizationCorrections makeWorkspacePolarizationCorrections() {
   return PolarizationCorrections(PolarizationCorrectionType::Workspace,
-                                 boost::optional<std::string>("test_eff_workspace"));
+                                 std::optional<std::string>("test_eff_workspace"));
 }
 
 PolarizationCorrections makeEmptyPolarizationCorrections() {
