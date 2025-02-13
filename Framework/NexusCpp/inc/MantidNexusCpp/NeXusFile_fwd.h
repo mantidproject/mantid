@@ -10,6 +10,29 @@
 
 typedef const char CONSTCHAR;
 
+/*
+ * Any new NXaccess_mode options should be numbered in 2^n format
+ * (8, 16, 32, etc) so that they can be bit masked and tested easily.
+ *
+ * To test older non bit masked options (values below 8) use e.g.
+ *
+ *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
+ *
+ * To test new (>=8) options just use normal bit masking e.g.
+ *
+ *       if ( mode & NXACC_NOSTRIP )
+ *
+ */
+constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
+
+constexpr int NX_UNLIMITED = -1;
+
+constexpr int NX_MAXRANK = 32;
+constexpr int NX_MAXNAMELEN = 64;
+constexpr int NX_MAXPATHLEN = 1024;
+
+constexpr int NXMAXSTACK = 50;
+
 typedef void *NXhandle; /* really a pointer to a NexusFile structure */
 typedef char NXname[128];
 
@@ -51,6 +74,13 @@ typedef struct {
   char targetPath[1024]; /* path to item to link */
   int linkType;          /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
+
+/* Map NeXus compression methods to HDF compression methods */
+constexpr int NX_CHUNK = 0;
+constexpr int NX_COMP_NONE = 100;
+constexpr int NX_COMP_LZW = 200;
+constexpr int NX_COMP_RLE = 300;
+constexpr int NX_COMP_HUF = 400;
 
 /**
  * Special codes for NeXus file status.

@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidNexusCpp/napi.h"
 
 #include <memory>
 #include <utility>
