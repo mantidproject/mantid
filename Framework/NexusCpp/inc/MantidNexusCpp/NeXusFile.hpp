@@ -2,7 +2,6 @@
 
 #include "MantidNexusCpp/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
-#include "MantidNexusCpp/napi.h"
 #include <map>
 #include <string>
 #include <utility>
@@ -628,10 +627,15 @@ public:
   bool isDataSetOpen();
 };
 
+/// Silence NeXus output
+MANTID_NEXUSCPP_DLL void setError(void *, void (*)(void *, const char *));
+
 /**
  * This function returns the NXnumtype given a concrete number.
  * \tparam NumT numeric data type of \a number to check
  */
 template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT const number = NumT());
+
+MANTID_NEXUSCPP_DLL NXstatus setCache(long newVal);
 
 }; // namespace NeXus

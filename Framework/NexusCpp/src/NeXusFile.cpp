@@ -2,6 +2,7 @@
 // REMOVE
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/napi.h"
 #include <iostream>
 #include <numeric>
 #include <sstream>
@@ -949,6 +950,10 @@ void File::initAttrDir() {
     throw Exception("NXinitattrdir failed", status);
   }
 }
+
+void setError(void *, void (*errFunc)(void *, const char *)) { NXMSetError(nullptr, errFunc); }
+
+NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 
