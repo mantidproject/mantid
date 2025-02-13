@@ -10,7 +10,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
-#include "MantidNexusCpp/napi.h"
 
 #include <boost/container/vector.hpp>
 #include <map>
