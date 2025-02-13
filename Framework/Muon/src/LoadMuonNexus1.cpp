@@ -30,8 +30,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidNexus/LegacyNexusClasses.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidMuon/MuonNexusReader.h"
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/scoped_array.hpp>

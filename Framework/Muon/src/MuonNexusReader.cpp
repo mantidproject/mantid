@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidMuon/MuonNexusReader.h"
 #include "MantidKernel/Logger.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include <boost/scoped_array.hpp>
