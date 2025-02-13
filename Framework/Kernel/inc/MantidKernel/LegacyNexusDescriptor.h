@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace NeXus {
+namespace Mantid::LegacyNexus {
 class File;
 }
 
@@ -29,22 +29,22 @@ namespace Kernel {
     On construction the simple details about the layout of the file are cached
    for faster querying later.
  */
-class MANTID_KERNEL_DLL NexusDescriptor {
+class MANTID_KERNEL_DLL LegacyNexusDescriptor {
 
 public:
   /// Constructor accepting a filename
-  NexusDescriptor(const std::string &filename);
+  LegacyNexusDescriptor(const std::string &filename);
   /// Destructor
-  ~NexusDescriptor();
+  ~LegacyNexusDescriptor();
 
   /// Disable default constructor
-  NexusDescriptor() = delete;
+  LegacyNexusDescriptor() = delete;
 
   /// Disable copy operator
-  NexusDescriptor(const NexusDescriptor &) = delete;
+  LegacyNexusDescriptor(const LegacyNexusDescriptor &) = delete;
 
   /// Disable assignment operator
-  NexusDescriptor &operator=(const NexusDescriptor &) = delete;
+  LegacyNexusDescriptor &operator=(const LegacyNexusDescriptor &) = delete;
 
   /**
    * Access the filename
@@ -61,7 +61,7 @@ public:
    * Access the open NeXus File object
    * @returns A reference to the open ::NeXus file object
    */
-  inline ::NeXus::File &data() { return *m_file; }
+  inline Mantid::LegacyNexus::File &data() { return *m_file; }
 
   /// Returns the name & type of the first entry in the file
   const std::pair<std::string, std::string> &firstEntryNameType() const;
@@ -72,7 +72,7 @@ private:
   /// Initialize object with filename
   void initialize(const std::string &filename);
   /// Walk the tree and cache the structure
-  void walkFile(::NeXus::File &file, const std::string &rootPath, const std::string &className,
+  void walkFile(Mantid::LegacyNexus::File &file, const std::string &rootPath, const std::string &className,
                 std::map<std::string, std::string> &pmap, int level);
 
   /// Full filename
@@ -87,7 +87,7 @@ private:
   std::map<std::string, std::string> m_pathsToTypes;
 
   /// Open NeXus handle
-  std::unique_ptr<::NeXus::File> m_file;
+  std::unique_ptr<Mantid::LegacyNexus::File> m_file;
 };
 
 } // namespace Kernel

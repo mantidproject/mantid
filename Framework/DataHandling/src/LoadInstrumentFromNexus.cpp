@@ -15,7 +15,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidMuon/MuonNexusReader.h"
 
 #include <fstream>
 

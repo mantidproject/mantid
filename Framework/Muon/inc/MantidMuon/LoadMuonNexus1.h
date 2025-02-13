@@ -20,7 +20,7 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-namespace NeXus {
+namespace LegacyNexus {
 class NXRoot;
 }
 
@@ -57,7 +57,7 @@ public:
   LoadMuonNexus1();
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::LegacyNexusDescriptor &descriptor) const override;
 
 protected:
   /// Overwrites Algorithm method
@@ -73,14 +73,14 @@ private:
   void addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods);
 
   /// Loads dead time table for the detector
-  void loadDeadTimes(Mantid::NeXus::NXRoot &root);
+  void loadDeadTimes(Mantid::LegacyNexus::NXRoot &root);
 
   /// Creates Dead Time Table using all the data between begin and end
   DataObjects::TableWorkspace_sptr createDeadTimeTable(std::vector<int> const &specToLoad,
                                                        std::vector<double> const &deadTimes);
 
   /// Loads detector grouping information
-  API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
+  API::Workspace_sptr loadDetectorGrouping(Mantid::LegacyNexus::NXRoot &root,
                                            const Mantid::Geometry::Instrument_const_sptr &inst);
 
   /// Creates Detector Grouping Table using all the data from the range
