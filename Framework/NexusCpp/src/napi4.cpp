@@ -710,6 +710,10 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int ra
   }
 
   type = nxToHDF4Type(datatype);
+  if (type == -1) {
+    NXReportError("ERROR: invalid type in NX4makedata");
+    return NXstatus::NX_ERROR;
+  }
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
@@ -792,6 +796,10 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
   }
 
   type = nxToHDF4Type(datatype);
+  if (type == -1) {
+    NXReportError("ERROR: invalid datatype in NX4compmakedata");
+    return NXstatus::NX_ERROR;
+  }
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
@@ -1052,6 +1060,10 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
 
   pFile = NXIassert(fid);
   type = nxToHDF4Type(iType);
+  if (type == -1) {
+    NXReportError("ERROR: Invalid data type for HDF attribute");
+    return NXstatus::NX_ERROR;
+  }
   if (pFile->iCurrentSDS != 0) {
     /* SDS attribute */
     iRet = SDsetattr(pFile->iCurrentSDS, static_cast<const char *>(name), static_cast<int32>(type),
