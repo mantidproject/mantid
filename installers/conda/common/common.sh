@@ -33,7 +33,10 @@ function trim_conda() {
   mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
   mkdir -p "$bundle_conda_prefix"/share/glib-2.0/schemas
   mv "$bundle_conda_prefix"/share_tmp/glib-2.0/schemas "$bundle_conda_prefix"/share/glib-2.0/
-  mv "$bundle_conda_prefix"/share_tmp/X11 "$bundle_conda_prefix"/share/
+  if [ -d "$bundle_conda_prefix"/share_tmp/X11 ]; then
+    # On some linux flavours we need this on some otherwise workbench won't launch
+    mv "$bundle_conda_prefix"/share_tmp/X11 "$bundle_conda_prefix"/share/
+  fi
   # Heavily cut down translations
   mv "$bundle_conda_prefix"/translations "$bundle_conda_prefix"/translations_tmp
   mkdir -p "$bundle_conda_prefix"/translations/qtwebengine_locales
