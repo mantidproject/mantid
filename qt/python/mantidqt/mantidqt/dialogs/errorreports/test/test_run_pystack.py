@@ -57,7 +57,7 @@ class TestRunPystack(TestCase):
         mock_check_workbench_process.return_value = True
         file_names = ["first", "second", "third"]
         with SetupSomeFilesInATempDir(file_names) as tmp_dir:
-            latest_file = _get_most_recent_core_dump_file(Path(tmp_dir))
+            latest_file = _get_most_recent_core_dump_file(Path(tmp_dir), None)
             self.assertEqual(latest_file.name, file_names[-1])
 
     @patch(f"{MODULE_PATH}.CORE_DUMP_RECENCY_LIMIT", 0.5)
@@ -65,11 +65,11 @@ class TestRunPystack(TestCase):
         with TemporaryDirectory() as tmp_dir:
             open(f"{tmp_dir}/test", "a").close()
             sleep(0.6)
-            self.assertIsNone(_get_most_recent_core_dump_file(Path(tmp_dir)))
+            self.assertIsNone(_get_most_recent_core_dump_file(Path(tmp_dir), None))
 
     def test_get_most_recent_core_dump_file_returns_none_if_the_dir_is_empty(self):
         with TemporaryDirectory() as tmp_dir:
-            self.assertIsNone(_get_most_recent_core_dump_file(Path(tmp_dir)))
+            self.assertIsNone(_get_most_recent_core_dump_file(Path(tmp_dir), None))
 
     def test_is_lz4_file_is_true_for_lz4_file(self):
         random_data = os.urandom(1024)
@@ -93,7 +93,7 @@ class TestRunPystack(TestCase):
         tmp_file = Path("/a/tmp/location")
         mock_decompress_lz4_file.return_value = tmp_file
         with SetupSomeFilesInATempDir(["core_file"]) as tmp_dir:
-            latest_file = _get_most_recent_core_dump_file(Path(tmp_dir))
+            latest_file = _get_most_recent_core_dump_file(Path(tmp_dir), None)
             self.assertEqual(latest_file, tmp_file)
             mock_decompress_lz4_file.assert_called_once_with(Path(f"{tmp_dir}/core_file"))
 

@@ -24,7 +24,7 @@ CORE_DUMP_RECENCY_LIMIT = 30
 log = Logger("errorreports (pystack analysis)")
 
 
-def retrieve_thread_traces_from_coredump_file() -> bytes:
+def retrieve_thread_traces_from_coredump_file(ppid: str) -> bytes:
     # Locate the core dumps dir
     core_dumps_path = None
     try:
@@ -34,7 +34,7 @@ def retrieve_thread_traces_from_coredump_file() -> bytes:
         return b""
 
     # Get most recent dump file, check it's python (can you check it's from workbench?)
-    core_file = _get_most_recent_core_dump_file(core_dumps_path)
+    core_file = _get_most_recent_core_dump_file(core_dumps_path, ppid)
     if core_file is None:
         return b""
 
@@ -58,7 +58,7 @@ def _get_core_dumps_dir() -> Path:
     return core_dumps_path
 
 
-def _get_most_recent_core_dump_file(core_dumps_dir: Path) -> Path | None:
+def _get_most_recent_core_dump_file(core_dumps_dir: Path, ppid: str) -> Path | None:
     files = core_dumps_dir.iterdir()
     files_sorted_by_latest = sorted([file for file in files], key=lambda file: file.stat().st_ctime, reverse=True)
     if files_sorted_by_latest:
@@ -66,32 +66,37 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path) -> Path | None:
             # test it's recent enough
             age = datetime.now() - datetime.fromtimestamp(latest_core_dump_file.stat().st_ctime)
             if age.seconds < CORE_DUMP_RECENCY_LIMIT:
-                log.notice(f"Fround recent file {latest_core_dump_file.as_posix()}")
+                log.notice(f"Found recent file {latest_core_dump_file.as_posix()}")
                 if _is_lz4_file(latest_core_dump_file):
                     latest_core_dump_file = _decompress_lz4_file(latest_core_dump_file)
                     log.notice(f"Decompressed lz4 core file to {latest_core_dump_file.as_posix()}")
                 # test it's the correct process.
-                if _check_core_file_is_the_workbench_process(latest_core_dump_file):
-                    log.notice(f"{latest_core_dump_file.as_posix()} identified as mantid workbench core dump")
+                if _check_core_file_is_the_workbench_process(latest_core_dump_file, ppid):
+                    log.notice(f"{latest_core_dump_file.as_posix()} identified as a mantid workbench core dump")
                     return latest_core_dump_file
+                else:
+                    log.notice(f"{latest_core_dump_file.as_posix()} not itdentified as a mantid workbench core dump")
             else:
                 log.notice(
-                    f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} seconds old) core dump file in {core_dumps_dir.as_posix()}"
+                    f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} "
+                    "seconds old) valid core dump file in {core_dumps_dir.as_posix()}"
                 )
                 return None
-    log.notice(f"No files found in {core_dumps_dir.as_posix()}")
+    log.notice(f"No valid files found in {core_dumps_dir.as_posix()}")
     return None
 
 
-def _check_core_file_is_the_workbench_process(core_dump_file: Path) -> bool:
+def _check_core_file_is_the_workbench_process(core_dump_file: Path, ppid: str) -> bool:
     args = ["pystack", "core", core_dump_file.as_posix()]
     process = subprocess.run(args, capture_output=True, text=True)
     if process.stderr:
         log.error(f"Pystack executable check failed: {process.stderr}")
         return False
     stdout = process.stdout
-    search_result = re.search(r"^executable: python arguments: python.*mantid/qt/applications/workbench.*$", stdout, re.MULTILINE)
-    return search_result is not None
+    search_result = re.search(r"ppid: (\d+) ", stdout)
+    if search_result is not None:
+        return search_result.group(1) == ppid
+    return False
 
 
 def _get_output_from_pystack(core_dump_file: Path) -> str:
