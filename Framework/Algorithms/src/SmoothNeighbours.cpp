@@ -681,7 +681,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
   // Calculate total number of events for each EventList
   std::vector<size_t> outputEvents(numberOfSpectra, 0);
   for (int i = 0; i < int(numberOfSpectra); i++) {
-    std::vector<weightedNeighbour> &neighbours = m_neighbours[i];
+    const std::vector<weightedNeighbour> &neighbours = m_neighbours[i];
     for (const auto &neighbour : neighbours) {
       size_t inWI = neighbour.first;
       outputEvents[i] += ws->getSpectrum(inWI).getNumberEvents();
