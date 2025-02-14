@@ -54,10 +54,10 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
  */
 
 LoadMuonNexus3::LoadMuonNexus3()
-    : m_version(0), m_loadAlgs{{std::make_shared<Mantid::DataHandling::LoadMuonNexusV2>(), &calculateConfidenceHDF5},
-                               {std::make_shared<LoadMuonNexus1>(), &calculateConfidence},
-                               {std::make_shared<LoadMuonNexus2>(), &calculateConfidence}},
-      LoadMuonNexus() {};
+    : LoadMuonNexus(), m_loadAlgs{{std::make_shared<Mantid::DataHandling::LoadMuonNexusV2>(), &calculateConfidenceHDF5},
+                                  {std::make_shared<LoadMuonNexus1>(), &calculateConfidence},
+                                  {std::make_shared<LoadMuonNexus2>(), &calculateConfidence}},
+      m_version(0) {};
 
 void LoadMuonNexus3::exec() {
   const std::string filePath = getPropertyValue("Filename");

@@ -62,7 +62,7 @@ public:
   int m_version;
 
   // Returns 0, as this wrapper version of the algorithm is never to be selected via load.
-  int confidence(Kernel::NexusDescriptor &descriptor) const override { return 0; };
+  int confidence(Kernel::NexusDescriptor &) const override { return 0; };
   // Methods to enable testing.
   const std::string &getSelectedAlg() const { return m_algName; }
   int getSelectedVersion() const { return m_version; }
