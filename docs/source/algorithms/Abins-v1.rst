@@ -58,7 +58,11 @@ Usage
 
 **Example - loading CASTEP phonon data:**
 
-.. testsetup:: AbinsCastepSimple
+.. testsetup:: *
+
+    # On CI defaultsave.directory may be set to an inappropriate
+    # value, causing the input validator to raise an error.
+    # Set it somewhere that is guaranteed to be suitable.
 
     from tempfile import TemporaryDirectory
     from mantid.kernel import ConfigService
@@ -67,6 +71,14 @@ Usage
 
     initial_defaultsave = ConfigService.getString("defaultsave.directory")
     ConfigService.setString("defaultsave.directory", test_dir.name)
+
+.. testcleanup:: *
+
+    # Restore the original defaultsave.directory to avoid surprises
+    # when running doctests locally.
+
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 .. testcode:: AbinsCastepSimple
 
@@ -85,22 +97,7 @@ Output:
     benzene_wrk_H_total
     benzene_wrk_H
 
-.. testcleanup:: AbinsCastepSimple
-
-    ConfigService.setString("defaultsave.directory", initial_defaultsave)
-    test_dir.cleanup()
-
 **Example - loading CRYSTAL phonon data:**
-
-.. testsetup:: AbinsCrystalSimple
-
-    from tempfile import TemporaryDirectory
-    from mantid.kernel import ConfigService
-
-    test_dir = TemporaryDirectory()
-
-    initial_defaultsave = ConfigService.getString("defaultsave.directory")
-    ConfigService.setString("defaultsave.directory", test_dir.name)
 
 .. testcode:: AbinsCrystalSimple
 
@@ -123,11 +120,6 @@ Output:
     wrk_Na
     wrk_O_total
     wrk_O
-
-.. testcleanup:: AbinsCrystalSimple
-
-    test_dir.cleanup()
-    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 **Example - calling AbINS with more arguments:**
 

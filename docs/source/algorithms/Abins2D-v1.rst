@@ -56,7 +56,11 @@ Usage
 
 A minimal example, relying heavily on default parameters:
 
-.. testsetup:: Abins2DCastepSimple
+.. testsetup:: *
+
+    # On CI defaultsave.directory may be set to an inappropriate
+    # value, causing the input validator to raise an error.
+    # Set it somewhere that is guaranteed to be suitable.
 
     from tempfile import TemporaryDirectory
     from mantid.kernel import ConfigService
@@ -65,6 +69,15 @@ A minimal example, relying heavily on default parameters:
 
     initial_defaultsave = ConfigService.getString("defaultsave.directory")
     ConfigService.setString("defaultsave.directory", test_dir.name)
+
+.. testcleanup:: *
+
+    # Restore the original defaultsave.directory to avoid surprises
+    # when running doctests locally.
+
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
+
 
 .. testcode:: Abins2DCastepSimple
 
@@ -83,11 +96,6 @@ Output: (note that only the fundamental excitations are included)
     benzene_wrk_H_total
     benzene_wrk_H
 
-.. testcleanup:: Abins2DCastepSimple
-
-    test_dir.cleanup()
-    ConfigService.setString("defaultsave.directory", initial_defaultsave)
-
 **Example - using more arguments:**
 
 In practice we would usually select an instrument, incident energy,
@@ -97,16 +105,6 @@ Abins only (so far) calculates the incoherent contribution, coherent
 weights can be added for a slight improvement to the predicted
 spectrum.  (If the spectrum is dominated by coherent scattering, this
 approximation may not be the appropriate tool.)
-
-.. testsetup:: Abins2DExplicitParameters
-
-    from tempfile import TemporaryDirectory
-    from mantid.kernel import ConfigService
-
-    test_dir = TemporaryDirectory()
-
-    initial_defaultsave = ConfigService.getString("defaultsave.directory")
-    ConfigService.setString("defaultsave.directory", test_dir.name)
 
 .. testcode:: Abins2DExplicitParameters
 
@@ -125,11 +123,6 @@ Output:
 
    Created 34 workspaces
    including wrk_verbose_atom_1_total
-
-.. testcleanup:: Abins2DExplicitParameters
-
-    test_dir.cleanup()
-    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 .. categories::
 
