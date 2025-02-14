@@ -8,23 +8,10 @@ from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWid
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from qtpy.QtCore import QUrl
 from qtpy.QtGui import QIcon
-from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
-
-
-class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
-    """
-    Intercepts requests so we can relax the CORS policy
-    for loading MathJax fonts from cdn.jsdelivr.net if local docs are used.
-    """
-
-    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
-        url = info.requestUrl()
-        if url.host() == "cdn.jsdelivr.net":
-            info.setHttpHeader(b"Access-Control-Allow-Origin", b"*")
 
 
 class HelpWindowView(QMainWindow):
-    def __init__(self, presenter, using_local_docs=False):
+    def __init__(self, presenter, interceptor=None):
         super().__init__()
         self.presenter = presenter
         self.setWindowTitle("Python Help Window")
@@ -36,9 +23,8 @@ class HelpWindowView(QMainWindow):
         # Allow local file:// docs to load remote resources (fonts, scripts, etc.)
         QWebEngineSettings.globalSettings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
 
-        # If local docs are used, set up request interceptor
-        if using_local_docs:
-            interceptor = LocalRequestInterceptor()
+        # If the interceptor is not None, apply it to the current profile
+        if interceptor is not None:
             profile = self.browser.page().profile()
             profile.setUrlRequestInterceptor(interceptor)
 

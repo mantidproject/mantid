@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import sys
-from mantidqt.widgets.helpwindow.helpwindowpresenter import HelpWindowPresenter
+
 from qtpy.QtWidgets import QApplication
+from mantidqt.widgets.helpwindow.helpwindowpresenter import HelpWindowPresenter
 
 _presenter = None
 
@@ -28,10 +29,6 @@ def show_help_page(relative_url, local_docs=None, online_base_url="https://docs.
 def main(cmdargs=None):
     """
     Run this script standalone to test the Python-based Help Window.
-
-    Example:
-      python helpwindowbridge.py algorithms/Load-v1.html \
-          --local-docs /path/to/build/docs/html
     """
     import argparse
 
