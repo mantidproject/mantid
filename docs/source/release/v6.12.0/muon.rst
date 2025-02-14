@@ -33,8 +33,9 @@ New features
 Algorithms
 ----------
 
-Bugfixes
+New features
 ############
-- The :ref:`LoadMuonNexus v2<algm-LoadMuonNexus-v2>` algorithm no longer chooses a different Muon loader if appropriate. Users should call the :ref:`Load <algm-Load>` algorithm directly if they want the appropriate loader to be chosen for them.
+- The :ref:`LoadMuonNexus v2<algm-LoadMuonNexus-v2>` algorithm no longer chooses a different Muon loader if appropriate. This functionality has been moved to a new algorithm version, :ref:`LoadMuonNexus v3<algm-LoadMuonNexus-v3>`.
+- Users can also call the :ref:`Load <algm-Load>` algorithm directly which will also select the appropriate loader for them.
 
 :ref:`Release 6.12.0 <v6.12.0>`
