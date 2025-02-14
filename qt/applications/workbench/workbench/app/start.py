@@ -25,13 +25,15 @@ from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 import workbench.app.workbench_process as wp  # noqa: E402
 
 
-def start_error_reporter():
+def start_error_reporter(workbench_pid):
     """
     Used to start the error reporter if the program has segfaulted.
     """
     from mantidqt.dialogs.errorreports import main as errorreports_main
 
-    errorreports_main.main(["--application", APPNAME, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
+    errorreports_main.main(
+        ["--application", APPNAME, "--workbench_pid", workbench_pid, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN]
+    )
 
 
 def setup_core_dump_files():
@@ -70,14 +72,16 @@ def start(options: argparse.ArgumentParser):
         if options.quit:
             launch_command += " --quit"
 
-        workbench_process = subprocess.run(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+        workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+        workbench_pid = str(workbench_process.pid)
+        workbench_process.wait()
 
         # handle exit information
         exit_code = workbench_process.returncode if workbench_process.returncode is not None else 1
         if exit_code != 0:
             # start error reporter if requested
             if not options.no_error_reporter:
-                start_error_reporter()
+                start_error_reporter(workbench_pid)
 
             # a signal was emited so raise the signal from the application
             if exit_code < 0:

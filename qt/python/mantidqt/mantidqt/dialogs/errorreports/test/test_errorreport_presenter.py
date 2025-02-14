@@ -30,7 +30,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.app_name = "ErrorReportPresenterTest"
-        self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code, application=self.app_name)
+        self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code, application=self.app_name, workbench_pid=None)
         self.view.CONTACT_INFO = "ContactInfo"
         self.view.NAME = "John Smith"
         self.view.EMAIL = "john.smith@example.com"
