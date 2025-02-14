@@ -58,8 +58,6 @@ public:
 
   int version() const override { return 3; }
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus", "LoadMuonNexusV2"}; }
-  std::string m_algName;
-  int m_version;
 
   // Returns 0, as this wrapper version of the algorithm is never to be selected via load.
   int confidence(Kernel::NexusDescriptor &) const override { return 0; };
@@ -69,6 +67,8 @@ public:
 
 private:
   const std::map<const std::shared_ptr<API::Algorithm>, ConfFuncPtr> m_loadAlgs;
+  std::string m_algName;
+  int m_version;
 
   void exec() override;
   void runSelectedAlg();
