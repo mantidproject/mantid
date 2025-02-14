@@ -1,0 +1,1 @@
+- The :ref:`algm-SaveNXcanSAS` algorithm can also accept compatible Workspace Groups as input.
