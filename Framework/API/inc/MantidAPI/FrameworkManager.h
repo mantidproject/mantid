@@ -76,8 +76,6 @@ private:
   void loadPluginsUsingKey(const std::string &locationKey, const std::string &excludeKey);
   /// Set up the global locale
   void setGlobalNumericLocaleToC();
-  /// Silence NeXus output
-  void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
   void asynchronousStartupTasks();
   /// Setup Usage Reporting if enabled
