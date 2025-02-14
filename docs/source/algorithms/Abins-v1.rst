@@ -58,6 +58,16 @@ Usage
 
 **Example - loading CASTEP phonon data:**
 
+.. testsetup:: AbinsCastepSimple
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
+
 .. testcode:: AbinsCastepSimple
 
     benzene_wrk = Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
@@ -77,15 +87,20 @@ Output:
 
 .. testcleanup:: AbinsCastepSimple
 
-    import os
-    from mantid.kernel import ConfigService
-
-    savedir = ConfigService.getString("defaultsave.directory")
-
-    os.remove(os.path.join(savedir, "benzene.hdf5"))
-
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
+    test_dir.cleanup()
 
 **Example - loading CRYSTAL phonon data:**
+
+.. testsetup:: AbinsCrystalSimple
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
 
 .. testcode:: AbinsCrystalSimple
 
@@ -111,12 +126,8 @@ Output:
 
 .. testcleanup:: AbinsCrystalSimple
 
-    import os
-    from mantid.kernel import ConfigService
-
-    savedir = ConfigService.getString("defaultsave.directory")
-
-    os.remove(os.path.join(savedir, "b3lyp.hdf5"))
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 **Example - calling AbINS with more arguments:**
 

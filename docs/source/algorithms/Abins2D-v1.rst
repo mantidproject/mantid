@@ -56,6 +56,16 @@ Usage
 
 A minimal example, relying heavily on default parameters:
 
+.. testsetup:: Abins2DCastepSimple
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
+
 .. testcode:: Abins2DCastepSimple
 
     benzene_wrk = Abins2D(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon")
@@ -75,12 +85,8 @@ Output: (note that only the fundamental excitations are included)
 
 .. testcleanup:: Abins2DCastepSimple
 
-    import os
-    from mantid.kernel import ConfigService
-
-    savedir = ConfigService.getString("defaultsave.directory")
-
-    os.remove(os.path.join(savedir, "benzene.hdf5"))
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 **Example - using more arguments:**
 
@@ -91,6 +97,16 @@ Abins only (so far) calculates the incoherent contribution, coherent
 weights can be added for a slight improvement to the predicted
 spectrum.  (If the spectrum is dominated by coherent scattering, this
 approximation may not be the appropriate tool.)
+
+.. testsetup:: Abins2DExplicitParameters
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
 
 .. testcode:: Abins2DExplicitParameters
 
@@ -112,12 +128,8 @@ Output:
 
 .. testcleanup:: Abins2DExplicitParameters
 
-    import os
-    from mantid.kernel import ConfigService
-
-    savedir = ConfigService.getString("defaultsave.directory")
-
-    os.remove(os.path.join(savedir, "benzene.hdf5"))
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
 
 .. categories::
 
