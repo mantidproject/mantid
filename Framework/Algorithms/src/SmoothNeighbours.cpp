@@ -678,6 +678,16 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
 
   this->setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
 
+  // Calculate total number of events for each EventList
+  std::vector<size_t> outputEvents(numberOfSpectra, 0);
+  for (int i = 0; i < int(numberOfSpectra); i++) {
+    std::vector<weightedNeighbour> &neighbours = m_neighbours[i];
+    for (const auto &neighbour : neighbours) {
+      size_t inWI = neighbour.first;
+      outputEvents[i] += ws->getSpectrum(inWI).getNumberEvents();
+    }
+  }
+
   // Go through all the output workspace
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
@@ -685,6 +695,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
 
     // Create the output event list (empty)
     EventList &outEL = outWS->getSpectrum(outWIi);
+    outEL.reserve(outputEvents[outWIi]);
 
     // Which are the neighbours?
     std::vector<weightedNeighbour> &neighbours = m_neighbours[outWIi];
