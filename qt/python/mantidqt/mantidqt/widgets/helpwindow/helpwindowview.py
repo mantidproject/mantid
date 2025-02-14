@@ -9,6 +9,20 @@ from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWid
 from qtpy.QtWebEngineWidgets import QWebEngineView
 from qtpy.QtCore import QUrl
 from qtpy.QtGui import QIcon
+from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
+
+
+class MyRequestInterceptor(QWebEngineUrlRequestInterceptor):
+    """
+    Intercepts requests in QWebEngineView so we can relax the CORS policy
+    for loading MathJax fonts from cdn.jsdelivr.net when local docs are in use.
+    """
+
+    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
+        url = info.requestUrl()
+        # If the request is for CDN, allow cross-origin requests
+        if url.host() == "cdn.jsdelivr.net":
+            info.setHttpHeader(b"Access-Control-Allow-Origin", b"*")
 
 
 class HelpWindowView(QMainWindow):
@@ -24,6 +38,10 @@ class HelpWindowView(QMainWindow):
         # Determine initial URL
         local_docs_base = os.environ.get("MANTID_LOCAL_DOCS_BASE")
         if local_docs_base and os.path.isdir(local_docs_base):
+            interceptor = MyRequestInterceptor()
+            profile = self.browser.page().profile()
+            profile.setUrlRequestInterceptor(interceptor)
+
             index_path = os.path.join(local_docs_base, "index.html")
             self.browser.setUrl(QUrl.fromLocalFile(index_path))
         else:
