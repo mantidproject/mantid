@@ -4,20 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import argparse
 import os
 import sys
 from mantidqt.widgets.helpwindow.helpwindowpresenter import HelpWindowPresenter
 from qtpy.QtCore import QUrl
 from qtpy.QtWidgets import QApplication
 
-_presenter = None
 
-# online_base_url = "https://docs.mantidproject.org/"
-# # NOTE: Once you build the html docs using the command ninja docs-html, you will need to
-# #      use the command export MANTID_LOCAL_DOCS_BASE="/path/to/build/docs/html".
-# #      If this it not set, this will default to the online docs.
-# local_docs_base = os.environ.get("MANTID_LOCAL_DOCS_BASE")  # e.g. /path/to/build/docs/html
+_presenter = None
 
 
 def show_help_page(relative_url, local_docs=None, online_base_url="https://docs.mantidproject.org/"):
@@ -44,10 +38,12 @@ def show_help_page(relative_url, local_docs=None, online_base_url="https://docs.
     _presenter.show_help_window()
 
 
-def main():
+def main(cmdargs=None):
     """
     Run this script standalone to test the Python-based Help Window.
     """
+    import argparse
+
     parser = argparse.ArgumentParser(description="Standalone test of the Python-based Mantid Help Window.")
     parser.add_argument(
         "relative_url", nargs="?", default="", help="Relative doc path (like 'algorithms/Load-v1.html'), defaults to 'index.html' if empty."
@@ -56,12 +52,13 @@ def main():
     parser.add_argument(
         "--online-base-url", default="https://docs.mantidproject.org/", help="Online docs base URL if local docs are not set or invalid."
     )
-    args = parser.parse_args()
+    args = parser.parse_args(cmdargs or sys.argv[1:])
+
     if args.local_docs is None:
         # e.g. MANTID_LOCAL_DOCS_BASE is /path/to/build/docs/html
         args.local_docs = os.environ.get("MANTID_LOCAL_DOCS_BASE", None)
-    app = QApplication(sys.argv)
 
+    app = QApplication(sys.argv)
     show_help_page(relative_url=args.relative_url, local_docs=args.local_docs, online_base_url=args.online_base_url)
 
     sys.exit(app.exec_())
