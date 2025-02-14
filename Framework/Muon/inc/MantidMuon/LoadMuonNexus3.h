@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -14,9 +14,7 @@
 
 #include <map>
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using ConfFuncPtr = int (*)(const std::string &, const std::shared_ptr<API::Algorithm> &);
 
@@ -49,7 +47,7 @@ together based on the groupings in the NeXus file. </LI>
 */
 class MANTID_MUON_DLL LoadMuonNexus3 : public LoadMuonNexus {
 public:
-  LoadMuonNexus3() : m_version(0), LoadMuonNexus() {}
+  LoadMuonNexus3();
 
   const std::string summary() const override {
     return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
@@ -63,18 +61,17 @@ public:
   std::string m_algName;
   int m_version;
 
-  // Returns 0, as this version of the algorithm is never to be selected via load.
+  // Returns 0, as this wrapper version of the algorithm is never to be selected via load.
   int confidence(Kernel::NexusDescriptor &descriptor) const override { return 0; };
   // Methods to enable testing.
   const std::string &getSelectedAlg() const { return m_algName; }
-  int getSelectedVersion() const { return m_version; }
+  const int getSelectedVersion() const { return m_version; }
 
 private:
-  std::map<std::shared_ptr<API::Algorithm>, ConfFuncPtr> m_loadAlgs;
+  const std::map<const std::shared_ptr<API::Algorithm>, ConfFuncPtr> m_loadAlgs;
 
   void exec() override;
   void runSelectedAlg();
 };
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

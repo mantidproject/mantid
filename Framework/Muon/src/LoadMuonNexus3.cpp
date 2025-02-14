@@ -21,7 +21,7 @@ namespace {
 const int CONFIDENCE_THRESHOLD{80};
 
 int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<Mantid::API::Algorithm> &alg) {
-  auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::NexusFileLoader>(alg);
+  const auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::NexusFileLoader>(alg);
   int confidence{0};
   if (H5::H5File::isHdf5(filePath)) {
     try {
@@ -36,7 +36,7 @@ int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<M
 }
 
 int calculateConfidence(const std::string &filePath, const std::shared_ptr<Mantid::API::Algorithm> &alg) {
-  auto fileLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Kernel::NexusDescriptor>>(alg);
+  const auto fileLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Kernel::NexusDescriptor>>(alg);
   Mantid::Kernel::NexusDescriptor descriptor(filePath);
   const int confidence = fileLoader->confidence(descriptor);
   return (confidence >= CONFIDENCE_THRESHOLD) ? confidence : 0;
@@ -53,11 +53,14 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
  *values
  */
 
+LoadMuonNexus3::LoadMuonNexus3()
+    : m_version(0), m_loadAlgs{{std::make_shared<Mantid::DataHandling::LoadMuonNexusV2>(), &calculateConfidenceHDF5},
+                               {std::make_shared<LoadMuonNexus1>(), &calculateConfidence},
+                               {std::make_shared<LoadMuonNexus2>(), &calculateConfidence}},
+      LoadMuonNexus() {};
+
 void LoadMuonNexus3::exec() {
-  std::string filePath = getPropertyValue("Filename");
-  m_loadAlgs.emplace(std::make_shared<Mantid::DataHandling::LoadMuonNexusV2>(), &calculateConfidenceHDF5);
-  m_loadAlgs.emplace(std::make_shared<LoadMuonNexus1>(), &calculateConfidence);
-  m_loadAlgs.emplace(std::make_shared<LoadMuonNexus2>(), &calculateConfidence);
+  const std::string filePath = getPropertyValue("Filename");
 
   int maxConfidenceRes{0};
   for (const auto &alg : m_loadAlgs) {
@@ -77,12 +80,11 @@ void LoadMuonNexus3::exec() {
 }
 
 void LoadMuonNexus3::runSelectedAlg() {
-  auto childAlg = createChildAlgorithm(m_algName, 0, 1, true, m_version);
-  auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
+  auto loader = createChildAlgorithm(m_algName, 0, 1, true, m_version);
   loader->copyPropertiesFrom(*this);
   loader->executeAsChildAlg();
   this->copyPropertiesFrom(*loader);
-  API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", outWS);
+  API::Workspace_sptr outWs = loader->getProperty("OutputWorkspace");
+  setProperty("OutputWorkspace", outWs);
 }
 } // namespace Mantid::Algorithms
