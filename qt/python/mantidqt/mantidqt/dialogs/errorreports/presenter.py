@@ -20,7 +20,7 @@ from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_fro
 class ErrorReporterPresenter(object):
     SENDING_ERROR_MESSAGE = "There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly"
 
-    def __init__(self, view, exit_code: str, application: str, traceback: Optional[str] = None):
+    def __init__(self, view, exit_code: str, application: str, workbench_pid: str, traceback: Optional[str] = None):
         """
         :param view: A reference to the view managed by this presenter
         :param exit_code: A string containing the exit_code of the failing application
@@ -45,7 +45,7 @@ class ErrorReporterPresenter(object):
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
                 elif is_linux():
-                    self._cpp_traces = retrieve_thread_traces_from_coredump_file()
+                    self._cpp_traces = retrieve_thread_traces_from_coredump_file(workbench_pid)
             except OSError:
                 pass
 
