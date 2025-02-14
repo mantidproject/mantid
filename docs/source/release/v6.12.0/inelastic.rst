@@ -8,7 +8,7 @@ Inelastic Changes
 New Features
 ------------
 - The deprecated Calculate Paalman Pings tab on the :ref:`Inelastic Corrections interface <interface-inelastic-corrections>` has been removed after no user feedback from v6.10 and v6.11.
-- The `Inelastic Data Processor <interface-inelastic-data-processor>` interface :math:`S(Q, \omega)` tab can now load ILL data.
+- The :ref:`Data Processor Interface <interface-inelastic-data-processor>` :math:`S(Q, \omega)` tab can now load ILL data.
 
 
 Bugfixes
@@ -16,7 +16,7 @@ Bugfixes
 - :ref:`Data Processor Interface <interface-inelastic-data-processor>` :ref:`Elwin Tab <elwin>`:
 
   - Integration range automatically updates as expected when workspaces are added via the ``Add Data`` button.
-  - Plot generation from workspaces ending with ``elwin_elf`` now works correctly and siplays no overflow warning messages.
+  - Plot generation from workspaces ending with ``elwin_elf`` now works correctly and diplays no overflow warning messages.
 
 
 :ref:`Release 6.12.0 <v6.12.0>`

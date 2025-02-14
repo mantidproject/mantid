@@ -27,12 +27,12 @@ Bugfixes
 
   - Previously, a species would only be identified as the standard
     isotopic mixture if the mass is very close to the Mantid reference
-    data. In some cases the values used by external phonon calculators
+    data. In some cases, the values used by external phonon calculators
     are significantly different and this could lead to misassignment
     (e.g. Zn in CASTEP). ``Abins`` will now initially choose the _nearest_
     mass option between an isotope and the standard isotopic mixture.
   - Many isotopes lack cross-section data and would lead to NaN
-    intensities. Now, if a NaN cross-section is identified ``Abins``
+    intensities. Now, if a NaN cross-section is identified, ``Abins``
     will either use the standard mixture data (if the mass is within
     0.01) or raise an error.
 - :ref:`Abins <algm-Abins-v1>` and :ref:`Abins2D <algm-Abins2D-v1>` now provide a more helpful error message when the Default Save Directory is unwriteable (a writeable save directory is required for caching data).
