@@ -29,7 +29,7 @@ Bugfixes
     isotopic mixture if the mass is very close to the Mantid reference
     data. In some cases, the values used by external phonon calculators
     are significantly different and this could lead to misassignment
-    (e.g. Zn in CASTEP). ``Abins`` will now initially choose the _nearest_
+    (e.g. Zn in CASTEP). ``Abins`` will now initially choose the *nearest*
     mass option between an isotope and the standard isotopic mixture.
   - Many isotopes lack cross-section data and would lead to NaN
     intensities. Now, if a NaN cross-section is identified, ``Abins``
