@@ -238,18 +238,20 @@ NXstatus NXsetcache(long newVal) {
 }
 
 /*-------------------------------------------------------------------------*/
-static void NXNXNXReportError(void *pData, const char *string) {
+static void NXNXNoReport(void *pData, const char *string) {
+  // do nothing but declare the variables unused
   UNUSED_ARG(pData);
-  fprintf(stderr, "%s \n", string);
+  UNUSED_ARG(string);
 }
 
 /*---------------------------------------------------------------------*/
 
 static void *NXEHpData = NULL;
-static void (*NXEHIReportError)(void *pData, const char *string) = NXNXNXReportError;
+// default to no logging
+static ErrFunc NXEHIReportError = NXNXNoReport;
 #ifdef HAVE_TLS
 static THREAD_LOCAL void *NXEHpTData = NULL;
-static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, const char *string) = NULL;
+static THREAD_LOCAL ErrFunc NXEHIReportTError = NULL;
 #endif
 
 void NXIReportError(void *pData, const char *string) {
@@ -273,13 +275,13 @@ void NXReportError(const char *string) {
 }
 
 /*---------------------------------------------------------------------*/
-extern void NXMSetError(void *pData, void (*NewError)(void *pD, const char *text)) {
+extern void NXMSetError(void *pData, ErrFunc NewError) {
   NXEHpData = pData;
   NXEHIReportError = NewError;
 }
 
 /*----------------------------------------------------------------------*/
-extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *text)) {
+extern void NXMSetTError(void *pData, ErrFunc NewError) {
 #ifdef HAVE_TLS
   NXEHpTData = pData;
   NXEHIReportTError = NewError;
@@ -289,25 +291,8 @@ extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *tex
 }
 
 /*----------------------------------------------------------------------*/
-extern ErrFunc NXMGetError() {
-#ifdef HAVE_TLS
-  if (NXEHIReportTError) {
-    return NXEHIReportTError;
-  }
-#endif
-  return NXEHIReportError;
-}
 
-/*----------------------------------------------------------------------*/
-static void NXNXNoReport(void *pData, const char *string) {
-  // do nothing but declare the variables unused
-  (void)pData;
-  (void)string;
-}
-
-/*----------------------------------------------------------------------*/
-
-static ErrFunc last_global_errfunc = NXNXNXReportError;
+static ErrFunc last_global_errfunc = NXEHIReportError;
 #ifdef HAVE_TLS
 static THREAD_LOCAL ErrFunc last_thread_errfunc = NULL;
 #endif

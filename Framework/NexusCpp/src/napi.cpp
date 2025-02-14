@@ -237,108 +237,9 @@ NXstatus NXsetcache(long newVal) {
   return NXstatus::NX_ERROR;
 }
 
-/*-------------------------------------------------------------------------*/
-static void NXNXNXReportError(void *pData, const char *string) {
-  UNUSED_ARG(pData);
-  fprintf(stderr, "%s \n", string);
-}
-
-/*---------------------------------------------------------------------*/
-
-static void *NXEHpData = NULL;
-static void (*NXEHIReportError)(void *pData, const char *string) = NXNXNXReportError;
-#ifdef HAVE_TLS
-static THREAD_LOCAL void *NXEHpTData = NULL;
-static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, const char *string) = NULL;
-#endif
-
-void NXIReportError(void *pData, const char *string) {
-  UNUSED_ARG(pData);
-  fprintf(
-      stderr,
-      "Your application uses NXIReportError, but its first parameter is ignored now - you should use NXReportError.");
-  NXReportError(string);
-}
-
-void NXReportError(const char *string) {
-#ifdef HAVE_TLS
-  if (NXEHIReportTError) {
-    (*NXEHIReportTError)(NXEHpTData, string);
-    return;
-  }
-#endif
-  if (NXEHIReportError) {
-    (*NXEHIReportError)(NXEHpData, string);
-  }
-}
-
-/*---------------------------------------------------------------------*/
-extern void NXMSetError(void *pData, void (*NewError)(void *pD, const char *text)) {
-  NXEHpData = pData;
-  NXEHIReportError = NewError;
-}
-
-/*----------------------------------------------------------------------*/
-extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *text)) {
-#ifdef HAVE_TLS
-  NXEHpTData = pData;
-  NXEHIReportTError = NewError;
-#else
-  NXMSetError(pData, NewError);
-#endif
-}
-
-/*----------------------------------------------------------------------*/
-extern ErrFunc NXMGetError() {
-#ifdef HAVE_TLS
-  if (NXEHIReportTError) {
-    return NXEHIReportTError;
-  }
-#endif
-  return NXEHIReportError;
-}
-
-/*----------------------------------------------------------------------*/
-static void NXNXNoReport(void *pData, const char *string) {
-  // do nothing but declare the variables unused
-  (void)pData;
-  (void)string;
-}
-
 /*----------------------------------------------------------------------*/
 
-static ErrFunc last_global_errfunc = NXNXNXReportError;
-#ifdef HAVE_TLS
-static THREAD_LOCAL ErrFunc last_thread_errfunc = NULL;
-#endif
-
-extern void NXMDisableErrorReporting() {
-#ifdef HAVE_TLS
-  if (NXEHIReportTError) {
-    last_thread_errfunc = NXEHIReportTError;
-    NXEHIReportTError = NXNXNoReport;
-    return;
-  }
-#endif
-  if (NXEHIReportError) {
-    last_global_errfunc = NXEHIReportError;
-    NXEHIReportError = NXNXNoReport;
-  }
-}
-
-extern void NXMEnableErrorReporting() {
-#ifdef HAVE_TLS
-  if (last_thread_errfunc) {
-    NXEHIReportTError = last_thread_errfunc;
-    last_thread_errfunc = NULL;
-    return;
-  }
-#endif
-  if (last_global_errfunc) {
-    NXEHIReportError = last_global_errfunc;
-    last_global_errfunc = NULL;
-  }
-}
+void NXReportError(const char *string) { UNUSED_ARG(string); }
 
 /*----------------------------------------------------------------------*/
 #ifdef WITH_HDF5
@@ -690,10 +591,8 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   if (status == NXstatus::NX_OK) {
     pushPath(fileStack, name);
   }
-  NXMDisableErrorReporting();
   char nxurl[1024];
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  NXMEnableErrorReporting();
   if (attStatus == NXstatus::NX_OK) {
     // this is an external linking group
     char exfile[512];
@@ -813,10 +712,8 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
     pushPath(fileStack, name);
   }
 
-  NXMDisableErrorReporting();
   char nxurl[1024];
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  NXMEnableErrorReporting();
   if (attStatus == NXstatus::NX_OK) {
     // this is an external linking group
     char exfile[512];
@@ -1271,9 +1168,7 @@ NXstatus NXisexternalgroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, ch
   if (status != NXstatus::NX_OK) {
     return status;
   }
-  NXMDisableErrorReporting();
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  NXMEnableErrorReporting();
   LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
   if (attStatus == NXstatus::NX_OK) {
     length = (int)strlen(nxurl);
@@ -1308,10 +1203,8 @@ NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLe
   if (status != NXstatus::NX_OK) {
     return status;
   }
-  NXMDisableErrorReporting();
   int length = 1023;
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  NXMEnableErrorReporting();
   LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
   if (attStatus == NXstatus::NX_OK) {
     length = static_cast<int>(strlen(nxurl));
@@ -1355,9 +1248,7 @@ NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONST
     return NXstatus::NX_OK;
   }
 
-  NXMDisableErrorReporting();
   LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
-  NXMEnableErrorReporting();
 
   status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
   if (status != NXstatus::NX_OK) {

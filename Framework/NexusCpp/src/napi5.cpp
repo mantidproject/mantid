@@ -1204,13 +1204,11 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
      this means: if the item is already linked: use the target attribute else,
      the path to the current node
    */
-  NXMDisableErrorReporting();
   datalen = 1024;
   memset(&sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
   if (NX5getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
     buildCurrentPath(pFile, sRes->targetPath, 1024);
   }
-  NXMEnableErrorReporting();
   sRes->linkType = 1;
   return NXstatus::NX_OK;
 }
@@ -2120,13 +2118,11 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
        this means: if the item is already linked: use the target attribute, else
        the path to the current node
      */
-    NXMDisableErrorReporting();
     int datalen = 1024;
     memset(sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
     if (NX5getattr(fileid, "target", sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       buildCurrentPath(pFile, sRes->targetPath, datalen);
     }
-    NXMEnableErrorReporting();
     sRes->linkType = 0;
     return NXstatus::NX_OK;
   }
