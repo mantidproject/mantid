@@ -65,7 +65,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override { return 0; };
   // Methods to enable testing.
   const std::string &getSelectedAlg() const { return m_algName; }
-  const int getSelectedVersion() const { return m_version; }
+  int getSelectedVersion() const { return m_version; }
 
 private:
   const std::map<const std::shared_ptr<API::Algorithm>, ConfFuncPtr> m_loadAlgs;
