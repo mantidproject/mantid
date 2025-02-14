@@ -131,6 +131,7 @@ GNU_DIAG_ON("conversion")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStatistics_overloads, getStatistics, 0, 1)
 
 void export_TimeSeriesProperty_Double() { EXPORT_TIMESERIES_PROP(double, Float); }
