@@ -12,7 +12,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
 
 
-class MyRequestInterceptor(QWebEngineUrlRequestInterceptor):
+class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
     """
     Intercepts requests in QWebEngineView so we can relax the CORS policy
     for loading MathJax fonts from cdn.jsdelivr.net when local docs are in use.
@@ -38,7 +38,7 @@ class HelpWindowView(QMainWindow):
         # Determine initial URL
         local_docs_base = os.environ.get("MANTID_LOCAL_DOCS_BASE")
         if local_docs_base and os.path.isdir(local_docs_base):
-            interceptor = MyRequestInterceptor()
+            interceptor = LocalRequestInterceptor()
             profile = self.browser.page().profile()
             profile.setUrlRequestInterceptor(interceptor)
 
