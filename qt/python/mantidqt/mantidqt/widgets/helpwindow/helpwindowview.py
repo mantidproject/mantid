@@ -4,9 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
 from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWidget
-from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from qtpy.QtCore import QUrl
 from qtpy.QtGui import QIcon
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
@@ -14,65 +13,61 @@ from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlR
 
 class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
     """
-    Intercepts requests in QWebEngineView so we can relax the CORS policy
-    for loading MathJax fonts from cdn.jsdelivr.net when local docs are in use.
+    Intercepts requests so we can relax the CORS policy
+    for loading MathJax fonts from cdn.jsdelivr.net if local docs are used.
     """
 
     def interceptRequest(self, info: QWebEngineUrlRequestInfo):
         url = info.requestUrl()
-        # If the request is for CDN, allow cross-origin requests
         if url.host() == "cdn.jsdelivr.net":
             info.setHttpHeader(b"Access-Control-Allow-Origin", b"*")
 
 
 class HelpWindowView(QMainWindow):
-    def __init__(self, presenter):
+    def __init__(self, presenter, using_local_docs=False):
         super().__init__()
         self.presenter = presenter
         self.setWindowTitle("Python Help Window")
         self.resize(800, 600)
 
-        # Web browser widget
+        # Create the QWebEngineView
         self.browser = QWebEngineView()
 
-        # Determine initial URL
-        local_docs_base = os.environ.get("MANTID_LOCAL_DOCS_BASE")
-        if local_docs_base and os.path.isdir(local_docs_base):
+        # Allow local file:// docs to load remote resources (fonts, scripts, etc.)
+        QWebEngineSettings.globalSettings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+
+        # If local docs are used, set up request interceptor
+        if using_local_docs:
             interceptor = LocalRequestInterceptor()
             profile = self.browser.page().profile()
             profile.setUrlRequestInterceptor(interceptor)
-
-            index_path = os.path.join(local_docs_base, "index.html")
-            self.browser.setUrl(QUrl.fromLocalFile(index_path))
-        else:
-            self.browser.setUrl(QUrl("https://docs.mantidproject.org/"))
 
         # Toolbar with navigation buttons
         self.toolbar = QToolBar("Navigation")
         self.addToolBar(self.toolbar)
 
-        # Back button
+        # Back
         back_button = QPushButton()
         back_button.setIcon(QIcon.fromTheme("go-previous"))
         back_button.setToolTip("Go Back")
         back_button.clicked.connect(self.browser.back)
         self.toolbar.addWidget(back_button)
 
-        # Forward button
+        # Forward
         forward_button = QPushButton()
         forward_button.setIcon(QIcon.fromTheme("go-next"))
         forward_button.setToolTip("Go Forward")
         forward_button.clicked.connect(self.browser.forward)
         self.toolbar.addWidget(forward_button)
 
-        # Home button
+        # Home
         home_button = QPushButton()
         home_button.setIcon(QIcon.fromTheme("go-home"))
         home_button.setToolTip("Go Home")
-        home_button.clicked.connect(self.go_home)
+        home_button.clicked.connect(self.on_home_clicked)
         self.toolbar.addWidget(home_button)
 
-        # Reload button
+        # Reload
         reload_button = QPushButton()
         reload_button.setIcon(QIcon.fromTheme("view-refresh"))
         reload_button.setToolTip("Reload")
@@ -82,20 +77,26 @@ class HelpWindowView(QMainWindow):
         # Layout
         layout = QVBoxLayout()
         layout.addWidget(self.browser)
-
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-    def go_home(self):
-        """Navigate to the home page."""
-        self.browser.setUrl(QUrl("https://docs.mantidproject.org/"))
+    def on_home_clicked(self):
+        """
+        Notifies the Presenter that the user wants to go "Home."
+        The Presenter decides whether it's local index.html or online docs.
+        """
+        self.presenter.show_home_page()
+
+    def set_page_url(self, url: QUrl):
+        """The Presenter calls this to load the desired doc page."""
+        self.browser.setUrl(url)
 
     def display(self):
-        """Show the help window."""
+        """Show the window on screen."""
         self.show()
 
     def closeEvent(self, event):
-        """Handle the close event and notify the presenter."""
+        """Handle window close: notify the Presenter so it can do cleanup."""
         self.presenter.on_close()
         super().closeEvent(event)
