@@ -18,7 +18,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::DataHandling::LoadGSASInstrumentFile;
@@ -77,8 +77,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("Test1BankTable");
-    Poco::File("Test1Bank.prm").remove();
-
+    std::filesystem::remove("Test1Bank.prm");
     return;
   }
 
@@ -130,8 +129,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("Test2BankTable");
-    Poco::File("Test2Bank.prm").remove();
-
+    std::filesystem::remove("Test2Bank.prm");
     return;
   }
 
@@ -178,8 +176,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("TestAGSTable");
-    Poco::File("TestAGS.prm").remove();
-
+    std::filesystem::remove("TestAGS.prm");
     return;
   }
 
@@ -202,8 +199,7 @@ public:
     TS_ASSERT(!alg.isExecuted());
 
     // 3. Clean
-    Poco::File("TestBadHistogramType.prm").remove();
-
+    std::filesystem::remove("TestBadHistogramType.prm");
     return;
   }
 
@@ -308,7 +304,7 @@ public:
     TS_ASSERT_EQUALS(fitParam.getValue(0.0), 0.0);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove("loadGSASInstrumentFileWorkspace");
   }
 
