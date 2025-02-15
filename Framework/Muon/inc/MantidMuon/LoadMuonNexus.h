@@ -12,7 +12,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/LegacyNexusDescriptor.h"
 #include "MantidMuon/DllConfig.h"
 
 //----------------------------------------------------------------------
@@ -48,7 +48,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class MANTID_MUON_DLL LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_MUON_DLL LoadMuonNexus : public API::IFileLoader<Kernel::LegacyNexusDescriptor> {
 public:
   /// Default constructor
   LoadMuonNexus();
@@ -68,7 +68,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::LegacyNexusDescriptor &descriptor) const override;
 
 protected:
   virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
