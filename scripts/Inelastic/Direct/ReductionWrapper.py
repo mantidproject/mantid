@@ -518,26 +518,19 @@ class ReductionWrapper(object):
                 "*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode", "notice"
             )
             return
-        ic = 0
         # ok = os.access(input_file,os.R_OK) # does not work in this case
-        try:
-            f = h5py.File(input_file, "r")
-            ok = True
-        except IOError:
-            ok = False
-            while not ok:
+        ok = False
+        for number_attempts in range(25):
+            try:
+                # try to open the file
+                with h5py.File(input_file, "r") as f:  # noqa: F841
+                    ok = True
+                    break  # can read the file
+            except IOError:
                 self.reducer.prop_man.log("*** File found but access can not be gained. Waiting for 10 sec", "notice")
                 time.sleep(10)
-                ic = ic + 1
-                try:
-                    f = h5py.File(input_file, "r")
-                    ok = True
-                except IOError:
-                    ok = False
-                    if ic > 24:
-                        raise IOError("Can not get read access to input file: " + input_file + " after 4 min of trying")
-        if ok:
-            f.close()
+        if not ok:
+            raise IOError("Can not get read access to input file: " + input_file + " after 4 min of trying")
 
     def reduce(self, input_file=None, output_directory=None):
         """The method performs all main reduction operations over
