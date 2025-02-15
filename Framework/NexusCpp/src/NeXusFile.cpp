@@ -2,14 +2,13 @@
 // REMOVE
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/napi.h"
 #include <iostream>
 #include <numeric>
 #include <sstream>
 #include <typeinfo>
 
 using namespace NeXus;
-using std::map;
-using std::pair;
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -18,8 +17,6 @@ using std::vector;
  * \file NeXusFile.cpp
  * The implementation of the NeXus C++ API
  */
-
-static const string NULL_STR = "NULL";
 
 namespace { // anonymous namespace to keep it in the file
 template <typename NumT> static string toString(const vector<NumT> &data) {
@@ -717,7 +714,7 @@ Info File::getInfo() {
   return info;
 }
 
-pair<string, string> File::getNextEntry() {
+Entry File::getNextEntry() {
   // set up temporary variables to get the information
   NXname name, class_name;
   NXnumtype datatype;
@@ -726,27 +723,27 @@ pair<string, string> File::getNextEntry() {
   if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
-    return pair<string, string>(str_name, str_class);
+    return Entry(str_name, str_class);
   } else if (status == NXstatus::NX_EOD) {
-    return pair<string, string>(NULL_STR, NULL_STR); // TODO return the correct thing
+    return EOD_ENTRY;
   } else {
     throw Exception("NXgetnextentry failed", status);
   }
 }
 
-map<string, string> File::getEntries() {
-  map<string, string> result;
+Entries File::getEntries() {
+  Entries result;
   this->getEntries(result);
   return result;
 }
 
-void File::getEntries(std::map<std::string, std::string> &result) {
+void File::getEntries(Entries &result) {
   result.clear();
   this->initGroupDir();
-  pair<string, string> temp;
+  Entry temp;
   while (true) {
     temp = this->getNextEntry();
-    if (temp.first == NULL_STR && temp.second == NULL_STR) { // TODO this needs to be changed when getNextEntry is fixed
+    if (temp == EOD_ENTRY) {
       break;
     } else {
       result.insert(temp);
@@ -949,6 +946,8 @@ void File::initAttrDir() {
     throw Exception("NXinitattrdir failed", status);
   }
 }
+
+NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 

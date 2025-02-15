@@ -37,10 +37,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-namespace {
-const std::string NULL_STR("NULL");
-}
-
 /// Empty default constructor
 LoadNexus::LoadNexus() : Algorithm(), m_filename() {}
 
@@ -297,7 +293,7 @@ int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::
   std::pair<std::string, std::string> entry;
   while (true) {
     entry = fileH->getNextEntry();
-    if (entry.first == NULL_STR && entry.second == NULL_STR)
+    if (entry == ::NeXus::EOD_ENTRY)
       break;
 
     if (entry.second == "NXentry")
@@ -312,7 +308,7 @@ int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::
     // loop through field names in this entry
     while (true) {
       entry = fileH->getNextEntry();
-      if (entry.first == NULL_STR && entry.second == NULL_STR)
+      if (entry == ::NeXus::EOD_ENTRY)
         break;
       // if a data field
       if (entry.second == "SDS") {

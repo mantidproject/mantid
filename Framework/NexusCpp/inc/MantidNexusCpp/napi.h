@@ -54,34 +54,6 @@
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
 
-/*
- * Any new NXaccess_mode options should be numbered in 2^n format
- * (8, 16, 32, etc) so that they can be bit masked and tested easily.
- *
- * To test older non bit masked options (values below 8) use e.g.
- *
- *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
- *
- * To test new (>=8) options just use normal bit masking e.g.
- *
- *       if ( mode & NXACC_NOSTRIP )
- *
- */
-#define NXACCMASK_REMOVEFLAGS (0x7) /* bit mask to remove higher flag options */
-
-#define NX_UNLIMITED -1
-
-#define NX_MAXRANK 32
-#define NX_MAXNAMELEN 64
-#define NX_MAXPATHLEN 1024
-
-/* Map NeXus compression methods to HDF compression methods */
-#define NX_CHUNK 0
-#define NX_COMP_NONE 100
-#define NX_COMP_LZW 200
-#define NX_COMP_RLE 300
-#define NX_COMP_HUF 400
-
 /* levels for deflate - to test for these we use ((value / 100) == NX_COMP_LZW) */
 #define NX_COMP_LZW_LVL0 (100 * NX_COMP_LZW + 0)
 #define NX_COMP_LZW_LVL1 (100 * NX_COMP_LZW + 1)
@@ -93,8 +65,6 @@
 #define NX_COMP_LZW_LVL7 (100 * NX_COMP_LZW + 7)
 #define NX_COMP_LZW_LVL8 (100 * NX_COMP_LZW + 8)
 #define NX_COMP_LZW_LVL9 (100 * NX_COMP_LZW + 9)
-
-#define NXMAXSTACK 50
 
 // name mangling macro
 #define CONCAT(__a, __b) __a##__b /* token concatenation */
