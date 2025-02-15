@@ -4,7 +4,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from typing import Callable
+from typing import Callable, Optional
 
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter
@@ -53,7 +53,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent, image_info_widget=image_info_widget)
-        super().__init__(ws, self.view._data_view)
+        super().__init__(ws, self.view.data_view)
         self._selectors: list[Selector] = []
         self._drawing_region = False
 
@@ -143,7 +143,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self._drawing_region:
             self._selectors.pop()
 
-        self._selectors.append(Selector(region_type, color, hatch, self.view._data_view.ax, self._on_rectangle_selected))
+        self._selectors.append(self._create_selector(region_type, color, hatch))
 
         self._drawing_region = True
 
@@ -154,6 +154,34 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             if selector.region_type() == region_type:
                 result.extend([selector.extents[2], selector.extents[3]])
         return result
+
+    def display_rectangular_region(self, region_type: str, color: str, hatch: str, y1: float, y2: float):
+        """
+        Add a rectangular region selector to the given location on the plot, if it does not already exist
+        and if it is located within the y-axis bounds.
+        This method currently only takes y values and will automatically set some x values.
+        """
+
+        def is_same_location(extents):
+            return self._equal_within_tolerance(extents[2], y1) and self._equal_within_tolerance(extents[3], y2)
+
+        existing_selector = self._find_selector_if(lambda x: x.region_type() == region_type and is_same_location(x.extents))
+        if existing_selector:
+            return
+
+        y_min, y_max = self.view.data_view.ax.get_ybound()
+        if y1 < y_min or y2 > y_max:
+            return
+
+        # Set some values for x1 and x2
+        x_min, x_max = self.view.data_view.ax.get_xbound()
+        x_width = (x_max - x_min) / 4
+        x1 = x_min + x_width
+        x2 = x1 + x_width
+
+        selector = self._create_selector(region_type, color, hatch, (x1, x2, y1, y2))
+        selector.set_active(False)
+        self._selectors.append(selector)
 
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
@@ -191,7 +219,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self.notifyee:
             self.notifyee.notifyRegionChanged()
 
-    def _find_selector_if(self, predicate: Callable) -> Selector:
+    def _find_selector_if(self, predicate: Callable) -> Optional[Selector]:
         """
         Find the first selector which agrees with a predicate. Return None if no selector is found
         :param predicate: A callable function or lambda that takes a Selector and returns a boolean
@@ -200,6 +228,10 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             if predicate(selector):
                 return selector
         return None
+
+    @staticmethod
+    def _equal_within_tolerance(val1, val2, tolerance=1e-8):
+        return abs(val1 - val2) < tolerance
 
     @staticmethod
     def _contains_point(extents, x, y) -> bool:
@@ -212,6 +244,14 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if x is None or y is None:
             return False
         return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]
+
+    def _create_selector(
+        self, region_type: str, color: str, hatch: str, extents: Optional[tuple[float, float, float, float]] = None
+    ) -> Selector:
+        selector = Selector(region_type, color, hatch, self.view.data_view.ax, self._on_rectangle_selected)
+        if extents:
+            selector.extents = extents
+        return selector
 
     def get_extra_image_info_columns(self, xdata, ydata):
         return {}
