@@ -684,6 +684,7 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
+         Mantid::Muon
   PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
 )
 

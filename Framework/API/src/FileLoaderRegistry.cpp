@@ -113,7 +113,7 @@ void FileLoaderRegistryImpl::unsubscribe(const std::string &name, const int vers
  */
 const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
-  using Kernel::NexusDescriptor;
+  using Kernel::LegacyNexusDescriptor;
   using Kernel::NexusHDF5Descriptor;
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
@@ -125,7 +125,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
 
     // must also try NexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
     std::pair<IAlgorithm_sptr, int> HDF4result =
-        searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
+        searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[Nexus], m_log);
 
     if (HDF5result.second > HDF4result.second)
       bestLoader = HDF5result.first;
@@ -134,7 +134,8 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   } else {
     try {
       bestLoader =
-          searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log).first;
+          searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[Nexus], m_log)
+              .first;
     } catch (std::exception const &e) {
       m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
     }
@@ -159,7 +160,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
  */
 bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std::string &filename) const {
   using Kernel::FileDescriptor;
-  using Kernel::NexusDescriptor;
+  using Kernel::LegacyNexusDescriptor;
   using Kernel::NexusHDF5Descriptor;
 
   // Check if it is in one of our lists
@@ -175,7 +176,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
   IAlgorithm_sptr loader;
   if (nexus) {
     try {
-      loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
+      loader = searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, names, m_log).first;
     } catch (std::exception const &e) {
       m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
     }
