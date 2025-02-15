@@ -112,6 +112,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "CalibrationFile",
             "OutputWorkspace",
             "PolarizationEfficiencies",
+            "FredrikzePolarizationSpinStateOrder",
             "ROIDetectorIDs",
         ]
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)

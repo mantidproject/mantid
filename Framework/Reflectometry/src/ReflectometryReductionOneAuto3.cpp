@@ -56,8 +56,8 @@ void validate(const std::string &method) {
 namespace CorrectionOption {
 static const std::string PNR{"PNR"};
 static const std::string PA{"PA"};
-static const std::string FLIPPERS_NO_ANALYSER{"0, 1"};
-static const std::string FLIPPERS_FULL{"00, 01, 10, 11"};
+static const std::string DEFAULT_FLIPPERS_NO_ANALYSER{"0, 1"};
+static const std::string DEFAULT_FLIPPERS_FULL{"00, 01, 10, 11"};
 } // namespace CorrectionOption
 
 std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
@@ -333,6 +333,14 @@ void ReflectometryReductionOneAuto3::init() {
                                                                        PropertyMode::Optional),
                   "A workspace to be used for polarization analysis that contains the efficiency factors as "
                   "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
+
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>("FredrikzePolarizationSpinStateOrder", "", Direction::Input),
+      "The spin state order of the workspaces in the workspace group to be passed to "
+      "PolarizationCorrectionsFredrikze. See the 'Spin State Configurations' -> "
+      "'InputSpinStates' section of the PolarizationCorrectionsFredrikze v1 documentation for "
+      "more details. This is only applied to Fredrikze corrections. Wildes flipper "
+      "configurations are taken from the instrument's parameter file.");
 
   // Sum banks
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("ROIDetectorIDs", "", Direction::Input),
@@ -1024,30 +1032,56 @@ std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(con
   auto groupIvsLam =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
   auto numWorkspacesInGrp = groupIvsLam->size();
+  if (numWorkspacesInGrp != 4 && numWorkspacesInGrp != 2) {
+    throw std::runtime_error("Only input workspace groups with two or four periods are supported");
+  }
+
+  // If using Wildes, check and use a flipper configuration from the parameter file.
+  if (correctionMethod == CorrectionMethod::WILDES) {
+    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(groupIvsLam->getItem(0))
+                                       ->getInstrument()
+                                       ->getParameterAsString("WildesFlipperConfig");
+
+    if (!correctionOption.empty()) {
+      return correctionOption;
+    }
+  }
+  // Otherwise, use the defaults defined in this file.
   if (numWorkspacesInGrp == 2) {
     return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PNR
-                                                             : CorrectionOption::FLIPPERS_NO_ANALYSER;
+                                                             : CorrectionOption::DEFAULT_FLIPPERS_NO_ANALYSER;
   }
-  if (numWorkspacesInGrp == 4) {
-    return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA : CorrectionOption::FLIPPERS_FULL;
+  return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA
+                                                           : CorrectionOption::DEFAULT_FLIPPERS_FULL;
+}
+
+std::string ReflectometryReductionOneAuto3::getFredrikzeInputSpinStateOrder(const std::string &correctionMethod) {
+  auto const &spinStatesProp = getPropertyValue("FredrikzePolarizationSpinStateOrder");
+  if (!spinStatesProp.empty() && correctionMethod == CorrectionMethod::WILDES) {
+    throw std::runtime_error(
+        "A custom spin state order cannot be entered using the FredrikzePolarizationSpinStateOrder property when "
+        "performing a Wildes polarization correction. Check you don't have one assigned in the Experiment Settings. "
+        "Modify the parameter file for your instrument to change the spin state order.");
   }
-  throw std::runtime_error("Only input workspace groups with two or four periods are supported");
+  return spinStatesProp;
 }
 
 /** Construct a polarization efficiencies workspace based on values of input
  * properties.
  */
-std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
+std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
 ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
   MatrixWorkspace_sptr efficiencies;
   std::string correctionMethod;
   std::string correctionOption;
+  std::string fredrikzeInputOrder;
 
   if (!isDefault("PolarizationEfficiencies")) {
     // Get the efficiencies from the provided workspace
     efficiencies = getProperty("PolarizationEfficiencies");
     correctionMethod = findPolarizationCorrectionMethod(efficiencies);
     correctionOption = findPolarizationCorrectionOption(correctionMethod);
+    fredrikzeInputOrder = getFredrikzeInputSpinStateOrder(correctionMethod);
   } else {
     // Get the efficiencies from the parameter file
     auto groupIvsLam =
@@ -1063,7 +1097,7 @@ ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
     correctionOption = effAlg->getPropertyValue("CorrectionOption");
   }
 
-  return std::make_tuple(efficiencies, correctionMethod, correctionOption);
+  return std::make_tuple(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder);
 }
 
 /**
@@ -1075,7 +1109,8 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
   MatrixWorkspace_sptr efficiencies;
   std::string correctionMethod;
   std::string correctionOption;
-  std::tie(efficiencies, correctionMethod, correctionOption) = getPolarizationEfficiencies();
+  std::string fredrikzeInputOrder;
+  std::tie(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder) = getPolarizationEfficiencies();
   CorrectionMethod::validate(correctionMethod);
 
   Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
@@ -1084,6 +1119,7 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);
+  polAlg->setProperty("SpinStatesInFredrikze", fredrikzeInputOrder);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
   polAlg->setProperty("AddSpinStateToLog", true);
 
