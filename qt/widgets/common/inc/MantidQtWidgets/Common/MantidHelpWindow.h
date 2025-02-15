@@ -43,6 +43,11 @@ public:
   void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
 
+public slots:
+  /// Perform any clean up on main window shutdown
+  void shutdown() override;
+  void warning(const QString &msg);
+
 private:
   void showHelp(const QString &url);
   void openWebpage(const QUrl &url);
@@ -51,17 +56,11 @@ private:
   std::string m_collectionFile;
   /// The window that renders the help information
   static QPointer<pqHelpWindow> g_helpWindow;
-
   /// Whether this is the very first startup of the helpwindow.
   bool m_firstRun;
 
   void findCollectionFile(const std::string &binDir);
   void determineFileLocs();
-
-public slots:
-  /// Perform any clean up on main window shutdown
-  void shutdown() override;
-  void warning(const QString &msg);
 };
 
 } // namespace MantidWidgets
