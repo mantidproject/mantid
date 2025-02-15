@@ -24,7 +24,11 @@ from mantid.kernel import (
 import numpy as np
 from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d, uniform_filter
 from scipy.signal import convolve
-from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
+from plugins.algorithms.peakdata_utils import (
+    InstrumentArrayConverter,
+    get_fwhm_from_back_to_back_params,
+    make_kernel,
+)
 
 
 class FindSXPeaksConvolve(DataProcessorAlgorithm):
@@ -285,23 +289,6 @@ def calculate_variance_over_mean(y, esq, nrows, ncols, nbins):
         (nrows - 1) // 2 : -(nrows - 1) // 2, (ncols - 1) // 2 : -(ncols - 1) // 2, (nbins - 1) // 2 : -(nbins - 1) // 2
     ]
     return var_over_mean, ycnts, avg_y, (nrows, ncols, nbins)
-
-
-def make_kernel(nrows, ncols, nbins):
-    # make a kernel with background subtraction shell of approx. same number of elements as peak region
-    kernel_shape, (nrows_bg, ncols_bg, nbins_bg) = get_kernel_shape(nrows, ncols, nbins)
-    kernel = np.zeros(kernel_shape)
-    kernel[nrows_bg:-nrows_bg, ncols_bg:-ncols_bg, nbins_bg:-nbins_bg] = 1
-    bg_mask = np.logical_not(kernel)
-    kernel[bg_mask] = -(nrows * ncols * nbins) / bg_mask.sum()  # such that kernel.sum() = 0
-    return kernel
-
-
-def get_kernel_shape(nrows, ncols, nbins):
-    nrows_bg = max(1, nrows // 16)  # padding either side of e.g. nrows for bg shell
-    ncols_bg = max(1, ncols // 16)
-    nbins_bg = max(1, nbins // 16)
-    return (nrows + 2 * nrows_bg, ncols + 2 * ncols_bg, nbins + 2 * nbins_bg), (nrows_bg, ncols_bg, nbins_bg)
 
 
 # register algorithm with mantid
