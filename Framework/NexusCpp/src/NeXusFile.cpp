@@ -191,6 +191,18 @@ void File::openPath(const string &path) {
   }
 }
 
+void File::openGroupPath(const string &path) {
+  if (path.empty()) {
+    throw Exception("Supplied empty path to openGroupPath");
+  }
+  NXstatus status = NXopengrouppath(this->m_file_id, path.c_str());
+  if (status != NXstatus::NX_OK) {
+    stringstream msg;
+    msg << "NXopengrouppath(" << path << ") failed";
+    throw Exception(msg.str(), status);
+  }
+}
+
 std::string File::getPath() {
   char cPath[2048];
 
@@ -701,7 +713,6 @@ string File::getStrData() {
 }
 
 Info File::getInfo() {
-  // vector<int> & dims, NXnumtype & type) {
   int64_t dims[NX_MAXRANK];
   NXnumtype type;
   int rank;
