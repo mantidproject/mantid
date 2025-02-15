@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 from numbers import Real
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any, Dict
 
 import numpy as np
@@ -134,10 +136,16 @@ class Tester(object):
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
 
     def _check_loader_data(
-        self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None, max_displacement_kpt: Real = float("Inf")
+        self,
+        correct_data=None,
+        input_ab_initio_filename=None,
+        extension=None,
+        loader=None,
+        max_displacement_kpt: Real = float("Inf"),
+        cache_directory: Path | None = None,
     ):
         read_filename = abins.test_helpers.find_file(f"{input_ab_initio_filename}.{extension}")
-        ab_initio_loader = loader(input_ab_initio_filename=read_filename)
+        ab_initio_loader = loader(input_ab_initio_filename=read_filename, cache_directory=cache_directory)
 
         abins_data = ab_initio_loader.load_formatted_data()
         self.assertTrue(abins_data.get_kpoints_data().is_normalised())
@@ -189,25 +197,27 @@ class Tester(object):
         if extension is None:
             extension = self._loaders_extensions[str(loader)]
 
-        # get calculated data
-        data = self._read_ab_initio(loader=loader, filename=name, extension=extension, **loader_kwargs)
-
         # get correct data
         correct_data = self._prepare_data(name, max_displacement_kpt=max_displacement_kpt)
 
-        # check read data
-        self._check_reader_data(
-            correct_data=correct_data, data=data, filename=name, extension=extension, max_displacement_kpt=max_displacement_kpt
-        )
+        with TemporaryDirectory() as tmpdir:
+            # get calculated data
+            data = self._read_ab_initio(loader=loader, filename=name, extension=extension, cache_directory=Path(tmpdir), **loader_kwargs)
 
-        # check loaded data
-        self._check_loader_data(
-            correct_data=correct_data,
-            input_ab_initio_filename=name,
-            extension=extension,
-            loader=loader,
-            max_displacement_kpt=max_displacement_kpt,
-        )
+            # check read data
+            self._check_reader_data(
+                correct_data=correct_data, data=data, filename=name, extension=extension, max_displacement_kpt=max_displacement_kpt
+            )
+
+            # check loaded data
+            self._check_loader_data(
+                correct_data=correct_data,
+                input_ab_initio_filename=name,
+                extension=extension,
+                loader=loader,
+                max_displacement_kpt=max_displacement_kpt,
+                cache_directory=Path(tmpdir),
+            )
 
     def _read_ab_initio(self, loader=None, filename=None, extension=None, **loader_kwargs) -> Dict[str, Any]:
         """

@@ -11,6 +11,7 @@ from math import isnan
 import os
 from pathlib import Path
 import re
+from tempfile import NamedTemporaryFile
 from typing import Dict, Iterable, List, Literal, Tuple, Union
 
 import yaml
@@ -22,7 +23,7 @@ except ImportError:
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
-from mantid.kernel import Direction, StringListValidator, StringArrayProperty, logger
+from mantid.kernel import ConfigService, Direction, StringListValidator, StringArrayProperty, logger
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 from abins.atominfo import AtomInfo
@@ -34,29 +35,6 @@ import abins.parameters
 
 class AbinsAlgorithm:
     """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)  # i.e. forward everything to PythonAlgorithm
-
-        # User input private properties
-        self._instrument_name = None
-
-        self._vibrational_or_phonon_data_file = None
-        self._ab_initio_program = None
-        self._out_ws_name = None
-        self._temperature = None
-        self._atoms = None
-        self._sum_contributions = None
-        self._save_ascii = None
-        self._scale_by_cross_section = None
-
-        self._num_quantum_order_events = None
-        self._autoconvolution = None
-        self._energy_units = None
-
-        # Interally-used private properties
-        self._max_event_order = None
-        self._bin_width = None
 
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
@@ -72,6 +50,8 @@ class AbinsAlgorithm:
         self._scale_by_cross_section = self.getPropertyValue("ScaleByCrossSection")
 
         self._energy_units = self.getProperty("EnergyUnits").value
+
+        self._cache_directory = Path(self.getProperty("CacheDirectory").value)
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
@@ -107,6 +87,17 @@ class AbinsAlgorithm:
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), doc="Name to give the output workspace.")
+
+        self.declareProperty(
+            FileProperty(
+                "CacheDirectory",
+                defaultValue=ConfigService.getString("defaultsave.directory"),
+                action=FileAction.Directory,
+                direction=Direction.Input,
+                extensions=[""],
+            ),
+            doc="Directory in which Abins reads/writes cache files",
+        )
 
         self.declareProperty(
             name="TemperatureInKelvin",
@@ -263,6 +254,13 @@ class AbinsAlgorithm:
             if word in workspace_name:
                 issues["OutputWorkspace"] = "Keyword: " + word + " cannot be used in the name of workspace."
                 break
+
+        cache_directory = Path(self.getProperty("CacheDirectory").value)
+        try:
+            with NamedTemporaryFile(mode="w", dir=cache_directory) as fd:
+                print("check this directory is writeable", file=fd)
+        except IOError:
+            issues["CacheDirectory"] = "Cache directory is not writeable"
 
         temperature = self.getProperty("TemperatureInKelvin").value
         if temperature < 0:

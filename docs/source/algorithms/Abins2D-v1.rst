@@ -56,6 +56,29 @@ Usage
 
 A minimal example, relying heavily on default parameters:
 
+.. testsetup:: *
+
+    # On CI defaultsave.directory may be set to an inappropriate
+    # value, causing the input validator to raise an error.
+    # Set it somewhere that is guaranteed to be suitable.
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
+
+.. testcleanup:: *
+
+    # Restore the original defaultsave.directory to avoid surprises
+    # when running doctests locally.
+
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
+
+
 .. testcode:: Abins2DCastepSimple
 
     benzene_wrk = Abins2D(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon")
@@ -72,11 +95,6 @@ Output: (note that only the fundamental excitations are included)
     benzene_wrk_C
     benzene_wrk_H_total
     benzene_wrk_H
-
-.. testcleanup:: Abins2DCastepSimple
-
-    import os
-    os.remove("benzene.hdf5")
 
 **Example - using more arguments:**
 
@@ -105,11 +123,6 @@ Output:
 
    Created 34 workspaces
    including wrk_verbose_atom_1_total
-
-.. testcleanup:: Abins2DExplicitParameters
-
-    import os
-    os.remove("benzene.hdf5")
 
 .. categories::
 

@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from tempfile import TemporaryDirectory
 import unittest
 from mantid.simpleapi import Abins, mtd
 
-from abins import test_helpers
 import abins.parameters
 
 try:
@@ -23,6 +23,8 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # set up input for Abins
         self._Si2 = "Si2-sc_AbinsAdvancedParameters"
         self._wrk_name = self._Si2 + "_ref"
+        self.tempdir = TemporaryDirectory()
+        self._cache_directory = self.tempdir.name
 
         # before each test set abins.parameters to default values
         abins.parameters.instruments = {
@@ -53,7 +55,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
     def tearDown(self):
-        test_helpers.remove_output_files(list_of_names=["_AbinsAdvanced"])
+        self.tempdir.cleanup()
         mtd.clear()
 
     def test_wrong_fwhm(self):
@@ -64,7 +66,12 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         for fwhm in bad_fwhm_values:
             abins.parameters.instruments["fwhm"] = fwhm
             self.assertRaisesRegex(
-                RuntimeError, "Invalid value of fwhm", Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name
+                RuntimeError,
+                "Invalid value of fwhm",
+                Abins,
+                VibrationalOrPhononFile=self._Si2 + ".phonon",
+                OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     # Tests for TOSCA parameters
@@ -83,6 +90,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_tosca_cos_scattering_angle(self):
@@ -99,6 +107,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_tosca_resolution_constant_A(self):
@@ -110,6 +119,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile=self._Si2 + ".phonon",
             OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_wrong_tosca_resolution_constant_B(self):
@@ -120,6 +130,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile=self._Si2 + ".phonon",
             OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_wrong_tosca_resolution_constant_C(self):
@@ -130,6 +141,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile=self._Si2 + ".phonon",
             OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
         )
 
     # tests for folders
@@ -146,6 +158,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_powder_data_group(self):
@@ -161,6 +174,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_crystal_data_group(self):
@@ -176,6 +190,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_powder_s_data_group(self):
@@ -191,6 +206,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_doubled_name(self):
@@ -203,6 +219,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile=self._Si2 + ".phonon",
             OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_wrong_min_wavenumber(self):
@@ -218,6 +235,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_max_wavenumber(self):
@@ -233,6 +251,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_energy_window(self):
@@ -245,6 +264,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile=self._Si2 + ".phonon",
             OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_wrong_s_absolute_threshold(self):
@@ -258,6 +278,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_s_relative_threshold(self):
@@ -271,6 +292,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_optimal_size(self):
@@ -286,6 +308,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_wrong_threads(self):
@@ -297,11 +320,16 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
                 Abins,
                 VibrationalOrPhononFile=self._Si2 + ".phonon",
                 OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_good_case(self):
         good_names = [self._wrk_name, self._wrk_name + "_Si", self._wrk_name + "_Si_total"]
-        Abins(VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        Abins(
+            VibrationalOrPhononFile=self._Si2 + ".phonon",
+            OutputWorkspace=self._wrk_name,
+            CacheDirectory=self._cache_directory,
+        )
         names = mtd.getObjectNames()
 
         # Builtin cmp has been removed in Python 3

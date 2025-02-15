@@ -58,11 +58,32 @@ Usage
 
 **Example - loading CASTEP phonon data:**
 
+.. testsetup:: *
+
+    # On CI defaultsave.directory may be set to an inappropriate
+    # value, causing the input validator to raise an error.
+    # Set it somewhere that is guaranteed to be suitable.
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
+
+.. testcleanup:: *
+
+    # Restore the original defaultsave.directory to avoid surprises
+    # when running doctests locally.
+
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
+
 .. testcode:: AbinsCastepSimple
 
     benzene_wrk = Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
                         QuantumOrderEventsNumber="1")
-
 
     for name in benzene_wrk.getNames():
         print(name)
@@ -75,11 +96,6 @@ Output:
     benzene_wrk_C
     benzene_wrk_H_total
     benzene_wrk_H
-
-.. testcleanup:: AbinsCastepSimple
-
-    import os
-    os.remove("benzene.hdf5")
 
 **Example - loading CRYSTAL phonon data:**
 
@@ -105,26 +121,28 @@ Output:
     wrk_O_total
     wrk_O
 
-.. testcleanup:: AbinsCrystalSimple
-
-    import os
-    os.remove("b3lyp.hdf5")
-
 **Example - calling AbINS with more arguments:**
 
-.. testcode:: AbinsexplicitParameters
+Here the cache file is directed to a temporary directory and will be cleaned up automatically.
 
-    wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
-                      ExperimentalFile="benzene_experimental.dat",
-                      TemperatureInKelvin=10, BinWidthInWavenumber=1.0, SampleForm="Powder", Instrument="TOSCA",
-                      Atoms="H, atom1, atom2", SumContributions=True, QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
+.. testcode:: AbinsExplicitParameters
+
+    from tempfile import TemporaryDirectory
+
+    with TemporaryDirectory() as tmp_dir:
+
+        wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
+                          ExperimentalFile="benzene_experimental.dat",
+                          TemperatureInKelvin=10, BinWidthInWavenumber=1.0, SampleForm="Powder", Instrument="TOSCA",
+                          Atoms="H, atom1, atom2", SumContributions=True, QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent",
+                          CacheDirectory=tmp_dir)
 
     for name in wrk_verbose.getNames():
         print(name)
 
 Output:
 
-.. testoutput:: AbinsexplicitParameters
+.. testoutput:: AbinsExplicitParameters
 
     experimental_wrk
     wrk_verbose_total
@@ -134,11 +152,6 @@ Output:
     wrk_verbose_atom_1
     wrk_verbose_atom_2_total
     wrk_verbose_atom_2
-
-.. testcleanup:: AbinsexplicitParameters
-
-    import os
-    os.remove("benzene.hdf5")
 
 .. categories::
 

@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch, Mock
 
@@ -23,12 +25,14 @@ class LoadCastepUsingEuphonicTest(unittest.TestCase):
         # filename makes it to Euphonic CASTEP parser
 
         filename = abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon")
-        reader = CASTEPLoader(input_ab_initio_filename=filename)
 
-        try:
-            reader.read_vibrational_or_phonon_data()
-        except TypeError:
-            pass  # Clerk will freak out when passed mocked data to serialise
+        with TemporaryDirectory() as tmpdir:
+            reader = CASTEPLoader(input_ab_initio_filename=filename, cache_directory=Path(tmpdir))
+
+            try:
+                reader.read_vibrational_or_phonon_data()
+            except TypeError:
+                pass  # Clerk will freak out when passed mocked data to serialise
 
         from_castep.assert_called_with(filename, prefer_non_loto=True)
 
@@ -43,9 +47,6 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
         with self.assertRaises(TypeError):
             # noinspection PyUnusedLocal
             CASTEPLoader(input_ab_initio_filename=1)
-
-    def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadCASTEP"])
 
     #  *************************** USE CASES ********************************************
     # ===================================================================================
