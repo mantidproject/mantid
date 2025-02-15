@@ -258,7 +258,7 @@ plots.y_min =
 plots.y_max =
 
 # The default width of the lines for the axes
-plots.axesLineWidth = 1
+plots.axesLineWidth = 1.0
 
 # Whether to enable the grid by default
 plots.enableGrid = Off
@@ -300,7 +300,7 @@ plots.line.Width = 1.5
 plots.marker.Style = None
 
 # Default maker size on 1d plots
-plots.marker.Size = 6
+plots.marker.Size = 6.0
 
 # Default cap size on error bars in 1d plots
 plots.errorbar.Capsize = 0.0
@@ -324,7 +324,7 @@ plots.errorbar.MarkerSize = 4
 plots.legend.Location = best
 
 # Default legend size
-plots.legend.FontSize = 8
+plots.legend.FontSize = 8.0
 
 # Default colormap for image plots
 plots.images.Colormap = viridis

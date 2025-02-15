@@ -154,10 +154,16 @@ set(TEST_FILES
     workbench/widgets/settings/test/test_settings_model.py
     workbench/widgets/settings/test/test_settings_presenter.py
     workbench/widgets/settings/test/test_settings_view.py
+    workbench/widgets/settings/base_classes/test/test_config_settings_changes_model.py
+    workbench/widgets/settings/base_classes/test/test_config_settings_presenter.py
     workbench/widgets/settings/general/test/test_general_settings.py
+    workbench/widgets/settings/general/test/test_general_settings_model.py
     workbench/widgets/settings/plots/test/test_plot_settings.py
+    workbench/widgets/settings/plots/test/test_plot_settings_model.py
     workbench/widgets/settings/categories/test/test_categories_settings.py
+    workbench/widgets/settings/categories/test/test_categories_settings_model.py
     workbench/widgets/settings/fitting/test/test_fitting_settings.py
+    workbench/widgets/settings/fitting/test/test_fitting_settings_model.py
     workbench/projectrecovery/test/test_projectrecovery.py
     workbench/projectrecovery/test/test_projectrecoveryloader.py
     workbench/projectrecovery/test/test_projectrecoverysaver.py

@@ -29,7 +29,7 @@ class ConfigSettingsChangesModel:
 
     def add_change(self, property_string: str, value: str) -> None:
         saved_value = self.get_saved_value(property_string)
-        if saved_value != value:
+        if saved_value.lower().rstrip() != value.lower().rstrip():
             self._changes[property_string] = value
         elif property_string in self._changes.keys():
             self._changes.pop(property_string)

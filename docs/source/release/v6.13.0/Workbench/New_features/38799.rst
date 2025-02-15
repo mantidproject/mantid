@@ -1,0 +1,1 @@
+- The settings widget 'Apply' button is now disabled when there are no pending changes.
