@@ -742,7 +742,7 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   ComplexFortranMatrix hamiltonian;
   ComplexFortranMatrix hamiltonianZeeman;
   int nre = 0;
-  auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
+  const auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
   hamiltonian += hamiltonianZeeman;
 
@@ -789,7 +789,7 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
   auto xVec = m_control.getAttribute("FWHMX").asVector();
   auto yVec = m_control.getAttribute("FWHMY").asVector();
 
-  auto &compSource = compositeSource();
+  const auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
     FunctionDomainGeneral domain;
     FunctionValues values;
@@ -828,14 +828,14 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   std::generate(compositePhysProps.begin(), compositePhysProps.end(),
                 []() { return std::make_shared<CompositeFunction>(); });
 
-  auto &compSource = compositeSource();
+  const auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
     DoubleFortranVector energies;
     ComplexFortranMatrix waveFunctions;
     ComplexFortranMatrix hamiltonian;
     ComplexFortranMatrix hamiltonianZeeman;
     int nre = 0;
-    auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*compSource.getFunction(ionIndex));
+    const auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*compSource.getFunction(ionIndex));
     peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
     hamiltonian += hamiltonianZeeman;
 
@@ -1060,7 +1060,7 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   ComplexFortranMatrix hamiltonian;
   ComplexFortranMatrix hamiltonianZeeman;
   int nre = 0;
-  auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
+  const auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
   hamiltonian += hamiltonianZeeman;
   size_t iFirst = hasBackground() ? 1 : 0;
@@ -1208,7 +1208,7 @@ void CrystalFieldFunction::makeMapsSingleSiteSingleSpectrum() const {
   size_t peakIndex = 0;
   // If there is a background it's the first function in m_target
   if (hasBackground()) {
-    auto &background = *m_target->getFunction(0);
+    const auto &background = *m_target->getFunction(0);
     i += makeMapsForFunction(background, i, BACKGROUND_PREFIX + ".");
     peakIndex = 1;
   }
@@ -1240,7 +1240,7 @@ void CrystalFieldFunction::makeMapsSingleSiteMultiSpectrum() const {
       spectrumPrefix.append(std::to_string(iSpec)).append(".");
       // If there is a background it's the first function in spectrum
       if (hasBackground()) {
-        auto &background = *spectrum->getFunction(0);
+        const auto &background = *spectrum->getFunction(0);
         i += makeMapsForFunction(background, i, spectrumPrefix + BACKGROUND_PREFIX + ".");
         peakIndex = 1;
       }
@@ -1263,7 +1263,7 @@ void CrystalFieldFunction::makeMapsSingleSiteMultiSpectrum() const {
 void CrystalFieldFunction::makeMapsMultiSiteSingleSpectrum() const {
   size_t i = 0;
   // Intensity scalings for each ion
-  auto &crystalField = compositeSource();
+  const auto &crystalField = compositeSource();
   for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
     std::string prefix(ION_PREFIX);
     prefix.append(std::to_string(ion)).append(".");
@@ -1274,7 +1274,7 @@ void CrystalFieldFunction::makeMapsMultiSiteSingleSpectrum() const {
   size_t ionIndex = 0;
   // If there is a background it's the first function in spectrum
   if (hasBackground()) {
-    auto &background = *m_target->getFunction(0);
+    const auto &background = *m_target->getFunction(0);
     i += makeMapsForFunction(background, i, BACKGROUND_PREFIX + ".");
     ionIndex = 1;
   }
@@ -1302,7 +1302,7 @@ void CrystalFieldFunction::makeMapsMultiSiteMultiSpectrum() const {
     i += makeMapsForFunction(*m_control.getFunction(j), i, prefix);
   }
   // Intensity scalings for each ion
-  auto &crystalField = compositeSource();
+  const auto &crystalField = compositeSource();
   for (size_t ion = 0; ion < crystalField.nFunctions(); ++ion) {
     std::string prefix(ION_PREFIX);
     prefix.append(std::to_string(ion)).append(".");

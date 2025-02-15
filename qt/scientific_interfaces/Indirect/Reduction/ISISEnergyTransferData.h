@@ -39,12 +39,12 @@ public:
       : m_inputFiles(inputFiles), m_inputText(inputText), m_sumFiles(sumFiles), m_loadLogFiles(loadLogFiles),
         m_useCalibration(useCalibration), m_calibrationWorkspace(calibrationWorkspace) {}
 
-  std::string getInputFiles() const { return m_inputFiles; }
-  std::string getInputText() const { return m_inputText; }
+  const std::string &getInputFiles() const { return m_inputFiles; }
+  const std::string &getInputText() const { return m_inputText; }
   bool getSumFiles() const { return m_sumFiles; }
   bool getLoadLogFiles() const { return m_loadLogFiles; }
   bool getUseCalibration() const { return m_useCalibration; }
-  std::string getCalibrationWorkspace() const { return m_calibrationWorkspace; }
+  const std::string &getCalibrationWorkspace() const { return m_calibrationWorkspace; }
 
 private:
   std::string m_inputFiles;
@@ -107,11 +107,11 @@ public:
         m_rebinHigh(rebinHigh), m_rebinString(rebinString) {}
 
   bool getShouldRebin() const { return m_shouldRebin; }
-  std::string getRebinType() const { return m_rebinType; }
+  const std::string &getRebinType() const { return m_rebinType; }
   double getRebinLow() const { return m_rebinLow; }
   double getRebinHigh() const { return m_rebinHigh; }
   double getRebinWidth() const { return m_rebinWidth; }
-  std::string getRebinString() const { return m_rebinString; }
+  const std::string &getRebinString() const { return m_rebinString; }
 
 private:
   bool m_shouldRebin;
@@ -146,16 +146,16 @@ public:
         m_defaultUseDeltaEInWavenumber(useDeltaEInWavenumber), m_defaultSaveNexus(saveNexus),
         m_defaultSaveASCII(saveASCII), m_defaultFoldMultipleFrames(foldMultipleFrames) {}
 
-  std::string getInstrument() const { return m_instrument; }
-  std::string getAnalyser() const { return m_analyser; }
-  std::string getReflection() const { return m_reflection; }
+  const std::string &getInstrument() const { return m_instrument; }
+  const std::string &getAnalyser() const { return m_analyser; }
+  const std::string &getReflection() const { return m_reflection; }
 
   int getDefaultSpectraMin() const { return m_defaultSpectraMin; }
   int getDefaultSpectraMax() const { return m_defaultSpectraMax; }
 
   double getDefaultEfixed() const { return m_defaultEfixed; }
 
-  std::string getDefaultRebin() const { return m_defaultRebin; }
+  const std::string &getDefaultRebin() const { return m_defaultRebin; }
 
   bool getDefaultUseDeltaEInWavenumber() const { return m_defaultUseDeltaEInWavenumber; }
   bool getDefaultSaveNexus() const { return m_defaultSaveNexus; }
@@ -190,13 +190,13 @@ public:
         m_backgroundData(backgroundData), m_analysisData(analysisData), m_rebinData(rebinData),
         m_outputData(outputData) {}
 
-  IETInputData getInputData() const { return m_inputData; }
+  const IETInputData &getInputData() const { return m_inputData; }
   IETConversionData getConversionData() const { return m_conversionData; }
   Mantid::API::AlgorithmRuntimeProps *groupingPropertiesRaw() const { return m_groupingProperties.get(); }
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() { return std::move(m_groupingProperties); }
   IETBackgroundData getBackgroundData() const { return m_backgroundData; }
   IETAnalysisData getAnalysisData() const { return m_analysisData; }
-  IETRebinData getRebinData() const { return m_rebinData; }
+  const IETRebinData &getRebinData() const { return m_rebinData; }
   IETOutputData getOutputData() const { return m_outputData; }
 
 private:
