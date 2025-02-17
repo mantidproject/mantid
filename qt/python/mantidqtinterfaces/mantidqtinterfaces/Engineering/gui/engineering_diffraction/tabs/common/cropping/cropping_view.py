@@ -17,7 +17,7 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
         self.setupUi(self)
         self.widget_custom.hide()
         self.widget_crop.hide()
-        self.finder_custom.setFileExtensions([".cal"])
+        self.finder_custom.setFileExtensions([".cal", ".xml"])
         self.finder_custom.allowMultipleFiles(False)
         self.finder_custom.setLabelText("Custom CalFile:")
         self.finder_custom.allowMultipleFiles(False)

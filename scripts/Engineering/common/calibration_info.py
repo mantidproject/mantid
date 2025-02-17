@@ -226,7 +226,11 @@ class CalibrationInfo:
             elif self.group == GROUP.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
             elif self.group == GROUP.CUSTOM:
-                self.create_grouping_workspace_from_calfile()
+                ext = self.cal_filepath.split(".")[-1]
+                if ext == "cal":
+                    self.create_grouping_workspace_from_calfile()
+                elif ext == "xml":
+                    self.group_ws = LoadDetectorsGroupingFile(InputFile=self.cal_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group])
         return self.group_ws
 
     def create_bank_grouping_workspace(self):
