@@ -67,10 +67,13 @@ public:
     {
       // Load the multiple NXentry test input.
       // (See notes about `NexusGeometrySave` and `NexusGeometryParser` at `_verify_basic_instrument` below.)
-      H5::H5File input(instrument_path("unit_testing/SMALLFAKE_example_multiple_entries.hdf5"), H5F_ACC_RDONLY);
+      H5::FileAccPropList access_plist;
+      access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+      H5::H5File input(instrument_path("unit_testing/SMALLFAKE_example_multiple_entries.hdf5"), H5F_ACC_RDONLY,
+                       access_plist);
 
       // Copy all of the NXentry groups to a new file.
-      H5::H5File testInput(multipleEntryInput.fullPath(), H5F_ACC_TRUNC);
+      H5::H5File testInput(multipleEntryInput.fullPath(), H5F_ACC_TRUNC, access_plist);
       H5Util::copyGroup(testInput, "/mantid_workspace_1", input, "/mantid_workspace_1");
       H5Util::copyGroup(testInput, "/mantid_workspace_2", input, "/mantid_workspace_2");
       H5Util::copyGroup(testInput, "/mantid_workspace_3", input, "/mantid_workspace_3");

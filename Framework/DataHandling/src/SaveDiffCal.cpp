@@ -277,7 +277,7 @@ void SaveDiffCal::exec() {
     Poco::File(filename).remove();
   }
 
-  H5File file(filename, H5F_ACC_EXCL);
+  H5File file(filename, H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
 
   auto calibrationGroup = H5Util::createGroupNXS(file, "calibration", "NXentry");
 

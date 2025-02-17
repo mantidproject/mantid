@@ -123,6 +123,15 @@ public:
   void openPath(const std::string &path);
 
   /**
+   * Open the group in which the NeXus object with the specified path exists.
+   *
+   * \param path A unix like path string to a group or field. The path
+   * string is a list of group names and SDS names separated with a slash,
+   * '/' (i.e. "/entry/sample/name").
+   */
+  void openGroupPath(const std::string &path);
+
+  /**
    * Get the path into the current file
    * \return A unix like path string pointing to the current
    *         position in the file

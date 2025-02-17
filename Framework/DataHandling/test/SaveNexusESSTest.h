@@ -267,7 +267,7 @@ public:
                                                                adapter, n > 1);
     }
 
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},
@@ -297,7 +297,7 @@ public:
     const size_t N_workspace_entries = 3;
     {
       // Create several NXentry.
-      H5::H5File h5(testInput.fullPath(), H5F_ACC_TRUNC);
+      H5::H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, Mantid::NeXus::H5Util::defaultFileAcc());
       for (size_t n = 1; n < N_workspace_entries; ++n) {
         std::ostringstream entryName;
         entryName << "/mantid_workspace_" << n;
@@ -317,7 +317,7 @@ public:
                                                                adapter, true);
     }
 
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},
@@ -348,7 +348,8 @@ public:
     for (size_t n = 1; n <= N_workspace_entries; ++n) {
       {
         // Write the latest NXentry.
-        H5::H5File h5(testInput.fullPath(), n > 1 ? H5F_ACC_RDWR : H5F_ACC_TRUNC);
+        H5::H5File h5(testInput.fullPath(), n > 1 ? H5F_ACC_RDWR : H5F_ACC_TRUNC,
+                      Mantid::NeXus::H5Util::defaultFileAcc());
         std::ostringstream entryName;
         entryName << "/mantid_workspace_" << n;
         H5::Group g = h5.createGroup(entryName.str());
@@ -366,7 +367,7 @@ public:
     }
 
     // Verify the resulting structure.
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},

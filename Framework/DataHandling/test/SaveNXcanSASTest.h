@@ -953,7 +953,7 @@ private:
                  NXcanSASTestTransmissionParameters transmissionParameters = NXcanSASTestTransmissionParameters(),
                  NXcanSASTestTransmissionParameters transmissionCanParameters = NXcanSASTestTransmissionParameters()) {
     auto filename = parameters.filename;
-    H5::H5File file(filename, H5F_ACC_RDONLY);
+    H5::H5File file(filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
 
     // Check sasentry
     auto entry = file.openGroup(sasEntryGroupName + suffix);

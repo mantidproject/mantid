@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidNexus/H5Util.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
 #include <Eigen/Dense>
@@ -77,7 +78,7 @@ public:
     if (!std::filesystem::exists(tmp)) {
       throw std::invalid_argument("no such file.\n");
     } else {
-      m_file.openFile(fullPath, H5F_ACC_RDONLY);
+      m_file.openFile(fullPath, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
       m_open = true;
     }
   }
