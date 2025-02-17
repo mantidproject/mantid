@@ -315,10 +315,8 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
-    :param bank: The bank to crop to, both if none.
-    :param calfile: The custom calibration file to crop to, not used if none.
-    :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
-    :return: dict containing calibrated diffractometer constants, and copy of the raw ceria workspace
+    :param calibration: CalibrationInfo object with details of calibration and grouping
+    :param full_instrument_cal_ws: The workspace with the full instrument calibration
     """
 
     # initial process of ceria ws
