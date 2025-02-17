@@ -109,7 +109,7 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
     @abstractmethod
     def get_reference_files(self):
         """Returns the name of the reference files to compare against."""
-        raise NotImplementedError("Implmenent get_reference_files to return " "the names of the files to compare against.")
+        raise NotImplementedError("Implmenent get_reference_files to return the names of the files to compare against.")
 
     @abstractmethod
     def _run(self):
@@ -125,10 +125,10 @@ class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
             raise RuntimeError("The result workspace(s) should be in a list")
         if num_ref_files != num_results:
             raise RuntimeError(
-                "The number of result workspaces (%d) does not match" " the number of reference files (%d)." % (num_ref_files, num_results)
+                "The number of result workspaces (%d) does not match the number of reference files (%d)." % (num_ref_files, num_results)
             )
         if num_ref_files < 1 or num_results < 1:
-            raise RuntimeError("There needs to be a least one result and " "reference.")
+            raise RuntimeError("There needs to be a least one result and reference.")
 
     @abstractmethod
     def _validate_properties(self):
@@ -214,7 +214,7 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
         if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
         if not isinstance(self.detector_range, list) and len(self.detector_range) != 2:
-            raise RuntimeError("detector_range should be a list of exactly 2 " "values")
+            raise RuntimeError("detector_range should be a list of exactly 2 values")
         if not isinstance(self.data_files, list):
             raise RuntimeError("data_file property should be a string")
         if self.rebin_string is not None and not isinstance(self.rebin_string, str):

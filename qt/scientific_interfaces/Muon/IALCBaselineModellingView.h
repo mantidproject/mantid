@@ -17,14 +17,20 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IALCBaselineModellingPresenter;
+
 /** IALCBaselineModellingView : Interface for ALC Baseline Modelling view step
  */
 class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingView : public QObject {
   Q_OBJECT
 
 public:
+  virtual ~IALCBaselineModellingView() = default;
+
   using SectionRow = std::pair<QString, QString>;
   using SectionSelector = std::pair<double, double>;
+
+  virtual void subscribePresenter(IALCBaselineModellingPresenter *presenter) = 0;
 
   /// Function chosen to fit the data to
   /// @return Function string, or empty string if nothing chosen
@@ -48,6 +54,9 @@ public:
   virtual int noOfSectionRows() const = 0;
 
   virtual void removePlot(QString const &plotName) = 0;
+
+private:
+  virtual void initConnections() const = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -122,6 +131,16 @@ public slots:
 
   /// Links help button to wiki page
   virtual void help() = 0;
+
+  virtual void handleFitRequested() const = 0;
+
+  virtual void handleAddSectionRequested() const = 0;
+
+  virtual void handleRemoveSectionRequested(int row) const = 0;
+
+  virtual void handleSectionRowModified(int row) const = 0;
+
+  virtual void handleSectionSelectorModified(int index) const = 0;
 
 signals:
   /// Fit requested

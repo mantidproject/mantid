@@ -54,7 +54,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),
-            "A list of peak centre values to be translated into TOF (if required) to find expected " "peaks.",
+            "A list of peak centre values to be translated into TOF (if required) to find expected peaks.",
         )
 
         self.declareProperty(
@@ -217,7 +217,7 @@ class EnggFitPeaks(PythonAlgorithm):
             # and it should be clarified when the role of FindPeaks etc. is fixed (trac ticket #10907)
             width = initial_params[2]
             if width <= 0.0:
-                failure_msg = "Cannot fit a peak with these initial parameters from FindPeaks, center: %s " ", width: %s, height: %s" % (
+                failure_msg = "Cannot fit a peak with these initial parameters from FindPeaks, center: %s , width: %s, height: %s" % (
                     initial_params[0],
                     width,
                     initial_params[1],
@@ -546,7 +546,7 @@ class EnggFitPeaks(PythonAlgorithm):
             return fitted_params["X0"]
         else:
             raise ValueError(
-                "Inconsistency found. I do not know how to deal with centers of peaks " "of types other than {0}".format(self.PEAK_TYPE)
+                "Inconsistency found. I do not know how to deal with centers of peaks of types other than {0}".format(self.PEAK_TYPE)
             )
 
     def _find_peak_intensity_in_params(self, fitted_params):
@@ -560,7 +560,7 @@ class EnggFitPeaks(PythonAlgorithm):
             return fitted_params["I"]
         else:
             raise ValueError(
-                "Inconsistency found. I do not know how to deal with intensities of " "peaks of types other than {0}".format(self.PEAK_TYPE)
+                "Inconsistency found. I do not know how to deal with intensities of peaks of types other than {0}".format(self.PEAK_TYPE)
             )
 
     def _b2bexp_is_acceptable(self, fitted_params):

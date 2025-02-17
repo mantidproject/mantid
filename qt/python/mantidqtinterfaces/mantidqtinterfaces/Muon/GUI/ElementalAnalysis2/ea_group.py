@@ -89,9 +89,7 @@ class EAGroup(object):
 
     @name.setter
     def name(self, name):
-        raise AttributeError(
-            "Attempting to change name from {} to {}. " "Cannot change name of EAGroup " "object".format(self._group_name, name)
-        )
+        raise AttributeError("Attempting to change name from {} to {}. Cannot change name of EAGroup object".format(self._group_name, name))
 
     @property
     def n_detectors(self):

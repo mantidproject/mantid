@@ -212,7 +212,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         """Creates a workspace group with the given number of workspaces."""
         child_names = list()
         for index in range(num_workspaces):
-            child_name = f"{group_name}_{str(index+1)}"
+            child_name = f"{group_name}_{str(index + 1)}"
             self._create_sample_workspace(child_name)
             child_names.append(child_name)
         return GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)

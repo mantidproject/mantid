@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, call
 from mantidqt.utils.qt.testing.gui_window_test import GuiWindowTest, not_on_windows, get_child, click_on
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
-skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to " "fix the other platforms.")
+skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to fix the other platforms.")
 
 
 class TestFunctionBrowser(GuiWindowTest):

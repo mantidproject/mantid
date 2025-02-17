@@ -123,7 +123,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             SPECTRA_PROP,
             "",
             StringMandatoryValidator(),
-            doc="The spectrum numbers to load. " "A dash will load a range and a semicolon delimits spectra to sum",
+            doc="The spectrum numbers to load. A dash will load a range and a semicolon delimits spectra to sum",
         )
 
         self.declareProperty(
@@ -146,7 +146,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         )
 
         self.declareProperty(
-            LOAD_MON, False, doc="If true then the monitor data is loaded and will be output by the " "algorithm into a separate workspace."
+            LOAD_MON, False, doc="If true then the monitor data is loaded and will be output by the algorithm into a separate workspace."
         )
 
         self.declareProperty(LOAD_LOG_FILES, True, doc="If true, then the log files for the specified runs will be loaded.")
@@ -275,7 +275,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         all_back = self._is_back_scattering(spectra[0])
         for spec_no in spectra[1:]:
             if all_back and self._is_fwd_scattering(spec_no):
-                raise RuntimeError("Mixing backward and forward spectra is not permitted. " "Please correct the SpectrumList property.")
+                raise RuntimeError("Mixing backward and forward spectra is not permitted. Please correct the SpectrumList property.")
         self._back_scattering = all_back
 
     def _raise_error_period_scatter(self, run_str, back_scattering):
@@ -1174,11 +1174,11 @@ class SpectraToFoilPeriodMap(object):
 
     def _validate_foil_number(self, foil_number):
         if foil_number < 1 or foil_number > 6:
-            raise ValueError("Invalid foil state given, expected a number between " "1 and 6. number=%d" % foil_number)
+            raise ValueError("Invalid foil state given, expected a number between 1 and 6. number=%d" % foil_number)
 
     def _validate_spectrum_number(self, spectrum_no):
         if spectrum_no < 1 or spectrum_no > 198:
-            raise ValueError("Invalid spectrum given, expected a number between 3 " "and 198. spectrum=%d" % spectrum_no)
+            raise ValueError("Invalid spectrum given, expected a number between 3 and 198. spectrum=%d" % spectrum_no)
 
 
 #########################################################################################

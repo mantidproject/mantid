@@ -13,9 +13,9 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 
-#include <hdf5.h>
+#include <H5Cpp.h>
 
 namespace Mantid {
 
@@ -42,7 +42,7 @@ class LoadDataSet
 };
 */
 
-class MANTID_DATAHANDLING_DLL LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadSassena : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }
@@ -55,24 +55,24 @@ public:
   const std::string category() const override { return "DataHandling\\Sassena"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 protected:
   /// Add a workspace to the group and register in the analysis data service
   void registerWorkspace(const API::WorkspaceGroup_sptr &gws, const std::string &wsName,
                          const DataObjects::Workspace2D_sptr &ws, const std::string &description);
   /// Read info about one HDF5 dataset, log if error
-  herr_t dataSetInfo(const hid_t &h5file, const std::string &setName, hsize_t *dims) const;
+  void dataSetInfo(const H5::H5File &h5file, const std::string &setName, hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  herr_t dataSetDouble(const hid_t &h5file, const std::string &setName, std::vector<double> &buf);
+  void dataSetDouble(const H5::H5File &h5file, const std::string &setName, std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  HistogramData::Points loadQvectors(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
+  HistogramData::Points loadQvectors(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws,
                                      std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
-  void loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+  void loadFQ(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
               const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
-  void loadFQT(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+  void loadFQT(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
                const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
 
 private:

@@ -133,7 +133,7 @@ class Plot3DWindow(QMainWindow):
 
         # get data key
         data_key = int(self.ui.comboBox_dataKey.currentText())
-        assert data_key in self._dataKeyList, "Data key %d does not exist in " "key list %s." % (data_key, str(self._dataKeyList))
+        assert data_key in self._dataKeyList, "Data key %d does not exist in key list %s." % (data_key, str(self._dataKeyList))
 
         # get intensity
         points, intensity_array = self.ui.graphicsView.get_data(data_key)
@@ -254,7 +254,7 @@ class Plot3DWindow(QMainWindow):
         :return:
         """
         # Check
-        assert isinstance(data_key, int), "Date key %s must be an integer" " but not %s" % (str(data_key), str(type(data_key)))
+        assert isinstance(data_key, int), "Date key %s must be an integer but not %s" % (str(data_key), str(type(data_key)))
         assert isinstance(base_color, list)
         assert isinstance(thresholds, list) and len(thresholds) == 2
         assert isinstance(change_color, list)

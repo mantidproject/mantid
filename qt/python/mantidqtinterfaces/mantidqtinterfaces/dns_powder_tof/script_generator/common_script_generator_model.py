@@ -59,7 +59,7 @@ class DNSScriptGeneratorModel(DNSObsModel):
     def get_auto_script_name(full_data):
         sample_name = full_data[0]["sample_name"].strip("_.")
         file_numbers = [x["file_number"] for x in full_data]
-        return f"script_{sample_name}_from_{min(file_numbers)}" f"_to_{max(file_numbers)}.py"
+        return f"script_{sample_name}_from_{min(file_numbers)}_to_{max(file_numbers)}.py"
 
     def get_filename(self, filename, full_data, auto=False):
         if auto:

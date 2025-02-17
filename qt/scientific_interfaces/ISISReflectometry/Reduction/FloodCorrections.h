@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include <boost/optional.hpp>
+#include <optional>
+#include <stdexcept>
 #include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -47,14 +49,14 @@ inline bool floodCorrectionRequiresInputs(FloodCorrectionType correctionType) {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections {
 public:
-  FloodCorrections(FloodCorrectionType correctionType, boost::optional<std::string> workspace = boost::none);
+  FloodCorrections(FloodCorrectionType correctionType, std::optional<std::string> workspace = std::nullopt);
 
   FloodCorrectionType correctionType() const;
-  boost::optional<std::string> workspace() const;
+  std::optional<std::string> workspace() const;
 
 private:
   FloodCorrectionType m_correctionType;
-  boost::optional<std::string> m_workspace;
+  std::optional<std::string> m_workspace;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(FloodCorrections const &lhs, FloodCorrections const &rhs);

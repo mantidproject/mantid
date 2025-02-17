@@ -77,7 +77,7 @@ class AlgorithmFactoryObserverTest(unittest.TestCase):
         self._alg_factory.subscribe(ToyAlgorithm)
         self.assertTrue(
             self.fake_class.updateHandle.call_count == 0,
-            "Expected updateHandle not to be called when observeUpdate is False. " "updateHandle was called {} times.".format(
+            "Expected updateHandle not to be called when observeUpdate is False. updateHandle was called {} times.".format(
                 self.fake_class.updateHandle.call_count
             ),
         )

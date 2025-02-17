@@ -96,15 +96,13 @@ class EAGroupingTableView(QtWidgets.QWidget):
         vertical_headers.setVisible(True)
         self.grouping_table.setColumnHidden(0, True)
 
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :" "\n    - The run can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(2).setToolTip(
-            "The detector :" "\n    - The detector can only use digits, characters " "and _"
-        )
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :\n    - The run can only use digits, characters and _")
+        self.grouping_table.horizontalHeaderItem(2).setToolTip("The detector :\n    - The detector can only use digits, characters and _")
         self.grouping_table.horizontalHeaderItem(3).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(4).setToolTip("A list of Rebins :" "\n  - Select None, Fixed or Variable from the list.")
+        self.grouping_table.horizontalHeaderItem(4).setToolTip("A list of Rebins :\n  - Select None, Fixed or Variable from the list.")
         self.grouping_table.horizontalHeaderItem(5).setToolTip(
-            "Rebin Options :" "\n  For fixed rebin enter number of steps" "\n  For variable rebin enter Bin Boundaries"
+            "Rebin Options :\n  For fixed rebin enter number of steps\n  For variable rebin enter Bin Boundaries"
         )
 
     def num_rows(self):
@@ -270,7 +268,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getText(
-            self, "Steps", "Rebinning creates a new workspace.\n" "Enter the new bin width in KeV for a new workspace:"
+            self, "Steps", "Rebinning creates a new workspace.\nEnter the new bin width in KeV for a new workspace:"
         )
         if not ok:
             self.grouping_table.cellWidget(row, 4).setCurrentIndex(0)

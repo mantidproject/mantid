@@ -19,7 +19,7 @@ from mantidqt.utils.qt.testing.application import get_application
 def split_qualified_name(qualified_name):
     parts = qualified_name.split(".")
     if len(parts) < 2:
-        raise RuntimeError("Qualified name must include name of the module in which it is defined," " found: {0}".format(qualified_name))
+        raise RuntimeError("Qualified name must include name of the module in which it is defined, found: {0}".format(qualified_name))
     module_name = ".".join(parts[:-1])
     name = parts[-1]
     return module_name, name

@@ -11,6 +11,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidNexusCpp/NeXusFile_fwd.h
     inc/MantidNexusCpp/napi.h
     inc/MantidNexusCpp/napi4.h
     inc/MantidNexusCpp/napi5.h
@@ -39,7 +40,7 @@ set_target_properties(
 )
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
 target_compile_definitions(NexusCpp PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
-target_link_libraries(NexusCpp PUBLIC ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+target_link_libraries(NexusCpp PUBLIC ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusCpp PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

@@ -155,9 +155,7 @@ class CrystalFieldMultiSite(object):
             ws = arg1
             ws_index = arg2
         else:
-            raise TypeError(
-                f"expected int for one argument in GetSpectrum, got {arg1.__class__.__name__} and " f"{arg2.__class__.__name__}"
-            )
+            raise TypeError(f"expected int for one argument in GetSpectrum, got {arg1.__class__.__name__} and {arg2.__class__.__name__}")
 
         if isinstance(ws, list) or isinstance(ws, np.ndarray):
             ws = self._convertToWS(ws)
@@ -365,7 +363,7 @@ class CrystalFieldMultiSite(object):
                 peak, background = str(background).split(";")
                 self._setCompositeBackground(peak, background)
             else:
-                raise ValueError(f"composite function passed to background must have " f"exactly 2 functions, got {len(background)}")
+                raise ValueError(f"composite function passed to background must have exactly 2 functions, got {len(background)}")
         elif isinstance(background, FunctionWrapper):
             setattr(self._background, property_name, CrystalField.Function(self.function, prefix="bg."))
             self.function.setAttributeValue("Background", str(background))
@@ -386,7 +384,7 @@ class CrystalFieldMultiSite(object):
             setattr(self._background, property_name, CrystalField.Function(self.function, prefix="bg."))
             self.function.setAttributeValue("Background", background)
         else:
-            raise ValueError(f"string passed to background must have exactly 1 or 2 functions, got " f"{number_of_functions}")
+            raise ValueError(f"string passed to background must have exactly 1 or 2 functions, got {number_of_functions}")
 
     def _combine_multisite(self, other):
         """Used to add two CrystalFieldMultiSite"""

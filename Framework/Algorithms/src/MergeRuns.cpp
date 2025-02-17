@@ -447,7 +447,7 @@ std::optional<std::vector<double>> MergeRuns::checkRebinning() {
   std::optional<std::vector<double>> rebinParams{std::nullopt};
   std::vector<double> bins{(*it)->x(0).rawData()};
   for (++it; it != inputsSortedByX.cend(); ++it) {
-    if (!WorkspaceHelpers::matchingBins(*inputsSortedByX.front(), **it, true)) {
+    if (!WorkspaceHelpers::matchingBins(inputsSortedByX.front(), *it, true)) {
       if (rebinBehaviour != REBIN_BEHAVIOUR) {
         if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
           g_log.error() << "Could not merge run: " << (*it)->getName()

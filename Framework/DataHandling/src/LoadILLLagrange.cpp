@@ -15,6 +15,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 
@@ -27,13 +29,13 @@ using namespace NeXus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLLagrange::confidence(NexusDescriptor &descriptor) const {
+int LoadILLLagrange::confidence(NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/IN1")) {
+  if (descriptor.isEntry("/entry0/IN1")) {
     return 80;
   } else {
     return 0;
@@ -55,7 +57,7 @@ const std::string LoadILLLagrange::summary() const { return "Loads ILL Lagrange 
 /**
  * Constructor
  */
-LoadILLLagrange::LoadILLLagrange() : IFileLoader<NexusDescriptor>() {}
+LoadILLLagrange::LoadILLLagrange() : IFileLoader<NexusHDF5Descriptor>() {}
 
 /**
  * Initialize the algorithm's properties.
@@ -168,13 +170,14 @@ void LoadILLLagrange::loadData() {
 void LoadILLLagrange::loadMetaData() {
 
   // Open NeXus file
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen((getPropertyValue("Filename")).c_str(), NXACC_READ, &nxHandle);
-
-  if (nxStat != NX_ERROR) {
+  try {
+    ::NeXus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
-    NXclose(&nxHandle);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << getPropertyValue("Filename") << "\" in read mode: " << e.what()
+                  << "\n";
   }
+
   // Add scanned variable: energy to the sample logs so it can be used for merging workspaces as X axis
   TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("Ei");
   int index = 0;

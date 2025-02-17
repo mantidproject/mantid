@@ -110,10 +110,10 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if self.getPropertyValue("SelfAttenuationMethod") == "Transmission":
             if self.getProperty("Transmission").isDefault:
-                issues["Transmission"] = "Transmission value or workspace needs to be provided for" " this self-attenuation approach."
+                issues["Transmission"] = "Transmission value or workspace needs to be provided for this self-attenuation approach."
                 return issues
             if self.getPropertyValue("SampleGeometry") != "None":
-                issues["SampleGeometry"] = "Sample geometry cannot be taken into account in this " "self-attenuation approach."
+                issues["SampleGeometry"] = "Sample geometry cannot be taken into account in this self-attenuation approach."
                 return issues
 
         if self.getPropertyValue("SelfAttenuationMethod") == "User" and self.getProperty("SampleSelfAttenuationFactors").isDefault:
@@ -236,7 +236,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings("CadmiumTransmissionWorkspace", EnabledWhenProperty(transmission, beam, LogicOperator.Or))
 
         self.declareProperty(
-            "Transmission", "", doc="The name of the transmission input workspace or a string with desired " "transmission value."
+            "Transmission", "", doc="The name of the transmission input workspace or a string with desired transmission value."
         )
 
         self.setPropertySettings("Transmission", reduction)
@@ -274,7 +274,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             defaultValue="None",
             validator=StringListValidator(["None", "Transmission", "Numerical", "MonteCarlo", "User"]),
             direction=Direction.Input,
-            doc="Which approach to calculate (or not) the self-attenuation correction factors to be" " used.",
+            doc="Which approach to calculate (or not) the self-attenuation correction factors to be used.",
         )
         self.setPropertySettings("SelfAttenuationMethod", EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
@@ -313,7 +313,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             defaultValue=0.5,
             validator=FloatBoundedValidator(lower=0),
             direction=Direction.Input,
-            doc="Scattering angle bin size in degrees used for expressing scan data on a single" " TwoTheta axis.",
+            doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.",
         )
 
         self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty("OutputTreatment", PropertyCriterion.IsEqualTo, "Sum"))
@@ -378,7 +378,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(
             name="MaxTOFChannel",
             defaultValue=512,
-            doc="What is the maximal number of TOF bins to be used." "Bins above this value will be removed.",
+            doc="What is the maximal number of TOF bins to be used. Bins above this value will be removed.",
         )
 
         self.setPropertySettings("MaxTOFChannel", tofMeasurement)
@@ -1095,7 +1095,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     clone_name = "{}_analyser_tr_corrected".format(ws)
                     CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         else:
-            self.log().information("Detector-analyser energy efficiency will not be corrected as unit conversion" "is not permitted.")
+            self.log().information("Detector-analyser energy efficiency will not be corrected as unit conversion is not permitted.")
         return ws
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
@@ -1332,7 +1332,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return attenuation_ws
 
     def _apply_self_attenuation_correction(self, sample_ws, empty_ws):
-        """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
+        """Applies the self-attenuation correction based on the Paalman-Pings Monte-Carlo calculation, taking into account
         the sample's material, shape, and dimensions."""
 
         attenuation_method = self.getPropertyValue("SelfAttenuationMethod")

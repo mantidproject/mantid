@@ -57,7 +57,7 @@ class RefineUBFFTSetupDialog(QDialog):
         except ValueError:
             # unable to parse the value right
             self.ui.label_message.setText(
-                "Unable to set up MinD, MaxD or Tolerance due to value error.\n" 'Either enter correct value or press "Cancel".'
+                'Unable to set up MinD, MaxD or Tolerance due to value error.\nEither enter correct value or press "Cancel".'
             )
 
         else:

@@ -1,0 +1,1 @@
+- Removed the obsolete algorithm `SaveISISNexus`. It is being removed before the normal comment period rather than undergoing extensive changes to accommodate the consolidation of nexus APIs in mantid.

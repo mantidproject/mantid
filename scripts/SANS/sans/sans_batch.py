@@ -57,25 +57,23 @@ class SANSBatchReduction(object):
 
         for state in states:
             if not isinstance(state, AllStates):
-                raise RuntimeError("The entries have to be sans state objects. " "The provided type is {0}".format(type(state)))
+                raise RuntimeError("The entries have to be sans state objects. The provided type is {0}".format(type(state)))
 
         if not isinstance(use_optimizations, bool):
-            raise RuntimeError("The optimization has to be a boolean. The provided type is" " {0}".format(type(use_optimizations)))
+            raise RuntimeError("The optimization has to be a boolean. The provided type is {0}".format(type(use_optimizations)))
 
         if not isinstance(plot_results, bool):
-            raise RuntimeError("The plot_result has to be a boolean. The provided type is" " {0}".format(type(plot_results)))
+            raise RuntimeError("The plot_result has to be a boolean. The provided type is {0}".format(type(plot_results)))
 
         if plot_results and not output_graph:
-            raise RuntimeError("The output_graph must be set if plot_results is true. The provided value is" " {0}".format(output_graph))
+            raise RuntimeError("The output_graph must be set if plot_results is true. The provided value is {0}".format(output_graph))
 
         if (
             output_mode is not OutputMode.PUBLISH_TO_ADS
             and output_mode is not OutputMode.SAVE_TO_FILE
             and output_mode is not OutputMode.BOTH
         ):
-            raise RuntimeError(
-                "The output mode has to be an enum of type OutputMode. The provided type is" " {0}".format(type(output_mode))
-            )
+            raise RuntimeError("The output mode has to be an enum of type OutputMode. The provided type is {0}".format(type(output_mode)))
 
         errors = self._validate_inputs(states)
         if errors:
@@ -152,25 +150,25 @@ class SANSCentreFinder(object):
         # 4. max_iter has to be an integer
 
         if not isinstance(state, AllStates):
-            raise RuntimeError("The entries have to be sans state objects. " "The provided type is {0}".format(type(state)))
+            raise RuntimeError("The entries have to be sans state objects. The provided type is {0}".format(type(state)))
 
         if not isinstance(r_min, float):
-            raise RuntimeError("The minimum radius has to be a float. The provided type is" " {0}".format(type(r_min)))
+            raise RuntimeError("The minimum radius has to be a float. The provided type is {0}".format(type(r_min)))
 
         if not isinstance(r_max, float):
-            raise RuntimeError("The maximum radius has to be a float. The provided type is" " {0}".format(type(r_max)))
+            raise RuntimeError("The maximum radius has to be a float. The provided type is {0}".format(type(r_max)))
 
         if not isinstance(xstart, float):
-            raise RuntimeError("The x starting position has to be a float. The provided type is" " {0}".format(type(xstart)))
+            raise RuntimeError("The x starting position has to be a float. The provided type is {0}".format(type(xstart)))
 
         if not isinstance(tolerance, float):
-            raise RuntimeError("The tolerance has to be a float. The provided type is" " {0}".format(type(tolerance)))
+            raise RuntimeError("The tolerance has to be a float. The provided type is {0}".format(type(tolerance)))
 
         if not isinstance(max_iter, int):
-            raise RuntimeError("The iteration number must be an integer. The provided type is" " {0}".format(type(max_iter)))
+            raise RuntimeError("The iteration number must be an integer. The provided type is {0}".format(type(max_iter)))
 
         if not isinstance(ystart, float):
-            raise RuntimeError("The y starting position has to be a float. The provided type is" " {0}".format(type(ystart)))
+            raise RuntimeError("The y starting position has to be a float. The provided type is {0}".format(type(ystart)))
 
         errors = self._validate_inputs(state)
         if errors:

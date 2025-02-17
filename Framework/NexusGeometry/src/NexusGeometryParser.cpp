@@ -11,7 +11,6 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
-#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
@@ -56,22 +55,22 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
     if (H5T_FLOAT != typeClass) {
       throw std::runtime_error("Storage type mismatch. Expecting to extract a "
                                "floating point number from " +
-                               H5_OBJ_NAME(data));
+                               data.getObjName());
     }
     if (sizeOfType != sizeof(ExpectedT)) {
       throw std::runtime_error("Storage type mismatch for floats. This operation "
                                "is dangerous. Nexus stored has byte size:" +
-                               std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
+                               std::to_string(sizeOfType) + " in " + data.getObjName());
     }
   } else if (std::is_integral<ExpectedT>::value) {
     if (H5T_INTEGER != typeClass) {
-      throw std::runtime_error("Storage type mismatch. Expecting to extract a integer from " + H5_OBJ_NAME(data));
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a integer from " + data.getObjName());
     }
     if (sizeOfType > sizeof(ExpectedT)) {
       // endianness not checked
       throw std::runtime_error("Storage type mismatch for integer. Result "
                                "would result in truncation. Nexus stored has byte size:" +
-                               std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
+                               std::to_string(sizeOfType) + " in " + data.getObjName());
     }
   }
 }
@@ -130,7 +129,7 @@ private:
       ints = get1DDataset<int64_t>(object, dsName);
     } else {
       std::stringstream ss;
-      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
+      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << object.getObjName()
          << ". Only 64 and 32 bit signed ints handled";
       throw std::runtime_error(ss.str());
     }
@@ -149,7 +148,7 @@ private:
       ints = convertVector<int64_t, uint32_t>(get1DDataset<int64_t>(object, dsName));
     } else {
       std::stringstream ss;
-      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
+      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << object.getObjName()
          << ". Only 64 and 32 bit signed ints handled";
       throw std::runtime_error(ss.str());
     }
@@ -160,7 +159,7 @@ private:
   typename std::enable_if<std::is_base_of<H5::H5Object, T>::value, std::string>::type
   unsupportedNXFloatMessage(size_t nxfloatsize, const T &object, const std::string &dsName) {
     std::stringstream ss;
-    ss << "Cannot handle reading ints of size " << nxfloatsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
+    ss << "Cannot handle reading ints of size " << nxfloatsize << " from " << dsName << " in " << object.getObjName()
        << ". Only 64 and 32 bit floats handled";
     return ss.str();
   }
@@ -359,8 +358,7 @@ private:
   Eigen::Transform<double, 3, Eigen::Affine> getTransformations(const H5File &file, const Group &detectorGroup) {
     H5std_string dependency;
     // Get absolute dependency path
-    auto status = H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), false, nullptr);
-    if (status == 0) {
+    if (detectorGroup.nameExists(DEPENDS_ON)) {
       dependency = get1DStringDataset(DEPENDS_ON, detectorGroup);
     } else {
       return Eigen::Transform<double, 3, Eigen::Affine>::Identity();
@@ -432,7 +430,7 @@ private:
         transforms = rotation * transforms;
       } else {
         throw std::runtime_error("Unknown Transform type \"" + transformType + "\" found in " +
-                                 H5_OBJ_NAME(transformation) + " when parsing Nexus geometry");
+                                 transformation.getObjName() + " when parsing Nexus geometry");
       }
     }
     return transforms;
@@ -645,7 +643,7 @@ private:
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     } else {
       std::stringstream ss;
-      ss << "Shape group " << H5_OBJ_NAME(shapeGroup) << " has unknown geometry type specified via " << NX_CLASS;
+      ss << "Shape group " << shapeGroup.getObjName() << " has unknown geometry type specified via " << NX_CLASS;
       throw std::runtime_error(ss.str());
     }
   }
@@ -738,7 +736,7 @@ public:
     for (auto &detectorGroup : detectorGroups) {
       // Transform in homogenous coordinates. Offsets will be rotated then bank
       // translation applied.
-      auto debug = H5_OBJ_NAME(detectorGroup);
+      auto debug = detectorGroup.getObjName();
       Eigen::Transform<double, 3, 2> transforms = getTransformations(file, detectorGroup);
       // Absolute bank position
       Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
@@ -801,7 +799,9 @@ public:
 
 std::unique_ptr<const Mantid::Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_ptr<AbstractLogger> logger) {
-  const H5File file(fileName, H5F_ACC_RDONLY);
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto rootGroup = file.openGroup("/");
   auto parentGroup = utilities::findGroupOrThrow(rootGroup, NX_ENTRY);
 
@@ -812,8 +812,9 @@ NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_p
 std::unique_ptr<const Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, const std::string &parentGroupName,
                                       std::unique_ptr<AbstractLogger> logger) {
-
-  const H5File file(fileName, H5F_ACC_RDONLY);
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto parentGroup = file.openGroup(std::string("/") + parentGroupName);
 
   Parser parser(std::move(logger));

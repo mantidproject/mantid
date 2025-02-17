@@ -525,7 +525,7 @@ int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   if (!descriptor.isEntry("/entry1/simulation/name")) {
     return 0;
   }
-  H5::H5File file(descriptor.getFilename(), H5F_ACC_RDONLY);
+  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY);
   H5::Group group = file.openGroup("/entry1/simulation");
   H5::DataSet dataset = group.openDataSet("name");
 

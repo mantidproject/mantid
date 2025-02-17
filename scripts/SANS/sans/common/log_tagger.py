@@ -21,7 +21,7 @@ def get_hash_value(value):
     """
     hash_value = sha224(str(value).encode("utf8")).hexdigest()
     if not hash_value or hash_value is None:
-        raise RuntimeError("SANSLogTagger: Something went wrong when trying to get the hash" " for {0}.".format(str(value)))
+        raise RuntimeError("SANSLogTagger: Something went wrong when trying to get the hash for {0}.".format(str(value)))
     return hash_value
 
 

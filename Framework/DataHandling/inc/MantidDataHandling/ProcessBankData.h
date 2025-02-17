@@ -8,7 +8,6 @@
 
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Task.h"
 
 #include <memory>
@@ -40,7 +39,7 @@ public:
    * @param event_weight :: array with weights for events
    * @param min_event_id ;: minimum detector ID to load
    * @param max_event_id :: maximum detector ID to load
-   */ // API::IFileLoader<Kernel::NexusDescriptor>
+   */
   ProcessBankData(DefaultEventLoader &loader, const std::string &entry_name, API::Progress *prog,
                   std::shared_ptr<std::vector<uint32_t>> event_id,
                   std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents, size_t startAt,

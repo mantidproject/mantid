@@ -78,8 +78,7 @@ class ProjectRecoveryLoader(object):
         file_name = os.path.join(directory, (os.path.basename(directory) + self.pr.recovery_file_ext))
         if not project_loader.load_project(file_name=file_name, load_workspaces=False):
             logger.error(
-                "Project Recovery: Not all workspaces were recovered successfully, any interfaces requiring "
-                "lost workspaces are not opened"
+                "Project Recovery: Not all workspaces were recovered successfully, any interfaces requiring lost workspaces are not opened"
             )
 
     def _regen_workspaces(self, directory):

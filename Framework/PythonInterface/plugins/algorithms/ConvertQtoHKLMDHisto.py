@@ -61,12 +61,12 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty("Extents", [-6.02, 6.02, -6.02, 6.02, -6.02, 6.02], direction=Direction.Input),
-            "Binning parameters for each dimension. Enter it as a" "comma-separated list of values with the" "format: 'minimum,maximum,'.",
+            "Binning parameters for each dimension. Enter it as a comma-separated list of values with the format: 'minimum,maximum,'.",
         )
 
         self.declareProperty(
             IntArrayProperty("Bins", [301, 301, 301], direction=Direction.Input),
-            "Number of bins to use for each dimension, Enter it as a" "comma-separated list of integers.",
+            "Number of bins to use for each dimension, Enter it as a comma-separated list of integers.",
         )
 
         self.declareProperty(
@@ -80,7 +80,7 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         input_ws = self.getProperty("InputWorkspace").value
 
         if input_ws.getSpecialCoordinateSystem().name != "QSample":
-            issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
+            issues["InputWorkspace"] = "Input workspace expected to be in QSample, workspace is in '{}'".format(
                 input_ws.getSpecialCoordinateSystem().name
             )
 
@@ -93,7 +93,7 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         bins = self.getProperty("Bins").value
 
         if len(extents) != ndims * 2:
-            issues["Extents"] = "Expected a min and max value for each " "dimension (got {}, expected {}).".format(len(extents), ndims * 2)
+            issues["Extents"] = "Expected a min and max value for each dimension (got {}, expected {}).".format(len(extents), ndims * 2)
 
         if len(bins) != ndims:
             issues["Bins"] = "Expected a number of bins for each dimension."

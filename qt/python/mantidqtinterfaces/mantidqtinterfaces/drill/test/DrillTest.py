@@ -95,7 +95,7 @@ class DrillTest(unittest.TestCase):
         """
         self.view.table.setCellContents(row, column, contents)
 
-    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter" ".QMessageBox")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter.QMessageBox")
     def fillTable(self, nrows, mMessageBox):
         """
         Fill the table with data. This methods creates rows and fills all the
@@ -136,7 +136,7 @@ class DrillTest(unittest.TestCase):
         patch = mock.patch("mantidqtinterfaces.drill.view.DrillView.QMessageBox")
         self.mMessageBox = patch.start()
         self.addCleanup(patch.stop)
-        patch = mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter" ".QMessageBox")
+        patch = mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.QMessageBox")
         self.mMessageBoxP = patch.start()
         self.addCleanup(patch.stop)
         # mock the controller
@@ -223,7 +223,7 @@ class DrillTest(unittest.TestCase):
         self.view.actionManageDirectories.trigger()
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
 
-    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter" ".DrillSettingsPresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillSettingsPresenter")
     def test_settingsWindow(self, mSettings):
         QTest.mouseClick(self.view.settings, Qt.LeftButton)
         mSettings.assert_called_once()
@@ -398,7 +398,7 @@ class DrillTest(unittest.TestCase):
         for i in range(len(self.model._samples)):
             self.assertEqual(self.model._samples[i].getParameterValues(), data[i])
 
-    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter" ".QMessageBox")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter.QMessageBox")
     def test_paste(self, mMessageBox):
         data = self.fillTable(8)
 

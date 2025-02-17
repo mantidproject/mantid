@@ -64,12 +64,12 @@ void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &gro
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 
-void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::optional<double> const &resolution) {
-  if (!resolution.is_initialized())
+void updateParamsFromResolution(AlgorithmRuntimeProps &properties, std::optional<double> const &resolution) {
+  if (!resolution.has_value())
     return;
 
   // Negate the resolution to give logarithmic binning
-  AlgorithmProperties::update("Params", -(resolution.get()), properties);
+  AlgorithmProperties::update("Params", -(resolution.value()), properties);
 }
 
 void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
@@ -80,22 +80,22 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optiona
 }
 
 void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group) {
-  auto resolution = boost::make_optional<double>(false, double());
+  std::optional<double> resolution = std::nullopt;
 
   for (auto const &row : group.rows()) {
     if (!row.is_initialized())
       continue;
 
     // Use the input Q step if provided, or the output Q step otherwise, if set
-    if (row->qRange().step().is_initialized())
+    if (row->qRange().step().has_value())
       resolution = row->qRange().step();
-    else if (row->qRangeOutput().step().is_initialized())
+    else if (row->qRangeOutput().step().has_value())
       resolution = row->qRangeOutput().step();
 
     // For now just use the first resolution found. Longer term it would be
     // better to check that all rows have the same resolution and set a warning
     // if not.
-    if (resolution.is_initialized())
+    if (resolution.has_value())
       break;
   }
 

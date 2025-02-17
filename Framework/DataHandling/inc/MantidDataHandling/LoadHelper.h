@@ -11,6 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Quat.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid {
 
@@ -27,7 +28,7 @@ std::vector<double> getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &, 
 double calculateEnergy(double);
 double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
-void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName = "",
+void addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName = "",
                            bool useFullPath = false);
 std::string dateTimeInIsoFormat(const std::string &);
 
@@ -57,7 +58,7 @@ NeXus::NXDouble getDoubleDataset(const NeXus::NXEntry &, const std::string &);
 
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
-void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &parent_name,
+void recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &parent_name,
                                      const std::string &parent_class, int level, bool useFullPath);
 } // namespace LoadHelper
 } // namespace DataHandling

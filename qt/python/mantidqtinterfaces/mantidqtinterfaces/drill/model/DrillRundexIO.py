@@ -89,7 +89,7 @@ class DrillRundexIO:
                 if parameter.getName() in settings:
                     parameter.setValue(settings[parameter.getName()])
         else:
-            logger.warning("No global settings found when importing {0}. " "Default settings will be used.".format(self._filename))
+            logger.warning("No global settings found when importing {0}. Default settings will be used.".format(self._filename))
 
         # export settings
         if RundexSettings.EXPORT_JSON_KEY in json_data:

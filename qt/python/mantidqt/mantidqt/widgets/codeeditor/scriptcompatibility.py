@@ -18,7 +18,7 @@ from qtpy.QtWidgets import QMessageBox
 # local imports
 from mantid import simpleapi
 
-API_IMPORT = "# import mantid algorithms\n" "from mantid.simpleapi import *\n\n"
+API_IMPORT = "# import mantid algorithms\nfrom mantid.simpleapi import *\n\n"
 
 
 def add_mantid_api_import(editor, content):
@@ -69,8 +69,8 @@ def permission_box_to_prepend_import():
     msg_box = QMessageBox()
     msg_box.setWindowTitle("Mantid Workbench")
     msg_box.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
-    msg_box.setText("It looks like this python file uses a Mantid " "algorithm but does not import the Mantid API.")
-    msg_box.setInformativeText("Would you like to add a line to import " "the Mantid API?")
+    msg_box.setText("It looks like this python file uses a Mantid algorithm but does not import the Mantid API.")
+    msg_box.setInformativeText("Would you like to add a line to import the Mantid API?")
     msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
     msg_box.setDefaultButton(QMessageBox.Yes)
     permission = msg_box.exec_()

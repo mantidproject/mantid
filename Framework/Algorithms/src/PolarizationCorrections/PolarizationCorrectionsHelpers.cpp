@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
@@ -13,7 +14,9 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <vector>
 
-namespace Mantid::Algorithms::PolarizationCorrectionsHelpers {
+namespace Mantid {
+namespace Algorithms {
+namespace PolarizationCorrectionsHelpers {
 
 /**
  * Returns the workspace in the group associated with the given targetSpinState according to the order defined by
@@ -59,4 +62,57 @@ std::vector<std::string> splitSpinStateString(const std::string &spinStates) {
   StringTokenizer tokens{spinStates, ",", StringTokenizer::TOK_TRIM};
   return std::vector<std::string>{tokens.begin(), tokens.end()};
 }
-} // namespace Mantid::Algorithms::PolarizationCorrectionsHelpers
+} // namespace PolarizationCorrectionsHelpers
+
+namespace SpinStatesORSO {
+/*
+ * For a given polarization spin state, return the corresponding Reflectometry ORSO file format notation.
+ * @param spinState The spin state to find the ORSO notation for.
+ * @return The ORSO notation that represents the given polarization spin state.
+ * @throw std::invalid_argument if no corresponding ORSO notation can be found.
+ */
+const std::string &getORSONotationForSpinState(const std::string &spinState) {
+  if (spinState == SpinStateConfigurationsWildes::PLUS_PLUS ||
+      spinState == SpinStateConfigurationsFredrikze::PARA_PARA) {
+    return SpinStatesORSO::PP;
+  }
+
+  if (spinState == SpinStateConfigurationsWildes::PLUS_MINUS ||
+      spinState == SpinStateConfigurationsFredrikze::PARA_ANTI) {
+    return SpinStatesORSO::PM;
+  }
+
+  if (spinState == SpinStateConfigurationsWildes::MINUS_PLUS ||
+      spinState == SpinStateConfigurationsFredrikze::ANTI_PARA) {
+    return SpinStatesORSO::MP;
+  }
+
+  if (spinState == SpinStateConfigurationsWildes::MINUS_MINUS ||
+      spinState == SpinStateConfigurationsFredrikze::ANTI_ANTI) {
+    return SpinStatesORSO::MM;
+  }
+
+  if (spinState == SpinStateConfigurationsWildes::PLUS || spinState == SpinStateConfigurationsFredrikze::PARA) {
+    return SpinStatesORSO::PO;
+  }
+
+  if (spinState == SpinStateConfigurationsWildes::MINUS || spinState == SpinStateConfigurationsFredrikze::ANTI) {
+    return SpinStatesORSO::MO;
+  }
+
+  throw std::invalid_argument("Cannot convert spin state " + spinState + " into ORSO notation.");
+}
+
+/*
+ * Add a sample log entry for the given polarization spin state using the corresponding Reflectometry ORSO file format
+ * notation.
+ * @param spinState The spin state to add the ORSO spin state sample log for.
+ * @throw std::invalid_argument if no corresponding ORSO spin state notation can be found.
+ */
+void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &spinState) {
+  const auto &logValue = getORSONotationForSpinState(spinState);
+  ws->mutableRun().addProperty(SpinStatesORSO::LOG_NAME, logValue, true);
+}
+} // namespace SpinStatesORSO
+} // namespace Algorithms
+} // namespace Mantid

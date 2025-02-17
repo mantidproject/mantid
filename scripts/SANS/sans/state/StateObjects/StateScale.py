@@ -81,5 +81,5 @@ def get_scale_builder(data_info, file_information=None):
         return StateScaleBuilder(file_information)
     else:
         raise NotImplementedError(
-            "StateScaleBuilder: Could not find any valid scale builder for the " "specified StateData object {0}".format(str(data_info))
+            "StateScaleBuilder: Could not find any valid scale builder for the specified StateData object {0}".format(str(data_info))
         )

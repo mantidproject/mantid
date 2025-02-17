@@ -139,7 +139,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
         // fileNames[0].substr(fileNames[0].find_last_of("."));
 
         auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
-        auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
+        auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusHDF5Descriptor>>(loader);
 
         for (size_t i = 1; i < fileNames.size(); ++i) {
           // If it's loading into a single file, perform a cursory check on file
@@ -327,7 +327,7 @@ void Load::exec() {
   if (!m_loader)
     m_loader = getFileLoader(fileNames[0][0]);
   auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(m_loader);
-  auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(m_loader);
+  auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusHDF5Descriptor>>(m_loader);
 
   if (isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne())) {
     // This is essentially just the same code that was called before multiple

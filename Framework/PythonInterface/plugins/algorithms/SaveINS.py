@@ -66,7 +66,7 @@ class SaveINS(PythonAlgorithm):
             if not SpaceGroupFactory.isSubscribedSymbol(spgr_sym):
                 issues["Spacegroup"] = "Not a valid spacegroup symbol."
         elif not ws.sample().hasCrystalStructure():
-            issues["InputWorkspace"] = "The workspace does not have a crystal structure defined, a spacegroup must " "be provided as input."
+            issues["InputWorkspace"] = "The workspace does not have a crystal structure defined, a spacegroup must be provided as input."
         # check the workspace has a UB defined
         if not sample.hasOrientedLattice():
             issues["InputWorkspace"] = "Workspace must have an oriented lattice defined."
@@ -134,7 +134,7 @@ class SaveINS(PythonAlgorithm):
                         # https: // doi.org / 10.1107 / S0021889887087028
                         mu = 20.6 + wl * 19.2
                     f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 1.0 {mf:.4f}\n")
-            f_handle.write(f"UNIT {' '.join([f'{nfu*natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
+            f_handle.write(f"UNIT {' '.join([f'{nfu * natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
             # Neutron TOF flags
             f_handle.write("MERG 0\n")  # do not merge same reflection at different lambda
             f_handle.write("HKLF 2\n")  # tells SHELX the columns saved in the reflection file

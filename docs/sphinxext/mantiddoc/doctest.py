@@ -342,7 +342,7 @@ class DocTestOutputParser(object):
           line (str): Line to test for title
         """
         if not line.startswith(DOCTEST_DOCUMENT_BEGIN):
-            raise ValueError("First line of output text should be a line " "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
+            raise ValueError("First line of output text should be a line beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
         return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
 
     def __split_on_cleanup(self, results):
@@ -391,7 +391,7 @@ class DocTestOutputParser(object):
         for line in results[1 : 1 + nitems]:
             match = ALLPASS_TEST_NAMES_RE.match(line)
             if not match:
-                raise ValueError("Unexpected information line in " "all pass case: %s" % line)
+                raise ValueError("Unexpected information line in all pass case: %s" % line)
             ntests, name = int(match.group(1)), match.group(2)
             for idx in range(ntests):
                 cases.append(TestCaseReport(classname, name, failure_descr=None))

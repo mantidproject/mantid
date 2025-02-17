@@ -24,9 +24,7 @@ dataset_dic = [
         "selector_speed": 7032.0,
         "scan_number": "14743",
         "scan_command": (
-            "scan([det_rot, sample_rot], [-5.0000, 125.0000], "
-            "[-0.5000, -0.5000], 10, tsf=120.0, field=['z7_sf', 'z7_nsf'],"
-            " tnsf=240.0)"
+            "scan([det_rot, sample_rot], [-5.0000, 125.0000], [-0.5000, -0.5000], 10, tsf=120.0, field=['z7_sf', 'z7_nsf'], tnsf=240.0)"
         ),
         "scan_points": "20",
         "new_format": True,
@@ -46,7 +44,7 @@ dataset_dic = [
         "selector_speed": 7030.0,
         "scan_number": "14932",
         "scan_command": (
-            "scan([det_rot, sample_rot], [-8.0000, 127.0000], " "[0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"
+            "scan([det_rot, sample_rot], [-8.0000, 127.0000], [0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"
         ),
         "scan_points": "340",
         "new_format": True,
@@ -66,7 +64,7 @@ dataset_dic = [
         "selector_speed": 7032.0,
         "scan_number": "14933",
         "scan_command": (
-            "scan([det_rot, sample_rot], [-9.0000, 126.0000], " "[0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"
+            "scan([det_rot, sample_rot], [-9.0000, 126.0000], [0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"
         ),
         "scan_points": "1",
         "new_format": True,

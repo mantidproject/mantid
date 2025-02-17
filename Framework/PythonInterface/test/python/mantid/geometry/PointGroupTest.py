@@ -60,7 +60,7 @@ class PointGroupTest(unittest.TestCase):
     def test_to_string(self):
         pg = PointGroupFactory.createPointGroup("m-3m")
 
-        expected_str = "Point group with:\nLattice system: Cubic" "\nCrystal system: Cubic\nSymbol: m-3m"
+        expected_str = "Point group with:\nLattice system: Cubic\nCrystal system: Cubic\nSymbol: m-3m"
 
         expected_repr = 'PointGroupFactory.createPointGroup("m-3m")'
 

@@ -216,7 +216,7 @@ class Project(AnalysisDataServiceObserver):
     @staticmethod
     def inform_user_not_possible():
         return QMessageBox().information(
-            None, "That action is not possible!", "You cannot exit workbench whilst it is saving or loading a " "project"
+            None, "That action is not possible!", "You cannot exit workbench whilst it is saving or loading a project"
         )
 
     @staticmethod
@@ -289,7 +289,7 @@ class Project(AnalysisDataServiceObserver):
             return QMessageBox.question(
                 parent,
                 "Unsaved Project",
-                "The project is currently unsaved. Would you like to " "save before closing?",
+                "The project is currently unsaved. Would you like to save before closing?",
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
                 QMessageBox.Yes,
             )

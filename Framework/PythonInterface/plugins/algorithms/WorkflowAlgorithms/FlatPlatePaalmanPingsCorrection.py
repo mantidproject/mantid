@@ -91,21 +91,21 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             name="SampleCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="SampleIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="SampleAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
@@ -119,7 +119,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             name="SampleNumberDensityUnit",
             defaultValue="Atoms",
             validator=StringListValidator(["Atoms", "Formula Units"]),
-            doc="Choose which units SampleDensity refers to. Allowed values: " "[Atoms, Formula Units]",
+            doc="Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]",
         )
 
         self.declareProperty(
@@ -141,21 +141,21 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             name="CanCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="CanIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="CanAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
@@ -304,8 +304,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         )
         if not self._has_sample_in:
             logger.warning(
-                "The sample has not been given, or the information is incomplete. Continuing but no absorption for sample will "
-                "be computed."
+                "The sample has not been given, or the information is incomplete. Continuing but no absorption for sample will be computed."
             )
 
         # Check can input

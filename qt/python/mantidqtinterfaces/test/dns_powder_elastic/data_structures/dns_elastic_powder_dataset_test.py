@@ -52,7 +52,7 @@ class DNSDatasetTest(unittest.TestCase):
     #
     def test_format_dataset(self):
         test_v = self.ds.format_dataset()
-        self.assertEqual(test_v, "{\n    '4p1K_map': {'path': 'C:/123\\serv" "ice',\n                 'z_nsf': [788058]}" ",\n}")
+        self.assertEqual(test_v, "{\n    '4p1K_map': {'path': 'C:/123\\service',\n                 'z_nsf': [788058]},\n}")
 
     def test_create_subtract(self):
         test_v = self.ds.create_subtract()

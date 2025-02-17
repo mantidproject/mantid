@@ -83,7 +83,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         result = CompareWorkspaces("vana4_red", "vana5_red")
 
-        self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if " "the same run is also defined as alignment run")
+        self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if the same run is also defined as alignment run")
 
     def test_unmirror_6_7(self):
         args = {"Run": "136553.nxs", "UnmirrorOption": 6, "OutputWorkspace": "vana6"}
@@ -100,7 +100,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         result = CompareWorkspaces("vana6_red", "vana7_red")
 
-        self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if " "the same run is also defined as alignment run")
+        self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if the same run is also defined as alignment run")
 
     def test_unmirror_7_same_reference(self):
         # there was a bug in MatchPeaks with InputWorkspace2 and center peaks ON

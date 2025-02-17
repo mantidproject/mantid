@@ -480,7 +480,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
   std::string instFilename;
 
   const bool isNexus = (descriptor == nullptr) ? LoadGeometry::isNexus(nexusfilename)
-                                               : LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries());
+                                               : LoadGeometry::isNexus(descriptor->getAllEntries());
 
   // Check if the geometry can be loaded directly from the Nexus file
   if (isNexus) {
@@ -612,7 +612,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   // get the title
   if (descriptor.isEntry("/" + entry_name + "/title", "SDS")) {
     file.openData("title");
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       std::string title = file.getStrData();
       if (!title.empty())
         WS->setTitle(title);
@@ -623,7 +623,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   // get the notes
   if (descriptor.isEntry("/" + entry_name + "/notes", "SDS")) {
     file.openData("notes");
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       std::string notes = file.getStrData();
       if (!notes.empty())
         WS->mutableRun().addProperty("file_notes", notes, true);
@@ -635,7 +635,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   if (descriptor.isEntry("/" + entry_name + "/run_number", "SDS")) {
     file.openData("run_number");
     std::string run;
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       run = file.getStrData();
     } else if (file.isDataInt()) {
       // inside ISIS the run_number type is int32
@@ -654,7 +654,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   if (descriptor.isEntry("/" + entry_name + "/experiment_identifier", "SDS")) {
     file.openData("experiment_identifier");
     std::string expId;
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       expId = file.getStrData();
     }
     if (!expId.empty()) {
@@ -672,7 +672,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
         file.openData("name");
         const auto info = file.getInfo();
         std::string sampleName;
-        if (info.type == ::NeXus::CHAR) {
+        if (info.type == NXnumtype::CHAR) {
           if (info.dims.size() == 1) {
             sampleName = file.getStrData();
           } else { // something special for 2-d array

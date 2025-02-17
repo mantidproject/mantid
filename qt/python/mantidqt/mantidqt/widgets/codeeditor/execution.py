@@ -76,7 +76,7 @@ def get_future_import_compiler_flags(code_str):
 
 
 def hide_warnings_in_script_editor():
-    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will " "likely fail.")
+    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
 
 class PythonCodeExecution(QObject):

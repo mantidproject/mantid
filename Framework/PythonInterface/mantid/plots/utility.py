@@ -213,7 +213,7 @@ def zoom_axis(ax, coord, x_or_y, factor):
     :param float factor: The factor by which to zoom in, a factor less than 1 zooms out
     """
     if x_or_y.lower() not in ["x", "y"]:
-        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'." "".format(x_or_y))
+        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'.".format(x_or_y))
     get_lims = getattr(ax, "get_{}lim".format(x_or_y.lower()))
     set_lims = getattr(ax, "set_{}lim".format(x_or_y.lower()))
 
@@ -310,10 +310,7 @@ def get_plot_specific_properties(ws, plot_type, plot_kwargs):
     else:
         if plot_type == "marker":
             plot_kwargs["linestyle"] = "None"
-            if ws.getMarkerStyle():
-                plot_kwargs["marker"] = MARKER_MAP[ws.getMarkerType()]
-            else:
-                plot_kwargs["marker"] = MARKER_MAP[ConfigService.getString("plots.markerworkspace.MarkerStyle")]
+            plot_kwargs["marker"] = MARKER_MAP[ws.getMarkerStyle()]
             marker_size = ws.getMarkerSize()
             plot_kwargs["markersize"] = (
                 marker_size if marker_size != 6 else float(ConfigService.getString("plots.markerworkspace.MarkerSize"))

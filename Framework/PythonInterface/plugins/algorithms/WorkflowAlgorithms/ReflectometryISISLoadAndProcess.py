@@ -152,7 +152,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Add property for the input runs
         self.declareProperty(
             StringArrayProperty(Prop.RUNS, values=[], validator=mandatoryInputRuns),
-            doc="A list of run numbers or workspace names for the input runs. " "Multiple runs will be summed before reduction.",
+            doc="A list of run numbers or workspace names for the input runs. Multiple runs will be summed before reduction.",
         )
         # Add properties from child algorithm
         properties = [
@@ -232,14 +232,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Add input transmission run properties
         self.declareProperty(
             StringArrayProperty(Prop.FIRST_TRANS_RUNS, values=[]),
-            doc="A list of run numbers or workspace names for the first transmission run. "
-            "Multiple runs will be summed before reduction.",
+            doc="A list of run numbers or workspace names for the first transmission run. Multiple runs will be summed before reduction.",
         )
         self.setPropertyGroup(Prop.FIRST_TRANS_RUNS, "Transmission")
         self.declareProperty(
             StringArrayProperty(Prop.SECOND_TRANS_RUNS, values=[]),
-            doc="A list of run numbers or workspace names for the second transmission run. "
-            "Multiple runs will be summed before reduction.",
+            doc="A list of run numbers or workspace names for the second transmission run. Multiple runs will be summed before reduction.",
         )
         self.setPropertyGroup(Prop.SECOND_TRANS_RUNS, "Transmission")
         # Add properties copied from child algorithm

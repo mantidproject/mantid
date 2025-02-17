@@ -16,6 +16,7 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Runnable.h>
 #include <Poco/Timer.h>
+#include <set>
 
 namespace Mantid {
 namespace LiveData {
@@ -200,6 +201,9 @@ private:
   // from the previous state (which was probably NO_RUN).
   // This holds a copy of the RunStatusPkt until we can call setRunDetails().
   std::shared_ptr<ADARA::RunStatusPkt> m_deferredRunDetailsPkt;
+
+  /// list of monitors that were seen on the stream but are not in the IDF
+  std::set<detid_t> m_badMonitors;
 };
 
 } // namespace LiveData

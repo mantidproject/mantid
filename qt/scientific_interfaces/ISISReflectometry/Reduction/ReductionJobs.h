@@ -28,7 +28,7 @@ public:
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;
   bool containsSingleEmptyGroup() const;
-  boost::optional<int> indexOfGroupWithName(std::string const &groupName) const;
+  std::optional<int> indexOfGroupWithName(std::string const &groupName) const;
   void removeGroup(int index);
   void removeAllGroups();
   void resetState();
@@ -87,8 +87,8 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere, doubl
   auto removeFirstGroup = intoHere.containsSingleEmptyGroup();
   for (auto const &group : fromHere.groups()) {
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
-    if (maybeGroupIndex.is_initialized()) {
-      auto indexToUpdateAt = maybeGroupIndex.get();
+    if (maybeGroupIndex.has_value()) {
+      auto indexToUpdateAt = maybeGroupIndex.value();
       auto &intoGroup = intoHere.mutableGroups()[indexToUpdateAt];
       mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance, listener);
     } else {

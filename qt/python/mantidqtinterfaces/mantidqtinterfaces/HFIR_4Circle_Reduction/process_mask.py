@@ -60,7 +60,7 @@ def get_region_of_interest(mask_ws_name):
     :return:
     """
     # check input
-    assert isinstance(mask_ws_name, str), "Mask workspace name {0} must be an integer but not a {1}" "".format(
+    assert isinstance(mask_ws_name, str), "Mask workspace name {0} must be an integer but not a {1}".format(
         mask_ws_name, type(mask_ws_name)
     )
     mask_ws = ADS.retrieve(mask_ws_name)
@@ -166,14 +166,14 @@ class RegionOfInterest(object):
         :param ws_name:
         :return:
         """
-        assert isinstance(ws_name, str), "Mask workspace name {0} must be a string but not a {1}" "".format(ws_name, type(ws_name))
+        assert isinstance(ws_name, str), "Mask workspace name {0} must be a string but not a {1}".format(ws_name, type(ws_name))
 
         # check workspace existing and type
         if ADS.doesExist(ws_name) is False:
             raise RuntimeError("Workspace {0} does not exist in ADS.")
         workspace = ADS.retrieve(ws_name)
         if workspace.id() != "MaskWorkspace":
-            raise RuntimeError("Workspace {0} is not a MaskWorkspace but a {1}" "".format(ws_name, workspace.id()))
+            raise RuntimeError("Workspace {0} is not a MaskWorkspace but a {1}".format(ws_name, workspace.id()))
 
         self._maskWorkspaceName = ws_name
 
@@ -199,7 +199,7 @@ class RegionOfInterest(object):
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
         if ll_x == ur_x or ll_y == ur_y:
-            err_msg = "Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})" "".format(ll_x, ll_y, ur_x, ur_y)
+            err_msg = "Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})".format(ll_x, ll_y, ur_x, ur_y)
             raise RuntimeError(err_msg)
 
         self._lowerLeftCorner = min(ll_x, ur_x), min(ll_y, ur_y)

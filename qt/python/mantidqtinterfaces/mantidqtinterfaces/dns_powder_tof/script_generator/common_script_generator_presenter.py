@@ -100,4 +100,4 @@ class DNSScriptGeneratorPresenter(DNSObserver):
             self.view.show_status_message(f"Script Saved to: {script_path}", 30, clear=True)
             self._set_script_filename(filename)
         else:
-            self.raise_error("No script filepath set, script will not be " "saved.")
+            self.raise_error("No script filepath set, script will not be saved.")

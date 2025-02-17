@@ -50,7 +50,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
 
     def _generate_presenter(self, view=None, fig=None):
         if not view:
-            view = Mock(get_selected_image_name=lambda: "Second Axes: (1, 1) - {}" "".format(self.img1_label))
+            view = Mock(get_selected_image_name=lambda: "Second Axes: (1, 1) - {}".format(self.img1_label))
         if not fig:
             fig = self.fig
         return ImagesTabWidgetPresenter(view=view, fig=fig)

@@ -29,6 +29,8 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace {
 
@@ -143,7 +145,7 @@ using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -151,14 +153,14 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLReflectometry::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLReflectometry::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
-       descriptor.pathExists("/entry0/theta"))        // ILL FIGARO
-      && descriptor.pathExists("/entry0/experiment_identifier") && descriptor.pathExists("/entry0/mode") &&
-      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
-       descriptor.pathExists("/entry0/instrument/Theta"))            // ILL FIGARO
+  if ((descriptor.isEntry("/entry0/wavelength") || // ILL D17
+       descriptor.isEntry("/entry0/theta"))        // ILL FIGARO
+      && descriptor.isEntry("/entry0/experiment_identifier") && descriptor.isEntry("/entry0/mode") &&
+      (descriptor.isEntry("/entry0/instrument/VirtualChopper") || // ILL D17
+       descriptor.isEntry("/entry0/instrument/Theta"))            // ILL FIGARO
   )
     return 80;
   else
@@ -499,13 +501,15 @@ void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vect
  */
 void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   const std::string filename{getPropertyValue("Filename")};
-  NXhandle nxfileID;
-  NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
-  if (stat == NX_ERROR)
-    throw Kernel::Exception::FileError("Unable to open File:", filename);
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  NXclose(&nxfileID);
+
+  try {
+    ::NeXus::File nxfileID(filename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const ::NeXus::Exception &) {
+    throw Kernel::Exception::FileError("Unable to open File:", filename);
+  }
+
   if (m_instrument == Supported::FIGARO) {
     auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
     // log data below should be a boolean, but boolean is broken in NeXus so it cannot be saved properly

@@ -95,7 +95,7 @@ class BivariateGaussian(IFunction1D):
             nX = int(self.getAttributeValue("nX"))
             nY = int(self.getAttributeValue("nY"))
             if nX * nY * 2 != t.size:
-                raise ValueError(f"Input array cannot be resized as a {nX} x {nY} x 2 matrix, please modify " "attributes nX and nY")
+                raise ValueError(f"Input array cannot be resized as a {nX} x {nY} x 2 matrix, please modify attributes nX and nY")
             pos = t.reshape(nX, nY, 2)
         elif t.ndim == 3:
             pos = t
@@ -153,7 +153,7 @@ class BivariateGaussian(IFunction1D):
                     self.setConstraintPenaltyFactor(param, penalty)
             except ValueError:
                 raise UserWarning(
-                    f"Cannot set parameter {param} for mbvg.  Valid choices are " "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')"
+                    f"Cannot set parameter {param} for mbvg.  Valid choices are ('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')"
                 )
 
     def function2D(self, t):

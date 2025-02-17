@@ -10,7 +10,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
 
 #include <vector>
 
@@ -62,7 +61,7 @@ Mantid::Types::Core::DateAndTime handleTofRawNexusFile(TimeType type, const std:
 NexusType whichNexusType(const std::string &filename) {
   std::vector<std::string> entryName;
   std::vector<std::string> definition;
-  auto count = Mantid::NeXus::getNexusEntryTypes(filename, entryName, definition);
+  auto count = LoadNexus::getNexusEntryTypes(filename, entryName, definition);
 
   // Issues with the file
   if (count <= -1) {

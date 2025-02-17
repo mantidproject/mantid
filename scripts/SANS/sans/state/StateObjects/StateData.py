@@ -68,7 +68,7 @@ class StateData(metaclass=JsonSerializable):
         # If the sample transmission/direct was specified, then a sample direct/transmission is required
         if not is_pure_none_or_not_none([self.sample_transmission, self.sample_direct]):
             entry = validation_message(
-                "If the sample transmission is specified then, the direct run needs to be " "specified too.",
+                "If the sample transmission is specified then, the direct run needs to be specified too.",
                 "Make sure that the transmission and direct runs are both specified (or none).",
                 {"sample_transmission": self.sample_transmission, "sample_direct": self.sample_direct},
             )
@@ -77,7 +77,7 @@ class StateData(metaclass=JsonSerializable):
         # If the can transmission/direct was specified, then this requires the can scatter
         if (self.can_direct or self.can_transmission) and (not self.can_scatter):
             entry = validation_message(
-                "If the can transmission is specified then the can scatter run needs to be " "specified too.",
+                "If the can transmission is specified then the can scatter run needs to be specified too.",
                 "Make sure that the can scatter file is set.",
                 {"can_scatter": self.can_scatter, "can_transmission": self.can_transmission, "can_direct": self.can_direct},
             )
@@ -87,13 +87,13 @@ class StateData(metaclass=JsonSerializable):
         if self.can_scatter and not is_pure_none_or_not_none([self.can_transmission, self.can_direct]):
             entry = validation_message(
                 "Inconsistent can transmission setting.",
-                "Make sure that the can transmission and can direct runs are set (or none of" " them).",
+                "Make sure that the can transmission and can direct runs are set (or none of them).",
                 {"can_transmission": self.can_transmission, "can_direct": self.can_direct},
             )
             is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateData: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateData: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid)))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -135,4 +135,4 @@ def get_data_builder(facility, file_information=None):
     if facility is SANSFacility.ISIS:
         return StateDataBuilder(file_information)
     else:
-        raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem" " to exist".format(str(facility)))
+        raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem to exist".format(str(facility)))

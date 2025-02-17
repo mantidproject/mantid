@@ -15,7 +15,7 @@ namespace Mantid::DataObjects {
 // places as well:
 //   - ARRAY_TYPES in ITableWorkspace.cpp, so that column is exported to Python
 //   properly
-//   - IF_VECTOR_COLUMN in NexusFileIO.cpp, so that column is save to Nexus file
+//   - IF_VECTOR_COLUMN in SaveNexusProcessedHelper.cpp, so that column is save to Nexus file
 //   properly
 //   - IF_VECTOR_COLUMN in LoadNexusProcessed.cpp, so that column can be loaded
 //   from Nexus file

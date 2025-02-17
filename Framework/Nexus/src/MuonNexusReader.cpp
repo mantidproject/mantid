@@ -70,7 +70,7 @@ void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
 // which does not use namespace.
 // This reader is only used by LoadMuonNexus - the NexusProcessed files are
 // dealt with by
-// NexusFileIO.cpp
+// SaveNexusProcessedHelper.cpp
 //
 // Expected content of Nexus file is:
 //     Entry: "run" (first entry opened, whatever name is)
@@ -299,14 +299,14 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   std::string units = "";
 
   NeXus::Info info = handle.getInfo();
-  if (info.type == NX_FLOAT32 && info.dims.size() == 1) {
+  if (info.type == NXnumtype::FLOAT32 && info.dims.size() == 1) {
     isNumeric = true;
     boost::scoped_array<float> dataVals(new float[info.dims[0]]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
     values.assign(dataVals.get(), dataVals.get() + info.dims[0]);
     stringValues.resize(info.dims[0]); // Leave empty
-  } else if (info.type == NX_CHAR && info.dims.size() == 2) {
+  } else if (info.type == NXnumtype::CHAR && info.dims.size() == 2) {
     boost::scoped_array<char> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
@@ -333,7 +333,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
 
   info = handle.getInfo();
   boost::scoped_array<float> timeVals(new float[info.dims[0]]);
-  if (info.type == NX_FLOAT32 && info.dims.size() == 1) {
+  if (info.type == NXnumtype::FLOAT32 && info.dims.size() == 1) {
     handle.getData(timeVals.get());
   } else {
     throw std::runtime_error("Error in MuonNexusReader: expected float array for log times");

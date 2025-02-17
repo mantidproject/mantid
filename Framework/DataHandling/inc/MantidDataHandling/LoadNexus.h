@@ -66,6 +66,9 @@ public:
   static const std::string muonTD;
   static const std::string pulsedTD;
 
+  static int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
+                                std::vector<std::string> &definition);
+
 private:
   /// Overwrites Algorithm method.
   void init() override;

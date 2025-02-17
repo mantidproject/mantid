@@ -1,0 +1,1 @@
+- Deprecated :ref:`SofQWCentre <algm-SofQWCentre>` and :ref:`SofQWPolygon <algm-SofQWPolygon>`.

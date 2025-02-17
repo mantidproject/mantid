@@ -110,7 +110,7 @@ void NexusTester::exec() {
   if (!SaveFilename.empty()) {
     ::NeXus::File file(SaveFilename, NXACC_CREATE5);
     file.makeGroup("FakeDataGroup", "NXdata", true);
-    file.makeCompData("FakeData", ::NeXus::UINT32, dims, Compress ? ::NeXus::LZW : ::NeXus::NONE, chunkDims, true);
+    file.makeCompData("FakeData", NXnumtype::UINT32, dims, Compress ? ::NeXus::LZW : ::NeXus::NONE, chunkDims, true);
     Progress prog(this, 0.0, 1.0, NumChunks);
     CPUTimer tim;
     for (int i = 0; i < NumChunks; i++) {
@@ -146,7 +146,7 @@ void NexusTester::exec() {
   if (!LoadFilename.empty()) {
     ::NeXus::File file(LoadFilename, NXACC_READ);
     int HDFCacheSize = getProperty("HDFCacheSize");
-    NXsetcache(HDFCacheSize);
+    ::NeXus::setCache(HDFCacheSize);
     file.openGroup("FakeDataGroup", "NXdata");
     Progress prog(this, 0.0, 1.0, NumChunks);
     CPUTimer tim;

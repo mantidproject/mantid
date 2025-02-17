@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <H5Cpp.h>
@@ -19,7 +19,7 @@ namespace DataHandling {
 /** LoadILLSANS; supports D11, D22 and D33 (TOF/monochromatic)
  */
 
-class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   LoadILLSANS();
   const std::string name() const override;
@@ -28,7 +28,7 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 private:
   enum MultichannelType { TOF, KINETIC, SCAN };
@@ -70,7 +70,7 @@ private:
                               const MultichannelType type = MultichannelType::TOF);
   size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
                                      const std::vector<double> &binning);
-  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
+  size_t loadDataFromTubes(NeXus::NXInt const &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);

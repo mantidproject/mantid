@@ -26,7 +26,7 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
         kwargs_dict = OrderedDict(
             {"key0": "val0", "key1": [2, "str"], "key2": 1, "key3": {"a": 1.1, "b": {"c": ["str2", 1.1]}}, "ndarray": array([1.1, 1.2])}
         )
-        expected_str = "key0='val0', key1=[2, 'str'], key2=1, key3={'a': 1.1, " "'b': {'c': ['str2', 1.1]}}, ndarray=[1.1, 1.2]"
+        expected_str = "key0='val0', key1=[2, 'str'], key2=1, key3={'a': 1.1, 'b': {'c': ['str2', 1.1]}}, ndarray=[1.1, 1.2]"
         self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
 
     def test_get_plotted_workspace_names_returns_list_of_workspace_names(self):

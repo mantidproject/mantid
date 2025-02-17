@@ -413,7 +413,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Show the superplot"""
         self.superplot = Superplot(self.canvas, self.window)
         if not self.superplot.is_valid():
-            logger.warning("Superplot cannot be opened on data not linked " "to a workspace.")
+            logger.warning("Superplot cannot be opened on data not linked to a workspace.")
             self.superplot = None
             self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
@@ -504,7 +504,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                     with open(filepath, "w") as f:
                         f.write(script)
                 except IOError as io_error:
-                    logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
+                    logger.error("Could not write file: {}\n{}".format(filepath, io_error))
 
     # If a user creates a plot from a script using mpl features we don't support, asking for a recreated script from the
     # plot can lead to problems. This should only really be supported for plots created by workbench.

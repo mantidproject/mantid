@@ -314,7 +314,7 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
     """
     accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
-        raise ValueError("{} should be a list or tuple, " "instead found '{}'".format(seq_name, value.__class__.__name__))
+        raise ValueError("{} should be a list or tuple, instead found '{}'".format(seq_name, value.__class__.__name__))
     if element_type is not None:
 
         def raise_if_not_type(x):
@@ -443,10 +443,10 @@ def _unpack_grouped_workspaces(mixed_list: List):
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:
-        raise ValueError("Both spectrum_nums and wksp_indices supplied. " "Please supply only 1.")
+        raise ValueError("Both spectrum_nums and wksp_indices supplied. Please supply only 1.")
 
     if tiled and overplot:
-        raise ValueError("Both tiled and overplot flags set to true. " "Please set only one to true.")
+        raise ValueError("Both tiled and overplot flags set to true. Please set only one to true.")
 
     raise_if_not_sequence(workspaces, "workspaces", MatrixWorkspace)
 
@@ -514,7 +514,7 @@ def _do_single_plot_mdhisto_workspace(ax, workspaces, errors=False):
                 num_dim += 1
         if num_dim != 1:
             raise RuntimeError(
-                f"Workspace {str(ws)} is an IMDHistoWorkspace with number of non-integral dimension " f"equal to {num_dim} but not 1."
+                f"Workspace {str(ws)} is an IMDHistoWorkspace with number of non-integral dimension equal to {num_dim} but not 1."
             )
 
         # Plot

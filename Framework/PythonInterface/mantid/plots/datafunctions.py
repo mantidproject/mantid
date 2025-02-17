@@ -1281,7 +1281,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
             if locator.tick_values(vmin=vmin, vmax=vmax).size == 0:
                 locator = LogLocator()
                 mantid.kernel.logger.warning(
-                    "Minor ticks on colorbar scale cannot be shown " "as the range between min value and max value is too large"
+                    "Minor ticks on colorbar scale cannot be shown as the range between min value and max value is too large"
                 )
             colorbar.set_ticks(locator)
 

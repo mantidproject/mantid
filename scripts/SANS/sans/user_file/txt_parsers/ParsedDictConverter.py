@@ -423,9 +423,9 @@ class ParsedDictConverter(IStateParser):
                     entry_lab.append(single_vertical_strip_mask.entry)
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: The vertical single strip mask {0} has an unknown "
-                        "detector {1} associated"
-                        " with it.".format(single_vertical_strip_mask.entry, single_vertical_strip_mask.detector_type)
+                        "UserFileStateDirector: The vertical single strip mask {0} has an unknown detector {1} associated with it.".format(
+                            single_vertical_strip_mask.entry, single_vertical_strip_mask.detector_type
+                        )
                     )
             if entry_hab:
                 state_builder.set_HAB_single_vertical_strip_mask(entry_hab)
@@ -450,9 +450,9 @@ class ParsedDictConverter(IStateParser):
                     stop_lab.append(range_vertical_strip_mask.stop)
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown "
-                        "detector {1} associated "
-                        "with it.".format(range_vertical_strip_mask.entry, range_vertical_strip_mask.detector_type)
+                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown detector {1} associated with it.".format(
+                            range_vertical_strip_mask.entry, range_vertical_strip_mask.detector_type
+                        )
                     )
             if start_hab:
                 state_builder.set_HAB_range_vertical_strip_start(start_hab)
@@ -504,9 +504,9 @@ class ParsedDictConverter(IStateParser):
                     stop_lab.append(range_horizontal_strip_mask.stop)
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown "
-                        "detector {1} associated "
-                        "with it.".format(range_horizontal_strip_mask.entry, range_horizontal_strip_mask.detector_type)
+                        "UserFileStateDirector: The vertical range strip mask {0} has an unknown detector {1} associated with it.".format(
+                            range_horizontal_strip_mask.entry, range_horizontal_strip_mask.detector_type
+                        )
                     )
             if start_hab:
                 state_builder.set_HAB_range_horizontal_strip_start(start_hab)

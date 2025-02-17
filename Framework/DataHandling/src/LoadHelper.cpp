@@ -15,7 +15,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include <strstream>
 
 namespace Mantid {
 
@@ -110,49 +112,82 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
 }
 
 /**
- * Add properties from a nexus file to
- * the workspace run.
+ * Add properties from a nexus file to the workspace run.
  * API entry for recursive routine below
  *
- *
- * @param nxfileID    :: Nexus file handle to be parsed, just after an
- *NXopengroup
+ * @param filehandle  :: Nexus file handle to be parsed, just after an NXopengroup
  * @param runDetails  :: where to add properties
- * @param entryName :: entry name to load properties from
+ * @param entryName   :: entry name to load properties from
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
- *
  */
-void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
+void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
-  char nxname[NX_MAXNAMELEN];
-  if (!entryName.empty()) {
-    strcpy(nxname, entryName.c_str());
+  // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
+  // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
+  // follows
+  std::string entryNameActual(entryName);
+  if (entryName.empty()) {
+    try {
+      const auto entryNameAndClass = filehandle.getNextEntry();
+      entryNameActual = entryNameAndClass.first;
+    } catch (const ::NeXus::Exception &) { /* ignore */
+    }
   }
 
-  // As a workaround against some "not so good" old ILL nexus files
-  // (ILLIN5_Vana_095893.nxs for example)
-  // by default we begin the parse on the first entry (entry0),
-  // or from a chosen entryName. This allow to avoid the
-  // bogus entries that follows.
-  int datatype;
-  char nxclass[NX_MAXNAMELEN];
-  // cppcheck-suppress argumentSize
-  NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
-  if (getnextentry_status == NX_OK) {
-    if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-      std::string emptyStr;
-      recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */, useFullPath);
-      NXclosegroup(nxfileID);
+  // open the group and parse down
+  if (!entryNameActual.empty()) {
+    constexpr int LEVEL_RECURSE{1};
+    filehandle.openGroup(entryNameActual, "NXentry");
+    const std::string EMPTY_STR;
+    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullPath);
+    filehandle.closeGroup();
+  }
+}
+
+namespace {
+template <typename NumericType>
+void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, const std::string &property_name,
+                        API::Run &runDetails) {
+  if (!runDetails.hasProperty(property_name)) {
+    g_log.warning() << "Property " << property_name << " was set twice. Please check the Nexus file and your inputs.";
+  }
+  // this assumes all values are rank==1
+
+  // Look for "units"
+  std::string units; // empty string
+  if (filehandle.hasAttr("units"))
+    filehandle.getAttr("units", units);
+
+  // read the field
+  std::vector<NumericType> data_vec;
+  data_vec.reserve(nxinfo.dims.front());
+  filehandle.getDataCoerce(data_vec);
+
+  // create the property on the run objects
+  const auto dim1size = data_vec.size();
+  if (dim1size == 1) {
+    if (units.empty())
+      runDetails.addProperty(property_name, data_vec.front());
+    else
+      runDetails.addProperty(property_name, data_vec.front(), units);
+  } else {
+    // create a bunch of little properties
+    for (size_t index = 0; index < dim1size; ++index) {
+      const auto property_name_indexed = property_name + "_" + std::to_string(index);
+      if (units.empty())
+        runDetails.addProperty(property_name_indexed, data_vec[index]);
+      else
+        runDetails.addProperty(property_name_indexed, data_vec[index], units);
     }
   }
 }
+} // namespace
 
 /**
  * Recursively add properties from a nexus file to
  * the workspace run.
  *
- * @param nxfileID    :: Nexus file handle to be parsed, just after an
- *NXopengroup
+ * @param filehandle    :: Nexus file handle to be parsed, just after an NXopengroup
  * @param runDetails  :: where to add properties
  * @param parent_name :: nexus caller name
  * @param parent_class :: nexus caller class
@@ -160,190 +195,98 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails,
                                                  const std::string &parent_name, const std::string &parent_class,
                                                  int level, bool useFullPath) {
-  // Classes
-  int datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
-  /// napi.h
-  char nxname[NX_MAXNAMELEN];
-  nxname[0] = '0';
-  char nxclass[NX_MAXNAMELEN];
-  nxclass[0] = '0';
+  const std::string SDS("SDS"); // denotes data field
 
-  bool has_entry = true; // follows getnextentry_status
-  while (has_entry) {
-    // cppcheck-suppress argumentSize
-    const NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
+  for (const auto &entry : filehandle.getEntries()) {
+    const auto nxname = entry.first;
+    const auto nxclass = entry.second;
+    if (nxclass == SDS) {
+      if ((parent_class != "NXData") && parent_class != "NXMonitor" && (nxname != "data")) { // create a property
+        filehandle.openData(nxname);
+        const auto nxinfo = filehandle.getInfo(); // get information about the open data
+        const auto rank = nxinfo.dims.size();
 
-    if (getnextentry_status == NX_OK) {
-      std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-      if (NXopengroup(nxfileID, nxname, nxclass) == NX_OK) {
-        if (std::string(nxclass) != "ILL_data_scan_vars" && std::string(nxclass) != "NXill_data_scan_vars") {
-          // Go down to one level, if the group is known to nexus
-          std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
-          std::string p_nxclass(nxclass);
-
-          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
+        // Note, we choose to only build properties on small float arrays filter logic is below
+        bool read_property = (rank == 1);
+        switch (nxinfo.type) {
+        case (NXnumtype::CHAR):
+          break; // everything is fine
+        case (NXnumtype::FLOAT32):
+        case (NXnumtype::FLOAT64):
+          // some 1d float arrays may be loaded
+          read_property = (nxinfo.dims[0] <= 9);
+          break;
+        case (NXnumtype::INT16):
+        case (NXnumtype::INT32):
+        case (NXnumtype::UINT16):
+          // only read scalar values for everything else - e.g. integers
+          read_property = (nxinfo.dims.front() == 1);
+          break;
+        default:
+          read_property = false;
         }
 
-        NXclosegroup(nxfileID);
-      } // if(NXopengroup
-      else if (NXopendata(nxfileID, nxname) == NX_OK) {
-        if (parent_class != "NXData" && parent_class != "NXMonitor" &&
-            std::string(nxname) != "data") { // create a property
-          int rank = 0;
-          int dims[4] = {0, 0, 0, 0};
-          int type;
+        if (read_property) {
+          // generate a name for the property
+          const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
 
-          // Get the value
-          if (NXgetinfo(nxfileID, &rank, dims, &type) == NX_OK) {
-            // Note, we choose to only build properties on small float arrays
-            // filter logic is below
-            bool build_small_float_array = false; // default
-            bool read_property = true;
-
-            if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-              if ((rank == 1) && (dims[0] <= 9)) {
-                build_small_float_array = true;
-              } else {
-                read_property = false;
-              }
-            } else if (type != NX_CHAR) {
-              if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
-                read_property = false;
-              }
+          switch (nxinfo.type) {
+          case (NXnumtype::CHAR): {
+            std::string property_value = filehandle.getStrData();
+            if (property_name.ends_with("_time")) {
+              // That's a time value! Convert to Mantid standard
+              property_value = dateTimeInIsoFormat(property_value);
+              if (runDetails.hasProperty(property_name))
+                runDetails.getProperty(property_name)->setValue(property_value);
+              else
+                runDetails.addProperty(property_name, property_value);
             } else {
-              if ((rank > 1) || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
-                read_property = false;
+              if (!runDetails.hasProperty(property_name)) {
+                runDetails.addProperty(property_name, property_value);
+              } else {
+                g_log.warning() << "Property " << property_name
+                                << " was set twice. Please check the Nexus file and your inputs.\n";
               }
             }
-
-            if (read_property) {
-
-              void *dataBuffer;
-              NXmalloc(&dataBuffer, rank, dims, type);
-
-              if (NXgetdata(nxfileID, dataBuffer) == NX_OK) {
-
-                if (type == NX_CHAR) {
-                  std::string property_value(reinterpret_cast<const char *>(dataBuffer));
-                  if (property_name.ends_with("_time")) {
-                    // That's a time value! Convert to Mantid standard
-                    property_value = dateTimeInIsoFormat(property_value);
-                    if (runDetails.hasProperty(property_name))
-                      runDetails.getProperty(property_name)->setValue(property_value);
-                    else
-                      runDetails.addProperty(property_name, property_value);
-                  } else {
-                    if (!runDetails.hasProperty(property_name)) {
-                      runDetails.addProperty(property_name, property_value);
-                    } else {
-                      g_log.warning() << "Property " << property_name
-                                      << " was set twice. Please check the Nexus file and your inputs." << std::endl;
-                    }
-                  }
-
-                } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) || (type == NX_INT16) || (type == NX_INT32) ||
-                           (type == NX_UINT16)) {
-
-                  // Look for "units"
-                  NXstatus units_status;
-                  char units_sbuf[NX_MAXNAMELEN];
-                  int units_len = NX_MAXNAMELEN;
-                  int units_type = NX_CHAR;
-
-                  units_status = NXgetattr(nxfileID, std::string("units").c_str(), units_sbuf, &units_len, &units_type);
-                  if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-                    // Mantid numerical properties are double only.
-                    double property_double_value = 0.0;
-
-                    // Simple case, one value
-                    if (dims[0] == 1) {
-                      if (type == NX_FLOAT32) {
-                        property_double_value = *(reinterpret_cast<float *>(dataBuffer));
-                      } else if (type == NX_FLOAT64) {
-                        property_double_value = *(reinterpret_cast<double *>(dataBuffer));
-                      }
-                      if (!runDetails.hasProperty(property_name)) {
-
-                        if (units_status != NX_ERROR)
-                          runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
-                        else
-                          runDetails.addProperty(property_name, property_double_value);
-                      } else {
-                        g_log.warning() << "Property " << property_name
-                                        << " was set twice. Please check the Nexus file and your inputs." << std::endl;
-                      }
-                    } else if (build_small_float_array) {
-                      // An array, converted to "name_index", with index < 10
-                      // (see
-                      // test above)
-                      for (int dim_index = 0; dim_index < dims[0]; dim_index++) {
-                        if (type == NX_FLOAT32) {
-                          property_double_value = (reinterpret_cast<float *>(dataBuffer))[dim_index];
-                        } else if (type == NX_FLOAT64) {
-                          property_double_value = (reinterpret_cast<double *>(dataBuffer))[dim_index];
-                        }
-                        std::string indexed_property_name =
-                            property_name + std::string("_") + std::to_string(dim_index);
-
-                        if (!runDetails.hasProperty(indexed_property_name)) {
-                          if (units_status != NX_ERROR)
-                            runDetails.addProperty(indexed_property_name, property_double_value,
-                                                   std::string(units_sbuf));
-                          else
-                            runDetails.addProperty(indexed_property_name, property_double_value);
-                        } else {
-                          g_log.warning()
-                              << "Property " << property_name
-                              << " was set twice. Please check the Nexus file and your inputs." << std::endl;
-                        }
-                      }
-                    }
-
-                  } else {
-                    // int case
-                    int property_int_value = 0;
-                    if (type == NX_INT16) {
-                      property_int_value = *(reinterpret_cast<short int *>(dataBuffer));
-                    } else if (type == NX_INT32) {
-                      property_int_value = *(reinterpret_cast<int *>(dataBuffer));
-                    } else if (type == NX_UINT16) {
-                      property_int_value = *(reinterpret_cast<short unsigned int *>(dataBuffer));
-                    }
-
-                    if (!runDetails.hasProperty(property_name)) {
-                      if (units_status != NX_ERROR)
-                        runDetails.addProperty(property_name, property_int_value, std::string(units_sbuf));
-                      else
-                        runDetails.addProperty(property_name, property_int_value);
-                    } else {
-                      g_log.warning() << "Property " << property_name
-                                      << " was set twice. Please check the Nexus file and your inputs." << std::endl;
-                    }
-
-                  } // if (type==...
-                }
-              }
-              NXfree(&dataBuffer);
-              dataBuffer = nullptr;
-            }
-
-          } // if NXgetinfo OK
-        } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
-
-        NXclosedata(nxfileID);
+            break;
+          }
+          case (NXnumtype::FLOAT32):
+          case (NXnumtype::FLOAT64):
+            addNumericProperty<double>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          case (NXnumtype::INT16):
+          case (NXnumtype::INT32):
+          case (NXnumtype::UINT16):
+            addNumericProperty<int>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          default:
+            std::stringstream msg;
+            msg << "Encountered unknown type: " << nxinfo.type;
+            throw std::runtime_error(msg.str());
+            break;
+          }
+        }
+        filehandle.closeData();
       }
-    } else if (getnextentry_status == NX_EOD) {
-      has_entry = false; // end of loop
     } else {
-      has_entry = false; // end of loop
+      if ((nxclass != "ILL_data_scan_vars") && (nxclass != "NXill_data_scan_vars")) {
+        // open the group and recurse down, if the group is known to nexus
+        filehandle.openGroup(nxname, nxclass);
+
+        const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
+        const std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
+        const std::string p_nxclass(nxclass);
+
+        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
+
+        filehandle.closeGroup();
+      }
     }
-
-  } // while
-
-} // recurseAndAddNexusFieldsToWsRun
+  }
+}
 
 /**
  * Parses the date as formatted at the ILL:
@@ -554,7 +497,7 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
   const auto useAcceptedDetectorIDs = acceptedDetectorIDs.size() != 0;
 
-  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  std::array<int, 3U> dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
   const auto nPixels = dims[std::get<1>(axisOrder)];
   const auto nScans = dims[std::get<2>(axisOrder)];

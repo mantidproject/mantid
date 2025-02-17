@@ -51,7 +51,7 @@ def load_scd_fullprof_intensity_file(file_name):
     :return: 2-tuple.  dictionary for reflection (key = hkl, value = (intensity, error)); string as error message
     """
     # check validity
-    assert isinstance(file_name, str), "Fullprof SCD intensity file %s must be a string but not of type %s." "" % (
+    assert isinstance(file_name, str), "Fullprof SCD intensity file %s must be a string but not of type %s." % (
         str(file_name),
         type(file_name),
     )

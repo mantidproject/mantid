@@ -10,14 +10,19 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingModel.h"
+#include "IALCPeakFittingModelSubscriber.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
+#include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** ALCPeakFittingModel : Concrete model for ALC peak fitting
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingModel : public IALCPeakFittingModel {
+class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingModel : public IALCPeakFittingModel,
+                                                       public API::IAlgorithmRunnerSubscriber {
 public:
   // -- IALCPeakFittingModel interface
   // -----------------------------------------------------------
@@ -32,6 +37,16 @@ public:
   // -- End of IALCPeakFittingModel interface
   // ----------------------------------------------------
 
+  // -- IAlgorithmRunnerSubscriber interface
+  // -----------------------------------------------------------
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
+  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm, const std::string &message) override;
+
+  // -- End of IAlgorithmRunnerSubscriber interface
+  // ----------------------------------------------------
+
+  ALCPeakFittingModel(std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner);
+
   /// Update the data
   void setData(Mantid::API::MatrixWorkspace_sptr newData);
 
@@ -41,7 +56,15 @@ public:
   /// Export fitted peaks as a table workspace
   Mantid::API::ITableWorkspace_sptr exportFittedPeaks();
 
+  void subscribe(IALCPeakFittingModelSubscriber *subscriber) override;
+
 private:
+  /// The subscriber to the model.
+  IALCPeakFittingModelSubscriber *m_subscriber;
+
+  /// The Algorithm runner for async processing.
+  std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
+
   /// The data we are fitting peaks to
   Mantid::API::MatrixWorkspace_sptr m_data;
 

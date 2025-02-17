@@ -43,8 +43,7 @@ def delete_all(subproject, classname, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Utility to delete a Mantid class from a project. "
-        "Please note, you may still have more fixes to do to get compilation!"
+        description="Utility to delete a Mantid class from a project. Please note, you may still have more fixes to do to get compilation!"
     )
 
     parser.add_argument("subproject", metavar="SUBPROJECT", type=str, help="The subproject under Framework/; e.g. Kernel")

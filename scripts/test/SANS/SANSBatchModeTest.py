@@ -20,7 +20,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
             temp_save_dir = os.getcwd()
         base_name = "batch_test_file_"
         file_names = []
-        minimal_user_file = "LOQ\n" "L/QXY 0 0.2 0.0125/lin\n"
+        minimal_user_file = "LOQ\nL/QXY 0 0.2 0.0125/lin\n"
         for element in range(0, amount):
             file_name = os.path.join(temp_save_dir, base_name + str(element) + ".txt")
             file_names.append(file_name)
@@ -72,7 +72,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         self.assertEqual(
             ReductionSingleton().user_settings.filename,
             original_user_file,
-            ("The reducer should use the original user file," "since we don't provide a valid new user file."),
+            ("The reducer should use the original user file, since we don't provide a valid new user file."),
         )
         # Clean up
         self._delete_minimal_user_files(user_files)

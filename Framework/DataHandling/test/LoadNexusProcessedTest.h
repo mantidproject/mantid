@@ -27,12 +27,13 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidNexus/H5Util.h"
+
+#include <H5Cpp.h>
 
 #include "SaveNexusProcessedTest.h"
 
 #include <cxxtest/TestSuite.h>
-
-#include <hdf5.h>
 
 #include <Poco/File.h>
 
@@ -45,6 +46,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
+using namespace Mantid::NeXus;
 using Mantid::detid_t;
 
 // Note that this suite tests an old version of Nexus processed files that we
@@ -797,18 +799,9 @@ public:
 
     // Remove the coordinate_system entry so it falls back on the log. NeXus
     // can't do this so use the HDF5 API directly
-    auto fid = H5Fopen(filePath.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    auto mantid_id = H5Gopen(fid, "mantid_workspace_1", H5P_DEFAULT);
-    auto peaks_id = H5Gopen(mantid_id, "peaks_workspace", H5P_DEFAULT);
-    if (peaks_id > 0) {
-      H5Ldelete(peaks_id, "coordinate_system", H5P_DEFAULT);
-      H5Gclose(peaks_id);
-      H5Gclose(mantid_id);
-    } else {
-      TS_FAIL("Cannot unlink coordinate_system group. Test file has unexpected "
-              "structure.");
-    }
-    H5Fclose(fid);
+    H5::H5File h5file(filePath.c_str(), H5F_ACC_RDWR);
+    H5Util::deleteObjectLink(h5file, "/mantid_workspace_1/peaks_workspace/coordinate_system");
+    h5file.close();
 
     LoadNexusProcessed loadAlg;
     loadAlg.setChild(true);

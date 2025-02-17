@@ -56,7 +56,7 @@ class VASPLoader(AbInitioLoader):
             self._num_k = 1
 
         else:
-            raise ValueError('Cannot guess format from filename "{}". Expected' " *.xml or *OUTCAR*".format(input_filename))
+            raise ValueError('Cannot guess format from filename "{}". Expected *.xml or *OUTCAR*'.format(input_filename))
 
         self.save_ab_initio_data(data=data)
         return self._rearrange_data(data=data)
@@ -371,5 +371,5 @@ def _collapse_bools(bools: List[str]) -> bool:
         return False
     else:
         raise ValueError(
-            f"Found unsupported selective dynamics constraint {' '.join(bools)} " "in vasprun.xml; only 'T T T' or 'F F F' can be used."
+            f"Found unsupported selective dynamics constraint {' '.join(bools)} in vasprun.xml; only 'T T T' or 'F F F' can be used."
         )
