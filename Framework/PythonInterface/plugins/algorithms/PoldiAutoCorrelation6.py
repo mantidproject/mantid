@@ -87,9 +87,14 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         for ispec in range(nspec):
             params[UnitParams.l2] = l2s[ispec]
             params[UnitParams.twoTheta] = tths[ispec]
-            # DIFC * (Ltot - L1_source-chop) / Ltot
+            # TOF from chopper to detector for wavelength corresponding to d=1Ang
+            # equivalent to DIFC * (Ltot - L1_source-chop) / Ltot
             tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
-            itimes = np.mod(tof_d1Ang * dspacs[:, None] + offsets + t0_const, cycle_time) / bin_width
+            arrival_time = tof_d1Ang * dspacs[:, None] + offsets + t0_const
+            # detector clock reset for each pulse
+            # equivalent to np.mod(arrival_time, cycle_time) but order of magnitude quicker
+            time_in_cycle_period = arrival_time - cycle_time * np.floor(arrival_time / cycle_time)
+            itimes = time_in_cycle_period / bin_width
             ibins = np.floor(itimes).astype(int)
             ibins_plus = ibins + 1
             ibins_plus[ibins_plus > ws.blocksize() - 1] = 0
