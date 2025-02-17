@@ -24,7 +24,7 @@ GROUP_DESCRIPTIONS = {
     GROUP.NORTH: "North Bank",
     GROUP.SOUTH: "South Bank",
     GROUP.CROPPED: "Custom spectrum numbers",
-    GROUP.CUSTOM: "Custom .cal file",
+    GROUP.CUSTOM: "Custom grouping file",
     GROUP.TEXTURE20: "Texture20",
     GROUP.TEXTURE30: "Texture30",
 }
@@ -33,7 +33,7 @@ GROUP_WS_NAMES = {
     GROUP.NORTH: "NorthBank_grouping",
     GROUP.SOUTH: "SouthBank_grouping",
     GROUP.CROPPED: "Cropped_spectra_grouping",
-    GROUP.CUSTOM: "Custom_calfile_grouping",
+    GROUP.CUSTOM: "Custom_grouping_file",
     GROUP.TEXTURE20: "Texture20_grouping",
     GROUP.TEXTURE30: "Texture30_grouping",
 }
@@ -64,7 +64,7 @@ class CalibrationInfo:
         self.ceria_path = ceria_path
         self.group_ws = None
         self.prm_filepath = None
-        self.cal_filepath = None
+        self.grouping_filepath = None
         self.spectra_list = None
         self.calibration_table = None
 
@@ -72,7 +72,7 @@ class CalibrationInfo:
         self.group = None
         self.group_ws = None
         self.prm_filepath = None
-        self.cal_filepath = None
+        self.grouping_filepath = None
         self.spectra_list = None
         self.ceria_path = None
         self.instrument = None
@@ -142,8 +142,8 @@ class CalibrationInfo:
     def set_spectra_list(self, spectra_list_str):
         self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
 
-    def set_cal_file(self, cal_filepath):
-        self.cal_filepath = cal_filepath
+    def set_grouping_file(self, grouping_filepath):
+        self.grouping_filepath = grouping_filepath
 
     def set_group(self, group):
         self.group = group
@@ -226,11 +226,11 @@ class CalibrationInfo:
             elif self.group == GROUP.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
             elif self.group == GROUP.CUSTOM:
-                ext = self.cal_filepath.split(".")[-1]
+                ext = self.grouping_filepath.split(".")[-1]
                 if ext == "cal":
                     self.create_grouping_workspace_from_calfile()
                 elif ext == "xml":
-                    self.group_ws = LoadDetectorsGroupingFile(InputFile=self.cal_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group])
+                    self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group])
         return self.group_ws
 
     def create_bank_grouping_workspace(self):
@@ -259,7 +259,7 @@ class CalibrationInfo:
         Create grouping workspace for ROI defined in .cal file
         """
         grp_ws, _, _ = CreateGroupingWorkspace(
-            InstrumentName=self.instrument, OldCalFilename=self.cal_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group]
+            InstrumentName=self.instrument, OldCalFilename=self.grouping_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group]
         )
         self.group_ws = grp_ws
 
