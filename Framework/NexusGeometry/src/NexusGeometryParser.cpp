@@ -801,12 +801,14 @@ std::unique_ptr<const Mantid::Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_ptr<AbstractLogger> logger) {
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
+  H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto rootGroup = file.openGroup("/");
   auto parentGroup = utilities::findGroupOrThrow(rootGroup, NX_ENTRY);
 
   Parser parser(std::move(logger));
-  return parser.extractInstrument(file, parentGroup);
+  auto instrument = parser.extractInstrument(file, parentGroup);
+  file.close();
+  return instrument;
 }
 
 std::unique_ptr<const Geometry::Instrument>
@@ -815,11 +817,13 @@ NexusGeometryParser::createInstrument(const std::string &fileName, const std::st
 
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
+  H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto parentGroup = file.openGroup(std::string("/") + parentGroupName);
 
   Parser parser(std::move(logger));
-  return parser.extractInstrument(file, parentGroup);
+  auto instrument = parser.extractInstrument(file, parentGroup);
+  file.close();
+  return instrument;
 }
 
 // Create a unique instrument name from Nexus file
