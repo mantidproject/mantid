@@ -299,7 +299,7 @@ void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &
   if (!path.empty()) {
     std::filesystem::remove(path);
   }
-  H5::H5File file(path.string(), H5F_ACC_EXCL);
+  H5::H5File file(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
 
   const std::string suffix("01");
   m_progress->report("Adding a new entry.");
