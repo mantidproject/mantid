@@ -799,7 +799,9 @@ public:
 
 std::unique_ptr<const Mantid::Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_ptr<AbstractLogger> logger) {
-  const H5File file(fileName, H5F_ACC_RDONLY);
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto rootGroup = file.openGroup("/");
   auto parentGroup = utilities::findGroupOrThrow(rootGroup, NX_ENTRY);
 
@@ -811,7 +813,9 @@ std::unique_ptr<const Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, const std::string &parentGroupName,
                                       std::unique_ptr<AbstractLogger> logger) {
 
-  const H5File file(fileName, H5F_ACC_RDONLY);
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  const H5File file(fileName, H5F_ACC_RDONLY, access_plist);
   auto parentGroup = file.openGroup(std::string("/") + parentGroupName);
 
   Parser parser(std::move(logger));
