@@ -290,7 +290,7 @@ public:
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l);
+    nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l); // cppcheck-suppress variableScope
     NXDimArray start;
     if (rank() == 4) {
       if (i < 0) // load all data
