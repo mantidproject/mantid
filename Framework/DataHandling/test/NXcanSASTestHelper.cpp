@@ -11,12 +11,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 namespace {
 // Create a histogram from a workspace and return it
@@ -160,6 +161,22 @@ Mantid::API::MatrixWorkspace_sptr getTransmissionWorkspace(NXcanSASTestTransmiss
   return ws;
 }
 
+Mantid::API::WorkspaceGroup_sptr provideGroupWorkspace(Mantid::API::AnalysisDataServiceImpl &ads,
+                                                       NXcanSASTestParameters &parameters) {
+  auto const &ws1 = provide1DWorkspace(parameters);
+  auto const &ws2 = provide1DWorkspace(parameters);
+  ads.add("ws1", ws1);
+  ads.add("ws2", ws2);
+  parameters.idf = getIDFfromWorkspace(ws1);
+
+  auto const groupAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setProperty("InputWorkspaces", "ws1,ws2");
+  groupAlg->setProperty("OutputWorkspace", "ws_group");
+  groupAlg->execute();
+  return ads.retrieveWS<Mantid::API::WorkspaceGroup>("ws_group");
+}
+
 Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(NXcanSASTestParameters &parameters) {
   auto ws = provide1DWorkspace(parameters);
 
@@ -220,7 +237,8 @@ void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws) {
 }
 
 void removeFile(const std::string &filename) {
-  if (Poco::File(filename).exists())
-    Poco::File(filename).remove();
+  if (auto const &path = std::filesystem::path(filename); !path.empty()) {
+    std::filesystem::remove(path);
+  }
 }
 } // namespace NXcanSASTestHelper

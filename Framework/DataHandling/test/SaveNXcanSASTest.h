@@ -11,7 +11,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,7 +23,7 @@
 #include "NXcanSASTestHelper.h"
 
 #include <H5Cpp.h>
-#include <Poco/File.h>
+#include <filesystem>
 #include <sstream>
 
 namespace {
@@ -74,7 +76,6 @@ public:
 
   void test_that_sample_run_numbers_included_if_sample_transmission_property_is_set() {
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -108,7 +109,6 @@ public:
 
   void test_that_can_run_numbers_included_if_can_transmission_property_is_set() {
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -142,7 +142,6 @@ public:
 
   void test_that_can_and_sample_runs_included_if_both_transmission_properties_are_set() {
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -185,7 +184,6 @@ public:
   void test_that_1D_workspace_without_transmissions_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -208,7 +206,6 @@ public:
 
   void test_that_sample_bgsub_values_included_if_properties_are_set() {
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -243,7 +240,6 @@ public:
   void test_that_unknown_detector_names_are_not_saved() {
     // Arrange
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("wrong-detector1");
     parameters.detectors.emplace_back("wrong-detector2");
@@ -268,7 +264,6 @@ public:
   void test_that_1D_workspace_without_transmissions_and_without_xerror_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -304,7 +299,6 @@ public:
   void run_test_1D_workspace_with_transmissions_is_saved_correctly(const bool isHistogram) {
     // Arrange
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -341,7 +335,6 @@ public:
   void test_that_2D_workspace_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
 
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
@@ -362,6 +355,31 @@ public:
 
     // Clean up
     removeFile(parameters.filename);
+  }
+
+  void test_that_group_workspaces_are_saved_correctly_in_individual_files() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    auto const ws_group = provideGroupWorkspace(ads, parameters);
+
+    // Act
+    save_file_no_issues(std::dynamic_pointer_cast<Mantid::API::Workspace>(ws_group), parameters);
+
+    for (auto const &suffix : parameters.expectedGroupSuffices) {
+      // Assert
+      auto tmpFilename = parameters.filename;
+      parameters.filename.insert(tmpFilename.size() - 3, suffix);
+      TS_ASSERT(!std::filesystem::is_empty(parameters.filename));
+      do_assert(parameters);
+
+      // clean files
+      removeFile(parameters.filename);
+      parameters.filename = tmpFilename;
+    }
+    // Clean ads
+    ads.clear();
   }
 
   void test_that_2D_workspace_histogram_is_saved_correctly() {
@@ -392,7 +410,7 @@ public:
   }
 
 private:
-  void save_file_no_issues(const Mantid::API::MatrixWorkspace_sptr &workspace, NXcanSASTestParameters &parameters,
+  void save_file_no_issues(const Mantid::API::Workspace_sptr &workspace, NXcanSASTestParameters &parameters,
                            const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
                            const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
@@ -512,7 +530,7 @@ private:
   void do_assert_detector(H5::Group &instrument, const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
-      auto detectorNameSanitized = Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
+      auto detectorNameSanitized = Mantid::DataHandling::NXcanSAS::makeCanSASRelaxedName(detectorName);
       auto detectorGroup = instrument.openGroup(detectorNameSanitized);
 
       auto numAttributes = detectorGroup.getNumAttrs();
@@ -934,7 +952,8 @@ private:
   void do_assert(NXcanSASTestParameters &parameters,
                  NXcanSASTestTransmissionParameters transmissionParameters = NXcanSASTestTransmissionParameters(),
                  NXcanSASTestTransmissionParameters transmissionCanParameters = NXcanSASTestTransmissionParameters()) {
-    H5::H5File file(parameters.filename, H5F_ACC_RDONLY);
+    auto filename = parameters.filename;
+    H5::H5File file(filename, H5F_ACC_RDONLY);
 
     // Check sasentry
     auto entry = file.openGroup(sasEntryGroupName + suffix);
