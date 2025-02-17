@@ -32,6 +32,8 @@ class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
 
 class HelpWindowModel:
     def __init__(self, local_docs_base=None, online_base="https://docs.mantidproject.org/"):
+        if local_docs_base and not os.path.isdir(local_docs_base):
+            raise ValueError(f"Local docs directory '{local_docs_base}' does not exist or is invalid.")
         self.local_docs_base = local_docs_base
         self.online_base = online_base.rstrip("/")
 
