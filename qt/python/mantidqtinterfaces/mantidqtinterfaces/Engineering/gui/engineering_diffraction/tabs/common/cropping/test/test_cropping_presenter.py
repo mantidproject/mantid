@@ -82,11 +82,18 @@ class CroppingPresenterTest(unittest.TestCase):
         self.assertFalse(self.presenter.spectra_valid)
         self.view.set_crop_invalid_indicator_visible.assert_called_with("Error lol")
 
-    def test_custom_groupingfile_changed_valid(self):
-        self.view.get_custom_groupingfile.return_value = "stuff/mycalfile.cal"
+    def test_custom_groupingfile_changed_to_cal_valid(self):
+        self.view.get_custom_groupingfile.return_value = "stuff/mygroupfile.cal"
         self.presenter.on_groupingfile_changed()
 
-        self.assertEqual("stuff/mycalfile.cal", self.presenter.custom_groupingfile)
+        self.assertEqual("stuff/mygroupfile.cal", self.presenter.custom_groupingfile)
+        self.assertTrue(self.presenter.groupingfile_valid)
+
+    def test_custom_groupingfile_changed_to_xml_valid(self):
+        self.view.get_custom_groupingfile.return_value = "stuff/myothergroupfile.xml"
+        self.presenter.on_groupingfile_changed()
+
+        self.assertEqual("stuff/myothergroupfile.xml", self.presenter.custom_groupingfile)
         self.assertTrue(self.presenter.groupingfile_valid)
 
     def test_custom_groupingfile_changed_invalid(self):

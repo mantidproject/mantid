@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string, CALIB_DIR
 from Engineering.common import path_handling
 from mantid.api import AnalysisDataService as ADS
@@ -68,7 +69,9 @@ class CalibrationInfo:
         self.prm_filepath = None
         self.grouping_filepath = None
         self.spectra_list = None
+        self.spectra_list_str = None
         self.calibration_table = None
+        self.extra_group_suffix = ""
 
     def clear(self):
         self.group = None
@@ -76,6 +79,7 @@ class CalibrationInfo:
         self.prm_filepath = None
         self.grouping_filepath = None
         self.spectra_list = None
+        self.spectra_list_str = None
         self.ceria_path = None
         self.instrument = None
         self.calibration_table = None
@@ -94,11 +98,8 @@ class CalibrationInfo:
     def _get_suffix(self, suffix_dict: dict) -> str:
         """Get the full suffix for the current group"""
         if self.group:
-            if self.group != GROUP.CUSTOM:
-                return suffix_dict[self.group]
-            else:
-                self.set_extra_group_suffix()
-                return f"{suffix_dict[GROUP.CUSTOM]}{self.extra_group_suffix}"
+            self.set_extra_group_suffix()
+            return f"{suffix_dict[self.group]}{self.extra_group_suffix}"
         return ""
 
     def get_group_description(self) -> Optional[str]:
@@ -127,10 +128,18 @@ class CalibrationInfo:
 
     # setters
     def set_extra_group_suffix(self) -> None:
-        try:
-            self.set_grouping_filepath_from_prm_filepath()
-            self.extra_group_suffix = "_" + path.split(self.grouping_filepath)[1].split(".")[0]
-        except TypeError:
+        if self.group == GROUP.CUSTOM:
+            try:
+                self.set_grouping_filepath_from_prm_filepath()
+                self.extra_group_suffix = "_" + path.split(self.grouping_filepath)[1].split(".")[0]
+            except TypeError:
+                self.extra_group_suffix = ""
+        elif self.group == GROUP.CROPPED:
+            if self.spectra_list_str:
+                self.extra_group_suffix = "_" + self.spectra_list_str
+            else:
+                self.extra_group_suffix = ""
+        else:
             self.extra_group_suffix = ""
 
     def set_prm_filepath(self, prm_filepath: Optional[str]) -> None:
@@ -149,22 +158,29 @@ class CalibrationInfo:
         :param file_path: Path of the .prm file being loaded
         """
         basepath, fname = path.split(file_path)
-        # fname has form INSTRUMENT_ceriaRunNo_BANKS
-        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture20", "Texture30"
-        fname_words = fname.split("_")
-        suffix = fname_words[-1].split(".")[0]  # take last element and remove extension
+        # fname has form INSTRUMENT_ceriaRunNo_BANKS.ext
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped_specstr", "Custom_grpfp", "Texture20", "Texture30"
+        inst_bank = fname.split("_")[:2]
+        suffix = (fname[len("_".join(inst_bank)) + 1 :]).split(".")[0]  # string after INSTRUMENT_ceriaRunNo_ minus ext
+        # for GROUP Enum: all_banks, bank_1 and bank_2 require the part after _, Cropped and Custom the part before _
+        ind = suffix.find("_")
+        suffix = suffix[:ind] if ind > 4 else suffix[ind + 1 :]
         if any(grp.value == suffix for grp in GROUP):
             self.group = GROUP(suffix)
             self.prm_filepath = file_path
+            self.set_grouping_filepath_from_prm_filepath()
         else:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
-        self.set_calibration_paths(*fname_words[0:2])
+        self.set_calibration_paths(*inst_bank)
 
     def set_spectra_list(self, spectra_list_str: str) -> None:
+        self.spectra_list_str = spectra_list_str
         self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
+        self.set_prm_filepath(None)  # clear any prm filepath as won't correspond to this spec_list
 
     def set_grouping_file(self, grouping_filepath: str) -> None:
         self.grouping_filepath = grouping_filepath
+        self.set_prm_filepath(None)  # clear any prm filepath as won't correspond to this grouping
 
     def set_group(self, group: GROUP) -> None:
         self.group = group
@@ -203,8 +219,8 @@ class CalibrationInfo:
         if not self.group.banks:
             # no need to load grp ws for bank grouping
             ws_name = self.get_group_ws_name()
-            grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
-            self.group_ws = LoadDetectorsGroupingFile(InputFile=grouping_filepath, OutputWorkspace=ws_name)
+            self.set_grouping_filepath_from_prm_filepath()
+            self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=ws_name)
 
     def save_grouping_workspace(self, directory: str) -> None:
         """
