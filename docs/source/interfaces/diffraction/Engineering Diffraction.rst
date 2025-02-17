@@ -97,7 +97,7 @@ Cropping
 ^^^^^^^^
 
 The interface also provides the ability to restrict a new calibration to a particular region of interest:
-one of the two banks on ENGIN-X, a custom .cal file, a list of spectra (referred to as cropped), Texture20 grouping
+one of the two banks on ENGIN-X, a custom grouping file, a list of spectra (referred to as cropped), Texture20 grouping
 (consists of 10 groupings per detector bank - 20 in total) and Texture30 (15 groupings per detector bank - 30 in total).
 
 Parameters

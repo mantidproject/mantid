@@ -58,7 +58,7 @@ class CalibrationPresenter(object):
             if self.view.get_crop_checked():
                 self.current_calibration.set_group(self.cropping_widget.get_group())
                 if self.current_calibration.group == GROUP.CUSTOM:
-                    self.current_calibration.set_cal_file(self.cropping_widget.get_custom_calfile())
+                    self.current_calibration.set_grouping_file(self.cropping_widget.get_custom_groupingfile())
                 elif self.current_calibration.group == GROUP.CROPPED:
                     self.current_calibration.set_spectra_list(self.cropping_widget.get_custom_spectra())
             else:
@@ -113,10 +113,12 @@ class CalibrationPresenter(object):
         Loads the most recently created or loaded calibration into the interface instance. To be used on interface
         startup.
         """
-        last_cal_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_calibration_path")
-        if last_cal_path:
+        last_grouping_path = get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_calibration_path"
+        )
+        if last_grouping_path:
             self.view.set_load_checked(True)
-            self.view.set_file_text_with_search(last_cal_path)
+            self.view.set_file_text_with_search(last_grouping_path)
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
@@ -135,8 +137,8 @@ class CalibrationPresenter(object):
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if self.view.get_crop_checked():
-            if self.cropping_widget.get_custom_calfile_enabled() and not self.cropping_widget.is_calfile_valid():
-                create_error_message(self.view, "Check custom calfile path is valid.")
+            if self.cropping_widget.get_custom_groupingfile_enabled() and not self.cropping_widget.is_groupingfile_valid():
+                create_error_message(self.view, "Check custom grouping file path is valid.")
                 return False
             if self.cropping_widget.get_custom_spectra_enabled() and not self.cropping_widget.is_spectra_valid():
                 create_error_message(self.view, "Check custom spectra are valid.")

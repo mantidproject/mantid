@@ -19,7 +19,7 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
         self.widget_crop.hide()
         self.finder_custom.setFileExtensions([".cal", ".xml"])
         self.finder_custom.allowMultipleFiles(False)
-        self.finder_custom.setLabelText("Custom CalFile:")
+        self.finder_custom.setLabelText("Custom Grouping File:")
         self.finder_custom.allowMultipleFiles(False)
 
     # =================
@@ -29,7 +29,7 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
     def set_on_combo_changed(self, slot):
         self.combo_bank.currentIndexChanged.connect(slot)
 
-    def set_on_custom_calfile_changed(self, slot):
+    def set_on_custom_groupingfile_changed(self, slot):
         self.finder_custom.fileEditingFinished.connect(slot)
         self.finder_custom.filesFound.connect(slot)
 
@@ -40,10 +40,10 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
     # Component Setters
     # =================
 
-    def set_custom_calfile_widget_hidden(self):
+    def set_custom_groupingfile_widget_hidden(self):
         self.widget_custom.hide()
 
-    def set_custom_calfile_widget_visible(self):
+    def set_custom_groupingfile_widget_visible(self):
         self.widget_custom.show()
 
     def set_custom_spectra_widget_hidden(self):
@@ -66,7 +66,7 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
     def get_combo_value(self):
         return self.combo_bank.currentText()
 
-    def get_custom_calfile(self):
+    def get_custom_groupingfile(self):
         return self.finder_custom.getFirstFilename()
 
     def get_custom_spectra_text(self):
