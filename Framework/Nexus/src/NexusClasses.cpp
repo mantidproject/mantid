@@ -8,6 +8,8 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/napi.h"
 
 #include <memory>
@@ -49,11 +51,11 @@ std::string NXAttributes::operator()(const std::string &name) const {
  */
 void NXAttributes::set(const std::string &name, const std::string &value) { m_values[name] = value; }
 
-/**  Sets the value of the attribute as a double.
+/**  Sets the value of the attribute from typed value.
  *   @param name :: The name of the attribute
  *   @param value :: The new value of the attribute
  */
-void NXAttributes::set(const std::string &name, double value) {
+template <typename T> void NXAttributes::set(const std::string &name, T value) {
   std::ostringstream ostr;
   ostr << value;
   m_values[name] = ostr.str();
@@ -116,22 +118,19 @@ void NXObject::getAttributes() {
     case NXnumtype::INT16: {
       short int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.data(), "%i", value);
-      attributes.set(pName, buff.data());
+      attributes.set(pName, value);
       break;
     }
     case NXnumtype::INT32: {
       int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.data(), "%i", value);
-      attributes.set(pName, buff.data());
+      attributes.set(pName, value);
       break;
     }
     case NXnumtype::UINT16: {
       short unsigned int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.data(), "%u", value);
-      attributes.set(pName, buff.data());
+      attributes.set(pName, value);
       break;
     }
     default:
@@ -165,7 +164,7 @@ void NXClass::readAllInfo() {
     if (info.nxclass == "SDS") {
       NXInfo data_info;
       NXopendata(m_fileID, info.nxname.c_str());
-      data_info.stat = NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
+      data_info.stat = NXgetinfo(m_fileID, &data_info.rank, &(data_info.dims[0]), &data_info.type);
       NXclosedata(m_fileID);
       data_info.nxname = info.nxname;
       m_datasets->emplace_back(data_info);
@@ -379,7 +378,7 @@ void NXDataSet::open() {
     throw std::runtime_error("Error opening data in group \"" + name() + "\"");
   }
 
-  if (NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NXstatus::NX_OK) {
+  if (NXgetinfo(m_fileID, &m_info.rank, &(m_info.dims[0]), &m_info.type) != NXstatus::NX_OK) {
     throw std::runtime_error("Error retrieving information for " + name() + " group");
   }
 
@@ -391,7 +390,7 @@ void NXDataSet::openLocal() {
   if (NXopendata(m_fileID, name().c_str()) != NXstatus::NX_OK) {
     throw std::runtime_error("Error opening data in group \"" + name() + "\"");
   }
-  if (NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NXstatus::NX_OK) {
+  if (NXgetinfo(m_fileID, &m_info.rank, &(m_info.dims[0]), &m_info.type) != NXstatus::NX_OK) {
     throw std::runtime_error("Error retrieving information for " + name() + " group");
   }
   getAttributes();
@@ -403,8 +402,8 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension.
  * @throws out_of_range error if requested on an object of rank 0
  */
-int NXDataSet::dim0() const {
-  if (m_info.rank == 0) {
+nxdimsize_t NXDataSet::dim0() const {
+  if (m_info.rank == 0UL) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
   return m_info.dims[0];
@@ -415,7 +414,7 @@ int NXDataSet::dim0() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 2
  */
-int NXDataSet::dim1() const {
+nxdimsize_t NXDataSet::dim1() const {
   if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
@@ -427,7 +426,7 @@ int NXDataSet::dim1() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 3
  */
-int NXDataSet::dim2() const {
+nxdimsize_t NXDataSet::dim2() const {
   if (m_info.rank < 3) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
@@ -439,7 +438,7 @@ int NXDataSet::dim2() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 4
  */
-int NXDataSet::dim3() const {
+nxdimsize_t NXDataSet::dim3() const {
   if (m_info.rank < 4) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
@@ -468,9 +467,9 @@ void NXDataSet::getData(void *data) {
  * the rank of the data.
  *   @throw runtime_error if the operation fails.
  */
-void NXDataSet::getSlab(void *data, int start[], int size[]) {
+void NXDataSet::getSlab(void *data, NXDimArray const &start, NXDimArray const &size) {
   NXopendata(m_fileID, name().c_str());
-  if (NXgetslab(m_fileID, data, start, size) != NXstatus::NX_OK)
+  if (NXgetslab(m_fileID, data, &(start[0]), &(size[0])) != NXstatus::NX_OK)
     throw std::runtime_error("Cannot read data slab from NeXus file");
   NXclosedata(m_fileID);
 }

@@ -11,6 +11,7 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
 
+#include <array>
 #include <boost/container/vector.hpp>
 #include <map>
 #include <memory>
@@ -26,14 +27,18 @@ namespace NeXus {
 @date 28/05/2009
 */
 
+// TODO change to int64_t
+typedef int nxdimsize_t;
+typedef std::array<int, 4> NXDimArray;
+
 /** Structure for keeping information about a Nexus data set,
  *  such as the dimensions and the type
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
   std::string nxname; ///< name of the object
-  int rank;           ///< number of dimensions of the data
-  int dims[4];        ///< sizes along each dimension
+  int rank;           ///< number of dimensions of the data -- TODO change to size_t or int64_t
+  NXDimArray dims;    ///< sizes along each dimension
   NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
   NXstatus stat;      ///< return status
   operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
@@ -63,14 +68,12 @@ const int g_processed_blocksize = 8;
  */
 class MANTID_NEXUS_DLL NXAttributes {
 public:
-  int n() const { return int(m_values.size()); }         ///< number of attributes
-  std::vector<std::string> names() const;                ///< Returns the list of attribute names
-  std::vector<std::string> values() const;               ///< Returns the list of attribute values
-  std::string operator()(const std::string &name) const; ///< returns the value of attribute with name name
-  void set(const std::string &name,
-           const std::string &value); ///< set the attribute's value
-  void set(const std::string &name,
-           double value); ///< set the attribute's value as a double
+  std::size_t n() const { return m_values.size(); }                 ///< number of attributes
+  std::vector<std::string> names() const;                           ///< Returns the list of attribute names
+  std::vector<std::string> values() const;                          ///< Returns the list of attribute values
+  std::string operator()(const std::string &name) const;            ///< returns the value of attribute with name name
+  void set(const std::string &name, const std::string &value);      ///< set the attribute's value from string
+  template <typename T> void set(const std::string &name, T value); ///< set the attribute's value from type
 private:
   std::map<std::string, std::string> m_values; ///< the list of attributes
 };
@@ -126,7 +129,7 @@ private:
 class MANTID_NEXUS_DLL NXDataSet : public NXObject {
 public:
   // Constructor
-  NXDataSet(const NXClass &parent, const std::string &name);
+  NXDataSet(NXClass const &parent, std::string const &name);
   /// NX class name. Returns "SDS"
   std::string NX_class() const override { return "SDS"; }
   /// Opens the data set. Does not read in any data. Call load(...) to load the
@@ -135,17 +138,17 @@ public:
   /// Opens datasets faster but the parent group must be already open
   void openLocal();
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
-  int rank() const { return m_info.rank; }
+  std::size_t rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  int dims(int i) const { return i < 4 ? m_info.dims[i] : 0; }
+  nxdimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
-  int dim0() const;
+  nxdimsize_t dim0() const;
   /// Returns the number of elements along the second dimension
-  int dim1() const;
+  nxdimsize_t dim1() const;
   /// Returns the number of elements along the third dimension
-  int dim2() const;
+  nxdimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
-  int dim3() const;
+  nxdimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
@@ -168,8 +171,8 @@ public:
    * rank()-4. i,j,k and l are its indices.
    *            The rank of the data must be 4
    */
-  virtual void load(const int blocksize, const int i, const int j, const int k, const int l) {
-    // Avoid compiler warnings
+  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
+    // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
     UNUSED_ARG(j);
@@ -179,7 +182,7 @@ public:
 
 protected:
   void getData(void *data);
-  void getSlab(void *data, int start[], int size[]);
+  void getSlab(void *data, NXDimArray const &start, NXDimArray const &size);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -199,7 +202,7 @@ public:
    * containing the dataset.
    *   @param name :: The name of the dataset relative to its parent
    */
-  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0) {}
+  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0UL) {}
   /** Returns a pointer to the internal data buffer.
    *  @throw runtime_error exception if the data have not been loaded /
    * initialized.
@@ -223,15 +226,15 @@ public:
    *  @throw range_error if the index is greater than the buffer size.
    *  @return A reference to the value
    */
-  const T &operator[](int i) const {
+  const T &operator[](std::size_t i) const {
     if (m_data.empty())
       throw std::runtime_error("Attempt to read uninitialized data from " + path());
-    if (i < 0 || i >= m_n)
+    if (i >= m_n)
       rangeError();
     return m_data[i];
   }
 
-  T &operator[](int i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
+  T &operator[](std::size_t i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
   /** Returns a value assuming the data is a two-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -239,8 +242,10 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(int i, int j) const { return this->operator[](i * dim1() + j); }
-  T &operator()(int i, int j) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j)); }
+  const T &operator()(std::size_t i, std::size_t j) const { return this->operator[](i * dim1() + j); }
+  T &operator()(std::size_t i, std::size_t j) {
+    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j));
+  }
   /** Returns a value assuming the data is a tree-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
@@ -249,13 +254,17 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  const T &operator()(int i, int j, int k) const { return this->operator[]((i * dim1() + j) * dim2() + k); }
-  T &operator()(int i, int j, int k) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k)); }
+  const T &operator()(std::size_t i, std::size_t j, std::size_t k) const {
+    return this->operator[]((i * dim1() + j) * dim2() + k);
+  }
+  T &operator()(std::size_t i, std::size_t j, std::size_t k) {
+    return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j, k));
+  }
 
   /// Returns a the internal buffer
   container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
-  int size() const { return m_n; }
+  std::size_t size() const { return m_n; }
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
    * data are stored as a 1d array.
    *   If the data are loaded in chunks the newly read in data replace the old
@@ -277,21 +286,21 @@ public:
    * rank()-4. i,j,k and l are its indeces.
    *            The rank of the data must be 4
    */
-  void load(const int blocksize = 1, const int i = -1, const int j = -1, const int k = -1, const int l = -1) override {
+  void load(int const blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    int n = 0;
-    int start[4];
+    nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l);
+    NXDimArray start;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
         n = dim0() * dim1() * dim2() * dim3();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (i >= dim0())
+        if (id >= dim0())
           rangeError();
         n = dim1() * dim2() * dim3();
         start[0] = i;
@@ -303,7 +312,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else if (k < 0) {
-        if (i >= dim0() || j >= dim1())
+        if (id >= dim0() || jd >= dim1())
           rangeError();
         n = dim2() * dim3();
         start[0] = i;
@@ -315,7 +324,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else if (l < 0) {
-        if (i >= dim0() || j >= dim1() || k >= dim2())
+        if (id >= dim0() || jd >= dim1() || kd >= dim2())
           rangeError();
         n = dim3();
         start[0] = i;
@@ -327,7 +336,7 @@ public:
         start[3] = 0;
         m_size[3] = dim2();
       } else {
-        if (i >= dim0() || j >= dim1() || k >= dim2() || l >= dim3())
+        if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
           rangeError();
         n = dim3();
         start[0] = i;
@@ -342,11 +351,11 @@ public:
     } else if (rank() == 3) {
       if (i < 0) {
         n = dim0() * dim1() * dim2();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (i >= dim0())
+        if (id >= dim0())
           rangeError();
         n = dim1() * dim2();
         start[0] = i;
@@ -356,11 +365,11 @@ public:
         start[2] = 0;
         m_size[2] = dim2();
       } else if (k < 0) {
-        if (i >= dim0() || j >= dim1())
+        if (id >= dim0() || jd >= dim1())
           rangeError();
-        int m = blocksize;
-        if (j + m > dim1())
-          m = dim1() - j;
+        nxdimsize_t m = blocksize;
+        if (jd + m > dim1())
+          m = dim1() - jd;
         n = dim2() * m;
         start[0] = i;
         m_size[0] = 1;
@@ -369,7 +378,7 @@ public:
         start[2] = 0;
         m_size[2] = dim2();
       } else {
-        if (i >= dim0() || j >= dim1() || k >= dim2())
+        if (id >= dim0() || jd >= dim1() || kd >= dim2())
           rangeError();
         n = 1;
         start[0] = i;
@@ -382,22 +391,22 @@ public:
     } else if (rank() == 2) {
       if (i < 0) {
         n = dim0() * dim1();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
-        if (i >= dim0())
+        if (id >= dim0())
           rangeError();
-        int m = blocksize;
-        if (i + m > dim0())
-          m = dim0() - i;
+        nxdimsize_t m = blocksize;
+        if (id + m > dim0())
+          m = dim0() - id;
         n = dim1() * m;
         start[0] = i;
         m_size[0] = m;
         start[1] = 0;
         m_size[1] = dim1();
       } else {
-        if (i >= dim0() || j >= dim1())
+        if (id >= dim0() || jd >= dim1())
           rangeError();
         n = 1;
         start[0] = i;
@@ -408,18 +417,18 @@ public:
     } else if (rank() == 1) {
       if (i < 0) {
         n = dim0();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else {
-        if (i >= dim0())
+        if (id >= dim0())
           rangeError();
         n = 1 * blocksize;
         start[0] = i;
         m_size[0] = blocksize;
       }
     }
-    alloc(n);
+    alloc(static_cast<size_t>(n));
     getSlab(m_data.data(), start, m_size);
   }
 
@@ -427,8 +436,8 @@ private:
   /** Allocates memory for the data buffer
    *  @param n :: The number of elements to allocate.
    */
-  void alloc(int n) {
-    if (n <= 0) {
+  void alloc(std::size_t n) {
+    if (n == 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + path());
     }
     try {
@@ -446,8 +455,8 @@ private:
   void rangeError() const { throw std::range_error("Nexus dataset range error"); }
   // We cannot use an STL vector due to the dreaded std::vector<bool>
   container_T<T> m_data; ///< The data buffer
-  int m_size[4];         ///< The sizes of the loaded data
-  int m_n;               ///< The buffer size
+  NXDimArray m_size;     ///< The sizes of the loaded data
+  std::size_t m_n;       ///< The buffer size
 };
 
 /// The integer dataset type
@@ -484,7 +493,7 @@ public:
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXClass(const NXClass &parent, const std::string &name);
+  NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
   /**  Returns the class information about the next entry (class or dataset) in
@@ -655,9 +664,9 @@ private:
       NXChar value(*this, "value");
       value.openLocal();
       value.load();
-      for (int i = 0; i < value.dim0(); i++) {
+      for (nxdimsize_t i = 0; i < value.dim0(); i++) {
         auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        for (int j = 0; j < value.dim1(); j++) {
+        for (nxdimsize_t j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
             *c = ' ';
@@ -671,7 +680,7 @@ private:
         NXDouble value(*this, "value");
         value.openLocal();
         value.load();
-        for (int i = 0; i < value.dim0(); i++) {
+        for (nxdimsize_t i = 0; i < value.dim0(); i++) {
           auto t = start_t + boost::posix_time::seconds(int(times[i]));
           logv->addValue(t, (value[i] == 0 ? false : true));
         }
@@ -701,7 +710,7 @@ private:
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);
     value.load();
-    for (int i = 0; i < value.dim0(); i++) {
+    for (nxdimsize_t i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
         auto t = start_t + boost::posix_time::seconds(int(times[i]));
         logv->addValue(t, value[i]);

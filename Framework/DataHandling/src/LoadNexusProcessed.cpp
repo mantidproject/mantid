@@ -846,10 +846,10 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
           workspace->addColumn("str", columnTitle);
-          int nRows = info.dims[0];
+          nxdimsize_t nRows = info.dims[0];
           workspace->setRowCount(nRows);
 
-          const int maxStr = info.dims[1];
+          nxdimsize_t const maxStr = info.dims[1];
           data.load();
           for (int iR = 0; iR < nRows; ++iR) {
             auto &cellContents = workspace->cell<std::string>(iR, columnNumber - 1);
@@ -1176,7 +1176,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      const int maxShapeJSONLength = info.dims[1];
+      nxdimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
       for (int i = 0; i < numberPeaks; ++i) {
 
@@ -1470,7 +1470,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      const int maxShapeJSONLength = info.dims[1];
+      nxdimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
       for (int i = 0; i < numberPeaks; ++i) {
 
