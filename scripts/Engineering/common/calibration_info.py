@@ -7,9 +7,11 @@
 from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string, CALIB_DIR
 from Engineering.common import path_handling
 from mantid.api import AnalysisDataService as ADS
+from mantid.dataobjects import GroupingWorkspace
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
+from typing import Optional
 
 GROUP_FILES = {
     GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml",
@@ -77,68 +79,71 @@ class CalibrationInfo:
         self.ceria_path = None
         self.instrument = None
         self.calibration_table = None
+        self.extra_group_suffix = ""
 
     # getters
-    def get_foc_ws_suffix(self):
+    def get_foc_ws_suffix(self) -> str:
+        return self._get_suffix(GROUP_FOC_WS_SUFFIX)
+
+    def get_group_suffix(self) -> str:
+        return self._get_suffix(GROUP_SUFFIX)
+
+    def get_group_ws_name(self) -> str:
+        return self._get_suffix(GROUP_WS_NAMES)
+
+    def _get_suffix(self, suffix_dict: dict) -> str:
+        """Get the full suffix for the current group"""
         if self.group:
             if self.group != GROUP.CUSTOM:
-                return GROUP_FOC_WS_SUFFIX[self.group]
+                return suffix_dict[self.group]
             else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_FOC_WS_SUFFIX[GROUP.CUSTOM]}_{fname}"
+                self.set_extra_group_suffix()
+                return f"{suffix_dict[GROUP.CUSTOM]}{self.extra_group_suffix}"
+        return ""
 
-    def get_group_suffix(self):
-        if self.group:
-            if self.group != GROUP.CUSTOM:
-                return GROUP_SUFFIX[self.group]
-            else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_SUFFIX[GROUP.CUSTOM]}_{fname}"
-
-    def get_group_ws_name(self):
-        if self.group:
-            if self.group != GROUP.CUSTOM:
-                return GROUP_WS_NAMES[self.group]
-            else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_WS_NAMES[GROUP.CUSTOM]}_{fname}"
-
-    def get_group_description(self):
+    def get_group_description(self) -> Optional[str]:
         if self.group:
             return GROUP_DESCRIPTIONS[self.group]
 
-    def get_group_file(self):
+    def get_group_file(self) -> Optional[str]:
         if self.group:
             return GROUP_FILES[self.group]
 
-    def get_calibration_table(self):
+    def get_calibration_table(self) -> Optional[str]:
         return self.calibration_table
 
-    def get_ceria_path(self):
+    def get_ceria_path(self) -> Optional[str]:
         return self.ceria_path
 
-    def get_ceria_runno(self):
+    def get_ceria_runno(self) -> Optional[str]:
         if self.ceria_path and self.instrument:
             return path_handling.get_run_number_from_path(self.ceria_path, self.instrument)
 
-    def get_instrument(self):
+    def get_instrument(self) -> Optional[str]:
         return self.instrument
 
-    def get_prm_filepath(self):
+    def get_prm_filepath(self) -> Optional[str]:
         return self.prm_filepath
 
     # setters
-    def set_prm_filepath(self, prm_filepath):
+    def set_extra_group_suffix(self) -> None:
+        try:
+            self.set_grouping_filepath_from_prm_filepath()
+            self.extra_group_suffix = "_" + path.split(self.grouping_filepath)[1].split(".")[0]
+        except TypeError:
+            self.extra_group_suffix = ""
+
+    def set_prm_filepath(self, prm_filepath: Optional[str]) -> None:
         self.prm_filepath = prm_filepath
 
-    def set_calibration_table(self, cal_table):
+    def set_calibration_table(self, cal_table: str) -> None:
         self.calibration_table = cal_table
 
-    def set_calibration_paths(self, instrument, ceria_path):
+    def set_calibration_paths(self, instrument: str, ceria_path: str) -> None:
         self.ceria_path = ceria_path
         self.instrument = instrument
 
-    def set_calibration_from_prm_fname(self, file_path):
+    def set_calibration_from_prm_fname(self, file_path: str) -> None:
         """
         Determine the ROI, instrument and ceria run from the .prm calibration file that is being loaded
         :param file_path: Path of the .prm file being loaded
@@ -155,17 +160,24 @@ class CalibrationInfo:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
         self.set_calibration_paths(*fname_words[0:2])
 
-    def set_spectra_list(self, spectra_list_str):
+    def set_spectra_list(self, spectra_list_str: str) -> None:
         self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
 
-    def set_grouping_file(self, grouping_filepath):
+    def set_grouping_file(self, grouping_filepath: str) -> None:
         self.grouping_filepath = grouping_filepath
 
-    def set_group(self, group):
+    def set_group(self, group: GROUP) -> None:
         self.group = group
 
     # functional
-    def load_relevant_calibration_files(self, output_prefix="engggui"):
+    def set_grouping_filepath_from_prm_filepath(self) -> None:
+        """
+        If there is a prm filepath declared, assign the xml filepath as the grouping filepath
+        """
+        if self.prm_filepath:
+            self.grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
+
+    def load_relevant_calibration_files(self, output_prefix: str = "engggui") -> None:
         """
         Load calibration table ws output from second step of calibration (PDCalibration of ROI focused spectra)
         :param output_prefix: prefix for workspace
@@ -206,7 +218,7 @@ class CalibrationInfo:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group=None, ext=".prm"):
+    def generate_output_file_name(self, group: Optional[GROUP] = None, ext: str = ".prm") -> str:
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file
@@ -219,7 +231,7 @@ class CalibrationInfo:
             suffix = GROUP_SUFFIX[group]
         return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
 
-    def get_subplot_title(self, ispec):
+    def get_subplot_title(self, ispec: int) -> str:
         """
         :param ispec: spectrum index for which the calibration results (TOF vs d) are being plotted
         :return: string to use as subplot title in plot generated in calibration tab
@@ -231,7 +243,7 @@ class CalibrationInfo:
         else:
             return f"{self.get_group_description()} spec: {ispec}"  # texture
 
-    def get_group_ws(self):
+    def get_group_ws(self) -> GroupingWorkspace:
         """
         Returns grouping workspace for ROI (creates if not present)
         :return: group workspace
@@ -242,14 +254,24 @@ class CalibrationInfo:
             elif self.group == GROUP.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
             elif self.group == GROUP.CUSTOM:
-                ext = self.grouping_filepath.split(".")[-1]
-                if ext == "cal":
-                    self.create_grouping_workspace_from_calfile()
-                elif ext == "xml":
-                    self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name())
+                self.create_grouping_workspace_from_file()
         return self.group_ws
 
-    def create_bank_grouping_workspace(self):
+    def create_grouping_workspace_from_file(self) -> None:
+        """
+        Create grouping workspace from a custom file (.cal or .xml)
+        """
+        if not self.grouping_filepath:
+            raise ValueError("Grouping file path is not set.")
+        ext = path.splitext(self.grouping_filepath)[-1].lower()
+        if ext == ".cal":
+            self.create_grouping_workspace_from_calfile()
+        elif ext == ".xml":
+            self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name())
+        else:
+            raise ValueError(f"Unsupported file extension: {ext}")
+
+    def create_bank_grouping_workspace(self) -> None:
         """
         Create grouping workspace for ROI corresponding to one or more banks
         """
@@ -270,7 +292,7 @@ class CalibrationInfo:
                 "Could not find or create grouping requested - make sure the directory of the grouping.xml files is on the path"
             )
 
-    def create_grouping_workspace_from_calfile(self):
+    def create_grouping_workspace_from_calfile(self) -> None:
         """
         Create grouping workspace for ROI defined in .cal file
         """
@@ -279,7 +301,7 @@ class CalibrationInfo:
         )
         self.group_ws = grp_ws
 
-    def create_grouping_workspace_from_spectra_list(self):
+    def create_grouping_workspace_from_spectra_list(self) -> None:
         """
         Create grouping workspace for ROI defined as a list of spectrum numbers
         """
@@ -289,7 +311,7 @@ class CalibrationInfo:
             grp_ws.setValue(det_ids[0], 1)
         self.group_ws = grp_ws
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """
         :return: bool for if CalibrationInfo object can be used for focusing
         """

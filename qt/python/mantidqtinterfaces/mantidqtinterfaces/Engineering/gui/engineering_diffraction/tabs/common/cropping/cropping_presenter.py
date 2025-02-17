@@ -65,19 +65,12 @@ class CroppingPresenter(object):
             self.set_custom_widgets_visibility(False, False)
 
     def on_groupingfile_changed(self):
-        valid = self.view.finder_custom.isValid()
-        self.groupingfile_valid = valid
-        if valid:
-            self.custom_groupingfile = self.view.get_custom_groupingfile()
-        else:
-            self.custom_groupingfile = None
+        self.groupingfile_valid = self.view.finder_custom.isValid()
+        self.custom_groupingfile = self.view.get_custom_groupingfile() if self.groupingfile_valid else None
 
     def on_spectra_changed(self, text):
         error, value = self.model.validate_and_clean_spectrum_numbers(text)
-        if error == "":
-            self.custom_spectra = value
-        else:
-            self.custom_spectra = None
+        self.custom_spectra = value if error == "" else None
         self.set_invalid_spectra_status(error)
 
     # Getters
