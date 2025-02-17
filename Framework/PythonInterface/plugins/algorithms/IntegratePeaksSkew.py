@@ -27,7 +27,6 @@ from mantid.kernel import (
     SpecialCoordinateSystem,
 )
 import numpy as np
-from scipy.signal import convolve2d
 from scipy.ndimage import label
 from mantid.dataobjects import PeakShapeDetectorBin
 from enum import Enum
@@ -68,8 +67,6 @@ class PeakDataSkew(PeakData):
         super().__init__(irow, icol, det_edges, detids, peak, ws)
         # null init attributes
         self.initial_frac_width = None
-        self.xpk, self.ypk, self.epk_sq = None, None, None
-        self.peak_mask, self.non_bg_mask = None, None
         self.status = None
         self.intens, self.sig = 0, 0
         self.x_integrated_data = None
@@ -217,30 +214,6 @@ class PeakDataSkew(PeakData):
         imins = np.where(dist == dist.min())
         return np.array(r[imins]), np.array(c[imins])
 
-    def focus_data_in_detector_mask(self):
-        # get background shell of non peak/feature pixels
-        kernel = np.ones((3, 3))
-        bg_shell_mask = convolve2d(self.peak_mask, kernel, mode="same")
-        norm = convolve2d(np.ones(bg_shell_mask.shape), kernel, mode="same")
-        bg_shell_mask = (bg_shell_mask / norm) > 0
-        bg_shell_mask = np.logical_and(bg_shell_mask, ~self.non_bg_mask)
-        # focus and subtract background shell
-        ws_bg_foc = self._focus_detids(self.detids[bg_shell_mask])
-        scale = exec_simpleapi_alg(
-            "CreateSingleValuedWorkspace", DataValue=self.peak_mask.sum() / bg_shell_mask.sum(), OutputWorkspace="__scale"
-        )
-        exec_simpleapi_alg("Multiply", LHSWorkspace=ws_bg_foc, RHSWorkspace=scale, OutputWorkspace=ws_bg_foc)
-        ws_pk_foc = self._focus_detids(self.detids[self.peak_mask])
-        exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
-        exec_simpleapi_alg("Subtract", LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
-        ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
-        self.ypk = ws_pk_foc.readY(0).copy()
-        self.epk_sq = ws_pk_foc.readE(0).copy() ** 2
-        self.xpk = ws_pk_foc.readX(0).copy()
-        if len(self.xpk) > len(self.ypk):
-            self.xpk = 0.5 * (self.xpk[:-1] + self.xpk[1:])  # convert to bin centers
-        exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_bg_foc, ws_pk_foc, scale])
-
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
         dx = np.diff(self.xpk)
@@ -329,41 +302,9 @@ class PeakDataSkew(PeakData):
         istep_lo -= nbad
         return ilo - istep_lo, ihi + istep_hi
 
-    def _focus_detids(self, detids):
-        if not self.ws.isCommonBins():
-            # get ws with just the selected detids
-            ws_roi, _ = self.get_roi_on_detector(detids)
-            # force common binning (same bin edges as first spectrum)
-            ws_roi_spec = exec_simpleapi_alg(
-                "ExtractSingleSpectrum", InputWorkspace=ws_roi, WorkspaceIndex=0, OutputWorkspace=ws_roi + "_spec"
-            )
-            exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_roi, WorkspaceToMatch=ws_roi_spec, OutputWorkspace=ws_roi)
-            ws_foc = exec_simpleapi_alg(
-                "GroupDetectors",
-                InputWorkspace=ws_roi,
-                WorkspaceIndexList=range(0, len(detids)),
-                OutputWorkspace=f"__foc{detids[0]}",
-            )
-            exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_roi, ws_roi_spec])
-        else:
-            ws_foc = exec_simpleapi_alg(
-                "GroupDetectors",
-                InputWorkspace=self.ws,
-                DetectorList=",".join([str(id) for id in detids]),
-                OutputWorkspace=f"__foc{detids[0]}",
-            )
-        return ws_foc
-
     @staticmethod
     def _calc_snr(signal, error_sq):
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
-
-    def get_roi_on_detector(self, detids):
-        isort = np.argsort(detids.flatten())
-        ws_roi = exec_simpleapi_alg(
-            "ExtractSpectra", InputWorkspace=self.ws, DetectorList=detids.flat[isort], OutputWorkspace=f"__roi{detids.flat[0]}"
-        )
-        return ws_roi, isort
 
     def update_peak_position(self):
         idet = np.argmax(self.x_integrated_data[self.peak_mask])
