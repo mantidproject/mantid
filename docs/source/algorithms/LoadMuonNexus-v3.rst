@@ -16,6 +16,7 @@ relative path and should have the extension .nxs or .NXS.
 v3 of this algoirthm acts as an algorithm selector. Given the input filename,
 the confidence of the following loaders will be assessed and the loader with the
 highest confidence selected:
+
 - :ref:`algm-LoadMuonNexus-v1`
 - :ref:`algm-LoadMuonNexus-v2`
 - :ref:`algm-LoadMuonNexusV2-v1`
@@ -35,7 +36,7 @@ Usage
 .. testcode:: LoadMuonNexusOnePeriod
 
    # Load MUSR dataset
-   ws = Load(Filename="MUSR00015189.nxs",EntryNumber=1)
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",EntryNumber=1)
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -49,7 +50,7 @@ Output:
 .. testcode:: ExLoadMuonNexusSomeSpectra
 
    # Load some spectra
-   ws = Load(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
+   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -63,7 +64,7 @@ Output:
 .. testcode:: ExLoadDeadTimeTable
 
    # Load some spectra
-   ws = Load(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
    tab = mtd['deadTimeTable']
    for i in range(0,tab.rowCount()):
        print("{} {:.12f}".format(tab.cell(i,0), tab.cell(i,1)))
