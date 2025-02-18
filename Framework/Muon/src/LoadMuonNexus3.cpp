@@ -50,7 +50,6 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
  *  @throw std::invalid_argument If the optional properties are set to invalid
  *values
  */
-
 LoadMuonNexus3::LoadMuonNexus3() : LoadMuonNexus() {
   addAlgToVec("LoadMuonNexusV2", 1, &calculateConfidenceHDF5);
   addAlgToVec("LoadMuonNexus", 1, &calculateConfidence);

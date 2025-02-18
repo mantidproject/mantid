@@ -12,13 +12,12 @@
 #include "MantidMuon/DllConfig.h"
 #include "MantidMuon/LoadMuonNexus.h"
 
-#include <map>
+#include <vector>
 
 namespace {
 using ConfFuncPtr = int (*)(const std::string &, const std::shared_ptr<Mantid::API::Algorithm> &);
 
 struct AlgDetail {
-  AlgDetail() : m_version(0), m_confFunc(nullptr), m_alg(nullptr) {};
   AlgDetail(const std::string &name, const int version, const ConfFuncPtr &loader,
             const Mantid::API::Algorithm_sptr &alg)
       : m_name(name), m_version(version), m_confFunc(loader), m_alg(alg) {}
