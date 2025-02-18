@@ -434,7 +434,7 @@ public:
 
 private:
   /** Allocates memory for the data buffer
-   *  @param n :: The number of elements to allocate.
+   *  @param new_size :: The number of elements to allocate.
    */
   void alloc(nxdimsize_t new_size) {
     if (new_size <= 0) {
