@@ -1,0 +1,2 @@
+- Renamed `Crop Calibration` within the `Engineering Diffraction` calibration interface to `Set Calibration Region of Interest` to more accurately reflect its functionality.
+- Renamed `Custom CalFile` to `Custom Grouping File` and allowed the provided file to be `.xml` as well as `.cal`. This brings it inline with the current detector grouping IO algorithms, :ref:`SaveDetectorsGrouping <algm-SaveDetectorsGrouping-v1>` and :ref:`LoadDetectorsGroupingFile <algm-LoadDetectorsGroupingFile-v1>`.
