@@ -9,16 +9,29 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/LoadMuonNexus1.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 #include "MantidMuon/LoadMuonNexus3.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using Mantid::detid_t;
-using Mantid::Types::Core::DateAndTime;
+
+namespace {
+// Mock class for LoadMuonNexusV2 which is in the DataHandling Library
+class LoadMuonNexusV2 : public NexusFileLoader {
+  const std::string name() const override { return "LoadMuonNexusV2"; }
+  int version() const override { return 1; }
+  int confidence(NexusHDF5Descriptor &descriptor) const override { return 100; }
+  void execLoader() override {}
+  const std::string summary() const override { return "mock class"; }
+  void init() override {}
+};
+} // namespace
 
 class LoadMuonNexus3Test : public CxxTest::TestSuite {
 public:
@@ -103,15 +116,6 @@ public:
     // Test execute to read file and populate workspace
     TS_ASSERT_THROWS_NOTHING(nxLoad.execute());
     TS_ASSERT(nxLoad.isExecuted());
-
-    // Check output workspace group
-    MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
-    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
-
-    // Perform limited tests on the outwork workspace as this is essentially just a wrapper algorithm.
-    // subset of tests performed in LoadMuonNexus2Test
-    check_spectra_and_detectors(output);
 
     TS_ASSERT(nxLoad.getSelectedAlg() == "LoadMuonNexusV2");
     TS_ASSERT(nxLoad.getSelectedVersion() == 1);

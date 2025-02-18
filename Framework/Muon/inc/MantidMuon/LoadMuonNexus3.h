@@ -14,9 +14,23 @@
 
 #include <map>
 
-namespace Mantid::Algorithms {
+namespace {
+using ConfFuncPtr = int (*)(const std::string &, const std::shared_ptr<Mantid::API::Algorithm> &);
 
-using ConfFuncPtr = int (*)(const std::string &, const std::shared_ptr<API::Algorithm> &);
+struct AlgDetail {
+  AlgDetail() : m_version(0), m_confFunc(nullptr), m_alg(nullptr) {};
+  AlgDetail(const std::string &name, const int version, const ConfFuncPtr &loader,
+            const Mantid::API::Algorithm_sptr &alg)
+      : m_name(name), m_version(version), m_confFunc(loader), m_alg(alg) {}
+
+  const std::string m_name;
+  const int m_version;
+  const ConfFuncPtr m_confFunc;
+  const Mantid::API::Algorithm_sptr m_alg;
+};
+} // namespace
+
+namespace Mantid::Algorithms {
 
 /**
 Loads an file in NeXus Muon format version 1 and 2 and stores it in a 2D
@@ -62,16 +76,16 @@ public:
   // Returns 0, as this wrapper version of the algorithm is never to be selected via load.
   int confidence(Kernel::NexusDescriptor &) const override { return 0; };
   // Methods to enable testing.
-  const std::string &getSelectedAlg() const { return m_algName; }
-  int getSelectedVersion() const { return m_version; }
+  const std::string &getSelectedAlg() const { return m_loadAlgs[m_selectedIndex].m_name; }
+  int getSelectedVersion() const { return m_loadAlgs[m_selectedIndex].m_version; }
 
 private:
-  const std::map<const std::shared_ptr<API::Algorithm>, ConfFuncPtr> m_loadAlgs;
-  std::string m_algName;
-  int m_version;
+  std::vector<AlgDetail> m_loadAlgs;
+  int m_selectedIndex;
 
   void exec() override;
   void runSelectedAlg();
+  void addAlgToVec(const std::string &name, const int version, const ConfFuncPtr &loader);
 };
 
 } // namespace Mantid::Algorithms

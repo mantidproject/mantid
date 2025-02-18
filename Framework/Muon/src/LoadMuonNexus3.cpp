@@ -6,13 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/LoadMuonNexus3.h"
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidKernel/Logger.h"
-#include "MantidMuon/LoadMuonNexus1.h"
-#include "MantidMuon/LoadMuonNexus2.h"
 #include "MantidNexus/NexusClasses.h"
 #include <H5Cpp.h>
 #include <string>
@@ -53,22 +51,21 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
  *values
  */
 
-LoadMuonNexus3::LoadMuonNexus3()
-    : LoadMuonNexus(), m_loadAlgs{{std::make_shared<Mantid::DataHandling::LoadMuonNexusV2>(), &calculateConfidenceHDF5},
-                                  {std::make_shared<LoadMuonNexus1>(), &calculateConfidence},
-                                  {std::make_shared<LoadMuonNexus2>(), &calculateConfidence}},
-      m_version(0) {};
+LoadMuonNexus3::LoadMuonNexus3() : LoadMuonNexus() {
+  addAlgToVec("LoadMuonNexusV2", 1, &calculateConfidenceHDF5);
+  addAlgToVec("LoadMuonNexus", 1, &calculateConfidence);
+  addAlgToVec("LoadMuonNexus", 2, &calculateConfidence);
+}
 
 void LoadMuonNexus3::exec() {
   const std::string filePath = getPropertyValue("Filename");
 
   int maxConfidenceRes{0};
-  for (const auto &alg : m_loadAlgs) {
-    int confidenceRes = alg.second(filePath, alg.first);
+  for (int i = 0; i < m_loadAlgs.size(); i++) {
+    const int confidenceRes = m_loadAlgs[i].m_confFunc(filePath, m_loadAlgs[i].m_alg);
     if (confidenceRes > maxConfidenceRes) {
       maxConfidenceRes = confidenceRes;
-      m_algName = alg.first->name();
-      m_version = alg.first->version();
+      m_selectedIndex = i;
     }
   }
 
@@ -80,11 +77,16 @@ void LoadMuonNexus3::exec() {
 }
 
 void LoadMuonNexus3::runSelectedAlg() {
-  auto loader = createChildAlgorithm(m_algName, 0, 1, true, m_version);
-  loader->copyPropertiesFrom(*this);
-  loader->executeAsChildAlg();
-  this->copyPropertiesFrom(*loader);
-  API::Workspace_sptr outWs = loader->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", outWs);
+  const auto &alg = m_loadAlgs[m_selectedIndex].m_alg;
+  this->setupAsChildAlgorithm(alg, 0, 1, true);
+  alg->copyPropertiesFrom(*this);
+  alg->executeAsChildAlg();
+  this->copyPropertiesFrom(*alg);
+}
+
+void LoadMuonNexus3::addAlgToVec(const std::string &name, const int version, const ConfFuncPtr &loader) {
+  const auto &factory = API::AlgorithmFactory::Instance();
+  const auto alg = factory.create(name, version);
+  m_loadAlgs.push_back(AlgDetail(name, version, loader, alg));
 }
 } // namespace Mantid::Algorithms
