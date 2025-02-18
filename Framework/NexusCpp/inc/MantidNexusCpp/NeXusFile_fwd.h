@@ -171,6 +171,14 @@ MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype 
 // forward declare
 namespace NeXus {
 
+// TODO change to std::size_t
+typedef std::int64_t dimsize_t;
+// TODO replace all instances with DimArray
+typedef std::vector<dimsize_t> DimVector; ///< usef specifically for the dims array
+// typedef std::array<DimSize, 4> DimArray;
+//  TODO this is probably the same as DimVector
+typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
+
 /**
  * The available compression types. These are all ignored in xml files.
  * \li NONE no compression
@@ -196,7 +204,7 @@ struct Info {
   /** The primative type for the field. */
   NXnumtype type;
   /** The dimensions of the file. */
-  std::vector<int64_t> dims;
+  DimVector dims;
 };
 
 /** Information about an attribute. */
@@ -208,7 +216,7 @@ struct AttrInfo {
   /** The name of the attribute. */
   std::string name;
   /** The dimensions of the attribute. */
-  std::vector<int> dims;
+  DimVector dims;
 };
 
 /** Forward declare of NeXus::File */
