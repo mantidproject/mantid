@@ -29,7 +29,7 @@ namespace NeXus {
 
 // TODO change to int64_t
 typedef int nxdimsize_t;
-typedef std::array<int, 4> NXDimArray;
+typedef std::array<nxdimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
  *  such as the dimensions and the type
@@ -202,7 +202,7 @@ public:
    * containing the dataset.
    *   @param name :: The name of the dataset relative to its parent
    */
-  NXDataSetTyped(const NXClass &parent, const std::string &name) : NXDataSet(parent, name), m_n(0UL) {}
+  NXDataSetTyped(NXClass const &parent, std::string const &name) : NXDataSet(parent, name), m_size(0UL) {}
   /** Returns a pointer to the internal data buffer.
    *  @throw runtime_error exception if the data have not been loaded /
    * initialized.
@@ -229,7 +229,7 @@ public:
   const T &operator[](std::size_t i) const {
     if (m_data.empty())
       throw std::runtime_error("Attempt to read uninitialized data from " + path());
-    if (i >= m_n)
+    if (i >= m_size)
       rangeError();
     return m_data[i];
   }
@@ -264,7 +264,7 @@ public:
   /// Returns a the internal buffer
   container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
-  std::size_t size() const { return m_n; }
+  std::size_t size() const { return m_size; }
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
    * data are stored as a 1d array.
    *   If the data are loaded in chunks the newly read in data replace the old
@@ -291,79 +291,79 @@ public:
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l); // cppcheck-suppress variableScope
-    NXDimArray start;
+    NXDimArray datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
         n = dim0() * dim1() * dim2() * dim3();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2() * dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = 0;
-        m_size[1] = dim1();
-        start[2] = 0;
-        m_size[2] = dim2();
-        start[3] = 0;
-        m_size[3] = dim2();
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = 0;
+        datasize[1] = dim1();
+        datastart[2] = 0;
+        datasize[2] = dim2();
+        datastart[3] = 0;
+        datasize[3] = dim2();
       } else if (k < 0) {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = dim2() * dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = 0;
-        m_size[2] = dim2();
-        start[3] = 0;
-        m_size[3] = dim2();
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = 1;
+        datastart[2] = 0;
+        datasize[2] = dim2();
+        datastart[3] = 0;
+        datasize[3] = dim2();
       } else if (l < 0) {
         if (id >= dim0() || jd >= dim1() || kd >= dim2())
           rangeError();
         n = dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
-        start[3] = 0;
-        m_size[3] = dim2();
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = 1;
+        datastart[2] = k;
+        datasize[2] = 1;
+        datastart[3] = 0;
+        datasize[3] = dim2();
       } else {
         if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
           rangeError();
         n = dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
-        start[3] = l;
-        m_size[3] = 1;
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = 1;
+        datastart[2] = k;
+        datasize[2] = 1;
+        datastart[3] = l;
+        datasize[3] = 1;
       }
     } else if (rank() == 3) {
       if (i < 0) {
         n = dim0() * dim1() * dim2();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = 0;
-        m_size[1] = dim1();
-        start[2] = 0;
-        m_size[2] = dim2();
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = 0;
+        datasize[1] = dim1();
+        datastart[2] = 0;
+        datasize[2] = dim2();
       } else if (k < 0) {
         if (id >= dim0() || jd >= dim1())
           rangeError();
@@ -371,27 +371,27 @@ public:
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = m;
-        start[2] = 0;
-        m_size[2] = dim2();
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = m;
+        datastart[2] = 0;
+        datasize[2] = dim2();
       } else {
         if (id >= dim0() || jd >= dim1() || kd >= dim2())
           rangeError();
         n = 1;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = 1;
+        datastart[2] = k;
+        datasize[2] = 1;
       }
     } else if (rank() == 2) {
       if (i < 0) {
         n = dim0() * dim1();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else if (j < 0) {
@@ -401,53 +401,53 @@ public:
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;
-        start[0] = i;
-        m_size[0] = m;
-        start[1] = 0;
-        m_size[1] = dim1();
+        datastart[0] = i;
+        datasize[0] = m;
+        datastart[1] = 0;
+        datasize[1] = dim1();
       } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = 1;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
+        datastart[0] = i;
+        datasize[0] = 1;
+        datastart[1] = j;
+        datasize[1] = 1;
       }
     } else if (rank() == 1) {
       if (i < 0) {
         n = dim0();
-        alloc(static_cast<std::size_t>(n));
+        alloc(n);
         getData(m_data.data());
         return;
       } else {
         if (id >= dim0())
           rangeError();
         n = 1 * blocksize;
-        start[0] = i;
-        m_size[0] = blocksize;
+        datastart[0] = i;
+        datasize[0] = blocksize;
       }
     }
-    alloc(static_cast<size_t>(n));
-    getSlab(m_data.data(), start, m_size);
+    alloc(n);
+    getSlab(m_data.data(), datastart, datasize);
   }
 
 private:
   /** Allocates memory for the data buffer
    *  @param n :: The number of elements to allocate.
    */
-  void alloc(std::size_t n) {
-    if (n == 0) {
+  void alloc(nxdimsize_t new_size) {
+    if (new_size <= 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + path());
     }
     try {
-      if (m_n != n) {
-        m_data.resize(n);
-        m_n = n;
+      if (new_size != static_cast<nxdimsize_t>(m_size)) {
+        m_data.resize(new_size);
+        m_size = static_cast<size_t>(new_size);
       }
     } catch (...) {
       std::ostringstream ostr;
-      ostr << "Cannot allocate " << n * sizeof(T) << " bytes of memory to load the data";
+      ostr << "Cannot allocate " << new_size * sizeof(T) << " bytes of memory to load the data";
       throw std::runtime_error(ostr.str());
     }
   }
@@ -455,8 +455,7 @@ private:
   void rangeError() const { throw std::range_error("Nexus dataset range error"); }
   // We cannot use an STL vector due to the dreaded std::vector<bool>
   container_T<T> m_data; ///< The data buffer
-  NXDimArray m_size;     ///< The sizes of the loaded data
-  std::size_t m_n;       ///< The buffer size
+  std::size_t m_size;    ///< The buffer size
 };
 
 /// The integer dataset type

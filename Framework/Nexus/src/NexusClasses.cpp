@@ -8,8 +8,6 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/napi.h"
 
 #include <memory>
