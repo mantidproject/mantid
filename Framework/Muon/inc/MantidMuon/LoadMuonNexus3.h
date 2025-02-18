@@ -14,7 +14,8 @@
 
 #include <vector>
 
-namespace {
+namespace Mantid::Algorithms {
+
 using ConfFuncPtr = int (*)(const std::string &, const std::shared_ptr<Mantid::API::Algorithm> &);
 
 struct AlgDetail {
@@ -27,9 +28,6 @@ struct AlgDetail {
   const ConfFuncPtr m_confFunc;
   const Mantid::API::Algorithm_sptr m_alg;
 };
-} // namespace
-
-namespace Mantid::Algorithms {
 
 /**
 Loads an file in NeXus Muon format version 1 and 2 and stores it in a 2D
@@ -80,7 +78,7 @@ public:
 
 private:
   std::vector<AlgDetail> m_loadAlgs;
-  int m_selectedIndex;
+  size_t m_selectedIndex;
 
   void exec() override;
   void runSelectedAlg();

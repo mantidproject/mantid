@@ -26,7 +26,7 @@ namespace {
 class LoadMuonNexusV2 : public NexusFileLoader {
   const std::string name() const override { return "LoadMuonNexusV2"; }
   int version() const override { return 1; }
-  int confidence(NexusHDF5Descriptor &descriptor) const override { return 100; }
+  int confidence(NexusHDF5Descriptor &) const override { return 100; }
   void execLoader() override {}
   const std::string summary() const override { return "mock class"; }
   void init() override {}

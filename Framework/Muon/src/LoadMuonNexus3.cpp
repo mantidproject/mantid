@@ -60,7 +60,7 @@ void LoadMuonNexus3::exec() {
   const std::string filePath = getPropertyValue("Filename");
 
   int maxConfidenceRes{0};
-  for (int i = 0; i < m_loadAlgs.size(); i++) {
+  for (size_t i = 0; i < m_loadAlgs.size(); i++) {
     const int confidenceRes = m_loadAlgs[i].m_confFunc(filePath, m_loadAlgs[i].m_alg);
     if (confidenceRes > maxConfidenceRes) {
       maxConfidenceRes = confidenceRes;
