@@ -1,2 +1,5 @@
-- Renamed `Crop Calibration` within the `Engineering Diffraction` calibration interface to `Set Calibration Region of Interest` to more accurately reflect its functionality.
-- Renamed `Custom CalFile` to `Custom Grouping File` and allowed the provided file to be `.xml` as well as `.cal`. This brings it inline with the current detector grouping IO algorithms, :ref:`SaveDetectorsGrouping <algm-SaveDetectorsGrouping-v1>` and :ref:`LoadDetectorsGroupingFile <algm-LoadDetectorsGroupingFile-v1>`.
+- Renamed ``Crop Calibration`` within the ``Engineering Diffraction`` calibration interface to ``Set Calibration Region of Interest`` to more accurately reflect its functionality.
+- Renamed ``Custom CalFile`` to ``Custom Grouping File`` and allowed the provided file to be ``.xml`` as well as ``.`cal``. This brings it inline with the current detector grouping IO algorithms, :ref:`algm-SaveDetectorsGrouping-v1` and :ref:`algm-LoadDetectorsGroupingFile-v1`.
+- Changed the naming suffix for custom file example_group.xml from _Custom to _Custom_example_group so they don't get overwritten when custom grouping is changed (also more clear to the user what grouping is being used).
+- Changed the naming suffix for cropped spectrum list: example_list from _Cropped to _Cropped_example_list so they don't get overwritten when custom grouping is changed (also more clear to the user what grouping is being used).
+- Added a warning to Focusing for when the vanadium normalisation has been loaded from the ADS
