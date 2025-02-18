@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/SaveNXcanSAS.h"
+#include "MantidDataHandling/SavePolarizedNXcanSAS.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -15,26 +15,16 @@ using namespace Mantid::API;
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SaveNXcanSAS)
+DECLARE_ALGORITHM(SavePolarizedNXcanSAS)
 
 /// constructor
-SaveNXcanSAS::SaveNXcanSAS() = default;
+SavePolarizedNXcanSAS::SavePolarizedNXcanSAS() = default;
 
-void SaveNXcanSAS::init() { initStandardProperties(); }
+void SavePolarizedNXcanSAS::init() { initStandardProperties(); }
 
-std::map<std::string, std::string> SaveNXcanSAS::validateInputs() { return validateStandardInputs(); }
+std::map<std::string, std::string> SavePolarizedNXcanSAS::validateInputs() { return validateStandardInputs(); }
 
-bool SaveNXcanSAS::checkGroups() {
-  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
-  try {
-    if (workspace && workspace->isGroup())
-      return true;
-  } catch (...) {
-  }
-  return false;
-}
-
-bool SaveNXcanSAS::processGroups() {
+bool SavePolarizedNXcanSAS::processGroups() {
   Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
   auto const &group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
   std::ranges::for_each(group.cbegin(), group.cend(), [&](auto const &wsChild) {
@@ -45,7 +35,7 @@ bool SaveNXcanSAS::processGroups() {
   return true;
 }
 
-void SaveNXcanSAS::processAllWorkspaces() {
+void SavePolarizedNXcanSAS::processAllWorkspaces() {
   m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3 * m_workspaces.size());
   auto baseFilename = getPropertyValue("Filename");
   for (auto wksIndex = 0; wksIndex < static_cast<int>(m_workspaces.size()); wksIndex++) {
@@ -54,7 +44,7 @@ void SaveNXcanSAS::processAllWorkspaces() {
   }
 }
 
-void SaveNXcanSAS::exec() {
+void SavePolarizedNXcanSAS::exec() {
   Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
   m_workspaces.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
 
