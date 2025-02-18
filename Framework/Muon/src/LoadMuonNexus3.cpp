@@ -84,8 +84,13 @@ void LoadMuonNexus3::runSelectedAlg() {
 }
 
 void LoadMuonNexus3::addAlgToVec(const std::string &name, const int version, const ConfFuncPtr &loader) {
-  const auto &factory = API::AlgorithmFactory::Instance();
-  const auto alg = factory.create(name, version);
-  m_loadAlgs.push_back(AlgDetail(name, version, loader, alg));
+  auto &factory = API::AlgorithmFactory::Instance();
+  if (factory.exists(name, version)) {
+    const auto alg = factory.create(name, version);
+    m_loadAlgs.push_back(AlgDetail(name, version, loader, alg));
+  } else {
+    Mantid::Kernel::Logger("LoadMuonNexus3").debug()
+        << "Cannot add algorithm: " << name << " v" << version << ". The algorithm is not registered." << '\n';
+  }
 }
 } // namespace Mantid::Algorithms
