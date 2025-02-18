@@ -273,13 +273,13 @@ def load_existing_calibration_files(calibration):
         msg = f"Could not open GSAS calibration file: {prm_filepath}"
         logger.warning(msg)
         return None
+    calibration.load_relevant_calibration_files()
     try:
         # read diff constants from prm
         write_diff_consts_to_table_from_prm(prm_filepath)
     except RuntimeError:
         logger.error(f"Invalid file selected: {prm_filepath}")
         return None
-    calibration.load_relevant_calibration_files()
     return prm_filepath
 
 
@@ -503,7 +503,9 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
 def process_vanadium(vanadium_path, calibration, full_calib):
     van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
-    if ADS.doesExist(van_foc_name):
+    if ADS.doesExist(van_foc_name) and calibration.group != GROUP.CUSTOM and calibration.group != GROUP.CROPPED:
+        # If we are using these it is not guaranteed that the same grouping scheme is present for a given filename
+        # so only retrieve it is using one of the fixed groupings
         ws_van_foc = ADS.retrieve(van_foc_name)
     else:
         if ADS.doesExist(van_run):
