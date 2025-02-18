@@ -94,9 +94,9 @@ Output:
 
    for i, workspace_name in enumerate(output_workspaces):
        workspace = AnalysisDataService.retrieve(workspace_name)
-       axes[0, i].errorbar(workspace, "rs", wkspIndex=0, label="Data", markersize=2)
+       data_label = workspace_name.split("Output_Fit")[-1].split("_Workspace")[0]
+       axes[0, i].errorbar(workspace, "rs", wkspIndex=0, label=data_label, markersize=2)
        axes[0, i].errorbar(workspace, "b-", wkspIndex=1, label="Fit")
-       axes[0, i].set_title(workspace_name, rotation=4)
        axes[0, i].set_xlabel("")
        axes[0, i].tick_params(axis="both", direction="in")
        axes[0, i].legend()
@@ -105,6 +105,7 @@ Output:
        axes[1, i].set_ylabel("Difference", labelpad=1)
        axes[1, i].tick_params(axis="both", direction="in")
 
+   fig.tight_layout()
    fig.subplots_adjust(hspace=0, wspace=0.4)
    fig.show()
 
