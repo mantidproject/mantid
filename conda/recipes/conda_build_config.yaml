@@ -138,9 +138,10 @@ toml:
 gsl:
   - 2.7
 
-# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux.
+# v0.3.23 causes a hang on osx for some system tests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux, v0.3.29 causes failures on macOS and linux.
+# Just pin it to 0.3.27 for simplicity, rather than '!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.28','!=0.3.29'
 libopenblas:
-  - '!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28'
+  - 0.3.27
 
 euphonic:
   - '>=1.2.1,<2.0'
