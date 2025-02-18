@@ -137,6 +137,11 @@ class TomlSchemaV1Validator(object):
             },
         }
 
+        polarization_keys = {
+            "flipper_configuration",
+            "spin_configuration",
+        }
+
         return {
             "toml_file_version": None,
             "binning": binning_keys,
@@ -149,6 +154,7 @@ class TomlSchemaV1Validator(object):
             "q_resolution": q_resolution_keys,
             "reduction": reduction_keys,
             "transmission": transmission_keys,
+            "polarization": polarization_keys,
         }
 
     @staticmethod

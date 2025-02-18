@@ -16,6 +16,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -73,6 +74,9 @@ class TomlV1Parser(IStateParser):
     def get_state_reduction_mode(self):
         return self._implementation.reduction_mode
 
+    def get_state_polarization(self):
+        return self._implementation.polarization
+
     def get_state_save(self):
         return StateSave()
 
@@ -112,6 +116,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_transmission()
         self._parse_transmission_roi()
         self._parse_transmission_fitting()
+        self._parse_polarization()
 
     @property
     def instrument(self):
@@ -134,6 +139,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.scale = StateScale()
         self.wavelength = StateWavelength()
         self.wavelength_and_pixel = get_wavelength_and_pixel_adjustment_builder(data_info=data_info).build()
+        self.polarization = StatePolarization()
 
         # Ensure they are linked up correctly
         self.adjustment.calculate_transmission = self.calculate_transmission
@@ -510,6 +516,13 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                 self.mask.phi_min = phi_mask["start"]
             if "stop" in phi_mask:
                 self.mask.phi_max = phi_mask["stop"]
+
+    def _parse_polarization(self):
+        polarization_dict = self.get_val("polarization")
+        if polarization_dict is None:
+            return
+        self.polarization.flipper_configuration = self.get_val("flipper_configuration", polarization_dict)
+        self.polarization.spin_configuration = self.get_val("spin_configuration", polarization_dict)
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):

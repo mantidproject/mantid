@@ -21,6 +21,7 @@ from sans.common.enums import (
 )
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
@@ -694,6 +695,15 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(101, norm_state.prompt_peak_correction_min)
         self.assertEqual(102, norm_state.prompt_peak_correction_max)
         self.assertTrue(norm_state.prompt_peak_correction_enabled)
+
+    def test_parse_polarization(self):
+        top_level_dict = {"polarization": {"flipper_configuration": "00,11,01,10", "spin_configuration": "-1-1,-1+1,+1-1,+1+1"}}
+        parser_result = self._setup_parser(top_level_dict)
+        polarization_state = parser_result.get_state_polarization()
+
+        self.assertIsInstance(polarization_state, StatePolarization)
+        self.assertEqual("00,11,01,10", polarization_state.flipper_configuration)
+        self.assertEqual("-1-1,-1+1,+1-1,+1+1", polarization_state.spin_configuration)
 
 
 if __name__ == "__main__":
