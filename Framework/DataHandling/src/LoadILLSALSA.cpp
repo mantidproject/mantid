@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidNexus/H5Util.h"
 
 #include <iterator>
 #include <sstream>
@@ -60,7 +61,7 @@ void LoadILLSALSA::init() {
  */
 void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
-  H5::H5File h5file(filename, H5F_ACC_RDONLY);
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   enum FileType { NONE, V1, V2 };
 
