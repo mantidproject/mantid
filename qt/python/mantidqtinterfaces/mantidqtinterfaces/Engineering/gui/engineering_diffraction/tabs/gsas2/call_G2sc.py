@@ -8,6 +8,9 @@
 import os
 import sys
 import json
+from pathlib import Path
+import fnmatch
+from typing import Generator
 
 
 def print_histogram_R_factors(project):
@@ -162,6 +165,22 @@ def export_lattice_parameters(temp_save_directory, name_of_project, project):
         parameters_file_path = os.path.join(temp_save_directory, name_of_project + f"_cell_parameters_{loop_phase.name}.txt")
         with open(parameters_file_path, "wt", encoding="utf-8") as file:
             file.write(parameters_json)
+
+
+def limited_rglob(directory: Path, pattern: str, max_depth: int) -> Generator[Path, None, None]:
+    """
+    Recursively search for files matching the pattern in the directory up to a specified depth.
+    """
+    if not directory.is_dir():
+        raise FileNotFoundError(f"The provided directory path '{directory}' is not a valid directory.")
+    for root, dirs, files in os.walk(directory):
+        current_depth = len(Path(root).parts) - len(directory.parts)
+        if current_depth > max_depth:
+            dirs[:] = []
+        if current_depth <= max_depth:
+            for file in files:
+                if fnmatch.fnmatch(file, pattern):
+                    yield Path(root) / file
 
 
 def main():
