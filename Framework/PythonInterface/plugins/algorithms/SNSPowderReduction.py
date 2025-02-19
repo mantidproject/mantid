@@ -292,6 +292,26 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
         self.declareProperty("SampleGeometry", {}, doc="A dictionary of geometry parameters for the sample.")
         self.declareProperty(
+            "ContainerGeometry",
+            {},
+            doc="A dictionary of geometry parameters for the container."
+        )
+        self.declareProperty(
+            "ContainerMaterial",
+            {},
+            doc="A dictionary of material parameters for the container."
+        )
+        self.declareProperty(
+            "GaugeVolume",
+            "",
+            "A string in XML form for gauge volume definition indicating sample portion visible to the beam."
+        )
+        self.declareProperty(
+            "BeamHeight",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Height of the neutron beam cross section in cm",
+        )
+        self.declareProperty(
             "MeasuredMassDensity",
             defaultValue=0.1,
             validator=FloatBoundedValidator(lower=0.0, exclusive=True),
@@ -423,6 +443,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._absMethod = self.getProperty("TypeOfCorrection").value
         self._sampleFormula = self.getProperty("SampleFormula").value
         self._sampleGeometry = self.getProperty("SampleGeometry").value
+        self._containerGeometry = self.getProperty("ContainerGeometry").value
+        self._containerMaterial = self.getProperty("ContainerMaterial").value
+        self._gaugeVolume = self.getProperty("GaugeVolume").value
+        self._beamHeight = self.getProperty("BeamHeight").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
         self._numberDensity = self.getProperty("SampleNumberDensity").value
         self._containerShape = self.getProperty("ContainerShape").value
@@ -524,6 +548,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._sampleFormula,  # Material for absorption correction
             self._massDensity,  # Mass density of the sample
             self._sampleGeometry,  # Geometry parameters for the sample
+            self._containerGeometry,  # Geometry parameters for the container
+            self._containerMaterial,  # Material parameters for the container
+            self._gaugeVolume,  # Gauge volume definition
+            self._beamHeight,  # Height of the neutron beam cross section in cm
             self._numberDensity,  # Optional number density of sample to be added
             self._containerShape,  # Shape definition of container
             self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
