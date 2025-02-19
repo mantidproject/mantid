@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidKernel/LegacyNexusDescriptor.h"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
@@ -16,16 +16,16 @@
 
 #include <cstdio>
 
-using Mantid::Kernel::NexusDescriptor;
+using Mantid::Kernel::LegacyNexusDescriptor;
 
-class NexusDescriptorTest : public CxxTest::TestSuite {
+class LegacyNexusDescriptorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NexusDescriptorTest *createSuite() { return new NexusDescriptorTest(); }
-  static void destroySuite(NexusDescriptorTest *suite) { delete suite; }
+  static LegacyNexusDescriptorTest *createSuite() { return new LegacyNexusDescriptorTest(); }
+  static void destroySuite(LegacyNexusDescriptorTest *suite) { delete suite; }
 
-  NexusDescriptorTest() {
+  LegacyNexusDescriptorTest() {
     using Mantid::Kernel::ConfigService;
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
     for (auto &dataPath : dataPaths) {
@@ -45,10 +45,10 @@ public:
                                "The AutoTestData directory needs to be in the search path");
     }
 
-    m_testHDF5 = std::make_shared<NexusDescriptor>(m_testHDF5Path);
+    m_testHDF5 = std::make_shared<LegacyNexusDescriptor>(m_testHDF5Path);
   }
 
-  //=================================== NexusDescriptor methods
+  //=================================== LegacyNexusDescriptor methods
   //==================================
 
   void test_Constructor_Initializes_Object_Correctly_Given_HDF_File() {
@@ -57,15 +57,15 @@ public:
   }
 
   void test_Constructor_Throws_With_Empty_filename() {
-    TS_ASSERT_THROWS(NexusDescriptor(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(LegacyNexusDescriptor(""), const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_With_NonExistant_filename() {
-    TS_ASSERT_THROWS(NexusDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(LegacyNexusDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF() {
-    TS_ASSERT_THROWS(NexusDescriptor fd(m_testNonHDFPath), const std::invalid_argument &);
+    TS_ASSERT_THROWS(LegacyNexusDescriptor fd(m_testNonHDFPath), const std::invalid_argument &);
   }
 
   void test_File_Handle_Returned_By_Data_Is_Valid() {
@@ -95,5 +95,5 @@ public:
 private:
   std::string m_testHDF5Path;
   std::string m_testNonHDFPath;
-  std::shared_ptr<NexusDescriptor> m_testHDF5;
+  std::shared_ptr<LegacyNexusDescriptor> m_testHDF5;
 };
