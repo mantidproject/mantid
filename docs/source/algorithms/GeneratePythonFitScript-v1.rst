@@ -106,7 +106,7 @@ Output:
        axes[1, i].tick_params(axis="both", direction="in")
 
    fig.tight_layout()
-   fig.subplots_adjust(hspace=0, wspace=0.4)
+   fig.subplots_adjust(hspace=0)
    fig.show()
 
 
