@@ -34,8 +34,9 @@ int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<M
 }
 
 int calculateConfidence(const std::string &filePath, const std::shared_ptr<Mantid::API::Algorithm> &alg) {
-  const auto fileLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Kernel::NexusDescriptor>>(alg);
-  Mantid::Kernel::NexusDescriptor descriptor(filePath);
+  const auto fileLoader =
+      std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Kernel::LegacyNexusDescriptor>>(alg);
+  Mantid::Kernel::LegacyNexusDescriptor descriptor(filePath);
   const int confidence = fileLoader->confidence(descriptor);
   return (confidence >= CONFIDENCE_THRESHOLD) ? confidence : 0;
 }

@@ -27,6 +27,9 @@
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
+// must be after MantidNexusCpp/NeXusFile.hpp
+#include "MantidLegacyNexus/NeXusFile.hpp"
+
 #include <Poco/Path.h>
 #include <cmath>
 #include <memory>
@@ -84,7 +87,7 @@ void LoadMuonNexus2::exec() {
   }
 
   // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
+  const Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
   std::shared_ptr<Instrument> instrument;
@@ -368,7 +371,7 @@ void LoadMuonNexus2::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/definition"))
