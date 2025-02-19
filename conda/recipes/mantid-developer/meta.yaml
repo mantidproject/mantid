@@ -7,7 +7,7 @@ package:
 requirements:
   run:
     - ccache
-    - cmake {{ cmake }}
+    - cmake
     - conda-verify
     - conda-wrappers # [win]
     - doxygen {{ doxygen }}
