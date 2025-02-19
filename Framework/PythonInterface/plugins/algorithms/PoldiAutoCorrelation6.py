@@ -114,7 +114,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # average of inverse intermediate correlation func (Eq.8 in POLDI concept paper)
         corr = 1 / np.sum(1 / inter_corr, axis=1)
         ws_corr = self.exec_child_alg("CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)")
-
+        ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
         self.setProperty("OutputWorkspace", ws_corr)
 
     def exec_child_alg(self, alg_name: str, **kwargs):
