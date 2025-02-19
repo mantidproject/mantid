@@ -71,7 +71,7 @@ Click Menus
 |
 |
 
-.. figure:: /images/PlotOptionsCurves.png
+.. figure:: /images/PlotOptionsCurves.jpg
    :alt: Plot Options Axes Legend
    :align: center
 
