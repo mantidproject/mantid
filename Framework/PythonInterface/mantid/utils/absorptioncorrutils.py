@@ -660,7 +660,7 @@ def create_absorption_input(
             <left-back-bottom-point  x="-0.02" y="-{0:4.2F}" z="-0.02"  />
             <right-front-bottom-point  x="0.02" y="{0:4.2F}" z="-0.02"  />
             </cuboid>"""
-        gauge_vol = gauge_vol.format(beam_height)
+        gauge_vol = gauge_vol.format(beam_height / 2.)
 
     if gauge_vol:
         DefineGaugeVolume(absName, gauge_vol)
