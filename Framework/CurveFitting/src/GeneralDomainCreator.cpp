@@ -58,13 +58,13 @@ GeneralDomainCreator::GeneralDomainCreator(const API::IFunctionGeneral &fun, Ker
 void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
   UNUSED_ARG(suffix);
   if (addProp) {
-    for (auto &propName : m_domainColumnNames) {
+    for (const auto &propName : m_domainColumnNames) {
       declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a domain column.");
     }
-    for (auto &propName : m_dataColumnNames) {
+    for (const auto &propName : m_dataColumnNames) {
       declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a fitting data column.");
     }
-    for (auto &propName : m_weightsColumnNames) {
+    for (const auto &propName : m_weightsColumnNames) {
       declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a fitting weights column.");
     }
   }
@@ -191,11 +191,11 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(const std::string &ba
   if (inputWorkspace) {
     // Collect the names of columns to clone
     std::vector<std::string> columnsToClone;
-    for (auto &propName : m_domainColumnNames) {
+    for (const auto &propName : m_domainColumnNames) {
       auto columnName = m_manager->getPropertyValue(propName);
       columnsToClone.emplace_back(columnName);
     }
-    for (auto &propName : m_dataColumnNames) {
+    for (const auto &propName : m_dataColumnNames) {
       auto columnName = m_manager->getPropertyValue(propName);
       columnsToClone.emplace_back(columnName);
     }
@@ -206,7 +206,7 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(const std::string &ba
 
     // Add columns with the calculated data
     size_t i0 = 0;
-    for (auto &propName : m_dataColumnNames) {
+    for (const auto &propName : m_dataColumnNames) {
       auto dataColumnName = m_manager->getPropertyValue(propName);
       auto calcColumnName = dataColumnName + "_calc";
       auto column = outputWorkspace->addColumn("double", calcColumnName);
@@ -220,7 +220,7 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(const std::string &ba
     outputWorkspace = API::WorkspaceFactory::Instance().createTable();
     outputWorkspace->setRowCount(rowCount);
     size_t i0 = 0;
-    for (auto &propName : m_dataColumnNames) {
+    for (const auto &propName : m_dataColumnNames) {
       auto calcColumnName = m_manager->getPropertyValue(propName);
       if (calcColumnName.empty()) {
         calcColumnName = propName;
