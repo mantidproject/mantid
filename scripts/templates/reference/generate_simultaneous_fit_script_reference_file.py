@@ -51,12 +51,13 @@ for i, workspace_name in enumerate(output_workspaces):
     axes[0, i].errorbar(workspace, "b-", wkspIndex=1, label="Fit")
     axes[0, i].set_xlabel("")
     axes[0, i].tick_params(axis="both", direction="in")
-    axes[0, i].legend()
+    legend = axes[0, i].legend()
+    legend.set_in_layout(False)
 
     axes[1, i].errorbar(workspace, "ko", wkspIndex=2, markersize=2)
-    axes[1, i].set_ylabel("Difference", labelpad=1)
+    axes[1, i].set_ylabel("Difference")
     axes[1, i].tick_params(axis="both", direction="in")
 
 fig.tight_layout()
-fig.subplots_adjust(hspace=0)
+fig.subplots_adjust(hspace=0, wspace=0.6)
 fig.show()
