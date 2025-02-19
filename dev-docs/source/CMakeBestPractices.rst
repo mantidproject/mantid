@@ -123,32 +123,32 @@ With the move to conda, we have created a CMake export target for the Framework 
 
 1. When you add a new Framework library, alias it using the namespace Mantid:: - This means when we link to Mantid::NewTarget it can either link to our inbuilt library, or one on our system. This ensures we can have a standalone mantidqt build.
 
-.. code-block:: cmake
+    .. code-block:: cmake
 
-    add_library(NewTarget ${SRC_FILES} ${INC_FILES})
-    add_library(Mantid::NewTarget ALIAS NewTarget)
+        add_library(NewTarget ${SRC_FILES} ${INC_FILES})
+        add_library(Mantid::NewTarget ALIAS NewTarget)
 
-2. Add the install commands which ensures the target is exported.
+2. Add the install commands.
 
-A Framework library can either be installed as a regular or plugin library.
+    A Framework library can either be installed as a regular or plugin library.
 
-Regular library:
+    Regular library (ensures target is exported):
 
-.. code-block:: cmake
+    .. code-block:: cmake
 
-    set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
-    mtd_install_framework_lib(TARGETS NewTarget EXPORT_NAME ${TARGET_EXPORT_NAME})
+        set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
+        mtd_install_framework_lib(TARGETS NewTarget EXPORT_NAME ${TARGET_EXPORT_NAME})
 
-Plugin library:
+    Plugin library:
 
-.. code-block:: cmake
+    .. code-block:: cmake
 
-    set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
-    mtd_install_framework_lib(TARGETS NewTarget PLUGIN_LIB)
+        set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
+        mtd_install_framework_lib(TARGETS NewTarget PLUGIN_LIB)
 
-If a library is installed as a plugin library in will be installed in the plugin directory as opposed to the library directory. No headers, export files, or CMake targets are installed as plugin libraries are to be loaded dynamically
-and will not be linked against at build time.
+    If a library is installed as a plugin library in will be installed in the plugin directory as opposed to the library directory. No headers, export files, or CMake targets are installed as plugin libraries are to be loaded dynamically
+    and will not be linked against at build time.
 
-A library cannot be linked to a plugin library as a dependency; a plugin library is not guaranteed to be present. If this is done, errors will occur during the packaging stage.
+    A library cannot be linked to a plugin library as a dependency; a plugin library is not guaranteed to be present. If this is done, errors will occur during the packaging stage.
 
 3. Add the new target to the MODULES variable in ``MantidFrameworkConfig.cmake.in``. If it added new dependencies also add the relevant ``find_dependency`` calls.
