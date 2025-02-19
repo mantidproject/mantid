@@ -10,6 +10,7 @@ import sys
 import json
 from pathlib import Path
 import fnmatch
+from types import ModuleType
 from typing import Generator
 
 
@@ -183,6 +184,26 @@ def limited_rglob(directory: Path, pattern: str, max_depth: int) -> Generator[Pa
                     yield Path(root) / file
 
 
+def find_gsasii(directory_path: Path, file_name: str) -> ModuleType:
+    """
+    Recursively search for the file_name in the directory_path - the search checks all subdirectories
+    :Raises ImportError: If the file_name is not found in the directory_path
+    """
+    for file_path in limited_rglob(directory_path, file_name, max_depth=3):
+        if file_path.is_file():
+            if str(file_path.parent) not in sys.path:
+                sys.path.append(str(file_path.parent))
+            try:
+                import GSASIIscriptable as G2sc
+
+                return G2sc
+            except ImportError as exc:
+                raise ImportError(
+                    f"GSASIIscriptable ({file_name}) module found in {str(file_path.parent)} but could not be imported"
+                ) from exc
+    raise ImportError(f"GSASIIscriptable module '{file_name}' could not be found using the provided path: {directory_path}")
+
+
 def main():
     # Parse Inputs from Mantid
     inputs_dict = json.loads(sys.argv[1])
@@ -207,13 +228,7 @@ def main():
     number_of_regions = inputs_dict["number_of_regions"]
 
     # Call GSASIIscriptable
-    import_path = None
-    try:
-        import_path = os.path.join(path_to_gsas2, "GSASII")
-        sys.path.insert(0, import_path)
-        import GSASIIscriptable as G2sc
-    except ModuleNotFoundError:
-        raise ImportError(f"GSAS-II was not found at {import_path}")
+    G2sc = find_gsasii(Path(path_to_gsas2), "GSASIIscriptable.py")
 
     project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
     gsas_project = G2sc.G2Project(filename=project_path)
