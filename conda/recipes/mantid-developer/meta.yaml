@@ -39,6 +39,7 @@ requirements:
     - pydantic
     - pyqt {{ pyqt }}
     - pystack # [linux]
+    - pyqtwebengine
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]

@@ -544,7 +544,7 @@ void LoadNXcanSAS::init() {
 void LoadNXcanSAS::exec() {
   const std::string fileName = getPropertyValue("Filename");
   const bool loadTransmissions = getProperty("LoadTransmission");
-  H5::H5File file(fileName, H5F_ACC_RDONLY);
+  H5::H5File file(fileName, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   // Setup progress bar
   const int numberOfSteps = loadTransmissions ? 4 : 3;

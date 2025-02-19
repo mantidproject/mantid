@@ -35,6 +35,22 @@ If ConvertFromPointData is true, an input workspace
 contains Point data will be converted using :ref:`ConvertToHistogram <algm-ConvertToHistogram>`
 and then the algorithm will be run on the converted workspace.
 
+Applying instrument calibration
+###############################
+
+Some workflows involve applying a calibration in the form of updated detector positions. In the case of
+time-of-flight (TOF) diffraction it is also possible to provide detector offsets
+(from :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`) or diffractometer constants
+(from :ref:`PDCalibration <algm-PDCalibration>`) for the conversion between TOF and d-spacing.
+For more details on diffractometer constants see :ref:`Unit Factory`, for the relation between offsets and diffractometer
+constants see :ref:`algm-ConvertDiffCal`.
+
+:ref:`ApplyDiffCal <algm-ApplyDiffCal>` is used to apply a detector calibration in the form of a ``CalibrationFile``,
+``CalibrationWorkspace`` or ``OffsetsWorkspace``. Note this calibration will be used to do the conversion from d-spacing
+to TOF unless the user calls :ref:`ApplyDiffCal <algm-ApplyDiffCal>` again with ``ClearCalibration=True`` after the call
+to :ref:`ConvertUnits <algm-ConvertUnits>` (to reproduce the behaviour of the deprecated ``AlignDetectors`` algorithm).
+
+
 Restrictions on the input workspace
 ###################################
 

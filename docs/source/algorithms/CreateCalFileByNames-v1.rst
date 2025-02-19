@@ -24,7 +24,7 @@ then any existing offsets and selection values will be maintained and
 only the grouping values changed.
 
 Detectors not assigned to any group will appear as group 0, i.e. not
-included when using AlignDetector or DiffractionFocussing algorithms.
+included when using the DiffractionFocussing algorithm.
 
 The group number is assigned based on a descent in the instrument tree
 assembly. If two assemblies are parented, say Bank1 and module1, and

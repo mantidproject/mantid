@@ -355,7 +355,7 @@ void LoadSassena::exec() {
   m_filename = this->getPropertyValue("Filename");
   H5::H5File h5file;
   try {
-    h5file = H5::H5File(m_filename.c_str(), H5F_ACC_RDONLY);
+    h5file = H5::H5File(m_filename.c_str(), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
   } catch (H5::FileIException &) {
     this->g_log.error("Cannot open " + m_filename);
     throw Kernel::Exception::FileError("Unable to open:", m_filename);

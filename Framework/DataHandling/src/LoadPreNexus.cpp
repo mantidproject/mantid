@@ -241,7 +241,7 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir, vector<s
     g_log.debug() << "Found 1 event file: \"" << eventFilenames[0] << "\"\n";
   } else {
     g_log.debug() << "Found " << eventFilenames.size() << " event files:";
-    for (auto &eventFilename : eventFilenames) {
+    for (const auto &eventFilename : eventFilenames) {
       g_log.debug() << "\"" << eventFilename << "\" ";
     }
     g_log.debug() << "\n";
@@ -260,7 +260,10 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir
                                     const double prog_stop) {
   // determine the name of the file "inst_run"
   string shortName = runinfo.substr(runinfo.find_last_of("/\\") + 1);
-  shortName = shortName.substr(0, shortName.find("_runinfo.xml"));
+  const string runInfoFileExt = "_runinfo.xml";
+  if (const auto &pos = shortName.find(runInfoFileExt); pos != string::npos) {
+    shortName.resize(pos);
+  }
   g_log.debug() << "SHORTNAME = \"" << shortName << "\"\n";
 
   // put together a list of possible locations

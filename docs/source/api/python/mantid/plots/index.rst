@@ -188,6 +188,7 @@ when giving the projection:
 Matrix Workspace Plotting
 =========================
 
+The :ref:`Matrix Workspace <MatrixWorkspace_Plotting>` has some additional features that help simplify plotting data.
 The `setPlotType()` method allows you to define how a workspace should be visualized when plotting. The following plot types are available:
 
 - **marker**:

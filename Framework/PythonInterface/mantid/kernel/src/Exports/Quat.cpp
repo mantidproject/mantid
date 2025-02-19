@@ -52,6 +52,7 @@ void export_Quat() {
       .def("len2", &Quat::len2, arg("self"), "Returns the square of the 'length' of the quaternion")
       .def("getEulerAngles", &Quat::getEulerAngles, (arg("self"), arg("convention") = "YZX"),
            "Default convention is \'YZX\'.")
+      // cppcheck-suppress syntaxError
       .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(), (arg("self"), arg("other")))
       .def("__sub__", &Quat::operator-, (arg("left"), arg("right")))

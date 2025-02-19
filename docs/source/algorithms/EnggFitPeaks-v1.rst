@@ -33,9 +33,8 @@ then the algorithm fails.
 
 After the conversion of units, the algorithm tries to fit (in
 time-of-flight) a peak in the neighborhood of every expected peak
-using a peak shape or function. The conversion is done as in the
-Mantid algorithm :ref:`AlignDetectors <algm-AlignDetectors>`
-(following GSAS equations) if the workspace is focused (single
+using a peak shape or function. The conversion is done following GSAS equations
+(see :ref:`Unit Factory <Unit Factory>` for more details) if the workspace is focused (single
 spectrum) and has a log entry named "difc", where the GSAS DIFC
 parameter is expected. Otherwise the conversion of units is done as in
 the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.

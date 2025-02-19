@@ -116,7 +116,7 @@ LoadMuonStrategy::createDetectorGroupingTable(const std::vector<detid_t> &detect
   auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
       API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
   detectorGroupingTable->addColumn("vector_int", "Detectors");
-  for (auto &group : groupingMap) {
+  for (const auto &group : groupingMap) {
     if (group.first != 0) { // Skip 0 group
       API::TableRow newRow = detectorGroupingTable->appendRow();
       newRow << group.second;

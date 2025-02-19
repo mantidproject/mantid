@@ -64,19 +64,51 @@ typedef struct __NexusFile {
 
 /*-------------------------------------------------------------------*/
 
-std::map<NXnumtype, int> const nxToHDF4Map{
-    {NXnumtype::CHAR, DFNT_CHAR8},    {NXnumtype::INT8, DFNT_INT8},       {NXnumtype::UINT8, DFNT_UINT8},
-    {NXnumtype::INT16, DFNT_INT16},   {NXnumtype::UINT16, DFNT_UINT16},   {NXnumtype::INT32, DFNT_INT32},
-    {NXnumtype::UINT32, DFNT_UINT32}, {NXnumtype::FLOAT32, DFNT_FLOAT32}, {NXnumtype::FLOAT64, DFNT_FLOAT64}};
-
-static int nxToHDF4Type(NXnumtype type) {
-  auto const iter = nxToHDF4Map.find(type);
-  if (iter != nxToHDF4Map.cend()) {
-    return iter->second;
-  } else {
-    NXReportError("ERROR: nxToHDF4Type: unknown type");
-    return -1;
+static int nxToHDF4Type(NXnumtype datatype) {
+  int type;
+  switch (datatype) {
+  case NXnumtype::CHAR: {
+    type = DFNT_CHAR8;
+    break;
   }
+  case NXnumtype::INT8: {
+    type = DFNT_INT8;
+    break;
+  }
+  case NXnumtype::UINT8: {
+    type = DFNT_UINT8;
+    break;
+  }
+  case NXnumtype::INT16: {
+    type = DFNT_INT16;
+    break;
+  }
+  case NXnumtype::UINT16: {
+    type = DFNT_UINT16;
+    break;
+  }
+  case NXnumtype::INT32: {
+    type = DFNT_INT32;
+    break;
+  }
+  case NXnumtype::UINT32: {
+    type = DFNT_UINT8;
+    break;
+  }
+  case NXnumtype::FLOAT32: {
+    type = DFNT_FLOAT32;
+    break;
+  }
+  case NXnumtype::FLOAT64: {
+    type = DFNT_FLOAT64;
+    break;
+  }
+  default: {
+    NXReportError("ERROR: nxToHDF4Type: unknown type");
+    type = -1;
+  }
+  }
+  return type;
 }
 
 /*-------------------------------------------------------------------*/
@@ -678,6 +710,10 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int ra
   }
 
   type = nxToHDF4Type(datatype);
+  if (type == -1) {
+    NXReportError("ERROR: invalid type in NX4makedata");
+    return NXstatus::NX_ERROR;
+  }
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
@@ -760,6 +796,10 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
   }
 
   type = nxToHDF4Type(datatype);
+  if (type == -1) {
+    NXReportError("ERROR: invalid datatype in NX4compmakedata");
+    return NXstatus::NX_ERROR;
+  }
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
@@ -1020,6 +1060,10 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
 
   pFile = NXIassert(fid);
   type = nxToHDF4Type(iType);
+  if (type == -1) {
+    NXReportError("ERROR: Invalid data type for HDF attribute");
+    return NXstatus::NX_ERROR;
+  }
   if (pFile->iCurrentSDS != 0) {
     /* SDS attribute */
     iRet = SDsetattr(pFile->iCurrentSDS, static_cast<const char *>(name), static_cast<int32>(type),
@@ -1096,13 +1140,11 @@ NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
   } else {
     sRes->iTag = DFTAG_NDG;
     sRes->iRef = SDidtoref(pFile->iCurrentSDS);
-    NXMDisableErrorReporting();
     datalen = 1024;
     memset(&sRes->targetPath, 0, 1024);
     if (NX4getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       NXIbuildPath(pFile, sRes->targetPath, 1024);
     }
-    NXMEnableErrorReporting();
     return NXstatus::NX_OK;
   }
   sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);

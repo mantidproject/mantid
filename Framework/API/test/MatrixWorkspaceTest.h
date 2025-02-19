@@ -407,7 +407,7 @@ public:
     TS_ASSERT_EQUALS(ws->getPlotType(), "plot");
 
     // test invalid is rejected
-    ws->setPlotType("invalid");
+    TS_ASSERT_THROWS(ws->setPlotType("invalid"), const std::invalid_argument &);
     TS_ASSERT_EQUALS(ws->getPlotType(), "plot");
 
     // test valid is accepted
@@ -417,6 +417,9 @@ public:
 
   void testGetSetMarkerStyle() {
     // test default
+    TS_ASSERT_EQUALS(ws->getMarkerStyle(), "vline");
+
+    TS_ASSERT_THROWS(ws->setMarkerStyle("invalid"), const std::invalid_argument &);
     TS_ASSERT_EQUALS(ws->getMarkerStyle(), "vline");
 
     // test set

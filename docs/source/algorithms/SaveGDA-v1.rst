@@ -56,7 +56,7 @@ D to TOF Conversion
    conversion factors for each bank.
 
 SaveGDA takes input in D-spacing, and applies the GSAS conversion
-(explained at :ref:`AlignDetectors <algm-AlignDetectors>`), using
+(explained in :ref:`Unit Factory`), using
 parameters from the calibration file, to convert back to
 time-of-flight. The caveat here is that, if the calibration file
 contains the wrong conversion factors, then the TOF values will not

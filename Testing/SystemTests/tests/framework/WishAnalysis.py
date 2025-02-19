@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import (
-    AlignDetectors,
+    ApplyDiffCal,
     ConvertFromDistribution,
     ConvertToDistribution,
     ConvertUnits,
@@ -64,9 +64,9 @@ class WishAnalysis(systemtesting.MantidSystemTest):
         # align detectors
         ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="TOF")
         ReplaceSpecialValues(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", NaNValue="0", InfinityValue="0")
-        AlignDetectors(
-            InputWorkspace="w16748-1", OutputWorkspace="w16748-1", CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal"
-        )
+        ApplyDiffCal(InstrumentWorkspace="w16748-1", CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal")
+        ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="dSpacing")
+        ApplyDiffCal(InstrumentWorkspace="w16748-1", ClearCalibration=True)
         # focus data
         DiffractionFocussing(
             InputWorkspace="w16748-1", OutputWorkspace="w16748-1foc", GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal"

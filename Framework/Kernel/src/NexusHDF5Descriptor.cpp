@@ -91,6 +91,10 @@ std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries
   try {
     fileID = H5::H5File(m_filename, H5F_ACC_RDONLY, H5::FileCreatPropList::DEFAULT, access_plist);
   } catch (const H5::FileIException &) {
+    try {
+      fileID.close();
+    } catch (const H5::FileIException &) { /* do nothing */
+    }
     throw std::invalid_argument("ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " + m_filename + "\n");
   }
 
@@ -104,6 +108,9 @@ std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries
 
   // scan file recursively starting with root group "/"
   getGroup(groupID, allEntries, m_firstEntryNameType, 0);
+
+  // handle going out of scope should automatically close
+  fileID.close();
 
   // rely on move semantics
   return allEntries;

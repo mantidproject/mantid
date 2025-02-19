@@ -26,6 +26,7 @@ requirements:
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - pyqt {{ pyqt }}                        # [build_platform != target_platform]
+    - pyqtwebengine                          #[build_platform != target_platform]
     - qt-main {{ qt_main }}                  # [build_platform != target_platform]
     - sip {{ sip }}                          # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]

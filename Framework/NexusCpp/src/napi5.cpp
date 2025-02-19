@@ -698,26 +698,59 @@ NXstatus NX5closegroup(NXhandle fid) {
 }
 
 /*-----------------------------------------------------------------------*/
-std::map<NXnumtype, hid_t> const nxToHDF5Map{{NXnumtype::CHAR, H5T_C_S1},
-                                             {NXnumtype::INT8, H5T_NATIVE_CHAR},
-                                             {NXnumtype::UINT8, H5T_NATIVE_UCHAR},
-                                             {NXnumtype::INT16, H5T_NATIVE_SHORT},
-                                             {NXnumtype::UINT16, H5T_NATIVE_USHORT},
-                                             {NXnumtype::INT32, H5T_NATIVE_INT},
-                                             {NXnumtype::UINT32, H5T_NATIVE_UINT},
-                                             {NXnumtype::INT64, H5T_NATIVE_INT64},
-                                             {NXnumtype::UINT64, H5T_NATIVE_UINT64},
-                                             {NXnumtype::FLOAT32, H5T_NATIVE_FLOAT},
-                                             {NXnumtype::FLOAT64, H5T_NATIVE_DOUBLE}};
-
-static hid_t nxToHDF5Type(NXnumtype type) {
-  auto const iter = nxToHDF5Map.find(type);
-  if (iter != nxToHDF5Map.cend()) {
-    return iter->second;
-  } else {
-    NXReportError("ERROR: nxToHDF5Type: unknown type");
-    return -1;
+static hid_t nxToHDF5Type(NXnumtype datatype) {
+  hid_t type;
+  switch (datatype) {
+  case NXnumtype::CHAR: {
+    type = H5T_C_S1;
+    break;
   }
+  case NXnumtype::INT8: {
+    type = H5T_NATIVE_CHAR;
+    break;
+  }
+  case NXnumtype::UINT8: {
+    type = H5T_NATIVE_UCHAR;
+    break;
+  }
+  case NXnumtype::INT16: {
+    type = H5T_NATIVE_SHORT;
+    break;
+  }
+  case NXnumtype::UINT16: {
+    type = H5T_NATIVE_USHORT;
+    break;
+  }
+  case NXnumtype::INT32: {
+    type = H5T_NATIVE_INT;
+    break;
+  }
+  case NXnumtype::UINT32: {
+    type = H5T_NATIVE_UINT;
+    break;
+  }
+  case NXnumtype::INT64: {
+    type = H5T_NATIVE_INT64;
+    break;
+  }
+  case NXnumtype::UINT64: {
+    type = H5T_NATIVE_UINT64;
+    break;
+  }
+  case NXnumtype::FLOAT32: {
+    type = H5T_NATIVE_FLOAT;
+    break;
+  }
+  case NXnumtype::FLOAT64: {
+    type = H5T_NATIVE_DOUBLE;
+    break;
+  }
+  default: {
+    NXReportError("ERROR: nxToHDF5Type: unknown type");
+    type = -1;
+  }
+  }
+  return type;
 }
 
 /* --------------------------------------------------------------------- */
@@ -1204,13 +1237,11 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
      this means: if the item is already linked: use the target attribute else,
      the path to the current node
    */
-  NXMDisableErrorReporting();
   datalen = 1024;
   memset(&sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
   if (NX5getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
     buildCurrentPath(pFile, sRes->targetPath, 1024);
   }
-  NXMEnableErrorReporting();
   sRes->linkType = 1;
   return NXstatus::NX_OK;
 }
@@ -1510,50 +1541,50 @@ NXstatus NX5getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
  *
  *-------------------------------------------------------------------------
  */
-static int hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
-  int iPtype = -1;
+static NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
+  NXnumtype iPtype = NXnumtype::BAD;
   size_t size;
   H5T_sign_t sign;
 
   if (tclass == H5T_STRING) {
-    iPtype = NX_CHAR;
+    iPtype = NXnumtype::CHAR;
   } else if (tclass == H5T_INTEGER) {
     size = H5Tget_size(atype);
     sign = H5Tget_sign(atype);
     if (size == 1) {
       if (sign == H5T_SGN_2) {
-        iPtype = NX_INT8;
+        iPtype = NXnumtype::INT8;
       } else {
-        iPtype = NX_UINT8;
+        iPtype = NXnumtype::UINT8;
       }
     } else if (size == 2) {
       if (sign == H5T_SGN_2) {
-        iPtype = NX_INT16;
+        iPtype = NXnumtype::INT16;
       } else {
-        iPtype = NX_UINT16;
+        iPtype = NXnumtype::UINT16;
       }
     } else if (size == 4) {
       if (sign == H5T_SGN_2) {
-        iPtype = NX_INT32;
+        iPtype = NXnumtype::INT32;
       } else {
-        iPtype = NX_UINT32;
+        iPtype = NXnumtype::UINT32;
       }
     } else if (size == 8) {
       if (sign == H5T_SGN_2) {
-        iPtype = NX_INT64;
+        iPtype = NXnumtype::INT64;
       } else {
-        iPtype = NX_UINT64;
+        iPtype = NXnumtype::UINT64;
       }
     }
   } else if (tclass == H5T_FLOAT) {
     size = H5Tget_size(atype);
     if (size == 4) {
-      iPtype = NX_FLOAT32;
+      iPtype = NXnumtype::FLOAT32;
     } else if (size == 8) {
-      iPtype = NX_FLOAT64;
+      iPtype = NXnumtype::FLOAT64;
     }
   }
-  if (iPtype == -1) {
+  if (iPtype == NXnumtype::BAD) {
     char message[80];
     snprintf(message, 79, "ERROR: hdf5ToNXtype: invalid type (%d)", tclass);
     NXReportError(message);
@@ -1722,8 +1753,8 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
       type = H5Dget_type(grp);
       atype = H5Tcopy(type);
       tclass = H5Tget_class(atype);
-      int iPtype = hdf5ToNXType(tclass, atype);
-      *datatype = static_cast<NXnumtype>(iPtype);
+      NXnumtype iPtype = hdf5ToNXType(tclass, atype);
+      *datatype = iPtype;
       strcpy(nxclass, "SDS");
       H5Tclose(atype);
       H5Tclose(type);
@@ -1839,7 +1870,8 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
 
 NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   pNexusFile5 pFile;
-  int i, iRank, mType;
+  int i, iRank;
+  NXnumtype mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
   hid_t memType;
@@ -1868,7 +1900,7 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     UNUSED_ARG(total_dims_size);
   }
   /* conversion to proper ints for the platform */
-  *iType = static_cast<NXnumtype>(mType);
+  *iType = mType;
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
     if (H5Tis_variable_str(pFile->iCurrentT)) {
       /* this will not work for arrays of strings */
@@ -2120,13 +2152,11 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
        this means: if the item is already linked: use the target attribute, else
        the path to the current node
      */
-    NXMDisableErrorReporting();
     int datalen = 1024;
     memset(sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
     if (NX5getattr(fileid, "target", sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       buildCurrentPath(pFile, sRes->targetPath, datalen);
     }
-    NXMEnableErrorReporting();
     sRes->linkType = 0;
     return NXstatus::NX_OK;
   }
@@ -2479,7 +2509,8 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
 /*------------------------------------------------------------------------*/
 NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
   pNexusFile5 pFile;
-  int iRet, mType;
+  int iRet;
+  NXnumtype mType;
   hid_t vid;
   hid_t filespace, attrt, memtype;
   hsize_t myDim[H5S_MAX_RANK];
@@ -2510,7 +2541,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   mType = hdf5ToNXType(tclass, attrt);
 
   /* conversion to proper ints for the platform */
-  *iType = static_cast<NXnumtype>(mType);
+  *iType = mType;
 
   if (tclass == H5T_STRING) {
     myrank++;

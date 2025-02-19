@@ -26,6 +26,8 @@ public:
   const std::string summary() const override {
     return "Save a MatrixWorkspace to a file in the NXcanSAS format (for both 1D and 2D data).";
   }
+  /// Override processGroups
+  bool processGroups() override;
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -40,6 +42,9 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
+  void processAllWorkspaces();
+
+  std::vector<API::MatrixWorkspace_sptr> m_workspaces;
 };
 
 } // namespace DataHandling

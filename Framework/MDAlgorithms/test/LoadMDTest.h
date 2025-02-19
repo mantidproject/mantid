@@ -632,7 +632,7 @@ public:
     std::string this_fileName = saveAlg.getProperty("Filename");
 
     if (rmCoordField) {
-      H5File h5file(this_fileName.c_str(), H5F_ACC_RDWR);
+      H5File h5file(this_fileName.c_str(), H5F_ACC_RDWR, Mantid::NeXus::H5Util::defaultFileAcc());
       H5Util::deleteObjectLink(h5file, rootGroup + "/coordinate_system");
     }
 

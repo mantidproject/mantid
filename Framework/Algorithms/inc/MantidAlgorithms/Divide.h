@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/BinaryOperation.h"
+#include "MantidKernel/OptionalBool.h"
 
 namespace Mantid {
 namespace Algorithms {

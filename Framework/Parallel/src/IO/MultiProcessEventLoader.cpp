@@ -57,7 +57,9 @@ void MultiProcessEventLoader::load(const std::string &filename, const std::strin
                                    std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const {
 
   try {
-    H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
+    H5::FileAccPropList access_plist;
+    access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+    H5::H5File file(filename.c_str(), H5F_ACC_RDONLY, access_plist);
     auto instrument = file.openGroup(groupname);
 
     auto bkSz = EventLoader::readBankSizes(instrument, bankNames);
@@ -217,7 +219,9 @@ void MultiProcessEventLoader::fillFromFile(EventsListsShmemStorage &storage, con
                                            const std::string &groupname, const std::vector<std::string> &bankNames,
                                            const std::vector<int32_t> &bankOffsets, const std::size_t from,
                                            const std::size_t to, bool precalc) {
-  H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  H5::H5File file(filename.c_str(), H5F_ACC_RDONLY, access_plist);
   auto instrument = file.openGroup(groupname);
 
   auto type = EventLoader::readDataType(instrument, bankNames, "event_time_offset");

@@ -45,6 +45,12 @@ template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATI
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
+H5::FileAccPropList defaultFileAcc() {
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  return access_plist;
+}
+
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
   return DataSpace(1, dims);
