@@ -71,7 +71,7 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus", "LoadMuonNexusV2"}; }
 
   // Returns 0, as this wrapper version of the algorithm is never to be selected via load.
-  int confidence(Kernel::NexusDescriptor &) const override { return 0; };
+  int confidence(Kernel::LegacyNexusDescriptor &) const override { return 0; };
   // Methods to enable testing.
   const std::string &getSelectedAlg() const { return m_loadAlgs[m_selectedIndex].m_name; }
   int getSelectedVersion() const { return m_loadAlgs[m_selectedIndex].m_version; }
