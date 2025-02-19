@@ -361,14 +361,18 @@ def calculate_absorption_correction(
             environment["Container"] = container_shape
 
     donorWS = create_absorption_input(
-        filename, props, num_wl_bins,
-        material=material, geometry=sample_geometry,
-        can_geometry=can_geometry, can_material=can_material,
+        filename,
+        props,
+        num_wl_bins,
+        material=material,
+        geometry=sample_geometry,
+        can_geometry=can_geometry,
+        can_material=can_material,
         gauge_vol=gauge_vol,
         beam_height=beam_height,
         environment=environment,
         find_environment=find_env,
-        metaws=metaws
+        metaws=metaws,
     )
 
     # NOTE: Ideally we want to separate cache related task from calculation,
@@ -644,18 +648,22 @@ def create_absorption_input(
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
         mantid.simpleapi.SetSampleFromLogs(
-            InputWorkspace=absName, Material=material, Geometry=geometry,
-            ContainerGeometry=can_geometry, ContainerMaterial=can_material,
-            Environment=environment, FindEnvironment=find_environment
+            InputWorkspace=absName,
+            Material=material,
+            Geometry=geometry,
+            ContainerGeometry=can_geometry,
+            ContainerMaterial=can_material,
+            Environment=environment,
+            FindEnvironment=find_environment,
         )
 
     if beam_height != Property.EMPTY_DBL and not gauge_vol:
-        gauge_vol = '''<cuboid id="shape">
+        gauge_vol = """<cuboid id="shape">
             <left-front-bottom-point x="0.02" y="-{0:4.2F}" z="-0.02"  />
             <left-front-top-point  x="0.02" y="-{0:4.2F}" z="0.02"  />
             <left-back-bottom-point  x="-0.02" y="-{0:4.2F}" z="-0.02"  />
             <right-front-bottom-point  x="0.02" y="{0:4.2F}" z="-0.02"  />
-            </cuboid>'''
+            </cuboid>"""
         gauge_vol = gauge_vol.format(beam_height)
 
     if gauge_vol:

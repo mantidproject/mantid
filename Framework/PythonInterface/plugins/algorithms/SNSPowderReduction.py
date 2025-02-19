@@ -291,20 +291,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
         self.declareProperty("SampleGeometry", {}, doc="A dictionary of geometry parameters for the sample.")
+        self.declareProperty("ContainerGeometry", {}, doc="A dictionary of geometry parameters for the container.")
+        self.declareProperty("ContainerMaterial", {}, doc="A dictionary of material parameters for the container.")
         self.declareProperty(
-            "ContainerGeometry",
-            {},
-            doc="A dictionary of geometry parameters for the container."
-        )
-        self.declareProperty(
-            "ContainerMaterial",
-            {},
-            doc="A dictionary of material parameters for the container."
-        )
-        self.declareProperty(
-            "GaugeVolume",
-            "",
-            "A string in XML form for gauge volume definition indicating sample portion visible to the beam."
+            "GaugeVolume", "", "A string in XML form for gauge volume definition indicating sample portion visible to the beam."
         )
         self.declareProperty(
             "BeamHeight",
