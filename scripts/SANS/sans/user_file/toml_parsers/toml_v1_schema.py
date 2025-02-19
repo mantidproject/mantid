@@ -138,8 +138,20 @@ class TomlSchemaV1Validator(object):
         }
 
         polarization_keys = {
-            "flipper_configuration",
-            "spin_configuration",
+            "flipper_configuration": None,
+            "spin_configuration": None,
+            "flipper": {
+                "*": {
+                    "idf_component_name": None,
+                    "device_name": None,
+                    "device_type": None,
+                    "location": {"x", "y", "z"},
+                    "transmission": None,
+                    "efficiency": None,
+                    "empty_cell": None,
+                    "initial_polarization": None,
+                }
+            },
         }
 
         return {

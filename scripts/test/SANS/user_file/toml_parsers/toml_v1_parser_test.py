@@ -705,6 +705,44 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual("00,11,01,10", polarization_state.flipper_configuration)
         self.assertEqual("-1-1,-1+1,+1-1,+1+1", polarization_state.spin_configuration)
 
+    def test_parse_flippers(self):
+        top_level_dict = {
+            "polarization": {
+                "flipper": {
+                    "polarizing": {
+                        "idf_component_name": "name_in_IDF",
+                        "device_name": "flipper1",
+                        "device_type": "coil",
+                        "location": {"x": 1.17, "y": 0.05, "z": 0.045},
+                        "transmission": "trans_ws",
+                        "efficiency": "eff_ws",
+                    },
+                    "analyzing": {
+                        "idf_component_name": "name_in_IDF_a",
+                        "device_name": "flipper2",
+                        "device_type": "coil",
+                        "location": {"x": 2.17, "y": 0.05, "z": 0.045},
+                        "transmission": "trans_ws",
+                        "efficiency": "eff_ws",
+                    },
+                }
+            }
+        }
+        parser_result = self._setup_parser(top_level_dict)
+        polarization_state = parser_result.get_state_polarization()
+        flippers = polarization_state.flippers
+        self.assertEqual(2, len(flippers))
+        self.assertEqual("flipper1", flippers[0].device_name)
+        self.assertEqual("flipper2", flippers[1].device_name)
+        self.assertEqual(1.17, flippers[0].location_x)
+        self.assertEqual(0.05, flippers[0].location_y)
+        self.assertEqual(0.045, flippers[0].location_z)
+        self.assertEqual(2.17, flippers[1].location_x)
+        self.assertEqual("name_in_IDF", flippers[0].idf_component_name)
+        self.assertEqual("coil", flippers[0].device_type)
+        self.assertEqual("trans_ws", flippers[0].transmission)
+        self.assertEqual("eff_ws", flippers[0].efficiency)
+
 
 if __name__ == "__main__":
     unittest.main()

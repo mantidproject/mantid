@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from typing import Optional
+
 from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
 from sans.common.general_functions import get_bank_for_spectrum_number, get_detector_types_from_instrument
 from sans.state.IStateParser import IStateParser
@@ -16,7 +18,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StatePolarization import StatePolarization
+from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -74,7 +76,7 @@ class TomlV1Parser(IStateParser):
     def get_state_reduction_mode(self):
         return self._implementation.reduction_mode
 
-    def get_state_polarization(self):
+    def get_state_polarization(self) -> Optional[StatePolarization]:
         return self._implementation.polarization
 
     def get_state_save(self):
@@ -523,6 +525,26 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             return
         self.polarization.flipper_configuration = self.get_val("flipper_configuration", polarization_dict)
         self.polarization.spin_configuration = self.get_val("spin_configuration", polarization_dict)
+        flipper_dicts = self.get_val("flipper", polarization_dict)
+        if flipper_dicts:
+            for flipper_dict in flipper_dicts.values():
+                self.polarization.flippers.append(self._parse_component(flipper_dict))
+
+    def _parse_component(self, component_dict: dict) -> StateComponent:
+        component_state = StateComponent()
+        if component_dict is None:
+            return component_state
+        component_state.idf_component_name = self.get_val("idf_component_name", component_dict)
+        component_state.device_name = self.get_val("device_name", component_dict)
+        component_state.device_type = self.get_val("device_type", component_dict)
+        location_dict = self.get_val("location", component_dict)
+        if location_dict:
+            component_state.location_x = self.get_val("x", location_dict)
+            component_state.location_y = self.get_val("y", location_dict)
+            component_state.location_z = self.get_val("z", location_dict)
+        component_state.transmission = self.get_val("transmission", component_dict)
+        component_state.efficiency = self.get_val("efficiency", component_dict)
+        return component_state
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):
