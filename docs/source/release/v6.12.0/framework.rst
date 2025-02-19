@@ -59,7 +59,7 @@ Geometry
 
 Bugfixes
 ############
-- ``CrystalStructure`` will now store and display Deuterium as ``D`` rather than ``H``.
+- ``CrystalStructure`` will now store and display deuterium as ``D`` rather than ``H``.
 
 
 Python
@@ -82,7 +82,7 @@ New features
 ############
 - Updated Matplotlib from version 3.7 to version 3.9. See release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_.
 - Updated compiler on Linux to gcc version 13, which should improve performance in some circumstances. The release notes can be found here https://gcc.gnu.org/gcc-13/changes.html.
-- Drop support for NumPy version 1. We now build against NumPy v2.0 and support up to v2.1. `Read about the changes <https://numpy.org/news/#numpy-200-released>`_. **Users should note that NumPy 2 introduces some breaking API changes. See the `NumPy 2 Migration Guide <https://numpy.org/devdocs/numpy_2_0_migration_guide.html>`_ for more details**
+- Drop support for NumPy version 1. We now build against NumPy v2.0 and support up to v2.1. `Read about the changes <https://numpy.org/news/#numpy-200-released>`_. **Users should note that NumPy 2 introduces some breaking API changes. See the** `NumPy 2 Migration Guide <https://numpy.org/devdocs/numpy_2_0_migration_guide.html>`_ **for more details.**
 
 
 MantidWorkbench
