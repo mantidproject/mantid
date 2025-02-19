@@ -56,6 +56,16 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         issues = dict()
         if self.getProperty("WavelengthMax").value <= self.getProperty("WavelengthMin").value:
             issues["WavelengthMax"] = "WavelengthMax must be greater than WavelengthMin."
+        ws = self.getProperty("InputWorkspace").value
+        if ws.getNumberHistograms() == 400:
+            issues["InputWorkspace"] = (
+                "InputWorkspace corresponds to the old 1D wire detector geometry on POLDI, "
+                "please use PoldiAutoCorrelation with keyword argument Version=5."
+            )
+        has_log = ws.run().hasProperty("chopperspeed")
+        has_chopper = ws.getInstrument().getComponentByName("chopper") is not None
+        if not has_log or not has_chopper:
+            issues["InputWorkspace"] = "InputWorkspace must have chopper component and chopperspeed log."
         return issues
 
     def PyExec(self):
