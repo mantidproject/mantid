@@ -146,7 +146,7 @@ With the move to conda, we have created a CMake export target for the Framework 
         set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
         mtd_install_framework_lib(TARGETS NewTarget PLUGIN_LIB)
 
-    If a library is installed as a plugin library in will be installed in the plugin directory as opposed to the library directory. No headers, export files, or CMake targets are installed as plugin libraries are to be loaded dynamically
+    If a library is installed as a plugin library it will be installed in the plugin directory as opposed to the library directory. No headers, export files, or CMake targets are installed, as plugin libraries are to be loaded dynamically
     and will not be linked against at build time.
 
     A library cannot be linked to a plugin library as a dependency; a plugin library is not guaranteed to be present. If this is done, errors will occur during the packaging stage.
