@@ -12,10 +12,10 @@ New Features
 - Surface and contour plots can now be generated more easily for multiple single-spectrum workspaces (via the `Plot Advanced` dialog when multiple single-spectrum workspaces are selected).
 - A crosshair tool has been added to plot toolbars.
 - Added an `Email mantid-help@mantidproject.org` action to the Help menu.
-- The settings dialog now `Okay`, `Apply` and `Cancel` buttons. Settings are no longer immediately applied when parameters are changed.
+- The settings dialog now has `Okay`, `Apply` and `Cancel` buttons. Settings are no longer immediately applied when parameters are changed.
 - MacOS compiler updated from version 16 to version 18, which should result in performance improvements. See https://releases.llvm.org for release notes.
 - The VULCAN instrument definition file now has six panels starting from 2022-05-15.
-- The Manage User Directories dialog now has a `Move to Top` button.
+- The :ref:`Manage User Directories <ManageUserDirectories>` dialog now has a `Move to Top` button.
 - ``setPlotType()`` can now be called on Matrix Workspaces to specify the :ref:`plot type <MatrixWorkspace_Plotting>`.
 
 
@@ -32,10 +32,10 @@ SliceViewer
 
 Bugfixes
 ############
-- Custom ``colormaps`` registered with ``matplotlib`` are now available in the SliceViewer.
+- Custom ``colormaps`` registered with ``matplotlib`` are now available in the :ref:`SliceViewer <sliceviewer>`.
 - Transposed data in the non-orthogonal view will now show with the correct ranges.
-- ``MDHistoWorkspaces`` open in SliceViewer will no longer produce ``Variable invalidated`` error messages if the underlying workspace is changed.
-- Normalisation is now correctly preserved when moving the slider with MD workspaces that contain more than one dimension.
+- ``MDHistoWorkspaces`` open in :ref:`SliceViewer <sliceviewer>` will no longer produce ``Variable invalidated`` error messages if the underlying workspace is changed.
+- Normalisation is now correctly preserved when moving the slider with :ref:`MD workspaces <MDWorkspace>` that contain more than one dimension.
 
 
 :ref:`Release 6.12.0 <v6.12.0>`
