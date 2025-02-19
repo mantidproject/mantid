@@ -638,10 +638,6 @@ def create_absorption_input(
         geometry = {}
     if not environment:
         environment = {}
-    if not can_geometry:
-        can_geometry = {}
-    if not can_material:
-        can_material = {}
     if can_geometry and can_material:
         environment = {}
 
