@@ -12,14 +12,14 @@ New features
 ############
 - :ref:`algm-PolarizationCorrectionFredrikze` and :ref:`algm-PolarizationEfficiencyCor` now have ``InputSpinStates`` and ``OutputSpinStates`` properties for specifying the spin state order in input and output workspace groups.
 - ``Mantid::Kernel::FloatingPointComparison`` has new functions for efficiently calculating absolute and relative differences.
-- On Linux the algorithm profiler is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- On Linux the :ref:`algorithm profiler <AlgorithmProfiler>` is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
 - The :ref:`AlgoTimeRegister <AlgoTimeRegister>` class is now exposed to python.
 - :ref:`ExtractMask <algm-ExtractMask>` has a new property ``UngroupDetectors`` to allow the output ``MaskWorkspace`` to expand the spectra to individual detectors.
 - :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` and :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` have a new ``AddSpinStateToLog`` property to add the final spin state into the sample log of each child workspace in the output group.
 - :ref:`EditInstrumentGeometry <algm-EditInstrumentGeometry>` now adds detectors to a single detector bank, rather than directly to the ``ComponentInfo`` root.
 - :ref:`SaveNexusESS <algm-SaveNexusESS>` now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.
 - New algorithm :ref:`algm-MagneticFormFactorCorrectionMD` to scale the MDEvents by the magnetic form factor.
-- :ref:`RebinRagged <algm-RebinRagged>` exposes ``FullBinsOnly`` from the :ref:`Rebin <algm-Rebin>` Algorithm.
+- :ref:`RebinRagged <algm-RebinRagged>` now exposes ``FullBinsOnly`` from the :ref:`Rebin <algm-Rebin>` Algorithm.
 - New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly distributed workspace by sampling from the probability distribution of the input workspace.
 - :ref:`CompareWorkspaces <algm-CompareWorkspaces>` has a new ``NaNsEqual`` boolean property to specify whether ``NaN`` values compare as equal.
 
@@ -27,8 +27,7 @@ Bugfixes
 ############
 - :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` will no longer segfault due to a racing condition in the parallel loop.
 - :ref:`RemovePromptPulse <algm-RemovePromptPulse>` will now correctly account for the first pulse.
-- The :ref:`Sample Transmission Calculator <sample_transmission_calculator>` now restricts entering commas mixed with decimal points in the text boxes for ``Low``, ``Width`` and ``High`` fields.
-- :ref:`CompareWorkspaces <algm-CompareWorkspaces>` will no longer evaluate ``NaN`` values as equal to any floating point (including ``inf`` and finite values).
+- :ref:`CompareWorkspaces <algm-CompareWorkspaces>` will no longer evaluate ``NaN`` values as equal to any floating point (including ``inf`` values).
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` will now throw an error if the input workspaces' bins do not match. A new ``CheckMatchingBins`` boolean property can be set to ``False`` to disable this check.
 - Some :ref:`algm-HeliumAnalyserEfficiency` properties have been renamed for consistency (any scripts using the old names will need to be updated):
 
