@@ -74,8 +74,15 @@ void addPropertyWithUnit(Run &self, const std::string &name, const bpl::object &
   extract<Property *> extractor(value);
   if (extractor.check()) {
     Property *prop = extractor();
-    self.addProperty(prop->clone(),
-                     replace); // Clone the property as Python owns the one that is passed in
+    // Clone the property as Python owns the one that is passed in
+    auto new_prop = prop->clone();
+    // set name and units if provided
+    if (!name.empty())
+      new_prop->setName(name);
+
+    if (!units.empty())
+      new_prop->setUnits(units);
+    self.addProperty(new_prop, replace);
     return;
   }
 
