@@ -119,4 +119,10 @@ auto RegionSelector::getRegion(const std::string &regionType) -> Selection {
   }
   return result;
 }
+
+void RegionSelector::displayRectangularRegion(const std::string &regionType, const std::string &color,
+                                              const std::string &hatch, const size_t y1, const size_t y2) {
+  GlobalInterpreterLock lock;
+  pyobj().attr("display_rectangular_region")(regionType, color, hatch, y1, y2);
+}
 } // namespace MantidQt::Widgets

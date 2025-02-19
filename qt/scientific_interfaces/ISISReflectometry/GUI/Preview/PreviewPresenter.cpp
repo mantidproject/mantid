@@ -128,13 +128,12 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_dockedWidgets->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
-  // Perform summing banks to update the next plot, if possible
-  runSumBanks();
+  runSumBanks(true);
 }
 
 void PreviewPresenter::notifyUpdateAngle() {
   // Re-run from the sum banks step to ensure the sliceviewer plot is up to date
-  runSumBanks();
+  runSumBanks(true);
 }
 
 void PreviewPresenter::notifySumBanksCompleted() {
@@ -201,7 +200,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 
   m_model->setSelectedBanks(detIDs);
   // Execute summing the selected banks
-  runSumBanks();
+  runSumBanks(false);
 }
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
@@ -272,7 +271,33 @@ void PreviewPresenter::plotInstView() {
                                 m_instViewModel->getAxis());
 }
 
-void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+void PreviewPresenter::plotRegionSelector() {
+  if (!m_plotExistingROIs) {
+    updateRegionSelectorWorkspace();
+    return;
+  }
+
+  // If there are matching experiment settings already then add region selectors to
+  // display these on the plot
+  auto const roiMap = m_mainPresenter->getMatchingProcessingInstructionsForPreviewRow();
+  if (!roiMap.empty()) {
+    clearRegionSelector();
+  }
+
+  updateRegionSelectorWorkspace();
+
+  for (auto it = roiMap.cbegin(); it != roiMap.cend(); ++it) {
+    auto const &roiType = it->first;
+    auto const roiTypeString = roiTypeToString(roiType);
+    auto const color = roiTypeToColor(roiType);
+    auto const hatch = roiTypeToHatch(roiType);
+    auto const regions = Mantid::Kernel::Strings::parseGroups<size_t>(it->second);
+
+    for (auto const &region : regions) {
+      m_regionSelector->displayRectangularRegion(roiTypeString, color, hatch, region.front(), region.back());
+    }
+  }
+}
 
 void PreviewPresenter::plotLinePlot() {
   auto ws = m_model->getReducedWs();
@@ -285,7 +310,9 @@ void PreviewPresenter::plotLinePlot() {
   m_plotPresenter->plot();
 }
 
-void PreviewPresenter::runSumBanks() {
+void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
+  m_plotExistingROIs = addExistingROIsToPlot;
+
   if (!m_model->getLoadedWs()) {
     g_log.error("Unable to perform sum banks step because there is no run loaded");
     return;
@@ -294,7 +321,19 @@ void PreviewPresenter::runSumBanks() {
   // Ensure the angle is up to date so that we can check for matching experiment settings lookup rows
   m_model->setTheta(m_view->getAngle());
 
-  if (!m_model->getSelectedBanks().has_value() && !m_mainPresenter->hasROIDetectorIDsForPreviewRow()) {
+  auto const &expSettingsDetectorROI = m_mainPresenter->getMatchingROIDetectorIDsForPreviewRow();
+  if (m_plotExistingROIs) {
+    auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectors();
+    if (selectedDetectorsOnPlot.empty()) {
+      // Update the model with any detector ROIs from the experiment settings.
+      // At the moment we only plot existing ROIs on the slice viewer plot, not the instrument view plot.
+      // If we don't keep the experiment settings detector ROIs then users might clear this unintentionally when
+      // applying changes to ROIs on the slice viewer.
+      m_model->setSelectedBanks(expSettingsDetectorROI);
+    }
+  }
+
+  if (!m_model->getSelectedBanks().has_value() && !expSettingsDetectorROI.has_value()) {
     // Do not sum the workspace if no detector IDs have been selected
     m_model->setSummedWs(m_model->getLoadedWs());
     notifySumBanksCompleted();
@@ -336,5 +375,7 @@ void PreviewPresenter::updateSelectedRegionInModelFromView() {
   m_model->setSelectedRegion(ROIType::Transmission,
                              m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
 }
+
+void PreviewPresenter::updateRegionSelectorWorkspace() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
