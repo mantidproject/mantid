@@ -7,7 +7,7 @@
 import unittest
 import copy
 from mantid.geometry import Goniometer
-from mantid.kernel import DateAndTime, FloatTimeSeriesProperty, TimeROI
+from mantid.kernel import DateAndTime, FloatTimeSeriesProperty, TimeROI, FloatPropertyWithValue
 from mantid.api import Run
 import numpy as np
 
@@ -180,6 +180,68 @@ class RunTest(unittest.TestCase):
         self.assertEqual(self._run, other)
         other.addProperty("pressure", 1, True)
         self.assertNotEqual(self._run, other)
+
+    def test_setting_property_from_property(self):
+        property = FloatPropertyWithValue("property", 42)
+        property.units = "meters"
+
+        run = Run()
+        self.assertEqual(len(run.getProperties()), 0)
+
+        # not setting name or units
+        run.addProperty("", property, True)
+        self.assertEqual(len(run.getProperties()), 1)
+        self.assertTrue("property" in run)
+        prop = run.getProperty("property")
+        self.assertEqual(prop.name, "property")
+        self.assertEqual(prop.value, 42)
+        self.assertEqual(prop.units, "meters")
+
+        # setting name but not units
+        run.addProperty("prop1", property, True)
+        self.assertEqual(len(run.getProperties()), 2)
+        self.assertTrue("prop1" in run)
+        prop = run.getProperty("prop1")
+        self.assertEqual(prop.name, "prop1")
+        self.assertEqual(prop.value, 42)
+        self.assertEqual(prop.units, "meters")
+
+        # setting name and units
+        run.addProperty("prop2", property, "yards", True)
+        self.assertEqual(len(run.getProperties()), 3)
+        self.assertTrue("prop2" in run)
+        prop = run.getProperty("prop2")
+        self.assertEqual(prop.name, "prop2")
+        self.assertEqual(prop.value, 42)
+        self.assertEqual(prop.units, "yards")
+
+        # test __setitem__
+        run["prop3"] = property
+        self.assertEqual(len(run.getProperties()), 4)
+        self.assertTrue("prop3" in run)
+        prop = run.getProperty("prop3")
+        self.assertEqual(prop.name, "prop3")
+        self.assertEqual(prop.value, 42)
+        self.assertEqual(prop.units, "meters")
+
+        # test with time series property
+        time_series = FloatTimeSeriesProperty("time_series")
+        time_series.addValue("2008-Jun-17 11:10:44", 1.0)
+        time_series.addValue("2008-Jun-17 11:10:45", 2.0)
+
+        run.addProperty("", time_series, True)
+        self.assertEqual(len(run.getProperties()), 5)
+        self.assertTrue("time_series" in run)
+        tsp = run.getProperty("time_series")
+        self.assertEqual(tsp.name, "time_series")
+        self.assertEqual(list(tsp.value), [1, 2])
+
+        run.addProperty("other_time_series", time_series, True)
+        self.assertEqual(len(run.getProperties()), 6)
+        self.assertTrue("other_time_series" in run)
+        tsp2 = run.getProperty("other_time_series")
+        self.assertEqual(tsp2.name, "other_time_series")
+        self.assertEqual(list(tsp2.value), [1, 2])
 
 
 if __name__ == "__main__":
