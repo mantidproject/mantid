@@ -82,7 +82,7 @@ Waterfall plots are very similar to :ref:`1D plots<Basic_1D_Plots>` of multiple 
 |
 |
 
-.. figure:: /images/PlotOptionsCurves.png
+.. figure:: /images/PlotOptionsCurves.jpg
    :alt: Plot Options Curves
    :align: center
 

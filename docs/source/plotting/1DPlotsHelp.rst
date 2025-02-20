@@ -73,7 +73,7 @@ Click Menus
 |
 |
 
-.. figure:: /images/PlotOptionsCurves.png
+.. figure:: /images/PlotOptionsCurves.jpg
    :alt: Plot Options Axes Legend
    :align: center
 
@@ -166,7 +166,7 @@ Tiled plots are essentially an array of axes (1D plots) on the same figure. As s
 |
 |
 
-.. figure:: /images/PlotOptionsCurves.png
+.. figure:: /images/PlotOptionsCurves.jpg
    :alt: Plot Options Curves
    :align: center
 
