@@ -1,0 +1,1 @@
+- Fixed a bug where the cmake build with `-DUSE_SANITIZER=address` no longer completed successfully.
