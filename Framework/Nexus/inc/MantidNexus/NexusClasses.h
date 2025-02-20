@@ -167,20 +167,12 @@ public:
    *   @param j :: Non-negative value makes it read a chunk of dimension
    * rank()-2. i and j are its indices.
    *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indices.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indices.
-   *            The rank of the data must be 4
    */
-  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
+  virtual void load(int const blocksize, int const i, int const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
     UNUSED_ARG(j);
-    UNUSED_ARG(k);
-    UNUSED_ARG(l);
   };
 
 protected:
@@ -283,11 +275,11 @@ public:
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
    */
-  void load(int const blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
+  void load(int const blocksize = 1, int const i = -1, int const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j), kd(k), ld(l); // cppcheck-suppress variableScope
+    nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
     std::vector<int64_t> datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
@@ -302,24 +294,12 @@ public:
         n = dim1() * dim2() * dim3();
         datastart = {i, 0, 0, 0};
         datasize = {1, dim1(), dim2(), dim2()};
-      } else if (k < 0) {
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = dim2() * dim3();
         datastart = {i, j, 0, 0};
         datasize = {1, 1, dim2(), dim2()};
-      } else if (l < 0) {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = dim3();
-        datastart = {i, j, k, 0};
-        datasize = {1, 1, 1, dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
-          rangeError();
-        n = dim3();
-        datastart = {i, j, k, l};
-        datasize = {1, 1, 1, 1};
       }
     } else if (rank() == 3) {
       if (i < 0) {
@@ -333,7 +313,7 @@ public:
         n = dim1() * dim2();
         datastart = {i, 0, 0};
         datasize = {1, dim1(), dim2()};
-      } else if (k < 0) {
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         nxdimsize_t m = blocksize;
@@ -342,12 +322,6 @@ public:
         n = dim2() * m;
         datastart = {i, j, 0};
         datasize = {1, m, dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = 1;
-        datastart = {i, j, k};
-        datasize = {1, 1, 1};
       }
     } else if (rank() == 2) {
       if (i < 0) {
