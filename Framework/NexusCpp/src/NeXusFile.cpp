@@ -91,14 +91,34 @@ static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char
 */
 
 namespace NeXus {
-File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {}
 
-File::File(const string &filename, const NXaccess access) : m_close_handle(true) {
-  this->initOpenFile(filename, access);
+File::File(const string &filename, const NXaccess access)
+    : m_filename(filename), m_access(access), m_close_handle(true) {
+  this->initOpenFile(m_filename, m_access);
 }
 
-File::File(const char *filename, const NXaccess access) : m_close_handle(true) {
-  this->initOpenFile(string(filename), access);
+File::File(const char *filename, const NXaccess access) : m_filename(filename), m_access(access), m_close_handle(true) {
+  this->initOpenFile(m_filename, m_access);
+}
+
+File::File(File const &f)
+    : m_filename(f.m_filename), m_access(f.m_access), m_file_id(f.m_file_id), m_close_handle(false) {}
+
+File::File(File const *const pf)
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
+
+File::File(std::shared_ptr<File> pf)
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
+
+File &File::operator=(File const &f) {
+  if (this == &f) {
+  } else {
+    this->m_filename = f.m_filename;
+    this->m_access = f.m_access;
+    this->m_file_id = f.m_file_id;
+    this->m_close_handle = f.m_close_handle;
+  }
+  return *this;
 }
 
 void File::initOpenFile(const string &filename, const NXaccess access) {

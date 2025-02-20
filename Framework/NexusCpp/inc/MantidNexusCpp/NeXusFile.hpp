@@ -3,6 +3,7 @@
 #include "MantidNexusCpp/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile_fwd.h"
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,6 +29,8 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  */
 class MANTID_NEXUSCPP_DLL File {
 private:
+  std::string m_filename;
+  NXaccess m_access;
   /** The handle for the C-API. */
   NXhandle m_file_id;
   /** should be close handle on exit */
@@ -79,12 +82,32 @@ public:
   File(const char *filename, const NXaccess access = NXACC_READ);
 
   /**
-   * Use an existing handle returned from NXopen()
+   * Copy constructor
    *
-   * \param handle Handle to connect to
-   * \param close_handle Should the handle be closed on destruction
+   * \param f File to copy over, to complete rule of three
    */
-  File(NXhandle handle, bool close_handle = false);
+  File(File const &f);
+
+  /**
+   * Copy constructor from pointer
+   *
+   * \param pf Pointer to file to copy over
+   */
+  File(File const *const pf);
+
+  /**
+   * Copy constructor from pointer
+   *
+   * \param pf Pointer to file to copy over
+   */
+  File(std::shared_ptr<File> pf);
+
+  /**
+   * Assignment operator, to complete the rule of three
+   *
+   * \param f File to assign
+   */
+  File &operator=(File const &f);
 
   /** Destructor. This does close the file. */
   ~File();
