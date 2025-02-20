@@ -1,1 +1,0 @@
-- Add option ``SeparateBatchNumbers`` to :ref:`SaveReflections <algm-SaveReflections-v1>` to write a different batch number/scale factor ID for each run.

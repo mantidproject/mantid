@@ -1,1 +1,0 @@
-- Fixed a bug in :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` that would cause it to hang when the error bank had zero events.

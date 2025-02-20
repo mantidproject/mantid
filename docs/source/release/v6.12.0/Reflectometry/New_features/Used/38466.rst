@@ -1,1 +1,0 @@
-- New algorithm :ref:`algm-ReflectometryISISCreateTransmission` has been added for creating transmission workspaces that are suitable for passing to :ref:`algm-PolarizationEfficienciesWildes`.

@@ -1,1 +1,0 @@
-- Added the ability to load ILL data into the :math:`S(Q, \omega)` tab of the `Inelastic Data Processor <interface-inelastic-data-processor>` interface.

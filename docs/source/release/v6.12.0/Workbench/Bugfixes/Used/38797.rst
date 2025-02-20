@@ -1,1 +1,0 @@
-- Standalone Linux installations should now launch without segfault on Ubuntu systems.

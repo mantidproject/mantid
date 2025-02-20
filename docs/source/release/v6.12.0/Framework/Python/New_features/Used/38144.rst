@@ -1,1 +1,0 @@
-- allows for declaring the many :class:`PropertyWithValue <mantid.kernel.FloatPropertyWithValue>` types as output properties from the python API.
