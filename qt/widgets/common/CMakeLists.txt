@@ -636,6 +636,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
 
+# Add option to the compiler to register MantidHelpWindow
+if(DOCS_QTHELP)
+  add_definitions(-DDOCS_QTHELP)
+endif()
+
 # Target Additional components for this module
 find_package(
   Qt5 ${QT_MIN_VERSION}
