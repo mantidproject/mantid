@@ -56,7 +56,7 @@ fi"
 )
 
 # The scripts need jemalloc to be resolved to the runtime library as the plain .so symlink is only present when a
-# -dev/-devel package is presentz
+# -dev/-devel package is present
 if(JEMALLOCLIB_FOUND)
   get_filename_component(JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH)
   # We only want to use the major version number
@@ -140,11 +140,15 @@ if(ENABLE_WORKBENCH)
       set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
       set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
       set(DEST_FILENAME_SUFFIX "")
+      # Don't need to set this for a conda environment
+      set(XKB_CONFIG_ROOT_COMMAND "")
     elseif(${install_type} STREQUAL "standalone")
       set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
       set(PYTHON_EXEC_LOCAL "\${INSTALLDIR}/bin/python")
       set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
       set(DEST_FILENAME_SUFFIX ".standalone")
+      # Need to set this, otherwise stanalone won't launch on some linux distributions
+      set(XKB_CONFIG_ROOT_COMMAND "XKB_CONFIG_ROOT=\${INSTALLDIR}/share/X11/xkb")
     else()
       message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")
     endif()
