@@ -36,8 +36,9 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
+  NXInfo(::NeXus::Info const &info, std::string const &name);
   std::string nxname; ///< name of the object
-  int rank;           ///< number of dimensions of the data -- TODO change to size_t or int64_t
+  std::size_t rank;   ///< number of dimensions of the data
   NXDimArray dims;    ///< sizes along each dimension
   NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
   NXstatus stat;      ///< return status
@@ -47,6 +48,7 @@ struct NXInfo {
 /**  Information about a Nexus class
  */
 struct NXClassInfo {
+  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
   std::string nxname;  ///< name of the object
   std::string nxclass; ///< NX class of the object or "SDS" if a dataset
@@ -90,7 +92,8 @@ class MANTID_NEXUS_DLL NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(const NXhandle fileID, const NXClass *parent, const std::string &name);
+  NXObject(::NeXus::File *fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -104,13 +107,13 @@ public:
   /// Attributes
   NXAttributes attributes;
   /// Nexus file id
-  NXhandle m_fileID;
+  std::shared_ptr<::NeXus::File> m_fileID;
 
 protected:
   std::string m_path; ///< Keeps the absolute path to the object
   bool m_open;        ///< Set to true if the object has been open
 private:
-  NXObject() : m_fileID(), m_open(false) {} ///< Private default constructor
+  NXObject(); ///< Private default constructor
   void getAttributes();
 };
 
@@ -164,25 +167,17 @@ public:
    *   @param j :: Non-negative value makes it read a chunk of dimension
    * rank()-2. i and j are its indices.
    *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indices.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indices.
-   *            The rank of the data must be 4
    */
-  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
+  virtual void load(int const blocksize, int const i, int const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
     UNUSED_ARG(j);
-    UNUSED_ARG(k);
-    UNUSED_ARG(l);
   };
 
 protected:
   void getData(void *data);
-  void getSlab(void *data, NXDimArray const &start, NXDimArray const &size);
+  void getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -279,19 +274,13 @@ public:
    *   @param j :: Non-negative value makes it read a chunk of dimension
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indeces.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indeces.
-   *            The rank of the data must be 4
    */
-  void load(int const blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
+  void load(int const blocksize = 1, int const i = -1, int const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l); // cppcheck-suppress variableScope
-    NXDimArray datastart, datasize;
+    nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
+    std::vector<int64_t> datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
@@ -303,50 +292,14 @@ public:
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2() * dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = 0;
-        datasize[1] = dim1();
-        datastart[2] = 0;
-        datasize[2] = dim2();
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else if (k < 0) {
+        datastart = {i, 0, 0, 0};
+        datasize = {1, dim1(), dim2(), dim2()};
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = dim2() * dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = 0;
-        datasize[2] = dim2();
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else if (l < 0) {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
-          rangeError();
-        n = dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
-        datastart[3] = l;
-        datasize[3] = 1;
+        datastart = {i, j, 0, 0};
+        datasize = {1, 1, dim2(), dim2()};
       }
     } else if (rank() == 3) {
       if (i < 0) {
@@ -358,35 +311,17 @@ public:
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = 0;
-        datasize[1] = dim1();
-        datastart[2] = 0;
-        datasize[2] = dim2();
-      } else if (k < 0) {
+        datastart = {i, 0, 0};
+        datasize = {1, dim1(), dim2()};
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         nxdimsize_t m = blocksize;
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = m;
-        datastart[2] = 0;
-        datasize[2] = dim2();
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = 1;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
+        datastart = {i, j, 0};
+        datasize = {1, m, dim2()};
       }
     } else if (rank() == 2) {
       if (i < 0) {
@@ -401,18 +336,14 @@ public:
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;
-        datastart[0] = i;
-        datasize[0] = m;
-        datastart[1] = 0;
-        datasize[1] = dim1();
+        datastart = {i, 0};
+        datasize = {m, dim1()};
       } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = 1;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
+        datastart = {i, j};
+        datasize = {1, 1};
       }
     } else if (rank() == 1) {
       if (i < 0) {
@@ -424,8 +355,8 @@ public:
         if (id >= dim0())
           rangeError();
         n = 1 * blocksize;
-        datastart[0] = i;
-        datasize[0] = blocksize;
+        datastart = {i};
+        datasize = {blocksize};
       }
     }
     alloc(n);
