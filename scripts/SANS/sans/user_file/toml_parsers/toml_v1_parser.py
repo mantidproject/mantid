@@ -5,11 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Optional
-
 from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
 from sans.common.general_functions import get_bank_for_spectrum_number, get_detector_types_from_instrument
-from sans.state.IStateParser import IStateParser
 from sans.state.StateObjects.StateAdjustment import StateAdjustment
 from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
 from sans.state.StateObjects.StateCompatibility import StateCompatibility
@@ -18,7 +15,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent, StateFilter, StateField
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -28,22 +25,18 @@ from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavele
 from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBase
 from sans.user_file.parser_helpers.wavelength_parser import DuplicateWavelengthStates, WavelengthTomlParser
 from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
+from sans.user_file.toml_parsers.toml_base_parser import TomlParserBase
 
 
-class TomlV1Parser(IStateParser):
+class TomlV1Parser(TomlParserBase):
     def __init__(self, dict_to_parse, file_information, schema_validator=None):
-        self._validator = schema_validator if schema_validator else TomlSchemaV1Validator(dict_to_parse)
-        self._validator.validate()
-
-        self._implementation = None
-        data_info = self.get_state_data(file_information)
-        self._implementation = self._get_impl(dict_to_parse, data_info)
-        self._implementation.parse_all()
+        validator = schema_validator if schema_validator else TomlSchemaV1Validator(dict_to_parse)
+        super(TomlV1Parser, self).__init__(dict_to_parse, file_information, validator)
 
     @staticmethod
     def _get_impl(*args):
         # Wrapper which can replaced with a mock
-        return _TomlV1ParserImpl(*args)
+        return TomlV1ParserImpl(*args)
 
     def get_state_data(self, file_information):
         state_data = super().get_state_data(file_information)
@@ -76,8 +69,9 @@ class TomlV1Parser(IStateParser):
     def get_state_reduction_mode(self):
         return self._implementation.reduction_mode
 
-    def get_state_polarization(self) -> Optional[StatePolarization]:
-        return self._implementation.polarization
+    def get_state_polarization(self) -> StatePolarization:
+        # Not supported by TOML V1, but we return a blank one to keep the parsing results consistent.
+        return StatePolarization()
 
     def get_state_save(self):
         return StateSave()
@@ -98,9 +92,9 @@ class TomlV1Parser(IStateParser):
         return self._implementation.wavelength_and_pixel
 
 
-class _TomlV1ParserImpl(TomlParserImplBase):
+class TomlV1ParserImpl(TomlParserImplBase):
     def __init__(self, input_dict, data_info: StateData):
-        super(_TomlV1ParserImpl, self).__init__(toml_dict=input_dict)
+        super(TomlV1ParserImpl, self).__init__(toml_dict=input_dict)
         # Always take the instrument from the TOML file rather than guessing in the new parser
         data_info.instrument = self.instrument
         self._create_state_objs(data_info=data_info)
@@ -118,7 +112,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_transmission()
         self._parse_transmission_roi()
         self._parse_transmission_fitting()
-        self._parse_polarization()
 
     @property
     def instrument(self):
@@ -141,7 +134,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.scale = StateScale()
         self.wavelength = StateWavelength()
         self.wavelength_and_pixel = get_wavelength_and_pixel_adjustment_builder(data_info=data_info).build()
-        self.polarization = StatePolarization()
 
         # Ensure they are linked up correctly
         self.adjustment.calculate_transmission = self.calculate_transmission
@@ -518,60 +510,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                 self.mask.phi_min = phi_mask["start"]
             if "stop" in phi_mask:
                 self.mask.phi_max = phi_mask["stop"]
-
-    def _parse_polarization(self):
-        polarization_dict = self.get_val("polarization")
-        if polarization_dict is None:
-            return
-        self.polarization.flipper_configuration = self.get_val("flipper_configuration", polarization_dict)
-        self.polarization.spin_configuration = self.get_val("spin_configuration", polarization_dict)
-        flipper_dicts = self.get_val("flipper", polarization_dict)
-        if flipper_dicts:
-            for flipper_dict in flipper_dicts.values():
-                self.polarization.flippers.append(self._parse_component(flipper_dict))
-        self.polarization.polarizer = self._parse_filter(self.get_val("polarizer", polarization_dict))
-        self.polarization.analyzer = self._parse_filter(self.get_val("analyzer", polarization_dict))
-        self.polarization.magnetic_field = self._parse_field(self.get_val("magnetic_field", polarization_dict))
-        self.polarization.electric_field = self._parse_field(self.get_val("electric_field", polarization_dict))
-        self.polarization.validate()
-
-    def _parse_component(self, component_dict: dict) -> StateComponent:
-        component_state = StateComponent()
-        if component_dict is None:
-            return component_state
-        component_state.idf_component_name = self.get_val("idf_component_name", component_dict)
-        component_state.device_name = self.get_val("device_name", component_dict)
-        component_state.device_type = self.get_val("device_type", component_dict)
-        location_dict = self.get_val("location", component_dict)
-        if location_dict:
-            component_state.location_x = self.get_val("x", location_dict)
-            component_state.location_y = self.get_val("y", location_dict)
-            component_state.location_z = self.get_val("z", location_dict)
-        component_state.transmission = self.get_val("transmission", component_dict)
-        component_state.efficiency = self.get_val("efficiency", component_dict)
-        return component_state
-
-    def _parse_filter(self, filter_dict: dict) -> StateFilter:
-        if filter_dict is None:
-            return StateFilter()
-        filter_state = self._parse_component(filter_dict)
-        filter_state.__class__ = StateFilter
-        filter_state.cell_length = self.get_val("cell_length", filter_dict)
-        filter_state.gas_pressure = self.get_val("gas_pressure", filter_dict)
-        return filter_state
-
-    def _parse_field(self, field_dict: dict) -> StateField:
-        field_state = StateField()
-        if field_dict is None:
-            return field_state
-        field_state.sample_strength_log = self.get_val("sample_strength_log", field_dict)
-        direction_dict = self.get_val("sample_direction", field_dict)
-        if direction_dict:
-            field_state.sample_direction_a = self.get_val("a", direction_dict)
-            field_state.sample_direction_p = self.get_val("p", direction_dict)
-            field_state.sample_direction_d = self.get_val("d", direction_dict)
-        field_state.sample_direction_log = self.get_val("sample_direction_log", field_dict)
-        return field_state
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):

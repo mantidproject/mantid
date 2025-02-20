@@ -58,6 +58,7 @@ class StateFilter(StateComponent, metaclass=JsonSerializable):
         # Relevant to He3 filters (Polarisers and Analysers)
         self.cell_length = None
         self.gas_pressure = None
+        self.empty_cell = None
         # Relevant to all polarisers and analysers.
         self.initial_polarization = None
 

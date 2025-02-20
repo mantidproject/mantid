@@ -5,12 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from typing import List, Dict
 from unittest import mock
 
 from sans.common.enums import (
     SANSInstrument,
-    SANSFacility,
     DetectorType,
     ReductionMode,
     RangeStepType,
@@ -19,43 +17,17 @@ from sans.common.enums import (
     FitType,
     RebinType,
 )
-from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
-from sans.state.StateObjects.StatePolarization import StatePolarization
-from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
+from sans.test_helper.toml_parser_test_helpers import setup_parser_dict
 
 
 class TomlV1ParserTest(unittest.TestCase):
-    @staticmethod
-    def _get_mock_data_info():
-        # TODO I really really dislike having to do this in a test, but
-        # TODO de-coupling StateData is required to avoid it
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00022024")
-        data_builder.set_sample_scatter_period(3)
-        return data_builder.build()
-
-    def _setup_parser(self, dict_vals) -> TomlV1Parser:
-        def _add_missing_mandatory_key(dict_to_check: Dict, key_path: List[str], replacement_val):
-            _dict = dict_to_check
-            for key in key_path[0:-1]:
-                if key not in _dict:
-                    _dict[key] = {}
-                _dict = _dict[key]
-
-            if key_path[-1] not in _dict:
-                _dict[key_path[-1]] = replacement_val  # Add in child value
-            return dict_to_check
-
-        self._mocked_data_info = self._get_mock_data_info()
-        # instrument key needs to generally be present
-        dict_vals = _add_missing_mandatory_key(dict_vals, ["instrument", "name"], "LOQ")
-        dict_vals = _add_missing_mandatory_key(dict_vals, ["detector", "configuration", "selected_detector"], "rear")
-
-        return TomlV1Parser(dict_vals, file_information=None)
+    def _setup_parser(self, dict_vals):
+        setup_dict, mocked_data_info = setup_parser_dict(dict_vals)
+        self._mocked_data_info = mocked_data_info
+        return TomlV1Parser(setup_dict, file_information=None)
 
     def test_instrument(self):
         parser = self._setup_parser(dict_vals={"instrument": {"name": SANSInstrument.SANS2D.value}})
@@ -695,125 +667,6 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(101, norm_state.prompt_peak_correction_min)
         self.assertEqual(102, norm_state.prompt_peak_correction_max)
         self.assertTrue(norm_state.prompt_peak_correction_enabled)
-
-    def test_parse_polarization(self):
-        top_level_dict = {"polarization": {"flipper_configuration": "00,11,01,10", "spin_configuration": "-1-1,-1+1,+1-1,+1+1"}}
-        parser_result = self._setup_parser(top_level_dict)
-        polarization_state = parser_result.get_state_polarization()
-
-        self.assertIsInstance(polarization_state, StatePolarization)
-        self.assertEqual("00,11,01,10", polarization_state.flipper_configuration)
-        self.assertEqual("-1-1,-1+1,+1-1,+1+1", polarization_state.spin_configuration)
-
-    def test_parse_flippers(self):
-        top_level_dict = {
-            "polarization": {
-                "flipper": {
-                    "polarizing": {
-                        "idf_component_name": "name_in_IDF",
-                        "device_name": "flipper1",
-                        "device_type": "coil",
-                        "location": {"x": 1.17, "y": 0.05, "z": 0.045},
-                        "transmission": "trans_ws",
-                        "efficiency": "eff_ws",
-                    },
-                    "analyzing": {
-                        "idf_component_name": "name_in_IDF_a",
-                        "device_name": "flipper2",
-                        "device_type": "coil",
-                        "location": {"x": 2.17, "y": 0.05, "z": 0.045},
-                        "transmission": "trans_ws",
-                        "efficiency": "eff_ws",
-                    },
-                }
-            }
-        }
-        parser_result = self._setup_parser(top_level_dict)
-        polarization_state = parser_result.get_state_polarization()
-        flippers = polarization_state.flippers
-        self.assertEqual(2, len(flippers))
-        self.assertEqual("flipper1", flippers[0].device_name)
-        self.assertEqual("flipper2", flippers[1].device_name)
-        self.assertEqual(1.17, flippers[0].location_x)
-        self.assertEqual(0.05, flippers[0].location_y)
-        self.assertEqual(0.045, flippers[0].location_z)
-        self.assertEqual(2.17, flippers[1].location_x)
-        self.assertEqual("name_in_IDF", flippers[0].idf_component_name)
-        self.assertEqual("coil", flippers[0].device_type)
-        self.assertEqual("trans_ws", flippers[0].transmission)
-        self.assertEqual("eff_ws", flippers[0].efficiency)
-
-    def test_parse_polarizer_and_analyzer(self):
-        top_level_dict = {
-            "polarization": {
-                "polarizer": {
-                    "idf_component_name": "name_in_IDF_pol",
-                    "device_name": "sm-polarizer",
-                    "device_type": "coil",
-                    "location": {"x": 1.17, "y": 0.05, "z": 0.045},
-                    "transmission": "trans_ws",
-                    "efficiency": "eff_ws",
-                    "cell_length": 0.005,
-                    "gas_pressure": 5,
-                },
-                "analyzer": {
-                    "idf_component_name": "name_in_IDF_ana",
-                    "device_name": "3He-analyzer",
-                    "device_type": "coil",
-                    "location": {"x": 2.17, "y": 0.05, "z": 0.045},
-                    "cell_length": 0.006,
-                    "gas_pressure": 6,
-                    "transmission": "trans_ws",
-                    "efficiency": "eff_ws",
-                },
-            }
-        }
-        parser_result = self._setup_parser(top_level_dict)
-        polarization_state = parser_result.get_state_polarization()
-        polarizer_state = polarization_state.polarizer
-        analyzer_state = polarization_state.analyzer
-        self.assertEqual(0.006, analyzer_state.cell_length)
-        self.assertEqual(0.005, polarizer_state.cell_length)
-        self.assertEqual(6, analyzer_state.gas_pressure)
-        self.assertEqual(5, polarizer_state.gas_pressure)
-        self.assertEqual("sm-polarizer", polarizer_state.device_name)
-        self.assertEqual("3He-analyzer", analyzer_state.device_name)
-        self.assertEqual(1.17, polarizer_state.location_x)
-        self.assertEqual(0.05, polarizer_state.location_y)
-        self.assertEqual(0.045, polarizer_state.location_z)
-        self.assertEqual(2.17, analyzer_state.location_x)
-        self.assertEqual("name_in_IDF_pol", polarizer_state.idf_component_name)
-        self.assertEqual("coil", polarizer_state.device_type)
-        self.assertEqual("trans_ws", polarizer_state.transmission)
-        self.assertEqual("eff_ws", polarizer_state.efficiency)
-
-    def test_parse_fields(self):
-        top_level_dict = {
-            "polarization": {
-                "magnetic_field": {
-                    "sample_strength_log": "nameoflog",
-                    "sample_direction": {"a": 0, "p": 2.3, "d": 0.002},
-                },
-                "electric_field": {
-                    "sample_strength_log": "nameofotherlog",
-                    "sample_direction_log": "nameofanotherlog",
-                },
-            }
-        }
-        parser_result = self._setup_parser(top_level_dict)
-        polarization_state = parser_result.get_state_polarization()
-        electric_state = polarization_state.electric_field
-        magnetic_state = polarization_state.magnetic_field
-        self.assertEqual("nameoflog", magnetic_state.sample_strength_log)
-        self.assertEqual(0, magnetic_state.sample_direction_a)
-        self.assertEqual(2.3, magnetic_state.sample_direction_p)
-        self.assertEqual(0.002, magnetic_state.sample_direction_d)
-        self.assertIsNone(magnetic_state.sample_direction_log)
-        self.assertEqual("nameofotherlog", electric_state.sample_strength_log)
-        self.assertEqual("nameofanotherlog", electric_state.sample_direction_log)
-        self.assertIsNone(electric_state.sample_direction_a)
-        self.assertIsNone(electric_state.sample_direction_p)
-        self.assertIsNone(electric_state.sample_direction_d)
 
 
 if __name__ == "__main__":
