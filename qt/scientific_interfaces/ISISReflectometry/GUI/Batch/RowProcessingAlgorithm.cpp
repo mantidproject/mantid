@@ -109,6 +109,8 @@ void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
   // Use the supplied workspace.
   if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
     AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
+    AlgorithmProperties::update("FredrikzePolarizationSpinStateOrder", corrections.fredrikzeSpinStateOrder(),
+                                properties);
   }
 }
 
