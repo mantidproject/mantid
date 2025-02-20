@@ -17,7 +17,6 @@ class AbinsLoadJSONTest(unittest.TestCase, abins.input.Tester):
         abins.parameters.sampling["force_constants"]["qpt_cutoff"] = 4.0
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadJSON"])
         abins.parameters.sampling["force_constants"]["qpt_cutoff"] = self.default_cutoff
 
     def test_json_1(self):

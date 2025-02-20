@@ -1,0 +1,1 @@
+- A "CacheDirectory" parameter has been added to the Abins and Abins2D algorithms. This allows an explicit cache directory to be set independently for each calculation; the previous behaviour (to use the User Save Directory) remains available as the default value.
