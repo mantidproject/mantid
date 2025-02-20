@@ -143,3 +143,7 @@ class TomlV2ParserTest(unittest.TestCase):
         self.assertIsNone(electric_state.sample_direction_a)
         self.assertIsNone(electric_state.sample_direction_p)
         self.assertIsNone(electric_state.sample_direction_d)
+
+
+if __name__ == "__main__":
+    unittest.main()
