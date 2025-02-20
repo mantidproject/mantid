@@ -118,7 +118,7 @@ SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
     NXInt spectra_block = detgroup.openNXInt("spectra");
     spectra_block.load();
     spectraInfo.spectraNumbers = spectra_block.vecBuffer();
-    spectraInfo.nSpectra = spectra_block.dim0();
+    spectraInfo.nSpectra = static_cast<int>(spectra_block.dim0());
     spectraInfo.hasSpectra = true;
   } catch (std::runtime_error &) {
     spectraInfo.hasSpectra = false;
@@ -146,7 +146,7 @@ SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
   // Detector index - contains the index of the detector in the workspace
   NXInt det_index = detgroup.openNXInt("detector_index");
   det_index.load();
-  spectraInfo.nSpectra = det_index.dim0();
+  spectraInfo.nSpectra = static_cast<int>(det_index.dim0());
   spectraInfo.detectorIndex = det_index.vecBuffer();
 
   return spectraInfo;
@@ -296,7 +296,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
   NXDataSetTyped<double> errors(wsEntry, "errors");
   errors.openLocal();
 
-  const int nChannels = data.dim1();
+  const int nChannels = static_cast<int>(data.dim1());
 
   int blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read
                      // 8 histograms at a time.
@@ -654,7 +654,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
   // range and/or list was going to be loaded)
   numspec = calculateWorkspaceSize(numspec, true);
 
-  int num_xbins = xbins.dim0();
+  auto num_xbins = xbins.dim0();
   if (xbins.rank() == 2) {
     num_xbins = xbins.dim1();
   }
@@ -851,7 +851,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
 
           nxdimsize_t const maxStr = info.dims[1];
           data.load();
-          for (int iR = 0; iR < nRows; ++iR) {
+          for (int64_t iR = 0; iR < nRows; ++iR) {
             auto &cellContents = workspace->cell<std::string>(iR, columnNumber - 1);
             auto startPoint = data() + maxStr * iR;
             cellContents.assign(startPoint, startPoint + maxStr);
@@ -932,14 +932,14 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
   if (!columnTitle.empty()) {
     ColumnVector<V3D> col = tableWs->addColumn("V3D", columnTitle);
 
-    const int rowCount = data.dim0();
+    const int64_t rowCount = data.dim0();
 
     // This might've been done already, but doing it twice shouldn't do any harm
     tableWs->setRowCount(rowCount);
 
     data.load();
 
-    for (int i = 0; i < rowCount; ++i) {
+    for (int64_t i = 0; i < rowCount; ++i) {
       auto &cell = col[i]; // cppcheck-suppress constVariableReference
       cell(data(i, 0), data(i, 1), data(i, 2));
     }
@@ -965,7 +965,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
   NXData nx_tw = entry.openNXData("peaks_workspace");
 
   int columnNumber = 1;
-  int numberPeaks = 0;
+  int64_t numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
     std::string str = "column_" + std::to_string(columnNumber);
@@ -1245,7 +1245,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   NXData nx_tw = entry.openNXData("peaks_workspace");
 
   int columnNumber = 1;
-  int numberPeaks = 0;
+  int64_t numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
     std::string str = "column_" + std::to_string(columnNumber);
@@ -1533,10 +1533,10 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                                                 const double &progressStart,
                                                                 const double &progressRange, const NXEntry &mtd_entry,
-                                                                const int xlength, std::string &workspaceType) {
+                                                                const int64_t xlength, std::string &workspaceType) {
   // Filter the list of spectra to process, applying min/max/list options
   NXDataSetTyped<double> data = wksp_cls.openDoubleData();
-  int nchannels = data.dim1();
+  int64_t nchannels = data.dim1();
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);
@@ -1821,7 +1821,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   xbins.load();
   std::string unit1 = xbins.attributes("units");
   // Non-uniform x bins get saved as a 2D 'axis1' dataset
-  int xlength(-1);
+  int64_t xlength(-1);
   if (xbins.rank() == 2) {
     xlength = xbins.dim1();
     m_shared_bins = false;
@@ -2158,13 +2158,13 @@ void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::Matri
   bins.load();
   NXDouble weights = wksp_cls.openNXDouble("mask_weights");
   weights.load();
-  const int n = spec.dim0();
-  const int n1 = n - 1;
+  const int64_t n = spec.dim0();
+  const int64_t n1 = n - 1;
   for (int i = 0; i < n; ++i) {
-    int si = spec(i, 0);
-    int j0 = spec(i, 1);
-    int j1 = i < n1 ? spec(i + 1, 1) : bins.dim0();
-    for (int j = j0; j < j1; ++j) {
+    int64_t si = spec(i, 0);
+    int64_t j0 = spec(i, 1);
+    int64_t j1 = i < n1 ? spec(i + 1, 1) : bins.dim0();
+    for (int64_t j = j0; j < j1; ++j) {
       local_workspace->flagMasked(si, bins[j], weights[j]);
     }
   }
@@ -2266,7 +2266,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors, bool hasXErrors,
-                                   int blocksize, int nchannels, int &hist, int &wsIndex,
+                                   int64_t blocksize, int64_t nchannels, int &hist, int &wsIndex,
                                    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   errors.load(blocksize, hist);
@@ -2297,7 +2297,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
     xErrors_end = xErrors_start + dx_increment;
   }
 
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while (hist < final) {
     auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
@@ -2344,7 +2344,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors, bool hasXErrors,
-                                   NXDouble &xbins, int blocksize, int nchannels, int &hist, int &wsIndex,
+                                   NXDouble &xbins, int64_t blocksize, int64_t nchannels, int &hist, int &wsIndex,
                                    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   double *data_start = data();
@@ -2370,10 +2370,10 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
     rb_workspace = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   xbins.load(blocksize, hist);
-  const int nxbins(xbins.dim1());
+  const int64_t nxbins(xbins.dim1());
   double *xbin_start = xbins();
   double *xbin_end = xbin_start + nxbins;
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
 
   if (hasXErrors) {
     xErrors.load(blocksize, hist);

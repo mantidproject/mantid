@@ -103,7 +103,7 @@ void LoadMuonNexus2::exec() {
 
   LegacyNexus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
   spectrum_index.load();
-  m_numberOfSpectra = spectrum_index.dim0();
+  m_numberOfSpectra = static_cast<specnum_t>(spectrum_index.dim0());
 
   // Load detector mapping
   const auto &detMapping = loadDetectorMapping(spectrum_index);
@@ -424,7 +424,7 @@ int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const 
  */
 std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
-  const int nSpectra = spectrumIndex.dim0();
+  const int nSpectra = static_cast<int>(spectrumIndex.dim0());
 
   // Find and open the data group
   NXRoot root(getPropertyValue("Filename"));
@@ -453,12 +453,12 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::L
       const auto detIndex = dataGroup.openNXInt("detector_index");
       const auto detCount = dataGroup.openNXInt("detector_count");
       const auto detList = dataGroup.openNXInt("detector_list");
-      const int nDet = detIndex.dim0();
-      for (int i = 0; i < nDet; ++i) {
-        const int start = detIndex[i];
-        const int nDetectors = detCount[i];
-        std::set<int> detIDs;
-        for (int jDet = 0; jDet < nDetectors; ++jDet) {
+      const detid_t nDet = static_cast<detid_t>(detIndex.dim0());
+      for (detid_t i = 0; i < nDet; ++i) {
+        const auto start = static_cast<detid_t>(detIndex[i]);
+        const auto nDetectors = detCount[i];
+        std::set<detid_t> detIDs;
+        for (detid_t jDet = 0; jDet < nDetectors; ++jDet) {
           detIDs.insert(detList[start + jDet]);
         }
         mapping[i] = detIDs;
@@ -470,8 +470,8 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::L
       throw std::runtime_error(message.str());
     }
   } else {
-    for (int i = 0; i < nSpectra; ++i) {
-      mapping[i] = std::set<int>{spectrumIndex[i]};
+    for (specnum_t i = 0; i < nSpectra; ++i) {
+      mapping[i] = std::set<detid_t>{spectrumIndex[i]};
     }
   }
 
