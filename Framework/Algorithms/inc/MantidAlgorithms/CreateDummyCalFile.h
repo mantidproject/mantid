@@ -18,7 +18,7 @@ namespace Algorithms {
  *  The offsets are all sets to zero and all detectors are selected. Detectors
  not assigned
  *  to any group will appear as group 0, i.e. not included when using
- AlignDetector or
+the
  *  DiffractionFocussing algorithms.
  *  The group number is assigned based on a descent in the instrument tree
  assembly.
@@ -58,7 +58,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ReadGroupsFromFile", "CreateCalFileByNames", "AlignDetectors", "DiffractionFocussing",
+    return {"ReadGroupsFromFile", "CreateCalFileByNames", "DiffractionFocussing",
             "LoadCalFile",        "SaveCalFile",          "MergeCalFiles"};
   }
   /// Algorithm's category for identification

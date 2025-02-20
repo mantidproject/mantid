@@ -54,7 +54,7 @@ extern NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int di
 extern NXstatus NX5getattra(NXhandle handle, const char *name, void *data);
 extern NXstatus NX5getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
-void NX5assignFunctions(pHDF4Function fHandle);
+void NX5assignFunctions(pLgcyFunction fHandle);
 
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata);
 herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *unused, void *opdata);

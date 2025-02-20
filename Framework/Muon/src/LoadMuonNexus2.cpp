@@ -23,9 +23,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidMuon/LegacyNexusClasses.h"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -45,7 +45,7 @@ using Geometry::Instrument;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
-using namespace Mantid::NeXus;
+using namespace Mantid::LegacyNexus;
 using Mantid::Types::Core::DateAndTime;
 
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
@@ -75,7 +75,7 @@ void LoadMuonNexus2::exec() {
   if (entry.containsGroup("run")) {
     try {
       m_numberOfPeriods = entry.getInt("run/number_periods");
-    } catch (::NeXus::Exception &) {
+    } catch (LegacyNexus::Exception &) {
       // assume 1
       m_numberOfPeriods = 1;
     }
@@ -84,7 +84,7 @@ void LoadMuonNexus2::exec() {
   }
 
   // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
+  const Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
   std::shared_ptr<Instrument> instrument;
@@ -101,7 +101,7 @@ void LoadMuonNexus2::exec() {
   }
   NXData dataGroup = entry.openNXData(detectorName);
 
-  Mantid::NeXus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
+  LegacyNexus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
   spectrum_index.load();
   m_numberOfSpectra = spectrum_index.dim0();
 
@@ -165,7 +165,7 @@ void LoadMuonNexus2::exec() {
   // Mantid::NeXus::NXInt period_index = dataGroup.openNXInt("period_index");
   // period_index.load();
 
-  Mantid::NeXus::NXInt counts = dataGroup.openIntData();
+  Mantid::LegacyNexus::NXInt counts = dataGroup.openIntData();
   counts.load();
 
   NXInstrument instr = entry.openNXInstrument("instrument");
@@ -265,7 +265,8 @@ void LoadMuonNexus2::exec() {
 /** loadData
  *  Load the counts data from an NXInt into a workspace
  */
-Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::NeXus::NXInt &counts, int period, int spec) {
+Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::LegacyNexus::NXInt &counts, int period,
+                                   int spec) {
   int nBins = 0;
   const int *data = nullptr;
 
@@ -368,7 +369,7 @@ void LoadMuonNexus2::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/definition"))
@@ -421,7 +422,7 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @returns :: map of index -> detector IDs
  * @throws std::runtime_error if fails to read data from file
  */
-std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
+std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
   const int nSpectra = spectrumIndex.dim0();
 
@@ -462,7 +463,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
         }
         mapping[i] = detIDs;
       }
-    } catch (const ::NeXus::Exception &err) {
+    } catch (const LegacyNexus::Exception &err) {
       // Throw a more user-friendly message
       std::ostringstream message;
       message << "Failed to read detector mapping: " << err.what();

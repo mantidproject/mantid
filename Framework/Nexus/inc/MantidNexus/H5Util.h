@@ -19,6 +19,7 @@ class DataSpace;
 class DataSet;
 class DSetCreatPropList;
 class DataType;
+class FileAccPropList;
 class Group;
 class H5File;
 class H5Object;
@@ -29,6 +30,9 @@ namespace NeXus {
 namespace H5Util {
 /** H5Util : TODO: DESCRIPTION
  */
+
+/** Default file access is H5F_CLOSE_STRONG. This should be set consistently for all access of a file. */
+MANTID_NEXUS_DLL H5::FileAccPropList defaultFileAcc();
 
 /// Create a 1D data-space to hold data of length.
 MANTID_NEXUS_DLL H5::DataSpace getDataSpace(const size_t length);

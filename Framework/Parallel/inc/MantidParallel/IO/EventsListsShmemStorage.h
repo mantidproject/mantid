@@ -29,7 +29,6 @@ class MANTID_PARALLEL_DLL EventsListsShmemStorage : public EventsListsShmemManag
 public:
   EventsListsShmemStorage(const std::string &segmentName, const std::string &elName, size_t size, size_t chunksCnt,
                           size_t pixelsCount);
-  virtual ~EventsListsShmemStorage() = default;
 
   void reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size);
 
