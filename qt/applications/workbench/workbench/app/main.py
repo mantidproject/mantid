@@ -9,6 +9,7 @@ import argparse
 import os
 
 from mantid import __version__ as mtd_version
+from qtpy.QtWebEngineWidgets import QWebEngineView  # noqa: F401
 import warnings
 
 
