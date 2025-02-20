@@ -34,7 +34,8 @@ PythonHelpBridge::PythonHelpBridge() {
   }
 }
 
-void PythonHelpBridge::showHelpPage(const std::string &relative_url) {
+void PythonHelpBridge::showHelpPage(const std::string &relative_url, const std::string &local_docs,
+                                    const std::string &online_base_url) {
   PyGILState_STATE gstate = PyGILState_Ensure();
   try {
     boost::python::object module = getHelpWindowModule();
