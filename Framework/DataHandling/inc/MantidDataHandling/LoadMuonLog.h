@@ -12,7 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidMuon/MuonNexusReader.h"
 
 namespace Mantid {
 

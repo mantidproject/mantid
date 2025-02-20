@@ -11,8 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidMuon/DllConfig.h"
+#include "MantidMuon/LegacyNexusClasses.h"
 #include "MantidMuon/LoadMuonNexus.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 
@@ -65,11 +65,11 @@ public:
 private:
   void exec() override;
 
-  HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges, const Mantid::NeXus::NXInt &counts,
-                                    int period, int spec);
-  void loadLogs(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXEntry &entry, int period);
+  HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges,
+                                    const Mantid::LegacyNexus::NXInt &counts, int period, int spec);
+  void loadLogs(const API::MatrixWorkspace_sptr &ws, Mantid::LegacyNexus::NXEntry &entry, int period);
   void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
-  std::map<int, std::set<int>> loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
+  std::map<int, std::set<int>> loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex);
 };
 
 } // namespace Algorithms
