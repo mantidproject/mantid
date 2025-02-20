@@ -18,7 +18,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent, StateFilter
+from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent, StateFilter, StateField
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -531,6 +531,8 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                 self.polarization.flippers.append(self._parse_component(flipper_dict))
         self.polarization.polarizer = self._parse_filter(self.get_val("polarizer", polarization_dict))
         self.polarization.analyzer = self._parse_filter(self.get_val("analyzer", polarization_dict))
+        self.polarization.magnetic_field = self._parse_field(self.get_val("magnetic_field", polarization_dict))
+        self.polarization.electric_field = self._parse_field(self.get_val("electric_field", polarization_dict))
 
     def _parse_component(self, component_dict: dict) -> StateComponent:
         component_state = StateComponent()
@@ -556,6 +558,19 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         filter_state.cell_length = self.get_val("cell_length", filter_dict)
         filter_state.gas_pressure = self.get_val("gas_pressure", filter_dict)
         return filter_state
+
+    def _parse_field(self, field_dict: dict) -> StateField:
+        field_state = StateField()
+        if field_dict is None:
+            return field_state
+        field_state.sample_strength_log = self.get_val("sample_strength_log", field_dict)
+        direction_dict = self.get_val("sample_direction", field_dict)
+        if direction_dict:
+            field_state.sample_direction_a = self.get_val("a", direction_dict)
+            field_state.sample_direction_p = self.get_val("p", direction_dict)
+            field_state.sample_direction_d = self.get_val("d", direction_dict)
+        field_state.sample_direction_log = self.get_val("sample_direction_log", field_dict)
+        return field_state
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):

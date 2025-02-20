@@ -787,6 +787,34 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual("trans_ws", polarizer_state.transmission)
         self.assertEqual("eff_ws", polarizer_state.efficiency)
 
+    def test_parse_fields(self):
+        top_level_dict = {
+            "polarization": {
+                "magnetic_field": {
+                    "sample_strength_log": "nameoflog",
+                    "sample_direction": {"a": 0, "p": 2.3, "d": 0.002},
+                },
+                "electric_field": {
+                    "sample_strength_log": "nameofotherlog",
+                    "sample_direction_log": "nameofanotherlog",
+                },
+            }
+        }
+        parser_result = self._setup_parser(top_level_dict)
+        polarization_state = parser_result.get_state_polarization()
+        electric_state = polarization_state.electric_field
+        magnetic_state = polarization_state.magnetic_field
+        self.assertEqual("nameoflog", magnetic_state.sample_strength_log)
+        self.assertEqual(0, magnetic_state.sample_direction_a)
+        self.assertEqual(2.3, magnetic_state.sample_direction_p)
+        self.assertEqual(0.002, magnetic_state.sample_direction_d)
+        self.assertIsNone(magnetic_state.sample_direction_log)
+        self.assertEqual("nameofotherlog", electric_state.sample_strength_log)
+        self.assertEqual("nameofanotherlog", electric_state.sample_direction_log)
+        self.assertIsNone(electric_state.sample_direction_a)
+        self.assertIsNone(electric_state.sample_direction_p)
+        self.assertIsNone(electric_state.sample_direction_d)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -148,12 +148,19 @@ class TomlSchemaV1Validator(object):
             "initial_polarization": None,
         }
         filter_keys = dict(component_keys, **{"cell_length": None, "gas_pressure": None})
+        field_keys = {
+            "sample_strength_log": None,
+            "sample_direction": {"a", "p", "d"},
+            "sample_direction_log": None,
+        }
         polarization_keys = {
             "flipper_configuration": None,
             "spin_configuration": None,
             "flipper": {"*": component_keys},
             "polarizer": filter_keys,
             "analyzer": filter_keys,
+            "magnetic_field": field_keys,
+            "electric_field": field_keys,
         }
 
         return {
