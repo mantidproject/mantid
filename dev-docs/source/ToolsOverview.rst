@@ -250,3 +250,17 @@ To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS
 For example, to convert all loops classified as *risky* or above, we would append::
 
     ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
+Cmake chart of target dependencies
+----------------------------------
+
+Cmake has the ability to make graphviz dot files of the dependencies for targets in mantid.
+This is useful for understanding why compilation will wait for individual libraries to link before compiling more files.
+
+.. code:: sh
+
+    cmake --graphviz=dependencies.dot .
+    dot -O -Tsvg dependencies.dot.WorkflowAlgorithms
+
+
+`Cmake reference <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_ for configuring the tool options.
