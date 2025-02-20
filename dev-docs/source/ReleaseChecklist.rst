@@ -36,6 +36,8 @@ are responsible for ensuring that the work gets done.
 Timeline
 --------
 
+This is final part of the :ref:`development and release cycle <DevelopmentAndReleaseCycle>`.
+
 +-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
 | | Key Event(s)              | | Task Priorities                             | | Actions Required from                                                  | | Time Until Release     |
 |                             |                                               |                                                                          |                          |
