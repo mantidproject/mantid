@@ -743,6 +743,50 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual("trans_ws", flippers[0].transmission)
         self.assertEqual("eff_ws", flippers[0].efficiency)
 
+    def test_parse_polarizer_and_analyzer(self):
+        top_level_dict = {
+            "polarization": {
+                "polarizer": {
+                    "idf_component_name": "name_in_IDF_pol",
+                    "device_name": "sm-polarizer",
+                    "device_type": "coil",
+                    "location": {"x": 1.17, "y": 0.05, "z": 0.045},
+                    "transmission": "trans_ws",
+                    "efficiency": "eff_ws",
+                    "cell_length": 0.005,
+                    "gas_pressure": 5,
+                },
+                "analyzer": {
+                    "idf_component_name": "name_in_IDF_ana",
+                    "device_name": "3He-analyzer",
+                    "device_type": "coil",
+                    "location": {"x": 2.17, "y": 0.05, "z": 0.045},
+                    "cell_length": 0.006,
+                    "gas_pressure": 6,
+                    "transmission": "trans_ws",
+                    "efficiency": "eff_ws",
+                },
+            }
+        }
+        parser_result = self._setup_parser(top_level_dict)
+        polarization_state = parser_result.get_state_polarization()
+        polarizer_state = polarization_state.polarizer
+        analyzer_state = polarization_state.analyzer
+        self.assertEqual(0.006, analyzer_state.cell_length)
+        self.assertEqual(0.005, polarizer_state.cell_length)
+        self.assertEqual(6, analyzer_state.gas_pressure)
+        self.assertEqual(5, polarizer_state.gas_pressure)
+        self.assertEqual("sm-polarizer", polarizer_state.device_name)
+        self.assertEqual("3He-analyzer", analyzer_state.device_name)
+        self.assertEqual(1.17, polarizer_state.location_x)
+        self.assertEqual(0.05, polarizer_state.location_y)
+        self.assertEqual(0.045, polarizer_state.location_z)
+        self.assertEqual(2.17, analyzer_state.location_x)
+        self.assertEqual("name_in_IDF_pol", polarizer_state.idf_component_name)
+        self.assertEqual("coil", polarizer_state.device_type)
+        self.assertEqual("trans_ws", polarizer_state.transmission)
+        self.assertEqual("eff_ws", polarizer_state.efficiency)
+
 
 if __name__ == "__main__":
     unittest.main()

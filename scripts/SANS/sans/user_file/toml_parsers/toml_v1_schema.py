@@ -137,21 +137,23 @@ class TomlSchemaV1Validator(object):
             },
         }
 
+        component_keys = {
+            "idf_component_name": None,
+            "device_name": None,
+            "device_type": None,
+            "location": {"x", "y", "z"},
+            "transmission": None,
+            "efficiency": None,
+            "empty_cell": None,
+            "initial_polarization": None,
+        }
+        filter_keys = dict(component_keys, **{"cell_length": None, "gas_pressure": None})
         polarization_keys = {
             "flipper_configuration": None,
             "spin_configuration": None,
-            "flipper": {
-                "*": {
-                    "idf_component_name": None,
-                    "device_name": None,
-                    "device_type": None,
-                    "location": {"x", "y", "z"},
-                    "transmission": None,
-                    "efficiency": None,
-                    "empty_cell": None,
-                    "initial_polarization": None,
-                }
-            },
+            "flipper": {"*": component_keys},
+            "polarizer": filter_keys,
+            "analyzer": filter_keys,
         }
 
         return {

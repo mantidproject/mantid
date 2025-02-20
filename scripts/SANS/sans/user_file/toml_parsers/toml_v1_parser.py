@@ -18,7 +18,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent
+from sans.state.StateObjects.StatePolarization import StatePolarization, StateComponent, StateFilter
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -529,6 +529,8 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         if flipper_dicts:
             for flipper_dict in flipper_dicts.values():
                 self.polarization.flippers.append(self._parse_component(flipper_dict))
+        self.polarization.polarizer = self._parse_filter(self.get_val("polarizer", polarization_dict))
+        self.polarization.analyzer = self._parse_filter(self.get_val("analyzer", polarization_dict))
 
     def _parse_component(self, component_dict: dict) -> StateComponent:
         component_state = StateComponent()
@@ -545,6 +547,15 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         component_state.transmission = self.get_val("transmission", component_dict)
         component_state.efficiency = self.get_val("efficiency", component_dict)
         return component_state
+
+    def _parse_filter(self, filter_dict: dict) -> StateFilter:
+        if filter_dict is None:
+            return StateFilter()
+        filter_state = self._parse_component(filter_dict)
+        filter_state.__class__ = StateFilter
+        filter_state.cell_length = self.get_val("cell_length", filter_dict)
+        filter_state.gas_pressure = self.get_val("gas_pressure", filter_dict)
+        return filter_state
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):
