@@ -638,8 +638,6 @@ def create_absorption_input(
         geometry = {}
     if not environment:
         environment = {}
-    if can_geometry and can_material:
-        environment = {}
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
