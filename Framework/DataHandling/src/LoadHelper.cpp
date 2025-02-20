@@ -408,7 +408,7 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
  */
 void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
-                                     const std::vector<double> &xAxis, int initialSpectrum, bool pointData,
+                                     const std::vector<double> &xAxis, int64_t initialSpectrum, bool pointData,
                                      const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
@@ -457,7 +457,7 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
         ws->setHistogram(currentSpectrum, binEdges, counts);
       }
       const auto detectorID = customDetectorIDs ? detectorIDs[currentSpectrum] : currentSpectrum;
-      ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorID);
+      ws->getSpectrum(currentSpectrum).setSpectrumNo(static_cast<int>(detectorID));
     }
   }
 }
@@ -489,7 +489,7 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  * tube-pixel-channel order
  */
 void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
-                                     const std::vector<double> &xAxis, int initialSpectrum,
+                                     const std::vector<double> &xAxis, int64_t initialSpectrum,
                                      const std::set<int> &acceptedDetectorIDs,
                                      const std::vector<int> &customDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
@@ -504,16 +504,16 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
 
   int nSkipped = 0;
 #pragma omp parallel for if (Kernel::threadSafe(*ws))
-  for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
-    for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
-      auto currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
+  for (int64_t tube_no = 0; tube_no < nTubes; ++tube_no) {
+    for (int64_t pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      int64_t currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
       if (useAcceptedDetectorIDs && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
                                               currentDetector) == acceptedDetectorIDs.end()) {
         nSkipped++;
         continue;
       }
       currentDetector -= nSkipped;
-      int currentSpectrum;
+      int64_t currentSpectrum;
       if (useCustomSpectraMap)
         currentSpectrum = customDetectorIDs[currentDetector - initialSpectrum];
       else

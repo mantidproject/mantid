@@ -395,7 +395,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     NXFloat deadTimesData = detector.openNXFloat("deadtimes");
     deadTimesData.load();
 
-    int numDeadTimes = deadTimesData.dim0();
+    auto numDeadTimes = deadTimesData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<double> deadTimes;
@@ -492,7 +492,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
     NXInt groupingData = dataEntry.openNXInt("grouping");
     groupingData.load();
 
-    int numGroupingEntries = groupingData.dim0();
+    auto numGroupingEntries = groupingData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<int> grouping;

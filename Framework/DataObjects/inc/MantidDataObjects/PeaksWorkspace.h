@@ -79,8 +79,8 @@ public:
   /// Move a peak object into this peaks workspace
   void addPeak(Peak &&peak);
   void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) override;
-  Peak &getPeak(int peakNum) override;
-  const Peak &getPeak(int peakNum) const override;
+  Peak &getPeak(size_t const peakNum) override;
+  const Peak &getPeak(size_t const peakNum) const override;
 
   IPeak_uptr createPeak(const Kernel::V3D &QLabFrame,
                         std::optional<double> detectorDistance = std::nullopt) const override;

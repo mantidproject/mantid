@@ -26,7 +26,7 @@ public:
 
   size_t getNumberOfSpectra() const override;
   size_t getNumberOfChannels() const override;
-  int getNumberOfPeriods() const override;
+  size_t getNumberOfPeriods() const override;
 
   std::unique_ptr<DataBlockGenerator> getGenerator() const override;
 
@@ -60,7 +60,7 @@ private:
  */
 template <typename T>
 void DLLExport populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite, T &indexContainer,
-                                                       int64_t nArray, int numberOfPeriods, size_t numberOfChannels,
+                                                       int64_t nArray, size_t numberOfPeriods, size_t numberOfChannels,
                                                        std::vector<specnum_t> monitorSpectra) {
   auto isMonitor = [&monitorSpectra](specnum_t index) {
     return std::find(std::begin(monitorSpectra), std::end(monitorSpectra), index) != std::end(monitorSpectra);
@@ -72,7 +72,7 @@ void DLLExport populateDataBlockCompositeWithContainer(DataBlockComposite &dataB
   // the
   // monitor itself
   struct HandleWhenElementIsMonitor {
-    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, int numberOfPeriods,
+    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, size_t numberOfPeriods,
                     size_t numberOfChannels, specnum_t previousValue, specnum_t startValue) {
       if (previousValue - startValue > 0) {
         auto numberOfSpectra = previousValue - startValue; /* Should be from [start,
@@ -95,7 +95,7 @@ void DLLExport populateDataBlockCompositeWithContainer(DataBlockComposite &dataB
   // be a gap between neighbouring spetrum numbers. Then we need to
   // write out this range as a data block.
   struct HandleWhenElementMadeAJump {
-    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, int numberOfPeriods,
+    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, size_t numberOfPeriods,
                     size_t numberOfChannels, specnum_t previousValue, specnum_t startValue) {
       auto numberOfSpectra = previousValue - startValue + 1;
       DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);

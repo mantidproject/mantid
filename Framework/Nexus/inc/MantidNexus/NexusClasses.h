@@ -28,7 +28,7 @@ namespace NeXus {
 */
 
 // TODO change to int64_t
-typedef int nxdimsize_t;
+typedef int64_t nxdimsize_t;
 typedef std::array<nxdimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
@@ -168,7 +168,7 @@ public:
    * rank()-2. i and j are its indices.
    *            The rank of the data must be >= 2
    */
-  virtual void load(int const blocksize, int const i, int const j) {
+  virtual void load(int64_t const blocksize, int64_t const i, int64_t const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
@@ -275,7 +275,7 @@ public:
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
    */
-  void load(int const blocksize = 1, int const i = -1, int const j = -1) override {
+  void load(int64_t const blocksize = 1, int64_t const i = -1, int64_t const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
