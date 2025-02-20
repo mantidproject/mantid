@@ -23,7 +23,7 @@ Here are some of the highlights for this release:
 - Drop support for NumPy version 1. We now build against NumPy v2.0 and support up to v2.1. `Read about the changes <https://numpy.org/news/#numpy-200-released>`_. **Users should note that NumPy 2 introduces some breaking API changes. See the** `NumPy 2 Migration Guide <https://numpy.org/devdocs/numpy_2_0_migration_guide.html>`_ **for more details.**
 - Updated Matplotlib from version 3.7 to version 3.9. See release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_.
 - ``setPlotType()`` can now be called on Matrix Workspaces to specify the :ref:`plot type <MatrixWorkspace_Plotting>`.
-- On Linux the :ref:`algorithm profiler <AlgorithmProfiler>` is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- The :ref:`algorithm profiler <AlgorithmProfiler>` is now available to Linux users. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
 - :ref:`MSlice <MSlice-ref>` has a new observer for workspaces in the Analysis Data Service in Mantid. Consequently, modifications to workspaces in Mantid are now synchronised with MSlice for shared workspaces. For example, this change now ensures that a deleted workspace in Mantid is also deleted in MSlice, which mitigates a common past error of `RuntimeError: Variable invalidated, data has been deleted`. The behaviour of the MSlice interface is thereby made consistent with that of other interfaces.
 
 
