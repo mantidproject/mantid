@@ -533,6 +533,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.polarization.analyzer = self._parse_filter(self.get_val("analyzer", polarization_dict))
         self.polarization.magnetic_field = self._parse_field(self.get_val("magnetic_field", polarization_dict))
         self.polarization.electric_field = self._parse_field(self.get_val("electric_field", polarization_dict))
+        self.polarization.validate()
 
     def _parse_component(self, component_dict: dict) -> StateComponent:
         component_state = StateComponent()
