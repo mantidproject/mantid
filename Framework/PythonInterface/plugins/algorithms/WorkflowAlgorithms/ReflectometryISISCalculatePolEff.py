@@ -103,7 +103,7 @@ _EFF_ALG_OUTPUT_DIAG = [_NON_PROP_DATA["OUT_PHI"], _NON_PROP_DATA["OUT_RHO"], _N
 _EFF_ALG_OUTPUT_DIAG_MAG = [_NON_PROP_DATA["OUT_2P"], _NON_PROP_DATA["OUT_2A"]]
 
 
-class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
+class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -114,7 +114,7 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
 
     def name(self):
         """Return the name of the algorithm."""
-        return "ReflectometryISISCreateTransmission"
+        return "ReflectometryISISCalculatePolEff"
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -284,4 +284,4 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             self.setProperty(key.name, eff_output[key.alias])
 
 
-AlgorithmFactory.subscribe(CalculateISISPolarizationEfficiencies)
+AlgorithmFactory.subscribe(ReflectometryISISCalculatePolEff)

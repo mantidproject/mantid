@@ -218,7 +218,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/BayesStretch2.py
     algorithms/WorkflowAlgorithms/quickBayesHelper.py
-    algorithms/WorkflowAlgorithms/CalculateISISPolarizationEfficiencies.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
@@ -294,6 +293,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCalibration.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCreateTransmission.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISCalculatePolEff.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderCore.py
