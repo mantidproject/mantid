@@ -16,7 +16,7 @@ Bugfixes
 - :ref:`Data Processor Interface <interface-inelastic-data-processor>` :ref:`Elwin Tab <elwin>`:
 
   - Integration range automatically updates as expected when workspaces are added via the ``Add Data`` button.
-  - Plot generation from workspaces ending with ``elwin_elf`` now works correctly and diplays no overflow warning messages.
+  - Plot generation from workspaces ending with ``elwin_elf`` now works correctly and displays no overflow warning messages.
 
 
 :ref:`Release 6.12.0 <v6.12.0>`
