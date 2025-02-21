@@ -2,7 +2,8 @@
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
-from typing import Annotated, TypeAlias, Tuple, Sequence
+from typing import Annotated, TypeAlias, Tuple, Sequence, Optional
+from scipy import interpolate
 
 # Forward declarations
 Workspace2D: TypeAlias = Annotated[type, "Workspace2D"]
@@ -136,3 +137,42 @@ def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tt
     # calc tof of longest wavelength neutron to reach detector with the largest total path
     time_max = UnitConversion.run("Wavelength", "TOF", lambda_max, l1 - l1_chop, DeltaEModeType.Elastic, params)
     return time_max
+
+
+def simulate_2d_data(ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0):
+    """
+    Function to simulate 2D pulse overlap data given 1D spectrum in d-spacing (i.e. powder pattern).
+    :param ws_2d: w
+    :return time_max: arrival time (mus) of longest wavelength neutron from first slit opening
+    """
+    is_dspac = ws_1d.getXDimension().name.replace("-", "") == "dSpacing"
+    if not is_dspac:
+        ws_1d = exec_alg("ConvertUnits", InputWorkspace=ws_1d, Target="dSpacing", OutputWorkspace="__temp")
+    yspec = ws_1d.readY(0)
+    finterp = interpolate.interp1d(ws_1d.readX(0), yspec, bounds_error=False, fill_value=(yspec[0], yspec[-1]))
+    if output_workspace is None:
+        output_workspace = ws_2d.name() + "_simulated"
+    ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d, OutputWorkspace=output_workspace)
+    # get instrument settings
+    cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
+    si = ws_sim.spectrumInfo()
+    tths = np.array([si.twoTheta(ispec) for ispec in range(ws_sim.getNumberHistograms())])
+    l2s = [si.l2(ispec) for ispec in range(ws_sim.getNumberHistograms())]
+    l1 = si.l1()
+    # get npulses to include
+    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
+    npulses = int(time_max // cycle_time)
+    # simulate detected spectra
+    ipulses = np.arange(npulses)[:, None]
+    offsets = (ipulses * cycle_time - slit_offsets).flatten()  # note different sign to auto-corr!
+    tofs = ws_sim.readX(0)[:, None] + offsets - t0_const  # same for all spectra
+    params = UnitParametersMap()
+    for ispec in range(ws_sim.getNumberHistograms()):
+        params[UnitParams.l2] = l2s[ispec]
+        params[UnitParams.twoTheta] = tths[ispec]
+        tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
+        ds = tofs / tof_d1Ang
+        ws_sim.setY(ispec, finterp(ds).sum(axis=1))
+    if not is_dspac:
+        exec_alg("DeleteWorkspace", Workspace=ws_1d)
+    return ws_sim
