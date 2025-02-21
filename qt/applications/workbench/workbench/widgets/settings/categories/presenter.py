@@ -4,12 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
+from workbench.widgets.settings.categories.categories_settings_model import CategoriesSettingsModel
 from workbench.widgets.settings.categories.view import CategoriesSettingsView
 
 from qtpy.QtCore import Qt
 
 
-class CategoriesSettings(object):
+class CategoriesSettings(SettingsPresenterBase):
     """
     Presenter of the visible categories settings section. It handles all changes to options
     within the section, and updates the ConfigService and workbench CONF accordingly.
@@ -18,10 +20,10 @@ class CategoriesSettings(object):
     be handled here.
     """
 
-    def __init__(self, parent, model, view=None):
-        self._view = view if view else CategoriesSettingsView(parent, self)
+    def __init__(self, parent, model: CategoriesSettingsModel, view=None):
+        super().__init__(model)
         self.parent = parent
-        self._model = model
+        self._view = view if view else CategoriesSettingsView(parent, self)
         self._view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
         self._view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
         self.set_algorithm_tree_categories()
@@ -36,10 +38,12 @@ class CategoriesSettings(object):
     def set_hidden_algorithms_string(self, _):
         categories_string = ";".join(self._create_hidden_categories_string(self._view.algorithm_tree_widget))
         self._model.set_hidden_algorithms(categories_string)
+        self.notify_changes()
 
     def set_hidden_interfaces_string(self, _):
         categories_string = ";".join(self._create_hidden_categories_string(self._view.interface_tree_widget))
         self._model.set_hidden_interfaces(categories_string)
+        self.notify_changes()
 
     def nested_box_clicked(self, item_clicked, column):
         new_state = item_clicked.checkState(column)
