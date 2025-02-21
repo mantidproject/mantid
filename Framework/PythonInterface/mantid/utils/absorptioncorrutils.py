@@ -652,13 +652,15 @@ def create_absorption_input(
         )
 
     if beam_height != Property.EMPTY_DBL and not gauge_vol:
-        gauge_vol = """<cuboid id="shape">
-            <left-front-bottom-point x="0.02" y="-{0:4.2F}" z="-0.02"  />
-            <left-front-top-point  x="0.02" y="-{0:4.2F}" z="0.02"  />
-            <left-back-bottom-point  x="-0.02" y="-{0:4.2F}" z="-0.02"  />
-            <right-front-bottom-point  x="0.02" y="{0:4.2F}" z="-0.02"  />
-            </cuboid>"""
-        gauge_vol = gauge_vol.format(beam_height / 2.0)
+        # If the gauge volume is not defined, use the beam height to define it,
+        # and we will be assuming a cylinder shape of the sample.
+        gauge_vol = """<cylinder id="shape">
+            <centre-of-bottom-base r="{0:4.2F}" t="90.0" p="270.0" />
+            <axis x="0.0" y="0.2" z="0.0" />
+            <radius val="{1:4.2F}" />
+            <height val="{2:4.2F}" />
+            </cylinder>"""
+        gauge_vol = gauge_vol.format(beam_height / 2.0, geometry["Radius"], beam_height)
 
     if gauge_vol:
         DefineGaugeVolume(absName, gauge_vol)
