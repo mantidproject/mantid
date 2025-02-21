@@ -86,7 +86,7 @@ namespace { // anonymous namespace for some utility functions
 Logger g_log("ConfigService");
 
 /**
- * Split the supplied string on semicolons.
+ * Split the supplied string on semicolons and commas.
  *
  * @param path The path to split.
  * @returns vector containing the split path.
@@ -94,7 +94,7 @@ Logger g_log("ConfigService");
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
-  if (path.find(';') == std::string::npos) { // don't bother tokenizing
+  if (path.find_first_of(";,") == std::string::npos) { // don't bother tokenizing
     splitted.emplace_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM + Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
