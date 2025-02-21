@@ -27,8 +27,7 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-// TODO change to int64_t
-typedef int nxdimsize_t;
+typedef int64_t nxdimsize_t;
 typedef std::array<nxdimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
@@ -135,8 +134,7 @@ public:
   NXDataSet(NXClass const &parent, std::string const &name);
   /// NX class name. Returns "SDS"
   std::string NX_class() const override { return "SDS"; }
-  /// Opens the data set. Does not read in any data. Call load(...) to load the
-  /// data
+  /// Opens the data set. Does not read in any data. Call load(...) to load the data
   void open();
   /// Opens datasets faster but the parent group must be already open
   void openLocal();
@@ -168,7 +166,7 @@ public:
    * rank()-2. i and j are its indices.
    *            The rank of the data must be >= 2
    */
-  virtual void load(int const blocksize, int const i, int const j) {
+  virtual void load(nxdimsize_t const blocksize, nxdimsize_t const i, nxdimsize_t const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
@@ -275,7 +273,7 @@ public:
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
    */
-  void load(int const blocksize = 1, int const i = -1, int const j = -1) override {
+  void load(nxdimsize_t const blocksize = 1, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
@@ -285,7 +283,7 @@ public:
       if (i < 0) // load all data
       {
         n = dim0() * dim1() * dim2() * dim3();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
@@ -304,7 +302,7 @@ public:
     } else if (rank() == 3) {
       if (i < 0) {
         n = dim0() * dim1() * dim2();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
@@ -326,7 +324,7 @@ public:
     } else if (rank() == 2) {
       if (i < 0) {
         n = dim0() * dim1();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
@@ -348,7 +346,7 @@ public:
     } else if (rank() == 1) {
       if (i < 0) {
         n = dim0();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else {
@@ -426,10 +424,6 @@ public:
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-  /**  Returns the class information about the next entry (class or dataset) in
-   * this class.
-   */
-  NXClassInfo getNextEntry();
   /// Creates a new object in the NeXus file at path path.
   // virtual void make(const std::string& path) = 0;
   /// Resets the current position for getNextEntry() to the beginning
@@ -595,7 +589,7 @@ private:
       value.openLocal();
       value.load();
       for (nxdimsize_t i = 0; i < value.dim0(); i++) {
-        auto t = start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(static_cast<int>(times[i]));
         for (nxdimsize_t j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
@@ -667,6 +661,10 @@ public:
    *   @return The log
    */
   NXLog openNXLog(const std::string &name) { return openNXClass<NXLog>(name); }
+  /**  Opens a NXNote class
+   *   @param name :: The name of the NXNote
+   *   @return The note
+   */
 };
 
 /**  Implements NXdata Nexus class.

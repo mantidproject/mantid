@@ -269,8 +269,8 @@ void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &d
 
 template <typename NumT>
 void File::makeData(const string &name, const NXnumtype type, const NumT length, bool open_data) {
-  vector<int64_t> dims;
-  dims.push_back(static_cast<int64_t>(length));
+  DimVector dims;
+  dims.push_back(static_cast<dimsize_t>(length));
   this->makeData(name, type, dims, open_data);
 }
 

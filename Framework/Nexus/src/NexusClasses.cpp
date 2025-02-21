@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/NexusClasses.h"
-
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidNexusCpp/NeXusException.hpp"
@@ -13,6 +12,8 @@
 
 #include <memory>
 #include <utility>
+
+using ::NeXus::dimsize_t;
 
 namespace Mantid::NeXus {
 
@@ -381,7 +382,7 @@ nxdimsize_t NXDataSet::dim0() const {
   if (m_info.rank == 0UL) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
-  return m_info.dims[0];
+  return static_cast<int>(m_info.dims[0]);
 }
 
 /**
@@ -393,7 +394,7 @@ nxdimsize_t NXDataSet::dim1() const {
   if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
-  return m_info.dims[1];
+  return static_cast<int>(m_info.dims[1]);
 }
 
 /**
@@ -405,7 +406,7 @@ nxdimsize_t NXDataSet::dim2() const {
   if (m_info.rank < 3) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
-  return m_info.dims[2];
+  return static_cast<int>(m_info.dims[2]);
 }
 
 /**
@@ -417,7 +418,7 @@ nxdimsize_t NXDataSet::dim3() const {
   if (m_info.rank < 4) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
-  return m_info.dims[3];
+  return static_cast<int>(m_info.dims[3]);
 }
 
 /**  Wrapper to the NXgetdata.
