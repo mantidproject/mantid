@@ -14,7 +14,7 @@ from mantid.kernel import (
 )
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 _ALGS = {
     "TRANS_ALG": "ReflectometryISISCreateTransmission",
@@ -31,10 +31,10 @@ class DataName:
 
 @dataclass(frozen=True)
 class PropData(DataName):
-    default: Any = None
+    default: Optional[Any] = None
     alg: str = ""
-    mag: bool = None
-    get_value: Callable = None
+    mag: Optional[bool] = None
+    get_value: Optional[Callable] = None
 
 
 def _int_array_to_string(raw_value):
@@ -167,29 +167,21 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
             doc="A set of workspace indices to be passed as the ProcessingInstructions property when calculating the magnetic transmission"
             " workspace. If this property is not set then no background subtraction is performed.",
         )
-        self.copyProperties(
-            _ALGS["TRANS_ALG"],
-            [
-                _PROP_DATA["I0_MON_IDX"].name,
-                _PROP_DATA["MON_WAV_MIN"].name,
-                _PROP_DATA["MON_WAV_MAX"].name,
-                _PROP_DATA["FLOOD_WS"].name,
+        for alg, props in {
+            _ALGS["TRANS_ALG"]: ["I0_MON_IDX", "MON_WAV_MIN", "MON_WAV_MAX", "FLOOD_WS"],
+            _ALGS["EFF_ALG"]: [
+                "FLIPPERS",
+                "INPUT_POL_EFF",
+                "INPUT_AN_EFF",
+                "INCLUDE_DIAG_OUT",
+                "OUT_PHI",
+                "OUT_RHO",
+                "OUT_ALPHA",
+                "OUT_TWO_A_MINUS_ONE",
+                "OUT_TWO_P_MINUS_ONE",
             ],
-        )
-        self.copyProperties(
-            _ALGS["EFF_ALG"],
-            [
-                _PROP_DATA["FLIPPERS"].name,
-                _PROP_DATA["INPUT_POL_EFF"].name,
-                _PROP_DATA["INPUT_AN_EFF"].name,
-                _PROP_DATA["INCLUDE_DIAG_OUT"].name,
-                _PROP_DATA["OUT_PHI"].name,
-                _PROP_DATA["OUT_RHO"].name,
-                _PROP_DATA["OUT_ALPHA"].name,
-                _PROP_DATA["OUT_TWO_A_MINUS_ONE"].name,
-                _PROP_DATA["OUT_TWO_P_MINUS_ONE"].name,
-            ],
-        )
+        }.items():
+            self.copyProperties(alg, [_PROP_DATA[prop].name for prop in props])
         self.declareProperty(
             MatrixWorkspaceProperty(
                 _PROP_DATA["OUT_WS"].name, "calc_pol_eff_out", direction=Direction.Output, optional=PropertyMode.Optional
@@ -216,7 +208,7 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
         )
         return trans_output, trans_output_mag
 
-    def _calculate_wildes_efficiencies(self, trans_output: list, trans_output_mag: list) -> dict[str:Any]:
+    def _calculate_wildes_efficiencies(self, trans_output: list, trans_output_mag: list) -> dict[str, Any]:
         eff_args = self._generate_eff_args(trans_output, trans_output_mag)
         eff_output = self._generate_eff_output_dict()
         eff_output.update(
@@ -245,7 +237,6 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
                 key = prop.name if not prop.alias else prop.alias
                 raw_value = self.getProperty(prop.name).value
                 args.update({key: raw_value if not prop.get_value else prop.get_value(raw_value)})
-                print(f"{key}: {raw_value if not prop.get_value else prop.get_value(raw_value)}")
         return args
 
     def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]) -> list:
@@ -273,7 +264,7 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
         eff_args.update(self._populate_args_dict(_ALGS["EFF_ALG"]))
         return eff_args
 
-    def _generate_eff_output_dict(self) -> dict[str:None]:
+    def _generate_eff_output_dict(self) -> dict[str, None]:
         alg_output_list = _EFF_ALG_OUTPUT + self.m_eff_alg_output_diag
         eff_output = {key: None for key in alg_output_list}
         return eff_output
