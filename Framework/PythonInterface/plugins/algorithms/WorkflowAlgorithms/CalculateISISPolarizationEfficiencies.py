@@ -10,11 +10,11 @@ from mantid.kernel import (
     StringArrayMandatoryValidator,
     StringArrayProperty,
     CompositeValidator,
-    StringPropertyWithValue,
+    IntArrayProperty,
 )
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 _ALGS = {
     "TRANS_ALG": "ReflectometryISISCreateTransmission",
@@ -34,17 +34,40 @@ class PropData(DataName):
     default: Any = None
     alg: str = ""
     mag: bool = None
+    get_value: Callable = None
+
+
+def _int_array_to_string(raw_value):
+    if len(raw_value) == 0:
+        return ""
+    min_val = min(raw_value)
+    max_val = max(raw_value)
+    return str(min_val) if (min_val == max_val) else f"{min_val}-{max_val}"
 
 
 _PROP_DATA = {
     "NON_MAG_INPUT_RUNS": PropData(name="NonMagInputRuns", alias="InputRuns", default=[], alg=_ALGS["TRANS_ALG"], mag=False),
-    "BACK_SUB_ROI": PropData(name="BackgroundProcessingInstructions", alg=_ALGS["TRANS_ALG"], mag=False),
-    "TRANS_ROI": PropData(name="ProcessingInstructions", alg=_ALGS["TRANS_ALG"], mag=False),
+    "BACK_SUB_ROI": PropData(
+        name="BackgroundProcessingInstructions", default=[], alg=_ALGS["TRANS_ALG"], mag=False, get_value=_int_array_to_string
+    ),
+    "TRANS_ROI": PropData(name="ProcessingInstructions", default=[], alg=_ALGS["TRANS_ALG"], mag=False, get_value=_int_array_to_string),
     "MAG_INPUT_RUNS": PropData(name="MagInputRuns", alias="InputRuns", default=[], alg=_ALGS["TRANS_ALG"], mag=True),
     "MAG_BACK_SUB_ROI": PropData(
-        name="MagBackgroundProcessingInstructions", alias="BackgroundProcessingInstructions", alg=_ALGS["TRANS_ALG"], mag=True
+        name="MagBackgroundProcessingInstructions",
+        alias="BackgroundProcessingInstructions",
+        default=[],
+        alg=_ALGS["TRANS_ALG"],
+        mag=True,
+        get_value=_int_array_to_string,
     ),
-    "MAG_TRANS_ROI": PropData(name="MagProcessingInstructions", alias="ProcessingInstructions", alg=_ALGS["TRANS_ALG"], mag=True),
+    "MAG_TRANS_ROI": PropData(
+        name="MagProcessingInstructions",
+        default=[],
+        alias="ProcessingInstructions",
+        alg=_ALGS["TRANS_ALG"],
+        mag=True,
+        get_value=_int_array_to_string,
+    ),
     "FLOOD_WS": PropData(name="FloodWorkspace", alg=_ALGS["TRANS_ALG"]),
     "I0_MON_IDX": PropData(name="I0MonitorIndex", alg=_ALGS["TRANS_ALG"]),
     "MON_WAV_MIN": PropData(name="MonitorIntegrationWavelengthMin", alg=_ALGS["TRANS_ALG"]),
@@ -123,27 +146,35 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             doc="A list of input run numbers. Multiple runs will be summed after loading",
         )
         self.declareProperty(
+            IntArrayProperty(_PROP_DATA["TRANS_ROI"].name, values=_PROP_DATA["TRANS_ROI"].default),
+            doc="Grouping pattern of spectrum numbers to yield only the detectors of interest. See group detectors for syntax.",
+        )
+        self.declareProperty(
+            IntArrayProperty(_PROP_DATA["BACK_SUB_ROI"].name, values=_PROP_DATA["BACK_SUB_ROI"].default),
+            doc="A set of workspace indices to be passed as the ProcessingInstructions property when calculating the transmission"
+            " workspace. If this property is not set then no background subtraction is performed.",
+        )
+        self.declareProperty(
             StringArrayProperty(_PROP_DATA["MAG_INPUT_RUNS"].name, values=_PROP_DATA["MAG_INPUT_RUNS"].default),
             doc="A list of magnetic input run numbers. Multiple runs will be summed after loading",
+        )
+        self.declareProperty(
+            IntArrayProperty(_PROP_DATA["MAG_TRANS_ROI"].name, values=_PROP_DATA["MAG_TRANS_ROI"].default),
+            doc="Grouping pattern of magnetic spectrum numbers to yield only the detectors of interest. See group detectors for syntax.",
+        )
+        self.declareProperty(
+            IntArrayProperty(_PROP_DATA["MAG_BACK_SUB_ROI"].name, values=_PROP_DATA["MAG_BACK_SUB_ROI"].default),
+            doc="A set of workspace indices to be passed as the ProcessingInstructions property when calculating the magnetic transmission"
+            " workspace. If this property is not set then no background subtraction is performed.",
         )
         self.copyProperties(
             _ALGS["TRANS_ALG"],
             [
-                _PROP_DATA["TRANS_ROI"].name,
                 _PROP_DATA["I0_MON_IDX"].name,
                 _PROP_DATA["MON_WAV_MIN"].name,
                 _PROP_DATA["MON_WAV_MAX"].name,
                 _PROP_DATA["FLOOD_WS"].name,
-                _PROP_DATA["BACK_SUB_ROI"].name,
             ],
-        )
-        self.declareProperty(
-            StringPropertyWithValue(_PROP_DATA["MAG_TRANS_ROI"].name, ""),
-            doc="Grouping pattern of magnetic spectrum numbers to yield only the detectors of interest. See group detectors for syntax.",
-        )
-        self.declareProperty(
-            MatrixWorkspaceProperty(_PROP_DATA["MAG_BACK_SUB_ROI"].name, "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="The workspace to be used for the flood correction. If this property is not set then no flood correction is performed.",
         )
         self.copyProperties(
             _ALGS["EFF_ALG"],
@@ -169,27 +200,29 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
     def PyExec(self):
         # Set class member variables and perform post-start validation
         self._initialize()
+        trans_output, trans_output_mag = self._create_transmission_workspaces()
+        eff_output = self._calculate_wildes_efficiencies(trans_output, trans_output_mag)
+        join_output = self._run_algorithm(
+            _ALGS["JOIN_ALG"], {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"]
+        )
+        self._set_output_properties(join_output[0], eff_output)
 
-        # Create transmission workspaces
+    def _create_transmission_workspaces(self) -> (list, list):
         trans_output = self._run_algorithm(_ALGS["TRANS_ALG"], self._populate_args_dict(_ALGS["TRANS_ALG"]), ["OutputWorkspace"])
         trans_output_mag = (
             self._run_algorithm(_ALGS["TRANS_ALG"], self._populate_args_dict(_ALGS["TRANS_ALG"], mag=True), ["OutputWorkspace"])
             if self.m_mag_runs_input
             else None
         )
+        return trans_output, trans_output_mag
 
-        # Calculate Wildes efficiencies
+    def _calculate_wildes_efficiencies(self, trans_output: list, trans_output_mag: list) -> dict[str:Any]:
         eff_args = self._generate_eff_args(trans_output, trans_output_mag)
         eff_output = self._generate_eff_output_dict()
         eff_output.update(
             dict(zip([x.alias for x in eff_output], self._run_algorithm(_ALGS["EFF_ALG"], eff_args, [x.name for x in eff_output])))
         )
-
-        # Join and output efficiencies
-        join_output = self._run_algorithm(
-            _ALGS["JOIN_ALG"], {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"]
-        )
-        self._set_output_properties(join_output[0], eff_output)
+        return eff_output
 
     def _initialize(self):
         self.m_mag_runs_input = bool(self.getProperty(_PROP_DATA["MAG_INPUT_RUNS"].name).value)
@@ -199,17 +232,23 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         self._validate_processing_instructions()
 
     def _validate_processing_instructions(self):
-        pass
+        if self.m_mag_runs_input:
+            if not (
+                len(self.getProperty(_PROP_DATA["TRANS_ROI"].name).value) == len(self.getProperty(_PROP_DATA["MAG_TRANS_ROI"].name).value)
+            ):
+                raise ValueError("The number of spectra specified in both magnetic and non-magnetic processing properties must be equal")
 
-    def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict:
+    def _populate_args_dict(self, alg_name: str, mag: bool = False) -> dict[str:Any]:
         args = {}
         for prop in _PROP_DATA.values():
             if prop.alg == alg_name and (prop.mag == mag or prop.mag is None):
                 key = prop.name if not prop.alias else prop.alias
-                args.update({key: self.getProperty(prop.name).value})
+                raw_value = self.getProperty(prop.name).value
+                args.update({key: raw_value if not prop.get_value else prop.get_value(raw_value)})
+                print(f"{key}: {raw_value if not prop.get_value else prop.get_value(raw_value)}")
         return args
 
-    def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]):
+    def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]) -> list:
         alg = self.createChildAlgorithm(alg_name, **args)
         alg.execute()
         result = []
@@ -217,7 +256,7 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
             result.append(alg.getProperty(key).value)
         return result
 
-    def _generate_eff_args(self, trans_output, trans_output_mag):
+    def _generate_eff_args(self, trans_output: list, trans_output_mag: list) -> dict[str:Any]:
         eff_args = {
             _NON_PROP_DATA["IN_NON_MAG_WS"].name: trans_output,
             _NON_PROP_DATA["OUT_FP_EFF"].name: _NON_PROP_DATA["OUT_FP_EFF"].alias,
@@ -234,7 +273,7 @@ class CalculateISISPolarizationEfficiencies(DataProcessorAlgorithm):
         eff_args.update(self._populate_args_dict(_ALGS["EFF_ALG"]))
         return eff_args
 
-    def _generate_eff_output_dict(self):
+    def _generate_eff_output_dict(self) -> dict[str:None]:
         alg_output_list = _EFF_ALG_OUTPUT + self.m_eff_alg_output_diag
         eff_output = {key: None for key in alg_output_list}
         return eff_output
