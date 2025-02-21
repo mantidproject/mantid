@@ -288,6 +288,7 @@ def calculate_absorption_correction(
     can_geometry={},
     can_material={},
     gauge_vol="",
+    container_gauge_vol="",
     beam_height=Property.EMPTY_DBL,
     number_density=Property.EMPTY_DBL,
     container_shape="PAC06",
@@ -330,7 +331,8 @@ def calculate_absorption_correction(
     :param sample_geometry: Dictionary to specify the sample geometry for absorption correction
     :param can_geometry: Dictionary to specify the container geometry for absorption correction
     :param can_material: Dictionary to specify the container material for absorption correction
-    :param gauge_vol: String in XML form to define the gauge volume, i.e., the sample portion visible to the beam
+    :param gauge_vol: String in XML form to define the volume of the sample visible to the beam
+    :param container_gauge_vol: String in XML form to define the volume of the container visible to the beam
     :param beam_height: Optional beam height to use for absorption correction
     :param number_density: Optional number density of sample to be added to the Material for absorption correction
     :param container_shape: Shape definition of container, such as PAC06.
@@ -404,6 +406,7 @@ def calculate_absorption_correction(
         donorWS,
         abs_method,
         element_size,
+        container_gauge_vol=container_gauge_vol,
         prefix_name=absName,
         cache_dirs=cache_dirs,
         ms_method=ms_method,
@@ -415,6 +418,7 @@ def calc_absorption_corr_using_wksp(
     donor_wksp,
     abs_method,
     element_size=1,
+    container_gauge_vol="",
     prefix_name="",
     cache_dirs=[],
     ms_method="",
@@ -424,7 +428,7 @@ def calc_absorption_corr_using_wksp(
     if cache_dirs:
         log.warning("Empty cache dir found.")
     # 1. calculate first order absorption correction
-    abs_s, abs_c = calc_1st_absorption_corr_using_wksp(donor_wksp, abs_method, element_size, prefix_name)
+    abs_s, abs_c = calc_1st_absorption_corr_using_wksp(donor_wksp, abs_method, element_size, container_gauge_vol, prefix_name)
     # 2. calculate 2nd order absorption correction
     if ms_method in ["", None, "None"]:
         log.information("Skip multiple scattering correction as instructed.")
@@ -475,6 +479,7 @@ def calc_1st_absorption_corr_using_wksp(
     donor_wksp,
     abs_method,
     element_size=1,
+    container_gauge_vol="",
     prefix_name="",
 ):
     """
@@ -484,6 +489,7 @@ def calc_1st_absorption_corr_using_wksp(
     :param donor_wksp: Input workspace to compute absorption correction on
     :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
     :param element_size: Size of one side of the integration element cube in mm
+    :param container_gauge_vol: String in XML form to define the volume of the container visible to the beam
     :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
 
     :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
@@ -505,6 +511,8 @@ def calc_1st_absorption_corr_using_wksp(
         return absName + "_ass", ""
     elif abs_method == "SampleAndContainer":
         AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_ass", ScatterFrom="Sample", ElementSize=element_size)
+        if container_gauge_vol:
+            DefineGaugeVolume(donor_wksp, container_gauge_vol)
         AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_acc", ScatterFrom="Container", ElementSize=element_size)
         return absName + "_ass", absName + "_acc"
     elif abs_method == "FullPaalmanPings":

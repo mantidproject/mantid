@@ -297,6 +297,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             "GaugeVolume", "", "A string in XML form for gauge volume definition indicating sample portion visible to the beam."
         )
         self.declareProperty(
+            "ContainerGaugeVolume", "", "A string in XML form for gauge volume definition indicating container portion visible to the beam."
+        )
+        self.declareProperty(
             "BeamHeight",
             defaultValue=Property.EMPTY_DBL,
             doc="Height of the neutron beam cross section in cm",
@@ -436,6 +439,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._containerGeometry = self.getProperty("ContainerGeometry").value
         self._containerMaterial = self.getProperty("ContainerMaterial").value
         self._gaugeVolume = self.getProperty("GaugeVolume").value
+        self._containerGaugeVolume = self.getProperty("ContainerGaugeVolume").value
         self._beamHeight = self.getProperty("BeamHeight").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
         self._numberDensity = self.getProperty("SampleNumberDensity").value
@@ -540,7 +544,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._sampleGeometry,  # Geometry parameters for the sample
             self._containerGeometry,  # Geometry parameters for the container
             self._containerMaterial,  # Material parameters for the container
-            self._gaugeVolume,  # Gauge volume definition
+            self._gaugeVolume,  # Gauge volume definition for sample
+            self._containerGaugeVolume,  # Gauge volume definition for container
             self._beamHeight,  # Height of the neutron beam cross section in cm
             self._numberDensity,  # Optional number density of sample to be added
             self._containerShape,  # Shape definition of container
