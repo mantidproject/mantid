@@ -27,7 +27,7 @@ class MANTID_DATAHANDLING_DLL DataBlock {
 public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);
-  DataBlock(int numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
+  DataBlock(size_t numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
 
   virtual ~DataBlock() = default;
 
@@ -38,7 +38,7 @@ public:
   virtual void setMaxSpectrumID(specnum_t minSpecID);
 
   virtual size_t getNumberOfSpectra() const;
-  virtual int getNumberOfPeriods() const;
+  virtual size_t getNumberOfPeriods() const;
   virtual size_t getNumberOfChannels() const;
 
   bool operator==(const DataBlock &other) const;
@@ -46,7 +46,7 @@ public:
   virtual std::unique_ptr<DataBlockGenerator> getGenerator() const;
 
 protected:
-  int m_numberOfPeriods;
+  size_t m_numberOfPeriods;
   // The number of spectra
   size_t m_numberOfSpectra;
   // The number of time channels per spectrum (N histogram bins -1)

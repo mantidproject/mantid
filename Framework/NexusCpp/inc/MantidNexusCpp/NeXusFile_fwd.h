@@ -174,8 +174,7 @@ namespace NeXus {
 // TODO change to std::size_t
 typedef std::int64_t dimsize_t;
 // TODO replace all instances with DimArray
-typedef std::vector<dimsize_t> DimVector; ///< usef specifically for the dims array
-// typedef std::array<dimsize_t, 4> DimArray;
+typedef std::vector<dimsize_t> DimVector; ///< use specifically for the dims array
 //  TODO this is probably the same as DimVector
 typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
 

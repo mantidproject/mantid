@@ -490,7 +490,7 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  * tube-pixel-channel order
  */
 void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
-                                     const std::vector<double> &xAxis, int initialSpectrum,
+                                     const std::vector<double> &xAxis, int64_t initialSpectrum,
                                      const std::set<int> &acceptedDetectorIDs,
                                      const std::vector<int> &customDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
