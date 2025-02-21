@@ -46,7 +46,7 @@ void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus:
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
 void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
-                         const std::vector<double> &xAxis, int initialSpectrum = 0,
+                         const std::vector<double> &xAxis, int64_t initialSpectrum = 0,
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::vector<int> &customID = std::vector<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
