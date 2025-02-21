@@ -1,3 +1,5 @@
+option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation for qtassistant" ON)
+
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
     src/AddWorkspaceMultiDialog.cpp
@@ -159,6 +161,11 @@ set(SRC_FILES
     src/Python/QHashToDict.cpp
 )
 
+if(DOCS_QTHELP STREQUAL "OFF")
+  list(APPEND SRC_FILES src/PythonHelpBridge.cpp)
+  list(APPEND SRC_FILES src/PythonHelpWindow.cpp)
+endif()
+
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
@@ -261,6 +268,11 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
+
+if(DOCS_QTHELP STREQUAL "OFF")
+  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpBridge.h)
+  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpWindow.h)
+endif()
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES

@@ -26,7 +26,7 @@ def show_help_page(relative_url, local_docs=None, online_base_url="https://docs.
     _presenter.showHelpPage(relative_url)
 
 
-def main(cmdargs=None):
+def main(cmdargs=sys.argv):
     """
     Run this script standalone to test the Python-based Help Window.
     """
