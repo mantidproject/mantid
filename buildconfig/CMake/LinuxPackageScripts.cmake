@@ -92,15 +92,6 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
 fi"
 )
 
-# Without specifying these schema files, the standalone can fail to launch on Linux. Inside a conda environment this
-# environment variable is set by something else.
-set(GSETTINGS_SCHEMA_DEFINITIONS
-    "# Specify path to schema files
-if [ -z \"\${GSETTINGS_SCHEMA_DIR}\" ]; then
-    GSETTINGS_MANTID_PATH=\${INSTALLDIR}/share/glib-2.0/schemas
-fi"
-)
-
 set(ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?")
 
 # Local dev version
@@ -134,17 +125,14 @@ unset(PYTHON_ARGS)
 
 if(ENABLE_WORKBENCH)
   foreach(install_type conda;standalone)
-    # used by mantidworkbench
     if(${install_type} STREQUAL "conda")
-      set(LOCAL_PYPATH "\${CONDA_PREFIX}/bin:\${CONDA_PREFIX}/lib:\${CONDA_PREFIX}/plugins")
-      set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
+      set(ROOT_DIR "\${CONDA_PREFIX}")
       set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
       set(DEST_FILENAME_SUFFIX "")
       # Don't need to set this for a conda environment
       set(XKB_CONFIG_ROOT_COMMAND "")
     elseif(${install_type} STREQUAL "standalone")
-      set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
-      set(PYTHON_EXEC_LOCAL "\${INSTALLDIR}/bin/python")
+      set(ROOT_DIR "\${INSTALLDIR}")
       set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
       set(DEST_FILENAME_SUFFIX ".standalone")
       # Need to set this, otherwise stanalone won't launch on some linux distributions
@@ -152,6 +140,18 @@ if(ENABLE_WORKBENCH)
     else()
       message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")
     endif()
+
+    set(LOCAL_PYPATH "${ROOT_DIR}/bin:${ROOT_DIR}/lib:${ROOT_DIR}/plugins")
+    set(PYTHON_EXEC_LOCAL "${ROOT_DIR}/bin/python")
+    # Without specifying these schema files, the standalone can fail to launch on Linux. Inside a conda environment this
+    # environment variable is set by something else.
+    set(GSETTINGS_SCHEMA_DEFINITIONS
+        "# Specify path to schema files
+if [ -z \"\${GSETTINGS_SCHEMA_DIR}\" ]; then
+  GSETTINGS_MANTID_PATH=${ROOT_DIR}/share/glib-2.0/schemas
+fi"
+    )
+
     # workbench launcher for jemalloc
     configure_file(
       ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
