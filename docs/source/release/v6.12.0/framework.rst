@@ -12,7 +12,7 @@ New features
 ############
 - :ref:`algm-PolarizationCorrectionFredrikze` and :ref:`algm-PolarizationEfficiencyCor` now have ``InputSpinStates`` and ``OutputSpinStates`` properties for specifying the spin state order in input and output workspace groups.
 - ``Mantid::Kernel::FloatingPointComparison`` has new functions for efficiently calculating absolute and relative differences.
-- On Linux the :ref:`algorithm profiler <AlgorithmProfiler>` is now built by default. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- The :ref:`algorithm profiler <AlgorithmProfiler>` is now available to Linux users. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
 - The :ref:`AlgoTimeRegister <AlgoTimeRegister>` class is now exposed to python.
 - :ref:`ExtractMask <algm-ExtractMask>` has a new property ``UngroupDetectors`` to allow the output ``MaskWorkspace`` to expand the spectra to individual detectors.
 - :ref:`PolarizationCorrectionWildes <algm-PolarizationCorrectionWildes>` and :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` have a new ``AddSpinStateToLog`` property to add the final spin state into the sample log of each child workspace in the output group.

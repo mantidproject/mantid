@@ -1,1 +1,0 @@
-- Move `pystog <https://github.com/neutrons/pystog>`_ from v0.2.7 to v0.5.0 which supports numpy v2

@@ -1,1 +1,0 @@
-- The setting widget no longer immediately writes to file upon changing a setting. Instead click 'Okay' or 'Apply' to save the changes.

@@ -1,6 +1,0 @@
-- Small usability improvements to :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`:
-
-  - Allow users to pass key-word arguments to methods ``save_peak_table`` and ``save_all_peaks`` (passed to :ref:`SaveReflections<algm-SaveReflections-v1>`)
-  - Make saving of .nxs file of peak tables in above methods optional using argument ``save_nxs`` (default is True)
-  - Check UB filepath exists in method ``load_isaw_ub``
-  - Added option to set min I/Sigma ``min_intens_over_Sigma`` in method ``remove_non_integrated_peaks`` (default is 0)

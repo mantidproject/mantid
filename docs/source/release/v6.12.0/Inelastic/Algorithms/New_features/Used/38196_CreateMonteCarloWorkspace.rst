@@ -1,1 +1,0 @@
-- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly simulated workspace by sampling from the probability distribution of input data.

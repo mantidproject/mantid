@@ -1,1 +1,0 @@
-- Fixed bug in `TableWorkspace::getMemorySize()` where the calculation was not summing memory correctly, leading to an underestimate of memory use..

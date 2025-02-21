@@ -25,7 +25,7 @@ Bugfixes
 - Legends now automatically snap back to the default position if dragged off the edge of a plot.
 - The :ref:`Sample Transmission Calculator <sample_transmission_calculator>` now restricts entering commas mixed with decimal points in the text boxes for ``Low``, ``Width`` and ``High`` fields.
 - Standalone Linux installations should now launch without a segfault on Ubuntu systems.
-
+- Deleting or moving the Script Repository install directory will no longer cause a crash.
 
 SliceViewer
 -----------
