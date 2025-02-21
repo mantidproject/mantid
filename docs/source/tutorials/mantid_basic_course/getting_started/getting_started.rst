@@ -39,7 +39,7 @@ from the bottom-left corner of the `downloads page <http://download.mantidprojec
 Manage User Directories
 =======================
 
-.. figure:: /images/ManageUserDirectories.png
+.. figure:: /images/ManageUserDirectories.PNG
    :width: 400px
    :alt: Manage User Directories
    :align: center
