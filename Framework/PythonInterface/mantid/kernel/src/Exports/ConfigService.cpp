@@ -65,11 +65,39 @@ std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, 
     return defaultValue;
 }
 
+std::vector<std::string> convertPathVectorToStrings(const std::vector<std::filesystem::path> &pathVector) {
+  std::vector<std::string> directoryStrings(pathVector.size());
+  std::transform(pathVector.cbegin(), pathVector.cend(), directoryStrings.begin(),
+                 [](const auto &p) { return p.string(); });
+  return directoryStrings;
+}
+
+std::string getInstrumentDirectory(ConfigServiceImpl const *const self) {
+  return self->getInstrumentDirectory().string();
+}
+
+std::string getPropertiesDir(ConfigServiceImpl const *const self) { return self->getPropertiesDir().string(); }
+
+std::vector<std::string> getInstrumentDirectories(ConfigServiceImpl const *const self) {
+  const auto &instrumentDirectories = self->getInstrumentDirectories();
+  return convertPathVectorToStrings(instrumentDirectories);
+}
+
+std::vector<std::string> getDataSearchDirs(ConfigServiceImpl const *const self) {
+  const auto &dataSearchDirs = self->getDataSearchDirs();
+  return convertPathVectorToStrings(dataSearchDirs);
+}
+
+std::string getAppDataDir(ConfigServiceImpl const *const self) { return self->getAppDataDir().string(); }
+
+std::string getUserPropertiesDir(ConfigServiceImpl const *const self) { return self->getUserPropertiesDir().string(); }
+
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 // Overload generator for getInstrument
+// Cppcheck doesn't understand Boost macros
 // cppcheck-suppress unknownMacro
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 1, 2)
 // Overload generator for getString
@@ -87,20 +115,18 @@ void export_ConfigService() {
   class_<ConfigServiceImpl, boost::noncopyable>("ConfigServiceImpl", no_init)
       .def("reset", &ConfigServiceImpl::reset, arg("self"),
            "Clears all user settings and removes the user properties file")
-      .def("getAppDataDirectory", &ConfigServiceImpl::getAppDataDir, arg("self"),
-           "Returns the path to Mantid's application directory")
+      .def("getAppDataDirectory", &getAppDataDir, arg("self"), "Returns the path to Mantid's application directory")
       .def("getLocalFilename", &ConfigServiceImpl::getLocalFilename, arg("self"),
            "Returns the path to the system wide properties file.")
       .def("getUserFilename", &ConfigServiceImpl::getUserFilename, arg("self"),
            "Returns the path to the user properties file")
-      .def("getPropertiesDir", &ConfigServiceImpl::getPropertiesDir, arg("self"),
+      .def("getPropertiesDir", &getPropertiesDir, arg("self"),
            "Returns the directory containing the Mantid.properties file.")
-      .def("getUserPropertiesDir", &ConfigServiceImpl::getUserPropertiesDir, arg("self"),
+      .def("getUserPropertiesDir", &getUserPropertiesDir, arg("self"),
            "Returns the directory to use to write out Mantid information")
-      .def("getInstrumentDirectory", &ConfigServiceImpl::getInstrumentDirectory, arg("self"),
+      .def("getInstrumentDirectory", &getInstrumentDirectory, arg("self"),
            "Returns the directory used for the instrument definitions")
-      .def("getInstrumentDirectories", &ConfigServiceImpl::getInstrumentDirectories, arg("self"),
-           return_value_policy<reference_existing_object>(),
+      .def("getInstrumentDirectories", &getInstrumentDirectories, arg("self"),
            "Returns the list of directories searched for the instrument "
            "definitions")
       .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, arg("self"), "Returns the default facility")
@@ -134,8 +160,7 @@ void export_ConfigService() {
            "Set the given property name. "
            "If it does not exist it is added to the current configuration")
       .def("hasProperty", &ConfigServiceImpl::hasProperty, (arg("self"), arg("rootName")))
-      .def("getDataSearchDirs", &ConfigServiceImpl::getDataSearchDirs, arg("self"),
-           return_value_policy<copy_const_reference>(), "Return the current list of data search paths")
+      .def("getDataSearchDirs", &getDataSearchDirs, arg("self"), "Return the current list of data search paths")
       .def("appendDataSearchDir", &ConfigServiceImpl::appendDataSearchDir, (arg("self"), arg("path")),
            "Append a directory to the current list of data search paths")
       .def("appendDataSearchSubDir", &ConfigServiceImpl::appendDataSearchSubDir, (arg("self"), arg("subdir")),

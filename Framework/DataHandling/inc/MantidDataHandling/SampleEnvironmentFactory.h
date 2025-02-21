@@ -8,6 +8,7 @@
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/SampleEnvironmentSpec.h"
+#include <filesystem>
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,7 +58,7 @@ private:
  */
 class MANTID_DATAHANDLING_DLL SampleEnvironmentSpecFileFinder final : public ISampleEnvironmentSpecFinder {
 public:
-  SampleEnvironmentSpecFileFinder(std::vector<std::string> directories);
+  SampleEnvironmentSpecFileFinder(std::vector<std::filesystem::path> directories);
 
   SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                   const std::string &name) const override;
@@ -65,7 +66,7 @@ public:
 
 private:
   const std::string m_fileext = ".xml";
-  const std::vector<std::string> m_rootDirs;
+  const std::vector<std::filesystem::path> m_rootDirs;
 };
 
 } // namespace DataHandling
