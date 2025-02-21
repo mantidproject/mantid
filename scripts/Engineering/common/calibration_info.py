@@ -24,7 +24,7 @@ GROUP_DESCRIPTIONS = {
     GROUP.NORTH: "North Bank",
     GROUP.SOUTH: "South Bank",
     GROUP.CROPPED: "Custom spectrum numbers",
-    GROUP.CUSTOM: "Custom .cal file",
+    GROUP.CUSTOM: "Custom grouping file",
     GROUP.TEXTURE20: "Texture20",
     GROUP.TEXTURE30: "Texture30",
 }
@@ -33,7 +33,7 @@ GROUP_WS_NAMES = {
     GROUP.NORTH: "NorthBank_grouping",
     GROUP.SOUTH: "SouthBank_grouping",
     GROUP.CROPPED: "Cropped_spectra_grouping",
-    GROUP.CUSTOM: "Custom_calfile_grouping",
+    GROUP.CUSTOM: "Custom_grouping_file",
     GROUP.TEXTURE20: "Texture20_grouping",
     GROUP.TEXTURE30: "Texture30_grouping",
 }
@@ -64,7 +64,7 @@ class CalibrationInfo:
         self.ceria_path = ceria_path
         self.group_ws = None
         self.prm_filepath = None
-        self.cal_filepath = None
+        self.grouping_filepath = None
         self.spectra_list = None
         self.calibration_table = None
 
@@ -72,7 +72,7 @@ class CalibrationInfo:
         self.group = None
         self.group_ws = None
         self.prm_filepath = None
-        self.cal_filepath = None
+        self.grouping_filepath = None
         self.spectra_list = None
         self.ceria_path = None
         self.instrument = None
@@ -81,11 +81,27 @@ class CalibrationInfo:
     # getters
     def get_foc_ws_suffix(self):
         if self.group:
-            return GROUP_FOC_WS_SUFFIX[self.group]
+            if self.group != GROUP.CUSTOM:
+                return GROUP_FOC_WS_SUFFIX[self.group]
+            else:
+                fname = path.split(self.grouping_filepath)[1].split(".")[0]
+                return f"{GROUP_FOC_WS_SUFFIX[GROUP.CUSTOM]}_{fname}"
 
     def get_group_suffix(self):
         if self.group:
-            return GROUP_SUFFIX[self.group]
+            if self.group != GROUP.CUSTOM:
+                return GROUP_SUFFIX[self.group]
+            else:
+                fname = path.split(self.grouping_filepath)[1].split(".")[0]
+                return f"{GROUP_SUFFIX[GROUP.CUSTOM]}_{fname}"
+
+    def get_group_ws_name(self):
+        if self.group:
+            if self.group != GROUP.CUSTOM:
+                return GROUP_WS_NAMES[self.group]
+            else:
+                fname = path.split(self.grouping_filepath)[1].split(".")[0]
+                return f"{GROUP_WS_NAMES[GROUP.CUSTOM]}_{fname}"
 
     def get_group_description(self):
         if self.group:
@@ -142,8 +158,8 @@ class CalibrationInfo:
     def set_spectra_list(self, spectra_list_str):
         self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
 
-    def set_cal_file(self, cal_filepath):
-        self.cal_filepath = cal_filepath
+    def set_grouping_file(self, grouping_filepath):
+        self.grouping_filepath = grouping_filepath
 
     def set_group(self, group):
         self.group = group
@@ -174,7 +190,7 @@ class CalibrationInfo:
         """
         if not self.group.banks:
             # no need to load grp ws for bank grouping
-            ws_name = GROUP_WS_NAMES[self.group]
+            ws_name = self.get_group_ws_name()
             grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
             self.group_ws = LoadDetectorsGroupingFile(InputFile=grouping_filepath, OutputWorkspace=ws_name)
 
@@ -226,14 +242,18 @@ class CalibrationInfo:
             elif self.group == GROUP.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
             elif self.group == GROUP.CUSTOM:
-                self.create_grouping_workspace_from_calfile()
+                ext = self.grouping_filepath.split(".")[-1]
+                if ext == "cal":
+                    self.create_grouping_workspace_from_calfile()
+                elif ext == "xml":
+                    self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name())
         return self.group_ws
 
     def create_bank_grouping_workspace(self):
         """
         Create grouping workspace for ROI corresponding to one or more banks
         """
-        ws_name = GROUP_WS_NAMES[self.group]
+        ws_name = self.get_group_ws_name()
         grp_ws = None
         try:
             grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(CALIB_DIR, GROUP_FILES[self.group]), OutputWorkspace=ws_name)
@@ -255,7 +275,7 @@ class CalibrationInfo:
         Create grouping workspace for ROI defined in .cal file
         """
         grp_ws, _, _ = CreateGroupingWorkspace(
-            InstrumentName=self.instrument, OldCalFilename=self.cal_filepath, OutputWorkspace=GROUP_WS_NAMES[self.group]
+            InstrumentName=self.instrument, OldCalFilename=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name()
         )
         self.group_ws = grp_ws
 
@@ -263,7 +283,7 @@ class CalibrationInfo:
         """
         Create grouping workspace for ROI defined as a list of spectrum numbers
         """
-        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=GROUP_WS_NAMES[self.group])
+        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=self.get_group_ws_name())
         for spec in self.spectra_list:
             det_ids = grp_ws.getDetectorIDs(spec - 1)
             grp_ws.setValue(det_ids[0], 1)
