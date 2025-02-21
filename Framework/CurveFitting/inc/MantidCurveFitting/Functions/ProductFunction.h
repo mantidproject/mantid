@@ -26,16 +26,16 @@ more other fit functions.
 */
 class MANTID_CURVEFITTING_DLL ProductFunction : public API::CompositeFunction {
 public:
-  /// overwrite IFunction base class methods
-  std::string name() const override { return "ProductFunction"; }
+  /// override IFunction base class methods
+  std::string name() const override;
   /// Function you want to fit to.
   void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   /// Calculate the derivatives
   void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
 protected:
-  /// overwrite IFunction base class method, which declare function parameters
-  void init() override {};
+  /// overwrite IFunction base class method, which declares function parameters
+  void init() override;
 };
 
 } // namespace Functions

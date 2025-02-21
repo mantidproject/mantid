@@ -16,6 +16,9 @@ using namespace CurveFitting;
 
 DECLARE_FUNCTION(ProductFunction)
 
+/// override IFunction base class methods
+std::string ProductFunction::name() const { return "ProductFunction"; }
+
 /** Function you want to fit to.
  *  @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
  *  @param values :: The function values to evaluate for the function domain
@@ -38,5 +41,8 @@ void ProductFunction::function(const API::FunctionDomain &domain, API::FunctionV
 void ProductFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
+
+/// overwrite IFunction base class method, which declares function parameters
+void ProductFunction::init() {};
 
 } // namespace Mantid::CurveFitting::Functions
