@@ -27,6 +27,13 @@ void OutputNamePresenter::setOutputWsBasename(std::string const &outputBasename,
   handleUpdateOutputLabel();
 }
 
+void OutputNamePresenter::enableEditing() {
+  m_view->enableLabelEditor();
+  // m_view->hideWarning();
+}
+
+std::string OutputNamePresenter::getCurrentLabel() { return m_view->getCurrentLabel(); }
+
 void OutputNamePresenter::generateWarningLabel() const {
   auto textColor = "color: darkGreen";
   auto text = "Unused name, new workspace will be created";
