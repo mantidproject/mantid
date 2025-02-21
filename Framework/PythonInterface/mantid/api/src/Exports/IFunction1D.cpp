@@ -20,7 +20,9 @@ void export_IFunction1D() {
    */
   class_<IFunction1D, bases<IFunction>, std::shared_ptr<IFunction1DAdapter>, boost::noncopyable>(
       "IFunction1D", "Base class for 1D Fit functions")
-      .def("function1D", (object(IFunction1DAdapter::*)(const object &) const)&IFunction1DAdapter::function1D,
+      .def("function1D",
+           // cppcheck-suppress cstyleCast - cppcheck complains but already using static_cast
+           static_cast<object (IFunction1DAdapter::*)(const object &) const>(&IFunction1DAdapter::function1D),
            (arg("self"), arg("xvals")),
            "Calculate the values of the function for the given x values and "
            "returns them");
