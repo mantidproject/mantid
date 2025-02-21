@@ -113,7 +113,7 @@ void LoadMuonNexus2::exec() {
 
   NXFloat raw_time = dataGroup.openNXFloat("raw_time");
   raw_time.load();
-  int nBins = raw_time.dim0();
+  auto nBins = raw_time.dim0();
   std::vector<double> timeBins;
   timeBins.assign(raw_time(), raw_time() + nBins);
   timeBins.emplace_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
@@ -267,7 +267,7 @@ void LoadMuonNexus2::exec() {
  */
 Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::LegacyNexus::NXInt &counts, int period,
                                    int spec) {
-  int nBins = 0;
+  int64_t nBins = 0;
   const int *data = nullptr;
 
   if (counts.rank() == 3) {
@@ -424,7 +424,7 @@ int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const 
  */
 std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
-  const int nSpectra = static_cast<int>(spectrumIndex.dim0());
+  auto const nSpectra = spectrumIndex.dim0();
 
   // Find and open the data group
   NXRoot root(getPropertyValue("Filename"));

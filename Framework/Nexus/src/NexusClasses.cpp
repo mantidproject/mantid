@@ -20,7 +20,7 @@ namespace Mantid::NeXus {
 static NXDimArray nxdimArray(::NeXus::DimVector xd) {
   NXDimArray ret{0};
   for (std::size_t i = 0; i < xd.size(); i++) {
-    ret[i] = static_cast<nxdimsize_t>(xd[i]);
+    ret[i] = xd[i];
   }
   return ret;
 }
