@@ -20,7 +20,7 @@ namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {
 
-enum Narrowing : bool { Allow = true, Prevent = false };
+enum class Narrowing : bool { Allow = true, Prevent = false };
 
 namespace {
 
