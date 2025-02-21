@@ -27,6 +27,7 @@ public:
     return "Save a MatrixWorkspace to a file in the NXcanSAS format (for both 1D and 2D data).";
   }
   /// Override processGroups
+  bool checkGroups() override;
   bool processGroups() override;
 
   /// Algorithm's version
