@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
-#include "MantidAPI/LogManager.h"
+#include <Poco/Logger.h>
 
 #include <H5Cpp.h>
 
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -20,8 +21,8 @@ using namespace H5;
 namespace Mantid::NeXus::H5Util {
 
 namespace {
-/// static logger object
-Mantid::Kernel::Logger g_log("H5Util");
+/// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
+const auto g_log = &Poco::Logger::get("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
 const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
@@ -263,10 +264,10 @@ void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vec
     readArray1DCoerce(dataset, output);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
-    g_log.information("Failed to open dataset \"" + name + "\"\n");
+    g_log->information("Failed to open dataset \"" + name + "\"\n");
   } catch (const H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log.information("DataSet \"" + name + "\" should be double" + "\n");
+    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
   }
 }
 
@@ -277,10 +278,10 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &gr
     readArray1DCoerce(dataset, result);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
-    g_log.information("Failed to open dataset \"" + name + "\"\n");
+    g_log->information("Failed to open dataset \"" + name + "\"\n");
   } catch (const H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log.information("DataSet \"" + name + "\" should be double" + "\n");
+    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
   }
 
   return result;

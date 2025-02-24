@@ -29,7 +29,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::NexusCpp)
+target_link_libraries(Nexus PRIVATE Mantid::NexusCpp Poco::Foundation)
 
 # Add the unit tests directory
 add_subdirectory(test)
@@ -38,7 +38,7 @@ add_subdirectory(test)
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Nexus> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Nexus TRUE)
+generate_mantid_export_header(Nexus FALSE)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidNexusTargets")
