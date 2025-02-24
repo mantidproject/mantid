@@ -2,7 +2,6 @@ set(SRC_FILES
     src/H5Util.cpp
     src/NexusClasses.cpp
     src/napi.cpp
-    src/napi4.cpp
     src/napi5.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
@@ -16,7 +15,6 @@ set(INC_FILES
     inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NeXusFile_fwd.h
     inc/MantidNexus/napi.h
-    inc/MantidNexus/napi4.h
     inc/MantidNexus/napi5.h
     inc/MantidNexus/napiconfig.h
     inc/MantidNexus/napi_internal.h
@@ -47,7 +45,7 @@ set_target_properties(Nexus PROPERTIES OUTPUT_NAME MantidNexus COMPILE_DEFINITIO
 
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
 target_compile_definitions(Nexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
-target_link_libraries(Nexus PRIVATE ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
+target_link_libraries(Nexus PRIVATE ${HDF5_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")

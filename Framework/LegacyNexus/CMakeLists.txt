@@ -32,12 +32,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(
-  LegacyNexus
-  PROPERTIES OUTPUT_NAME MantidLegacyNexus
-             COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP
-             WITH_HDF4 WITH_HDF5
-)
+set_target_properties(LegacyNexus PROPERTIES OUTPUT_NAME MantidLegacyNexus COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP)
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
 target_compile_definitions(LegacyNexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 target_link_libraries(LegacyNexus PUBLIC ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
