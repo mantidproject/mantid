@@ -292,7 +292,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
     m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_READ);
   } catch (::NeXus::Exception const &e) {
     std::cout << "NXRoot: Error loading " << m_filename << "\" in read mode: " << e.what() << "\n";
-    throw std::runtime_error("Unable to open File:" + m_filename);
+    throw;
   }
   readAllInfo();
 }
@@ -305,11 +305,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
   // Open NeXus file
-  try {
-    m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_CREATE5);
-  } catch (::NeXus::Exception const &) {
-    throw std::runtime_error("Unable to open File:" + m_filename);
-  }
+  m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_CREATE5);
 }
 
 NXRoot::~NXRoot() { m_fileID->close(); }
