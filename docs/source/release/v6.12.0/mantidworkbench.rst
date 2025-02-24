@@ -9,7 +9,7 @@ New Features
 ------------
 - ``mantidworkbench`` is now an additional entry point for launching the ``mantidworkbench`` Conda package.
 - ``workbench`` and ``mantidworkbench`` Conda entry points now launch workbench with ``jemalloc`` configured as the memory allocator on Linux.
-- Surface and contour plots can now be generated more easily for multiple single-spectrum workspaces (via the `Plot Advanced` dialog when multiple single-spectrum workspaces are select
+- Surface and contour plots can now be generated more easily for multiple single-spectrum workspaces (via the `Plot Advanced` dialog when multiple single-spectrum workspaces are selected).
 - Added an `Email mantid-help@mantidproject.org` action to the Help menu.
 - The settings dialog now has `Okay`, `Apply` and `Cancel` buttons. Settings are no longer immediately applied when parameters are changed.
 - MacOS compiler updated from version 16 to version 18, which should result in performance improvements. See https://releases.llvm.org for release notes.
