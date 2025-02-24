@@ -91,7 +91,7 @@ void PythonHelpWindow::showCustomInterface(const QString &name, const QString &a
 }
 
 void PythonHelpWindow::shutdown() {
-  // no-op for python help window
+  // TODO: We may need to close the Python-based help window when integrated into Mantid Workbench
 }
 
 } // namespace MantidWidgets

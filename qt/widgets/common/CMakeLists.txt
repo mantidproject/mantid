@@ -1,5 +1,3 @@
-option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation for qtassistant" ON)
-
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
     src/AddWorkspaceMultiDialog.cpp
@@ -161,7 +159,7 @@ set(SRC_FILES
     src/Python/QHashToDict.cpp
 )
 
-if(DOCS_QTHELP STREQUAL "OFF")
+if(NOT ENABLE_QTASSISTANT)
   list(APPEND SRC_FILES src/PythonHelpBridge.cpp)
   list(APPEND SRC_FILES src/PythonHelpWindow.cpp)
 endif()
@@ -269,7 +267,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
 
-if(DOCS_QTHELP STREQUAL "OFF")
+if(NOT ENABLE_QTASSISTANT)
   list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpBridge.h)
   list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpWindow.h)
 endif()
@@ -649,7 +647,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # Add option to the compiler to register MantidHelpWindow
-if(DOCS_QTHELP)
+if(ENABLE_QTASSISTANT)
   add_definitions(-DDOCS_QTHELP)
 endif()
 
@@ -738,6 +736,7 @@ set(TEST_FILES
     test/ProgressableViewTest.h
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
+    test/PythonHelpWindowTest.h
     test/SelectionNotificationServiceTest.h
     test/SelectionWorkspacesDialogTest.h
     test/TrackedActionTest.h
