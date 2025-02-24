@@ -41,66 +41,41 @@ class SetCalibrationMixin(object):
 
 
 class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
-    def test_set_calibration_from_prm_group_both(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_all_banks.prm", GROUP.BOTH)
+    def test_set_calibration_from_prm(self):
+        test_cases = [
+            ("ENGINX_123456_all_banks.prm", GROUP.BOTH),
+            ("ENGINX_123456_bank_1.prm", GROUP.NORTH),
+            ("ENGINX_123456_bank_2.prm", GROUP.SOUTH),
+            ("ENGINX_123456_Texture20.prm", GROUP.TEXTURE20),
+            ("ENGINX_123456_Texture30.prm", GROUP.TEXTURE30),
+            ("ENGINX_123456_Custom.prm", GROUP.CUSTOM),
+            ("ENGINX_123456_Cropped.prm", GROUP.CROPPED),
+        ]
 
-    def test_set_calibration_from_prm_group_bank1(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_bank_1.prm", GROUP.NORTH)
-
-    def test_set_calibration_from_prm_group_bank2(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_bank_2.prm", GROUP.SOUTH)
-
-    def test_set_calibration_from_prm_group_texture20(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_Texture20.prm", GROUP.TEXTURE20)
-
-    def test_set_calibration_from_prm_group_texture30(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_Texture30.prm", GROUP.TEXTURE30)
-
-    def test_set_calibration_from_prm_group_custom(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_Custom.prm", GROUP.CUSTOM)
-
-    def test_set_calibration_from_prm_group_cropped(self):
-        self.setup_set_calibration_from_prm("ENGINX_123456_Cropped.prm", GROUP.CROPPED)
+        for filename, group in test_cases:
+            with self.subTest(filename=filename, group=group):
+                self.setup_set_calibration_from_prm(filename, group)
 
     # test that get_group_ws will call the correct method depending on grouping
     # the groupings which call create_bank_grouping_workspace and create_grouping_workspace_from_calfile require files
     # to be loaded which will weigh down unit tests - can presume these loading functions are tested elsewhere
 
     @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
-    def test_get_group_ws_both(self, mock_create_bank_grouping_workspace):
-        self.setup_get_group_ws(GROUP.BOTH)
+    def test_setup_get_group_ws(self, mock_create_bank_grouping_workspace):
+        test_cases = [GROUP.BOTH, GROUP.NORTH, GROUP.SOUTH, GROUP.TEXTURE20, GROUP.TEXTURE30]
 
-        mock_create_bank_grouping_workspace.assert_called_once()
-
-    @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
-    def test_get_group_ws_bank1(self, mock_create_bank_grouping_workspace):
-        self.setup_get_group_ws(GROUP.NORTH)
-
-        mock_create_bank_grouping_workspace.assert_called_once()
-
-    @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
-    def test_get_group_ws_bank2(self, mock_create_bank_grouping_workspace):
-        self.setup_get_group_ws(GROUP.SOUTH)
-
-        mock_create_bank_grouping_workspace.assert_called_once()
-
-    @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
-    def test_get_group_ws_texture20(self, mock_create_bank_grouping_workspace):
-        self.setup_get_group_ws(GROUP.TEXTURE20)
-
-        mock_create_bank_grouping_workspace.assert_called_once()
-
-    @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
-    def test_get_group_ws_texture30(self, mock_create_bank_grouping_workspace):
-        self.setup_get_group_ws(GROUP.TEXTURE30)
-
-        mock_create_bank_grouping_workspace.assert_called_once()
+        for group in test_cases:
+            with self.subTest(group=group):
+                self.setup_get_group_ws(group)
+                mock_create_bank_grouping_workspace.assert_called_once()
+                mock_create_bank_grouping_workspace.reset_mock()
 
     @patch.object(CalibrationInfo, "create_grouping_workspace_from_calfile")
     def test_get_group_ws_custom(self, mock_create_grouping_workspace_from_calfile):
         self.setup_get_group_ws(GROUP.CUSTOM)
 
         mock_create_grouping_workspace_from_calfile.assert_called_once()
+        mock_create_grouping_workspace_from_calfile.reset_mock()
 
     def test_get_group_ws_cropped(self):
         # This grouping doesn't require an input file, so we don't need to mock the response
@@ -122,59 +97,40 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
     @patch.object(CalibrationInfo, "get_group_ws")
     @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_both(self, mock_get_group_ws, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.BOTH, "banks")
+    def test_setup_load_relevant_calibration_files_get_group_ws(self, mock_load, mock_get_group_ws):
+        test_cases = [
+            (GROUP.BOTH, "banks"),
+            (GROUP.NORTH, "bank_1"),
+            (GROUP.SOUTH, "bank_2"),
+            (GROUP.TEXTURE20, "Texture20"),
+            (GROUP.TEXTURE30, "Texture30"),
+        ]
 
-        mock_Load.assert_called_once()
-        mock_get_group_ws.assert_called_once()
+        for group, suffix in test_cases:
+            with self.subTest(group=group, suffix=suffix):
+                self.setup_load_relevant_calibration_files(group, suffix)
 
-    @patch.object(CalibrationInfo, "get_group_ws")
-    @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_bank1(self, mock_get_group_ws, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.NORTH, "bank_1")
+                mock_load.assert_called_once()
+                mock_get_group_ws.assert_called_once()
 
-        mock_Load.assert_called_once()
-        mock_get_group_ws.assert_called_once()
-
-    @patch.object(CalibrationInfo, "get_group_ws")
-    @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_bank2(self, mock_get_group_ws, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.SOUTH, "bank_2")
-
-        mock_Load.assert_called_once()
-        mock_get_group_ws.assert_called_once()
-
-    @patch.object(CalibrationInfo, "get_group_ws")
-    @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_texture20(self, mock_get_group_ws, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.TEXTURE20, "Texture20")
-
-        mock_Load.assert_called_once()
-        mock_get_group_ws.assert_called_once()
-
-    @patch.object(CalibrationInfo, "get_group_ws")
-    @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_texture30(self, mock_get_group_ws, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.TEXTURE30, "Texture30")
-
-        mock_Load.assert_called_once()
-        mock_get_group_ws.assert_called_once()
+                mock_load.reset_mock(), mock_get_group_ws.reset_mock()
 
     @patch.object(CalibrationInfo, "load_custom_grouping_workspace")
     @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_custom(self, mock_load_custom_grouping_workspace, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.CUSTOM, "Custom")
+    def test_setup_load_relevant_calibration_files_custom_grouping(self, mock_load, mock_load_custom_grouping_workspace):
+        test_cases = [
+            (GROUP.CUSTOM, "Custom"),
+            (GROUP.CROPPED, "Cropped"),
+        ]
 
-        mock_Load.assert_called_once()
-        mock_load_custom_grouping_workspace.assert_called_once()
+        for group, suffix in test_cases:
+            with self.subTest(group=group, suffix=suffix):
+                self.setup_load_relevant_calibration_files(group, suffix)
 
-    @patch.object(CalibrationInfo, "load_custom_grouping_workspace")
-    @patch(eng_common + ".Load")
-    def test_load_relevant_calibration_files_cropped(self, mock_load_custom_grouping_workspace, mock_Load):
-        self.setup_load_relevant_calibration_files(GROUP.CROPPED, "Cropped")
+                mock_load.assert_called_once()
+                mock_load_custom_grouping_workspace.assert_called_once()
 
-        mock_Load.assert_called_once()
-        mock_load_custom_grouping_workspace.assert_called_once()
+                mock_load.reset_mock(), mock_load_custom_grouping_workspace.reset_mock()
 
 
 if __name__ == "__main__":
