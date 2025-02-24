@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import unittest
 from unittest.mock import patch, MagicMock, call
 
 from workbench.widgets.settings.categories.categories_settings_model import CategoriesSettingsModel, CategoryProperties
@@ -54,3 +55,7 @@ class CategoriesSettingsModelTest(BaseSettingsModelTest):
             [{"Basic": "Load"}, {"Arithmetic": "Mean"}],
             call(),
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

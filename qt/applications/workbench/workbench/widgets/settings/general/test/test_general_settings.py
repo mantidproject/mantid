@@ -481,3 +481,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.set_user_layout.assert_called_once_with({})
         mock_notify_changes.assert_called_once()
         mock_parent.populate_layout_menu.assert_called_once_with()
+
+
+if __name__ == "__main__":
+    unittest.main()

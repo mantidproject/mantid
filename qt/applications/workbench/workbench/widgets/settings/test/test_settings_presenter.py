@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from unittest import TestCase
+import unittest
 
 from unittest.mock import call, MagicMock, Mock, patch
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
@@ -55,7 +55,7 @@ class MockSettingsView(object):
         self.ask_before_close = MagicMock()
 
 
-class SettingsPresenterTest(TestCase):
+class SettingsPresenterTest(unittest.TestCase):
     def setUp(self) -> None:
         self.mock_view = MockSettingsView()
         self.mock_model = MagicMock()
@@ -164,3 +164,7 @@ class SettingsPresenterTest(TestCase):
         closed = self.presenter.view_closing()
 
         self.assertFalse(closed)
+
+
+if __name__ == "__main__":
+    unittest.main()

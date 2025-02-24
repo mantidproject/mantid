@@ -154,3 +154,7 @@ class CategoriesSettingsTest(unittest.TestCase):
         presenter.set_hidden_interfaces_string(None)
         self.mock_model.set_hidden_interfaces.assert_called_once_with(";".join(hidden_interface_string))
         notify_changes_mock.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()

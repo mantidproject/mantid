@@ -4,13 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from unittest import TestCase
+import unittest
 from unittest.mock import MagicMock
 
 from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
 
 
-class ConfigSettingsPresenterTest(TestCase):
+class ConfigSettingsPresenterTest(unittest.TestCase):
     def setUp(self) -> None:
         self.mock_model = MagicMock()
         self.mock_model.has_unsaved_changes = MagicMock()
@@ -27,3 +27,7 @@ class ConfigSettingsPresenterTest(TestCase):
         self.mock_model.has_unsaved_changes.return_value = False
         self.presenter.notify_changes()
         self._mock_parent_presenter.changes_updated.assert_called_once_with(False)
+
+
+if __name__ == "__main__":
+    unittest.main()

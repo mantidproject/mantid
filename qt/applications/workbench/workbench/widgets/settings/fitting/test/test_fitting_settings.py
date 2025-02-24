@@ -167,3 +167,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_find_peaks_tolerance_changed(8)
         self.mock_model.set_tolerance.assert_called_once_with("8")
         mock_notify_changes.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()
