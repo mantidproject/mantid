@@ -41,7 +41,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     const auto &props = alg.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 4);
+    TS_ASSERT_EQUALS(props.size(), 5);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
     TS_ASSERT(props[0]->isDefault());
@@ -52,9 +52,12 @@ public:
     TS_ASSERT_EQUALS(props[2]->name(), "IncludeData");
     TS_ASSERT(props[2]->isDefault());
 
-    TS_ASSERT_EQUALS(props[3]->name(), "DetectorTableWorkspace");
+    TS_ASSERT_EQUALS(props[3]->name(), "IncludeDetectorPosition");
     TS_ASSERT(props[3]->isDefault());
-    TS_ASSERT(dynamic_cast<WorkspaceProperty<TableWorkspace> *>(props[3]));
+
+    TS_ASSERT_EQUALS(props[4]->name(), "DetectorTableWorkspace");
+    TS_ASSERT(props[4]->isDefault());
+    TS_ASSERT(dynamic_cast<WorkspaceProperty<TableWorkspace> *>(props[4]));
   }
 
   void test_Exec_Matrix_Workspace() {
@@ -163,6 +166,36 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
 
     TS_ASSERT_THROWS(alg.executeAsChildAlg(), const std::runtime_error &);
+  }
+
+  void test_Exec_Matrix_Workspace_with_Include_DetPos() {
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludeDetectorPosition", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+    TS_ASSERT(alg.isExecuted());
+
+    // Not setting an output workspace name should give the name:
+    //[input workspace name] + "-Detectors"
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(inputWS->getName() + "-Detectors"));
+    TS_ASSERT(ws);
+
+    if (!ws) {
+      return;
+    }
+
+    // Check the results
+    TS_ASSERT_EQUALS(ws->columnCount(), 12); // extra column compared to test_Exec_Matrix_Workspace
+    TS_ASSERT_EQUALS(ws->rowCount(), 2);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(ws->getName());
   }
 };
 
