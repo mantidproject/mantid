@@ -15,8 +15,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON PythonHelpBridge {
 public:
   PythonHelpBridge();
-  void showHelpPage(const std::string &relative_url, const std::string &local_docs = "",
-                    const std::string &online_base_url = "https://docs.mantidproject.org/");
+  void showHelpPage(const std::string &relative_url);
 };
 
 } // namespace MantidWidgets
