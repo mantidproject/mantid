@@ -27,7 +27,8 @@ void CreateDetectorTable::init() {
   declareProperty("IncludeData", false, "Include the first value from each spectrum.");
   setPropertySettings("IncludeData",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
-  declareProperty("IncludeDetectorPosition", false, "Include the absolute position of the detector group as a column.");
+  declareProperty<bool>("IncludeDetectorPosition", false,
+                        "Include the absolute position of the detector group for each spectrum.", Direction::Input);
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTableWorkspace", "", Direction::Output,
                                                                       PropertyMode::Optional),
