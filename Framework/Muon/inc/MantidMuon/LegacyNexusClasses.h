@@ -6,15 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi.h"
 #include "MantidMuon/DllConfig.h"
 
 #include <boost/container/vector.hpp>
+#include <ios>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -438,8 +439,8 @@ private:
         m_n = n;
       }
     } catch (...) {
-      std::ostringstream ostr;
-      ostr << "Cannot allocate " << n * sizeof(T) << " bytes of memory to load the data";
+      std::stringstream ostr;
+      ostr << "Cannot allocate " << (n * sizeof(T)) << " bytes of memory to load the data";
       throw std::runtime_error(ostr.str());
     }
   }
@@ -614,126 +615,11 @@ private:
   NXClass() : NXObject() { clear(); }
 };
 
-//------------------- auxiliary classes ----------------------------//
-
-/**  Implements NXlog Nexus class.
- */
-class MANTID_MUON_DLL NXLog : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXLog(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /// Nexus class id
-  std::string NX_class() const override { return "NXlog"; }
-  /// Creates a property wrapper around the log
-  Kernel::Property *createProperty();
-  /// Creates a TimeSeriesProperty and returns a pointer to it
-  Kernel::Property *createTimeSeries(const std::string &start_time = "", const std::string &new_name = "");
-
-private:
-  /// Creates a single value property of the log
-  Kernel::Property *createSingleValueProperty();
-  /// Parse a time series
-  template <class TYPE>
-  Kernel::Property *parseTimeSeries(const std::string &logName, const TYPE &times, const std::string &time0 = "") {
-    std::string start_time = (!time0.empty()) ? time0 : times.attributes("start");
-    if (start_time.empty()) {
-      start_time = "2000-01-01T00:00:00";
-    }
-    auto start_t = Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
-    NXInfo vinfo = getDataSetInfo("value");
-    if (!vinfo)
-      return nullptr;
-
-    if (vinfo.dims[0] != times.dim0())
-      return nullptr;
-
-    if (vinfo.type == NXnumtype::CHAR) {
-      auto logv = new Kernel::TimeSeriesProperty<std::string>(logName);
-      NXChar value(*this, "value");
-      value.openLocal();
-      value.load();
-      for (int i = 0; i < value.dim0(); i++) {
-        auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        for (int j = 0; j < value.dim1(); j++) {
-          char *c = &value(i, j);
-          if (!isprint(*c))
-            *c = ' ';
-        }
-        logv->addValue(t, std::string(value() + i * value.dim1(), value.dim1()));
-      }
-      return logv;
-    } else if (vinfo.type == NXnumtype::FLOAT64) {
-      if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
-        auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
-        NXDouble value(*this, "value");
-        value.openLocal();
-        value.load();
-        for (int i = 0; i < value.dim0(); i++) {
-          auto t = start_t + boost::posix_time::seconds(int(times[i]));
-          logv->addValue(t, (value[i] == 0 ? false : true));
-        }
-        return logv;
-      }
-      NXDouble value(*this, "value");
-      return loadValues<NXDouble, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NXnumtype::FLOAT32) {
-      NXFloat value(*this, "value");
-      return loadValues<NXFloat, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NXnumtype::INT32) {
-      NXInt value(*this, "value");
-      return loadValues<NXInt, TYPE>(logName, value, start_t, times);
-    }
-    return nullptr;
-  }
-
-  /// Loads the values in the log into the workspace
-  ///@param logName :: the name of the log
-  ///@param value :: the value
-  ///@param start_t :: the start time
-  ///@param times :: the array of time offsets
-  ///@returns a property pointer
-  template <class NX_TYPE, class TIME_TYPE>
-  Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value, Types::Core::DateAndTime start_t,
-                               const TIME_TYPE &times) {
-    value.openLocal();
-    auto logv = new Kernel::TimeSeriesProperty<double>(logName);
-    value.load();
-    for (int i = 0; i < value.dim0(); i++) {
-      if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
-        auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        logv->addValue(t, value[i]);
-      }
-    }
-    return logv;
-  }
-};
-
 //-------------------- main classes -------------------------------//
-
-/**  Main class is the one that can contain auxiliary classes.
- */
-class MANTID_MUON_DLL NXMainClass : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXMainClass(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /**  Opens a NXLog class
-   *   @param name :: The name of the NXLog
-   *   @return The log
-   */
-  NXLog openNXLog(const std::string &name) { return openNXClass<NXLog>(name); }
-};
 
 /**  Implements NXdata Nexus class.
  */
-class MANTID_MUON_DLL NXData : public NXMainClass {
+class MANTID_MUON_DLL NXData : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -775,14 +661,14 @@ public:
 
 /**  Implements NXdetector Nexus class.
  */
-class MANTID_MUON_DLL NXDetector : public NXMainClass {
+class MANTID_MUON_DLL NXDetector : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXDetector(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXDetector(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXdetector"; }
   /// Opens the dataset containing pixel distances
@@ -795,14 +681,14 @@ public:
 
 /**  Implements NXinstrument Nexus class.
  */
-class MANTID_MUON_DLL NXInstrument : public NXMainClass {
+class MANTID_MUON_DLL NXInstrument : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXInstrument(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXInstrument(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXinstrument"; }
   /**  Opens a NXDetector
@@ -814,14 +700,14 @@ public:
 
 /**  Implements NXentry Nexus class.
  */
-class MANTID_MUON_DLL NXEntry : public NXMainClass {
+class MANTID_MUON_DLL NXEntry : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXEntry(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXEntry(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXentry"; }
   /**  Opens a NXData

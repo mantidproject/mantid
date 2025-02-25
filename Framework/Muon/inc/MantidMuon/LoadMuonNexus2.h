@@ -10,6 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMuon/DllConfig.h"
 #include "MantidMuon/LegacyNexusClasses.h"
 #include "MantidMuon/LoadMuonNexus.h"
@@ -67,7 +69,7 @@ private:
 
   HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges,
                                     const Mantid::LegacyNexus::NXInt &counts, int period, int spec);
-  void loadLogs(const API::MatrixWorkspace_sptr &ws, Mantid::LegacyNexus::NXEntry &entry, int period);
+  void loadLogs(const API::MatrixWorkspace_sptr &ws, const Mantid::LegacyNexus::NXEntry &entry, int period);
   void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
   std::map<int, std::set<int>> loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex);
 };
