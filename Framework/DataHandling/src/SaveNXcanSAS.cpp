@@ -25,12 +25,9 @@ void SaveNXcanSAS::init() { initStandardProperties(); }
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() { return validateStandardInputs(); }
 
 bool SaveNXcanSAS::checkGroups() {
-  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
-  try {
-    if (workspace && workspace->isGroup())
-      return true;
-  } catch (...) {
-  }
+  const Mantid::API::Workspace_sptr &workspace = getProperty("InputWorkspace");
+  if (workspace && workspace->isGroup())
+    return true;
   return false;
 }
 
