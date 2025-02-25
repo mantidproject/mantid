@@ -101,6 +101,8 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
  * @param indices :: Limit the table to these workspace indices
  * @param includeData :: If true then first value from the each spectrum is
  * displayed
+ * @param includeDetectorPosition :: If true then include the absolute position of
+ * the detector group for each spectrum
  * @param logger: The Mantid logger so errors can be written to it.
  *
  * @return A pointer to the table workspace of detector information

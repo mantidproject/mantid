@@ -64,7 +64,7 @@ void populateTable(Mantid::API::ITableWorkspace_sptr &t, const Mantid::API::Matr
                    bool signedThetaParamRetrieved, bool showSignedTwoTheta,
                    const Mantid::Geometry::PointingAlong &beamAxisIndex, const double sampleDist, const bool isScanning,
                    const bool include_data, const bool calcQ, const bool includeDiffConstants,
-                   const bool IncludeDetectorPosition, Kernel::Logger &logger);
+                   const bool includeDetectorPosition, Kernel::Logger &logger);
 std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
                                                                const bool calcQ, const bool hasDiffConstants,
                                                                const bool includeDetectorPosition);
