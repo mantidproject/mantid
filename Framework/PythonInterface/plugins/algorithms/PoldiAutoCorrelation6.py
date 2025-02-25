@@ -104,7 +104,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             # detector clock reset for each pulse
             # equivalent to np.mod(arrival_time, cycle_time) but order of magnitude quicker
             time_in_cycle_period = arrival_time - cycle_time * np.floor(arrival_time / cycle_time)
-            itimes = time_in_cycle_period / bin_width
+            itimes = (time_in_cycle_period / bin_width) - 0.5  # correct for first time bin center at bin_width / 2
             ibins = np.floor(itimes).astype(int)
             ibins_plus = ibins + 1
             ibins_plus[ibins_plus > ws.blocksize() - 1] = 0
