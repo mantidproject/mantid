@@ -41,17 +41,17 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLTOF2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
-       descriptor.isEntry("/entry0/mode") && !descriptor.isEntry("/entry0/dataSD") // This one is for
-                                                                                   // LoadILLIndirect
-       && !descriptor.isEntry("/entry0/instrument/VirtualChopper")                 // This one is for
-                                                                                   // LoadILLReflectometry
-       && !descriptor.isEntry("/entry0/instrument/Tx"))                            // This eliminates SALSA data
-      || (descriptor.isEntry("/entry0/data_scan") &&
-          descriptor.isEntry("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
+  if ((descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
+       descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
+                                                                                         // LoadILLIndirect
+       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
+                                                                                         // LoadILLReflectometry
+       && !descriptor.pathExists("/entry0/instrument/Tx"))                               // This eliminates SALSA data
+      || (descriptor.pathExists("/entry0/data_scan") &&
+          descriptor.pathExists("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
   ) {
     return 80;
   } else {
@@ -59,7 +59,7 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {}
+LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::LegacyNexusDescriptor>() {}
 
 /**
  * Initialises the algorithm

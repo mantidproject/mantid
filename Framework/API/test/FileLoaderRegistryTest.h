@@ -53,6 +53,13 @@ public:
     runCheck("emu00006473.nxs", "LoadMuonNexus", 1);
   }
 
+  void testILL() {
+    // IN5 tests
+    const std::string path("ILL/IN5/");
+    runCheck(path + "095893.nxs", "LoadILLTOF", 2); // hdf4
+    runCheck(path + "104007.nxs", "LoadILLTOF", 2); // hdf5
+  }
+
   void testSNS() {
     runCheck("TOPAZ_3007.peaks.nxs", "LoadNexusProcessed", 2);
     runCheck("PG3_733.nxs", "LoadNexusProcessed", 2);
