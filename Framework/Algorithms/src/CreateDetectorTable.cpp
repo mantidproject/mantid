@@ -329,6 +329,9 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
       if (includeDiffConstants) {
         colValues << 0.0 << 0.0 << 0.0 << 0.0;
       }
+      if (includeDetectorPosition) {
+        colValues << V3D(0.0, 0.0, 0.0);
+      }
     } // End catch for no spectrum
   }
 }
