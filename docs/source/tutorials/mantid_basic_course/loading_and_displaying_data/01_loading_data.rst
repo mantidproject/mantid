@@ -5,8 +5,7 @@ Loading Data
 ============
 
 .. figure:: /images/ShowLoadandWorkspaceAreaInMantidWB.png
-    :width: 400px
-    :alt: Loading in Mantid Workbench
+   :alt: Loading in Mantid Workbench
 
 Loading a File
 ==============
