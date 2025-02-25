@@ -24,8 +24,8 @@
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>

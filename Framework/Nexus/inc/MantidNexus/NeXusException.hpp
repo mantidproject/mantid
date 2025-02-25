@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MantidNexusCpp/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexus/DllConfig.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 #include <stdexcept>
 #include <string>
 
@@ -18,7 +18,7 @@ namespace NeXus {
  * \ingroup cpp_core
  */
 
-class MANTID_NEXUSCPP_DLL Exception : public std::runtime_error {
+class MANTID_NEXUS_DLL Exception : public std::runtime_error {
 public:
   /**
    * Create a new NeXus::Exception

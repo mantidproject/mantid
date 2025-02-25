@@ -47,8 +47,8 @@
  */
 #pragma once
 
-#include "MantidNexusCpp/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexus/DllConfig.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 #include <stdint.h>
 
 /* NeXus HDF45 */
@@ -161,14 +161,14 @@ extern "C" {
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopen(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXopen(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
 
 /**
  * Opens an existing NeXus file a second time for e.g. access from another thread.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUSCPP_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
+MANTID_NEXUS_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
 
 /**
  * close a NeXus file
@@ -177,7 +177,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUSCPP_DLL NXstatus NXclose(NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXclose(NXhandle *pHandle);
 
 /**
  * flush data to disk
@@ -185,7 +185,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXclose(NXhandle *pHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXflush(NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXflush(NXhandle *pHandle);
 
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
@@ -196,7 +196,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXflush(NXhandle *pHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmakegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
+MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
 
 /**
  * Step into a group. All further access will be within the opened group.
@@ -206,7 +206,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXmakegroup(NXhandle handle, CONSTCHAR *name, CONST
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
+MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
 
 /**
  * Open the NeXus object with the path specified
@@ -217,7 +217,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXopengroup(NXhandle handle, CONSTCHAR *name, CONST
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopenpath(NXhandle handle, CONSTCHAR *path);
+MANTID_NEXUS_DLL NXstatus NXopenpath(NXhandle handle, CONSTCHAR *path);
 
 /**
  * Opens the group in which the NeXus object with the specified path exists
@@ -228,7 +228,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXopenpath(NXhandle handle, CONSTCHAR *path);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopengrouppath(NXhandle handle, CONSTCHAR *path);
+MANTID_NEXUS_DLL NXstatus NXopengrouppath(NXhandle handle, CONSTCHAR *path);
 
 /**
  * Retrieve the current path in the NeXus file
@@ -238,7 +238,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXopengrouppath(NXhandle handle, CONSTCHAR *path);
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetpath(NXhandle handle, char *path, int pathlen);
+MANTID_NEXUS_DLL NXstatus NXgetpath(NXhandle handle, char *path, int pathlen);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
@@ -246,7 +246,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetpath(NXhandle handle, char *path, int pathlen)
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUSCPP_DLL NXstatus NXclosegroup(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle handle);
 
 /**
  * Create a multi dimensional data array or dataset. The dataset is NOT opened.
@@ -259,13 +259,12 @@ MANTID_NEXUSCPP_DLL NXstatus NXclosegroup(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[]);
+MANTID_NEXUS_DLL NXstatus NXmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[]);
 
 /**
  * @copydoc NXmakedata()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
-                                          int64_t dim[]);
+MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
 
 /**
  * Create a compressed dataset. The dataset is NOT opened. Data from this set will automatically be compressed when
@@ -287,14 +286,14 @@ MANTID_NEXUSCPP_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXn
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXcompmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[],
-                                            int comp_typ, int const bufsize[]);
+MANTID_NEXUS_DLL NXstatus NXcompmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[],
+                                         int comp_typ, int const bufsize[]);
 
 /**
  * @copydoc NXcompmakedata()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
-                                              int64_t dim[], int comp_typ, int64_t const chunk_size[]);
+MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
+                                           int64_t dim[], int comp_typ, int64_t const chunk_size[]);
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or
@@ -304,7 +303,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopendata(NXhandle handle, CONSTCHAR *label);
+MANTID_NEXUS_DLL NXstatus NXopendata(NXhandle handle, CONSTCHAR *label);
 
 /**
  * Close access to a dataset.
@@ -312,7 +311,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXopendata(NXhandle handle, CONSTCHAR *label);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXclosedata(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXclosedata(NXhandle handle);
 
 /**
  * Write data to a datset which has previouly been opened with NXopendata.
@@ -323,7 +322,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXclosedata(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXputdata(NXhandle handle, const void *data);
+MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle handle, const void *data);
 
 /**
  * Write an attribute. The kind of attribute written depends on the
@@ -340,8 +339,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXputdata(NXhandle handle, const void *data);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen,
-                                       NXnumtype iType);
+MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
 
 /**
  * Write an attribute of any rank. The kind of attribute written depends on the
@@ -357,8 +355,8 @@ MANTID_NEXUSCPP_DLL NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const v
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank,
-                                        const int dim[], const NXnumtype iType);
+MANTID_NEXUS_DLL NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank,
+                                     const int dim[], const NXnumtype iType);
 
 /**
  * Write  a subset of a multi dimensional dataset.
@@ -369,13 +367,12 @@ MANTID_NEXUSCPP_DLL NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXputslab(NXhandle handle, const void *data, const int start[], const int size[]);
+MANTID_NEXUS_DLL NXstatus NXputslab(NXhandle handle, const void *data, const int start[], const int size[]);
 
 /**
  * @copydoc NXputdata()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXputslab64(NXhandle handle, const void *data, const int64_t start[],
-                                         const int64_t size[]);
+MANTID_NEXUS_DLL NXstatus NXputslab64(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
 
 /**
  * Retrieve link data for a dataset. This link data can later on be used to link this
@@ -386,7 +383,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXputslab64(NXhandle handle, const void *data, cons
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
 
 /**
  * Create a link to the group or dataset described by pLink in the currently open
@@ -397,7 +394,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
 
 /**
  * Create a link to the group or dataset described by pLink in the currently open
@@ -409,7 +406,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname, NXlink *pLink);
 
 /**
  * Open the source group of a linked group or dataset. Returns an error when the item is
@@ -418,7 +415,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXopensourcegroup(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXopensourcegroup(NXhandle handle);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -429,7 +426,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXopensourcegroup(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetdata(NXhandle handle, void *data);
+MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle handle, void *data);
 
 /**
  * Retrieve information about the curretly open dataset.
@@ -442,12 +439,12 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetdata(NXhandle handle, void *data);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
+MANTID_NEXUS_DLL NXstatus NXgetinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
 
 /**
  * @copydoc NXgetinfo()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
+MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
 /**
  * Get the next entry in the currently open group. This is for retrieving infromation about the
@@ -461,7 +458,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetinfo64(NXhandle handle, int *rank, int64_t dim
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetnextentry(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype);
+MANTID_NEXUS_DLL NXstatus NXgetnextentry(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype);
 
 /**
  * Read a subset of data from file into memory.
@@ -473,12 +470,12 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetnextentry(NXhandle handle, NXname name, NXname
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetslab(NXhandle handle, void *data, const int start[], const int size[]);
+MANTID_NEXUS_DLL NXstatus NXgetslab(NXhandle handle, void *data, const int start[], const int size[]);
 
 /**
  * @copydoc NXgetslab()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetslab64(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
+MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
 
 /**
  * Read an attribute containing a single string or numerical value.
@@ -491,7 +488,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetslab64(NXhandle handle, void *data, const int6
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetattr(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType);
+MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType);
 
 /**
  * Get the count of attributes in the currently open dataset, group or global attributes when at root level.
@@ -500,7 +497,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetattr(NXhandle handle, const char *name, void *
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
+MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
 
 /**
  * Iterate over global, group or dataset attributes depending on the currently open group or
@@ -516,7 +513,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
+MANTID_NEXUS_DLL NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
 /**
  * Read an arbitrarily shaped attribute.
@@ -526,7 +523,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetattra(NXhandle handle, const char *name, void *data);
+MANTID_NEXUS_DLL NXstatus NXgetattra(NXhandle handle, const char *name, void *data);
 
 /**
  * Get the information about the storage of the named attribute.
@@ -537,7 +534,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetattra(NXhandle handle, const char *name, void 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
+MANTID_NEXUS_DLL NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
 /**
  * Retrieve link data for the currently open group. This link data can later on be used to link this
@@ -548,7 +545,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink *pLink);
 
 /**
  * Retrieve information about the currently open group.
@@ -561,7 +558,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink *pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetgroupinfo(NXhandle handle, int *no_items, NXname name, NXname nxclass);
+MANTID_NEXUS_DLL NXstatus NXgetgroupinfo(NXhandle handle, int *no_items, NXname name, NXname nxclass);
 
 /**
  * Tests if two link data structures describe the same item.
@@ -571,7 +568,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetgroupinfo(NXhandle handle, int *no_items, NXna
  * \return NX_OK when both link data structures describe the same item, NX_ERROR else.
  * \ingroup c_linking
  */
-MANTID_NEXUSCPP_DLL NXstatus NXsameID(NXhandle handle, NXlink const *pFirstID, NXlink const *pSecondID);
+MANTID_NEXUS_DLL NXstatus NXsameID(NXhandle handle, NXlink const *pFirstID, NXlink const *pSecondID);
 
 /**
  * Resets a pending group search to the start again. To be called in a #NXgetnextentry loop when
@@ -580,7 +577,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXsameID(NXhandle handle, NXlink const *pFirstID, N
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXinitgroupdir(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXinitgroupdir(NXhandle handle);
 
 /**
  * Resets a pending attribute search to the start again. To be called in a #NXgetnextattr loop when
@@ -589,7 +586,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXinitgroupdir(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUSCPP_DLL NXstatus NXinitattrdir(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
 
 /**
  * Inquire the filename of the currently open file. FilenameBufferLength of the file name
@@ -600,7 +597,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXinitattrdir(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength);
+MANTID_NEXUS_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength);
 
 /**
  * Test if a group is actually pointing to an external file. If so, retrieve the URL of the
@@ -613,8 +610,8 @@ MANTID_NEXUSCPP_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int 
  * \return NX_OK when the group is pointing to an external file, NX_ERROR else.
  * \ingroup c_external
  */
-MANTID_NEXUSCPP_DLL NXstatus NXisexternalgroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, char *url,
-                                               int urlLen);
+MANTID_NEXUS_DLL NXstatus NXisexternalgroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, char *url,
+                                            int urlLen);
 
 /**
  * Test if a dataset is actually pointing to an external file. If so, retrieve the URL of the
@@ -626,7 +623,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXisexternalgroup(NXhandle handle, CONSTCHAR *name,
  * \return NX_OK when the dataset is pointing to an external file, NX_ERROR else.
  * \ingroup c_external
  */
-MANTID_NEXUSCPP_DLL NXstatus NXisexternaldataset(NXhandle handle, CONSTCHAR *name, char *url, int urlLen);
+MANTID_NEXUS_DLL NXstatus NXisexternaldataset(NXhandle handle, CONSTCHAR *name, char *url, int urlLen);
 
 /**
  * Create a link to a group in an external file. This works by creating a NeXus group under the current level in
@@ -640,7 +637,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXisexternaldataset(NXhandle handle, CONSTCHAR *nam
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_external
  */
-MANTID_NEXUSCPP_DLL NXstatus NXlinkexternal(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url);
+MANTID_NEXUS_DLL NXstatus NXlinkexternal(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url);
 
 /**
  * Create a link to a dataset in an external file. This works by creating a dataset under the current level in
@@ -653,7 +650,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXlinkexternal(NXhandle handle, CONSTCHAR *name, CO
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_external
  */
-MANTID_NEXUSCPP_DLL NXstatus NXlinkexternaldataset(NXhandle handle, CONSTCHAR *name, CONSTCHAR *url);
+MANTID_NEXUS_DLL NXstatus NXlinkexternaldataset(NXhandle handle, CONSTCHAR *name, CONSTCHAR *url);
 
 /**
  * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
@@ -664,12 +661,12 @@ MANTID_NEXUSCPP_DLL NXstatus NXlinkexternaldataset(NXhandle handle, CONSTCHAR *n
  * \return NX_OK when allocation succeeds, NX_ERROR in the case of an error.
  * \ingroup c_memory
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype);
+MANTID_NEXUS_DLL NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype);
 
 /**
  * @copydoc NXmalloc()
  */
-MANTID_NEXUSCPP_DLL NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype);
+MANTID_NEXUS_DLL NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype);
 
 /**
  * Utility function to return NeXus version
@@ -677,7 +674,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXmalloc64(void **data, int rank, const int64_t dim
  * same format as NEXUS_VERSION string in napi.h i.e. "major.minor.patch"
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL const char *NXgetversion();
+MANTID_NEXUS_DLL const char *NXgetversion();
 
 /**
  * Utility function to release the memory for data.
@@ -685,9 +682,9 @@ MANTID_NEXUSCPP_DLL const char *NXgetversion();
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_memory
  */
-MANTID_NEXUSCPP_DLL NXstatus NXfree(void **data);
+MANTID_NEXUS_DLL NXstatus NXfree(void **data);
 
-MANTID_NEXUSCPP_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
+MANTID_NEXUS_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
 
 /**
  * Retrieve information about the currently open dataset. In contrast to the main function below,
@@ -701,26 +698,26 @@ MANTID_NEXUSCPP_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
+MANTID_NEXUS_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
 
 /**
  * @copydoc NXgetrawinfo
  */
-MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
+MANTID_NEXUS_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
 /**
  * Dispatches the error message
  */
-MANTID_NEXUSCPP_DLL void NXReportError(const char *text);
+MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
-MANTID_NEXUSCPP_DLL char *NXIformatNeXusTime();
+MANTID_NEXUS_DLL char *NXIformatNeXusTime();
 
 /**
  * A function for setting the default cache size for HDF-5
  * \ingroup c_init
  */
-MANTID_NEXUSCPP_DLL NXstatus NXsetcache(long newVal);
+MANTID_NEXUS_DLL NXstatus NXsetcache(long newVal);
 
 #ifdef __cplusplus
 };

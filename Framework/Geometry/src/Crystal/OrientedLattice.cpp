@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;

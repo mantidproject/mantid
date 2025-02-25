@@ -7,7 +7,7 @@
 #pragma once
 
 // NeXus
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 // STL
 #include <climits>

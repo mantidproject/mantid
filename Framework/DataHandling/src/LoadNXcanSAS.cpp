@@ -23,7 +23,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
 
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>

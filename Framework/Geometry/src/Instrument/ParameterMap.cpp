@@ -13,7 +13,7 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <boost/algorithm/string.hpp>
 #include <cstring>
 

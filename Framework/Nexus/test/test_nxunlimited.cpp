@@ -24,8 +24,8 @@
   $Id: napi_test.c 1178 2009-01-21 12:28:55Z Freddie Akeroyd $
 
 ----------------------------------------------------------------------------*/
-#include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napiconfig.h"
+#include "MantidNexus/napi.h"
+#include "MantidNexus/napiconfig.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

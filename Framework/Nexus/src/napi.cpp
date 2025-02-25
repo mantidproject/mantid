@@ -31,10 +31,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi_internal.h"
-#include "MantidNexusCpp/napiconfig.h"
-#include "MantidNexusCpp/nxstack.h"
+#include "MantidNexus/napi.h"
+#include "MantidNexus/napi_internal.h"
+#include "MantidNexus/napiconfig.h"
+#include "MantidNexus/nxstack.h"
 
 /*---------------------------------------------------------------------
  Recognized and handled napimount URLS
@@ -62,7 +62,7 @@
 #define strdup _strdup
 #endif
 
-#include "MantidNexusCpp/nx_stptok.h"
+#include "MantidNexus/nx_stptok.h"
 
 #if HAVE_LIBPTHREAD
 
@@ -243,10 +243,10 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
 
 /*----------------------------------------------------------------------*/
 #ifdef WITH_HDF5
-#include "MantidNexusCpp/napi5.h"
+#include "MantidNexus/napi5.h"
 #endif
 #ifdef WITH_HDF4
-#include "MantidNexusCpp/napi4.h"
+#include "MantidNexus/napi4.h"
 #endif
 /* ----------------------------------------------------------------------
 

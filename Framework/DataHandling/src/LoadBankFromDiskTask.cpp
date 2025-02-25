@@ -13,9 +13,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusIOHelper.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <algorithm>
 #include <utility>

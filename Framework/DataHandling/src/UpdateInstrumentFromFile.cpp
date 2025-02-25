@@ -17,8 +17,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <H5Cpp.h>
 #include <algorithm>

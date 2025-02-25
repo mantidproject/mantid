@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/FileFinder.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusIOHelper.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cxxtest/TestSuite.h>
 

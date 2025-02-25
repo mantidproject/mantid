@@ -24,8 +24,8 @@
   $Id$
 
 ----------------------------------------------------------------------------*/
-#include "MantidNexusCpp/NeXusFile_fwd.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/napi.h"
 #include "napi_test_util.h"
 #include <filesystem>
 #include <iostream>
@@ -37,10 +37,10 @@
 static int testLoadPath();
 static int testExternal(const std::string &progName);
 
-using NexusCppTest::print_data;
-using NexusCppTest::removeFile;
-using NexusCppTest::write_dmc01;
-using NexusCppTest::write_dmc02;
+using NexusNapiTest::print_data;
+using NexusNapiTest::removeFile;
+using NexusNapiTest::write_dmc01;
+using NexusNapiTest::write_dmc02;
 
 namespace { // anonymous namespace
 std::string relativePathOf(const std::string &filename) { return std::filesystem::path(filename).filename().string(); }
@@ -480,7 +480,8 @@ int main(int argc, char *argv[]) {
   if (NXclosedata(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (r8_data)\n" << "original data\n";
+    std::cout << "Link check FAILED (r8_data)\n"
+              << "original data\n";
     NXIprintlink(fileid, &dlink);
     std::cout << "linked data\n";
     NXIprintlink(fileid, &blink);
@@ -499,7 +500,8 @@ int main(int argc, char *argv[]) {
   if (NXgetgroupID(fileid, &blink) != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (sample)\n" << "original group\n";
+    std::cout << "Link check FAILED (sample)\n"
+              << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);
@@ -514,7 +516,8 @@ int main(int argc, char *argv[]) {
   if (NXgetgroupID(fileid, &blink) != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (renLinkGroup)\n" << "original group\n";
+    std::cout << "Link check FAILED (renLinkGroup)\n"
+              << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);
@@ -529,7 +532,8 @@ int main(int argc, char *argv[]) {
   if (NXgetdataID(fileid, &blink) != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (renLinkData)\n" << "original group\n";
+    std::cout << "Link check FAILED (renLinkData)\n"
+              << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);

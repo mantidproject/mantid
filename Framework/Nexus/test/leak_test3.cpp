@@ -5,7 +5,7 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/napi.h"
 
 #define PSZ(s) (s).c_str()
 
