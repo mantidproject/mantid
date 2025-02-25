@@ -27,11 +27,6 @@ void OutputNamePresenter::setOutputWsBasename(std::string const &outputBasename,
   handleUpdateOutputLabel();
 }
 
-void OutputNamePresenter::enableEditing() {
-  m_view->enableLabelEditor();
-  // m_view->hideWarning();
-}
-
 std::string OutputNamePresenter::getCurrentLabel() { return m_view->getCurrentLabel(); }
 
 void OutputNamePresenter::generateWarningLabel() const {
@@ -43,6 +38,8 @@ void OutputNamePresenter::generateWarningLabel() const {
   }
   m_view->setWarningLabel(text, textColor);
 }
+
+void OutputNamePresenter::hideOutputNameBox() const { m_view->hideOutputNameBox(); }
 
 std::string OutputNamePresenter::generateOutputLabel() {
   auto outputName = m_model->outputBasename();

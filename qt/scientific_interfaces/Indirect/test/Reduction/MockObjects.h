@@ -124,6 +124,8 @@ public:
   MOCK_METHOD1(setInstrumentSpecDefault, void(std::map<std::string, bool> &specMap));
 
   MOCK_METHOD1(showMessageBox, void(std::string const &message));
+
+  MOCK_CONST_METHOD0(hideOutputNameBox, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

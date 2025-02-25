@@ -40,6 +40,12 @@ std::string OutputNameView::getCurrentOutputName() const { return m_uiForm.lbNam
 
 std::string OutputNameView::getCurrentLabel() const { return m_uiForm.leLabel->text().toStdString(); }
 
+void OutputNameView::hideOutputNameBox() const {
+  m_uiForm.lbName->hide();
+  m_uiForm.lbOutput->hide();
+  m_uiForm.lbWarning->hide();
+}
+
 void OutputNameView::notifyUpdateOutputLabel() { m_presenter->handleUpdateOutputLabel(); }
 
 } // namespace MantidQt::CustomInterfaces

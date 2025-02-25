@@ -60,6 +60,7 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
   setOutputPlotOptionsPresenter(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface);
   setOutputNamePresenter(m_view->getOutputName());
   m_outputNamePresenter->setWsSuffixes(SUFFIXES);
+  m_outputNamePresenter->hideOutputNameBox();
 }
 
 void IETPresenter::validateInstrumentDetails(IUserInputValidator *validator) const {

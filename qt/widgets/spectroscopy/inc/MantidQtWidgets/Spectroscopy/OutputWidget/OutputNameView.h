@@ -28,6 +28,8 @@ public:
 
   virtual std::string getCurrentLabel() const = 0;
   virtual std::string getCurrentOutputName() const = 0;
+
+  virtual void hideOutputNameBox() const = 0;
 };
 
 class MANTID_SPECTROSCOPY_DLL OutputNameView final : public QWidget, public IOutputNameView {
@@ -44,6 +46,8 @@ public:
 
   std::string getCurrentLabel() const override;
   std::string getCurrentOutputName() const override;
+
+  void hideOutputNameBox() const override;
 
 private slots:
   void notifyUpdateOutputLabel();
