@@ -712,52 +712,6 @@ private:
   }
 };
 
-/**  Implements NXnote Nexus class.
- */
-class MANTID_MUON_DLL NXNote : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXNote(const NXClass &parent, const std::string &name)
-      : NXClass(parent, name), m_author_ok(), m_data_ok(), m_description_ok() {}
-  /// Nexus class id
-  std::string NX_class() const override { return "NXnote"; }
-  /// Returns the note's author
-  std::string author();
-  /// Returns the note's content
-  std::vector<std::string> &data();
-  /// Returns the description string
-  std::string description();
-
-protected:
-  std::string m_author;            ///< author
-  std::vector<std::string> m_data; ///< content
-  std::string m_description;       ///< description
-  bool m_author_ok;                ///< author loaded indicator
-  bool m_data_ok;                  ///< data loaded indicator
-  bool m_description_ok;           ///< description loaded indicator
-};
-
-/**  Implements NXnote Nexus class with binary data.
- */
-class MANTID_MUON_DLL NXBinary : public NXNote {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXBinary(const NXClass &parent, const std::string &name) : NXNote(parent, name) {}
-  /// Return the binary data associated with the note
-  std::vector<char> &binary();
-
-private:
-  std::vector<char> m_binary; ///< content
-};
-
 //-------------------- main classes -------------------------------//
 
 /**  Main class is the one that can contain auxiliary classes.
@@ -775,11 +729,6 @@ public:
    *   @return The log
    */
   NXLog openNXLog(const std::string &name) { return openNXClass<NXLog>(name); }
-  /**  Opens a NXNote class
-   *   @param name :: The name of the NXNote
-   *   @return The note
-   */
-  NXNote openNXNote(const std::string &name) { return openNXClass<NXNote>(name); }
 };
 
 /**  Implements NXdata Nexus class.
@@ -844,22 +793,6 @@ public:
   NXFloat openPolarAngle() { return openNXFloat("polar_angle"); }
 };
 
-/**  Implements NXdisk_chopper Nexus class.
- */
-class MANTID_MUON_DLL NXDiskChopper : public NXMainClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXDiskChopper(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
-  /// Nexus class id
-  std::string NX_class() const override { return "NXdisk_chopper"; }
-  /// Opens the dataset containing pixel distances
-  NXFloat openRotationSpeed() { return openNXFloat("rotation_speed"); }
-};
-
 /**  Implements NXinstrument Nexus class.
  */
 class MANTID_MUON_DLL NXInstrument : public NXMainClass {
@@ -877,12 +810,6 @@ public:
    *   @return The detector
    */
   NXDetector openNXDetector(const std::string &name) { return openNXClass<NXDetector>(name); }
-
-  /**  Opens a NXDetector
-   *   @param name :: The name of the class
-   *   @return The detector
-   */
-  NXDiskChopper openNXDiskChopper(const std::string &name) { return openNXClass<NXDiskChopper>(name); }
 };
 
 /**  Implements NXentry Nexus class.
