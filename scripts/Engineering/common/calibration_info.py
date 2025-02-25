@@ -67,6 +67,7 @@ class CalibrationInfo:
         self.grouping_filepath = None
         self.spectra_list = None
         self.calibration_table = None
+        self.extra_group_suffix = ""
 
     def clear(self):
         self.group = None
@@ -77,6 +78,14 @@ class CalibrationInfo:
         self.ceria_path = None
         self.instrument = None
         self.calibration_table = None
+        self.extra_group_suffix = ""
+
+    def set_extra_group_suffix(self):
+        try:
+            self.set_grouping_filepath_from_prm_filepath()
+            self.extra_group_suffix = "_" + path.split(self.grouping_filepath)[1].split(".")[0]
+        except TypeError:
+            self.extra_group_suffix = ""
 
     # getters
     def get_foc_ws_suffix(self):
@@ -84,24 +93,24 @@ class CalibrationInfo:
             if self.group != GROUP.CUSTOM:
                 return GROUP_FOC_WS_SUFFIX[self.group]
             else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_FOC_WS_SUFFIX[GROUP.CUSTOM]}_{fname}"
+                self.set_extra_group_suffix()
+                return f"{GROUP_FOC_WS_SUFFIX[GROUP.CUSTOM]}{self.extra_group_suffix}"
 
     def get_group_suffix(self):
         if self.group:
             if self.group != GROUP.CUSTOM:
                 return GROUP_SUFFIX[self.group]
             else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_SUFFIX[GROUP.CUSTOM]}_{fname}"
+                self.set_extra_group_suffix()
+                return f"{GROUP_SUFFIX[GROUP.CUSTOM]}{self.extra_group_suffix}"
 
     def get_group_ws_name(self):
         if self.group:
             if self.group != GROUP.CUSTOM:
                 return GROUP_WS_NAMES[self.group]
             else:
-                fname = path.split(self.grouping_filepath)[1].split(".")[0]
-                return f"{GROUP_WS_NAMES[GROUP.CUSTOM]}_{fname}"
+                self.set_extra_group_suffix()
+                return f"{GROUP_WS_NAMES[GROUP.CUSTOM]}{self.extra_group_suffix}"
 
     def get_group_description(self):
         if self.group:
@@ -151,6 +160,7 @@ class CalibrationInfo:
         if any(grp.value == suffix for grp in GROUP):
             self.group = GROUP(suffix)
             self.prm_filepath = file_path
+            self.set_grouping_filepath_from_prm_filepath()
         else:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
         self.set_calibration_paths(*fname_words[0:2])
@@ -165,6 +175,10 @@ class CalibrationInfo:
         self.group = group
 
     # functional
+    def set_grouping_filepath_from_prm_filepath(self):
+        if self.prm_filepath is not None:
+            self.grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
+
     def load_relevant_calibration_files(self, output_prefix="engggui"):
         """
         Load calibration table ws output from second step of calibration (PDCalibration of ROI focused spectra)
@@ -191,8 +205,8 @@ class CalibrationInfo:
         if not self.group.banks:
             # no need to load grp ws for bank grouping
             ws_name = self.get_group_ws_name()
-            grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
-            self.group_ws = LoadDetectorsGroupingFile(InputFile=grouping_filepath, OutputWorkspace=ws_name)
+            self.set_grouping_filepath_from_prm_filepath()
+            self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=ws_name)
 
     def save_grouping_workspace(self, directory: str) -> None:
         """

@@ -27,9 +27,10 @@ class SetCalibrationMixin(object):
         self.assertEqual(calibration.get_ceria_path(), "123456")
         self.assertEqual(calibration.group, group)
 
-    def setup_get_group_ws(self, group):
+    def setup_get_group_ws(self, group, filepath=None):
         calibration = CalibrationInfo()
         calibration.group = group
+        calibration.grouping_filepath = filepath
         calibration.get_group_ws()
 
     def setup_load_relevant_calibration_files(self, group, suffix):
@@ -71,11 +72,18 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
                 mock_create_bank_grouping_workspace.reset_mock()
 
     @patch.object(CalibrationInfo, "create_grouping_workspace_from_calfile")
-    def test_get_group_ws_custom(self, mock_create_grouping_workspace_from_calfile):
-        self.setup_get_group_ws(GROUP.CUSTOM)
+    def test_get_group_ws_custom_cal(self, mock_create_grouping_workspace_from_calfile):
+        self.setup_get_group_ws(GROUP.CUSTOM, "3x5_group.cal")
 
         mock_create_grouping_workspace_from_calfile.assert_called_once()
         mock_create_grouping_workspace_from_calfile.reset_mock()
+
+    @patch(eng_common + ".LoadDetectorsGroupingFile")
+    def test_get_group_ws_custom_xml(self, mock_LoadDetectorsGroupingFile):
+        self.setup_get_group_ws(GROUP.CUSTOM, "3x5_group.xml")
+
+        mock_LoadDetectorsGroupingFile.assert_called_once()
+        mock_LoadDetectorsGroupingFile.reset_mock()
 
     def test_get_group_ws_cropped(self):
         # This grouping doesn't require an input file, so we don't need to mock the response
@@ -131,6 +139,35 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
                 mock_load_custom_grouping_workspace.assert_called_once()
 
                 mock_load.reset_mock(), mock_load_custom_grouping_workspace.reset_mock()
+
+    def test_set_extra_group_suffix(self):
+        test_cases = [("test.xml", "_test"), (None, "")]
+
+        for fp, target in test_cases:
+            with self.subTest(fp=fp, target=target):
+                calibration = CalibrationInfo()
+                calibration.group = GROUP.CUSTOM
+                calibration.grouping_filepath = fp
+
+                calibration.set_extra_group_suffix()
+
+                self.assertEqual(calibration.extra_group_suffix, target)
+
+    def test_get_group_suffix(self):
+        test_cases = [
+            (GROUP.CUSTOM, "test.xml", "Custom_test"),
+            (GROUP.CUSTOM, None, "Custom"),  # if no grouping fp can be found still should work
+            (GROUP.BOTH, None, "all_banks"),
+            (GROUP.BOTH, "NorthAndSouthBanks.xml", "all_banks"),
+        ]
+
+        for group, fp, target in test_cases:
+            with self.subTest(group=group, fp=fp, target=target):
+                calibration = CalibrationInfo()
+                calibration.group = group
+                calibration.grouping_filepath = fp
+
+                self.assertEqual(calibration.get_group_suffix(), target)
 
 
 if __name__ == "__main__":
