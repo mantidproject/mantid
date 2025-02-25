@@ -3,7 +3,7 @@ from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Annotated, TypeAlias, Tuple, Sequence, Optional
-from scipy import interpolate
+# from scipy import interpolate
 
 # Forward declarations
 Workspace2D: TypeAlias = Annotated[type, "Workspace2D"]
@@ -148,8 +148,7 @@ def simulate_2d_data(ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: O
     is_dspac = ws_1d.getXDimension().name.replace("-", "") == "dSpacing"
     if not is_dspac:
         ws_1d = exec_alg("ConvertUnits", InputWorkspace=ws_1d, Target="dSpacing", OutputWorkspace="__temp")
-    yspec = ws_1d.readY(0)
-    finterp = interpolate.interp1d(ws_1d.readX(0), yspec, bounds_error=False, fill_value=(yspec[0], yspec[-1]))
+        ws_1d = exec_alg("ConvertToPointData", InputWorkspace=ws_1d, OutputWorkspace=ws_1d.name())
     if output_workspace is None:
         output_workspace = ws_2d.name() + "_simulated"
     ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d, OutputWorkspace=output_workspace)
@@ -172,7 +171,7 @@ def simulate_2d_data(ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: O
         params[UnitParams.twoTheta] = tths[ispec]
         tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
         ds = tofs / tof_d1Ang
-        ws_sim.setY(ispec, finterp(ds).sum(axis=1))
+        ws_sim.setY(ispec, np.interp(ds, ws_1d.readX(0), ws_1d.readY(0)).sum(axis=1))
     if not is_dspac:
         exec_alg("DeleteWorkspace", Workspace=ws_1d)
     return ws_sim
