@@ -1,2 +1,0 @@
-- A new ``InputSpinStates`` and ``OutputSpinStates`` property has been added to :ref:`algm-PolarizationCorrectionFredrikze` and
-  :ref:`algm-PolarizationEfficiencyCor` to allow the order of the workspaces in the input and output Workspace Groups to be set.

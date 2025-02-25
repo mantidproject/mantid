@@ -1,1 +1,0 @@
-- Fixed logic in FitParameter so that if only a Minimum constraint or only a Maximum constraint is available the string returned will not record a 0 for the unavailable constraint.

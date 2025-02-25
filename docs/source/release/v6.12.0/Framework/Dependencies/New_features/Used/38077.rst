@@ -1,1 +1,0 @@
-- Updated Matplotlib from version 3.7 to version 3.9. The release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_

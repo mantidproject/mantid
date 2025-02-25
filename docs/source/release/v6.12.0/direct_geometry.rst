@@ -14,7 +14,7 @@ New features
 
 Bugfixes
 ############
-- :ref:`PyChop <PyChop>` definition files for SNS instruments ARCS and SEQUOIA hav been fixed.
+- :ref:`PyChop <PyChop>` definition files for SNS instruments ARCS and SEQUOIA have been fixed.
 
   The correct files are now included so that PyChop calculations in Mantid
   agree with those from the `online SNS calculator <https://rez.mcvine.ornl.gov/>`_.

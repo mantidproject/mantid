@@ -1,1 +1,0 @@
-At :ref:`Elwin Tab <elwin>` of :ref:`Data Processor Interface <interface-inelastic-data-processor>` fix (1) the Integration Range updated values, when workspaces are added though `Add Data` button and (2) the plot generation of the workspace ending in elwin_elf.

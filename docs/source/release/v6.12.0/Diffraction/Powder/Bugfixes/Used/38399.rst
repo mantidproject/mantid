@@ -1,1 +1,0 @@
-- Fix bug where unable to call `create_vanadium` without setting sample details in :ref:`ISIS Powder Diffraction Scripts <isis-powder-diffraction-ref>`.

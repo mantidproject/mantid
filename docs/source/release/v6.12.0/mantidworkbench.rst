@@ -10,7 +10,6 @@ New Features
 - ``mantidworkbench`` is now an additional entry point for launching the ``mantidworkbench`` Conda package.
 - ``workbench`` and ``mantidworkbench`` Conda entry points now launch workbench with ``jemalloc`` configured as the memory allocator on Linux.
 - Surface and contour plots can now be generated more easily for multiple single-spectrum workspaces (via the `Plot Advanced` dialog when multiple single-spectrum workspaces are selected).
-- A crosshair tool has been added to plot toolbars.
 - Added an `Email mantid-help@mantidproject.org` action to the Help menu.
 - The settings dialog now has `Okay`, `Apply` and `Cancel` buttons. Settings are no longer immediately applied when parameters are changed.
 - MacOS compiler updated from version 16 to version 18, which should result in performance improvements. See https://releases.llvm.org for release notes.
@@ -25,7 +24,7 @@ Bugfixes
 - Legends now automatically snap back to the default position if dragged off the edge of a plot.
 - The :ref:`Sample Transmission Calculator <sample_transmission_calculator>` now restricts entering commas mixed with decimal points in the text boxes for ``Low``, ``Width`` and ``High`` fields.
 - Standalone Linux installations should now launch without a segfault on Ubuntu systems.
-
+- Deleting or moving the Script Repository install directory will no longer cause a crash.
 
 SliceViewer
 -----------
