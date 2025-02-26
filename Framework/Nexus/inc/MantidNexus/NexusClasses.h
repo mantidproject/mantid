@@ -547,43 +547,11 @@ private:
   NXClass() : NXObject() { clear(); }
 };
 
-//------------------- auxiliary classes ----------------------------//
-
-/**  Implements NXlog Nexus class.
- */
-class MANTID_NEXUS_DLL NXLog : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXLog(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /// Nexus class id
-  std::string NX_class() const override { return "NXlog"; }
-};
-
 //-------------------- main classes -------------------------------//
-
-/**  Main class is the one that can contain auxiliary classes.
- */
-class MANTID_NEXUS_DLL NXMainClass : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXMainClass(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /**  Opens a NXLog class
-   *   @param name :: The name of the NXLog
-   *   @return The log
-   */
-};
 
 /**  Implements NXdata Nexus class.
  */
-class MANTID_NEXUS_DLL NXData : public NXMainClass {
+class MANTID_NEXUS_DLL NXData : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -625,14 +593,14 @@ public:
 
 /**  Implements NXdetector Nexus class.
  */
-class MANTID_NEXUS_DLL NXDetector : public NXMainClass {
+class MANTID_NEXUS_DLL NXDetector : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXDetector(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXDetector(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXdetector"; }
   /// Opens the dataset containing pixel distances
@@ -645,14 +613,14 @@ public:
 
 /**  Implements NXinstrument Nexus class.
  */
-class MANTID_NEXUS_DLL NXInstrument : public NXMainClass {
+class MANTID_NEXUS_DLL NXInstrument : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXInstrument(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXInstrument(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXinstrument"; }
   /**  Opens a NXDetector
@@ -664,14 +632,14 @@ public:
 
 /**  Implements NXentry Nexus class.
  */
-class MANTID_NEXUS_DLL NXEntry : public NXMainClass {
+class MANTID_NEXUS_DLL NXEntry : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXEntry(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXEntry(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXentry"; }
   /**  Opens a NXData

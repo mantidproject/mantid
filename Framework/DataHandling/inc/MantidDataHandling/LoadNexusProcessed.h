@@ -133,7 +133,7 @@ private:
   /// Read the data from the sample group
   void readSampleGroup(Mantid::NeXus::NXEntry &mtd_entry, API::MatrixWorkspace_sptr local_workspace);
   /// Add a property to the sample object
-  bool addSampleProperty(Mantid::NeXus::NXMainClass &sample_entry, const std::string &entryName,
+  bool addSampleProperty(Mantid::NeXus::NXClass &sample_entry, const std::string &entryName,
                          API::Sample &sampleDetails);
   /// Splits a string of exactly three words into the separate words
   void getWordsInString(const std::string &words3, std::string &w1, std::string &w2, std::string &w3);

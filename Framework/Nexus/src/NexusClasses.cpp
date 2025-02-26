@@ -446,6 +446,6 @@ void NXDataSet::getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus
 //          NXData methods
 //---------------------------------------------------------
 
-NXData::NXData(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+NXData::NXData(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
 
 } // namespace Mantid::NeXus
