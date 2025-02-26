@@ -42,6 +42,7 @@
 	  14/03/14 correct the active tube length to 1041.4mm, zigzag offset 3mm 
 	  01/05/24 update positions with measured values on the instrument, redefine position of sample relative to centre of rotation of the sample stack
 	  18/12/24 adding polarizing neutron optics to IDF
+    26/02/25 updated sample and detector position, comments on how to calculate values in relative coordinates, and how to modify TOML file when tank is moving, suggestions for future changes to read back encoded positions   
   -->
   
   
@@ -55,9 +56,9 @@
   <type name="source" is="Source" />
 
   
-  <!-- This is the position of the centre of rotation of the sample stack. It sits 8.776 from the center of Monitor 1. The sample center is expected to sit 407.5 from the end of the snout. Use the sample offset in the user file to correct for off-centered sample and/or moved sample stack, 17.3035 should be the position of the standard sample holder position (0.06m away from the safety shutter), the sample offset in the user file is then +0.2395 -->
+  <!-- The centre of rotation of the sample stack sits 8.776 from the center of Monitor 1, i.e. z =17.064. At the instrument, the sample center is expected to sit 407.5 from the end of the snout. Use the sample offset in the user file to correct for off-centered sample and/or moved sample stack, 17.3035 should be the position of the standard sample holder position (0.06m away from the safety shutter), the sample offset in the user file is then -0.06 -->
   <component type="some-sample-holder">
-    <location z="17.064"/>
+    <location z="17.3635"/>
   </component>
   <type name="some-sample-holder" is="SamplePos" />
   
@@ -99,7 +100,7 @@
       <location z="13.496" name="monitor2"/>
     </component>
     <component type="Moderator-Monitor3">
-      <!-- transmisssion detector, either in or out of beam, measured distance M1 to M3 is 7.700-->
+      <!-- transmission detector, either in or out of beam, measured distance M1 to M3 is 7.700-->
       <location z="15.988" name="monitor3"/>
     </component>
     <component type="monitor-tbd">
@@ -108,7 +109,7 @@
     </component>
 	<component type="monitor-tbd">
       <!-- The beamstop monitor is defined to be 20mm in front of the detector (measured 35mm with casing), move_backstop_monitor in mantid/scripts/SANS/sans/algorithm_detail/move_workspaces.py will take care to keep the relative distance to the detector-->
-      <location z="17.329" name="monitor5"/>
+      <location z="20.829" name="monitor5"/>
     </component>        
     
     <!-- Putting in monitors, which are defined in raw/nexus
@@ -147,11 +148,11 @@
 
   <type name="no shape monitor" is="monitor" />   
 
-<!-- 17.3635 should be the position of the safety shutter. The measured 4m detector position is 13.061 to M1 (total 21.349), and 8m position to M1 is 17.059 (total 25.347). This is for the standard SC position (z_rear = 0.5) with tank in forward position (rear_z = 0.0). In the user file, add z-offset to apply tank displacement and position of detector in tank: [detector.correction.position] rear_z = 0.0 + detector position.  TODO:Mantid should read the actual detector position and add it as an offset automatically. This would need a class ZOOM in mantid/scripts/SANS/isis_instrument.py with methods to get and set detector position/ move components like for the other instruments.
+<!-- 17.3635 is the position of the safety shutter. The measured 4m detector position is 13.061 to M1 (total 21.349), and 8m position to M1 is 17.059 (total 25.347). This is for the standard SC position (z_rear = 0.5) with tank in forward position. In the user file, add z-offset to apply tank displacement and position of detector in tank: [detector.correction.position], i.e. rear_z = 0.5 + (detector position-4m)+tank displacement.  TODO:Mantid should read the actual detector position and add it as an offset automatically. This would need a class ZOOM in mantid/scripts/SANS/isis_instrument.py with methods to get and set detector position/ move components like for the other instruments.
  -->
 
    <component type="detector-bank" idlist="RearDetector" name="rear-detector">
-     <location z="21.349" />
+     <location z="20.849" />
    </component>   
 
     
