@@ -30,7 +30,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <vector>

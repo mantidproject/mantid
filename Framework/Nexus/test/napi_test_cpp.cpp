@@ -1,4 +1,4 @@
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "napi_test_util.h"
 #include <cstdio>
 #include <cstdlib>
@@ -10,9 +10,9 @@
 #include <string>
 #include <vector>
 
-using NexusCppTest::removeFile;
-using NexusCppTest::write_dmc01;
-using NexusCppTest::write_dmc02;
+using NexusNapiTest::removeFile;
+using NexusNapiTest::write_dmc01;
+using NexusNapiTest::write_dmc02;
 using std::cout;
 using std::endl;
 using std::map;

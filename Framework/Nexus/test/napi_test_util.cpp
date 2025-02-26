@@ -1,9 +1,9 @@
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/napi.h"
 #include <filesystem>
 #include <iostream>
 
-namespace NexusCppTest {
+namespace NexusNapiTest {
 void print_data(const std::string &prefix, std::ostream &stream, const void *data, const NXnumtype type,
                 const int num) {
   stream << prefix << " ";
@@ -227,4 +227,4 @@ void removeFile(const std::string &filename) {
   }
 }
 
-} // namespace NexusCppTest
+} // namespace NexusNapiTest

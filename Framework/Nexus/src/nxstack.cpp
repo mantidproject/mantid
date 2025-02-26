@@ -23,9 +23,9 @@
   Added code to support the path stack for NXgetpath,
         Mark Koennecke, October 2009
 */
-#include "MantidNexusCpp/nxstack.h"
-#include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi_internal.h"
+#include "MantidNexus/nxstack.h"
+#include "MantidNexus/napi.h"
+#include "MantidNexus/napi_internal.h"
 #include <stdlib.h>
 #include <string.h>
 

@@ -18,8 +18,8 @@
 
 #include "MantidKernel/StringTokenizer.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 

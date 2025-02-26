@@ -8,7 +8,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <Poco/Thread.h>

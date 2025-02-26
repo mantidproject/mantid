@@ -13,7 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <cmath>
 

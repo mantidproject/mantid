@@ -35,8 +35,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>

@@ -1,6 +1,6 @@
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/napiconfig.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/napiconfig.h"
 
 /**
  * \file NeXusException.cpp

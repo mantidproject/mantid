@@ -16,8 +16,8 @@
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/scoped_ptr.hpp>
 

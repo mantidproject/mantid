@@ -25,7 +25,7 @@
 
 ----------------------------------------------------------------------------*/
 
-#include "MantidNexusCpp/napiconfig.h"
+#include "MantidNexus/napiconfig.h"
 
 #ifdef WITH_HDF4
 
@@ -36,9 +36,9 @@
 #include <time.h>
 
 // clang-format off
-#include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi_internal.h"
-#include "MantidNexusCpp/napi4.h"
+#include "MantidNexus/napi.h"
+#include "MantidNexus/napi_internal.h"
+#include "MantidNexus/napi4.h"
 // clang-format on
 
 extern void *NXpData;

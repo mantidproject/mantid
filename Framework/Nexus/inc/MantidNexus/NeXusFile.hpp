@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MantidNexusCpp/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexus/DllConfig.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -27,7 +27,7 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
  */
-class MANTID_NEXUSCPP_DLL File {
+class MANTID_NEXUS_DLL File {
 private:
   std::string m_filename;
   NXaccess m_access;
@@ -630,8 +630,8 @@ public:
  * This function returns the NXnumtype given a concrete number.
  * \tparam NumT numeric data type of \a number to check
  */
-template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT const number = NumT());
+template <typename NumT> MANTID_NEXUS_DLL NXnumtype getType(NumT const number = NumT());
 
-MANTID_NEXUSCPP_DLL NXstatus setCache(long newVal);
+MANTID_NEXUS_DLL NXstatus setCache(long newVal);
 
 }; // namespace NeXus
