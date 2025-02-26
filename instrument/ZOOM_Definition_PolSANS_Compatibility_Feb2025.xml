@@ -26,23 +26,23 @@
   
       Data gathered by Diego Alba Venero from the ZOOM instrument drawings
 	  This is a hack from the SANS2D_Definition_Tubes.xml
-	  all this chagnes are from the SANS2D IDF
+	  all these changes are from the SANS2D IDF
       12/06/09 this version has X & Y coords detector swapped so orientation
-      is correct for temporary wiring table.
+          is correct for temporary wiring table
       18/06/09 better distances for detectors and both at L2=4m, front at X=-1.1m
       26/06/09 swap front & rear as names wrong, translate front in opposite direction
-	  21/07/09 remove the 150mm sideways shift (i.e. back to symmetrical detector coords)
+      21/07/09 remove the 150mm sideways shift (i.e. back to symmetrical detector coords)
 	  to simplify manipulations in Mantid and help allow for detector mapping not quite 
 	  as expected.
-	  01/02/10 very small change to pixel size 191*5.1=974.2=2*487.05 (was 487.4)
+      01/02/10 very small change to pixel size 191*5.1=974.2=2*487.05 (was 487.4)
 	  - note have to swap x= and y= in Anders output list !
       02/04/12 Put in 'no shape monitors' for possible in the future monitors
-      with ID 5-8
-	  04/02/14 start again with gas tube arrays
-	  14/03/14 correct the active tube length to 1041.4mm, zigzag offset 3mm 
-	  01/05/24 update positions with measured values on the instrument, redefine position of sample relative to centre of rotation of the sample stack
-	  18/12/24 adding polarizing neutron optics to IDF
-    26/02/25 updated sample and detector position, comments on how to calculate values in relative coordinates, and how to modify TOML file when tank is moving, suggestions for future changes to read back encoded positions   
+          with ID 5-8
+      04/02/14 start again with gas tube arrays
+      14/03/14 correct the active tube length to 1041.4mm, zigzag offset 3mm 
+      01/05/24 update positions with measured values on the instrument, redefine position of sample relative to centre of rotation of the sample stack
+      18/12/24 adding polarizing neutron optics to IDF
+      26/02/25 updated sample and detector position, comments on how to calculate values in relative coordinates, and how to modify TOML file when tank is moving, suggestions for future changes to read back encoded positions   
   -->
   
   
