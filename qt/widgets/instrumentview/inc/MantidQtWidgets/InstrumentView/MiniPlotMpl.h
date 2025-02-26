@@ -43,6 +43,7 @@ public:
   bool isYLogScale() const;
   void replot();
 
+  // cppcheck-suppress unknownMacro
 public slots:
   void clearCurve();
   void setYLogScale();

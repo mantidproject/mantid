@@ -254,6 +254,7 @@ public:
 
   void saveSettings() const;
 
+  // cppcheck-suppress unknownMacro
 public slots:
   void initialize(bool resetGeometry, bool setDefaultView);
   void cancel();
