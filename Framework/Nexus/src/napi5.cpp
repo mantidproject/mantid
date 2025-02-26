@@ -26,7 +26,7 @@
 #include <string>
 #define H5Aiterate_vers 2
 
-#include "MantidNexusCpp/napiconfig.h"
+#include "MantidNexus/napiconfig.h"
 
 #ifdef WITH_HDF5
 
@@ -38,10 +38,10 @@
 #include <time.h>
 
 // clang-format off
-#include "MantidNexusCpp/napiconfig.h"
-#include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi_internal.h"
-#include "MantidNexusCpp/napi5.h"
+#include "MantidNexus/napiconfig.h"
+#include "MantidNexus/napi.h"
+#include "MantidNexus/napi_internal.h"
+#include "MantidNexus/napi5.h"
 // clang-format on
 
 #ifdef H5_VERSION_GE

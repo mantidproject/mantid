@@ -20,7 +20,7 @@
 #endif
 
 #include <json/value.h>
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <type_traits>

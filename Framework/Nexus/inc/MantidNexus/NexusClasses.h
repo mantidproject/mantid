@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 
 #include <algorithm>
 #include <array>

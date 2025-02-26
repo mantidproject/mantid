@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "MantidNexusCpp/DllConfig.h"
+#include "MantidNexus/DllConfig.h"
 #include <iosfwd>
 #include <map>
 #include <string>
@@ -165,8 +165,8 @@ enum class NXnumtype : const int {
   BAD = -1
 };
 
-MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXstatus status);
-MANTID_NEXUSCPP_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype type);
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXstatus status);
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype type);
 
 // forward declare
 namespace NeXus {

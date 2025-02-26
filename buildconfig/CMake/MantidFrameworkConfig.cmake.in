@@ -29,7 +29,7 @@ unset(_mypackage_module_path_save)
 set(MODULES
     Types
     Json
-    NexusCpp
+    Nexus
     LegacyNexus
     Kernel
     Parallel
@@ -41,7 +41,6 @@ set(MODULES
     NexusGeometry
     DataObjects
     Catalog
-    Nexus
     PythonInterfaceCore
 )
 

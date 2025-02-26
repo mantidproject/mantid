@@ -30,10 +30,10 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/napi.h"
 #include "napi_test_util.h"
 
-using NexusCppTest::print_data;
+using NexusNapiTest::print_data;
 
 NXstatus createAttrs(const NXhandle file) {
   int array_dims[2] = {5, 4};

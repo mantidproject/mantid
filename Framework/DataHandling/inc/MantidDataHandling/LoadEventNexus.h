@@ -26,8 +26,8 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <algorithm>

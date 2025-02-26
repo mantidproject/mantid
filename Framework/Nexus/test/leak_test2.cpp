@@ -1,4 +1,4 @@
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/napi.h"
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>

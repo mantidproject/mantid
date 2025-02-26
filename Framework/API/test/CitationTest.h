@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Citation.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <cxxtest/TestSuite.h>
 

@@ -135,7 +135,11 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
-                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/src/NeXusFile.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc/MantidNexus/NeXusFile.hpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc/MantidNexus/napi.h
+
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =

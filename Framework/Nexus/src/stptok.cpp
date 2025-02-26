@@ -10,7 +10,7 @@
 **   that stopped the scan.
 */
 
-#include "MantidNexusCpp/nx_stptok.h"
+#include "MantidNexus/nx_stptok.h"
 #include <stdlib.h>
 #include <string.h>
 

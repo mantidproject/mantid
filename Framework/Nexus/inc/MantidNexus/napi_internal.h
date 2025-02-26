@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <MantidNexusCpp/napi.h>
+#include <MantidNexus/napi.h>
 
 /*-----------------------------------------------------------------------
     NAPI internals

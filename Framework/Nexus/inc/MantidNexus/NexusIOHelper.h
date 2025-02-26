@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <boost/any.hpp>
