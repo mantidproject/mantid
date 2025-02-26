@@ -736,7 +736,6 @@ set(TEST_FILES
     test/ProgressableViewTest.h
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
-    test/PythonHelpWindowTest.h
     test/SelectionNotificationServiceTest.h
     test/SelectionWorkspacesDialogTest.h
     test/TrackedActionTest.h
@@ -750,6 +749,10 @@ set(TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
+
+if(NOT ENABLE_QTASSISTANT)
+  list(APPEND TEST_FILES test/PythonHelpWindowTest.h)
+endif()
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
