@@ -4,12 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from abc import ABC
 from typing import Dict, List
 
 from mantid.kernel import ConfigService
 
 
-class ConfigSettingsChangesModel:
+class ConfigSettingsChangesModel(ABC):
     def __init__(self):
         self._changes: Dict[str, str] = {}
 
