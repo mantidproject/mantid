@@ -241,7 +241,10 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
 
     def _run_algorithm(self, alg_name: str, args: dict, output_properties: list[str]) -> list:
         alg = self.createChildAlgorithm(alg_name, **args)
-        alg.execute()
+        try:
+            alg.execute()
+        except Exception as e:
+            raise RuntimeError(f"""Error thrown during execution of child algorithm: {alg_name}.\nArguments: {args}\nException: {str(e)}""")
         result = []
         for key in output_properties:
             result.append(alg.getProperty(key).value)
