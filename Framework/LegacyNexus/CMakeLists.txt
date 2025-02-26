@@ -4,6 +4,7 @@ set(SRC_FILES
     src/napi.cpp
     src/napi4.cpp
     src/napi5.cpp
+    src/NexusClasses.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
     src/nxstack.cpp
@@ -17,6 +18,7 @@ set(INC_FILES
     inc/MantidLegacyNexus/napi5.h
     inc/MantidLegacyNexus/napiconfig.h
     inc/MantidLegacyNexus/napi_internal.h
+    inc/MantidLegacyNexus/NexusClasses.h
     inc/MantidLegacyNexus/NeXusException.hpp
     inc/MantidLegacyNexus/NeXusFile.hpp
     inc/MantidLegacyNexus/nx_stptok.h

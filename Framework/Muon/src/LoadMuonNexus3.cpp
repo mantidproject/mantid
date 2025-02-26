@@ -11,7 +11,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/Logger.h"
-#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidLegacyNexus/NexusClasses.h"
 #include <H5Cpp.h>
 #include <string>
 

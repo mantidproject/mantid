@@ -19,13 +19,14 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 #include <cmath>

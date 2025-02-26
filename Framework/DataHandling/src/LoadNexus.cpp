@@ -20,7 +20,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 #include <cmath>
 #include <memory>
