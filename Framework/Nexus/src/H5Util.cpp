@@ -46,6 +46,38 @@ template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATI
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
+#define throwIfUnallowedNarrowing(InT, OutT, narrow)                                                                   \
+  if constexpr (sizeof(OutT) < sizeof(InT) && narrow == Narrowing::Prevent) {                                          \
+    std::string msg = "H5Util: narrowing from " + getType<InT>().fromClass();                                          \
+    msg += " to " + getType<OutT>().fromClass() + " is prevented.";                                                    \
+    throw DataTypeIException(msg);                                                                                     \
+  }
+
+#define narrowingVectorCast(input, output)                                                                             \
+  output.resize(input.size());                                                                                         \
+  std::transform(input.cbegin(), input.cend(), output.begin(),                                                         \
+                 [](const auto &a) { return boost::numeric_cast<OutT>(a); });
+
+// Macro for cool people
+#define RUN_H5UTIL_FUNCTION(dataType, narrow, func_name, ...)                                                          \
+  if (dataType == PredType::NATIVE_FLOAT) {                                                                            \
+    func_name<float, OutT, narrow>(__VA_ARGS__);                                                                       \
+  } else if (dataType == PredType::NATIVE_DOUBLE) {                                                                    \
+    func_name<double, OutT, narrow>(__VA_ARGS__);                                                                      \
+  } else if (dataType == PredType::NATIVE_INT32) {                                                                     \
+    func_name<int32_t, OutT, narrow>(__VA_ARGS__);                                                                     \
+  } else if (dataType == PredType::NATIVE_UINT32) {                                                                    \
+    func_name<uint32_t, OutT, narrow>(__VA_ARGS__);                                                                    \
+  } else if (dataType == PredType::NATIVE_INT64) {                                                                     \
+    func_name<int64_t, OutT, narrow>(__VA_ARGS__);                                                                     \
+  } else if (dataType == PredType::NATIVE_UINT64) {                                                                    \
+    func_name<uint64_t, OutT, narrow>(__VA_ARGS__);                                                                    \
+  } else {                                                                                                             \
+    std::string msg = "H5Util: error in narrowing, unknowing H5Cpp PredType ";                                         \
+    msg += dataType.fromClass() + ".";                                                                                 \
+    throw DataTypeIException(msg);                                                                                     \
+  }
+
 H5::FileAccPropList defaultFileAcc() {
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
@@ -257,11 +289,11 @@ void readStringAttribute(const H5::H5Object &object, const std::string &attribut
 }
 
 // This method avoids a copy on return so should be preferred to its sibling method
-template <typename NumT>
-void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output) {
+template <typename OutT, Narrowing narrow>
+void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<OutT> &output) {
   try {
     DataSet dataset = group.openDataSet(name);
-    readArray1DCoerce(dataset, output);
+    readArray1DCoerce<OutT, narrow>(dataset, output);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log->information("Failed to open dataset \"" + name + "\"\n");
@@ -271,11 +303,12 @@ void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vec
   }
 }
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name) {
-  std::vector<NumT> result;
+template <typename OutT, Narrowing narrow>
+std::vector<OutT> readArray1DCoerce(const H5::Group &group, const std::string &name) {
+  std::vector<OutT> result;
   try {
     DataSet dataset = group.openDataSet(name);
-    readArray1DCoerce(dataset, result);
+    readArray1DCoerce<OutT, narrow>(dataset, result);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log->information("Failed to open dataset \"" + name + "\"\n");
@@ -288,105 +321,74 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &gr
 }
 
 namespace {
-template <typename InputNumT, typename OutputNumT>
-void convertingRead(const DataSet &dataset, const DataType &dataType, std::vector<OutputNumT> &output,
-                    const DataSpace &memspace, const DataSpace &filespace) {
-  std::vector<InputNumT> temp(filespace.getSelectNpoints());
-  dataset.read(temp.data(), dataType, memspace, filespace);
+template <typename InT, typename OutT, Narrowing narrow>
+void convertingVectorRead(const DataSet &dataset, const DataType &dataType, std::vector<OutT> &output,
+                          const DataSpace &memspace, const DataSpace &filespace) {
+  throwIfUnallowedNarrowing(InT, OutT, narrow);
 
-  output.resize(temp.size());
-
-  std::transform(temp.begin(), temp.end(), output.begin(),
-                 [](const auto &a) { // lambda
-                   return boost::numeric_cast<OutputNumT>(a);
-                 });
+  std::size_t dataSize = filespace.getSelectNpoints();
+  if constexpr (std::is_same_v<InT, OutT>) {
+    output.resize(dataSize);
+    dataset.read(output.data(), dataType, memspace, filespace);
+  } else {
+    std::vector<InT> temp(dataSize);
+    dataset.read(temp.data(), dataType, memspace, filespace);
+    narrowingVectorCast(temp, output);
+  }
 }
 
-template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> convertingNumArrayAttributeRead(Attribute &attribute, const DataType &dataType) {
-  DataSpace dataSpace = attribute.getSpace();
+template <typename InT, typename OutT, Narrowing narrow>
+void convertingNumArrayAttributeRead(Attribute &attribute, DataType const &dataType, std::vector<OutT> &value) {
+  throwIfUnallowedNarrowing(InT, OutT, narrow);
 
-  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
-  attribute.read(dataType, temp.data());
-
-  std::vector<OutputNumT> result;
-  result.resize(temp.size());
-
-  std::transform(temp.begin(), temp.end(), result.begin(),
-                 [](const InputNumT a) { return boost::numeric_cast<OutputNumT>(a); });
-
-  return result;
+  std::size_t dataSize = (attribute.getSpace()).getSelectNpoints();
+  if constexpr (std::is_same_v<InT, OutT>) {
+    value.resize(dataSize);
+    attribute.read(dataType, value.data());
+  } else {
+    std::vector<InT> temp(dataSize);
+    attribute.read(dataType, temp.data());
+    narrowingVectorCast(temp, value)
+  }
 }
 
-template <typename InputNumT, typename OutputNumT>
-OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
-  InputNumT temp;
-  attribute.read(dataType, &temp);
-  auto result = boost::numeric_cast<OutputNumT>(temp);
-  return result;
+template <typename InT, typename OutT, Narrowing narrow>
+void convertingScalarRead(Attribute &attribute, const DataType &dataType, OutT &value) {
+  throwIfUnallowedNarrowing(InT, OutT, narrow);
+
+  if constexpr (std::is_same_v<InT, OutT>) {
+    attribute.read(dataType, &value);
+  } else {
+    InT temp;
+    attribute.read(dataType, &temp);
+    value = boost::numeric_cast<OutT>(temp);
+  }
 }
 
 } // namespace
 
-template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
+template <typename OutT, Narrowing narrow>
+OutT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
   auto attribute = object.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
-  NumT value;
-
-  if (getType<NumT>() == dataType) {
-    attribute.read(dataType, &value);
-  } else if (PredType::NATIVE_INT32 == dataType) {
-    value = convertingRead<int32_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    value = convertingRead<uint32_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_INT64 == dataType) {
-    value = convertingRead<int64_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_UINT64 == dataType) {
-    value = convertingRead<uint64_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    value = convertingRead<float, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_DOUBLE == dataType) {
-    value = convertingRead<double, NumT>(attribute, dataType);
-  } else {
-    // not a supported type
-    throw DataTypeIException();
-  }
+  OutT value;
+  RUN_H5UTIL_FUNCTION(dataType, narrow, convertingScalarRead, attribute, dataType, value);
   return value;
 }
 
-template <typename NumT>
-std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
+template <typename OutT, Narrowing narrow>
+std::vector<OutT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
   auto attribute = object.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
-  std::vector<NumT> value;
-
-  if (getType<NumT>() == dataType) {
-    DataSpace dataSpace = attribute.getSpace();
-    value.resize(dataSpace.getSelectNpoints());
-    attribute.read(dataType, value.data());
-  } else if (PredType::NATIVE_INT32 == dataType) {
-    value = convertingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    value = convertingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_INT64 == dataType) {
-    value = convertingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_UINT64 == dataType) {
-    value = convertingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    value = convertingNumArrayAttributeRead<float, NumT>(attribute, dataType);
-  } else if (PredType::NATIVE_DOUBLE == dataType) {
-    value = convertingNumArrayAttributeRead<double, NumT>(attribute, dataType);
-  } else {
-    // not a supported type
-    throw DataTypeIException();
-  }
+  std::vector<OutT> value;
+  RUN_H5UTIL_FUNCTION(dataType, narrow, convertingNumArrayAttributeRead, attribute, dataType, value);
   return value;
 }
 
-template <typename NumT>
-void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output, const size_t length,
+template <typename OutT, Narrowing narrow>
+void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, const size_t length,
                        const size_t offset) {
   DataSpace filespace = dataset.getSpace();
   const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
@@ -410,25 +412,7 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output, co
 
   // do the actual read
   const DataType dataType = dataset.getDataType();
-  if (getType<NumT>() == dataType) { // no conversion necessary
-    output.resize(static_cast<size_t>(filespace.getSelectNpoints()));
-    dataset.read(output.data(), dataType, memspace, filespace);
-  } else if (PredType::NATIVE_INT32 == dataType) {
-    convertingRead<int32_t>(dataset, dataType, output, memspace, filespace);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    convertingRead<uint32_t>(dataset, dataType, output, memspace, filespace);
-  } else if (PredType::NATIVE_INT64 == dataType) {
-    convertingRead<int64_t>(dataset, dataType, output, memspace, filespace);
-  } else if (PredType::NATIVE_UINT64 == dataType) {
-    convertingRead<uint64_t>(dataset, dataType, output, memspace, filespace);
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    convertingRead<float>(dataset, dataType, output, memspace, filespace);
-  } else if (PredType::NATIVE_DOUBLE == dataType) {
-    convertingRead<double>(dataset, dataType, output, memspace, filespace);
-  } else {
-    // not a supported type
-    throw DataTypeIException();
-  }
+  RUN_H5UTIL_FUNCTION(dataType, narrow, convertingVectorRead, dataset, dataType, output, memspace, filespace);
 }
 
 /// Test if a group exists in an HDF5 file or parent group.
@@ -530,7 +514,6 @@ template MANTID_NEXUS_DLL int32_t readNumAttributeCoerce(const H5::H5Object &obj
 template MANTID_NEXUS_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
-
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce
 // -------------------------------------------------------------------
