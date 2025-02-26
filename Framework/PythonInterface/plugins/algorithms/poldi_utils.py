@@ -35,7 +35,7 @@ def load_poldi(
     :param fpath_data: filepath of ASCII file with counts
     :param fpath_idf: filepath to instrument definition file
     :param chopper_speed: chopper speed used on instrument (rpm)
-    :param t0: time offset to applied to slit openings (mus)
+    :param t0: time offset to applied to slit openings (fraction of cycle time)
     :param t0_const: TZERO diffractometer constant for instrument
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
@@ -89,7 +89,7 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
     # get chopper offsets in time
     nslits = chopper.nelements()
-    slit_offsets = np.array([chopper[islit].getPos()[0] * cycle_time + t0 for islit in range(nslits)])
+    slit_offsets = np.array([(chopper[islit].getPos()[0] + t0) * cycle_time for islit in range(nslits)])
     return cycle_time, slit_offsets, t0_const, l1_chop
 
 
