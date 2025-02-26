@@ -343,6 +343,9 @@ _translations = {
     "Glass": "Elsarboukh, Glass",
     "Ganyushin, Dmitry": "Ganyushin, Dmitry",
     "Dmitry Ganyushin": "Ganyushin, Dmitry",
+    "Andy Bridger": "Bridger, Andy",
+    "andy-bridger": "Bridger, Andy",
+    "RabiyaF": "Farooq, Rabiya",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
