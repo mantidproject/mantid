@@ -367,6 +367,10 @@ void convertingScalarRead(Attribute &attribute, const DataType &dataType, OutT &
 
 } // namespace
 
+/** Read a single quantity from an attribute, coerced to type of OutT.
+ * Narrowing behavior can be controlled with optional template param narrow,
+ * which, if narrow = Prevent, will throw an error if type coercion would cause narrowing.
+ */
 template <typename OutT, Narrowing narrow>
 OutT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
   auto attribute = object.openAttribute(attributeName);
@@ -377,6 +381,10 @@ OutT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attri
   return value;
 }
 
+/** Read a numerical array from an attribute, coerced to type of OutT.
+ * Narrowing behavior can be controlled with optional template param narrow,
+ * which, if narrow = Prevent, will throw an error if type coercion would cause narrowing.
+ */
 template <typename OutT, Narrowing narrow>
 std::vector<OutT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
   auto attribute = object.openAttribute(attributeName);
@@ -387,6 +395,10 @@ std::vector<OutT> readNumArrayAttributeCoerce(const H5::H5Object &object, const 
   return value;
 }
 
+/** Read a standard vector from a dataset, coerced to type of OutT.
+ * Narrowing behavior can be controlled with optional template param narrow,
+ * which, if narrow = Prevent, will throw an error if type coercion would cause narrowing.
+ */
 template <typename OutT, Narrowing narrow>
 void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, const size_t length,
                        const size_t offset) {
@@ -508,15 +520,26 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
 // -------------------------------------------------------------------
+
+/* NOTE these instantiations are for case Narrowing::Allow
+/ To use Narrowing:Prevent, will need to instantiate and export those methods
+*/
+
 template MANTID_NEXUS_DLL float readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL double readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce
 // -------------------------------------------------------------------
+
+/* NOTE these instantiations are for case Narrowing::Allow
+/ To use Narrowing:Prevent, will need to instantiate and export those methods
+*/
+
 template MANTID_NEXUS_DLL std::vector<float> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                          const std::string &attributeName);
 template MANTID_NEXUS_DLL std::vector<double> readNumArrayAttributeCoerce(const H5::H5Object &object,
@@ -533,6 +556,11 @@ template MANTID_NEXUS_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(cons
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
 // -------------------------------------------------------------------
+
+/* NOTE these instantiations are for case Narrowing::Allow
+/ To use Narrowing:Prevent, will need to instantiate and export those methods
+*/
+
 template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
                                             const std::vector<float> &values);
 template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
