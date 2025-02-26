@@ -3,7 +3,6 @@ from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Annotated, TypeAlias, Tuple, Sequence, Optional
-# from scipy import interpolate
 
 # Forward declarations
 Workspace2D: TypeAlias = Annotated[type, "Workspace2D"]
@@ -26,7 +25,6 @@ def exec_alg(alg_name: str, **kwargs):
 def load_poldi(
     fpath_data: str,
     fpath_idf: str,
-    xmax: float = 3000,
     chopper_speed: float = 5000,
     t0: float = 0.025701,
     t0_const: float = 85.0,
@@ -36,7 +34,6 @@ def load_poldi(
     Function to load POLDI v2 data from ASCII file containing array of counts
     :param fpath_data: filepath of ASCII file with counts
     :param fpath_idf: filepath to instrument definition file
-    :param xmax: maximum x-value (mus) recorded in file (x-axis is arrival time modulo cycle period)
     :param chopper_speed: chopper speed used on instrument (rpm)
     :param t0: time offset to applied to slit openings (mus)
     :param t0_const: TZERO diffractometer constant for instrument
@@ -45,8 +42,9 @@ def load_poldi(
     """
     ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf, OutputWorkspace=output_workspace)
     dat = np.loadtxt(fpath_data)
-    bin_width = xmax / dat.shape[-1]
-    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{xmax}", OutputWorkspace=ws.name())
+    cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
+    bin_width = cycle_time / dat.shape[-1]
+    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}", OutputWorkspace=ws.name())
     for ispec in range(ws.getNumberHistograms()):
         ws.setY(ispec, dat[ispec, :])
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=ws.name())
@@ -67,6 +65,11 @@ def load_poldi(
     return ws
 
 
+def _calc_cycle_time_from_chopper_speed(chopper_speed):
+    # chopper has 32 slits, 8 slits per section (4*8 - quarter repeated 4 times).
+    return 60.0 / (4.0 * chopper_speed) * 1.0e6  # mus
+
+
 def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray[float], float, float]:
     """
     Function to get instrument settings from logs stored on workspace
@@ -83,8 +86,7 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     t0 = chopper.getNumberParameter("t0")[0]
     t0_const = chopper.getNumberParameter("t0_const")[0]
     chopper_speed = ws.run().getPropertyAsSingleValue("chopperspeed")  # rpm
-    # chopper has 32 slits, 8 slits per section (4*8 - quarter repeated 4 times).
-    cycle_time = 60.0 / (4.0 * chopper_speed) * 1.0e6  # mus
+    cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
     # get chopper offsets in time
     nslits = chopper.nelements()
     slit_offsets = np.array([chopper[islit].getPos()[0] * cycle_time + t0 for islit in range(nslits)])
