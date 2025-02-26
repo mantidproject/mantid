@@ -57,7 +57,7 @@ public:
     // IN5 tests
     const std::string path("ILL/IN5/");
     runCheck(path + "095893.nxs", "LoadILLTOF", 2); // hdf4
-    runCheck(path + "104007.nxs", "LoadILLTOF", 2); // hdf5
+    runCheck(path + "104007.nxs", "LoadILLTOF", 3); // hdf5
   }
 
   void testSNS() {

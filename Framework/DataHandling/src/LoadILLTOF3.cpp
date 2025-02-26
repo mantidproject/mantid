@@ -1,10 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadILLTOF2.h"
+#include "MantidDataHandling/LoadILLTOF3.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -17,7 +17,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NexusClasses.h"
 
 namespace {
 /// An array containing the supported instrument names
@@ -31,7 +30,7 @@ using namespace API;
 using namespace NeXus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF3)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -41,30 +40,30 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
+int LoadILLTOF3::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
-       descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
-                                                                                         // LoadILLIndirect
-       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
-                                                                                         // LoadILLReflectometry
-       && !descriptor.pathExists("/entry0/instrument/Tx"))                               // This eliminates SALSA data
-      || (descriptor.pathExists("/entry0/data_scan") &&
-          descriptor.pathExists("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
+  if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
+       descriptor.isEntry("/entry0/mode") && !descriptor.isEntry("/entry0/dataSD") // This one is for
+                                                                                   // LoadILLIndirect
+       && !descriptor.isEntry("/entry0/instrument/VirtualChopper")                 // This one is for
+                                                                                   // LoadILLReflectometry
+       && !descriptor.isEntry("/entry0/instrument/Tx"))                            // This eliminates SALSA data
+      || (descriptor.isEntry("/entry0/data_scan") &&
+          descriptor.isEntry("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
   ) {
-    return 79; // return 79 since LoadILLTOF3 will return 80 if file is hdf5 based
+    return 80;
   } else {
     return 0;
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::LegacyNexusDescriptor>() {}
+LoadILLTOF3::LoadILLTOF3() : API::IFileLoader<Kernel::NexusHDF5Descriptor>() {}
 
 /**
  * Initialises the algorithm
  */
-void LoadILLTOF2::init() {
+void LoadILLTOF3::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "File path of the Data file to load");
 
@@ -76,7 +75,7 @@ void LoadILLTOF2::init() {
 /**
  * Executes the algorithm
  */
-void LoadILLTOF2::exec() {
+void LoadILLTOF3::exec() {
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
   bool convertToTOF = getProperty("convertToTOF");
@@ -116,7 +115,7 @@ void LoadILLTOF2::exec() {
  *
  * @return List of monitor data
  */
-std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
+std::vector<std::string> LoadILLTOF3::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
   std::vector<std::string> monitorList;
   if (m_isScan) {
     // in case of a scan, there is only one monitor and its data are stored per scan step
@@ -140,7 +139,7 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &first
  *
  * @param firstEntry The NeXus entry
  */
-void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
+void LoadILLTOF3::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
 
@@ -175,7 +174,7 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  *
  * @param entry The NeXus entry
  */
-void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
+void LoadILLTOF3::initWorkspace(const NeXus::NXEntry &entry) {
 
   // read in the data
   const std::string dataName = m_isScan ? "data_scan/detector_data/data" : "data";
@@ -229,7 +228,7 @@ void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadILLTOF2::loadTimeDetails(const NeXus::NXEntry &entry) {
+void LoadILLTOF3::loadTimeDetails(const NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -259,7 +258,7 @@ void LoadILLTOF2::loadTimeDetails(const NeXus::NXEntry &entry) {
  *
  * @param filename The NeXus file
  */
-void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
+void LoadILLTOF3::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
@@ -280,7 +279,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
  * Calculates the incident energy from the wavelength and adds
  * it as sample log 'Ei'
  */
-void LoadILLTOF2::addEnergyToRun() {
+void LoadILLTOF3::addEnergyToRun() {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
   const double ei = LoadHelper::calculateEnergy(m_wavelength);
@@ -290,7 +289,7 @@ void LoadILLTOF2::addEnergyToRun() {
 /**
  * Adds facility info to the sample logs
  */
-void LoadILLTOF2::addFacility() {
+void LoadILLTOF3::addFacility() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("Facility", std::string("ILL"));
 }
@@ -298,7 +297,7 @@ void LoadILLTOF2::addFacility() {
 /**
  * Calculates and adds the pulse intervals for the run
  */
-void LoadILLTOF2::addPulseInterval() {
+void LoadILLTOF3::addPulseInterval() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   double n_pulses = -1;
   double fermiChopperSpeed = -1;
@@ -332,7 +331,7 @@ void LoadILLTOF2::addPulseInterval() {
  * @param convertToTOF Should the bin edges be converted to time of flight or keep the channel indices
  * @return Vector of doubles containing bin edges or point centres positions
  */
-std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF) {
+std::vector<double> LoadILLTOF3::prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF) {
 
   std::vector<double> xAxis(m_localWorkspace->readX(0).size());
   if (m_isScan) {
@@ -381,7 +380,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool c
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
+void LoadILLTOF3::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
                                       bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
@@ -424,7 +423,7 @@ void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::ve
  * @param entry The Nexus entry to load the data from
  * @param monitorList Vector containing paths to monitor data
  */
-void LoadILLTOF2::fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
+void LoadILLTOF3::fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array
   auto xAxis = prepareAxis(entry, false);
   auto data = LoadHelper::getIntDataset(entry, "data_scan/detector_data/data");

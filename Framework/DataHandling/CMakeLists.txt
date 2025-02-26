@@ -73,6 +73,7 @@ set(SRC_FILES
     src/LoadILLSALSA.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
+    src/LoadILLTOF3.cpp
     src/LoadISISNexus2.cpp
     src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
@@ -293,6 +294,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLSALSA.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
+    inc/MantidDataHandling/LoadILLTOF3.h
     inc/MantidDataHandling/LoadISISNexus2.h
     inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
@@ -506,6 +508,7 @@ set(TEST_FILES
     LoadILLSALSATest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
+    LoadILLTOF3Test.h
     LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
