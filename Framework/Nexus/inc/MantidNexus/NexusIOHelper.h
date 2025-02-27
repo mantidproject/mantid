@@ -48,7 +48,8 @@ namespace {
   case NXnumtype::UINT64:                                                                                              \
     return func_name<T, uint64_t, narrow>(__VA_ARGS__);                                                                \
   default:                                                                                                             \
-    throw std::runtime_error("NeXusIOHelper: Unknown type in Nexus file");                                             \
+    std::string msg = "NexusIOHelper: Unknown type " + std::to_string((int)type) + " in Nexus file";                   \
+    throw std::runtime_error(msg);                                                                                     \
   }
 
 int64_t vectorVolume(const std::vector<int64_t> &size) {
