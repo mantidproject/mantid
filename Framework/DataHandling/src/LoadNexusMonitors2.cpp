@@ -169,7 +169,7 @@ void LoadNexusMonitors2::exec() {
   m_top_entry_name = this->getPropertyValue("NXentryName");
   // must be done here before the NeXus::File, HDF5 files can't have 2
   // simultaneous handlers
-  Kernel::NexusHDF5Descriptor descriptor(m_filename);
+  Kernel::NexusDescriptor descriptor(m_filename);
 
   // top level file information
   ::NeXus::File file(m_filename);

@@ -829,7 +829,7 @@ const std::string LoadPLN::summary() const { return "Loads a PLN Hdf and linked 
 
 /// Return the confidence as an integer value that this algorithm can
 /// load the file \p descriptor.
-int LoadPLN::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadPLN::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.extension() != ".hdf")
     return 0;
 
@@ -914,6 +914,6 @@ void LoadPLN::exec() {
 }
 
 // register the algorithms into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadPLN)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
 } // namespace Mantid::DataHandling

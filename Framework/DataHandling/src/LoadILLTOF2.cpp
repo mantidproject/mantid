@@ -30,7 +30,7 @@ using namespace API;
 using namespace NeXus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -40,7 +40,7 @@ DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
@@ -58,7 +58,7 @@ int LoadILLTOF2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusHDF5Descriptor>() {}
+LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {}
 
 /**
  * Initialises the algorithm

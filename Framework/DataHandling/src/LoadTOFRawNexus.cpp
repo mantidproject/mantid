@@ -24,7 +24,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadTOFRawNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -65,7 +65,7 @@ void LoadTOFRawNexus::init() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
@@ -487,7 +487,7 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
-  Kernel::NexusHDF5Descriptor descriptor(filename);
+  Kernel::NexusDescriptor descriptor(filename);
 
   try {
     LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
