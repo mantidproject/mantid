@@ -10,9 +10,12 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/LegacyNexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
+// forward declares
+namespace LegacyNexus {
+class NXEntry;
+}
 namespace DataHandling {
 /**
  Loads an ILL IN4/5/6/Panther NeXus file into a Mantid workspace.
@@ -46,16 +49,17 @@ private:
   void addFacility();
   void addPulseInterval();
 
-  void fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
-  void fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList);
+  void fillStaticWorkspace(const LegacyNexus::NXEntry &entry, const std::vector<std::string> &monitorList,
+                           bool convertToTOF);
+  void fillScanWorkspace(const LegacyNexus::NXEntry &entry, const std::vector<std::string> &monitorList);
 
-  std::vector<std::string> getMonitorInfo(const NeXus::NXEntry &firstEntry);
-  void initWorkspace(const NeXus::NXEntry &entry);
+  std::vector<std::string> getMonitorInfo(const LegacyNexus::NXEntry &firstEntry);
+  void initWorkspace(const LegacyNexus::NXEntry &entry);
 
-  void loadInstrumentDetails(const NeXus::NXEntry &);
-  void loadTimeDetails(const NeXus::NXEntry &entry);
+  void loadInstrumentDetails(const LegacyNexus::NXEntry &);
+  void loadTimeDetails(const LegacyNexus::NXEntry &entry);
 
-  std::vector<double> prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF);
+  std::vector<double> prepareAxis(const LegacyNexus::NXEntry &entry, bool convertToTOF);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

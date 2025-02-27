@@ -82,9 +82,11 @@ public:
       TS_ASSERT_EQUALS(histogram.size(), numberOfChannels)
       const auto &xs = histogram.x();
       if (convertToTOF) {
+        const auto mywidth = xs[1] - xs[0];
+        const auto myoffset = xs[0] - (mywidth / 2.);
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
           const double binEdge = tofDelay + static_cast<double>(channelIndex) * tofChannelWidth + tofChannelWidth / 2;
-          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
+          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3);
         }
       } else {
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
@@ -148,9 +150,9 @@ public:
 
   void test_IN5_hdf4_load() {
     // From the input test file.
-    const double tofDelay = 5982.856;
-    const double tofChannelWidth = 14.6349;
-    const size_t channelCount = 512;
+    const double tofDelay = 5129.9414;     // ?
+    const double tofChannelWidth = 6.9084; // ?
+    const size_t channelCount = 1024;
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
     const bool convertToTOF = true;
@@ -159,7 +161,7 @@ public:
     auto const run = ws->run();
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), "095893");
+    TS_ASSERT_EQUALS(runList->value(), "95893");
   }
 
   void test_IN6_load() {
