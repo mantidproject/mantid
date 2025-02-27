@@ -1224,7 +1224,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon
       paramVisibility =
           paramVisibility.substr(paramVisibility.find(visibilityKey) + visibilityKey.size(), paramVisibility.size());
-      paramValue.erase(paramValue.find(visibilityKey), paramValue.size());
+      paramValue.erase(paramValue.find(visibilityKey) - 1, paramValue.size());
     }
     const auto paramDescr = std::string("");
     if (paramName == "masked") {
