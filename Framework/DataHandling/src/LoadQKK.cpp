@@ -30,7 +30,7 @@ using namespace Mantid::Kernel;
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadQKK)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
 
 /**
  * Return the confidence with with this algorithm can load the file

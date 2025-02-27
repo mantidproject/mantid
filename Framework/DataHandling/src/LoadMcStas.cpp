@@ -32,7 +32,7 @@ using namespace DataObjects;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStas)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name

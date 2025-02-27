@@ -58,7 +58,7 @@ constexpr double WAVE_TO_E = 81.8;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLDiffraction)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
 int LoadILLDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {

@@ -49,7 +49,7 @@ constexpr size_t TOF_MODE_ON = 1;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
 int LoadILLPolarizedDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {

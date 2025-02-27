@@ -65,7 +65,7 @@ namespace Mantid::Algorithms {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;

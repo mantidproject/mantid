@@ -30,7 +30,7 @@ using namespace NeXus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLLagrange)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
 int LoadILLLagrange::confidence(NexusHDF5Descriptor &descriptor) const {

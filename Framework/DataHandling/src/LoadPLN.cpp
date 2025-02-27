@@ -914,6 +914,6 @@ void LoadPLN::exec() {
 }
 
 // register the algorithms into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadPLN)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
 } // namespace Mantid::DataHandling

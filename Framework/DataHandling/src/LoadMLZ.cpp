@@ -35,7 +35,7 @@ using HistogramData::BinEdges;
 using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMLZ)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 
 /** Constructor
  */

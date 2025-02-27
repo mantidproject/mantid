@@ -35,7 +35,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLIndirect2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

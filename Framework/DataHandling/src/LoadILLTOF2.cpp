@@ -30,7 +30,7 @@ using namespace API;
 using namespace NeXus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 /**
  * Return the confidence with with this algorithm can load the file

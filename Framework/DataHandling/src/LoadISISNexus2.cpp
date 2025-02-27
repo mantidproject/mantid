@@ -56,7 +56,7 @@ Mantid::DataHandling::DataBlockComposite getMonitorsFromComposite(Mantid::DataHa
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadISISNexus2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;

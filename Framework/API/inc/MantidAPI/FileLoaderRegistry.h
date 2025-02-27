@@ -42,7 +42,7 @@ DECLARE_ALGORITHM macro
 class MANTID_API_DLL FileLoaderRegistryImpl {
 public:
   /// Defines types of possible file
-  enum LoaderFormat { Nexus, Generic, NexusHDF5 };
+  enum LoaderFormat { LegacyNexus, Generic, Nexus };
 
 public:
   /// @returns the number of entries in the registry
@@ -89,7 +89,7 @@ private:
   template <typename T> struct SubscriptionValidator {
     static void check(LoaderFormat format) {
       switch (format) {
-      case Nexus:
+      case LegacyNexus:
         if (!std::is_base_of<IFileLoader<Kernel::LegacyNexusDescriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
                                    "' registered as Nexus loader but it does not "
@@ -97,7 +97,7 @@ private:
                                    "API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
-      case NexusHDF5:
+      case Nexus:
         if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
                                    "' registered as NexusHDF5 loader but it does not "

@@ -44,7 +44,7 @@ using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXus
 
 namespace Mantid::MDAlgorithms {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMD)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

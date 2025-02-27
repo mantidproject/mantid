@@ -44,7 +44,7 @@ int calculateConfidence(const std::string &filePath, const std::shared_ptr<Manti
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus3)
 
 /** Executes the right version of the Muon nexus loader
  *  @throw Exception::FileError If the Nexus file cannot be found/opened

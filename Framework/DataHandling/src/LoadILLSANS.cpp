@@ -38,7 +38,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

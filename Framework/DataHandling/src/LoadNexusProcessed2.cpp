@@ -24,7 +24,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 //----------------------------------------------------------------------------------------------
 
 namespace {

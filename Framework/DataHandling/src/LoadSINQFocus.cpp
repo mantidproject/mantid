@@ -29,7 +29,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSINQFocus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

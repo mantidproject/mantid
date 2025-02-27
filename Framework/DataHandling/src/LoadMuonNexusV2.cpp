@@ -27,7 +27,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexusV2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
 using namespace Kernel;
 using namespace API;

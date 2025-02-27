@@ -1367,6 +1367,6 @@ void LoadEMUTar::exec() {
 
 // register the algorithms into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEMUHdf)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
 
 } // namespace Mantid::DataHandling

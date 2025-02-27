@@ -19,7 +19,7 @@ namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

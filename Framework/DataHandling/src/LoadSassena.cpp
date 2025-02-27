@@ -23,7 +23,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSassena)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena)
 
 /**
  * Return the confidence with with this algorithm can load the file

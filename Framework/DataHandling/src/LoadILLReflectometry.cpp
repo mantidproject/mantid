@@ -145,7 +145,7 @@ using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file
