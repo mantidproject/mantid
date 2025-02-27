@@ -41,6 +41,7 @@ public:
 
   void detach();
 
+  // cppcheck-suppress unknownMacro
 public slots:
   void setRange(double min, double max);
 
