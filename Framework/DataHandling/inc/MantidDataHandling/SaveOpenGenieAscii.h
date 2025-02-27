@@ -20,7 +20,7 @@ class MANTID_DATAHANDLING_DLL SaveOpenGenieAscii : public Mantid::API::Algorithm
 public:
   /// (Empty) Constructor
   SaveOpenGenieAscii() = default;
-  ~SaveOpenGenieAscii() = default;
+  ~SaveOpenGenieAscii() override = default;
 
   /// Algorithm's name
   const std::string name() const override { return "SaveOpenGenieAscii"; }

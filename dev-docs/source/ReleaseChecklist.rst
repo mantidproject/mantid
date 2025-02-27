@@ -36,6 +36,8 @@ are responsible for ensuring that the work gets done.
 Timeline
 --------
 
+This is final part of the :ref:`development and release cycle <DevelopmentAndReleaseCycle>`.
+
 +-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
 | | Key Event(s)              | | Task Priorities                             | | Actions Required from                                                  | | Time Until Release     |
 |                             |                                               |                                                                          |                          |
@@ -122,6 +124,8 @@ Manual Testing
    `Ensemble Manual Testing <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`__.
    In short, testing teams of around 3-5 developers, spread across sub-teams
    are assigned tasks with the code expert in that testing team.
+*  It is important to ensure that for each operating system, there is at least one person responsible for installing
+   the conda version and one person responsible for installing the non-conda version of Mantid.
 
 Beta Testing Ends - Prepare for Smoke Testing
 #############################################
@@ -483,9 +487,6 @@ have been fixed. Then:
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
-  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
-  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -565,6 +566,9 @@ Anaconda channel.
    <https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml>`__.
    Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
    The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
+*  Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+   This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+   publishing for the ``main`` nightly pipeline.
 
 **Generate DOI**
 

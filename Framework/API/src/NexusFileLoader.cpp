@@ -11,7 +11,7 @@ void NexusFileLoader::exec() {
   // make sure the descriptor is initialized
   if (!m_fileInfo) {
     const std::string filename = this->getPropertyValue(this->getFilenamePropertyName());
-    m_fileInfo = std::make_shared<Mantid::Kernel::NexusHDF5Descriptor>(filename);
+    m_fileInfo = std::make_shared<Mantid::Kernel::NexusDescriptor>(filename);
   }
 
   // execute the algorithm as normal
@@ -22,18 +22,18 @@ NexusFileLoader::createChildAlgorithm(const std::string &name, const double star
                                       const bool enableLogging, const int &version) {
   auto child = IFileLoader::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
 
-  // set the NexusHDF5Descriptor on the child algorithm
+  // set the NexusDescriptor on the child algorithm
   auto nfl = std::dynamic_pointer_cast<NexusFileLoader>(child);
   if (nfl) {
     nfl->setFileInfo(m_fileInfo);
   }
   return child;
 }
-void NexusFileLoader::setFileInfo(std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
+void NexusFileLoader::setFileInfo(std::shared_ptr<Mantid::Kernel::NexusDescriptor> fileInfo) {
   m_fileInfo = std::move(fileInfo);
 }
 
-const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> NexusFileLoader::getFileInfo() const noexcept {
+const std::shared_ptr<Mantid::Kernel::NexusDescriptor> NexusFileLoader::getFileInfo() const noexcept {
   return m_fileInfo;
 }
 

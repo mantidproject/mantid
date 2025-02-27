@@ -22,6 +22,7 @@
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeDetectorBinFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -34,8 +35,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
@@ -49,7 +50,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::NeXus;
 using namespace DataObjects;
@@ -191,7 +192,7 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else
@@ -1165,10 +1166,12 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
 
       PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
       PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryDetectorBin = std::make_shared<PeakShapeDetectorBinFactory>();
       PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
 
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
-      peakFactorySphere->setSuccessor(peakFactoryNone);
+      peakFactorySphere->setSuccessor(peakFactoryDetectorBin);
+      peakFactoryDetectorBin->setSuccessor(peakFactoryNone);
 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
@@ -1457,10 +1460,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 
       PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
       PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryDetectorBin = std::make_shared<PeakShapeDetectorBinFactory>();
       PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
 
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
-      peakFactorySphere->setSuccessor(peakFactoryNone);
+      peakFactorySphere->setSuccessor(peakFactoryDetectorBin);
+      peakFactoryDetectorBin->setSuccessor(peakFactoryNone);
 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);

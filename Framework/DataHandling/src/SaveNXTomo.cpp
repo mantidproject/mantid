@@ -21,9 +21,9 @@
 
 #include "MantidKernel/MantidVersion.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory

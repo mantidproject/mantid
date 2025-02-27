@@ -162,7 +162,7 @@ Order (low first)
     if (*ax != *ux)
       return (*ux < *ax);
   }
-  return uc != Units.end();
+  return false;
 }
 
 Acomp &Acomp::operator+=(const Acomp &A)
@@ -490,9 +490,8 @@ It requires that the Intersect is the same for both
     return -1;
 
   if (!A.Units.empty()) {
-    auto Ept = Units.end();
     Units.resize(Units.size() + A.Units.size());
-    copy(A.Units.begin(), A.Units.end(), Ept);
+    copy(A.Units.begin(), A.Units.end(), back_inserter(Units));
     std::sort(Units.begin(), Units.end());
   }
 

@@ -28,6 +28,10 @@ class RegionSelectorView(QWidget):
 
         self.setWindowTitle("Region Selector")
 
+    @property
+    def data_view(self):
+        return self._data_view
+
     def set_workspace(self, workspace):
         self._data_view.image_info_widget.setWorkspace(workspace)
 

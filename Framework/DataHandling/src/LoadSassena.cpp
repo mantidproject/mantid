@@ -23,7 +23,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSassena)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -31,7 +31,7 @@ DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSassena)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSassena::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadSassena::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.hasRootAttr("sassena_version") || descriptor.isEntry("/qvectors")) {
     return 99;
   }

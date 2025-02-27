@@ -12,7 +12,6 @@ add_dependencies(FrameworkTests Framework)
 
 add_subdirectory(Types)
 add_subdirectory(Json)
-add_subdirectory(NexusCpp)
 add_subdirectory(LegacyNexus)
 add_subdirectory(Kernel)
 add_subdirectory(Parallel)

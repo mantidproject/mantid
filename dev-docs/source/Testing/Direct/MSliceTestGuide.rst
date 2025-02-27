@@ -163,7 +163,7 @@ Taking Cuts
 #. Check that the ``File`` menu only has one menu item, ``Close``
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
 #. Click on ``Save Cut to Workspace`` and check the ``MD Histo`` tab of the Workspace Manager to verify that the new workspace was added
-#. Click on Flip Integration Axis. The y axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
+#. Click on Flip Integration Axis. The x axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
 
 
 .. figure:: ../../../../docs/source/images/flip_integration_axis.png
@@ -326,3 +326,16 @@ The Workspace Manager
    :alt: compare_mslice_ws_2.png
    :align: center
    :width: 80%
+
+
+Interaction with ADS
+--------------------
+#. Create a few (maybe three or four) interactive cuts from a slice plot and click ``Save Cut to Workspace`` for each of them
+#. Navigate to the ``MD Histo`` tab of the Workspace Manager and select all cuts
+#. Click on ``Save to Workbench``
+#. In Mantid, all selected cuts from the ``MD Histo`` tab are now visible in the Workspaces window
+#. Select one of these and rename it
+#. Check that the corresponding workspace in the ``MD Histo`` has been renamed accordingly
+#. Select the renamed workspace in Mantid and click ``Delete``
+#. Check that the corresponding workspace in the ``MD Histo`` tab is deleted as well
+#. Now click ``Clear`` in the Workspaces window in Mantid and check that all workspaces in the ``2D`` and ``MD Histo`` tabs in MSlice are deleted as well

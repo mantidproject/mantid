@@ -23,7 +23,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -56,7 +56,7 @@ Optional Properties:
 </UL>
 
 */
-class MANTID_DATAHANDLING_DLL LoadPLN : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
+class MANTID_DATAHANDLING_DLL LoadPLN : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   int version() const override;
@@ -64,7 +64,7 @@ public:
   const std::string category() const override;
   const std::string name() const override;
   const std::string summary() const override;
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   void exec() override;

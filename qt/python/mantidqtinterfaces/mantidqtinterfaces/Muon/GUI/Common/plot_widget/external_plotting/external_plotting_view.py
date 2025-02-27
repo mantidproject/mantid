@@ -7,7 +7,6 @@
 from typing import List
 
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import PlotInformation
-from mantid.plots.utility import legend_set_draggable
 
 
 class ExternalPlottingView(object):
@@ -55,7 +54,7 @@ class ExternalPlottingView(object):
             external_axis.plot(
                 plot_info.workspace, specNum=plot_info.specNum, autoscale_on_update=True, distribution=not plot_info.normalised
             )
-            legend_set_draggable(external_axis.legend(), True)
+            external_axis.make_legend()
         fig_window.show()
 
     def _create_external_workbench_fig_window(self):

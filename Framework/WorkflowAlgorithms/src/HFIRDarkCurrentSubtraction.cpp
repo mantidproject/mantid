@@ -147,14 +147,14 @@ void HFIRDarkCurrentSubtraction::exec() {
 
 /// Get the counting time from a workspace
 /// @param inputWS :: workspace to read the counting time from
-double HFIRDarkCurrentSubtraction::getCountingTime(const MatrixWorkspace_sptr &inputWS) {
+double HFIRDarkCurrentSubtraction::getCountingTime(const MatrixWorkspace_sptr &inputWS) const {
   // First, look whether we have the information in the log
   if (inputWS->run().hasProperty("timer")) {
     return inputWS->run().getPropertyValueAsType<double>("timer");
   } else {
     // If we don't have the information in the log, use the default timer
     // spectrum
-    MantidVec &timer = inputWS->dataY(DEFAULT_TIMER_ID);
+    const MantidVec &timer = inputWS->dataY(DEFAULT_TIMER_ID);
     return timer[0];
   }
 }

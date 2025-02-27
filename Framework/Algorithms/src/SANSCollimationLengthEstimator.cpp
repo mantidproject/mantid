@@ -168,10 +168,10 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(const Matr
  * @param prop: a property
  * @returns the guide value
  */
-double SANSCollimationLengthEstimator::getGuideValue(Mantid::Kernel::Property *prop) const {
-  if (auto timeSeriesProperty = dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
+double SANSCollimationLengthEstimator::getGuideValue(const Mantid::Kernel::Property *prop) const {
+  if (auto timeSeriesProperty = dynamic_cast<const TimeSeriesProperty<double> *>(prop)) {
     return timeSeriesProperty->firstValue();
-  } else if (auto doubleProperty = dynamic_cast<PropertyWithValue<double> *>(prop)) {
+  } else if (auto doubleProperty = dynamic_cast<const PropertyWithValue<double> *>(prop)) {
     auto val = doubleProperty->value();
     if (checkForDouble(val)) {
       g_log.warning("SANSCollimationLengthEstimator: The Guide was not "

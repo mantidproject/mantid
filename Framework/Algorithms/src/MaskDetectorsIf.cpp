@@ -31,7 +31,6 @@ namespace {
 template <class T> struct not_finite {
   T first_argument_type;
   T second_argument_type;
-  bool result_type;
 
   constexpr bool operator()(const T &value, const T &ignored) const {
     UNUSED_ARG(ignored);
@@ -138,7 +137,7 @@ void MaskDetectorsIf::outputToWorkspace() {
       outputW->getSpectrum(i).clearData();
   }
 
-  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputW.get()))
+  if (const auto *event = dynamic_cast<DataObjects::EventWorkspace *>(outputW.get()))
     event->clearMRU();
 
   setProperty("OutputWorkspace", outputW);

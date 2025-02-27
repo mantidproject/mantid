@@ -21,7 +21,6 @@ public:
 
   void init() override;
   std::string name() const override { return "CrystalFieldSpectrum"; }
-  const std::string category() const override { return "General"; }
   void buildTargetFunction() const override;
 
 protected:

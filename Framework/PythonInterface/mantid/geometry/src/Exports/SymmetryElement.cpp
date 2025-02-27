@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/scope.hpp>
@@ -48,7 +49,7 @@ void export_SymmetryElement() {
       .value("NoRotation", SymmetryElementRotation::NoRotation);
 
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
-      .def("getHMSymbol", &SymmetryElement::hmSymbol, arg("self"),
+      .def("getHMSymbol", &SymmetryElement::hmSymbol, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the Hermann-Mauguin symbol for the element.")
       .def("getAxis", &getAxis, arg("self"),
            "Returns the symmetry axis or [0,0,0] for "

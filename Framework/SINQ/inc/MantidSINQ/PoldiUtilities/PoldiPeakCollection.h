@@ -39,7 +39,7 @@ public:
 
   virtual ~PoldiPeakCollection() = default;
 
-  PoldiPeakCollection_sptr clone();
+  PoldiPeakCollection_sptr clonePeakCollection();
 
   size_t peakCount() const;
 
@@ -50,7 +50,7 @@ public:
   IntensityType intensityType() const;
 
   void setProfileFunctionName(std::string newProfileFunction);
-  std::string getProfileFunctionName() const;
+  const std::string &getProfileFunctionName() const;
   bool hasProfileFunctionName() const;
 
   void setPointGroup(const Geometry::PointGroup_sptr &pointGroup);

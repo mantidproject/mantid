@@ -31,7 +31,7 @@ public:
   AlgorithmProgressDialogPresenter(QWidget *parent, IAlgorithmProgressDialogWidget *view,
                                    AlgorithmProgressModel &model);
 
-  void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
+  void algorithmStartedSlot(Mantid::API::AlgorithmID) override final;
   void updateProgressBarSlot(Mantid::API::AlgorithmID, const double progress, const QString message,
                              const double estimatedTime, const int progressPrecision) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;

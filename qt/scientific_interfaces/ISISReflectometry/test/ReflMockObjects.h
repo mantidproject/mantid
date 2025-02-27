@@ -23,6 +23,7 @@
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Preview/ROIType.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearchModel.h"
@@ -40,6 +41,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include "Reduction/PreviewRow.h"
+#include "Reduction/ProcessingInstructions.h"
 
 #include <QMap>
 #include <QString>
@@ -64,7 +66,7 @@ public:
 class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
-  MOCK_METHOD1(initInstrumentList, void(const std::string &));
+  MOCK_METHOD1(initInstrumentList, std::string(const std::string &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
@@ -105,13 +107,14 @@ public:
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyPreviewApplyRequested, void());
-  MOCK_CONST_METHOD0(hasROIDetectorIDsForPreviewRow, bool());
+  MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
+  MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, boost::optional<ProcessingInstructions>());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD1(initInstrumentList, void(const std::string &));
+  MOCK_METHOD1(initInstrumentList, std::string(const std::string &));
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
   MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));

@@ -293,11 +293,13 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y, 
  * @return True if the workspace is in the ADS
  */
 bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName, bool silent) {
-  if (workspaceName.isEmpty())
+  if (workspaceName.isEmpty()) {
+    addErrorMessage("No workspace added.", silent);
     return false;
+  }
 
   if (!doesExistInADS(workspaceName.toStdString())) {
-    addErrorMessage(workspaceName.toStdString() + " could not be found.", silent);
+    addErrorMessage(workspaceName.toStdString() + " not found.", silent);
     return false;
   }
   return true;

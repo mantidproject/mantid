@@ -12,6 +12,7 @@ class PEARL_FOCUS_MODES(object):
     groups = "groups"
     trans = "trans"
     mods = "mods"
+    trans_custom = "trans_custom"
 
 
 class PEARL_TT_MODES(object):

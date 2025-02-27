@@ -23,7 +23,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.presenter = self._make_presenter(self.run_selection, self.run_finder, self.view)
 
     def _make_mock_view(self):
-        mock_view = mock.create_autospec(RunSelectorWidget, spec_set=True)
+        mock_view = mock.create_autospec(RunSelectorWidget, spec_set=True, instance=True)
         mock_view.addRuns = FakeSignal()
         mock_view.removeRuns = FakeSignal()
         mock_view.manageDirectories = FakeSignal()
@@ -32,10 +32,10 @@ class RunSelectorPresenterTest(unittest.TestCase):
         return mock_view
 
     def _make_mock_selection(self):
-        return mock.create_autospec(RunSelectionModel)
+        return mock.create_autospec(RunSelectionModel, instance=True)
 
     def _make_mock_finder(self):
-        return mock.create_autospec(SummableRunFinder)
+        return mock.create_autospec(SummableRunFinder, instance=True)
 
     def _make_presenter(self, run_selection, run_finder, view):
         return RunSelectorPresenter("some_title", run_selection, run_finder, view, None)

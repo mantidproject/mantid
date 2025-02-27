@@ -25,7 +25,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -56,7 +56,7 @@ Mantid::DataHandling::DataBlockComposite getMonitorsFromComposite(Mantid::DataHa
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadISISNexus2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
@@ -77,7 +77,7 @@ LoadISISNexus2::LoadISISNexus2()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadISISNexus2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/raw_data_1", "NXentry")) {
     // It also could be an Event Nexus file or a TOFRaw file,
     // so confidence is set to less than 80.

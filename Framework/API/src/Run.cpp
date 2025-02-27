@@ -12,7 +12,7 @@
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <memory>
@@ -643,7 +643,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
  * @param prefix indicates current group location in file (absolute name)
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusDescriptor &fileInfo,
                     const std::string &prefix, bool keepOpen) {
 
   if (!group.empty()) {

@@ -103,7 +103,7 @@ Mantid::API::WorkspaceGroup_sptr createMultiPeriodAsymmetryData(const int &nPeri
  * Create a simple dead time TableWorkspace with two columns (spectrum
  * number and dead time).
  */
-Mantid::API::ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
+Mantid::API::ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, const std::vector<double> &deadTimes);
 
 /**
  * Create a simple time zero TableWorkspace with one column (time zero)

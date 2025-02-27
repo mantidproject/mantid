@@ -88,7 +88,7 @@ public:
   /// Sort this vector in order defined by an index array
   void sort(const std::vector<size_t> &indices);
   /// Copy the values to an std vector of doubles
-  std::vector<double> toStdVector() const;
+  const std::vector<double> &toStdVector() const;
   /// Return a reference to m_data
   std::vector<double> &StdVectorRef();
 

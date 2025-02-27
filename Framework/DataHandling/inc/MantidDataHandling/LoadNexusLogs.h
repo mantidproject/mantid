@@ -8,7 +8,7 @@
 
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <vector>
 
 namespace Mantid {
@@ -52,7 +52,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Logs;DataHandling\\Nexus"; }
 
-  int confidence(Kernel::NexusHDF5Descriptor & /*descriptor*/) const override { return 0; }
+  int confidence(Kernel::NexusDescriptor & /*descriptor*/) const override { return 0; }
 
 private:
   /// Overwrites Algorithm method.

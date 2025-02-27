@@ -112,7 +112,7 @@ void SortTableWorkspaceDialog::workspaceChanged(const QString &wsName) {
     m_columnNames.clear();
     // get and cache the column names from the workspace
     auto columnNames = ws->getColumnNames();
-    for (auto &columnName : columnNames) {
+    for (const auto &columnName : columnNames) {
       m_columnNames << QString::fromStdString(columnName);
     }
     m_form.cbColumnName->addItems(m_columnNames);

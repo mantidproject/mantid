@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pathlib import Path
 from typing import Any, Dict, Type, TypedDict, TypeVar
 
 from pydantic import validate_call
@@ -32,12 +33,13 @@ class AbinsData:
         self._check_consistent_dimensions()
 
     @staticmethod
-    def from_calculation_data(filename: str, ab_initio_program: str) -> "AbinsData":
+    def from_calculation_data(filename: str, ab_initio_program: str, cache_directory: Path) -> "AbinsData":
         """
         Get AbinsData from ab initio calculation output file.
 
         :param filename: Path to vibration/phonon data file
         :param ab_initio_program: Program which generated data file; this should be a key in AbinsData.ab_initio_loaders
+        :param cache_directory: Location for cache files
         """
         from abins.input import all_loaders  # Defer import to avoid loops when abins.__init__ imports AbinsData
 
@@ -47,7 +49,7 @@ class AbinsData:
                     ab_initio_program.upper(), " ".join(all_loaders.keys())
                 )
             )
-        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
+        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename, cache_directory=cache_directory)
         data = loader.get_formatted_data()
         return data
 

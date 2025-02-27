@@ -161,7 +161,7 @@ Mantid::API::WorkspaceGroup_sptr createMultiPeriodAsymmetryData(const int &nPeri
  * @param deadTimes ::  The dead times for each spectra.
  * @return TableWorkspace with dead times appropriate for pairing algorithm.
  */
-ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes) {
+ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, const std::vector<double> &deadTimes) {
 
   auto deadTimeTable =
       std::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));

@@ -100,11 +100,35 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._on_specnums_changed()
         self._on_wkspindices_changed()
 
+    # Check if workspace only has a single spectra, if true set it as first valid spectrum number
+    def update_spectrum_number_text(self):
+        if self.selection and (
+            (self.selection.wksp_indices and len(self.selection.wksp_indices) > 0)
+            or (self.selection.spectra and len(self.selection.spectra) > 0)
+        ):
+            return
+
+        if not self._ui.specNums.text():
+            for ws in self._workspaces:
+                if ws.getNumberHistograms() == 1:
+                    spectrum_number = ws.getSpectrum(0).getSpectrumNo()
+                    self._ui.specNums.setText(str(spectrum_number))
+                    self._parse_spec_nums()
+                    break
+
     def on_ok_clicked(self):
+        self.update_spectrum_number_text()
+
+        if self.selection is None:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid workspace index or spectrum number.")
+            return
+
         if self._check_number_of_plots(self.selection):
             self.accept()
 
     def on_plot_all_clicked(self):
+        self.update_spectrum_number_text()
+
         selection = SpectraSelection(self._workspaces)
         selection.spectra = self._plottable_spectra
         selection.plot_type = self._ui.plotType.currentIndex()
@@ -252,21 +276,29 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.wkspIndices.clear()
         ui.wkspIndicesValid.hide()
 
-        self._parse_spec_nums()
-        ui.specNumsValid.setVisible(not self._is_input_valid())
-        if self._is_input_valid() or ui.specNums.text() == "":
-            ui.specNumsValid.setVisible(False)
-            ui.specNumsValid.setToolTip("")
-        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
+        try:
+            self._parse_spec_nums()
+        except Exception as e:
+            logger.error(f"Error parsing spectrum numbers: {e}")
+            ui.specNumsValid.setToolTip("Invalid spectrum number input.")
             ui.specNumsValid.setVisible(True)
-            ui.specNumsValid.setToolTip("Enter one spectrum number in " + ui.specNums.placeholderText())
+            ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
+        spectrum_numbers = [ws.getSpectrumNumbers() for ws in self._workspaces]
+        unique_spectra = {tuple(numbers) for numbers in spectrum_numbers}
+
+        if len(unique_spectra) > 1:
+            ui.specNums.setEnabled(False)
+            ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. Use 'Plot All' or workspace indices instead.")
         else:
-            ui.specNumsValid.setVisible(True)
-            ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
+            ui.specNums.setEnabled(True)
+            ui.specNumsValid.setToolTip("")
+
+        ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
         if self._advanced:
-            ui.advanced_options_widget._validate_custom_logs(self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
+            ui.advanced_options_widget._validate_custom_logs(ui.advanced_options_widget.ui.custom_log_line_edit.text())
 
     def _on_plot_type_changed(self, new_index):
         if self._overplot:
@@ -290,7 +322,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
                     self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
 
-                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+
             else:
                 self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
                 self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)

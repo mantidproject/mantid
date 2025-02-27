@@ -13,7 +13,7 @@ from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_view import AxisC
 
 class AxisChangerTwoPresenterTest(unittest.TestCase):
     def setUp(self):
-        view = mock.create_autospec(AxisChangerView)
+        view = mock.create_autospec(AxisChangerView, instance=True)
         self.acp = AxisChangerPresenter(view)
         self.view = self.acp.view
         self.slot = mock.Mock()

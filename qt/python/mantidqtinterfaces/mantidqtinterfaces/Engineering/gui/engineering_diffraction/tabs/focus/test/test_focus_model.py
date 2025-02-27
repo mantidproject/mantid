@@ -26,7 +26,7 @@ class FocusModelTest(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         self.model = model.FocusModel()
-        self.calibration = create_autospec(CalibrationInfo)
+        self.calibration = create_autospec(CalibrationInfo, instance=True)
         self.calibration.is_valid.return_value = True
         self.calibration.get_instrument.return_value = "ENGINX"
         self.calibration.get_group_suffix.return_value = "all_banks"
@@ -91,7 +91,8 @@ class FocusModelTest(unittest.TestCase):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
         presenter = settings_presenter.SettingsPresenter(
-            mock.create_autospec(settings_model.SettingsModel), mock.create_autospec(settings_view.SettingsView)
+            mock.create_autospec(settings_model.SettingsModel, instance=True),
+            mock.create_autospec(settings_view.SettingsView, instance=True),
         )
         presenter.settings = {  # "save_location" is not defined
             "full_calibration": "cal",

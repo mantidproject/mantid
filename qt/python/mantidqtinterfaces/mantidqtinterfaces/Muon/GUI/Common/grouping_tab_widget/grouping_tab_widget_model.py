@@ -45,6 +45,10 @@ class GroupingTabModel(object):
         return workspace
 
     @property
+    def get_context(self):
+        return self._context
+
+    @property
     def groups(self):
         return self._groups_and_pairs.groups
 

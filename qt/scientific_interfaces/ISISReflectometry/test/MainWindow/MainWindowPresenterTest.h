@@ -34,6 +34,10 @@ using testing::Return;
 using testing::ReturnRef;
 using testing::Throw;
 
+namespace {
+static const std::string DEFAULT_INSTRUMENT = "INTER";
+} // unnamed namespace
+
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -78,10 +82,15 @@ public:
 
   void testConstructorAddsBatchPresenterForAllBatchViews() {
     EXPECT_CALL(m_view, batches()).Times(1);
-    for (auto batchPresenter : m_batchPresenters)
-      expectBatchAdded(batchPresenter);
-
-    auto presenter = makePresenter();
+    auto optionsPresenter = makeOptionsPresenter();
+    auto slitCalculator = makeSlitCalculator();
+    auto makeBatchPresenter = makeBatchPresenterFactory();
+    expectSlitCalculatorInstrumentUpdated(DEFAULT_INSTRUMENT);
+    for (size_t i = 0; i < m_batchPresenters.size(); ++i) {
+      expectBatchAdded(m_batchPresenters[i], DEFAULT_INSTRUMENT);
+    }
+    auto presenter =
+        makePresenter(std::move(optionsPresenter), std::move(slitCalculator), std::move(makeBatchPresenter));
     TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(), m_batchViews.size());
   }
 
@@ -91,7 +100,8 @@ public:
     EXPECT_CALL(m_view, newBatch()).Times(1).WillOnce(Return(dynamic_cast<IBatchView *>(batchView)));
     auto batchPresenter = new NiceMock<MockBatchPresenter>();
     EXPECT_CALL(*m_makeBatchPresenter, makeProxy(batchView)).Times(1).WillOnce(Return(batchPresenter));
-    expectBatchAdded(batchPresenter);
+    expectBatchAdded(batchPresenter, DEFAULT_INSTRUMENT);
+    expectSlitCalculatorInstrumentNotUpdated();
 
     presenter.notifyNewBatchRequested();
   }
@@ -211,8 +221,7 @@ public:
 
   void testShowSlitCalculatorSetsInstrument() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "TEST_INSTRUMENT");
-    expectSlitCalculatorInstrumentUpdated(instrument);
+    expectSlitCalculatorInstrumentUpdated(DEFAULT_INSTRUMENT);
     presenter.notifyShowSlitCalculatorRequested();
   }
 
@@ -277,7 +286,6 @@ public:
 
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
-    setupInstrument(presenter, "INTER");
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(1);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(1);
@@ -286,15 +294,13 @@ public:
 
   void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfNotChanged() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
-    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
-    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
-    presenter.notifyChangeInstrumentRequested(instrument);
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(DEFAULT_INSTRUMENT)).Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(DEFAULT_INSTRUMENT)).Times(0);
+    presenter.notifyChangeInstrumentRequested(DEFAULT_INSTRUMENT);
   }
 
   void testChangeInstrumentUpdatesInstrumentInSlitCalculator() {
     auto presenter = makePresenter();
-    setupInstrument(presenter, "INTER");
     auto const instrument = std::string("POLREF");
     expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyChangeInstrumentRequested(instrument);
@@ -302,41 +308,37 @@ public:
 
   void testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
     expectSlitCalculatorInstrumentNotUpdated();
-    presenter.notifyChangeInstrumentRequested(instrument);
+    presenter.notifyChangeInstrumentRequested(DEFAULT_INSTRUMENT);
   }
 
   void testUpdateInstrumentDoesNotUpdateInstrumentInSlitCalculator() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
     expectSlitCalculatorInstrumentNotUpdated();
     presenter.notifyUpdateInstrumentRequested();
   }
 
   void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
-    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
-    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(DEFAULT_INSTRUMENT)).Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(DEFAULT_INSTRUMENT)).Times(0);
     presenter.notifyUpdateInstrumentRequested();
   }
 
   void testUpdateInstrumentDoesNotChangeInstrumentName() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
     presenter.notifyUpdateInstrumentRequested();
-    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), DEFAULT_INSTRUMENT);
   }
 
   void testUpdateInstrumentThrowsIfInstrumentNotSet() {
     auto presenter = makePresenter();
+    presenter.m_instrument = nullptr;
     TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
   }
 
   void testUpdateInstrumentSetsFacilityInConfig() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
     auto &config = Mantid::Kernel::ConfigService::Instance();
     config.setString("default.facility", "OLD_FACILITY");
     presenter.notifyUpdateInstrumentRequested();
@@ -345,11 +347,10 @@ public:
 
   void testUpdateInstrumentSetsInstrumentInConfig() {
     auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
     auto &config = Mantid::Kernel::ConfigService::Instance();
     config.setString("default.instrument", "OLD_INSTRUMENT");
     presenter.notifyUpdateInstrumentRequested();
-    TS_ASSERT_EQUALS(config.getString("default.instrument"), instrument);
+    TS_ASSERT_EQUALS(config.getString("default.instrument"), DEFAULT_INSTRUMENT);
   }
 
   void testCloseEventChecksIfPrevented() {
@@ -505,24 +506,47 @@ private:
     return optionsPresenter;
   }
 
-  MainWindowPresenterFriend makePresenter(std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> optionsPresenter =
-                                              std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
-    m_optionsPresenter = optionsPresenter.get();
-    auto encoder = std::make_unique<NiceMock<MockEncoder>>();
-    m_encoder = encoder.get();
-    auto decoder = std::make_unique<NiceMock<MockDecoder>>();
-    m_decoder = decoder.get();
+  std::unique_ptr<NiceMock<MockSlitCalculator>> makeSlitCalculator() {
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
+    return slitCalculator;
+  }
+
+  std::unique_ptr<NiceMock<MockBatchPresenterFactory>> makeBatchPresenterFactory() {
     auto makeBatchPresenter = std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
     // Set up a mock batch presenter for each view to be returned from the
     // factory
     for (auto batchView : m_batchViews) {
       auto batchPresenter = new NiceMock<MockBatchPresenter>();
+      ON_CALL(*batchPresenter, initInstrumentList(_)).WillByDefault(Return(DEFAULT_INSTRUMENT));
       m_batchPresenters.emplace_back(batchPresenter);
       ON_CALL(*m_makeBatchPresenter, makeProxy(batchView)).WillByDefault(Return(batchPresenter));
     }
+    return makeBatchPresenter;
+  }
+
+  MainWindowPresenterFriend
+  makePresenter(std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> optionsPresenter = nullptr,
+                std::unique_ptr<NiceMock<MockSlitCalculator>> slitCalculator = nullptr,
+                std::unique_ptr<NiceMock<MockBatchPresenterFactory>> makeBatchPresenter = nullptr) {
+    if (!optionsPresenter) {
+      optionsPresenter = makeOptionsPresenter();
+    }
+
+    auto encoder = std::make_unique<NiceMock<MockEncoder>>();
+    m_encoder = encoder.get();
+    auto decoder = std::make_unique<NiceMock<MockDecoder>>();
+    m_decoder = decoder.get();
+
+    if (!slitCalculator) {
+      slitCalculator = makeSlitCalculator();
+    }
+
+    if (!makeBatchPresenter) {
+      makeBatchPresenter = makeBatchPresenterFactory();
+    }
+
     // Make the presenter
     auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
                                                std::move(decoder), std::move(slitCalculator),
@@ -543,15 +567,10 @@ private:
     m_batchPresenters.clear();
   }
 
-  std::string setupInstrument(MainWindowPresenterFriend &presenter, std::string const &instrumentName) {
-    presenter.m_instrument = std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
-    return presenter.instrumentName();
-  }
-
-  void expectBatchAdded(MockBatchPresenter *batchPresenter) {
+  void expectBatchAdded(MockBatchPresenter *batchPresenter, std::string const &instrumentName) {
     EXPECT_CALL(*batchPresenter, acceptMainPresenter(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, initInstrumentList(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
+    EXPECT_CALL(*batchPresenter, initInstrumentList(_)).Times(1).WillOnce(Return(instrumentName));
+    EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(instrumentName)).Times(1);
     EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }

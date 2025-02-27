@@ -1067,7 +1067,7 @@ std::string getValueFromStdOut(const std::string &orig, const std::string &key) 
     return std::string();
   }
 
-  return Mantid::Kernel::Strings::strip(orig.substr(start, stop - start - 1));
+  return Mantid::Kernel::Strings::strip(orig.substr(start, stop - start));
 }
 
 /**

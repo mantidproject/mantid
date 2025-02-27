@@ -167,6 +167,7 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
     master_string.reserve(stream_size - separator.length());
 
     // Concatenate the contributions from the remaning threads
+    // cppcheck-suppress knownConditionTrueFalse
     for (int i = 1; i < nThreads; i++) {
       master_string += output[i];
     }

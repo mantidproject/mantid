@@ -209,6 +209,20 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.add_maxent_workspace_to_ADS.call_count, 0)
         self.assertEqual(mock_maxent.call_count, 0)
 
+    @mock.patch("mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter.run_MuonMaxent")
+    def test_calculate_maxent_ignores_keyboardinterrupt(self, mock_maxent):
+        mock_maxent.side_effect = KeyboardInterrupt()
+        params = {"InputWorkspace": "test"}
+        self.presenter.get_parameters_for_maxent_calculation = mock.Mock(return_value=params)
+        type(self.presenter).use_groups = mock.PropertyMock(return_value=True)
+        type(self.presenter).get_num_groups = mock.PropertyMock(return_value=2)
+        self.presenter.add_maxent_workspace_to_ADS = mock.Mock()
+        alg = mock.Mock()
+
+        self.presenter.calculate_maxent(alg)
+        self.assertEqual(self.presenter.add_maxent_workspace_to_ADS.call_count, 0)
+        self.assertEqual(mock_maxent.call_count, 1)
+
     def test_create_group_table(self):
         group1 = MuonGroup("fwd", [1, 2, 3])
         type(self.presenter).get_selected_groups = mock.PropertyMock(return_value=[group1])

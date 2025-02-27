@@ -7,6 +7,8 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
+#include "../../../ISISReflectometry/GUI/Preview/ROIType.h"
+#include "../../../ISISReflectometry/Reduction/ProcessingInstructions.h"
 #include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../MainWindow/MockMainWindowPresenter.h"
@@ -64,8 +66,9 @@ public:
 
   void testInitInstrumentListUpdatesRunsPresenter() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, initInstrumentList(_)).Times(1);
-    presenter->initInstrumentList();
+    std::string const selectedInstrument = "INTER";
+    EXPECT_CALL(*m_runsPresenter, initInstrumentList(selectedInstrument)).Times(1).WillOnce(Return(selectedInstrument));
+    TS_ASSERT_EQUALS(presenter->initInstrumentList(selectedInstrument), selectedInstrument);
   }
 
   void testMainPresenterUpdatedWhenChangeInstrumentRequested() {
@@ -545,30 +548,95 @@ public:
     presenter->notifyPreviewApplyRequested();
   }
 
-  void testHasROIDetectorIDsForPreviewRow() {
+  void testGetMatchingProcessingInstructionsForPreviewRow() {
     auto const lookupRow = makeLookupRow(boost::none);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
-    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, true);
+    auto const previewRow = PreviewRow({"12345"});
+    auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
+    auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
+    TS_ASSERT_EQUALS(result.size(), 3);
+    TS_ASSERT_EQUALS(result.at(ROIType::Signal), lookupRow.processingInstructions())
+    TS_ASSERT_EQUALS(result.at(ROIType::Background), lookupRow.backgroundProcessingInstructions())
+    TS_ASSERT_EQUALS(result.at(ROIType::Transmission), lookupRow.transmissionProcessingInstructions())
   }
 
-  void testHasROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
+  void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoInstructions() {
     auto lookupRow = makeLookupRow(boost::none);
-    lookupRow.setRoiDetectorIDs(boost::none);
+    lookupRow.setProcessingInstructions(ROIType::Signal, boost::none);
+    lookupRow.setProcessingInstructions(ROIType::Background, boost::none);
+    lookupRow.setProcessingInstructions(ROIType::Transmission, boost::none);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
-    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, false);
+    auto const previewRow = PreviewRow({"12345"});
+    auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
+    auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
+    TS_ASSERT(result.empty());
   }
 
-  void testHasROIDetectorIDsForPreviewRowNoLookupRowFound() {
-    runHasROIDetectorIDsForPreviewRowTest(boost::none, false);
+  void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoSignalInstructions() {
+    auto lookupRow = makeLookupRow(boost::none);
+    auto const result =
+        runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Signal);
+    TS_ASSERT_EQUALS(result.at(ROIType::Background), lookupRow.backgroundProcessingInstructions());
+    TS_ASSERT_EQUALS(result.at(ROIType::Transmission), lookupRow.transmissionProcessingInstructions());
   }
 
-  void testHasROIDetectorIDsForPreviewRowMultipleLookupRowsFound() {
+  void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoBackgroundInstructions() {
+    auto lookupRow = makeLookupRow(boost::none);
+    auto const result =
+        runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Background);
+    TS_ASSERT_EQUALS(result.at(ROIType::Signal), lookupRow.processingInstructions());
+    TS_ASSERT_EQUALS(result.at(ROIType::Transmission), lookupRow.transmissionProcessingInstructions());
+  }
+
+  void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoTransmissionInstructions() {
+    auto lookupRow = makeLookupRow(boost::none);
+    auto const result =
+        runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Transmission);
+    TS_ASSERT_EQUALS(result.at(ROIType::Signal), lookupRow.processingInstructions());
+    TS_ASSERT_EQUALS(result.at(ROIType::Background), lookupRow.backgroundProcessingInstructions());
+  }
+
+  void testGetMatchingProcessingInstructionsForPreviewRowNoLookupRowFound() {
+    auto const previewRow = PreviewRow({"12345"});
+    auto const presenter = makePresenterWithPreviewRowLookup(boost::none, previewRow);
+    auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
+    TS_ASSERT(result.empty());
+  }
+
+  void testGetMatchingProcessingInstructionsForPreviewRowMultipleLookupRowsFound() {
     auto mockModel = makeMockModel();
     auto const previewRow = PreviewRow({"12345"});
     EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).WillOnce(Throw(MultipleRowsFoundException("")));
     auto presenter = makePresenter(std::move(mockModel));
     EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
-    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), false);
+    auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
+    TS_ASSERT(result.empty());
+  }
+
+  void testGetMatchingROIDetectorIDsForPreviewRow() {
+    auto const lookupRow = makeLookupRow(boost::none);
+    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    runGetMatchingROIDetectorIDsForPreviewRowTest(maybeLookupRow, lookupRow.roiDetectorIDs());
+  }
+
+  void testGetMatchingROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
+    auto lookupRow = makeLookupRow(boost::none);
+    lookupRow.setRoiDetectorIDs(boost::none);
+    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    runGetMatchingROIDetectorIDsForPreviewRowTest(maybeLookupRow, boost::none);
+  }
+
+  void testGetMatchingROIDetectorIDsForPreviewRowNoLookupRowFound() {
+    runGetMatchingROIDetectorIDsForPreviewRowTest(boost::none, boost::none);
+  }
+
+  void testGetMatchingROIDetectorIDsForPreviewRowMultipleLookupRowsFound() {
+    auto mockModel = makeMockModel();
+    auto const previewRow = PreviewRow({"12345"});
+    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).WillOnce(Throw(MultipleRowsFoundException("")));
+    auto presenter = makePresenter(std::move(mockModel));
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+    TS_ASSERT_EQUALS(presenter->getMatchingROIDetectorIDsForPreviewRow(), boost::none);
   }
 
 private:
@@ -591,13 +659,23 @@ private:
   Slicing m_slicing;
   std::deque<IConfiguredAlgorithm_sptr> m_mockAlgorithmsList;
 
-  void runHasROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow, bool expectedResult) {
-    auto mockModel = makeMockModel();
+  std::map<ROIType, ProcessingInstructions>
+  runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(LookupRow &lookupRow,
+                                                                          ROIType instructionToOmit) {
+    lookupRow.setProcessingInstructions(instructionToOmit, boost::none);
+    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
     auto const previewRow = PreviewRow({"12345"});
-    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).Times(1).WillOnce(Return(lookupRow));
-    auto presenter = makePresenter(std::move(mockModel));
-    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
-    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), expectedResult);
+    auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
+    auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
+    TS_ASSERT_EQUALS(result.size(), 2);
+    return result;
+  }
+
+  void runGetMatchingROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow,
+                                                     boost::optional<ProcessingInstructions> expectedResult) {
+    auto const previewRow = PreviewRow({"12345"});
+    auto const presenter = makePresenterWithPreviewRowLookup(lookupRow, previewRow);
+    TS_ASSERT_EQUALS(presenter->getMatchingROIDetectorIDsForPreviewRow(), expectedResult);
   }
 
   class BatchPresenterFriend : public BatchPresenter {
@@ -659,6 +737,15 @@ private:
     // is resumed
     ON_CALL(*m_runsPresenter, resumeAutoreduction()).WillByDefault(Return(true));
     ON_CALL(*m_experimentPresenter, hasValidSettings()).WillByDefault(Return(true));
+    return presenter;
+  }
+
+  std::unique_ptr<BatchPresenterFriend> makePresenterWithPreviewRowLookup(boost::optional<LookupRow> lookupRow,
+                                                                          PreviewRow const &previewRow) {
+    auto mockModel = makeMockModel();
+    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).Times(1).WillOnce(Return(lookupRow));
+    auto presenter = makePresenter(std::move(mockModel));
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
     return presenter;
   }
 

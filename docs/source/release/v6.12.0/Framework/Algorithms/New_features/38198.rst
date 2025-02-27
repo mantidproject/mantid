@@ -1,1 +1,0 @@
-- A new property ``UngroupDetectors`` was added to :ref:`ExtractMask <algm-ExtractMask>` allowing the output ``MaskWorkspace`` to expand the spectra to individal detectors.

@@ -44,7 +44,7 @@ public:
   /// Defatult constructor
   TOFSANSResolution();
   /// Default destructor
-  virtual ~TOFSANSResolution() = default;
+  ~TOFSANSResolution() override = default;
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolution"; }
   /// Summary of algorithms purpose

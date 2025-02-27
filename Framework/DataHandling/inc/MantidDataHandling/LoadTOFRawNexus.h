@@ -15,7 +15,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <mutex>
@@ -27,7 +27,7 @@ namespace DataHandling {
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and
  stores it in a 2D workspace.
  */
-class MANTID_DATAHANDLING_DLL LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
+class MANTID_DATAHANDLING_DLL LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default Constructor
   LoadTOFRawNexus();
@@ -48,7 +48,7 @@ public:
   static std::string getEntryName(const std::string &filename);
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   void countPixels(const std::string &nexusfilename, const std::string &entry_name,
                    std::vector<std::string> &bankNames);

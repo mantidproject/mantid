@@ -169,6 +169,19 @@ public:
     run_test(eventIndices, start_event_index, total_events, first_pulse_index);
   }
 
+  void test_zerosEvents() {
+    // test that the pulse indexer can handle no events
+    auto eventIndices = std::make_shared<std::vector<uint64_t>>();
+    eventIndices->push_back(0);
+    eventIndices->push_back(0);
+
+    constexpr size_t start_event_index{0};
+    constexpr size_t total_events{0};
+    constexpr size_t first_pulse_index{1};
+
+    run_test(eventIndices, start_event_index, total_events, first_pulse_index);
+  }
+
   void test_invalidPulseROI() {
     auto eventIndices = generate_nonConstant();
 

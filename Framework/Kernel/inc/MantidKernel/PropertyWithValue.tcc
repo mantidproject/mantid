@@ -20,7 +20,7 @@
 #endif
 
 #include <json/value.h>
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <type_traits>
@@ -72,7 +72,7 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, 
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, const TYPE &defaultValue,
                                            const std::string &defaultValueStr, IValidator_sptr validator,
                                            unsigned int direction)
     : Property(name, typeid(TYPE), direction), m_value(extractToValueVector<TYPE>(defaultValueStr)),
@@ -221,6 +221,7 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::setDataItem(const 
 
 /// Copy assignment operator assigns only the value and the validator not the
 /// name, default (initial) value, etc.
+// cppcheck-suppress operatorEqVarError
 template <typename TYPE> PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::operator=(const PropertyWithValue &right) {
   if (&right == this)
     return *this;
@@ -399,9 +400,9 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value, const std::fa
 template <typename TYPE> const TYPE PropertyWithValue<TYPE>::getValueForAlias(const TYPE &alias) const {
   std::string strAlias = toString(alias);
   std::string strValue = m_validator->getValueForAlias(strAlias);
-  TYPE value;
-  toValue(strValue, value);
-  return value;
+  TYPE typeValue;
+  toValue(strValue, typeValue);
+  return typeValue;
 }
 
 /**Returns the validator as a constant variable so it cannot be changed

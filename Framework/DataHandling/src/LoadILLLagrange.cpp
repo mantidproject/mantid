@@ -16,8 +16,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 
@@ -30,10 +30,10 @@ using namespace NeXus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLLagrange)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLLagrange::confidence(NexusHDF5Descriptor &descriptor) const {
+int LoadILLLagrange::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   if (descriptor.isEntry("/entry0/IN1")) {
@@ -58,7 +58,7 @@ const std::string LoadILLLagrange::summary() const { return "Loads ILL Lagrange 
 /**
  * Constructor
  */
-LoadILLLagrange::LoadILLLagrange() : IFileLoader<NexusHDF5Descriptor>() {}
+LoadILLLagrange::LoadILLLagrange() : IFileLoader<NexusDescriptor>() {}
 
 /**
  * Initialize the algorithm's properties.

@@ -27,8 +27,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 
@@ -38,7 +38,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -70,7 +70,7 @@ const std::string LoadILLSANS::summary() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLSANS::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the ILL for SANS machines
   if (descriptor.isEntry("/entry0/mode") &&
       ((descriptor.isEntry("/entry0/reactor_power") && descriptor.isEntry("/entry0/instrument_name")) ||

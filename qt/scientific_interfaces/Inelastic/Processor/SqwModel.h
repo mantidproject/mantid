@@ -26,6 +26,7 @@ public:
   virtual API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() const = 0;
   virtual API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() const = 0;
   virtual void setInputWorkspace(const std::string &workspace) = 0;
+  virtual MatrixWorkspace_sptr inputWorkspace() const = 0;
   virtual void setQMin(double qMin) = 0;
   virtual void setQWidth(double qWidth) = 0;
   virtual void setQMax(double qMax) = 0;
@@ -54,6 +55,7 @@ public:
   API::IConfiguredAlgorithm_sptr setupSofQWAlgorithm() const override;
   API::IConfiguredAlgorithm_sptr setupAddSampleLogAlgorithm() const override;
   void setInputWorkspace(const std::string &workspace) override;
+  MatrixWorkspace_sptr inputWorkspace() const override;
   void setQMin(double qMin) override;
   void setQWidth(double qWidth) override;
   void setQMax(double qMax) override;
@@ -73,7 +75,7 @@ public:
                                                const std::string &reflection) const override;
 
 private:
-  std::string m_inputWorkspace;
+  MatrixWorkspace_sptr m_inputWorkspace;
   std::string m_baseName;
   double m_eFixed;
   double m_qLow;

@@ -21,6 +21,7 @@ from mantid.simpleapi import (
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt, arange, ones, zeros
+import json
 
 
 class IntegratePeaksSkewTest(unittest.TestCase):
@@ -77,6 +78,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # check peaks in bank 1 were not integrated (mask touches masked pixel)
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
+            self.assertEqual(pk.getPeakShape().shapeName(), "none")
 
     def test_integrate_on_edge_option_respects_detector_masking(self):
         ws_masked = CloneWorkspace(InputWorkspace=self.ws)
@@ -512,6 +514,30 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         det_edges_expected = zeros((5, 7), dtype=bool)
         det_edges_expected[:, -1] = True  # last tube in window is second from end of bank and ncols_edge=2
         self.assertTrue((peak_data.det_edges == det_edges_expected).all())
+
+    def test_shapeof_valid_peaks(self):
+        out = IntegratePeaksSkew(
+            InputWorkspace=self.ws,
+            PeaksWorkspace=self.peaks,
+            ThetaWidth=0,
+            BackscatteringTOFResolution=0.3,
+            IntegrateIfOnEdge=True,
+            UseNearestPeak=False,
+            UpdatePeakPosition=False,
+            LorentzCorrection=False,
+            OutputWorkspace="out10",
+        )
+        # check shape of the only valid peak
+        pk = out.getPeak(0)
+        self.assertEqual(pk.getPeakShape().shapeName(), "detectorbin")
+        self.assertEqual(pk.getPeakShape().algorithmName(), "IntegratePeaksSkew")
+        pk_shape_dict = json.loads(pk.getPeakShape().toJSON())
+        self.assertEqual(len(pk_shape_dict["detectors"]), 6)
+        for det in pk_shape_dict["detectors"]:
+            self.assertEqual(det["startX"], 3)
+            self.assertEqual(det["endX"], 8)
+        for i in [1, 2]:
+            self.assertEqual(out.getPeak(i).getPeakShape().shapeName(), "none")
 
 
 if __name__ == "__main__":

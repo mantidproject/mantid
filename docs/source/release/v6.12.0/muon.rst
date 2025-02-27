@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/FDA/Bugfixes
+- The :ref:`Muon FDA interface <Frequency_Domain_Analysis-ref>` will no longer display an unnecessary error prompt after cancelling a ``MaxEnt`` calculation.
 
 
 Muon Analysis
@@ -19,31 +19,15 @@ Muon Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
-
-
-Muon Analysis and Frequency Domain Analysis
--------------------------------------------
-
-Bugfixes
-############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
+- External plots will no longer be squashed by plot legends.
 
 
 ALC
 ---
 
-Bugfixes
+New features
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
-
-
-Elemental Analysis
-------------------
-
-Bugfixes
-############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+- The :ref:`Muon ALC interface<MuonALC-ref>` can now import data from an externally generated matrix workspace (i.e. not previously exported from the Muon ALC interface).
 
 
 Algorithms

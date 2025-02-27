@@ -124,7 +124,7 @@ public:
   /// Const of one second time duration
   static const time_duration ONE_SECOND;
 
-  static time_t utc_mktime(struct tm *utctime);
+  static time_t utc_mktime(const struct tm *utctime);
 
 private:
   /// A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.

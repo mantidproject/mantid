@@ -171,7 +171,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() override {
+  void clear() override final {
     m_queueLock.lock();
     // Empty out the queue
     m_queue.clear();
@@ -275,7 +275,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() override {
+  void clear() override final {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
     m_map.clear();

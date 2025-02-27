@@ -20,7 +20,10 @@ from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import (
 
 class PeaksWorkspaceSelectorPresenterTest(unittest.TestCase):
     def test_construction_subscribes_to_view_and_sets_workspaces(self):
-        mock_view, mock_model = create_autospec(PeaksWorkspaceSelectorView), create_autospec(PeaksWorkspaceSelectorModel)
+        mock_view, mock_model = (
+            create_autospec(PeaksWorkspaceSelectorView, instance=True),
+            create_autospec(PeaksWorkspaceSelectorModel, instance=True),
+        )
         presenter = PeaksWorkspaceSelectorPresenter(mock_view, mock_model)
 
         mock_view.subscribe.assert_called_once_with(presenter)

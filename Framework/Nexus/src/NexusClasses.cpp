@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <memory>
 #include <utility>
@@ -446,6 +446,6 @@ void NXDataSet::getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus
 //          NXData methods
 //---------------------------------------------------------
 
-NXData::NXData(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+NXData::NXData(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
 
 } // namespace Mantid::NeXus

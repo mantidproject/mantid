@@ -19,8 +19,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -35,7 +35,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLIndirect2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -59,7 +59,7 @@ const std::string LoadILLIndirect2::category() const { return "DataHandling\\Nex
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLIndirect2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if (descriptor.isEntry("/entry0/wavelength")               // ILL

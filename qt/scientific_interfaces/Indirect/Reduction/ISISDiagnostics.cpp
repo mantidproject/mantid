@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
+#include <MantidAPI/FileFinder.h>
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QFileInfo>
 
@@ -93,29 +94,27 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   // SIGNAL/SLOT CONNECTIONS
 
   // Update properties when a range selector is changed
-  connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeSelectorDropped(double, double)));
-  connect(backgroundRangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(rangeSelectorDropped(double, double)));
+  connect(peakRangeSelector, &MantidWidgets::RangeSelector::selectionChanged, this,
+          &ISISDiagnostics::rangeSelectorDropped);
+  connect(backgroundRangeSelector, &MantidWidgets::RangeSelector::selectionChanged, this,
+          &ISISDiagnostics::rangeSelectorDropped);
 
   // Update range selctors when a property is changed
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(doublePropertyChanged(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
   // Enable/disable second range options when checkbox is toggled
-  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(sliceTwoRanges(QtProperty *, bool)));
+  connect(m_blnManager, &QtBoolPropertyManager::valueChanged, this, &ISISDiagnostics::sliceTwoRanges);
   // Enables/disables calibration file selection when user toggles Use
   // Calibratin File checkbox
-  connect(m_uiForm.ckUseCalibration, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
-
+  connect(m_uiForm.ckUseCalibration, &QCheckBox::toggled, this, &ISISDiagnostics::sliceCalib);
   // Plot slice miniplot when file has finished loading
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFoundChanged()), this, SLOT(handleNewFile()));
+  connect(m_uiForm.dsInputFiles, &FileFinderWidget::filesFoundChanged, this, &ISISDiagnostics::handleNewFile);
   // Shows message on run button when Mantid is finding the file for a given run
   // number
-  connect(m_uiForm.dsInputFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+  connect(m_uiForm.dsInputFiles, &FileFinderWidget::findingFiles, this, &ISISDiagnostics::pbRunFinding);
   // Reverts run button back to normal when file finding has finished
-  connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+  connect(m_uiForm.dsInputFiles, &FileFinderWidget::fileFindingFinished, this, &ISISDiagnostics::pbRunFinished);
   // Handles running, plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ISISDiagnostics::saveClicked);
 
   // Set default UI state
   sliceTwoRanges(nullptr, false);
@@ -164,7 +163,7 @@ void ISISDiagnostics::handleRun() {
     sliceAlg->setProperty("BackgroundRange", backgroundRange);
   }
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &ISISDiagnostics::algorithmComplete);
   m_plotOptionsPresenter->watchADS(false);
   runAlgorithm(sliceAlg);
 }
@@ -203,7 +202,7 @@ void ISISDiagnostics::handleValidation(IUserInputValidator *validator) const {
  */
 void ISISDiagnostics::algorithmComplete(bool error) {
   m_plotOptionsPresenter->watchADS(true);
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &ISISDiagnostics::algorithmComplete);
   m_runPresenter->setRunEnabled(true);
   m_uiForm.pbSave->setEnabled(!error);
 
@@ -334,8 +333,7 @@ void ISISDiagnostics::sliceCalib(bool state) { m_uiForm.dsCalibration->setEnable
 void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
   MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(doublePropertyChanged(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
 
   if (from == m_uiForm.ppRawPlot->getRangeSelector("SlicePeak")) {
     m_dblManager->setValue(m_properties["PeakStart"], min);
@@ -345,8 +343,7 @@ void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
     m_dblManager->setValue(m_properties["BackgroundEnd"], max);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(doublePropertyChanged(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
 }
 
 /**
@@ -359,8 +356,7 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
   auto peakRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
   auto backgroundRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(doublePropertyChanged(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
 
   if (prop == m_properties["PeakStart"]) {
     setRangeSelectorMin(m_properties["PeakStart"], m_properties["PeakEnd"], peakRangeSelector, val);
@@ -380,8 +376,7 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
     m_dblManager->setMaximum(m_properties["PreviewSpec"], val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(doublePropertyChanged(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISDiagnostics::doublePropertyChanged);
 }
 
 /**
@@ -390,7 +385,7 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
  * @param error True if the algorithm was stopped due to error, false otherwise
  */
 void ISISDiagnostics::sliceAlgDone(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &ISISDiagnostics::sliceAlgDone);
 
   if (error)
     return;

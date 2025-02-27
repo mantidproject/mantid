@@ -17,7 +17,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         # Keep import private so we're not tempted to use it in other tests
         from mantidqt.widgets.instrumentview.view import InstrumentView
 
-        self.mock_view = mock.create_autospec(InstrumentView)
+        self.mock_view = mock.create_autospec(InstrumentView, instance=True)
         self.ws = mock.NonCallableMock()
         self.presenter = InstrumentViewPresenter(ws=self.ws, view=self.mock_view)
 

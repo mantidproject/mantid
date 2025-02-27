@@ -17,8 +17,8 @@ tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.cali
 
 class CalibrationPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(view.CalibrationView)
-        self.model = mock.create_autospec(model.CalibrationModel)
+        self.view = mock.create_autospec(view.CalibrationView, instance=True)
+        self.model = mock.create_autospec(model.CalibrationModel, instance=True)
         self.view.get_cropping_widget.return_value = MagicMock()
         self.presenter = presenter.CalibrationPresenter(self.model, self.view)
         self.presenter.cropping_widget = MagicMock()
@@ -28,7 +28,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_crop_checked.return_value = False
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
@@ -43,7 +43,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_group.return_value = GROUP.NORTH
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
@@ -58,7 +58,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_group.return_value = GROUP.TEXTURE30
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
@@ -74,7 +74,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
         self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
 
         self.presenter.update_calibration_from_view()
@@ -91,7 +91,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_calfile.return_value = "cal"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
         self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
 
         self.presenter.update_calibration_from_view()
@@ -184,7 +184,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         prm_filepath = "path/to/prm.prm"
         self.view.get_path_filename.return_value = prm_filepath
         mock_valid_path.return_value = True
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.on_calibrate_clicked()
 
@@ -200,7 +200,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True
         mock_valid_path.return_value = False
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.on_calibrate_clicked()
 
@@ -214,7 +214,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_new_checked.return_value = True
         self.view.get_plot_output.return_value = True
         mock_validate.return_value = True
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.on_calibrate_clicked()
 
@@ -227,7 +227,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_plot_output.return_value = True
         self.view.get_load_checked.return_value = False
         mock_validate.return_value = False
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.on_calibrate_clicked()
 
