@@ -37,7 +37,7 @@
     },
     {
       "name": "osx-default",
-      "description": "Inherited by all OSX configurations",
+      "description": "Inherited by all macOS configurations",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_FIND_FRAMEWORK": "LAST",
@@ -46,11 +46,18 @@
     },
     {
       "name": "osx-64-ci",
-      "description": "Build options for a CI build on OSX",
+      "description": "Build options for a CI build on macOS",
       "inherits": [
         "osx-default",
         "ci-default",
         "conda"
+      ]
+    },
+    {
+      "name": "osx-arm64-ci",
+      "description": "Build options for a CI build on an Arm macOS machine",
+      "inherits": [
+        "osx-64-ci"
       ]
     },
     {
@@ -107,7 +114,7 @@
     },
     {
       "name": "osx",
-      "description": "Default build options for a developer OSX build",
+      "description": "Default build options for a developer macOS build",
       "inherits": [
         "unix-debug",
         "osx-default",
