@@ -39,7 +39,7 @@ switch(GIT_BRANCH) {
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
+    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64']
     break
 }
 
@@ -294,6 +294,38 @@ pipeline {
             }
           }
         }
+        stage('package conda: osx-arm64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            anyOf {
+              expression { env.BUILD_PACKAGE == 'osx-arm64' }
+              expression { env.BUILD_PACKAGE == 'all' }
+            }
+          }
+          agent { label 'osx-arm64' }
+          options {
+              timestamps ()
+              retry(3)
+          }
+          steps {
+            // Clean up conda-bld before we start to avoid any
+            // confusion with old packages
+            dir('conda-bld') {
+              deleteDir()
+            }
+            checkoutSource("${GIT_SHA}")
+            // Build the base set of packages (ones not required for mantidworkbench)
+            // in parallel
+            package_conda('osx-arm64', 'base')
+            archive_conda_packages('osx-arm64')
+          }
+          post {
+            always {
+              archive_env_logs('osx-arm64')
+            }
+          }
+        }
       }
     }
     stage('Package workbench') {
@@ -301,7 +333,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64'
+            values 'linux-64', 'win-64', 'osx-64', 'osx-arm64'
           }
         }
         stages {
@@ -565,7 +597,7 @@ def package_conda_options(platform, base_or_workbench) {
     }
   }
 
-  package_options = "${package_flags} --git-tag ${GIT_TAG}"
+  package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
   return package_options.trim()
 }
 
