@@ -200,7 +200,7 @@ NXLog openNXLog(const NXClass &nxclass, const std::string &name) { return nxclas
 namespace Mantid::Algorithms {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;

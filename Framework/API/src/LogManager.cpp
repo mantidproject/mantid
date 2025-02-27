@@ -617,7 +617,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  * load any NXlog in the current open group.
  */
 void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
-                           const Mantid::Kernel::NexusHDF5Descriptor & /*fileInfo*/, const std::string & /*prefix*/,
+                           const Mantid::Kernel::NexusDescriptor & /*fileInfo*/, const std::string & /*prefix*/,
                            bool /*keepOpen*/) {
   throw std::runtime_error("LogManager::loadNexus should not be used");
 }
@@ -644,7 +644,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool k
   }
 }
 
-void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusDescriptor &fileInfo,
                            const std::string &prefix) {
 
   // Only load from NXlog entries

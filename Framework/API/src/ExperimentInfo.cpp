@@ -934,7 +934,7 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
  * @param fileInfo :: The file info descriptor corresponding to the provided file
  * @param prefix :: The prefix of the file
  */
-void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusDescriptor &fileInfo,
                                                const std::string &prefix) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
@@ -969,8 +969,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
 }
 
 void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
-                                             std::string &parameterStr,
-                                             const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                             std::string &parameterStr, const Mantid::Kernel::NexusDescriptor &fileInfo,
                                              const std::string &prefix) {
   // TODO
   // load sample and log info

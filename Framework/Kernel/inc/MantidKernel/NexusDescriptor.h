@@ -17,21 +17,21 @@
 namespace Mantid {
 namespace Kernel {
 
-class MANTID_KERNEL_DLL NexusHDF5Descriptor {
+class MANTID_KERNEL_DLL NexusDescriptor {
 
 public:
   /**
    * Unique constructor
    * @param filename input HDF5 Nexus file name
    */
-  NexusHDF5Descriptor(std::string filename);
+  NexusDescriptor(std::string filename);
 
-  NexusHDF5Descriptor() = delete;
+  NexusDescriptor() = delete;
 
   /**
    * Using RAII components, no need to deallocate explicitly
    */
-  ~NexusHDF5Descriptor() = default;
+  ~NexusDescriptor() = default;
 
   /**
    * Returns a copy of the current file name

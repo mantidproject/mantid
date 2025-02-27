@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 namespace H5 {
 class Group;
@@ -20,7 +20,7 @@ namespace DataHandling {
 /** LoadNXcanSAS : Tries to load an NXcanSAS file type into a Workspace2D.
  *  This can load either 1D or 2D data
  */
-class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
   LoadNXcanSAS();
@@ -37,7 +37,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Loads the transmission runs
