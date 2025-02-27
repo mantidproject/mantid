@@ -680,6 +680,27 @@ public:
     auto &pmap = expInfo.instrumentParameters();
     auto det = expInfo.getInstrument()->getDetector(1);
     auto value = pmap.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(pmap.get(det.get(), "par")->visible(), true);
+    TS_ASSERT_EQUALS(value, "11;22;33;44");
+  }
+
+  void test_readParameterMap_visibility_key() {
+    auto inst = ComponentCreationHelper::createMinimalInstrument(V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+                                                                 V3D{12, 0, 0} /*detector*/);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    expInfo.readParameterMap("detID:1;string;par;11;22;33;44;visible:false");
+    auto &pmap = expInfo.instrumentParameters();
+    auto det = expInfo.getInstrument()->getDetector(1);
+    auto value = pmap.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(pmap.get(det.get(), "par")->visible(), false);
+    TS_ASSERT_EQUALS(value, "11;22;33;44");
+
+    expInfo.readParameterMap("detID:1;string;par;11;22;33;44;visible:true");
+    auto &pmap2 = expInfo.instrumentParameters();
+    det = expInfo.getInstrument()->getDetector(1);
+    value = pmap2.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(pmap2.get(det.get(), "par")->visible(), true);
     TS_ASSERT_EQUALS(value, "11;22;33;44");
   }
 
