@@ -25,6 +25,11 @@ const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", 
 
 /// static logger
 Mantid::Kernel::Logger legacyhelperlog("LegacyLoadHelper");
+
+const std::string NXINSTRUMENT("NXinstrument");
+const std::string SDS("SDS"); // denotes data field
+const std::string EMPTY_STR("");
+
 } // namespace
 
 namespace Mantid::DataHandling {
@@ -43,7 +48,7 @@ namespace LegacyLoadHelper { // these methods are copied from LoadHelper
  */
 std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
   std::vector<NXClassInfo> v = firstEntry.groups();
-  const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == "NXinstrument"; });
+  const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
   if (it != v.cend())
     return it->nxname;
   return "";
@@ -90,7 +95,6 @@ void fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const NXInt &data,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &acceptedDetectorIDs = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2)) {
-
   const bool customDetectorIDs = detectorIDs.size() != 0;
   const bool excludeDetectorIDs = acceptedDetectorIDs.size() != 0;
 
@@ -188,14 +192,9 @@ void addNumericProperty(LegacyNexus::File &filehandle, const LegacyNexus::Info &
  * @param parent_name :: nexus caller name
  * @param parent_class :: nexus caller class
  * @param level       :: current level in nexus tree
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
- *
  */
 void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &runDetails,
-                                     const std::string &parent_name, const std::string &parent_class, int level,
-                                     bool useFullPath) {
-  const std::string SDS("SDS"); // denotes data field
-
+                                     const std::string &parent_name, const std::string &parent_class, int level) {
   for (const auto &entry : filehandle.getEntries()) {
     const auto nxname = entry.first;
     const auto nxclass = entry.second;
@@ -272,11 +271,8 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
         // open the group and recurse down, if the group is known to nexus
         filehandle.openGroup(nxname, nxclass);
 
-        const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-        const std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
-        const std::string p_nxclass(nxclass);
-
-        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
+        // current names can be useful for next level
+        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, nxname, nxclass, level + 1);
 
         filehandle.closeGroup();
       }
@@ -292,27 +288,21 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
  * @param runDetails  :: where to add properties
  */
 void addNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &runDetails) {
-  const std::string entryName("");
-  const bool useFullPath{false};
-
   // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
   // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
   // follows
-  std::string entryNameActual(entryName);
-  if (entryName.empty()) {
-    try {
-      const auto entryNameAndClass = filehandle.getNextEntry();
-      entryNameActual = entryNameAndClass.first;
-    } catch (const LegacyNexus::Exception &) { /* ignore */
-    }
+  std::string entryNameActual("");
+  try {
+    const auto entryNameAndClass = filehandle.getNextEntry();
+    entryNameActual = entryNameAndClass.first;
+  } catch (const LegacyNexus::Exception &) { /* ignore */
   }
 
   // open the group and parse down
   if (!entryNameActual.empty()) {
     constexpr int LEVEL_RECURSE{1};
     filehandle.openGroup(entryNameActual, "NXentry");
-    const std::string EMPTY_STR;
-    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullPath);
+    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE);
     filehandle.closeGroup();
   }
 }
