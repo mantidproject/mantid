@@ -92,15 +92,15 @@ private:
       case LegacyNexus:
         if (!std::is_base_of<IFileLoader<Kernel::LegacyNexusDescriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as Nexus loader but it does not "
+                                   "' registered as LegacyNexus loader but it does not "
                                    "inherit from "
-                                   "API::IFileLoader<Kernel::NexusDescriptor>");
+                                   "API::IFileLoader<Kernel::LegacyNexusDescriptor>");
         }
         break;
       case Nexus:
         if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as NexusHDF5 loader but it does not "
+                                   "' registered as Nexus loader but it does not "
                                    "inherit from "
                                    "API::IFileLoader<Kernel::NexusDescriptor>");
         }

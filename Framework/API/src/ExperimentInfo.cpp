@@ -1224,7 +1224,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon
       paramVisibility =
           paramVisibility.substr(paramVisibility.find(visibilityKey) + visibilityKey.size(), paramVisibility.size());
-      paramValue = paramValue.substr(0, paramValue.find(visibilityKey) - 1);
+      paramValue.erase(paramValue.find(visibilityKey), paramValue.size());
     }
     const auto paramDescr = std::string("");
     if (paramName == "masked") {
@@ -1350,7 +1350,7 @@ IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(const std::string &
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_const_sptr
 IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
