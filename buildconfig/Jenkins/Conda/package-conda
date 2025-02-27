@@ -6,10 +6,10 @@
 # (if present from a previous build step) or build and produce that package too.
 #
 # Script usage:
-# package-conda WORKSPACE [options]
+# package-conda WORKSPACE PLATFORM [options]
 #
 # Example command to build all of the packages:
-# package-conda $WORKSPACE --build-mantid --build-qt --build-docs --build-workbench
+# package-conda $WORKSPACE $PLATFORM --build-mantid --build-qt --build-docs --build-workbench
 #
 # Expected args:
 #   1. WORKSPACE: path to the base of the working space for a build. The source
@@ -23,6 +23,7 @@
 #   --build-docs: build the HTML/Qthelp documentation
 #   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
 #   --git-tag: specify a tag for a release or nightly version
+#   --platform: target architecture, e.g. linux-64
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 start_time=$(date +%s)
@@ -55,6 +56,7 @@ ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
 BUILD_WORKBENCH_WITH_DOCS=true
+PLATFORM=""
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -71,6 +73,9 @@ do
             ;;
         --git-tag)
             GIT_TAG="$2"
+            shift ;;
+        --platform)
+            PLATFORM="$2"
             shift ;;
         *)
             echo "Argument not accepted: $1"
@@ -122,8 +127,10 @@ EXTRA_BUILD_OPTIONS="--debug "
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
     EXTRA_BUILD_OPTIONS+="--no-build-id"
-elif [[ $OSTYPE == 'darwin'* ]]; then
+elif [[ $PLATFORM == "osx-64" ]]; then
     EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
+elif [[ $PLATFORM == "osx-arm64" ]]; then
+    EXTRA_BUILD_OPTIONS+="-m ./osx_arm64.yaml"
 fi
 
 # Run conda build.
