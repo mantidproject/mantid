@@ -404,7 +404,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual("plot", ws1.getPlotType())
 
         # test invalid doesn't take
-        ws1.setPlotType("invalid")
+        self.assertRaisesRegex(ValueError, "Invalid plot type", ws1.setPlotType, "invalid")
         self.assertEqual("plot", ws1.getPlotType())
 
         # test valid takes
@@ -419,7 +419,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual("vline", ws1.getMarkerStyle())
 
         # test invalid doesn't take
-        ws1.setMarkerStyle("invalid")
+        self.assertRaisesRegex(ValueError, "Invalid marker type", ws1.setMarkerStyle, "invalid")
         self.assertEqual("vline", ws1.getMarkerStyle())
 
         # test valid takes

@@ -2541,7 +2541,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
 }
 
 /*------------------------------------------------------------------------*/
-void NX5assignFunctions(pHDF4Function fHandle) {
+void NX5assignFunctions(pLgcyFunction fHandle) {
   fHandle->nxclose = NX5close;
   fHandle->nxreopen = NX5reopen;
   fHandle->nxflush = NX5flush;

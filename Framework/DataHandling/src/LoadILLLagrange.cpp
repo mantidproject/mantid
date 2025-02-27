@@ -15,6 +15,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
@@ -93,7 +94,7 @@ void LoadILLLagrange::exec() {
 void LoadILLLagrange::loadData() {
 
   // open the H5 file
-  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY);
+  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   H5::DataSet dataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
 

@@ -503,8 +503,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
  * Loads the scanned_variables/variables_names block
  */
 void LoadILLDiffraction::loadScanVars() {
-
-  H5File h5file(m_filename, H5F_ACC_RDONLY);
+  H5File h5file(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");

@@ -157,12 +157,12 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
+  static WeakPtr retrieveOrKeyError(const SvcType *const self, const std::string &name) {
     using namespace Mantid::Kernel;
 
     SvcPtrType item;
     try {
-      item = self.retrieve(name);
+      item = self->retrieve(name);
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
       std::string err = "'" + name + "' does not exist.";

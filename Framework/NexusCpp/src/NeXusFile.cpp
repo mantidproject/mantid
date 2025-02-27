@@ -9,8 +9,6 @@
 #include <typeinfo>
 
 using namespace NeXus;
-using std::map;
-using std::pair;
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -35,7 +33,7 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
-static DimSizeVector toDimSize(const vector<int> &small_v) {
+static vector<int64_t> toDimSize(const vector<int> &small_v) {
   // copy the dims over to call the int64_t version
   return DimSizeVector(small_v.begin(), small_v.end());
 }
@@ -93,32 +91,14 @@ static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char
 */
 
 namespace NeXus {
+File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {}
 
-File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true) {
+File::File(const string &filename, const NXaccess access) : m_close_handle(true) {
   this->initOpenFile(filename, access);
 }
 
-File::File(const char *filename, const NXaccess access) : m_filename(filename), m_access(access), m_close_handle(true) {
-  this->initOpenFile(m_filename, access);
-}
-
-File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_file_id(f.m_file_id), m_close_handle(false) {}
-
-File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
-
-File &File::operator=(File const &f) {
-  if (this == &f) {
-  } else {
-    this->m_filename = f.m_filename;
-    this->m_access = f.m_access;
-    this->m_file_id = f.m_file_id;
-    this->m_close_handle = f.m_close_handle;
-    this->initOpenFile(this->m_filename, this->m_access);
-  }
-  return *this;
+File::File(const char *filename, const NXaccess access) : m_close_handle(true) {
+  this->initOpenFile(string(filename), access);
 }
 
 void File::initOpenFile(const string &filename, const NXaccess access) {
@@ -244,7 +224,7 @@ void File::makeData(const string &name, NXnumtype type, const vector<int> &dims,
   this->makeData(name, type, toDimSize(dims), open_data);
 }
 
-void File::makeData(const string &name, NXnumtype type, const DimVector &dims, bool open_data) {
+void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &dims, bool open_data) {
   // error check the parameters
   if (name.empty()) {
     throw Exception("Supplied empty label to makeData");
@@ -269,8 +249,8 @@ void File::makeData(const string &name, NXnumtype type, const DimVector &dims, b
 
 template <typename NumT>
 void File::makeData(const string &name, const NXnumtype type, const NumT length, bool open_data) {
-  DimVector dims;
-  dims.push_back(static_cast<DimSize>(length));
+  vector<int64_t> dims;
+  dims.push_back(static_cast<int64_t>(length));
   this->makeData(name, type, dims, open_data);
 }
 
@@ -296,7 +276,7 @@ void File::writeData(const string &name, const string &value) {
 }
 
 template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-  DimVector dims(1, static_cast<DimSize>(value.size()));
+  DimVector dims(1, static_cast<dimsize_t>(value.size()));
   this->writeData(name, value, dims);
 }
 
@@ -317,12 +297,13 @@ template <typename NumT> void File::writeExtendibleData(const string &name, vect
   writeExtendibleData(name, value, 4096);
 }
 
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> &value, const DimSize chunk) {
+template <typename NumT>
+void File::writeExtendibleData(const string &name, vector<NumT> &value, const dimsize_t chunk) {
   DimVector dims(1, NX_UNLIMITED);
   DimSizeVector chunk_dims(1, chunk);
   // Use chunking without using compression
   this->makeCompData(name, getType<NumT>(), dims, NONE, chunk_dims, true);
-  this->putSlab(value, DimSize(0), DimSize(value.size()));
+  this->putSlab(value, dimsize_t(0), dimsize_t(value.size()));
   this->closeData();
 }
 
@@ -341,7 +322,7 @@ void File::writeExtendibleData(const string &name, vector<NumT> &value, DimVecto
 
 template <typename NumT> void File::writeUpdatedData(const std::string &name, std::vector<NumT> &value) {
   this->openData(name);
-  this->putSlab(value, DimSize(0), DimSize(value.size()));
+  this->putSlab(value, dimsize_t(0), dimsize_t(value.size()));
   this->closeData();
 }
 
@@ -518,9 +499,7 @@ void File::putSlab(const void *data, const DimSizeVector &start, const DimSizeVe
 
 template <typename NumT>
 void File::putSlab(const vector<NumT> &data, const vector<int> &start, const vector<int> &size) {
-  vector<int64_t> start_big = toDimSize(start);
-  vector<int64_t> size_big = toDimSize(size);
-  this->putSlab(data, start_big, size_big);
+  this->putSlab(data, toDimSize(start), toDimSize(size));
 }
 
 template <typename NumT>
@@ -532,10 +511,10 @@ void File::putSlab(const vector<NumT> &data, const DimSizeVector &start, const D
 }
 
 template <typename NumT> void File::putSlab(const vector<NumT> &data, int start, int size) {
-  this->putSlab(data, static_cast<DimSize>(start), static_cast<DimSize>(size));
+  this->putSlab(data, static_cast<dimsize_t>(start), static_cast<dimsize_t>(size));
 }
 
-template <typename NumT> void File::putSlab(const vector<NumT> &data, DimSize start, DimSize size) {
+template <typename NumT> void File::putSlab(const vector<NumT> &data, dimsize_t start, dimsize_t size) {
   DimSizeVector start_v(1, start);
   DimSizeVector size_v(1, size);
   this->putSlab(data, start_v, size_v);
@@ -741,7 +720,7 @@ Info File::getInfo() {
   return info;
 }
 
-pair<string, string> File::getNextEntry() {
+Entry File::getNextEntry() {
   // set up temporary variables to get the information
   NXname name, class_name;
   NXnumtype datatype;
@@ -750,7 +729,7 @@ pair<string, string> File::getNextEntry() {
   if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
-    return pair<string, string>(str_name, str_class);
+    return Entry(str_name, str_class);
   } else if (status == NXstatus::NX_EOD) {
     return EOD_ENTRY;
   } else {
@@ -974,11 +953,7 @@ void File::initAttrDir() {
   }
 }
 
-void EnableErrorReporting() { NXMEnableErrorReporting(); }
-
 NXstatus setCache(long newVal) { return NXsetcache(newVal); }
-
-void setError(void *pData, void (*newErr)(void *, const char *)) { NXMSetError(pData, newErr); }
 
 } // namespace NeXus
 
@@ -1076,50 +1051,50 @@ template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, 
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value);
 
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int8_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint8_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int16_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint16_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int32_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint32_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int64_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint64_t> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value,
-                                                            const DimSize chunk);
+                                                            const dimsize_t chunk);
 
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int8_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint8_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int16_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint16_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int32_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint32_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<int64_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<uint64_t> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 template MANTID_NEXUSCPP_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value,
-                                                            DimVector &dims, std::vector<int64_t> &chunk);
+                                                            DimVector &dims, DimSizeVector &chunk);
 
 template MANTID_NEXUSCPP_DLL void File::writeUpdatedData(const string &name, vector<float> &value);
 template MANTID_NEXUSCPP_DLL void File::writeUpdatedData(const string &name, vector<double> &value);

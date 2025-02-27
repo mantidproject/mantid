@@ -28,8 +28,6 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  */
 class MANTID_NEXUSCPP_DLL File {
 private:
-  std::string m_filename;
-  NXaccess m_access;
   /** The handle for the C-API. */
   NXhandle m_file_id;
   /** should be close handle on exit */
@@ -81,25 +79,12 @@ public:
   File(const char *filename, const NXaccess access = NXACC_READ);
 
   /**
-   * Copy constructor
+   * Use an existing handle returned from NXopen()
    *
-   * \param f File to copy over, to complete rule of three
+   * \param handle Handle to connect to
+   * \param close_handle Should the handle be closed on destruction
    */
-  File(File const &f);
-
-  /**
-   * Copy constructor from pointer
-   *
-   * \param pf Pointer to file to copy over
-   */
-  File(File const *const pf);
-
-  /**
-   * Assignment operator, to complete the rule of three
-   *
-   * \param f File to assign
-   */
-  File &operator=(File const &f);
+  File(NXhandle handle, bool close_handle = false);
 
   /** Destructor. This does close the file. */
   ~File();
@@ -257,7 +242,7 @@ public:
    * \param chunkSize :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const DimSize chunk);
+  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const dimsize_t chunk);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -434,7 +419,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, DimSize start, DimSize size);
+  template <typename NumT> void putSlab(const std::vector<NumT> &data, dimsize_t start, dimsize_t size);
 
   /**
    * \return The id of the data used for linking.
@@ -624,17 +609,6 @@ public:
  */
 template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT const number = NumT());
 
-MANTID_NEXUSCPP_DLL void EnableErrorReporting();
-
 MANTID_NEXUSCPP_DLL NXstatus setCache(long newVal);
-
-/**
- * Set a global error function.
- * Not threadsafe.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_NEXUSCPP_DLL void setError(void *pData, void (*newErr)(void *, const char *));
 
 }; // namespace NeXus

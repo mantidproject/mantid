@@ -461,7 +461,7 @@ void LoadDiffCal::exec() {
   H5::Exception::dontPrint();
   H5File file;
   try {
-    file = H5File(m_filename, H5F_ACC_RDONLY);
+    file = H5File(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
   } catch (FileIException &) {
     throw FileError("Failed to open file using HDF5", m_filename);
   }

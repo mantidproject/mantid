@@ -107,7 +107,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         return "Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer"
 
     def seeAlso(self):
-        return ["AlignDetectors", "DiffractionFocussing", "SNSPowderReduction"]
+        return ["DiffractionFocussing", "SNSPowderReduction"]
 
         # ------------------------------------------------------------------------------
 

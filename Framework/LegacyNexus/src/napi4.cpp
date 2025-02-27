@@ -1688,7 +1688,7 @@ NXstatus NX4getattrainfo(NXhandle, NXname, int *, int[], NXnumtype *) {
 }
 
 /*--------------------------------------------------------------------*/
-void NX4assignFunctions(pHDF4Function fHandle) {
+void NX4assignFunctions(pLgcyFunction fHandle) {
   fHandle->nxclose = NX4close;
   fHandle->nxreopen = NULL;
   fHandle->nxflush = NX4flush;

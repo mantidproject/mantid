@@ -238,18 +238,20 @@ NXstatus NXsetcache(long newVal) {
 }
 
 /*-------------------------------------------------------------------------*/
-static void NXNXNXReportError(void *pData, const char *string) {
+static void NXNXNoReport(void *pData, const char *string) {
+  // do nothing but declare the variables unused
   UNUSED_ARG(pData);
-  fprintf(stderr, "%s \n", string);
+  UNUSED_ARG(string);
 }
 
 /*---------------------------------------------------------------------*/
 
 static void *NXEHpData = NULL;
-static void (*NXEHIReportError)(void *pData, const char *string) = NXNXNXReportError;
+// default to no logging
+static ErrFunc NXEHIReportError = NXNXNoReport;
 #ifdef HAVE_TLS
 static THREAD_LOCAL void *NXEHpTData = NULL;
-static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, const char *string) = NULL;
+static THREAD_LOCAL ErrFunc NXEHIReportTError = NULL;
 #endif
 
 void NXIReportError(void *pData, const char *string) {
@@ -273,13 +275,13 @@ void NXReportError(const char *string) {
 }
 
 /*---------------------------------------------------------------------*/
-extern void NXMSetError(void *pData, void (*NewError)(void *pD, const char *text)) {
+extern void NXMSetError(void *pData, ErrFunc NewError) {
   NXEHpData = pData;
   NXEHIReportError = NewError;
 }
 
 /*----------------------------------------------------------------------*/
-extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *text)) {
+extern void NXMSetTError(void *pData, ErrFunc NewError) {
 #ifdef HAVE_TLS
   NXEHpTData = pData;
   NXEHIReportTError = NewError;
@@ -289,25 +291,8 @@ extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *tex
 }
 
 /*----------------------------------------------------------------------*/
-extern ErrFunc NXMGetError() {
-#ifdef HAVE_TLS
-  if (NXEHIReportTError) {
-    return NXEHIReportTError;
-  }
-#endif
-  return NXEHIReportError;
-}
 
-/*----------------------------------------------------------------------*/
-static void NXNXNoReport(void *pData, const char *string) {
-  // do nothing but declare the variables unused
-  (void)pData;
-  (void)string;
-}
-
-/*----------------------------------------------------------------------*/
-
-static ErrFunc last_global_errfunc = NXNXNXReportError;
+static ErrFunc last_global_errfunc = NXEHIReportError;
 #ifdef HAVE_TLS
 static THREAD_LOCAL ErrFunc last_thread_errfunc = NULL;
 #endif
@@ -385,8 +370,8 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
 static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
 
 /*---------------------------------------------------------------------*/
-static pHDF4Function handleToNexusFunc(NXhandle fid) {
-  if (pFileHDF4Stack fileStack = static_cast<pFileHDF4Stack>(fid)) {
+static pLgcyFunction handleToNexusFunc(NXhandle fid) {
+  if (pFileLgcyStack fileStack = static_cast<pFileLgcyStack>(fid)) {
     return peekFileOnStack(fileStack);
   } else {
     return NULL;
@@ -394,11 +379,11 @@ static pHDF4Function handleToNexusFunc(NXhandle fid) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileHDF4Stack fileStack);
+static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack);
 /*----------------------------------------------------------------------*/
 NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
   NXstatus status;
-  pFileHDF4Stack fileStack = NULL;
+  pFileLgcyStack fileStack = NULL;
 
   *gHandle = NULL;
   fileStack = makeFileStack();
@@ -415,9 +400,9 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileHDF4Stack fileStack) {
+static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack) {
   int backend_type, iRet;
-  pHDF4Function fHandle = NULL;
+  pLgcyFunction fHandle = NULL;
   char error[1024];
   char *filename = NULL;
   int my_am = (am & NXACCMASK_REMOVEFLAGS);
@@ -430,12 +415,12 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileHD
   /*
      allocate data
    */
-  fHandle = static_cast<pHDF4Function>(malloc(sizeof(HDF4Function)));
+  fHandle = static_cast<pLgcyFunction>(malloc(sizeof(LgcyFunction)));
   if (fHandle == NULL) {
     NXReportError("ERROR: no memory to create Function structure");
     return NXstatus::NX_ERROR;
   }
-  memset(fHandle, 0, sizeof(HDF4Function)); /* so any functions we miss are NULL */
+  memset(fHandle, 0, sizeof(LgcyFunction)); /* so any functions we miss are NULL */
 
   /*
      test the strip flag. Elimnate it for the rest of the tests to work
@@ -557,14 +542,14 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileHD
   return retstat;
 }
 
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileHDF4Stack fileStack) {
+static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack) {
   return LOCKED_CALL(NXinternalopenImpl(userfilename, am, fileStack));
 }
 
 NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
-  pFileHDF4Stack newFileStack;
-  pFileHDF4Stack origFileStack = static_cast<pFileHDF4Stack>(pOrigHandle);
-  pHDF4Function fOrigHandle = NULL, fNewHandle = NULL;
+  pFileLgcyStack newFileStack;
+  pFileLgcyStack origFileStack = static_cast<pFileLgcyStack>(pOrigHandle);
+  pLgcyFunction fOrigHandle = NULL, fNewHandle = NULL;
   *pNewHandle = NULL;
   newFileStack = makeFileStack();
   if (newFileStack == NULL) {
@@ -582,8 +567,8 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
     NXReportError("ERROR: NXreopen not implemented for this underlying file format");
     return NXstatus::NX_ERROR;
   }
-  fNewHandle = static_cast<HDF4Function *>(malloc(sizeof(HDF4Function)));
-  memcpy(fNewHandle, fOrigHandle, sizeof(HDF4Function));
+  fNewHandle = static_cast<LgcyFunction *>(malloc(sizeof(LgcyFunction)));
+  memcpy(fNewHandle, fOrigHandle, sizeof(LgcyFunction));
   LOCKED_CALL(fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData)));
   pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
   *pNewHandle = newFileStack;
@@ -595,12 +580,12 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
 NXstatus NXclose(NXhandle *fid) {
   NXhandle hfil;
   NXstatus status;
-  pFileHDF4Stack fileStack = NULL;
-  pHDF4Function pFunc = NULL;
+  pFileLgcyStack fileStack = NULL;
+  pLgcyFunction pFunc = NULL;
   if (*fid == NULL) {
     return NXstatus::NX_OK;
   }
-  fileStack = (pFileHDF4Stack)*fid;
+  fileStack = (pFileLgcyStack)*fid;
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
   status = LOCKED_CALL(pFunc->nxclose(&hfil));
@@ -622,7 +607,7 @@ NXstatus NXclose(NXhandle *fid) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && (nxclass != NULL) /* && !strncmp("NX", nxclass, 2) */ && !validNXName(name, 0)) {
     char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in group name \"%s\"", name);
@@ -680,10 +665,10 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXstatus status, attStatus;
   NXaccess access = NXACC_READ;
   NXlink breakID;
-  pFileHDF4Stack fileStack;
-  pHDF4Function pFunc = NULL;
+  pFileLgcyStack fileStack;
+  pLgcyFunction pFunc = NULL;
 
-  fileStack = static_cast<pFileHDF4Stack>(fid);
+  fileStack = static_cast<pFileLgcyStack>(fid);
   pFunc = handleToNexusFunc(fid);
 
   status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
@@ -718,11 +703,11 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
 NXstatus NXclosegroup(NXhandle fid) {
   NXstatus status;
-  pFileHDF4Stack fileStack = NULL;
+  pFileLgcyStack fileStack = NULL;
   NXlink closeID, currentID;
 
-  pHDF4Function pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileHDF4Stack>(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
+  fileStack = static_cast<pFileLgcyStack>(fid);
   if (fileStackDepth(fileStack) == 0) {
     status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
     if (status == NXstatus::NX_OK) {
@@ -758,7 +743,7 @@ NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
 }
 
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
     char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
@@ -783,7 +768,7 @@ NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int r
 
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
     char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
@@ -802,10 +787,10 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXstatus status, attStatus;
   NXaccess access = NXACC_READ;
   NXlink breakID;
-  pFileHDF4Stack fileStack;
-  pHDF4Function pFunc = NULL;
+  pFileLgcyStack fileStack;
+  pLgcyFunction pFunc = NULL;
 
-  fileStack = static_cast<pFileHDF4Stack>(fid);
+  fileStack = static_cast<pFileLgcyStack>(fid);
   pFunc = handleToNexusFunc(fid);
   status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
 
@@ -841,11 +826,11 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
 
 NXstatus NXclosedata(NXhandle fid) {
   NXstatus status;
-  pFileHDF4Stack fileStack = NULL;
+  pFileLgcyStack fileStack = NULL;
   NXlink closeID, currentID;
 
-  pHDF4Function pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileHDF4Stack>(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
+  fileStack = static_cast<pFileLgcyStack>(fid);
 
   if (fileStackDepth(fileStack) == 0) {
     status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
@@ -873,14 +858,14 @@ NXstatus NXclosedata(NXhandle fid) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NXputdata(NXhandle fid, const void *data) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxputdata(pFunc->pNexusData, data));
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   if (datalen > 1 && iType != NXnumtype::CHAR) {
     NXReportError(
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
@@ -912,28 +897,28 @@ NXstatus NXputslab(NXhandle fid, const void *data, const int iStart[], const int
 }
 
 NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxputslab64(pFunc->pNexusData, data, iStart, iSize));
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetdataID(pFunc->pNexusData, sRes));
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxmakelink(pFunc->pNexusData, sLink));
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(newname, 0)) {
     char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in link name \"%s\"", newname);
@@ -962,11 +947,11 @@ NXstatus NXopensourcegroup(NXhandle fid) {
 
 NXstatus NXflush(NXhandle *pHandle) {
   NXhandle hfil;
-  pFileHDF4Stack fileStack = NULL;
+  pFileLgcyStack fileStack = NULL;
   NXstatus status;
 
-  pHDF4Function pFunc = NULL;
-  fileStack = (pFileHDF4Stack)*pHandle;
+  pLgcyFunction pFunc = NULL;
+  fileStack = (pFileLgcyStack)*pHandle;
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
   status = LOCKED_CALL(pFunc->nxflush(&hfil));
@@ -1031,7 +1016,7 @@ NXstatus NXfree(void **data) {
 /* --------------------------------------------------------------------- */
 
 NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetnextentry(pFunc->pNexusData, name, nxclass, datatype));
 }
 
@@ -1071,7 +1056,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   int rank;
   int64_t iDim[NX_MAXRANK];
 
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (rank == 1)) {
@@ -1098,7 +1083,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 
 /*---------------------------------------------------------------------------*/
 NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
 }
 
@@ -1106,7 +1091,7 @@ NXstatus NXgetrawinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType
   int i;
   NXstatus status;
   int64_t dims64[NX_MAXRANK];
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dims64, iType));
   for (i = 0; i < *rank; ++i) {
     dimension[i] = (int)dims64[i];
@@ -1130,7 +1115,7 @@ NXstatus NXgetinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
   char *pPtr = NULL;
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   *rank = 0;
   status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
   /*
@@ -1166,64 +1151,64 @@ NXstatus NXgetslab(NXhandle fid, void *data, const int iStart[], const int iSize
 }
 
 NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetslab64(pFunc->pNexusData, data, iStart, iSize));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattrinfo(NXhandle fid, int *iN) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetattrinfo(pFunc->pNexusData, iN));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
-  pHDF4Function pFunc = handleToNexusFunc(fileid);
+  pLgcyFunction pFunc = handleToNexusFunc(fileid);
   return LOCKED_CALL(pFunc->nxgetgroupID(pFunc->pNexusData, sRes));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetgroupinfo(pFunc->pNexusData, iN, pName, pClass));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
-  pHDF4Function pFunc = handleToNexusFunc(fileid);
+  pLgcyFunction pFunc = handleToNexusFunc(fileid);
   return LOCKED_CALL(pFunc->nxsameID(pFunc->pNexusData, pFirstID, pSecondID));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitattrdir(NXhandle fid) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxinitattrdir(pFunc->pNexusData));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitgroupdir(NXhandle fid) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxinitgroupdir(pFunc->pNexusData));
 }
 
 /*----------------------------------------------------------------------*/
 NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength) {
-  pFileHDF4Stack fileStack;
+  pFileLgcyStack fileStack;
 
-  pHDF4Function pFunc = handleToNexusFunc(handle);
+  pLgcyFunction pFunc = handleToNexusFunc(handle);
   if (pFunc->nxnativeinquirefile != NULL) {
 
     NXstatus status = LOCKED_CALL(pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength));
@@ -1234,7 +1219,7 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
     }
   }
 
-  fileStack = static_cast<pFileHDF4Stack>(handle);
+  fileStack = static_cast<pFileLgcyStack>(handle);
   char const *pPtr = NULL;
   pPtr = peekFilenameOnStack(fileStack);
   if (pPtr != NULL) {
@@ -1257,7 +1242,7 @@ NXstatus NXisexternalgroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, ch
   NXnumtype type = NXnumtype::CHAR;
   char nxurl[1024];
 
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
 
   if (pFunc->nxnativeisexternallink != NULL) {
     status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
@@ -1294,7 +1279,7 @@ NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLe
   NXnumtype type = NXnumtype::CHAR;
   char nxurl[1024];
 
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
 
   if (pFunc->nxnativeisexternallink != NULL) {
     status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
@@ -1331,7 +1316,7 @@ NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONST
   NXstatus status;
   NXnumtype type = NXnumtype::CHAR;
   size_t length = 1024;
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
 
   // in HDF5 we support external linking natively
   if (pFunc->nxnativeexternallink != NULL) {
@@ -1377,7 +1362,7 @@ NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
   NXnumtype type = NXnumtype::CHAR;
   NXstatus status;
   size_t length = 1024;
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   int rank = 1;
   int64_t dims[1] = {1};
 
@@ -1668,16 +1653,16 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
 
 /*---------------------------------------------------------------------*/
 NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
-  pHDF4Function pFunc = handleToNexusFunc(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxprintlink(pFunc->pNexusData, link));
 }
 
 /*----------------------------------------------------------------------*/
 NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
   int status;
-  pFileHDF4Stack fileStack = NULL;
+  pFileLgcyStack fileStack = NULL;
 
-  fileStack = static_cast<pFileHDF4Stack>(fid);
+  fileStack = static_cast<pFileLgcyStack>(fid);
   status = buildPath(fileStack, path, pathlen);
   if (status != 1) {
     return NXstatus::NX_ERROR;
@@ -1687,19 +1672,19 @@ NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
 
 NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
                     const NXnumtype iType) {
-  pHDF4Function pFunc = handleToNexusFunc(handle);
+  pLgcyFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxputattra(pFunc->pNexusData, name, data, rank, dim, iType));
 }
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pHDF4Function pFunc = handleToNexusFunc(handle);
+  pLgcyFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType));
 }
 NXstatus NXgetattra(NXhandle handle, const char *name, void *data) {
-  pHDF4Function pFunc = handleToNexusFunc(handle);
+  pLgcyFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxgetattra(pFunc->pNexusData, name, data));
 }
 NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pHDF4Function pFunc = handleToNexusFunc(handle);
+  pLgcyFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxgetattrainfo(pFunc->pNexusData, pName, rank, dim, iType));
 }
 
