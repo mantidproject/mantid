@@ -487,9 +487,6 @@ have been fixed. Then:
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
-  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
-  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -569,6 +566,9 @@ Anaconda channel.
    <https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml>`__.
    Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
    The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
+*  Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+   This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+   publishing for the ``main`` nightly pipeline.
 
 **Generate DOI**
 
