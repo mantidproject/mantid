@@ -501,7 +501,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
 /// constructor
 LoadNXcanSAS::LoadNXcanSAS() = default;
 
-int LoadNXcanSAS::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   if (extn != ".nxs" && extn != ".h5") {
     return 0;

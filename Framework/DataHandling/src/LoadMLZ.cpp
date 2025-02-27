@@ -98,7 +98,7 @@ void LoadMLZ::exec() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMLZ::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the MLZ
   if (descriptor.isEntry("/Scan/wavelength") && descriptor.isEntry("/Scan/title") && descriptor.isEntry("/Scan/mode")) {
     return 80;

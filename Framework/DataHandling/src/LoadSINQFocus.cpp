@@ -60,7 +60,7 @@ const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSINQFocus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the SINQ (to date Loader only valid for focus)
   if (descriptor.isEntry("/entry1/FOCUS/SINQ")) {

@@ -38,7 +38,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadQKK::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
   const auto &firstEntryName = descriptor.firstEntryNameType().first;
   if (descriptor.isEntry("/" + firstEntryName + "/data/hmm_xy"))
     return 80;

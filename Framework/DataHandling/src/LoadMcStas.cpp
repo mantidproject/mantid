@@ -521,7 +521,7 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry("/entry1/simulation/name")) {
     return 0;
   }

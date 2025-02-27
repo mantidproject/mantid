@@ -203,7 +203,7 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
 //----------------------------------------------------------------------------------------------
 
 std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
-                                       const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
+                                       const Mantid::Kernel::NexusDescriptor &fileInfo, const std::string &prefix) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets

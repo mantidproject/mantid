@@ -61,7 +61,7 @@ constexpr double WAVE_TO_E = 81.8;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {
+int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B, Tx field eliminates SALSA
@@ -90,7 +90,7 @@ const std::string LoadILLDiffraction::summary() const { return "Loads ILL diffra
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusHDF5Descriptor>(), m_instNames({"D20", "D2B", "D1B", "D4C", "IN5", "PANTHER", "SHARP"}) {}
+    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B", "D4C", "IN5", "PANTHER", "SHARP"}) {}
 /**
  * Initialize the algorithm's properties.
  */

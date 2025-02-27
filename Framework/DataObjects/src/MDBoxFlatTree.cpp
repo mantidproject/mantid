@@ -412,7 +412,7 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IM
 
 void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
                                         std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
-                                        const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                        const Mantid::Kernel::NexusDescriptor &fileInfo,
                                         const std::string &currentGroup, bool lazy) {
 
   // First, find how many experimentX blocks there are

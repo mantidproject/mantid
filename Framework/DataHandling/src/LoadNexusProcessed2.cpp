@@ -235,7 +235,7 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, size_t entryNumb
   return false;
 }
 
-int LoadNexusProcessed2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadNexusProcessed2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return LoadNexusProcessed::confidence(descriptor) + 1; // incrementally better than v1.
   else

@@ -60,7 +60,7 @@ LoadMD::LoadMD()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMD::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence = 0;
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
   if (allEntries.count("NXentry") == 1) {
@@ -138,7 +138,7 @@ void LoadMD::execLoader() {
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
   // The main entry
-  const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
+  const std::shared_ptr<Mantid::Kernel::NexusDescriptor> fileInfo = getFileInfo();
 
   std::string entryName;
   if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {

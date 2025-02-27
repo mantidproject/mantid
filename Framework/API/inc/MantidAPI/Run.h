@@ -111,9 +111,9 @@ public:
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const override;
 
-  /// Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster metadata
+  /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster metadata
   /// lookup
-  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusDescriptor &fileInfo,
                  const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) override;

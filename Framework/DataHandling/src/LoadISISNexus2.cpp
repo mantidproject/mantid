@@ -77,7 +77,7 @@ LoadISISNexus2::LoadISISNexus2()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadISISNexus2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/raw_data_1", "NXentry")) {
     // It also could be an Event Nexus file or a TOFRaw file,
     // so confidence is set to less than 80.

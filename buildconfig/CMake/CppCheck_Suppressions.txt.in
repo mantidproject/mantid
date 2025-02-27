@@ -123,8 +123,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:140
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:579
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:1228
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:1354
+uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:1227
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:1353
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:148
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:160
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cpp:267

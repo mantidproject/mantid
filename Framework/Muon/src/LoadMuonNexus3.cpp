@@ -23,7 +23,7 @@ int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<M
   int confidence{0};
   if (H5::H5File::isHdf5(filePath)) {
     try {
-      Mantid::Kernel::NexusHDF5Descriptor descriptorHDF5(filePath);
+      Mantid::Kernel::NexusDescriptor descriptorHDF5(filePath);
       confidence = nexusLoader->confidence(descriptorHDF5);
     } catch (std::exception const &e) {
       Mantid::Kernel::Logger("LoadMuonNexus3").debug()

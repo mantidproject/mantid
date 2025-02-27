@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadGeometry.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
 namespace Mantid::DataHandling {
@@ -27,7 +27,7 @@ bool LoadGeometry::isNexus(const std::string &filename) {
   }
 
   if (H5::H5File::isHdf5(filename)) {
-    Mantid::Kernel::NexusHDF5Descriptor descriptor(filename);
+    Mantid::Kernel::NexusDescriptor descriptor(filename);
     return isNexus(descriptor.getAllEntries());
   }
 

@@ -37,7 +37,7 @@ const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexu
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   const auto &entries = descriptor.getAllEntries();
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
