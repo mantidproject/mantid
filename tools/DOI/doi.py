@@ -89,9 +89,7 @@ XML_CONTENT_HEADER = "Content-Type:application/xml;charset=UTF-8"
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     """Builds the xml form containing the metadata for the DOI.  Where helpful,
     comments showing the definition / allowed values of the data fields have
-    been taken from section 2.3 of:
-    http://schema.datacite.org/meta/kernel-3/doc/DataCite-MetadataKernel_v3.0.pdf
-    Version 4 file here:
+    been taken from section 1.2 of:
     https://datacite-metadata-schema.readthedocs.io/_/downloads/en/4.6/pdf/
 
     The decision has been made to not use the optional "contributors" field,
