@@ -9,13 +9,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 #   1. Install prefix
 #   2. Optional. If provided, the name of an environment to create and activate
 #   3. Optional. If true is specified any existing mamba installation is removed
+#   4. Optional. Target platform, e.g. linux-64
 setup_mamba () {
   local install_prefix=$1
   local env_name=$2
-  local clean=false
-  if [ $# -eq 3 ]; then
-    clean=$3
-  fi
+  local clean=$3
+  local platform=$4
   $SCRIPT_DIR/download-and-install-mambaforge $install_prefix $clean
   source $install_prefix/etc/profile.d/conda.sh
   source $install_prefix/etc/profile.d/mamba.sh
@@ -55,7 +54,7 @@ create_and_activate_mantid_developer_env() {
   $SCRIPT_DIR/package-conda "$packaging_dir" --build-mantid-developer --platform "$platform"
   create_and_activate_env mantid-developer "$platform"
 
-  if [[-n "$platform" ]]; then
+  if [[ -n "$platform" ]]; then
     conda config --env --set subdir "$platform"
   fi
 
