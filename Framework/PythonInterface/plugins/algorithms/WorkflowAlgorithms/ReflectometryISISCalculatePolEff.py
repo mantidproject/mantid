@@ -210,9 +210,9 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
 
     def _calculate_wildes_efficiencies(self, trans_output: list, trans_output_mag: list) -> dict[str, Any]:
         eff_args = self._generate_eff_args(trans_output, trans_output_mag)
-        aff_output_list = _EFF_ALG_OUTPUT + self.m_eff_alg_output_diag
+        eff_output_list = _EFF_ALG_OUTPUT + self.m_eff_alg_output_diag
         eff_output = dict(
-            zip([x.alias for x in aff_output_list], self._run_algorithm(_ALGS["EFF_ALG"], eff_args, [x.name for x in aff_output_list]))
+            zip([x.alias for x in eff_output_list], self._run_algorithm(_ALGS["EFF_ALG"], eff_args, [x.name for x in eff_output_list]))
         )
         return eff_output
 
@@ -261,7 +261,7 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
                 {
                     _NON_PROP_DATA["IN_MAG_WS"].name: trans_output_mag,
                     _NON_PROP_DATA["OUT_POL_EFF"].name: _NON_PROP_DATA["OUT_POL_EFF"].alias,
-                    _NON_PROP_DATA["OUT_AN_EFF"].name: _NON_PROP_DATA["OUT_POL_EFF"].name,
+                    _NON_PROP_DATA["OUT_AN_EFF"].name: _NON_PROP_DATA["OUT_AN_EFF"].alias,
                 }
             )
         eff_args.update(self._populate_args_dict(_ALGS["EFF_ALG"]))
