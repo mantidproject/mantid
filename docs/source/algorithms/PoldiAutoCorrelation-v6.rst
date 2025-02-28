@@ -39,7 +39,7 @@ Further details of the POLDI instrument and the reduction can be found in [1]_.
    :align: right
    :alt: Correlation spectrum of silicon powder standard.
 
-    Correlation spectrum of silicon powder standard.
+   Correlation spectrum of silicon powder standard.
 
 Usage
 -----
