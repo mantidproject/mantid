@@ -29,10 +29,7 @@ public:
   void runCheck(const std::string &filename, const std::string &alg_expected, const int version_expected) {
     std::string path = FileFinder::Instance().getFullPath(filename);
 
-    TS_ASSERT(!path.empty());
-
-    // algorithm can load the file
-    // TS_ASSERT(FileLoaderRegistry::Instance().canLoad(alg_expected, path));
+    TSM_ASSERT("File not found: " + filename, !path.empty());
 
     // get the right algorithm
     try {
