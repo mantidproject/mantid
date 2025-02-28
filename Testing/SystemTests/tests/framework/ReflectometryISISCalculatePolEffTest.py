@@ -19,7 +19,7 @@ class ReflectometryISISCalculatePolEffTestBase(MantidSystemTest, metaclass=ABCMe
     _FLOOD_FILE = "POLREF_Flood_TOF_single_bin.nx5"
     _FLOOD_WS = "flood_ws"
     _DEFAULT_ARGS = {
-        "InputRuns": _NON_MAG_RUNS,
+        "NonMagInputRuns": _NON_MAG_RUNS,
         "ProcessingInstructions": _PROCESSING_INSTRUCTIONS,
         "I0MonitorIndex": 2,
         "MonitorIntegrationWavelengthMin": 2.5,
