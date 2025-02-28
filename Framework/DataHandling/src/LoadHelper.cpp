@@ -17,6 +17,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 #include <strstream>
 
 namespace Mantid {

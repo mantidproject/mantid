@@ -29,6 +29,7 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 

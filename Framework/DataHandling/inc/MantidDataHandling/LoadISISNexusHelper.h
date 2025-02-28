@@ -9,7 +9,7 @@
 #define MANTID_DATAHANDLING_LOADISISNEXUSHELPER_H_
 
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 namespace Mantid {
 

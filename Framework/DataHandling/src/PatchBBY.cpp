@@ -8,6 +8,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/String.h>
 #include <Poco/TemporaryFile.h>

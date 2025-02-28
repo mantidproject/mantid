@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadISISNexusHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidNexus/NexusClasses.h"
 namespace {
 static constexpr std::size_t RUN_TIME_STRING_LENGTH = 19;
 } // namespace

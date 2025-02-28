@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
