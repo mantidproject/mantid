@@ -64,6 +64,21 @@ CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
 EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 
+# This removes '-ci' from the end of the cmake preset to get the target platform
+# We check that it's not e.g. cppcheck or doxygen
+PLATFORM="${CMAKE_PRESET%-ci}"
+allowed_platforms=("win-64" "linux-64" "osx-64" "osx-arm64")
+is_allowed=false
+for item in "${allowed_platforms[@]}"; do
+    if [ "$PLATFORM" == "$item" ]; then
+        is_allowed=true
+        break
+    fi
+done
+if [ "$is_allowed" == false ]; then
+    PLATFORM=""
+fi
+
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
@@ -112,7 +127,7 @@ git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
-create_and_activate_mantid_developer_env $WORKSPACE
+create_and_activate_mantid_developer_env $WORKSPACE $PLATFORM
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
