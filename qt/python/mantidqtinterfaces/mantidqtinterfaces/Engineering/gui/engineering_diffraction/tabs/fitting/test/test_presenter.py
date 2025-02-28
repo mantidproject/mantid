@@ -29,7 +29,7 @@ for iws in range(len(ws_list)):
 
 class FittingPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(view.FittingView)
+        self.view = mock.create_autospec(view.FittingView, instance=True)
         self.presenter = presenter.FittingPresenter(self.view)
 
         self.call_in_progress = mock.call(

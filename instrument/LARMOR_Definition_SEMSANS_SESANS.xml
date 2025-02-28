@@ -5,7 +5,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="LARMOR" valid-from   ="2024-02-21 20:00:00"
-                          valid-to     ="2100-01-31 23:59:59"
+                          valid-to     ="2025-01-01 23:59:58"
 		          last-modified="2024-03-28 13:22:00">
 
   <defaults>

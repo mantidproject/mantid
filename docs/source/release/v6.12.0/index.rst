@@ -4,7 +4,7 @@
 Mantid 6.12.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../../../images/CreateMonteCarloWorkspace_spectrum.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -12,11 +12,20 @@ Mantid 6.12.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.12.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Here are some of the highlights for this release:
+
+- Drop support for NumPy version 1. We now build against NumPy v2.0 and support up to v2.1. `Read about the changes <https://numpy.org/news/#numpy-200-released>`_. **Users should note that NumPy 2 introduces some breaking API changes. See the** `NumPy 2 Migration Guide <https://numpy.org/doc/stable/numpy_2_0_migration_guide.html>`_ **for more details.**
+- :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` now uses :ref:`MultiDomainFunction<func-MultiDomainFunction>` to tie peak profile parameters across pixels.
+- :ref:`PEARL powder <isis-powder-diffraction-pearl-ref>` has a new ``trans_custom`` focus mode. This allows the user to specify modules to include in the transverse bank focusing using the parameter ``trans_mod_nums``. The module numbers in the range 1-9 can be specified using the same string syntax as run-numbers - e.g. ``trans_mod_nums="1-3,5"`` corresponds to focusing modules 1,2,3 and 5.
+- New algorithm :ref:`algm-ReflectometryISISCreateTransmission` for creating transmission workspaces that are suitable for passing to :ref:`algm-PolarizationEfficienciesWildes`.
+- New algorithm :ref:`CreateMonteCarloWorkspace <algm-CreateMonteCarloWorkspace>` that creates a randomly distributed workspace by sampling from the probability distribution of the input workspace (see image above).
+- Updated Matplotlib from version 3.7 to version 3.9. See release notes for `version 3.8 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.8.0.html>`_  and `version 3.9 <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.9.0.html>`_.
+- ``setPlotType()`` can now be called on Matrix Workspaces to specify the :ref:`plot type <MatrixWorkspace_Plotting>`.
+- The :ref:`algorithm profiler <AlgorithmProfiler>` is now available to Linux users. To enable profiling, the :ref:`Algorithm Profiling Settings <Algorithm_Profiling>` must be set.
+- :ref:`MSlice <MSlice-ref>` has a new observer for workspaces in the Analysis Data Service in Mantid. Consequently, modifications to workspaces in Mantid are now synchronised with MSlice for shared workspaces. For example, this change now ensures that a deleted workspace in Mantid is also deleted in MSlice, which mitigates a common past error of `RuntimeError: Variable invalidated, data has been deleted`. The behaviour of the MSlice interface is thereby made consistent with that of other interfaces.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

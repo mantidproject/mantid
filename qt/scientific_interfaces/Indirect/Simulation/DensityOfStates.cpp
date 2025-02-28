@@ -29,9 +29,8 @@ DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra);
 
-  connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
-
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.mwInputFile, &FileFinderWidget::filesFound, this, &DensityOfStates::handleFileChange);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &DensityOfStates::saveClicked);
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -125,7 +124,7 @@ void DensityOfStates::handleRun() {
 
   m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &DensityOfStates::dosAlgoComplete);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -135,7 +134,7 @@ void DensityOfStates::handleRun() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::dosAlgoComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &DensityOfStates::dosAlgoComplete);
 
   m_runPresenter->setRunEnabled(true);
   setSaveEnabled(!error);
@@ -161,7 +160,7 @@ void DensityOfStates::handleFileChange() {
 
     m_batchAlgoRunner->addAlgorithm(ionTableAlgo);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
+    connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &DensityOfStates::ionLoadComplete);
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_uiForm.lwIons->clear();
@@ -182,7 +181,7 @@ void DensityOfStates::handleFileChange() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::ionLoadComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &DensityOfStates::ionLoadComplete);
 
   if (error) {
     g_log.error("Could not get a list of ions from input file");

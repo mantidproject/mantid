@@ -15,11 +15,10 @@ SettingsView::SettingsView(QWidget *parent)
     : QWidget(parent), m_presenter(), m_uiForm(std::make_unique<Ui::InterfaceSettings>()) {
   m_uiForm->setupUi(this);
 
-  connect(m_uiForm->pbOk, SIGNAL(clicked()), this, SLOT(notifyOkClicked()));
-  connect(m_uiForm->pbApply, SIGNAL(clicked()), this, SLOT(notifyApplyClicked()));
-  connect(m_uiForm->pbCancel, SIGNAL(clicked()), this, SLOT(notifyCancelClicked()));
-
-  connect(m_uiForm->pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
+  connect(m_uiForm->pbOk, &QPushButton::clicked, this, &SettingsView::notifyOkClicked);
+  connect(m_uiForm->pbApply, &QPushButton::clicked, this, &SettingsView::notifyApplyClicked);
+  connect(m_uiForm->pbCancel, &QPushButton::clicked, this, &SettingsView::notifyCancelClicked);
+  connect(m_uiForm->pbHelp, &QPushButton::clicked, this, &SettingsView::openHelp);
 }
 
 QWidget *SettingsView::getView() { return this; }

@@ -1,1 +1,0 @@
-- On Linux the algorithm AlgoTimeRegister (addtime,Intance) is exposed to python to measure time

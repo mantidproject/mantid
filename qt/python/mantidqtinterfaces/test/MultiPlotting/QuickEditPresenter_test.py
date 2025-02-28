@@ -13,7 +13,7 @@ from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_view import QuickEditV
 
 class QuickEditPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(QuickEditView)
+        self.view = mock.create_autospec(QuickEditView, instance=True)
         self.pres = QuickEditPresenter(self.view)
         self.slot = mock.Mock()
 

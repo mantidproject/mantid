@@ -29,23 +29,23 @@ class Transform2Test(unittest.TestCase):
         self.context = setup_context(True)
         # create widget
         self.widget = transform_widget.TransformWidget(self.context, FFTWidget, MaxEntWidget)
-        self.widget._maxent._presenter = mock.MagicMock()  # create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)
-        self.widget._fft._presenter = mock.MagicMock()  # create_autospec(fft_presenter_new.FFTPresenter, spec_Set=True)
+        self.widget._maxent._presenter = mock.MagicMock()
+        self.widget._fft._presenter = mock.MagicMock()
         # create the view
-        self.view = mock.create_autospec(transform_view.TransformView, spec_set=False)
+        self.view = mock.create_autospec(transform_view.TransformView, instance=True)
         self.view.getView = mock.Mock()
         self.view.getMethods = mock.Mock(return_value=["FFT", "MaxEnt"])
         self.view.hideAll = mock.Mock()
         self.view.showMethod = mock.Mock()
-        self.view.selection = mock.create_autospec(transform_selection_view.TransformSelectionView, spec_set=True)
+        self.view.selection = mock.create_autospec(transform_selection_view.TransformSelectionView, spec_set=True, instance=True)
         self.view.selection.changeMethodSignal = mock.Mock()
         # set the mocked view to the widget
         self.widget.mockWidget(self.view)
 
     def mock_widgets(self):
-        self.widget._selector = mock.create_autospec(transform_selection_widget.TransformSelectionWidget, spec_set=True)
-        self.widget._maxent = mock.create_autospec(MaxEntWidget, spec_set=True)
-        self.widget._fft = mock.create_autospec(FFTWidget, spec_set=True)
+        self.widget._selector = mock.create_autospec(transform_selection_widget.TransformSelectionWidget, spec_set=True, instance=True)
+        self.widget._maxent = mock.create_autospec(MaxEntWidget, spec_set=True, instance=True)
+        self.widget._fft = mock.create_autospec(FFTWidget, spec_set=True, instance=True)
 
     def test_update_view_from_model(self):
         self.mock_widgets()

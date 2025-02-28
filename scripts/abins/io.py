@@ -35,6 +35,23 @@ class IO(BaseModel):
     autoconvolution: int = 10
     temperature: float = None
 
+    @staticmethod
+    def _dir_is_not_writeable(directory: str):
+        """Check write permissions of directory by writing a temporary file
+
+        This is the only _really_ reliable way of knowing; checking attributes can
+        still give incorrect answers depending on OS, network drive status etc.
+        """
+        from tempfile import NamedTemporaryFile
+
+        try:
+            with NamedTemporaryFile(mode="w", dir=directory) as fd:
+                print("check this directory is writeable", file=fd)
+        except IOError:
+            return True
+
+        return False
+
     def model_post_init(self, __context):
         try:
             self._hash_input_filename = self.calculate_ab_initio_file_hash()
@@ -51,6 +68,12 @@ class IO(BaseModel):
         else:
             core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5
 
+        if self._dir_is_not_writeable(self.get_save_dir_path()):
+            raise Exception(
+                "Could not write a file to the default save directory: "
+                "this is required for caching. Please set 'Default Save Directory' to "
+                "a writeable location using the File/Manage User Directories interface."
+            )
         self._hdf_filename = os.path.join(self.get_save_dir_path(), core_name + ".hdf5")  # name of hdf file
 
         self._attributes = {}  # attributes for group

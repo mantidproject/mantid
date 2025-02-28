@@ -79,7 +79,7 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
 
     def _setup_output_focused_runs_test(self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit):
         mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        mock_run_details = create_autospec(run_details._RunDetails)
+        mock_run_details = create_autospec(run_details._RunDetails, instance=True)
         runs = ["123", "124"]
         run_string = "-".join(runs)
         mock_run_details.output_string = run_string
@@ -273,6 +273,18 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
 
         expected_calls = 2 * [call(d_spacing_group=run_string, tof_group=run_string, unit_to_keep=None)]
         mock_keep_unit.assert_has_calls(expected_calls)
+
+    def test_check_sample_details_is_vanadium(self):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst._is_vanadium = True
+        mock_inst._sample_details = None
+        mock_inst._check_sample_details()  # does not throw
+
+    def test_check_sample_details_is_not_vanadium(self):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst._is_vanadium = False
+        mock_inst._sample_details = None
+        self.assertRaises(ValueError, mock_inst._check_sample_details)
 
 
 if __name__ == "__main__":

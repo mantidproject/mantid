@@ -118,15 +118,6 @@ class ToolBarTest(unittest.TestCase):
         self.assertTrue(self._is_grid_button_checked(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_checked_for_plot_with_no_crosshair(self, mock_qappthread):
-        mock_qappthread.return_value = mock_qappthread
-
-        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
-        axes.plot([-10, 10], [1, 2])
-        # Grid button should be OFF because we have not enabled the crosshair.
-        self.assertFalse(self._is_crosshair_button_checked(fig))
-
-    @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_checked_for_plot_with_grid_using_kwargs(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
@@ -274,19 +265,6 @@ class ToolBarTest(unittest.TestCase):
         # This is only called when show() is called on the figure manager, so we have to manually call it here.
         fig_manager.toolbar.set_buttons_visibility(fig)
         return fig_manager.toolbar._actions[button].isEnabled()
-
-    @classmethod
-    def _is_crosshair_button_checked(cls, fig):
-        """
-        Create the figure manager and check whether its toolbar is toggled on or off for the given figure.
-        We have to explicitly call set_button_visibility() here, which would otherwise be called within the show()
-        function.
-        """
-        canvas = MantidFigureCanvas(fig)
-        fig_manager = FigureManagerWorkbench(canvas, 1)
-        # This is only called when show() is called on the figure manager, so we have to manually call it here.
-        fig_manager.toolbar.set_buttons_visibility(fig)
-        return fig_manager.toolbar._actions["toggle_crosshair"].isChecked()
 
 
 if __name__ == "__main__":

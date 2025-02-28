@@ -17,6 +17,7 @@
 #include <Poco/Path.h>
 #include <fstream>
 #include <memory>
+#include <regex>
 #include <string>
 
 #include <Poco/NObserver.h>
@@ -643,6 +644,19 @@ public:
     ConfigService::Instance().remove(rootName);
     mantidLegs = ConfigService::Instance().hasProperty(rootName);
     TS_ASSERT_EQUALS(mantidLegs, false);
+  }
+
+  void testMacOsVersionReadable() {
+    const std::string osName = ConfigService::Instance().getOSName();
+    const std::string osVersionReadable = ConfigService::Instance().getOSVersionReadable();
+    if (osName == "Darwin") {
+      const std::string macOsRegexPattern = "[mM]ac[ ]?OS.*";
+      const bool match = std::regex_match(osVersionReadable, std::regex(macOsRegexPattern));
+      if (!match) {
+        // This will print the incorrect string, unlike TS_ASSERT(match)
+        TS_ASSERT_EQUALS(osVersionReadable, macOsRegexPattern);
+      }
+    }
   }
 
 protected:

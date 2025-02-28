@@ -20,8 +20,8 @@ class DNSPathPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # cls.parent = mock.patch(DNSReductionGUI_presenter)
-        cls.view = mock.create_autospec(DNSPathView)
-        cls.model = mock.create_autospec(DNSPathModel)
+        cls.view = mock.create_autospec(DNSPathView, instance=True)
+        cls.model = mock.create_autospec(DNSPathModel, instance=True)
         # view signals
 
         cls.view.sig_data_path_is_set = mock.Mock(return_value="dummypath")

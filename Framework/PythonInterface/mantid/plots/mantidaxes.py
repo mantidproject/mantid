@@ -37,6 +37,7 @@ from mantid.plots.utility import artists_hidden, autoscale_on_update, legend_set
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
+
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
@@ -50,6 +51,7 @@ def plot_decorator(func):
         # Saves saving it on array objects
         if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
+
             kwargs["workspaces"] = args[0].name()
             kwargs["function"] = func_name
 
@@ -478,8 +480,11 @@ class MantidAxes(Axes):
         :param new_name : the new name of workspace
         :param old_name : the old name of workspace
         """
+
         for cargs in self.creation_args:
-            if cargs["workspaces"] == old_name:
+            # If a workspace plot is overplotted with a line (e.g ax.axvline), the second set of creation args
+            # will not have a "workspaces" key
+            if cargs.get("workspaces") == old_name:
                 cargs["workspaces"] = new_name
         for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
             for ws_artist in ws_artist_list:

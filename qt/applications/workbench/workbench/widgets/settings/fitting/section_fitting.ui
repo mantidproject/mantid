@@ -33,8 +33,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>555</width>
-        <height>225</height>
+        <width>551</width>
+        <height>218</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -84,6 +84,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                </widget>
               </item>
              </layout>
@@ -132,6 +135,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                </widget>
               </item>
              </layout>
@@ -159,6 +165,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                </widget>
               </item>
              </layout>
@@ -179,6 +188,9 @@
                   <width>202</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
                 </property>
                </widget>
               </item>

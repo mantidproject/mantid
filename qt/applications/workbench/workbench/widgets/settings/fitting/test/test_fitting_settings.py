@@ -4,13 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
 import unittest
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.settings.fitting.presenter import FittingSettings, FittingProperties
+from workbench.widgets.settings.fitting.presenter import FittingSettings
+from workbench.widgets.settings.test_utilities.settings_test_utilities import (
+    assert_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes,
+)
 
 
 class MockSettingsView(object):
@@ -22,115 +23,124 @@ class MockSettingsView(object):
         self.findpeaks_tol = Mock()
 
 
-class MockConfigService(object):
+class MockFittingSettingsModel:
     def __init__(self):
-        self.getString = StrictMock(return_value="1")
-        self.setString = StrictMock()
+        self.get_background_function_names = MagicMock()
+        self.get_peak_function_names = MagicMock()
+        self.get_auto_background = MagicMock()
+        self.get_default_peak = MagicMock()
+        self.get_fwhm = MagicMock()
+        self.get_tolerance = MagicMock()
+        self.set_auto_background = MagicMock()
+        self.set_default_peak = MagicMock()
+        self.set_fwhm = MagicMock()
+        self.set_tolerance = MagicMock()
+
+
+MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.fitting.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
 
 
 @start_qapplication
+@patch(MOUSEWHEEL_EVENT_FILTER_PATH)
 class FittingSettingsTest(unittest.TestCase):
-    CONFIG_SERVICE_CLASSPATH = "workbench.widgets.settings.fitting.presenter.ConfigService"
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_view = MockSettingsView()
+        cls.mock_model = MockFittingSettingsModel()
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    @staticmethod
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
+        view = presenter.get_view()
+        assert_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
+
     def test_setup_signals(self, _):
-        presenter = FittingSettings(None)
+        self.mock_view.auto_bkg.currentTextChanged.connect = MagicMock()
+        self.mock_view.background_args.editingFinished.connect = MagicMock()
+        self.mock_view.default_peak.currentTextChanged.connect = MagicMock()
+        self.mock_view.findpeaks_fwhm.valueChanged.connect = MagicMock()
+        self.mock_view.findpeaks_tol.valueChanged.connect = MagicMock()
 
-        self.assert_connected_once(presenter.view.auto_bkg, presenter.view.auto_bkg.currentTextChanged)
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
-        self.assert_connected_once(presenter.view.default_peak, presenter.view.default_peak.currentTextChanged)
+        self.mock_view.auto_bkg.currentTextChanged.connect.assert_called_once_with(presenter.action_auto_background_changed)
+        self.mock_view.background_args.editingFinished.connect.assert_called_once_with(presenter.action_background_args_changed)
+        self.mock_view.default_peak.currentTextChanged.connect.assert_called_once_with(presenter.action_default_peak_changed)
+        self.mock_view.findpeaks_fwhm.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_fwhm_changed)
+        self.mock_view.findpeaks_tol.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_tolerance_changed)
 
-        self.assert_connected_once(presenter.view.background_args, presenter.view.background_args.editingFinished)
+    def test_action_auto_background_changed(self, _):
+        self.mock_view.background_args.text = Mock(return_value="")
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
-        self.assert_connected_once(presenter.view.findpeaks_fwhm, presenter.view.findpeaks_fwhm.valueChanged)
-
-        self.assert_connected_once(presenter.view.findpeaks_tol, presenter.view.findpeaks_tol.valueChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_auto_background_changed(self, mock_ConfigService):
-        presenter = FittingSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_auto_background.reset_mock()
 
         presenter.action_auto_background_changed("None")
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "")
+        self.mock_model.set_auto_background.assert_called_once_with("")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_auto_background.reset_mock()
 
         presenter.action_auto_background_changed("Polynomial")
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial ")
+        self.mock_model.set_auto_background.assert_called_once_with("Polynomial ")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_background_args_changed(self, mock_ConfigService):
-        mock_view = MockSettingsView()
-        mock_view.auto_bkg.currentText = Mock(return_value="Polynomial")
-        presenter = FittingSettings(None, mock_view)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_background_args_changed(self, _):
+        self.mock_view.auto_bkg.currentText = Mock(return_value="Polynomial")
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
-        mock_view.background_args.text = Mock(return_value="n=3")
+        self.mock_model.set_auto_background.reset_mock()
+
+        self.mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial n=3")
+        self.mock_model.set_auto_background.assert_called_once_with("Polynomial n=3")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_auto_background.reset_mock()
 
-        mock_view.background_args.text = Mock(return_value="n=5")
+        self.mock_view.background_args.text = Mock(return_value="n=5")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial n=5")
+        self.mock_model.set_auto_background.assert_called_once_with("Polynomial n=5")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_background_args_changed_with_auto_background_none(self, mock_ConfigService):
-        mock_view = MockSettingsView()
-        mock_view.auto_bkg.currentText = Mock(return_value="None")
-        presenter = FittingSettings(None, mock_view)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_background_args_changed_with_auto_background_none(self, _):
+        self.mock_view.auto_bkg.currentText = Mock(return_value="None")
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
-        mock_view.background_args.text = Mock(return_value="n=3")
+        self.mock_model.set_auto_background.reset_mock()
+
+        self.mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "")
+        self.mock_model.set_auto_background.assert_called_once_with("")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_default_peak_changed(self, mock_ConfigService):
-        presenter = FittingSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_default_peak_changed(self, _):
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_default_peak_changed("None")
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.DEFAULT_PEAK.value, "None")
+        self.mock_model.set_default_peak.assert_called_once_with("None")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_default_peak.reset_mock()
 
         presenter.action_default_peak_changed("Gaussian")
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.DEFAULT_PEAK.value, "Gaussian")
+        self.mock_model.set_default_peak.assert_called_once_with("Gaussian")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_find_peaks_fwhm_changed(self, mock_ConfigService):
-        presenter = FittingSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_find_peaks_fwhm_changed(self, _):
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_fwhm_changed(5)
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.FWHM.value, "5")
+        self.mock_model.set_fwhm.assert_called_once_with("5")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_fwhm.reset_mock()
 
         presenter.action_find_peaks_fwhm_changed(9)
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.FWHM.value, "9")
+        self.mock_model.set_fwhm.assert_called_once_with("9")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_find_peaks_tolerance_changed(self, mock_ConfigService):
-        presenter = FittingSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_find_peaks_tolerance_changed(self, _):
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_tolerance_changed(3)
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.TOLERANCE.value, "3")
+        self.mock_model.set_tolerance.assert_called_once_with("3")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_tolerance.reset_mock()
 
         presenter.action_find_peaks_tolerance_changed(8)
-        mock_ConfigService.setString.assert_called_once_with(FittingProperties.TOLERANCE.value, "8")
+        self.mock_model.set_tolerance.assert_called_once_with("8")

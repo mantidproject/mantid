@@ -100,7 +100,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         state.data = data_state
 
         # Act
-        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter)
+        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter, instance=True)
         async_worker = DiagnosticsAsync(parent_presenter=mocked_parent)
         async_worker.set_unit_test_mode(True)
         async_worker.run_integral("", True, IntegralEnum.Horizontal, DetectorType.LAB, state)
@@ -131,7 +131,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         state.data = data_state
 
         # Act
-        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter)
+        mocked_parent = mock.create_autospec(DiagnosticsPagePresenter, instance=True)
         async_worker = DiagnosticsAsync(parent_presenter=mocked_parent)
         async_worker.set_unit_test_mode(True)
         async_worker.run_integral("", True, IntegralEnum.Horizontal, DetectorType.LAB, state)

@@ -76,14 +76,14 @@ void RotateSampleShape::exec() {
     g_log.warning() << "Empty goniometer created; will always return an "
                        "identity rotation matrix.\n";
 
-  const auto sampleShapeRotation = gon.getR();
+  const auto &sampleShapeRotation = gon.getR();
   if (sampleShapeRotation == Kernel::Matrix<double>(3, 3, true)) {
     // If the resulting rotationMatrix is Identity, ignore the calculatrion
     g_log.warning("Rotation matrix set via RotateSampleShape is an Identity matrix. Ignored rotating sample shape");
     return;
   }
 
-  const auto oldRotation = ei->run().getGoniometer().getR();
+  const auto &oldRotation = ei->run().getGoniometer().getR();
   auto newSampleShapeRot = sampleShapeRotation * oldRotation;
   if (isMeshShape) {
     auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());

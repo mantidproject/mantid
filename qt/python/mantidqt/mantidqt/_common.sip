@@ -469,6 +469,8 @@ class InstrumentSelector : QWidget {
 public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
   void setTechniques(const QStringList &techniques);
+  void setFacility(const QString &facilityName);
+  QString getFacility();
   void setCurrentIndex(int);
   void setCurrentText(QString);
   QString currentText();

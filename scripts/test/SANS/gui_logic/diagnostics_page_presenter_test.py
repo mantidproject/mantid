@@ -21,8 +21,8 @@ class DiagnosticsPagePresenterTest(unittest.TestCase):
         self.presenter.set_view(self.view, SANSInstrument.LARMOR)
 
         # Inject mocks to things tested elsewhere
-        self.presenter._worker = mock.create_autospec(self.presenter._worker)
-        self.presenter._model = mock.create_autospec(self.presenter._model)
+        self.presenter._worker = mock.create_autospec(self.presenter._worker, instance=True)
+        self.presenter._model = mock.create_autospec(self.presenter._model, instance=True)
 
         self.mock_state = self.presenter._model.create_state.return_value
 

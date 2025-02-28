@@ -784,6 +784,14 @@ class MantidAxesTest(unittest.TestCase):
         self.ax.rename_workspace(new_name="new_name", old_name="ws")
         self.assertEqual("new_name", self.ax.creation_args[0]["workspaces"])
 
+    def test_rename_workspace_works_with_additional_line_plot(self):
+        ws = CreateSampleWorkspace()
+        self.ax.plot(ws, specNum=2)
+        self.ax.axvline(x=1, label="label", color="red")
+        self.assertIsNone(self.ax.creation_args[1].get("workspaces"))
+        # Line plot has no workspaces creation arg, test there is no exception
+        self.ax.rename_workspace(new_name="new_name", old_name="ws")
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             "ws": [Mock(is_normalized=normalization_states[0]), Mock(is_normalized=normalization_states[1])],

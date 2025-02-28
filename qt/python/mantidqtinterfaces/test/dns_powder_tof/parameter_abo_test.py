@@ -19,7 +19,7 @@ class ParameterAboTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.observer1 = mock.create_autospec(DNSObserver)
+        cls.observer1 = mock.create_autospec(DNSObserver, instance=True)
         cls.observer1.name = "observer1"
         cls.observer1.load_xml = mock.Mock(return_value={"test": 1})
         cls.observer1.save_xml = mock.Mock()

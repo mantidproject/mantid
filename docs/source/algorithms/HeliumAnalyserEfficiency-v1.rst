@@ -9,7 +9,7 @@
 Description
 -----------
 
-Takes a normalised group workspace and combines this with the cell path length multiplied by the gas pressure (``GasPressureTimesCellLength``)
+Takes a normalised group workspace and combines this with the cell path length multiplied by the gas pressure (``PXD``)
 to calculate the efficiency of the analyser. The input workspace must be a group of four single spectrum histogram workspaces, each
 representing the transmission of a known spin state as specified by the ``SpinStates`` parameter.
 
@@ -26,12 +26,12 @@ The efficiency of the analyser cell is given by
 
 If our four periods are :math:`T_{00}, T_{01}, T_{10}, T_{11}`, with the subscript denoting the spin configuration, then
 :math:`T_{para} = T_{00} + T_{11}` and :math:`T_{anti} = T_{01} + T_{10}`, and we can calculate :math:`\epsilon_{cell}` from the above equation.
-The value of :math:`pd` is given by the input ``GasPressureTimesCellLength``, and :math:`\lambda` is the wavelength of each bin, so we fit
+The value of :math:`pd` is given by the input ``PXD``, and :math:`\lambda` is the wavelength of each bin, so we fit
 :math:`\frac{1 + \tanh(0.0733 p d \lambda p_{He})}{2}` to our calculated :math:`\epsilon_{cell}` to give us :math:`p_{He}` and hence the
 theoretical efficiency curve.
 
 To calculate the error, :math:`\sigma_{\epsilon_{cell}}`, we need the error on :math:`p_{He}`, :math:`\sigma_{p_{He}}`, and
-the error of :math:`pd`, :math:`\sigma_{pd}`, given by ``GasPressureTimesCellLengthError``. The covariance between :math:`pd` and :math:`p_{He}`
+the error of :math:`pd`, :math:`\sigma_{pd}`, given by ``PXDError``. The covariance between :math:`pd` and :math:`p_{He}`
 is assumed to be zero. Then the error :math:`\sigma_{\epsilon_{cell}}` is given by
 
 .. math::
