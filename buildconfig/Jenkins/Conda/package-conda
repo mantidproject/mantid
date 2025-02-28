@@ -6,10 +6,10 @@
 # (if present from a previous build step) or build and produce that package too.
 #
 # Script usage:
-# package-conda WORKSPACE PLATFORM [options]
+# package-conda WORKSPACE [options]
 #
 # Example command to build all of the packages:
-# package-conda $WORKSPACE $PLATFORM --build-mantid --build-qt --build-docs --build-workbench
+# package-conda $WORKSPACE --build-mantid --build-qt --build-docs --build-workbench
 #
 # Expected args:
 #   1. WORKSPACE: path to the base of the working space for a build. The source
@@ -87,7 +87,7 @@ done
 
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true
+setup_mamba $WORKSPACE/mambaforge "" true $PLATFORM
 mamba activate base
 mamba install --yes boa conda-verify versioningit
 
