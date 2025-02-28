@@ -57,6 +57,9 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         if self.getProperty("WavelengthMax").value <= self.getProperty("WavelengthMin").value:
             issues["WavelengthMax"] = "WavelengthMax must be greater than WavelengthMin."
         ws = self.getProperty("InputWorkspace").value
+        if ws is None:
+            # group workspace
+            return issues
         if ws.getNumberHistograms() == 400:
             issues["InputWorkspace"] = (
                 "InputWorkspace corresponds to the old 1D wire detector geometry on POLDI, "
