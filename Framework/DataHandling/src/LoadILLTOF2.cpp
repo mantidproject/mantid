@@ -39,7 +39,7 @@ using namespace API;
 using namespace LegacyNexus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 namespace LegacyLoadHelper { // these methods are copied from LoadHelper
 /**
