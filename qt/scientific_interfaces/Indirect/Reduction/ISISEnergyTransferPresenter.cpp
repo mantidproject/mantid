@@ -32,7 +32,7 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 namespace {
 constexpr auto REDUCTION_ALG_NAME = "ISISIndirectEnergyTransfer";
 constexpr auto PLOT_PREPROCESS_ALG_NAME = "GroupDetectors";
-std::vector<std::string> SUFFIXES = {"_Reduced"};
+const std::vector<std::string> SUFFIXES = {"_Reduced"};
 
 enum class AlgorithmType { REDUCTION, PLOT_RAW_PREPROCESS };
 

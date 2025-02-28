@@ -50,14 +50,14 @@ public:
     m_presenter->generateWarningLabel();
   }
 
-  void test_enable_editing() {
-    EXPECT_CALL(*m_view, enableLabelEditor()).Times(1);
-    m_presenter->enableEditing();
-  }
-
   void test_get_current_label() {
     EXPECT_CALL(*m_view, getCurrentLabel()).Times(1);
     m_presenter->getCurrentLabel();
+  }
+
+  void test_hide_output_name_box() {
+    EXPECT_CALL(*m_view, hideOutputNameBox()).Times(1);
+    m_presenter->hideOutputNameBox();
   }
 
   void test_label_warning_message_if_workspace_does_not_exists_on_ads() {

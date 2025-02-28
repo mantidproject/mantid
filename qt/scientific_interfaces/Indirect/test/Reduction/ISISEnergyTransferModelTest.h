@@ -307,7 +307,7 @@ public:
     std::string inputFiles("1234, 1235");
     std::string outputName = m_model->getOutputGroupName(instData, inputFiles);
 
-    TS_ASSERT_EQUALS(outputName, "instrument1234, 1235_analyser_reflection_Reduced");
+    TS_ASSERT_EQUALS(outputName, "instrument1234, 1235_analyserreflection_Reduced");
   }
 
   void test_energyTransferAlgorithm() {
