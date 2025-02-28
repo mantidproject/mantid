@@ -69,7 +69,7 @@ Bugfixes
 
 
 Dependencies
-------------------
+------------
 
 New features
 ############
@@ -78,6 +78,14 @@ New features
 Bugfixes
 ############
 .. amalgamate:: Framework/Dependencies/Bugfixes
+
+
+Build Tools
+-----------
+
+Bugfixes
+############
+.. amalgamate:: Framework/Build_tools/Bugfixes
 
 
 MantidWorkbench
