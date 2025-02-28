@@ -82,7 +82,9 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # determine npulses to include in calc
         time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
         npulses = int(time_max // cycle_time)
-        # get final d-spacing array
+        # get final d-spacing array based on detector limits and wavelength range
+        # in actuality not all d-spacings will be measured within the wavelength range in every pixel
+        # but this is a small effect as detector doesn't cover much two-theta range
         dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
         bin_width = ws.readX(0)[1] - ws.readX(0)[0]
         dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)
