@@ -9,6 +9,7 @@
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <algorithm>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
