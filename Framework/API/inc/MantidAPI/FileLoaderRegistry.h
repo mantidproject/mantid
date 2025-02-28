@@ -92,25 +92,22 @@ private:
       case LegacyNexus:
         if (!std::is_base_of<IFileLoader<Kernel::LegacyNexusDescriptor>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as Nexus loader but it does not "
-                                   "inherit from "
-                                   "API::IFileLoader<Kernel::NexusDescriptor>");
+                                   "' registered as LegacyNexus loader but it does not inherit from "
+                                   "API::IFileLoader<Kernel::LegacyNexusDescriptor>");
         }
         break;
       case Nexus:
         if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
-          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as NexusHDF5 loader but it does not "
-                                   "inherit from "
-                                   "API::IFileLoader<Kernel::NexusDescriptor>");
+          throw std::runtime_error(
+              std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+              "' registered as Nexus loader but it does not inherit from API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
-          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as Generic loader but it does "
-                                   "not inherit from "
-                                   "API::IFileLoader<Kernel::FileDescriptor>");
+          throw std::runtime_error(
+              std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+              "' registered as Generic loader but it does not inherit from API::IFileLoader<Kernel::FileDescriptor>");
         }
         break;
       default:
