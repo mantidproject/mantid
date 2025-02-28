@@ -1,1 +1,0 @@
-- Updated :ref:`FindGlobalBMatrix <algm-FindGlobalBMatrix-v1>` to change how reference UBs are chosen before refinement and improvements made to verbosity of error/ warning reporting for users.

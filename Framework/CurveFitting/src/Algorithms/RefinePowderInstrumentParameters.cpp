@@ -483,10 +483,11 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(const TableW
  * Arguments
  * - fit2: boolean.  if True,then do Simplex fit for each step
  */
-void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
-                                                                  vector<double> upperbounds, vector<double> stepsizes,
-                                                                  size_t maxsteps, double stepsizescalefactor,
-                                                                  bool fit2) {
+void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(const vector<string> &parnames,
+                                                                  const vector<double> &lowerbounds,
+                                                                  const vector<double> &upperbounds,
+                                                                  vector<double> &stepsizes, size_t maxsteps,
+                                                                  double stepsizescalefactor, bool fit2) {
 
   // 1. Set up starting values, esp. to m_Function
   size_t numparameters = parnames.size();
@@ -769,7 +770,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(const DataObjects::Tabl
     sigma2 = -1;
 
     API::TableRow row = peakparamws->getRow(ir);
-    for (auto &colname : colnames) {
+    for (const auto &colname : colnames) {
       if (colname == "H")
         row >> h;
       else if (colname == "K")

@@ -10,7 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <climits>
 #include <optional>
 
@@ -47,9 +47,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveISISNexus", "SaveNexus", "LoadNexusProcessed"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveNexus", "LoadNexusProcessed"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

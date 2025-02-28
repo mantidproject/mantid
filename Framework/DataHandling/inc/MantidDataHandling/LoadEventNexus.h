@@ -21,13 +21,13 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -92,7 +92,7 @@ public:
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
@@ -111,12 +111,12 @@ public:
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                const Kernel::NexusHDF5Descriptor &descriptor);
+                                const Kernel::NexusDescriptor &descriptor);
 
   /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
   template <typename T>
   static bool loadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
-                             Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
+                             Algorithm *alg, const Kernel::NexusDescriptor *descriptor = nullptr);
 
   /// Load instrument for Nexus file
   template <typename T>
@@ -126,7 +126,7 @@ public:
   /// Load instrument from IDF file specified by Nexus file
   template <typename T>
   static bool runLoadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
-                                Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
+                                Algorithm *alg, const Kernel::NexusDescriptor *descriptor = nullptr);
 
   static void loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS);
 
@@ -361,14 +361,13 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std:
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const std::string &entry_name,
-                                  const std::string &classType,
-                                  const Kernel::NexusHDF5Descriptor *descriptor = nullptr) {
+                                  const std::string &classType, const Kernel::NexusDescriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
   file.openGroup(entry_name, "NXentry");
 
-  // NexusHDF5Descriptor
+  // NexusDescriptor
   if (descriptor != nullptr) {
     // not an ISIS file
     if (!descriptor->isEntry("/" + entry_name + "/detector_1_events")) {
@@ -475,12 +474,12 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
 template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
                                        const std::string &top_entry_name, Algorithm *alg,
-                                       const Kernel::NexusHDF5Descriptor *descriptor) {
+                                       const Kernel::NexusDescriptor *descriptor) {
   std::string instrument;
   std::string instFilename;
 
   const bool isNexus = (descriptor == nullptr) ? LoadGeometry::isNexus(nexusfilename)
-                                               : LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries());
+                                               : LoadGeometry::isNexus(descriptor->getAllEntries());
 
   // Check if the geometry can be loaded directly from the Nexus file
   if (isNexus) {
@@ -604,7 +603,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
 /** Load the run number and other meta data from the given bank */
 template <typename T>
 void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                       const Kernel::NexusHDF5Descriptor &descriptor) {
+                                       const Kernel::NexusDescriptor &descriptor) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
@@ -612,7 +611,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   // get the title
   if (descriptor.isEntry("/" + entry_name + "/title", "SDS")) {
     file.openData("title");
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       std::string title = file.getStrData();
       if (!title.empty())
         WS->setTitle(title);
@@ -623,7 +622,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   // get the notes
   if (descriptor.isEntry("/" + entry_name + "/notes", "SDS")) {
     file.openData("notes");
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       std::string notes = file.getStrData();
       if (!notes.empty())
         WS->mutableRun().addProperty("file_notes", notes, true);
@@ -635,7 +634,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   if (descriptor.isEntry("/" + entry_name + "/run_number", "SDS")) {
     file.openData("run_number");
     std::string run;
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       run = file.getStrData();
     } else if (file.isDataInt()) {
       // inside ISIS the run_number type is int32
@@ -654,7 +653,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   if (descriptor.isEntry("/" + entry_name + "/experiment_identifier", "SDS")) {
     file.openData("experiment_identifier");
     std::string expId;
-    if (file.getInfo().type == ::NeXus::CHAR) {
+    if (file.getInfo().type == NXnumtype::CHAR) {
       expId = file.getStrData();
     }
     if (!expId.empty()) {
@@ -672,7 +671,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
         file.openData("name");
         const auto info = file.getInfo();
         std::string sampleName;
-        if (info.type == ::NeXus::CHAR) {
+        if (info.type == NXnumtype::CHAR) {
           if (info.dims.size() == 1) {
             sampleName = file.getStrData();
           } else { // something special for 2-d array
@@ -737,7 +736,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
 template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, T localWorkspace,
                                     const std::string &top_entry_name, Algorithm *alg,
-                                    const Kernel::NexusHDF5Descriptor *descriptor) {
+                                    const Kernel::NexusDescriptor *descriptor) {
 
   bool loadNexusInstrumentXML = true;
   if (alg->existsProperty("LoadNexusInstrumentXML"))

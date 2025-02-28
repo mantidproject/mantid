@@ -103,6 +103,8 @@ class QtVariantPropertyPrivate;
 class EXPORT_OPT_MANTIDQT_COMMON QtVariantProperty : public QtProperty {
 public:
   ~QtVariantProperty() override;
+  QtVariantProperty(const QtVariantProperty &) = delete;
+  QtVariantProperty &operator=(const QtVariantProperty &) = delete;
   QVariant value() const;
   QVariant attributeValue(const QString &attribute) const;
   int valueType() const;

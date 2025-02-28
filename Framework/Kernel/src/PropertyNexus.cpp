@@ -10,8 +10,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
@@ -141,28 +141,28 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
   file->openData("value");
   std::unique_ptr<Property> retVal = nullptr;
   switch (file->getInfo().type) {
-  case ::NeXus::FLOAT32:
+  case NXnumtype::FLOAT32:
     retVal = makeProperty<float>(file, group, times);
     break;
-  case ::NeXus::FLOAT64:
+  case NXnumtype::FLOAT64:
     retVal = makeProperty<double>(file, group, times);
     break;
-  case ::NeXus::INT32:
+  case NXnumtype::INT32:
     retVal = makeProperty<int32_t>(file, group, times);
     break;
-  case ::NeXus::UINT32:
+  case NXnumtype::UINT32:
     retVal = makeProperty<uint32_t>(file, group, times);
     break;
-  case ::NeXus::INT64:
+  case NXnumtype::INT64:
     retVal = makeProperty<int64_t>(file, group, times);
     break;
-  case ::NeXus::UINT64:
+  case NXnumtype::UINT64:
     retVal = makeProperty<uint64_t>(file, group, times);
     break;
-  case ::NeXus::CHAR:
+  case NXnumtype::CHAR:
     retVal = makeStringProperty(file, group, times);
     break;
-  case ::NeXus::UINT8: {
+  case NXnumtype::UINT8: {
     // Check the type at the group level. Boolean stored as UINT8
     file->closeData();
     const bool typeIsBool = file->hasAttr("boolean");
@@ -172,10 +172,13 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
       retVal = makeTimeSeriesBoolProperty(file, group, times);
     break;
   }
-  case ::NeXus::INT8:
-  case ::NeXus::INT16:
-  case ::NeXus::UINT16:
+  case NXnumtype::INT8:
+  case NXnumtype::INT16:
+  case NXnumtype::UINT16:
     retVal = nullptr;
+    break;
+  case NXnumtype::BAD:
+    throw std::runtime_error("Invalid data type found.");
     break;
   }
 
@@ -200,7 +203,7 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
 //----------------------------------------------------------------------------------------------
 
 std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
-                                       const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
+                                       const Mantid::Kernel::NexusDescriptor &fileInfo, const std::string &prefix) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets

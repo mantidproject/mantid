@@ -67,7 +67,7 @@ public:
 
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void initInstrumentList(const std::string &selectedInstrument = "") override;
+  std::string initInstrumentList(const std::string &selectedInstrument = "") override;
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   bool isProcessing() const override;

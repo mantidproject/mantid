@@ -35,8 +35,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
@@ -50,7 +50,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::NeXus;
 using namespace DataObjects;
@@ -68,7 +68,7 @@ using IntArray = std::vector<int>;
 // Struct to contain spectrum information.
 struct SpectraInfo {
   // Number of spectra
-  int nSpectra{0};
+  int64_t nSpectra{0};
   // Do we have any spectra
   bool hasSpectra{false};
   // Contains spectrum numbers for each workspace index
@@ -118,7 +118,7 @@ SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
     NXInt spectra_block = detgroup.openNXInt("spectra");
     spectra_block.load();
     spectraInfo.spectraNumbers = spectra_block.vecBuffer();
-    spectraInfo.nSpectra = spectra_block.dim0();
+    spectraInfo.nSpectra = static_cast<int>(spectra_block.dim0());
     spectraInfo.hasSpectra = true;
   } catch (std::runtime_error &) {
     spectraInfo.hasSpectra = false;
@@ -146,7 +146,7 @@ SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
   // Detector index - contains the index of the detector in the workspace
   NXInt det_index = detgroup.openNXInt("detector_index");
   det_index.load();
-  spectraInfo.nSpectra = det_index.dim0();
+  spectraInfo.nSpectra = static_cast<int>(det_index.dim0());
   spectraInfo.detectorIndex = det_index.vecBuffer();
 
   return spectraInfo;
@@ -192,7 +192,7 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else
@@ -296,7 +296,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
   NXDataSetTyped<double> errors(wsEntry, "errors");
   errors.openLocal();
 
-  const int nChannels = data.dim1();
+  const int64_t nChannels = data.dim1();
 
   int blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read
                      // 8 histograms at a time.
@@ -323,7 +323,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
     double *errorStart = errors();
     double *errorEnd = errorStart + nChannels;
 
-    int final(histIndex + blockSize);
+    int64_t final(histIndex + blockSize);
     while (histIndex < final) {
       auto &Y = periodWorkspace->mutableY(wsIndex);
       Y.assign(dataStart, dataEnd);
@@ -654,7 +654,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
   // range and/or list was going to be loaded)
   numspec = calculateWorkspaceSize(numspec, true);
 
-  int num_xbins = xbins.dim0();
+  auto num_xbins = xbins.dim0();
   if (xbins.rank() == 2) {
     num_xbins = xbins.dim1();
   }
@@ -816,50 +816,51 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
 
     if (info.rank == 1) {
-      if (info.type == NX_FLOAT64) {
+      if (info.type == NXnumtype::FLOAT64) {
         loadNumericColumn<double, double>(nx_tw, dataSetName, workspace, "double");
-      } else if (info.type == NX_INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         loadNumericColumn<int, int32_t>(nx_tw, dataSetName, workspace, "int");
-      } else if (info.type == NX_UINT32) {
+      } else if (info.type == NXnumtype::UINT32) {
         loadNumericColumn<uint32_t, uint32_t>(nx_tw, dataSetName, workspace, "uint");
-      } else if (info.type == NX_INT64) {
+      } else if (info.type == NXnumtype::INT64) {
         loadNumericColumn<int64_t, int64_t>(nx_tw, dataSetName, workspace, "long64");
-      } else if (info.type == NX_UINT64) {
+      } else if (info.type == NXnumtype::UINT64) {
         loadNumericColumn<size_t, uint64_t>(nx_tw, dataSetName, workspace, "size_t");
-      } else if (info.type == NX_FLOAT32) {
+      } else if (info.type == NXnumtype::FLOAT32) {
         loadNumericColumn<float, float>(nx_tw, dataSetName, workspace, "float");
-      } else if (info.type == NX_UINT8) {
+      } else if (info.type == NXnumtype::UINT8) {
         loadNumericColumn<bool, bool>(nx_tw, dataSetName, workspace, "bool");
       } else {
-        throw std::logic_error("Column with Nexus data type " + std::to_string(info.type) + " cannot be loaded.");
+        throw std::logic_error("Column with Nexus data type " + std::to_string(static_cast<int>(info.type)) +
+                               " cannot be loaded.");
       }
     } else if (info.rank == 2) {
-      if (info.type == NX_CHAR) {
+      if (info.type == NXnumtype::CHAR) {
         NXChar data = nx_tw.openNXChar(dataSetName);
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
           workspace->addColumn("str", columnTitle);
-          int nRows = info.dims[0];
+          nxdimsize_t nRows = info.dims[0];
           workspace->setRowCount(nRows);
 
-          const int maxStr = info.dims[1];
+          nxdimsize_t const maxStr = info.dims[1];
           data.load();
-          for (int iR = 0; iR < nRows; ++iR) {
+          for (int64_t iR = 0; iR < nRows; ++iR) {
             auto &cellContents = workspace->cell<std::string>(iR, columnNumber - 1);
             auto startPoint = data() + maxStr * iR;
             cellContents.assign(startPoint, startPoint + maxStr);
             boost::trim_right(cellContents);
           }
         }
-      } else if (info.type == NX_INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         loadVectorColumn<int>(nx_tw, dataSetName, workspace, "vector_int");
-      } else if (info.type == NX_FLOAT64) {
+      } else if (info.type == NXnumtype::FLOAT64) {
         auto data = nx_tw.openNXDouble(dataSetName);
         if (data.attributes("interpret_as") == "V3D") {
           loadV3DColumn(data, workspace);
@@ -931,14 +932,14 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
   if (!columnTitle.empty()) {
     ColumnVector<V3D> col = tableWs->addColumn("V3D", columnTitle);
 
-    const int rowCount = data.dim0();
+    const int64_t rowCount = data.dim0();
 
     // This might've been done already, but doing it twice shouldn't do any harm
     tableWs->setRowCount(rowCount);
 
     data.load();
 
-    for (int i = 0; i < rowCount; ++i) {
+    for (int64_t i = 0; i < rowCount; ++i) {
       auto &cell = col[i]; // cppcheck-suppress constVariableReference
       cell(data(i, 0), data(i, 1), data(i, 2));
     }
@@ -963,14 +964,14 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
 
   NXData nx_tw = entry.openNXData("peaks_workspace");
 
-  int columnNumber = 1;
-  int numberPeaks = 0;
+  size_t columnNumber = 1;
+  size_t numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
@@ -981,7 +982,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     // determine number of peaks
     // here we assume that a peaks_table has always one column of doubles
 
-    if (info.type == NX_FLOAT64) {
+    if (info.type == NXnumtype::FLOAT64) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
@@ -1055,7 +1056,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
   if (convention != m_QConvention)
     qSign = -1.0;
 
-  for (int r = 0; r < numberPeaks; r++) {
+  for (size_t r = 0; r < numberPeaks; r++) {
     // Create individual LeanElasticPeak
     const auto &goniometer = peakWS->run().getGoniometer();
     LeanElasticPeak peak;
@@ -1069,7 +1070,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
@@ -1077,7 +1078,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
@@ -1085,7 +1086,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
@@ -1093,7 +1094,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setIntensity(val);
       }
@@ -1101,7 +1102,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setSigmaIntensity(val);
       }
@@ -1109,7 +1110,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setBinCount(val);
       }
@@ -1117,7 +1118,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setWavelength(val);
       }
@@ -1125,7 +1126,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         int ival = nxInt[r];
         if (ival != -1)
           peakWS->getPeak(r).setRunNumber(ival);
@@ -1134,7 +1135,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         int ival = nxInt[r];
         peakWS->getPeak(r).setPeakNumber(ival);
       }
@@ -1142,7 +1143,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setAbsorptionWeightedPathLength(val);
       }
@@ -1151,7 +1152,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       nxDouble.load();
       Kernel::Matrix<double> gm(3, 3, false);
       int k = 0;
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         for (int j = 0; j < 9; j++) {
           double val = nxDouble[k];
           k++;
@@ -1175,9 +1176,9 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      const int maxShapeJSONLength = info.dims[1];
+      nxdimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
-      for (int i = 0; i < numberPeaks; ++i) {
+      for (size_t i = 0; i < numberPeaks; ++i) {
 
         // iR = peak row number
         auto startPoint = data() + (maxShapeJSONLength * i);
@@ -1194,7 +1195,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D qlab;
-      for (int r = 0; r < numberPeaks; ++r) {
+      for (size_t r = 0; r < numberPeaks; ++r) {
         qlab = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setQLabFrame(qlab, 0.0);
       }
@@ -1202,7 +1203,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D hkl;
-      for (int r = 0; r < numberPeaks; ++r) {
+      for (size_t r = 0; r < numberPeaks; ++r) {
         hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntHKL(hkl);
       }
@@ -1210,14 +1211,14 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D mnp;
-      for (int r = 0; r < numberPeaks; ++r) {
+      for (size_t r = 0; r < numberPeaks; ++r) {
         mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
       }
     }
 
     // After all columns read set IntHKL if not set
-    for (int r = 0; r < numberPeaks; r++) {
+    for (size_t r = 0; r < numberPeaks; r++) {
       V3D intHKL = peakWS->getPeak(r).getIntHKL();
       if (intHKL.norm2() == 0) {
         intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
@@ -1243,14 +1244,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 
   NXData nx_tw = entry.openNXData("peaks_workspace");
 
-  int columnNumber = 1;
-  int numberPeaks = 0;
+  size_t columnNumber = 1;
+  size_t numberPeaks = 0;
   std::vector<std::string> columnNames;
   do {
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NX_ERROR) {
+    if (info.stat == NXstatus::NX_ERROR) {
       // Assume we done last column of table
       break;
     }
@@ -1261,7 +1262,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     // determine number of peaks
     // here we assume that a peaks_table has always one column of doubles
 
-    if (info.type == NX_FLOAT64) {
+    if (info.type == NXnumtype::FLOAT64) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
@@ -1335,7 +1336,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   if (convention != m_QConvention)
     qSign = -1.0;
 
-  for (int r = 0; r < numberPeaks; r++) {
+  for (size_t r = 0; r < numberPeaks; r++) {
     // Warning! Do not use anything other than the default constructor here
     // It is currently important (10/05/17) that the DetID (set in the loop
     // below this one) is set before QLabFrame as this causes Peak to ray trace
@@ -1354,7 +1355,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         int ival = nxInt[r];
         if (ival != -1)
           peakWS->getPeak(r).setDetectorID(ival);
@@ -1363,7 +1364,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
@@ -1371,7 +1372,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
@@ -1379,7 +1380,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
@@ -1387,7 +1388,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setIntensity(val);
       }
@@ -1395,7 +1396,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setSigmaIntensity(val);
       }
@@ -1403,7 +1404,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setBinCount(val);
       }
@@ -1411,7 +1412,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setWavelength(val);
       }
@@ -1419,7 +1420,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         int ival = nxInt[r];
         if (ival != -1)
           peakWS->getPeak(r).setRunNumber(ival);
@@ -1428,7 +1429,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         int ival = nxInt[r];
         peakWS->getPeak(r).setPeakNumber(ival);
       }
@@ -1436,7 +1437,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
-      for (int r = 0; r < numberPeaks; r++) {
+      for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setAbsorptionWeightedPathLength(val);
       }
@@ -1444,9 +1445,9 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       Kernel::Matrix<double> gm(3, 3, false);
-      int k = 0;
-      for (int r = 0; r < numberPeaks; r++) {
-        for (int j = 0; j < 9; j++) {
+      size_t k = 0;
+      for (size_t r = 0; r < numberPeaks; r++) {
+        for (size_t j = 0; j < 9; j++) {
           double val = nxDouble[k];
           k++;
           gm[j % 3][j / 3] = val;
@@ -1469,9 +1470,9 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      const int maxShapeJSONLength = info.dims[1];
+      nxdimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
-      for (int i = 0; i < numberPeaks; ++i) {
+      for (size_t i = 0; i < numberPeaks; ++i) {
 
         // iR = peak row number
         auto startPoint = data() + (maxShapeJSONLength * i);
@@ -1488,7 +1489,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D hkl;
-      for (int r = 0; r < numberPeaks; ++r) {
+      for (size_t r = 0; r < numberPeaks; ++r) {
         hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntHKL(hkl);
       }
@@ -1496,14 +1497,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D mnp;
-      for (int r = 0; r < numberPeaks; ++r) {
+      for (size_t r = 0; r < numberPeaks; ++r) {
         mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
       }
     }
   }
   // After all columns read set IntHKL if not set
-  for (int r = 0; r < numberPeaks; r++) {
+  for (size_t r = 0; r < numberPeaks; r++) {
     V3D intHKL = peakWS->getPeak(r).getIntHKL();
     if (intHKL.norm2() == 0) {
       intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
@@ -1532,10 +1533,10 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                                                 const double &progressStart,
                                                                 const double &progressRange, const NXEntry &mtd_entry,
-                                                                const int xlength, std::string &workspaceType) {
+                                                                const int64_t xlength, std::string &workspaceType) {
   // Filter the list of spectra to process, applying min/max/list options
   NXDataSetTyped<double> data = wksp_cls.openDoubleData();
-  int nchannels = data.dim1();
+  int64_t nchannels = data.dim1();
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);
@@ -1640,8 +1641,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
   int read_stop = (fullblocks * blocksize);
   const double progressBegin = progressStart + 0.25 * progressRange;
   const double progressScaler = 0.75 * progressRange;
-  int hist_index = 0;
-  int wsIndex = 0;
+  int64_t hist_index = 0;
+  int64_t wsIndex = 0;
   if (m_shared_bins) {
     // if spectrum min,max,list properties are set
     if (m_interval || m_list) {
@@ -1668,15 +1669,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
         }
         size_t finalblock = m_spec_max - 1 - read_stop;
         if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, static_cast<int>(finalblock), nchannels,
-                    hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, finalblock, nchannels, hist_index,
+                    wsIndex, local_workspace);
         }
       }
       // if spectrum list property is set read each spectrum separately by
       // setting blocksize=1
       if (m_list) {
         for (const auto itr : m_spec_list) {
-          int specIndex = itr - 1;
+          int64_t specIndex = itr - 1;
           progress(progressBegin +
                        progressScaler * static_cast<double>(specIndex) / static_cast<double>(m_spec_list.size()),
                    "Reading workspace data...");
@@ -1693,8 +1694,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
       }
       size_t finalblock = total_specs - read_stop;
       if (finalblock > 0) {
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, static_cast<int>(finalblock), nchannels,
-                  hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, finalblock, nchannels, hist_index, wsIndex,
+                  local_workspace);
       }
     }
 
@@ -1719,14 +1720,14 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
         }
         size_t finalblock = m_spec_max - 1 - read_stop;
         if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, static_cast<int>(finalblock),
-                    nchannels, hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, finalblock, nchannels, hist_index,
+                    wsIndex, local_workspace);
         }
       }
       //
       if (m_list) {
         for (const auto itr : m_spec_list) {
-          int specIndex = itr - 1;
+          int64_t specIndex = itr - 1;
           progress(progressBegin + progressScaler * static_cast<double>(specIndex) / static_cast<double>(read_stop),
                    "Reading workspace data...");
           loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, 1, nchannels, specIndex, wsIndex,
@@ -1742,8 +1743,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
       }
       size_t finalblock = total_specs - read_stop;
       if (finalblock > 0) {
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, static_cast<int>(finalblock),
-                  nchannels, hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, finalblock, nchannels, hist_index,
+                  wsIndex, local_workspace);
       }
     }
 
@@ -1820,7 +1821,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   xbins.load();
   std::string unit1 = xbins.attributes("units");
   // Non-uniform x bins get saved as a 2D 'axis1' dataset
-  int xlength(-1);
+  int64_t xlength(-1);
   if (xbins.rank() == 2) {
     xlength = xbins.dim1();
     m_shared_bins = false;
@@ -2148,7 +2149,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
-  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
+  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NXstatus::NX_ERROR) {
     return;
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
@@ -2157,13 +2158,13 @@ void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::Matri
   bins.load();
   NXDouble weights = wksp_cls.openNXDouble("mask_weights");
   weights.load();
-  const int n = spec.dim0();
-  const int n1 = n - 1;
+  const int64_t n = spec.dim0();
+  const int64_t n1 = n - 1;
   for (int i = 0; i < n; ++i) {
-    int si = spec(i, 0);
-    int j0 = spec(i, 1);
-    int j1 = i < n1 ? spec(i + 1, 1) : bins.dim0();
-    for (int j = j0; j < j1; ++j) {
+    int64_t si = spec(i, 0);
+    int64_t j0 = spec(i, 1);
+    int64_t j1 = i < n1 ? spec(i + 1, 1) : bins.dim0();
+    for (int64_t j = j0; j < j1; ++j) {
       local_workspace->flagMasked(si, bins[j], weights[j]);
     }
   }
@@ -2187,7 +2188,7 @@ void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::Matri
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors, bool hasXErrors,
-                                   int blocksize, int nchannels, int &hist,
+                                   int64_t blocksize, int64_t nchannels, int64_t &hist,
                                    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   errors.load(blocksize, hist);
@@ -2218,7 +2219,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
     xErrors_end = xErrors_start + dx_increment;
   }
 
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while (hist < final) {
     auto &Y = local_workspace->mutableY(hist);
     Y.assign(data_start, data_end);
@@ -2265,7 +2266,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors, bool hasXErrors,
-                                   int blocksize, int nchannels, int &hist, int &wsIndex,
+                                   int64_t blocksize, int64_t nchannels, int64_t &hist, int64_t &wsIndex,
                                    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   errors.load(blocksize, hist);
@@ -2296,7 +2297,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
     xErrors_end = xErrors_start + dx_increment;
   }
 
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while (hist < final) {
     auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
@@ -2343,8 +2344,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
                                    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors, bool hasXErrors,
-                                   NXDouble &xbins, int blocksize, int nchannels, int &hist, int &wsIndex,
-                                   const API::MatrixWorkspace_sptr &local_workspace) {
+                                   NXDouble &xbins, int64_t blocksize, int64_t nchannels, int64_t &hist,
+                                   int64_t &wsIndex, const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   double *data_start = data();
   double *data_end = data_start + nchannels;
@@ -2369,10 +2370,10 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data, NXDataSetTyped<
     rb_workspace = std::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   xbins.load(blocksize, hist);
-  const int nxbins(xbins.dim1());
+  const int64_t nxbins(xbins.dim1());
   double *xbin_start = xbins();
   double *xbin_end = xbin_start + nxbins;
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
 
   if (hasXErrors) {
     xErrors.load(blocksize, hist);

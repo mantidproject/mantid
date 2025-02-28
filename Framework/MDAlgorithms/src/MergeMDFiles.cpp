@@ -14,7 +14,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <boost/scoped_ptr.hpp>

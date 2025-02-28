@@ -26,7 +26,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MeshObject)
 
-boost::python::object wrapMeshWithNDArray(MeshObject &self) {
+boost::python::object wrapMeshWithNDArray(const MeshObject &self) {
   // PyArray_SimpleNewFromData doesn't interact well with smart pointers so use raw pointer
   const auto &vertices = self.getV3Ds();
   const auto &triangles = self.getTriangles();

@@ -333,15 +333,12 @@ void MatrixWorkspace::setPlotType(const std::string &t) {
   StringListValidator v(validPlotTypes);
 
   if (v.isValid(t) == "") {
-    if (run.hasProperty("plot_type"))
-      run.addProperty("plot_type", t, true);
-    else
-      run.addProperty("plot_type", t, false);
+    run.addProperty("plot_type", t, true);
   } else {
     std::string validValues = std::accumulate(
         validPlotTypes.begin() + 1, validPlotTypes.end(), validPlotTypes.front(),
         [](const std::string &valuesString, const std::string &plotType) { return valuesString + ", " + plotType; });
-    g_log.warning("Invalid plot type '" + t + "'. Must be one of: " + validValues);
+    throw std::invalid_argument("Invalid plot type '" + t + "'. Must be one of: " + validValues);
   }
 }
 
@@ -375,7 +372,7 @@ void MatrixWorkspace::setMarkerStyle(const std::string &markerType) {
                         [](const std::string &valuesString, const std::string &markerStyle) {
                           return valuesString + ", " + markerStyle;
                         });
-    g_log.warning("Invalid marker type '" + markerType + "'. Must be one of: " + validValues);
+    throw std::invalid_argument("Invalid marker type '" + markerType + "'. Must be one of: " + validValues);
   }
 }
 

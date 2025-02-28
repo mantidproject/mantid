@@ -1,7 +1,29 @@
-set(SRC_FILES src/H5Util.cpp src/MuonNexusReader.cpp src/NexusClasses.cpp)
+set(SRC_FILES
+    src/H5Util.cpp
+    src/NexusClasses.cpp
+    src/napi.cpp
+    src/napi4.cpp
+    src/napi5.cpp
+    src/NeXusException.cpp
+    src/NeXusFile.cpp
+    src/nxstack.cpp
+    src/stptok.cpp
+)
 
-set(INC_FILES inc/MantidNexus/H5Util.h inc/MantidNexus/MuonNexusReader.h inc/MantidNexus/NexusClasses.h
-              inc/MantidNexus/NexusIOHelper.h
+set(INC_FILES
+    inc/MantidNexus/H5Util.h
+    inc/MantidNexus/NexusClasses.h
+    inc/MantidNexus/NexusIOHelper.h
+    inc/MantidNexus/NeXusFile_fwd.h
+    inc/MantidNexus/napi.h
+    inc/MantidNexus/napi4.h
+    inc/MantidNexus/napi5.h
+    inc/MantidNexus/napiconfig.h
+    inc/MantidNexus/napi_internal.h
+    inc/MantidNexus/NeXusException.hpp
+    inc/MantidNexus/NeXusFile.hpp
+    inc/MantidNexus/nx_stptok.h
+    inc/MantidNexus/nxstack.h
 )
 
 set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h)
@@ -19,8 +41,13 @@ add_library(Mantid::Nexus ALIAS Nexus)
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
+
 # Set the name of the generated library
 set_target_properties(Nexus PROPERTIES OUTPUT_NAME MantidNexus COMPILE_DEFINITIONS IN_MANTID_NEXUS)
+
+# H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
+target_compile_definitions(Nexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
+target_link_libraries(Nexus PRIVATE ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -31,7 +58,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::NexusCpp)
+target_link_libraries(Nexus PRIVATE Poco::Foundation)
 
 # Add the unit tests directory
 add_subdirectory(test)
@@ -40,7 +67,7 @@ add_subdirectory(test)
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Nexus> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(Nexus TRUE)
+generate_mantid_export_header(Nexus FALSE)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidNexusTargets")

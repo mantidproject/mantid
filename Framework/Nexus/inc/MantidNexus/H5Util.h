@@ -19,6 +19,7 @@ class DataSpace;
 class DataSet;
 class DSetCreatPropList;
 class DataType;
+class FileAccPropList;
 class Group;
 class H5File;
 class H5Object;
@@ -29,6 +30,12 @@ namespace NeXus {
 namespace H5Util {
 /** H5Util : TODO: DESCRIPTION
  */
+
+/** Controls whether narrowing is allowed within type coercion. */
+enum class Narrowing : bool { Allow = true, Prevent = false };
+
+/** Default file access is H5F_CLOSE_STRONG. This should be set consistently for all access of a file. */
+MANTID_NEXUS_DLL H5::FileAccPropList defaultFileAcc();
 
 /// Create a 1D data-space to hold data of length.
 MANTID_NEXUS_DLL H5::DataSpace getDataSpace(const size_t length);
@@ -85,17 +92,19 @@ MANTID_NEXUS_DLL bool hasAttribute(const H5::H5Object &object, const char *attri
 MANTID_NEXUS_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
                                           std::string &output);
 
-template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template <typename NumT, Narrowing narrow = Narrowing::Allow>
+NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT>
+template <typename NumT, Narrowing narrow = Narrowing::Allow>
 std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT>
+template <typename NumT, Narrowing narrow = Narrowing::Allow>
 void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template <typename NumT, Narrowing narrow = Narrowing::Allow>
+std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template <typename NumT>
+template <typename NumT, Narrowing narrow = Narrowing::Allow>
 void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output,
                        const size_t length = std::numeric_limits<size_t>::max(),
                        const size_t offset = static_cast<size_t>(0));

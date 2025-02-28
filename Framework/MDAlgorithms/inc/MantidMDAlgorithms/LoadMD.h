@@ -41,7 +41,7 @@ public:
   const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   /// Initialise the properties
@@ -57,8 +57,7 @@ private:
 
   void loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws,
-                ::NeXus::NXnumtype dataType);
+  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws, NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();

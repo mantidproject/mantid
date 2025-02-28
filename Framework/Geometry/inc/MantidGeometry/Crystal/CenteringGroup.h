@@ -43,7 +43,7 @@ public:
 
   CenteringGroup(const std::string &centeringSymbol);
   CenteringType getType() const;
-  std::string getSymbol() const;
+  const std::string &getSymbol() const;
 
 protected:
   CenteringType m_type;

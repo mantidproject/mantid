@@ -15,7 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
@@ -356,10 +356,10 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, con
       } else {
         if (safeOpenpath(fin, it->second)) {
           NeXus::Info inf = fin->getInfo();
-          if (inf.type == ::NeXus::CHAR) {
+          if (inf.type == NXnumtype::CHAR) {
             std::string data = fin->getStrData();
             r.addProperty(it->first, data, true);
-          } else if (inf.type == ::NeXus::FLOAT32 || inf.type == ::NeXus::FLOAT64) {
+          } else if (inf.type == NXnumtype::FLOAT32 || inf.type == NXnumtype::FLOAT64) {
             std::vector<double> data;
             fin->getDataCoerce(data);
             r.addProperty(it->first, data, true);

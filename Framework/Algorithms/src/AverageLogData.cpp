@@ -66,12 +66,12 @@ void AverageLogData::exec() {
     throw std::runtime_error("There is no property " + logname + " in the workspace.");
   }
 
-  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
+  const auto *slog = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
   if (!slog) {
     throw std::runtime_error("Problem reading property " + logname);
   }
-  Kernel::TimeSeriesProperty<double> *pclog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData("proton_charge"));
+  const Kernel::TimeSeriesProperty<double> *pclog =
+      dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData("proton_charge"));
   if (!pclog) {
     throw std::runtime_error("Problem reading the proton charge property");
   }

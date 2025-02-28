@@ -204,8 +204,8 @@ void SaveNexusProcessed::getWSIndexList(std::vector<int> &indices, const MatrixW
 void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
                                 std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile, const bool keepFile,
                                 optional_size_t entryNumber) {
-  // TODO: Remove?
-  NXMEnableErrorReporting();
+  //
+  //
 
   // Retrieve the filename from the properties
   const std::string filename = getPropertyValue("Filename");
@@ -269,9 +269,6 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   nexusFile->resetProgress(&prog_init);
   nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
-  // Equivalent C++ API handle
-  ::NeXus::File cppFile(nexusFile->fileID);
-
   prog_init.reportIncrement(1, "Opening file");
   if (nexusFile->writeNexusProcessedHeader(title, wsName) != 0)
     throw Exception::FileError("Failed to write to file", filename);
@@ -281,7 +278,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   // write instrument data, if present and writer enabled
   if (matrixWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    matrixWorkspace->saveExperimentInfoNexus(&cppFile, saveLegacyInstrument());
+    matrixWorkspace->saveExperimentInfoNexus(nexusFile->filehandle().get(), saveLegacyInstrument());
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
@@ -312,23 +309,23 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
     }
 
     if (saveLegacyInstrument()) {
-      cppFile.openGroup("instrument", "NXinstrument");
-      cppFile.makeGroup("detector", "NXdetector", true);
+      nexusFile->filehandle()->openGroup("instrument", "NXinstrument");
+      nexusFile->filehandle()->makeGroup("detector", "NXdetector", true);
 
-      cppFile.putAttr("version", 1);
-      saveSpectraDetectorMapNexus(*matrixWorkspace, &cppFile, indices, ::NeXus::LZW);
-      saveSpectrumNumbersNexus(*matrixWorkspace, &cppFile, indices, ::NeXus::LZW);
-      cppFile.closeGroup();
-      cppFile.closeGroup();
+      nexusFile->filehandle()->putAttr("version", 1);
+      saveSpectraDetectorMapNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, ::NeXus::LZW);
+      saveSpectrumNumbersNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, ::NeXus::LZW);
+      nexusFile->filehandle()->closeGroup();
+      nexusFile->filehandle()->closeGroup();
     }
 
   } // finish matrix workspace specifics
 
   if (peaksWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    peaksWorkspace->saveExperimentInfoNexus(&cppFile);
+    peaksWorkspace->saveExperimentInfoNexus(nexusFile->filehandle().get());
     prog_init.reportIncrement(1, "Writing sample and instrument");
-    peaksWorkspace->saveNexus(&cppFile);
+    peaksWorkspace->saveNexus(nexusFile->filehandle().get());
   } else if (tableWorkspace) {
     nexusFile->writeNexusTableWorkspace(tableWorkspace, "table_workspace");
   }
@@ -346,7 +343,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
     }
   }
 
-  inputWorkspace->history().saveNexus(&cppFile);
+  inputWorkspace->history().saveNexus(nexusFile->filehandle().get());
   nexusFile->closeGroup();
 }
 

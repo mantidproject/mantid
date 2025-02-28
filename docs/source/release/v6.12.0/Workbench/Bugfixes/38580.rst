@@ -1,1 +1,0 @@
-- Legends now automatically snap back to the default position if dragged off-screen.

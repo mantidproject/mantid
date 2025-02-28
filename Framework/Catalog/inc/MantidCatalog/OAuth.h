@@ -38,10 +38,10 @@ public:
              std::optional<std::string> refreshToken);
   ~OAuthToken();
 
-  std::string tokenType() const;
+  const std::string &tokenType() const;
   int expiresIn() const;
-  std::string accessToken() const;
-  std::string scope() const;
+  const std::string &accessToken() const;
+  const std::string &scope() const;
   std::optional<std::string> refreshToken() const;
 
   bool isExpired() const;

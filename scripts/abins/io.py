@@ -8,6 +8,7 @@ import hashlib
 import io
 import json
 import os
+from pathlib import Path
 import subprocess
 import shutil
 from typing import List, Optional
@@ -19,7 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, validate_call
 
 import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, BUF, HDF5_ATTR_TYPE
-from mantid.kernel import logger, ConfigService
+from mantid.kernel import logger
 
 
 class IO(BaseModel):
@@ -34,6 +35,7 @@ class IO(BaseModel):
     setting: str = ""
     autoconvolution: int = 10
     temperature: float = None
+    cache_directory: Path
 
     @staticmethod
     def _dir_is_not_writeable(directory: str):
@@ -52,6 +54,17 @@ class IO(BaseModel):
 
         return False
 
+    def get_save_dir_path(self):
+        from mantid.kernel import ConfigService
+
+        if self.cache_directory:
+            return self.cache_directory
+
+        else:
+            raise Exception("No directory")
+
+        return Path(ConfigService.getString("defaultsave.directory"))
+
     def model_post_init(self, __context):
         try:
             self._hash_input_filename = self.calculate_ab_initio_file_hash()
@@ -59,6 +72,9 @@ class IO(BaseModel):
             logger.error(str(err))
         except ValueError as err:
             logger.error(str(err))
+
+        # Set default if necessary
+        self.cache_directory = self.get_save_dir_path()
 
         # extract name of file from the full path in the platform independent way
         filename = os.path.basename(self.input_filename)
@@ -68,13 +84,11 @@ class IO(BaseModel):
         else:
             core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5
 
-        if self._dir_is_not_writeable(self.get_save_dir_path()):
+        if self._dir_is_not_writeable(str(self.cache_directory)):
             raise Exception(
-                "Could not write a file to the default save directory: "
-                "this is required for caching. Please set 'Default Save Directory' to "
-                "a writeable location using the File/Manage User Directories interface."
+                f"Could not write a file to the cache directory {self.cache_directory}. Please check this location is reasonable."
             )
-        self._hdf_filename = os.path.join(self.get_save_dir_path(), core_name + ".hdf5")  # name of hdf file
+        self._hdf_filename = str(self.cache_directory / f"{core_name}.hdf5")
 
         self._attributes = {}  # attributes for group
 
@@ -84,10 +98,6 @@ class IO(BaseModel):
         self._data = {}
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
-
-    @staticmethod
-    def get_save_dir_path() -> str:
-        return ConfigService.getString("defaultsave.directory")
 
     def _valid_hash(self):
         """

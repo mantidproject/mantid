@@ -12,14 +12,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -37,7 +37,7 @@ const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexu
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   const auto &entries = descriptor.getAllEntries();
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {

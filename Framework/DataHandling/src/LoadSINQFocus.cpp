@@ -63,7 +63,7 @@ const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"
 int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the SINQ (to date Loader only valid for focus)
-  if (descriptor.pathExists("/entry1/FOCUS/SINQ")) {
+  if (descriptor.isEntry("/entry1/FOCUS/SINQ")) {
     return 80;
   } else {
     return 0;

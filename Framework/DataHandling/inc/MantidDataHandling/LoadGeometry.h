@@ -28,7 +28,7 @@ bool isIDF(const std::string &filename);
 bool isNexus(const std::string &filename);
 /// Determine if the Geometry file type is Nexus
 /// version that reuses the metadata container
-bool isNexus(const std::string &filename, const std::map<std::string, std::set<std::string>> &allEntries);
+bool isNexus(const std::map<std::string, std::set<std::string>> &allEntries);
 /// List allowed file extensions for geometry
 const std::vector<std::string> validExtensions();
 

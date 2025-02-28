@@ -115,7 +115,7 @@ API::Workspace_sptr EventWorkspaceCollection::combinedWorkspace() {
     final = getSingleHeldWorkspace();
   } else {
     auto wsg = std::make_shared<API::WorkspaceGroup>();
-    for (auto &ws : m_WsVec) {
+    for (const auto &ws : m_WsVec) {
       wsg->addWorkspace(ws);
     }
     final = wsg;

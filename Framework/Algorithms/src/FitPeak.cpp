@@ -974,17 +974,6 @@ void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
 double FitOneSinglePeak::getFitCostFunctionValue() { return m_bestRwp; }
 
 //----------------------------------------------------------------------------------------------
-/**
- * Get the fitting error of the peak function
- */
-std::map<std::string, double> FitOneSinglePeak::getPeakError() { return m_fitErrorPeakFunc; }
-
-/**
- * Get the fitting error of the background function
- */
-std::map<std::string, double> FitOneSinglePeak::getBackgroundError() { return m_fitErrorBkgdFunc; }
-
-//----------------------------------------------------------------------------------------------
 void FitOneSinglePeak::exec() { throw runtime_error("Not used."); }
 
 //----------------------------------------------------------------------------------------------

@@ -30,7 +30,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <vector>
@@ -44,7 +44,7 @@ using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXus
 
 namespace Mantid::MDAlgorithms {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMD)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -60,7 +60,7 @@ LoadMD::LoadMD()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMD::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence = 0;
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
   if (allEntries.count("NXentry") == 1) {
@@ -138,7 +138,7 @@ void LoadMD::execLoader() {
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
   // The main entry
-  const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
+  const std::shared_ptr<Mantid::Kernel::NexusDescriptor> fileInfo = getFileInfo();
 
   std::string entryName;
   if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
@@ -250,8 +250,7 @@ void LoadMD::execLoader() {
  * @param ws
  * @param dataType
  */
-void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws,
-                      ::NeXus::NXnumtype dataType) {
+void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
   m_file->openData(name);
   if (m_file->getInfo().type != dataType)
     throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
@@ -307,10 +306,10 @@ void LoadMD::loadHisto() {
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
   // Load each data slab
-  this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
+  this->loadSlab("signal", ws->mutableSignalArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws, NXnumtype::FLOAT64);
+  this->loadSlab("mask", ws->mutableMaskArray(), ws, NXnumtype::INT8);
 
   m_file->close();
 

@@ -27,7 +27,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexusV2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
 using namespace Kernel;
 using namespace API;
@@ -52,7 +52,7 @@ LoadMuonNexusV2::LoadMuonNexusV2()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
+int LoadMuonNexusV2::confidence(NexusDescriptor &descriptor) const {
   // Without this entry we cannot use LoadISISNexus
   if (!descriptor.isEntry(NeXusEntry::RAWDATA, "NXentry")) {
     return 0;
@@ -67,7 +67,7 @@ int LoadMuonNexusV2::confidence(NexusHDF5Descriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
 
-  ::NeXus::File file(descriptor.getFilename());
+  ::NeXus::File file(descriptor.filename());
   file.openPath(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {

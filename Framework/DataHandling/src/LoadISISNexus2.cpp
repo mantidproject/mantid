@@ -25,7 +25,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -78,7 +78,7 @@ LoadISISNexus2::LoadISISNexus2()
  * be used
  */
 int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
+  if (descriptor.isEntry("/raw_data_1", "NXentry")) {
     // It also could be an Event Nexus file or a TOFRaw file,
     // so confidence is set to less than 80.
     return 75;
@@ -283,7 +283,7 @@ void LoadISISNexus2::exec() {
     const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
     const std::string prop_name = "OutputWorkspace_";
 
-    for (int p = 1; p <= m_loadBlockInfo.getNumberOfPeriods(); ++p) {
+    for (std::size_t p = 1; p <= m_loadBlockInfo.getNumberOfPeriods(); ++p) {
       std::ostringstream os;
       os << p;
       m_progress->report("Loading period " + os.str());
@@ -344,7 +344,7 @@ void LoadISISNexus2::exec() {
         WorkspaceGroup_sptr monitor_group(new WorkspaceGroup);
         monitor_group->setTitle(monitor_workspace->getTitle());
 
-        for (int p = 1; p <= m_detBlockInfo.getNumberOfPeriods(); ++p) {
+        for (std::size_t p = 1; p <= m_detBlockInfo.getNumberOfPeriods(); ++p) {
           std::ostringstream os;
           os << "_" << p;
           m_progress->report("Loading period " + os.str());
@@ -352,7 +352,7 @@ void LoadISISNexus2::exec() {
             monitor_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
                 WorkspaceFactory::Instance().create(period_free_workspace));
             loadPeriodData(p, entry, monitor_workspace, m_load_selected_spectra);
-            monLogCreator.addPeriodLogs(p, monitor_workspace->mutableRun());
+            monLogCreator.addPeriodLogs(static_cast<int>(p), monitor_workspace->mutableRun());
             // Check consistency of logs data for multi-period workspaces and
             // raise
             // warnings where necessary.
@@ -454,7 +454,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexclu
 
   // Check the entry number
   m_entrynumber = getProperty("EntryNumber");
-  if (static_cast<int>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods() || m_entrynumber < 0) {
+  if (static_cast<size_t>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods()) {
     std::string err = "Invalid entry number entered. File contains " +
                       std::to_string(m_loadBlockInfo.getNumberOfPeriods()) + " period. ";
     throw std::invalid_argument(err);
@@ -975,7 +975,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
   NXInt data = nxData.openIntData();
 
   auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
-  populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets, data.dim0() /*Number of Periods*/,
+  populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets,
+                                          static_cast<int>(data.dim0()) /*Number of Periods*/,
                                           data.dim2() /*Number of channels*/, monitorSpectra);
 
   // We should handle legacy files which include the spectrum number of the

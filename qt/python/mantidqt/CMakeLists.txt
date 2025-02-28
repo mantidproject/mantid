@@ -105,6 +105,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
     mantidqt/widgets/fitpropertybrowser/test/test_interactive_tool.py
+    mantidqt/widgets/helpwindow/test/test_helpwindowmodel.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_presenter.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py

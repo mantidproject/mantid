@@ -529,7 +529,7 @@ target_link_libraries(
          Mantid::Geometry
          Mantid::Indexing
          Mantid::Parallel
-         Mantid::NexusCpp
+         Mantid::Nexus
   PRIVATE ${WINSOCK} ${BCRYPT} Mantid::Beamline Mantid::Json
 )
 

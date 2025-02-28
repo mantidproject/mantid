@@ -1,0 +1,1 @@
+- Add additional downstream monitor to SNAP instrument definition file

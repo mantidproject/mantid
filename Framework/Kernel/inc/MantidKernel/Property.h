@@ -104,6 +104,8 @@ public:
   const std::type_info *type_info() const;
   const std::string type() const;
 
+  void setName(const std::string &name);
+
   /// Overridden function that checks whether the property, if not overriden
   /// returns ""
   virtual std::string isValid() const;

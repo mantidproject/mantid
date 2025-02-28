@@ -49,6 +49,7 @@ public:
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override { return {"Power", "Exponential"}; }
   /// Algorithm's category for identification
+  // cppcheck-suppress uselessOverride
   const std::string category() const override { return "Arithmetic"; }
 
 private:

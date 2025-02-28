@@ -28,10 +28,10 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidNexus/MuonNexusReader.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidMuon/MuonNexusReader.h"
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/scoped_array.hpp>
@@ -65,11 +65,11 @@ namespace Mantid::Algorithms {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
-using namespace Mantid::NeXus;
+using namespace Mantid::LegacyNexus;
 using HistogramData::BinEdges;
 using HistogramData::Counts;
 
@@ -93,7 +93,7 @@ void LoadMuonNexus1::exec() {
   NXEntry entry = root.openEntry("run/histogram_data_1");
   try {
     NXInfo info = entry.getDataSetInfo("time_zero");
-    if (info.stat != NX_ERROR) {
+    if (info.stat != NXstatus::NX_ERROR) {
       double dum = root.getFloat("run/histogram_data_1/time_zero");
       setProperty("TimeZero", dum);
     }
@@ -104,14 +104,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string firstGoodBin = counts.attributes("first_good_bin");
-    if (!firstGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+    if (!firstGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NX_FLOAT32:
+      case NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NX_INT32:
+      case NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -131,14 +131,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string lastGoodBin = counts.attributes("last_good_bin");
-    if (!lastGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+    if (!lastGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NX_FLOAT32:
+      case NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NX_INT32:
+      case NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -388,11 +388,11 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
   NXEntry detector = root.openEntry("run/instrument/detector");
 
   NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
-  if (infoDeadTimes.stat != NX_ERROR) {
+  if (infoDeadTimes.stat != NXstatus::NX_ERROR) {
     NXFloat deadTimesData = detector.openNXFloat("deadtimes");
     deadTimesData.load();
 
-    int numDeadTimes = deadTimesData.dim0();
+    auto numDeadTimes = deadTimesData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<double> deadTimes;
@@ -414,12 +414,13 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     if (numDeadTimes < m_numberOfSpectra) {
       // Check number of dead time entries match the number of
       // spectra in the nexus file
-      throw Exception::FileError("Number of dead times specified is less than number of spectra", m_filename);
+      throw Kernel::Exception::FileError("Number of dead times specified is less than number of spectra", m_filename);
 
     } else if (numDeadTimes % m_numberOfSpectra) {
 
       // At least, number of dead times should cover the number of spectra
-      throw Exception::FileError("Number of dead times doesn't cover every spectrum in every period", m_filename);
+      throw Kernel::Exception::FileError("Number of dead times doesn't cover every spectrum in every period",
+                                         m_filename);
     } else {
 
       if (m_numberOfPeriods == 1) {
@@ -485,11 +486,11 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
-  if (infoGrouping.stat != NX_ERROR) {
+  if (infoGrouping.stat != NXstatus::NX_ERROR) {
     NXInt groupingData = dataEntry.openNXInt("grouping");
     groupingData.load();
 
-    int numGroupingEntries = groupingData.dim0();
+    auto numGroupingEntries = groupingData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<int> grouping;
@@ -511,13 +512,13 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
     if (numGroupingEntries < m_numberOfSpectra) {
       // Check number of dead time entries match the number of
       // spectra in the nexus file
-      throw Exception::FileError("Number of grouping entries is less than number of spectra", m_filename);
+      throw Kernel::Exception::FileError("Number of grouping entries is less than number of spectra", m_filename);
 
     } else if (numGroupingEntries % m_numberOfSpectra) {
       // At least the number of entries should cover all the spectra
-      throw Exception::FileError("Number of grouping entries doesn't cover "
-                                 "every spectrum in every period",
-                                 m_filename);
+      throw Kernel::Exception::FileError("Number of grouping entries doesn't cover "
+                                         "every spectrum in every period",
+                                         m_filename);
 
     } else {
 
@@ -579,7 +580,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
 
         if (tableGroup->size() != 0) {
           if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
-            throw Exception::FileError("Zero grouping for some of the periods", m_filename);
+            throw Kernel::Exception::FileError("Zero grouping for some of the periods", m_filename);
 
           return tableGroup;
         }
@@ -812,7 +813,7 @@ void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWork
 void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
 
   // Get handle to nexus file
-  ::NeXus::File handle(m_filename, NXACC_READ);
+  File handle(m_filename, ::NXACC_READ);
 
   // For single-period datasets, read /run/instrument/beam/frames_good
   if (nperiods == 1) {
@@ -822,7 +823,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       handle.openPath("run/instrument/beam");
       try {
         handle.openData("frames_good");
-      } catch (::NeXus::Exception &) {
+      } catch (LegacyNexus::Exception &) {
         // If it's not there, read "frames" instead and assume they are good
         g_log.warning("Could not read /run/instrument/beam/frames_good");
         handle.openData("frames");
@@ -836,7 +837,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       auto &run = localWorkspace->mutableRun();
       run.addProperty("goodfrm", dataVals[0]);
 
-    } catch (::NeXus::Exception &) {
+    } catch (LegacyNexus::Exception &) {
       g_log.warning("Could not read number of good frames");
     }
 
@@ -848,7 +849,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       handle.openPath("run/instrument/beam/");
       handle.openData("frames_period_daq");
 
-      ::NeXus::Info info = handle.getInfo();
+      Info info = handle.getInfo();
       // Check that frames_period_daq contains values for
       // every period
       if (period >= info.dims[0]) {
@@ -880,7 +881,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
         run.removeLogData("goodfrm");
         run.addProperty("goodfrm", dataVals[period]);
       }
-    } catch (::NeXus::Exception &) {
+    } catch (LegacyNexus::Exception &) {
       g_log.warning("Could not read /run/instrument/beam/frames_period_daq");
     }
   } // else
@@ -894,7 +895,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus1::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/analysis"))

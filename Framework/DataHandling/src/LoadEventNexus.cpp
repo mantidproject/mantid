@@ -33,6 +33,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
@@ -48,7 +50,7 @@ using std::vector;
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
@@ -58,9 +60,6 @@ using namespace DataObjects;
 using Types::Core::DateAndTime;
 
 namespace {
-// detnotes the end of iteration for NeXus::getNextEntry
-const std::string NULL_STR("NULL");
-
 const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
 enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
@@ -106,7 +105,7 @@ LoadEventNexus::LoadEventNexus()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadEventNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   int confidence = 0;
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -346,7 +345,7 @@ void LoadEventNexus::setTopEntryName() {
           m_top_entry_name = entry.first;
           break;
         }
-      } else if (entry.first == NULL_STR && entry.second == NULL_STR) {
+      } else if (entry == ::NeXus::EOD_ENTRY) {
         g_log.error() << "Unable to determine name of top level NXentry - assuming "
                          "\"entry\".\n";
         m_top_entry_name = "entry";
@@ -534,7 +533,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
  * @return The number of events.
  */
 std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
-                      const NexusHDF5Descriptor &descriptor) {
+                      const NexusDescriptor &descriptor) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
     hasTotalCounts = false;
@@ -543,7 +542,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusF
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == ::NeXus::UINT64) {
+        if (info.type == NXnumtype::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;
@@ -947,13 +946,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       }
     } else {
       prog->doReport("Loading all logs");
-      // Open NeXus file
-      NXhandle nxHandle;
-      NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
-
-      if (nxStat != NX_ERROR) {
+      try {
+        // Open NeXus file
+        ::NeXus::File nxHandle(m_filename, NXACC_READ);
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
-        NXclose(&nxHandle);
+      } catch (const ::NeXus::Exception &e) {
+        g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
       }
     }
   } else {
@@ -969,7 +967,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
   }
   // set more properties on the workspace
-  const std::shared_ptr<NexusHDF5Descriptor> descriptor = getFileInfo();
+  const std::shared_ptr<NexusDescriptor> descriptor = getFileInfo();
 
   try {
     // this is a static method that is why it is passing the
@@ -1368,7 +1366,7 @@ template <>
 bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(const std::string &nexusfilename,
                                                                       EventWorkspaceCollection_sptr localWorkspace,
                                                                       const std::string &top_entry_name, Algorithm *alg,
-                                                                      const Kernel::NexusHDF5Descriptor *descriptor) {
+                                                                      const Kernel::NexusDescriptor *descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg, descriptor);
   localWorkspace->setInstrument(ws->getInstrument());

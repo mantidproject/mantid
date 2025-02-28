@@ -1,3 +1,0 @@
-- A new peak shape named `detectorbin` was introduced to save the detector IDs and bin indices of either TOF or dSpacing domains. This peak shape could be used for Overlap detection, Two-step integration and Eventual visualisation on instrument view.
-- The new peak shape has been associated with the peaks integrated with :ref:`algm-IntegratePeaksShoeboxTOF` and :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` integration algorithms.
-- By accessing the `detectorbin` peak shape users now can view the detector ids associated for each integrated peak from the above algorithms.

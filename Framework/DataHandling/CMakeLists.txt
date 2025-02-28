@@ -80,7 +80,6 @@ set(SRC_FILES
     src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
     src/LoadIsawDetCal.cpp
-    src/LoadLLB.cpp
     src/LoadLog.cpp
     src/LoadMLZ.cpp
     src/LoadMappingTable.cpp
@@ -178,7 +177,6 @@ set(SRC_FILES
     src/SaveGDA.cpp
     src/SaveGSASInstrumentFile.cpp
     src/SaveGSS.cpp
-    src/SaveISISNexus.cpp
     src/SaveIsawDetCal.cpp
     src/SaveMask.cpp
     src/SaveNISTDAT.cpp
@@ -204,7 +202,6 @@ set(SRC_FILES
     src/SaveSampleEnvironmentAndShape.cpp
     src/SaveStl.cpp
     src/SaveTBL.cpp
-    src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
     src/ScaleInstrumentComponent.cpp
     src/SetBeam.cpp
@@ -303,7 +300,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
     inc/MantidDataHandling/LoadIsawDetCal.h
-    inc/MantidDataHandling/LoadLLB.h
     inc/MantidDataHandling/LoadLog.h
     inc/MantidDataHandling/LoadMLZ.h
     inc/MantidDataHandling/LoadMappingTable.h
@@ -398,7 +394,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveGDA.h
     inc/MantidDataHandling/SaveGSASInstrumentFile.h
     inc/MantidDataHandling/SaveGSS.h
-    inc/MantidDataHandling/SaveISISNexus.h
     inc/MantidDataHandling/SaveIsawDetCal.h
     inc/MantidDataHandling/SaveMask.h
     inc/MantidDataHandling/SaveNISTDAT.h
@@ -424,7 +419,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
     inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
-    inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
     inc/MantidDataHandling/ScaleInstrumentComponent.h
     inc/MantidDataHandling/SetBeam.h
@@ -519,7 +513,6 @@ set(TEST_FILES
     LoadInstrumentFromRawTest.h
     LoadInstrumentTest.h
     LoadIsawDetCalTest.h
-    LoadLLBTest.h
     LoadLogTest.h
     LoadMLZTest.h
     LoadMappingTableTest.h
@@ -627,7 +620,6 @@ set(TEST_FILES
     SaveSampleEnvironmentAndShapeTest.h
     SaveStlTest.h
     SaveTBLTest.h
-    SaveToSNSHistogramNexusTest.h
     ScaleInstrumentComponentTest.h
     SetBeamTest.h
     SetSampleMaterialTest.h
@@ -692,6 +684,7 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
+         Mantid::Muon
   PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
 )
 
@@ -708,7 +701,7 @@ add_subdirectory(test)
 target_include_directories(
   DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/DataHandling> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(DataHandling FALSE)
+generate_mantid_export_header(DataHandling TRUE)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)

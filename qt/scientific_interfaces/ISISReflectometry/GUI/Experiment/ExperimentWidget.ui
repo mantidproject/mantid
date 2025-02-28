@@ -697,6 +697,29 @@
        </item>
       </widget>
      </item>
+     <item row="13" column="2">
+      <widget class="QLabel" name="polCorrFredrikzeSpinStateLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Fredrikze Input SpinState Order</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="3">
+      <widget class="QLineEdit" name="polCorrFredrikzeSpinStateEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

@@ -1195,13 +1195,12 @@ int LoadEMUHdf::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.extension() != ".hdf")
     return 0;
 
-  if (descriptor.pathExists("/entry1/site_name") && descriptor.pathExists("/entry1/instrument/doppler/ctrl/velocity") &&
-      descriptor.pathExists("/entry1/instrument/doppler/ctrl/amplitude") &&
-      descriptor.pathExists("/entry1/instrument/detector/daq_dirname") &&
-      descriptor.pathExists("/entry1/instrument/detector/dataset_number") &&
-      descriptor.pathExists("/entry1/data/hmm_total_t_ds0") && descriptor.pathExists("/entry1/data/hmm_total_t_ds1") &&
-      descriptor.pathExists("/entry1/data/hmm_total_xt_ds0") &&
-      descriptor.pathExists("/entry1/data/hmm_total_xt_ds1")) {
+  if (descriptor.isEntry("/entry1/site_name") && descriptor.isEntry("/entry1/instrument/doppler/ctrl/velocity") &&
+      descriptor.isEntry("/entry1/instrument/doppler/ctrl/amplitude") &&
+      descriptor.isEntry("/entry1/instrument/detector/daq_dirname") &&
+      descriptor.isEntry("/entry1/instrument/detector/dataset_number") &&
+      descriptor.isEntry("/entry1/data/hmm_total_t_ds0") && descriptor.isEntry("/entry1/data/hmm_total_t_ds1") &&
+      descriptor.isEntry("/entry1/data/hmm_total_xt_ds0") && descriptor.isEntry("/entry1/data/hmm_total_xt_ds1")) {
     return 80;
   } else {
     return 0;

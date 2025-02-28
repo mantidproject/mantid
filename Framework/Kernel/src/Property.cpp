@@ -59,6 +59,16 @@ Property::~Property() = default;
  */
 const std::string &Property::name() const { return m_name; }
 
+/** Set the property's name
+ *  @param name :: The name of the property
+ */
+void Property::setName(const std::string &name) {
+  if (name.empty()) {
+    throw std::invalid_argument("An empty property name is not permitted");
+  }
+  m_name = name;
+}
+
 /** Get the property's documentation string
  *  @return The documentation string
  */

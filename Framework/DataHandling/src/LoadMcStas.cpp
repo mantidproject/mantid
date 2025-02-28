@@ -32,7 +32,7 @@ using namespace DataObjects;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStas)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
@@ -74,7 +74,7 @@ void LoadMcStas::init() {
  */
 void LoadMcStas::execLoader() {
   std::string filename = getPropertyValue("Filename");
-  H5::H5File file(filename, H5F_ACC_RDONLY);
+  H5::H5File file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   auto const &descriptor = getFileInfo();
   auto const &allEntries = descriptor->getAllEntries();
@@ -521,11 +521,11 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry("/entry1/simulation/name")) {
     return 0;
   }
-  H5::H5File file(descriptor.getFilename(), H5F_ACC_RDONLY);
+  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
   H5::Group group = file.openGroup("/entry1/simulation");
   H5::DataSet dataset = group.openDataSet("name");
 

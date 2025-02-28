@@ -20,5 +20,6 @@ void export_OffsetsWorkspace() {
   class_<OffsetsWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>("OffsetsWorkspace", no_init);
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<OffsetsWorkspace>();
 }

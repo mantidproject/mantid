@@ -261,7 +261,7 @@ private:
                                std::vector<double>());
     }
 
-    H5::H5File h5file(outputFile, H5F_ACC_RDONLY);
+    H5::H5File h5file(outputFile, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     const char *dset = "/mantid_workspace/data/data";
     int rank(0);
     H5::DataSet dataset = h5file.openDataSet(dset);

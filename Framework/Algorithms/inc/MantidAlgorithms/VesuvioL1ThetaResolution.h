@@ -30,8 +30,9 @@ private:
   void exec() override;
   void loadInstrument();
 
-  void calculateDetector(const Mantid::Geometry::IDetector &detector, std::function<double()> &flatRandomVariateGen,
-                         std::vector<double> &l1Values, std::vector<double> &thetaValues);
+  void calculateDetector(const Mantid::Geometry::IDetector &detector,
+                         const std::function<double()> &flatRandomVariateGen, std::vector<double> &l1Values,
+                         std::vector<double> &thetaValues);
   Mantid::API::MatrixWorkspace_sptr processDistribution(Mantid::API::MatrixWorkspace_sptr ws, const double binWidth);
 
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;

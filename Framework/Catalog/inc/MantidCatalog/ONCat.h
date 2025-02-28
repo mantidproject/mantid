@@ -106,7 +106,7 @@ public:
   ~ONCat();
 
   bool isUserLoggedIn() const;
-  std::string url() const;
+  const std::string &url() const;
 
   void login(const std::string &username, const std::string &password);
   void logout();

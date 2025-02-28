@@ -120,7 +120,7 @@ void LoadRawDialog::initLayout() {
   //------------- Cache option , log files options and Monitors Options
   //---------------------
 
-  Mantid::Kernel::Property *cacheProp = getAlgorithmProperty("Cache");
+  const Mantid::Kernel::Property *cacheProp = getAlgorithmProperty("Cache");
   if (cacheProp) {
     auto *cacheBox = new QComboBox;
     std::vector<std::string> items = cacheProp->allowedValues();
@@ -137,7 +137,7 @@ void LoadRawDialog::initLayout() {
   prop_line->addStretch();
   // If the algorithm version supports the LoadLog property add a check box for
   // it
-  Mantid::Kernel::Property *loadlogs = getAlgorithmProperty("LoadLogFiles");
+  const Mantid::Kernel::Property *loadlogs = getAlgorithmProperty("LoadLogFiles");
   if (loadlogs) {
     QCheckBox *checkbox = new QCheckBox("Load Log Files", this);
     prop_line->addWidget(checkbox);
@@ -146,7 +146,7 @@ void LoadRawDialog::initLayout() {
   prop_line->addStretch();
   //------------- If the algorithm version supports the LoadMonitors property
   // add a check box for it ----
-  Mantid::Kernel::Property *loadMonitors = getAlgorithmProperty("LoadMonitors");
+  const Mantid::Kernel::Property *loadMonitors = getAlgorithmProperty("LoadMonitors");
   if (loadMonitors) {
     auto *monitorsBox = new QComboBox;
     std::vector<std::string> monitoritems = loadMonitors->allowedValues();

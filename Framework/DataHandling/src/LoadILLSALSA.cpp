@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidNexus/H5Util.h"
 
 #include <iterator>
 #include <sstream>
@@ -33,9 +34,9 @@ const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
  * @return An integer specifying the confidence level. 0 indicates it will not be used
  */
 int LoadILLSALSA::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if ((descriptor.pathExists("/entry0/data_scan") || descriptor.pathExists("/entry0/data")) &&
-      descriptor.pathExists("/entry0/instrument/Tx") && descriptor.pathExists("/entry0/instrument/Ty") &&
-      descriptor.pathExists("/entry0/instrument/Tz"))
+  if ((descriptor.isEntry("/entry0/data_scan") || descriptor.isEntry("/entry0/data")) &&
+      descriptor.isEntry("/entry0/instrument/Tx") && descriptor.isEntry("/entry0/instrument/Ty") &&
+      descriptor.isEntry("/entry0/instrument/Tz"))
     return 80;
   else
     return 0;
@@ -60,7 +61,7 @@ void LoadILLSALSA::init() {
  */
 void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
-  H5::H5File h5file(filename, H5F_ACC_RDONLY);
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   enum FileType { NONE, V1, V2 };
 
@@ -254,9 +255,8 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
 
 void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
-  NXhandle nxHandle;
-  NXopen(filename.c_str(), NXACC_READ, &nxHandle);
+
+  ::NeXus::File nxHandle(filename, NXACC_READ);
   LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
-  NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling

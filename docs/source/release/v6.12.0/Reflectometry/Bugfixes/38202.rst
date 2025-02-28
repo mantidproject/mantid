@@ -1,1 +1,0 @@
-- Fix a bug where :ref:`algm-ReflectometryReductionOneLiveData` was re-writing the spectra map when loading the instrument into the input live data workspace.

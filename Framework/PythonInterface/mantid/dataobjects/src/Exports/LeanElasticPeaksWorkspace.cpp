@@ -22,5 +22,6 @@ void export_LeanElasticPeaksWorkspace() {
   class_<LeanElasticPeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>("LeanElasticPeaksWorkspace", no_init);
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<LeanElasticPeaksWorkspace>();
 }

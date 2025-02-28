@@ -21,10 +21,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/MuonNexusReader.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -36,7 +32,6 @@ namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
-using namespace Mantid::NeXus;
 
 /// Empty default constructor
 LoadMuonNexus::LoadMuonNexus()
@@ -175,7 +170,7 @@ void LoadMuonNexus::runLoadInstrument(const DataObjects::Workspace2D_sptr &local
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   UNUSED_ARG(descriptor);
   return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
 }

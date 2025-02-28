@@ -1,1 +1,0 @@
-- Fixed a segmentation fault in :ref:`FindPeaksConvolve <algm-FindPeaksConvolve>` algorithm due to a racing condition in the parallel loop. The issue was first observed as a flaky unit test failure in the CI.

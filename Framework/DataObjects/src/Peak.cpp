@@ -344,7 +344,7 @@ void Peak::setCol(int col) { m_col = col; }
  * best for RectangularDetector instruments (goes up two levels)
  * @return name of the bank.
  */
-std::string Peak::getBankName() const { return m_bankName; }
+const std::string &Peak::getBankName() const { return m_bankName; }
 
 /** Set the BankName of this peak
  * @param bankName :: index to set

@@ -29,7 +29,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -437,7 +437,7 @@ public:
       TS_ASSERT_EQUALS(columnInfo1.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo1.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo1.dims[1], 4);
-      TS_ASSERT_EQUALS(columnInfo1.type, NX_INT32);
+      TS_ASSERT_EQUALS(columnInfo1.type, NXnumtype::INT32);
 
       std::vector<int> data1;
       savedNexus.getData<int>(data1);
@@ -474,7 +474,7 @@ public:
       TS_ASSERT_EQUALS(columnInfo2.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo2.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo2.dims[1], 2);
-      TS_ASSERT_EQUALS(columnInfo2.type, NX_FLOAT64);
+      TS_ASSERT_EQUALS(columnInfo2.type, NXnumtype::FLOAT64);
 
       std::vector<double> data2;
       savedNexus.getData<double>(data2);
@@ -599,56 +599,56 @@ public:
 
     {
       savedNexus.openData("column_1");
-      doTestColumnInfo(savedNexus, NX_INT32, "", "IntColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::INT32, "", "IntColumn");
       int32_t expectedData[] = {5, 2, 3};
       doTestColumnData("IntColumn", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_2");
-      doTestColumnInfo(savedNexus, NX_FLOAT64, "", "DoubleColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::FLOAT64, "", "DoubleColumn");
       double expectedData[] = {0.5, 0.2, 0.3};
       doTestColumnData("DoubleColumn", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_3");
-      doTestColumnInfo(savedNexus, NX_FLOAT32, "", "FloatColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::FLOAT32, "", "FloatColumn");
       float expectedData[] = {10.5f, 10.2f, 10.3f};
       doTestColumnData("FloatColumn", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_4");
-      doTestColumnInfo(savedNexus, NX_UINT32, "", "UInt32Column");
+      doTestColumnInfo(savedNexus, NXnumtype::UINT32, "", "UInt32Column");
       uint32_t expectedData[] = {15, 12, 13};
       doTestColumnData("UInt32Column", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_5");
-      doTestColumnInfo(savedNexus, NX_INT64, "", "Int64Column");
+      doTestColumnInfo(savedNexus, NXnumtype::INT64, "", "Int64Column");
       int64_t expectedData[] = {25, 22, 23};
       doTestColumnData("Int64Column", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_6");
-      doTestColumnInfo(savedNexus, NX_UINT64, "", "SizeColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::UINT64, "", "SizeColumn");
       uint64_t expectedData[] = {35, 32, 33};
       doTestColumnData("SizeColumn", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_7");
-      doTestColumnInfo(savedNexus, NX_UINT8, "", "BoolColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::UINT8, "", "BoolColumn");
       unsigned char expectedData[] = {1, 0, 1};
       doTestColumnData("BoolColumn", savedNexus, expectedData);
     }
 
     {
       savedNexus.openData("column_8");
-      doTestColumnInfo2(savedNexus, NX_FLOAT64, "V3D", "V3DColumn", 3);
+      doTestColumnInfo2(savedNexus, NXnumtype::FLOAT64, "V3D", "V3DColumn", 3);
       double expectedData[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
       doTestColumnData("V3DColumn", savedNexus, expectedData, 9);
     }
@@ -660,7 +660,7 @@ public:
       TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo.dims[1], 9);
-      TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
+      TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
       std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
@@ -732,7 +732,7 @@ public:
 
     {
       savedNexus.openData("column_1");
-      doTestColumnInfo(savedNexus, NX_INT32, "", "IntColumn");
+      doTestColumnInfo(savedNexus, NXnumtype::INT32, "", "IntColumn");
       int32_t expectedData[] = {5, 2, 3};
       doTestColumnData("IntColumn", savedNexus, expectedData);
     }
@@ -744,7 +744,7 @@ public:
       TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
-      TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
+      TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
       std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
@@ -926,7 +926,7 @@ public:
   }
 
 private:
-  void doTestColumnInfo(::NeXus::File &file, int type, const std::string &interpret_as, const std::string &name) {
+  void doTestColumnInfo(::NeXus::File &file, NXnumtype type, const std::string &interpret_as, const std::string &name) {
     ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 1);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
@@ -947,7 +947,7 @@ private:
     }
   }
 
-  void doTestColumnInfo2(::NeXus::File &file, int type, const std::string &interpret_as, const std::string &name,
+  void doTestColumnInfo2(::NeXus::File &file, NXnumtype type, const std::string &interpret_as, const std::string &name,
                          int dim1) {
     ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 2);

@@ -1,1 +1,0 @@
-:class:`~mantid.plots.MantidAxes` accounts for plotting both workspaces and lines on the same axis in the rename case

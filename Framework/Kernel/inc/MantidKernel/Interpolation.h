@@ -60,7 +60,7 @@ public:
   void setMethod(const std::string &method) { m_method = method; }
 
   /// get interpolation method
-  std::string getMethod() const { return m_method; };
+  const std::string &getMethod() const { return m_method; };
 
   /// set x-axis unit
   void setXUnit(const std::string &unit);

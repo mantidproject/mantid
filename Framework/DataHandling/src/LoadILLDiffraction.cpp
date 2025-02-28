@@ -22,7 +22,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>
@@ -65,8 +66,8 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B, Tx field eliminates SALSA
   // the third one is to recognize IN5/PANTHER/SHARP scan mode
-  if ((descriptor.pathExists("/entry0/instrument/2theta") && !descriptor.pathExists("/entry0/instrument/Tx")) ||
-      descriptor.pathExists("/entry0/instrument/Canne")) {
+  if ((descriptor.isEntry("/entry0/instrument/2theta") && !descriptor.isEntry("/entry0/instrument/Tx")) ||
+      descriptor.isEntry("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -222,15 +223,18 @@ void LoadILLDiffraction::loadMetaData() {
   auto &mutableRun = m_outWorkspace->mutableRun();
   mutableRun.addProperty("Facility", std::string("ILL"));
 
-  // Open NeXus file
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
-
-  if (nxStat != NX_ERROR) {
-    LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
-    NXclose(&nxHandle);
+  // get some information from the NeXus file
+  try {
+    ::NeXus::File filehandle(m_filename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(filehandle, mutableRun);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
   }
-  mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
+
+  if (mutableRun.hasProperty("run_number"))
+    mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
+  else
+    throw std::runtime_error("Failed to find run_number in Run object");
 
   if (!mutableRun.hasProperty("Detector.calibration_file"))
     mutableRun.addProperty("Detector.calibration_file", std::string("none"));
@@ -499,8 +503,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
  * Loads the scanned_variables/variables_names block
  */
 void LoadILLDiffraction::loadScanVars() {
-
-  H5File h5file(m_filename, H5F_ACC_RDONLY);
+  H5File h5file(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");

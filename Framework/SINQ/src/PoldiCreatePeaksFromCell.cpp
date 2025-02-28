@@ -46,7 +46,7 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs() {
   std::map<std::string, std::string> errorMap;
 
   double dMin = getProperty("LatticeSpacingMin");
-  Property *dMaxProperty = getProperty("LatticeSpacingMax");
+  const Property *dMaxProperty = getProperty("LatticeSpacingMax");
 
   auto dMax = boost::lexical_cast<double>(dMaxProperty->value());
   if (!dMaxProperty->isDefault() && (dMax < dMin)) {
@@ -80,7 +80,7 @@ SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(const std::string 
  *  @return Largest considered lattice spacing
  */
 double PoldiCreatePeaksFromCell::getDMaxValue(const UnitCell &unitCell) const {
-  Property *dMaxProperty = getProperty("LatticeSpacingMax");
+  const Property *dMaxProperty = getProperty("LatticeSpacingMax");
 
   if (dMaxProperty->isDefault()) {
     // Instead of returning just the value, 1.0 is added to avoid running into

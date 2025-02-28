@@ -60,14 +60,14 @@ public:
   /// Set the name of the group to save the settings for
   void setSettingsGroup(const QString &name);
   /// Settings group
-  QString settingsGroup() const;
+  const QString &settingsGroup() const;
   /// Read settings from persistent store
   void readSettings();
   /// Write settings from persistent store
   void writeSettings();
 
   /// Set a new code lexer for this object
-  void setLexer(QsciLexer * /*codelexer*/) override;
+  void setLexer(QsciLexer * /*codelexer*/) override final;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
   /// Enable the auto complete. Default is for backwards compatability
@@ -85,7 +85,7 @@ public:
   /// Capture key presses
   void keyPressEvent(QKeyEvent *event) override;
   /// The current filename
-  inline QString fileName() const { return m_filename; }
+  const inline QString &fileName() const { return m_filename; }
   /// Set a new file name
   void setFileName(const QString &filename);
 
@@ -105,6 +105,8 @@ public:
   /// Get the current zoom factor
   int getZoom() const;
 
+  // C++ does not recognise QT macros
+  // cppcheck-suppress unknownMacro
 public slots:
   /// Save the script, opening a dialog
   void saveAs();

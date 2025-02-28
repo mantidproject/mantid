@@ -65,9 +65,10 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
+  // cppcheck-suppress uselessOverride
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
-  /// Algorithm's category for identification overriding a virtual method
+  // cppcheck-suppress uselessOverride
   const std::string category() const override { return "Transforms\\Rebin"; }
   /// Alias for the algorithm. Must override so it doesn't get parent class's
   const std::string alias() const override { return ""; }

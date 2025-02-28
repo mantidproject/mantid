@@ -1,1 +1,0 @@
-- :ref:`RemovePromptPulse <algm-RemovePromptPulse>` has been fixed to correctly account for the first pulse.

@@ -145,7 +145,7 @@ public:
 
   size_t order() const;
   CoordinateSystem getCoordinateSystem() const;
-  std::vector<SymmetryOperation> getSymmetryOperations() const;
+  const std::vector<SymmetryOperation> &getSymmetryOperations() const;
   bool containsOperation(const SymmetryOperation &operation) const;
 
   Group operator*(const Group &other) const;

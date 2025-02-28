@@ -42,8 +42,8 @@ public:
   virtual ~AbstractSpaceGroupGenerator() = default;
 
   inline size_t getNumber() const { return m_number; }
-  inline std::string getHMSymbol() const { return m_hmSymbol; }
-  inline std::string getGeneratorString() const { return m_generatorString; }
+  const inline std::string &getHMSymbol() const { return m_hmSymbol; }
+  const inline std::string &getGeneratorString() const { return m_generatorString; }
 
   SpaceGroup_const_sptr getPrototype();
 

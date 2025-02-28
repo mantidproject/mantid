@@ -43,8 +43,8 @@ private:
   unsigned int m_rank;
   std::vector<int> m_dim;
   void cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS, const Mantid::API::IMDHistoWorkspace_sptr &outWS,
-               Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim, std::vector<int> start, std::vector<int> end,
-               unsigned int dim);
+               Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim, const std::vector<int> &start,
+               const std::vector<int> &end, unsigned int dim);
 
   void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };

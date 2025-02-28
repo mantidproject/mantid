@@ -49,7 +49,7 @@ private:
   void saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform *transform, std::string entry_name);
   /// Save a generic matrix
   template <typename T>
-  void saveMatrix(::NeXus::File *const file, std::string name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+  void saveMatrix(::NeXus::File *const file, std::string name, Kernel::Matrix<T> &m, NXnumtype type,
                   std::string tag = "");
 };
 
