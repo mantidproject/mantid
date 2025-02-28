@@ -117,7 +117,7 @@ std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::st
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
 
-  return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
+  return instrument + inputText + "_" + analyser + reflection + "_Reduced";
 }
 
 MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
