@@ -8,7 +8,7 @@
 
 namespace Mantid::NeXus {
 class NXClass;
-class NXClassInfo;
+struct NXClassInfo;
 class NXData;
 class NXEntry;
 class NXRoot;
