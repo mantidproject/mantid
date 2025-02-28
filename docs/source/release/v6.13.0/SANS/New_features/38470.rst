@@ -1,1 +1,1 @@
-- New algorithm ``ReflectometryISISCalculatePolEff`` added. This algorithm provides a convenient wrapped for the ``ReflectometryISISCreateTransmission``, ``PolarizationEfficienciesWildes`` and ``JoinISISPolarizationEfficiencies`` algorithms.
+- New algorithm ``ReflectometryISISCalculatePolEff`` added. This algorithm provides a convenient wrapper for the ``ReflectometryISISCreateTransmission``, ``PolarizationEfficienciesWildes`` and ``JoinISISPolarizationEfficiencies`` algorithms.
