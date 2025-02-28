@@ -59,7 +59,7 @@ do
 done
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true
+setup_mamba $WORKSPACE/mambaforge "" true ""
 mamba activate base
 mamba install --yes conda-index
 
