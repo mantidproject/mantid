@@ -47,11 +47,13 @@ namespace LegacyLoadHelper { // these methods are copied from LoadHelper
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
+  std::string result("");
   std::vector<NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
   if (it != v.cend())
-    return it->nxname;
-  return "";
+    result = it->nxname;
+
+  return result;
 }
 
 /**

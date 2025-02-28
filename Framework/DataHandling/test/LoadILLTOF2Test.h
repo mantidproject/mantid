@@ -82,8 +82,6 @@ public:
       TS_ASSERT_EQUALS(histogram.size(), numberOfChannels)
       const auto &xs = histogram.x();
       if (convertToTOF) {
-        const auto mywidth = xs[1] - xs[0];
-        const auto myoffset = xs[0] - (mywidth / 2.);
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
           const double binEdge = tofDelay + static_cast<double>(channelIndex) * tofChannelWidth + tofChannelWidth / 2;
           TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3);

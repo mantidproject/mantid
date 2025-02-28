@@ -40,7 +40,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF3)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF3::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLTOF3::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
@@ -58,7 +58,7 @@ int LoadILLTOF3::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   }
 }
 
-LoadILLTOF3::LoadILLTOF3() : API::IFileLoader<Kernel::NexusHDF5Descriptor>() {}
+LoadILLTOF3::LoadILLTOF3() : API::IFileLoader<Kernel::NexusDescriptor>() {}
 
 /**
  * Initialises the algorithm
