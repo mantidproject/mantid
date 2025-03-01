@@ -64,10 +64,11 @@ if(JEMALLOCLIB_FOUND)
 endif()
 
 # definitions to preload jemalloc but not if we are using address sanitizer as this confuses things
-if(WITH_ASAN)
+string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
+if(${USE_SANITIZERS_LOWER} MATCHES "address")
   set(JEMALLOC_DEFINITIONS
       "
-LOCAL_PRELOAD=\${LD_PRELOAD}
+LOCAL_PRELOAD=${ASAN_LIB}
 "
   )
 else()
