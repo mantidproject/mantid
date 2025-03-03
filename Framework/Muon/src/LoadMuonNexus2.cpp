@@ -210,7 +210,6 @@ using Geometry::Instrument;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
-using namespace Mantid::LegacyNexus;
 using Mantid::Types::Core::DateAndTime;
 
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}

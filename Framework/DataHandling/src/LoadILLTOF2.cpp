@@ -36,7 +36,6 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace LegacyNexus;
 using namespace HistogramData;
 
 DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
@@ -46,7 +45,7 @@ namespace LegacyLoadHelper { // these methods are copied from LoadHelper
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
-std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
+std::string findInstrumentNexusPath(const LegacyNexus::NXEntry &firstEntry) {
   std::string result("");
   std::vector<NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
@@ -209,16 +208,16 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
         // Note, we choose to only build properties on small float arrays filter logic is below
         bool read_property = (rank == 1);
         switch (nxinfo.type) {
-        case (NXnumtype::CHAR):
+        case (LegacyNexus::NXnumtype::CHAR):
           break; // everything is fine
-        case (NXnumtype::FLOAT32):
-        case (NXnumtype::FLOAT64):
+        case (LegacyNexus::NXnumtype::FLOAT32):
+        case (LegacyNexus::NXnumtype::FLOAT64):
           // some 1d float arrays may be loaded
           read_property = (nxinfo.dims[0] <= 9);
           break;
-        case (NXnumtype::INT16):
-        case (NXnumtype::INT32):
-        case (NXnumtype::UINT16):
+        case (LegacyNexus::NXnumtype::INT16):
+        case (LegacyNexus::NXnumtype::INT32):
+        case (LegacyNexus::NXnumtype::UINT16):
           // only read scalar values for everything else - e.g. integers
           read_property = (nxinfo.dims.front() == 1);
           break;
@@ -231,7 +230,7 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
           const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
 
           switch (nxinfo.type) {
-          case (NXnumtype::CHAR): {
+          case (LegacyNexus::NXnumtype::CHAR): {
             std::string property_value = filehandle.getStrData();
             if (property_name.ends_with("_time")) {
               // That's a time value! Convert to Mantid standard
@@ -250,13 +249,13 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
             }
             break;
           }
-          case (NXnumtype::FLOAT32):
-          case (NXnumtype::FLOAT64):
+          case (LegacyNexus::NXnumtype::FLOAT32):
+          case (LegacyNexus::NXnumtype::FLOAT64):
             addNumericProperty<double>(filehandle, nxinfo, property_name, runDetails);
             break;
-          case (NXnumtype::INT16):
-          case (NXnumtype::INT32):
-          case (NXnumtype::UINT16):
+          case (LegacyNexus::NXnumtype::INT16):
+          case (LegacyNexus::NXnumtype::INT32):
+          case (LegacyNexus::NXnumtype::UINT16):
             addNumericProperty<int>(filehandle, nxinfo, property_name, runDetails);
             break;
           default:
@@ -543,7 +542,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   // Open NeXus file
   try {
-    LegacyNexus::File nxfileID(filename, NXACC_READ);
+    LegacyNexus::File nxfileID(filename, LegacyNexus::NXACC_READ);
     LegacyLoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const LegacyNexus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;

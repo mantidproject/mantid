@@ -69,7 +69,6 @@ DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
-using namespace Mantid::LegacyNexus;
 using HistogramData::BinEdges;
 using HistogramData::Counts;
 
