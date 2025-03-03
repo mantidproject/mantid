@@ -84,6 +84,7 @@ public:
     // Check the results
     TS_ASSERT_EQUALS(ws->columnCount(), 11);
     TS_ASSERT_EQUALS(ws->rowCount(), 2);
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), 1); // Spectrum No should be 1, if not in the exception
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->getName());
@@ -157,6 +158,7 @@ public:
     // Check the results
     TS_ASSERT_EQUALS(ws->columnCount(), 13);
     TS_ASSERT_EQUALS(ws->rowCount(), 1);
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), 2); // Spectrum No should be 2 due to the WorkspaceIndex
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -184,6 +186,7 @@ public:
     // Check the results
     TS_ASSERT_EQUALS(ws->columnCount(), 2);
     TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), 0); // First column is Index when exec on PeaksWorkspace, so expect 0
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->getName());
@@ -201,7 +204,7 @@ public:
   }
 
   void test_Exec_Matrix_Workspace_with_Include_DetPos() {
-    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
 
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -224,7 +227,10 @@ public:
 
     // Check the results
     TS_ASSERT_EQUALS(ws->columnCount(), 12); // extra column compared to test_Exec_Matrix_Workspace
-    TS_ASSERT_EQUALS(ws->rowCount(), 2);
+    TS_ASSERT_EQUALS(ws->rowCount(), 3);
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), 1); // Spectrum No should be 1, if not in the exception
+    TS_ASSERT_EQUALS(ws->cell<V3D>(1, 11),
+                     V3D(0.0, 0.0, -9.0)); // Last two are monitors, first position should be (0.0, 0.0, -9.0)
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->getName());
