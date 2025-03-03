@@ -129,8 +129,6 @@ if [[ $OSTYPE == "msys" ]]; then
     EXTRA_BUILD_OPTIONS+="--no-build-id"
 elif [[ $PLATFORM == "osx-64" ]]; then
     EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
-elif [[ $PLATFORM == "osx-arm64" ]]; then
-    EXTRA_BUILD_OPTIONS+="-m ./osx_arm64.yaml"
 fi
 
 # Run conda build.
