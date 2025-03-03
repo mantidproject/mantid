@@ -587,7 +587,6 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:122
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:613
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceAscii.cpp:330
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:453

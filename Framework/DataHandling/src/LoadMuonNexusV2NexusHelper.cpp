@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cctype>

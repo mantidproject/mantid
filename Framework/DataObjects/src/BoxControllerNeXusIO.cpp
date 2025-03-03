@@ -257,10 +257,6 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   // Open the data
   m_File->openData("event_data");
-  // There are rummors that this is faster. Not sure if it is important
-  //      int type = NXnumtype::FLOAT32;
-  //      int rank = 0;
-  //      NXgetinfo(file->getHandle(), &rank, dims, &type);
 
   NeXus::Info info = m_File->getInfo();
   NXnumtype Type = info.type;

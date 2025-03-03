@@ -9,7 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 #include <H5Cpp.h>
 

@@ -1,6 +1,5 @@
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/napiconfig.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 
 /**
  * \file NeXusException.cpp
@@ -9,10 +8,8 @@
 
 namespace NeXus {
 
-Exception::Exception(const std::string &msg, const NXstatus status) : std::runtime_error(msg) {
-  this->m_what = msg;
-  this->m_status = status;
-}
+Exception::Exception(const std::string &msg, const NXstatus status)
+    : std::runtime_error(msg), m_what(msg), m_status(status) {}
 
 const char *Exception::what() const throw() { return this->m_what.c_str(); }
 

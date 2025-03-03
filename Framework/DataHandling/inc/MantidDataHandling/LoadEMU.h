@@ -19,7 +19,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
