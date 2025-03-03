@@ -142,6 +142,27 @@ class SANSSave(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The scale factor the BackgroundSubtractionWorkspace is multiplied by before subtraction. Can be blank.",
         )
+        self.declareProperty(
+            "PolarizationProperties",
+            dict(),
+            direction=Direction.Input,
+            doc="A dictionary of properties to values for all of the metadata used in a polarized reduction. Supported "
+            "properties are:\n"
+            "InputSpinStates (str),\n"
+            "PolarizerComponentName (str),\n"
+            "AnalyzerComponentName (str),\n"
+            "FlipperComponentNames (str, comma separated list),\n"
+            "MagneticFieldStrengthLogName (str),\n"
+            "MagneticFieldDirection (str, comma separated list of axes),\n"
+            "PolarizationTransmissionWorkspaces (dict, component name -> workspace name),\n"
+            "PolarizationEfficiencyWorkspaces (dict, component name -> workspace name),\n"
+            "PolarizationEmptyCellWorkspaces (dict, component name -> workspace name),\n"
+            "ElectricFieldStrengthLogName (str),\n"
+            "ElectricFieldDirection (str, comma separated list of axes),\n"
+            "InitialCellPolarizations (dict, component name -> value (str)),\n"
+            "InitialCellPolarizationErrorWorkspaces (dict, component name -> value (str)),\n"
+            "GasPressure (dict, component name -> value (float))\n",
+        )
 
     def PyExec(self):
         use_zero_error_free = self.getProperty("UseZeroErrorFree").value
