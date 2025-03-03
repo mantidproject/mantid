@@ -6,14 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.widgets import instrumentselector
 from workbench.config import SAVE_STATE_VERSION
+from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
 from workbench.widgets.settings.general.view import GeneralSettingsView
+from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel
 from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QFontDatabase
 
 
-class GeneralSettings(object):
+class GeneralSettings(SettingsPresenterBase):
     """
     Presenter of the General settings section. It handles all changes to options
     within the section, and updates the ConfigService and workbench CONF accordingly.
@@ -24,11 +26,11 @@ class GeneralSettings(object):
 
     WINDOW_BEHAVIOUR = ["On top", "Floating"]
 
-    def __init__(self, parent, model, view=None, settings_presenter=None):
-        self._view = view if view else GeneralSettingsView(parent, self)
+    def __init__(self, parent, model: GeneralSettingsModel, view=None, settings_presenter=None):
+        super().__init__(model)
         self.parent = parent
+        self._view = view if view else GeneralSettingsView(parent, self)
         self.settings_presenter = settings_presenter
-        self._model = model
         self.load_current_setting_values()
 
         self.setup_facilities_group()
@@ -103,12 +105,15 @@ class GeneralSettings(object):
             font_string = ""
         if font_string != font.toString():
             self._model.set_font(font.toString())
+        self.notify_changes()
 
     def action_window_behaviour_changed(self, text):
         self._model.set_window_behaviour(text)
+        self.notify_changes()
 
     def action_completion_enabled_modified(self, state):
         self._model.set_completion_enabled(bool(state))
+        self.notify_changes()
 
     def setup_checkbox_signals(self):
         self._view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
@@ -129,6 +134,7 @@ class GeneralSettings(object):
         # refresh the instrument selection to contain instruments about the selected facility only
         self._view.instrument.setFacility(new_facility)
         self.action_instrument_changed(self._view.instrument.currentText())
+        self.notify_changes()
 
     def setup_confirmations(self):
         self._view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
@@ -138,15 +144,19 @@ class GeneralSettings(object):
 
     def action_prompt_save_on_close(self, state):
         self._model.set_prompt_save_on_close(bool(state))
+        self.notify_changes()
 
     def action_prompt_save_editor_modified(self, state):
         self._model.set_prompt_on_save_editor_modified(bool(state))
+        self.notify_changes()
 
     def action_prompt_deleting_workspace(self, state):
         self._model.set_prompt_on_deleting_workspace(bool(state))
+        self.notify_changes()
 
     def action_use_notifications_modified(self, state):
         self._model.set_use_notifications("On" if bool(state) else "Off")
+        self.notify_changes()
 
     def load_current_setting_values(self):
         self._view.prompt_save_on_close.setChecked(self._model.get_prompt_save_on_close())
@@ -175,24 +185,31 @@ class GeneralSettings(object):
 
     def action_project_recovery_enabled(self, state):
         self._model.set_project_recovery_enabled(str(bool(state)))
+        self.notify_changes()
 
     def action_time_between_recovery(self, value):
         self._model.set_project_recovery_time_between_recoveries(str(value))
+        self.notify_changes()
 
     def action_total_number_checkpoints(self, value):
         self._model.set_project_recovery_number_of_checkpoints(str(value))
+        self.notify_changes()
 
     def action_crystallography_convention(self, state):
         self._model.set_crystallography_convention("Crystallography" if state == Qt.Checked else "Inelastic")
+        self.notify_changes()
 
     def action_instrument_changed(self, new_instrument):
         self._model.set_instrument(new_instrument)
+        self.notify_changes()
 
     def action_show_invisible_workspaces(self, state):
-        self._model.set_show_invisible_workspaces(str(bool(state)))
+        self._model.set_show_invisible_workspaces("1" if state == Qt.Checked else "0")
+        self.notify_changes()
 
     def action_use_open_gl(self, state):
         self._model.set_use_opengl("On" if bool(state) else "Off")
+        self.notify_changes()
 
     def setup_layout_options(self):
         self.fill_layout_display()
@@ -220,6 +237,7 @@ class GeneralSettings(object):
             layout_dict = self.get_layout_dict()
             layout_dict[filename] = self.parent.saveState(SAVE_STATE_VERSION)
             self._model.set_user_layout(layout_dict)
+            self.notify_changes()
             self._view.new_layout_name.clear()
             self.fill_layout_display()
             self.parent.populate_layout_menu()
@@ -238,6 +256,7 @@ class GeneralSettings(object):
             layout_dict = self.get_layout_dict()
             layout_dict.pop(layout, None)
             self._model.set_user_layout(layout_dict)
+            self.notify_changes()
             self.fill_layout_display()
             self.parent.populate_layout_menu()
 

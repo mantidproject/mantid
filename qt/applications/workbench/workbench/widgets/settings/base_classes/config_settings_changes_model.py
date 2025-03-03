@@ -4,12 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from abc import ABC
 from typing import Dict, List
 
 from mantid.kernel import ConfigService
 
 
-class ConfigSettingsChangesModel:
+class ConfigSettingsChangesModel(ABC):
     def __init__(self):
         self._changes: Dict[str, str] = {}
 
@@ -29,7 +30,7 @@ class ConfigSettingsChangesModel:
 
     def add_change(self, property_string: str, value: str) -> None:
         saved_value = self.get_saved_value(property_string)
-        if saved_value != value:
+        if saved_value.lower().rstrip() != value.lower().rstrip():
             self._changes[property_string] = value
         elif property_string in self._changes.keys():
             self._changes.pop(property_string)

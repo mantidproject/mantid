@@ -68,6 +68,7 @@ class MockGeneralSettingsModel:
 @start_qapplication
 class GeneralSettingsTest(unittest.TestCase):
     MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.general.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+    NOTIFY_CHANGES_PATH = "workbench.widgets.settings.general.presenter.GeneralSettings.notify_changes"
 
     def setUp(self) -> None:
         self.mock_model = MockGeneralSettingsModel()
@@ -75,8 +76,9 @@ class GeneralSettingsTest(unittest.TestCase):
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
+    @patch(NOTIFY_CHANGES_PATH)
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
-    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter, _):
         presenter = GeneralSettings(None, model=GeneralSettingsModel())
 
         calls = [
@@ -89,7 +91,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         mock_mousewheel_filter.assert_has_calls(calls, any_order=True)
 
-    def test_setup_facilities_with_valid_combination(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_setup_facilities_with_valid_combination(self, _):
         mock_facility = MockFacility("facility1")
         self.mock_model.get_facility.return_value = mock_facility.name()
         mock_instrument = mock_facility.all_instruments[0]
@@ -141,12 +144,14 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.get_view().main_font, presenter.get_view().main_font.clicked)
         self.assert_connected_once(presenter.get_view().window_behaviour, presenter.get_view().window_behaviour.currentTextChanged)
 
-    def test_action_facility_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_facility_changed(self, mock_notify_changes: MagicMock):
         self.mock_model.get_facility_names.return_value = ["facility1", "facility2"]
         self.mock_model.get_facility.return_value = "facility1"
         presenter = GeneralSettings(None, model=self.mock_model)
         self.mock_model.set_facility.reset_mock()
         self.mock_model.set_instrument.reset_mock()
+        mock_notify_changes.reset_mock()
 
         new_facility = "TEST_LIVE"
         default_test_live_instrument = "ADARA_FakeEvent"
@@ -154,6 +159,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.mock_model.set_facility.assert_called_once_with(new_facility)
         self.mock_model.set_instrument.assert_called_once_with(default_test_live_instrument)
+        mock_notify_changes.assert_has_calls([call(), call()])
 
         self.assertEqual(presenter.get_view().instrument.getFacility(), "TEST_LIVE")
 
@@ -163,54 +169,74 @@ class GeneralSettingsTest(unittest.TestCase):
         # check that the signals are connected to something
         self.assert_connected_once(presenter.get_view().prompt_save_on_close, presenter.get_view().prompt_save_on_close.stateChanged)
 
-    def test_action_prompt_save_on_close(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_prompt_save_on_close(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_prompt_save_on_close(True)
 
         self.mock_model.set_prompt_save_on_close.assert_called_once_with(True)
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_prompt_save_on_close.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_prompt_save_on_close(False)
 
         self.mock_model.set_prompt_save_on_close.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
 
-    def test_action_window_behaviour_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_window_behaviour_changed(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
         values = presenter.WINDOW_BEHAVIOUR
         presenter.action_window_behaviour_changed(values[0])
 
         self.mock_model.set_window_behaviour.assert_called_once_with(values[0])
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_window_behaviour.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_window_behaviour_changed(values[1])
 
         self.mock_model.set_window_behaviour.assert_called_once_with(values[1])
+        mock_notify_changes.assert_called_once()
 
-    def test_action_prompt_save_editor_modified(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_prompt_save_editor_modified(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_prompt_save_editor_modified(True)
 
         self.mock_model.set_prompt_on_save_editor_modified.assert_called_once_with(True)
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_prompt_on_save_editor_modified.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_prompt_save_editor_modified(False)
 
         self.mock_model.set_prompt_on_save_editor_modified.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
 
-    def test_action_prompt_deleting_workspace(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_prompt_deleting_workspace(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
         presenter.settings_presenter = MagicMock()
 
         presenter.action_prompt_deleting_workspace(True)
 
         self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(True)
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_prompt_on_deleting_workspace.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_prompt_deleting_workspace(False)
 
         self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
 
     def test_load_current_setting_values(self):
         # load current setting is called automatically in the constructor
@@ -228,99 +254,133 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_show_invisible_workspaces.assert_called_once()
         self.mock_model.get_completion_enabled.assert_called_once()
 
-    def test_action_project_recovery_enabled(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_project_recovery_enabled(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_project_recovery_enabled(True)
         self.mock_model.set_project_recovery_enabled.assert_called_once_with("True")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_project_recovery_enabled.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_project_recovery_enabled(False)
         self.mock_model.set_project_recovery_enabled.assert_called_once_with("False")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_time_between_recovery(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_time_between_recovery(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         time = "6000"
         presenter.action_time_between_recovery(time)
         self.mock_model.set_project_recovery_time_between_recoveries.assert_called_once_with(time)
+        mock_notify_changes.assert_called_once()
 
-    def test_action_total_number_checkpoints(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_total_number_checkpoints(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
         self.mock_model.set_project_recovery_number_of_checkpoints.assert_called_once_with(num_checkpoints)
+        mock_notify_changes.assert_called_once()
 
-    def test_action_instrument_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_instrument_changed(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
-        self.mock_model.set_instrument(new_instr)
+        self.mock_model.set_instrument.assert_called_once_with(new_instr)
+        mock_notify_changes.assert_called_once()
 
-    def test_action_crystallography_convention(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_crystallography_convention(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_crystallography_convention(Qt.Checked)
         self.mock_model.set_crystallography_convention.assert_called_once_with("Crystallography")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_crystallography_convention.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Unchecked)
         self.mock_model.set_crystallography_convention.assert_called_once_with("Inelastic")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_use_open_gl(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_use_open_gl(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_use_open_gl(Qt.Checked)
         self.mock_model.set_use_opengl.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_use_opengl.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_use_open_gl(Qt.Unchecked)
         self.mock_model.set_use_opengl.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_use_notifications_modified(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_use_notifications_modified(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_use_notifications_modified(Qt.Checked)
 
         self.mock_model.set_use_notifications.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_use_notifications.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_use_notifications_modified(Qt.Unchecked)
 
         self.mock_model.set_use_notifications.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_font_selected(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_font_selected(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
         mock_font = Mock()
         mock_font.toString.return_value = "Serif"
         presenter.action_font_selected(mock_font)
         self.mock_model.set_font.assert_called_once_with("Serif")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_invisible_workspaces(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_invisible_workspaces(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
-        presenter.action_show_invisible_workspaces(True)
-        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("True")
+        presenter.action_show_invisible_workspaces(Qt.Checked)
+        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("1")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_invisible_workspaces.reset_mock()
+        mock_notify_changes.reset_mock()
 
-        presenter.action_show_invisible_workspaces(False)
-        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("False")
+        presenter.action_show_invisible_workspaces(Qt.Unchecked)
+        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("0")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_completion_enabled_modified(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_completion_enabled_modified(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_completion_enabled_modified(True)
         self.mock_model.set_completion_enabled.assert_called_once_with(True)
+        mock_notify_changes.assert_called_once()
+
         self.mock_model.set_completion_enabled.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_completion_enabled_modified(False)
         self.mock_model.set_completion_enabled.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_fill_layout_display(self, _):
@@ -353,7 +413,8 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assertEqual({}, presenter.get_layout_dict())
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
-    def test_save_layout(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_save_layout(self, mock_notify_changes: MagicMock, _):
         mock_view = Mock()
         presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
@@ -372,6 +433,7 @@ class GeneralSettingsTest(unittest.TestCase):
         calls = [call(get_potential_update=True), call(get_potential_update=True)]
         self.mock_model.get_user_layout.assert_has_calls(calls)
         self.mock_model.set_user_layout.assert_called_once_with({"a": 1, "key": "value"})
+        mock_notify_changes.assert_called_once()
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
@@ -397,7 +459,8 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_parent.restoreState.assert_called_once_with(test_dict["a"], SAVE_STATE_VERSION)
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
-    def test_delete_layout(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_delete_layout(self, mock_notify_changes: MagicMock, _):
         mock_view = Mock()
         presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
@@ -416,4 +479,9 @@ class GeneralSettingsTest(unittest.TestCase):
         calls = [call(get_potential_update=True), call(get_potential_update=True)]
         self.mock_model.get_user_layout.assert_has_calls(calls)
         self.mock_model.set_user_layout.assert_called_once_with({})
+        mock_notify_changes.assert_called_once()
         mock_parent.populate_layout_menu.assert_called_once_with()
+
+
+if __name__ == "__main__":
+    unittest.main()
