@@ -263,16 +263,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.c
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:207
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1007
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1049
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1469
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1471
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1835
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:2388
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:2452
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:2453
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:2454
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:2455
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:190
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:191
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/OptimizeCrystalPlacement.cpp:165
@@ -794,8 +784,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowse
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1271
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1350
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:191
-duplicateExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1157
-duplicateValueTernary:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1157
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1628
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1822
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1841

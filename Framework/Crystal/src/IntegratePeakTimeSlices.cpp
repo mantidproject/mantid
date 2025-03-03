@@ -1001,12 +1001,13 @@ std::vector<double> DataModeHandler::GetParams(double b) {
 bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
 
 {
-  double TotBoundaryIntensities = statBase[ITotBoundary];
   auto nBoundaryCells = static_cast<int>(statBase[INBoundary]);
   this->StatBase = statBase;
   double b = 0;
-  if (nBoundaryCells > 0)
+  if (nBoundaryCells > 0) {
+    double TotBoundaryIntensities = statBase[ITotBoundary];
     b = TotBoundaryIntensities / nBoundaryCells;
+  }
 
   auto nCells = static_cast<int>(statBase[ISS1]);
   double Den = statBase[IIntensities] - b * nCells;
@@ -1043,7 +1044,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
       if (Vx_calc <= 0 || Vy_calc <= 0) // EdgePeak but not big enuf
         return true;
 
-      double params[] = {back_calc, Intensity_calc, col_calc, row_calc, Vx_calc, Vy_calc, Vxy_calc};
+      const double params[] = {back_calc, Intensity_calc, col_calc, row_calc, Vx_calc, Vy_calc, Vxy_calc};
       double r = CalcSampleIntensityMultiplier(params);
       Intensity_calc *= r;
       return true;
@@ -1463,9 +1464,9 @@ void IntegratePeakTimeSlices::SetUpData1(API::MatrixWorkspace_sptr &Data,
 
       if (row > NBadEdges && col > NBadEdges && (m_NROWS < 0 || row < m_NROWS - NBadEdges) &&
           (m_NCOLS < 0 || col < m_NCOLS - NBadEdges)) {
-        auto &histogram = inpWkSpace->y(workspaceIndex);
+        const auto &histogram = inpWkSpace->y(workspaceIndex);
 
-        auto &histoerrs = inpWkSpace->e(workspaceIndex);
+        const auto &histoerrs = inpWkSpace->e(workspaceIndex);
         double intensity = 0;
         double variance = 0;
         for (int chan = chanMin; chan <= chanMax; chan++) {
@@ -1829,7 +1830,7 @@ std::string DataModeHandler::CalcConstraints(std::vector<std::pair<double, doubl
  * @param lastCol  The previous col( for log info only)
  * @param neighborRadius The neighborhood radius( for log info only)
  */
-void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
+void IntegratePeakTimeSlices::Fit(const MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
                                   std::vector<string> &names, std::vector<double> &params, std::vector<double> &errs,
                                   double lastRow, double lastCol, double neighborRadius) {
 
@@ -1949,7 +1950,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data, double &chisqOverD
  * @param lastCol  The previous col( for log info only)
  * @param neighborRadius The neighborhood radius( for log info only)
  */
-void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
+void IntegratePeakTimeSlices::PreFit(const MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done,
                                      std::vector<string> &names, std::vector<double> &params, std::vector<double> &errs,
                                      double lastRow, double lastCol, double neighborRadius) {
 
@@ -2382,7 +2383,7 @@ bool DataModeHandler::CalcVariances() {
   if (!CalcVariance)
     return false;
 
-  double param[7] = {back_calc, Intensity_calc, col_calc, row_calc, Vx_calc, Vy_calc, Vxy_calc};
+  const double param[7] = {back_calc, Intensity_calc, col_calc, row_calc, Vx_calc, Vy_calc, Vxy_calc};
   return !isEdgePeak(param, 7);
 }
 
@@ -2446,10 +2447,10 @@ double DataModeHandler::CalcISAWIntensityVariance(const double *params, const do
  *EdgePeak
  */
 double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) const {
-  auto MinRow = static_cast<int>(StatBase[IStartRow]);
-  int MaxRow = MinRow + static_cast<int>(StatBase[INRows]) - 1;
-  auto MinCol = static_cast<int>(StatBase[IStartCol]);
-  int MaxCol = MinCol + static_cast<int>(StatBase[INCol]) - 1;
+  auto minRow = static_cast<int>(StatBase[IStartRow]);
+  int maxRow = minRow + static_cast<int>(StatBase[INRows]) - 1;
+  auto minCol = static_cast<int>(StatBase[IStartCol]);
+  int maxCol = minCol + static_cast<int>(StatBase[INCol]) - 1;
   double r = 1;
 
   if (params[IVXX] <= 0 || params[IVYY] <= 0)
@@ -2458,9 +2459,9 @@ double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) cons
   //  NstdX iand NstdY are the number of 1/4 standard deviations. Elements of
   //  probs are in
   //    1/4 standard deviations
-  double NstdX = 4 * min<double>(params[IXMEAN] - MinCol, MaxCol - params[IXMEAN]) / sqrt(params[IVXX]);
+  double NstdX = 4 * min<double>(params[IXMEAN] - minCol, maxCol - params[IXMEAN]) / sqrt(params[IVXX]);
 
-  double NstdY = 4 * min<double>(params[IYMEAN] - MinRow, MaxRow - params[IYMEAN]) / sqrt(params[IVYY]);
+  double NstdY = 4 * min<double>(params[IYMEAN] - minRow, maxRow - params[IYMEAN]) / sqrt(params[IVYY]);
 
   double sgn = 1;
   if (NstdX < 0) {
