@@ -91,8 +91,6 @@ Bugfixes
 MantidWorkbench
 ---------------
 
-..
-  This section doesn't exist yet:
-  See :doc:`mantidworkbench`.
+See :doc:`mantidworkbench`.
 
 :ref:`Release 6.13.0 <v6.13.0>`
