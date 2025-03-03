@@ -38,6 +38,7 @@ class MockFittingSettingsModel:
 
 
 MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.fitting.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+NOTIFY_CHANGES_PATH = "workbench.widgets.settings.fitting.presenter.FittingSettings.notify_changes"
 
 
 @start_qapplication
@@ -72,7 +73,8 @@ class FittingSettingsTest(unittest.TestCase):
         self.mock_view.findpeaks_fwhm.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_fwhm_changed)
         self.mock_view.findpeaks_tol.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_tolerance_changed)
 
-    def test_action_auto_background_changed(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_auto_background_changed(self, mock_notify_changes: MagicMock, _):
         self.mock_view.background_args.text = Mock(return_value="")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -80,13 +82,17 @@ class FittingSettingsTest(unittest.TestCase):
 
         presenter.action_auto_background_changed("None")
         self.mock_model.set_auto_background.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_auto_background.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_auto_background_changed("Polynomial")
         self.mock_model.set_auto_background.assert_called_once_with("Polynomial ")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_background_args_changed(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_background_args_changed(self, mock_notify_changes: MagicMock, _):
         self.mock_view.auto_bkg.currentText = Mock(return_value="Polynomial")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -95,14 +101,18 @@ class FittingSettingsTest(unittest.TestCase):
         self.mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
         self.mock_model.set_auto_background.assert_called_once_with("Polynomial n=3")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_auto_background.reset_mock()
+        mock_notify_changes.reset_mock()
 
         self.mock_view.background_args.text = Mock(return_value="n=5")
         presenter.action_background_args_changed()
         self.mock_model.set_auto_background.assert_called_once_with("Polynomial n=5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_background_args_changed_with_auto_background_none(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_background_args_changed_with_auto_background_none(self, mock_notify_changes: MagicMock, _):
         self.mock_view.auto_bkg.currentText = Mock(return_value="None")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -111,36 +121,53 @@ class FittingSettingsTest(unittest.TestCase):
         self.mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
         self.mock_model.set_auto_background.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_default_peak_changed(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_default_peak_changed(self, mock_notify_changes: MagicMock, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_default_peak_changed("None")
         self.mock_model.set_default_peak.assert_called_once_with("None")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_default_peak.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_default_peak_changed("Gaussian")
         self.mock_model.set_default_peak.assert_called_once_with("Gaussian")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_find_peaks_fwhm_changed(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_find_peaks_fwhm_changed(self, mock_notify_changes: MagicMock, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_fwhm_changed(5)
         self.mock_model.set_fwhm.assert_called_once_with("5")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_fwhm.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_find_peaks_fwhm_changed(9)
         self.mock_model.set_fwhm.assert_called_once_with("9")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_find_peaks_tolerance_changed(self, _):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_find_peaks_tolerance_changed(self, mock_notify_changes: MagicMock, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_tolerance_changed(3)
         self.mock_model.set_tolerance.assert_called_once_with("3")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_tolerance.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_find_peaks_tolerance_changed(8)
         self.mock_model.set_tolerance.assert_called_once_with("8")
+        mock_notify_changes.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()

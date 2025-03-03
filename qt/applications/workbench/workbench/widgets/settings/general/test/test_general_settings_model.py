@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import unittest
 from unittest.mock import MagicMock, patch, call
 
 from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel, GeneralProperties, GeneralUserConfigProperties
@@ -405,3 +406,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
             [{"a test": "dictionary"}, {"another": "one"}],
             GeneralUserConfigProperties.USER_LAYOUT.value,
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
