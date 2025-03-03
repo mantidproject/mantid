@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

@@ -17,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 namespace {
 /// An array containing the supported instrument names

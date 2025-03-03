@@ -13,7 +13,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

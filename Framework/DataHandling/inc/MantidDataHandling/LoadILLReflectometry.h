@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {

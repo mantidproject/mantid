@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <limits>
 #include <vector>
