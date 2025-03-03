@@ -125,7 +125,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:57
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:148
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/API/src/FileFinder.cpp:160
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cpp:267
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:313
@@ -194,7 +193,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CropWorkspa
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCorUser.cpp:176
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing.cpp:116
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:97
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:826
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
@@ -206,7 +204,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeri
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExtractMaskToTable.cpp:363
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterByLogValue.cpp:82
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:304
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:620
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:272
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
@@ -266,7 +263,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.c
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:207
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:838
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1007
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1049
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1469
@@ -312,7 +308,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2309
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2378
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2454
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/VesuvioCalculateGammaBackground.cpp:418
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:377
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:826
@@ -346,7 +341,6 @@ constVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Inelastic
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/InelasticDiffSphere.cpp:106
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/MultivariateGaussianComptonProfile.cpp:135
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/MultivariateGaussianComptonProfile.cpp:156
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ReflectivityMulf.cpp:273
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/IFittingAlgorithm.cpp:230
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/LatticeDomainCreator.cpp:171
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:369
@@ -359,11 +353,9 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/DownloadInstrument.h:26
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/FindDetectorsPar.h:124
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/ISISJournal.h:35
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadANSTOEventFile.h:132
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDetectorsGroupingFile.h:104
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEmptyInstrument.h:65
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:211
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
@@ -415,7 +407,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspac
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/GroupingWorkspace.cpp:153
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:124
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:1242
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspaceIterator.cpp:145
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/OffsetsWorkspace.cpp:49
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
@@ -455,7 +446,6 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:642
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:376
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:405
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:129
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
@@ -724,7 +714,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.c
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp:62
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressPresenter.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:441
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Batch/JobTreeView.cpp:48
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ConvolutionFunctionModel.cpp:230
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:103
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:113
@@ -762,7 +751,6 @@ iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:629
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MessageDisplay.cpp:151
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/OptionsPropertyWidget.cpp:53
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ProgressableView.cpp:31
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyHandler.cpp:65
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cpp:60
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cpp:379
@@ -806,7 +794,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowse
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1271
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1350
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:191
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1157
 duplicateExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1157
 duplicateValueTernary:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1157
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:1628

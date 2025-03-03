@@ -835,9 +835,6 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
   // Get NROWS and NCOLS for other panels
   NROWS = NCOLS = -1;
 
-  if (!inst)
-    return;
-
   if (!panel)
     return;
   std::shared_ptr<const Component> compPanel = std::dynamic_pointer_cast<const Component>(panel);
