@@ -1,0 +1,1 @@
+- :class:`ConfigService.setDataSearchDirs <mantid.kernel.ConfigServiceImpl.setDataSearchDirs>` will no longer crash when comma separated paths are used in the `datasearch.directories` setting of the `mantid.user.properties` file.
