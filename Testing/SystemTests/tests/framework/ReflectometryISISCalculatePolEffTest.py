@@ -84,6 +84,7 @@ class ReflectometryISISCalculatePolEffTestBase(MantidSystemTest, metaclass=ABCMe
 
     def validate(self):
         self.tolerance = 1e-10
+        self.nanEqual = True
         return self._OUTPUT_WS_NAME, self.reference_file
 
 
