@@ -1,0 +1,1 @@
+- :ref:`CreateDetectorTable<algm-CreateDetectorTable>` now has an optional argument, ``IncludeDetectorPosition``, which, if `True`, will add a column, ``Position``, to the end of the ``DetectorTable``. This column has the detector position as a ``V3D`` type object for each spectrum in the table.
