@@ -43,6 +43,10 @@ QColor AlternateCSPythonLexer::defaultColor(int style) const {
   case TripleDoubleQuotedString:
     return QColor(0x00, 0xaa, 0x00);
 
+  case TripleSingleQuotedFString:
+  case TripleDoubleQuotedFString:
+    return QColor(0x00, 0xaa, 0x00);
+
   case ClassName:
     return QColor(0x00, 0x00, 0x00);
 
