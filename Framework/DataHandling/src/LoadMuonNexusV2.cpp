@@ -22,6 +22,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <vector>
 

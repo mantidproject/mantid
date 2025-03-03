@@ -26,6 +26,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cctype>

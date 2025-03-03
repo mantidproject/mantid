@@ -20,6 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cmath>

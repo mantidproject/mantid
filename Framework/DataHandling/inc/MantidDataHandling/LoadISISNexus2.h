@@ -17,7 +17,7 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 #include <boost/scoped_ptr.hpp>
 

@@ -17,7 +17,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 #include <map>
 #include <vector>
 
