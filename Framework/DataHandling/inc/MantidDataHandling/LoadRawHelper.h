@@ -19,15 +19,12 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <climits>
+#include <filesystem>
 #include <list>
 #include <memory>
 
 class ISISRAW;
 class ISISRAW2;
-
-namespace Poco {
-class Path;
-}
 
 namespace Mantid {
 namespace API {
@@ -60,7 +57,7 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// Search for the log files in the workspace, and output their names as a list.
-  static std::list<std::string> searchForLogFiles(const Poco::Path &pathToRawFile);
+  static std::list<std::string> searchForLogFiles(const std::filesystem::path &pathToRawFile);
   /// returns true if the Exclude Monitor option(property) selected
   static bool isExcludeMonitors(const std::string &monitorOption);
   /// returns true if the Separate Monitor Option  selected

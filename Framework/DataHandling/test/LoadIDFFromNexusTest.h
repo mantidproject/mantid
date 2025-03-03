@@ -19,7 +19,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include <Poco/Path.h>
+
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -248,9 +249,9 @@ public:
 
     // First we check that both scoped files are in the same directory,
     // because the rest of the test relies on this.
-    Poco::Path cPath(cFullFilename);
-    Poco::Path pPath(pFullFilename);
-    TS_ASSERT_EQUALS(cPath.parent().toString(), pPath.parent().toString());
+    std::filesystem::path cPath(cFullFilename);
+    std::filesystem::path pPath(pFullFilename);
+    TS_ASSERT(std::filesystem::equivalent(cPath.parent_path(), pPath.parent_path()));
 
     // Set properties
     loader.setPropertyValue("Workspace", wsName);
@@ -330,9 +331,9 @@ public:
 
     // First we check that both scoped files are in the same directory,
     // because the rest of the test relies on this.
-    Poco::Path cPath(cFullFilename);
-    Poco::Path pPath(pFullFilename);
-    TS_ASSERT_EQUALS(cPath.parent().toString(), pPath.parent().toString());
+    std::filesystem::path cPath(cFullFilename);
+    std::filesystem::path pPath(pFullFilename);
+    TS_ASSERT_EQUALS(cPath.parent_path().string(), pPath.parent_path().string());
 
     // Set properties
     loader.setPropertyValue("Workspace", wsName);
@@ -369,11 +370,10 @@ public:
 
     // LET parameter correction file exists
     std::string testpath1 = loader.getParameterCorrectionFile("LET");
-    Poco::Path iPath(true);                                                             // Absolute path
-    TS_ASSERT(iPath.tryParse(testpath1));                                               // Result has correct syntax
-    TS_ASSERT(iPath.isFile());                                                          // Result is a file
-    TS_ASSERT(iPath.getFileName() == "LET_Parameter_Corrections.xml");                  // Correct filename
-    TS_ASSERT(iPath.directory(iPath.depth() - 1) == "embedded_instrument_corrections"); // Correct folder
+    std::filesystem::path iPath(testpath1);                                         // Absolute path
+    TS_ASSERT(std::filesystem::is_regular_file(iPath));                             // Result is a file
+    TS_ASSERT(iPath.filename() == "LET_Parameter_Corrections.xml");                 // Correct filename
+    TS_ASSERT(iPath.parent_path().filename() == "embedded_instrument_corrections"); // Correct folder
 
     // TEST0 parameter correction file does not exist
     std::string testpath0 = loader.getParameterCorrectionFile("TEST0");

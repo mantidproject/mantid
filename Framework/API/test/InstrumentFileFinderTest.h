@@ -157,9 +157,9 @@ public:
   }
 
   void testHelper_ValidDateOverlap() {
-    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "unit_testing";
-    ConfigService::Instance().setString("instrumentDefinition.directory", testDir);
+    const std::filesystem::path instDir = ConfigService::Instance().getInstrumentDirectory();
+    const std::filesystem::path testDir = instDir / "unit_testing";
+    ConfigService::Instance().setString("instrumentDefinition.directory", testDir.string());
     InstrumentFileFinder helper;
     std::string boevs = helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
@@ -167,10 +167,10 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"), std::string::npos);
     boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    ConfigService::Instance().setString("instrumentDefinition.directory", instDir);
+    ConfigService::Instance().setString("instrumentDefinition.directory", instDir.string());
 
     std::vector<std::string> formats = {"xml"};
-    std::vector<std::string> dirs;
+    std::vector<std::filesystem::path> dirs;
     dirs.emplace_back(testDir);
     std::vector<std::string> fnames = helper.getResourceFilenames("ARGUS", formats, dirs, "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"), std::string::npos);

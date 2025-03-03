@@ -86,7 +86,7 @@ void UserFunctionDialog::loadFunctions() {
   setFunction("Base", "erfc", "erfc(x)", "Complementary error function erfc(x) = 1 - erf(x)");
   setFunction("Built-in", "Gauss", "h*exp(-s*(x-c)^2)");
   setFunction("Built-in", "ExpDecay", "h*exp(-x/t)");
-  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
+  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir().string()) +
                 "Mantid.user.functions");
   if (funFile.exists() && funFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QTextStream in(&funFile);
@@ -354,7 +354,7 @@ void UserFunctionDialog::saveFunction() {
 }
 
 void UserFunctionDialog::saveToFile() {
-  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
+  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir().string()) +
                 "Mantid.user.functions");
   if (funFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QMap<QString, QString>::const_iterator it = m_funs.begin();

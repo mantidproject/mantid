@@ -134,12 +134,12 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
 void SequentialFitDialog::addFile() {
   QFileDialog dlg(this);
   dlg.setFileMode(QFileDialog::ExistingFiles);
-  const std::vector<std::string> &searchDirs = Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
+  const auto &searchDirs = Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
   QString dir;
   if (searchDirs.empty()) {
     dir = "";
   } else {
-    dir = QString::fromStdString(searchDirs.front());
+    dir = QString::fromStdString(searchDirs.front().string());
   }
   dlg.setDirectory(dir);
   if (dlg.exec()) {
