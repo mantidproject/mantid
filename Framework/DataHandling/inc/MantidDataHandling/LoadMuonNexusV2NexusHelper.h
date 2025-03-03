@@ -12,6 +12,7 @@
 #include "MantidNexus/NexusClasses_fwd.h"
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Mantid {
