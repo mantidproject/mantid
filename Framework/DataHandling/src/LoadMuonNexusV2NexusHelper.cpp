@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <string>
 
 namespace {
 template <typename type> std::string convertVectorToString(const std::vector<type> &vector) {
