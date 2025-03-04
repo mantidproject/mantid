@@ -12,34 +12,22 @@
 
 namespace {
 const std::string MOD_NAME("mantidqt.widgets.helpwindow.helpwindowbridge");
-const boost::python::str MOD_NAME_PY(MOD_NAME);
-
 boost::python::object getHelpWindowModule() {
-  static bool imported = false;
-  static boost::python::object module;
-  if (!imported) {
-    module = boost::python::import(MOD_NAME_PY);
-    imported = true;
-  }
-  return module;
+  boost::python::object mod = boost::python::import(boost::python::str(MOD_NAME));
+  return mod;
 }
 } // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-PythonHelpBridge::PythonHelpBridge() {
-  if (!Py_IsInitialized()) {
-    Py_Initialize();
-  }
-}
+PythonHelpBridge::PythonHelpBridge() {}
 
 void PythonHelpBridge::showHelpPage(const std::string &relative_url) {
   PyGILState_STATE gstate = PyGILState_Ensure();
   try {
-    boost::python::object module = getHelpWindowModule();
+    auto module = getHelpWindowModule();
     module.attr("show_help_page")(relative_url);
-
   } catch (boost::python::error_already_set &) {
     PyErr_Print();
     PyGILState_Release(gstate);
