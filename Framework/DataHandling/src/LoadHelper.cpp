@@ -36,11 +36,13 @@ using namespace API;
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
+  std::string result("");
   std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == "NXinstrument"; });
   if (it != v.cend())
-    return it->nxname;
-  return "";
+    result = it->nxname;
+
+  return result;
 }
 
 std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {

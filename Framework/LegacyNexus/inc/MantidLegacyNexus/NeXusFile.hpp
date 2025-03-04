@@ -17,6 +17,8 @@
 
 namespace Mantid::LegacyNexus {
 
+static std::pair<std::string, std::string> const EOD_ENTRY("NULL", "NULL");
+
 /**
  * The available compression types. These are all ignored in xml files.
  * \li NONE no compression

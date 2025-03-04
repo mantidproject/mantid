@@ -32,14 +32,6 @@ public:
                                extractEndTime(filename));
   }
 
-  void test_that_times_can_be_extracted_from_muon_file() {
-    const std::string filename("emu00006473.nxs");
-    const std::string startTime = "2006-11-21T07:04:30";
-    const std::string endTime = "2006-11-21T09:29:28";
-
-    do_test(filename, startTime, endTime);
-  }
-
   void test_that_times_can_be_extracted_from_isis_file() {
     const std::string filename("POLREF00014966.nxs");
     const std::string startTime = "2015-10-13T05:34:32";

@@ -399,6 +399,7 @@ set(TEST_FILES
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
     FilePropertyTest.h
+    FileLoaderRegistryTest.h
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h
     FunctionAttributeTest.h

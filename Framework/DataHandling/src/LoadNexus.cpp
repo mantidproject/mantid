@@ -18,9 +18,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 #include <cmath>
 #include <memory>
@@ -100,10 +100,10 @@ void LoadNexus::exec() {
   } else if (entryName[0] == "raw_data_1") {
     runLoadIsisNexus();
   } else {
-    Mantid::NeXus::NXRoot root(m_filename);
-    Mantid::NeXus::NXEntry entry = root.openEntry(root.groups().front().nxname);
+    Mantid::LegacyNexus::NXRoot root(m_filename);
+    Mantid::LegacyNexus::NXEntry entry = root.openEntry(root.groups().front().nxname);
     try {
-      Mantid::NeXus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+      Mantid::LegacyNexus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
       throw Exception::FileError("Unable to read File:", m_filename);
@@ -274,11 +274,11 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
  */
 int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
                                   std::vector<std::string> &definition) {
-  std::unique_ptr<::NeXus::File> fileH;
+  std::unique_ptr<Mantid::LegacyNexus::File> fileH;
 
   try {
-    fileH = std::make_unique<::NeXus::File>(fileName);
-  } catch (::NeXus::Exception &) {
+    fileH = std::make_unique<Mantid::LegacyNexus::File>(fileName);
+  } catch (Mantid::LegacyNexus::Exception &) {
     return -1;
   }
   entryName.clear();
@@ -293,7 +293,7 @@ int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::
   std::pair<std::string, std::string> entry;
   while (true) {
     entry = fileH->getNextEntry();
-    if (entry == ::NeXus::EOD_ENTRY)
+    if (entry == LegacyNexus::EOD_ENTRY)
       break;
 
     if (entry.second == "NXentry")
@@ -308,7 +308,7 @@ int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::
     // loop through field names in this entry
     while (true) {
       entry = fileH->getNextEntry();
-      if (entry == ::NeXus::EOD_ENTRY)
+      if (entry == LegacyNexus::EOD_ENTRY)
         break;
       // if a data field
       if (entry.second == "SDS") {

@@ -4,11 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidLegacyNexus/NexusClasses.h"
+#include "MantidLegacyNexus/NeXusException.hpp"
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyWithValue.h"
-
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -306,7 +305,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   NXstatus stat = NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
   if (stat == NXstatus::NX_ERROR) {
     std::cout << "NXRoot: Error loading " << m_filename;
-    throw Kernel::Exception::FileError("Unable to open File:", m_filename);
+    throw Exception("Unable to open File: " + m_filename);
   }
   readAllInfo();
 }
@@ -321,7 +320,7 @@ NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::mo
   // Open NeXus file
   NXstatus stat = NXopen(m_filename.c_str(), NXACC_CREATE5, &m_fileID);
   if (stat == NXstatus::NX_ERROR) {
-    throw Kernel::Exception::FileError("Unable to open File:", m_filename);
+    throw Exception("Unable to open File: " + m_filename);
   }
 }
 

@@ -19,9 +19,9 @@ using std::vector;
  * The implementation of the NeXus C++ API
  */
 
-static const string NULL_STR = "NULL";
-
 namespace { // anonymous namespace to keep it in the file
+const std::string NULL_STR("NULL");
+
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
   result << "[";
@@ -728,7 +728,7 @@ pair<string, string> File::getNextEntry() {
     string str_class(class_name);
     return pair<string, string>(str_name, str_class);
   } else if (status == NXstatus::NX_EOD) {
-    return pair<string, string>(NULL_STR, NULL_STR); // TODO return the correct thing
+    return EOD_ENTRY; // TODO return the correct thing
   } else {
     throw Exception("NXgetnextentry failed", status);
   }
@@ -746,7 +746,7 @@ void File::getEntries(std::map<std::string, std::string> &result) {
   pair<string, string> temp;
   while (true) {
     temp = this->getNextEntry();
-    if (temp.first == NULL_STR && temp.second == NULL_STR) { // TODO this needs to be changed when getNextEntry is fixed
+    if (temp == EOD_ENTRY) { // TODO this needs to be changed when getNextEntry is fixed
       break;
     } else {
       result.insert(temp);
