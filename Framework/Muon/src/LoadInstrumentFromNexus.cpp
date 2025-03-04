@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadInstrumentFromNexus.h"
+#include "MantidMuon/LoadInstrumentFromNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -19,7 +19,7 @@
 
 #include <fstream>
 
-namespace Mantid::DataHandling {
+namespace Mantid::Muon {
 
 DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 
@@ -86,4 +86,4 @@ void LoadInstrumentFromNexus::exec() {
   progress(1.0);
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Muon

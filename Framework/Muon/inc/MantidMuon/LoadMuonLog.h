@@ -11,13 +11,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidMuon/DllConfig.h"
 #include "MantidMuon/MuonNexusReader.h"
 
 namespace Mantid {
 
-namespace DataHandling {
-/** @class LoadMuonLog LoadMuonLog.h DataHandling/LoadMuonLog.h
+namespace Muon {
+/** @class LoadMuonLog LoadMuonLog.h Muon/LoadMuonLog.h
 
 Load ISIS Muon log data from a NeXus file. Sections of NXlog values within the
 first run will be loaded.
@@ -40,7 +40,7 @@ Required Properties:
 @author Ronald Fowler, based on LoadLog by Anders Markvardsen, ISIS, RAL
 @date 11/08/2008
 */
-class MANTID_DATAHANDLING_DLL LoadMuonLog final : public API::Algorithm {
+class MANTID_MUON_DLL LoadMuonLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadMuonLog();
@@ -53,7 +53,7 @@ public:
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override { return {"LoadLog", "LoadLogPropertyTable"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "DataHandling\\Logs;Muon\\DataHandling"; }
+  const std::string category() const override { return "Muon\\DataHandling"; }
 
 private:
   /// Overwrites Algorithm method.
@@ -76,5 +76,5 @@ private:
   bool isDateTimeString(const std::string &str);
 };
 
-} // namespace DataHandling
+} // namespace Muon
 } // namespace Mantid

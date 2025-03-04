@@ -78,7 +78,6 @@ set(SRC_FILES
     src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
     src/LoadInstrument.cpp
-    src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
     src/LoadIsawDetCal.cpp
     src/LoadLog.cpp
@@ -87,7 +86,6 @@ set(SRC_FILES
     src/LoadMask.cpp
     src/LoadMcStas.cpp
     src/LoadMcStasNexus.cpp
-    src/LoadMuonLog.cpp
     src/LoadMuonNexusV2.cpp
     src/LoadMuonNexusV2NexusHelper.cpp
     src/LoadMuonStrategy.cpp
@@ -299,7 +297,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
     inc/MantidDataHandling/LoadInstrument.h
-    inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
     inc/MantidDataHandling/LoadIsawDetCal.h
     inc/MantidDataHandling/LoadLog.h
@@ -308,7 +305,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMask.h
     inc/MantidDataHandling/LoadMcStas.h
     inc/MantidDataHandling/LoadMcStasNexus.h
-    inc/MantidDataHandling/LoadMuonLog.h
     inc/MantidDataHandling/LoadMuonNexusV2.h
     inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
     inc/MantidDataHandling/LoadMuonStrategy.h
@@ -687,7 +683,6 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
-         Mantid::Muon
   PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry Mantid::LegacyNexus
 )
 
