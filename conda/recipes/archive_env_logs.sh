@@ -4,14 +4,9 @@ build_prefix=$1
 prefix=$2
 package_name=$3
 
-platform=$(uname)
-if [ "$platform" == Linux ] ; then
-  platform_dir=linux-64
-elif [ "$platform" == Darwin ] ; then
-  platform_dir=osx-64
-else
-  platform_dir=none
-fi
+# This gets the subdir from conda in the form e.g. subdir: linux-64, then extracts
+# the platform
+platform_dir=$(conda config --show subdir | grep 'subdir' | awk '{print $2}')
 
 mkdir -p ../../$platform_dir/env_logs
 source ../../../mambaforge/etc/profile.d/conda.sh
