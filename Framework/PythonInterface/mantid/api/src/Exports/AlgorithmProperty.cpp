@@ -27,7 +27,7 @@ namespace {
  * @param direction An output/input/inout property
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, const IValidator *validator,
+AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, IValidator *validator,
                                                            unsigned int direction) {
   return new AlgorithmProperty(name, validator->clone(), direction);
 }
@@ -39,10 +39,9 @@ AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &na
  * when passed to the framework
  * @return A pointer to a new AlgorithmProperty object
  */
-static const AlgorithmProperty *(*const createPropertyWithValidator)(const std::string &, const IValidator *) =
-    +[](const std::string &name, const IValidator *validator) -> const AlgorithmProperty * {
+AlgorithmProperty *createPropertyWithValidator(const std::string &name, IValidator *validator) {
   return createPropertyWithValidatorAndDirection(name, validator, Mantid::Kernel::Direction::Input);
-};
+}
 } // namespace
 
 void export_AlgorithmProperty() {
@@ -55,7 +54,7 @@ void export_AlgorithmProperty() {
       .def(init<const std::string &>(args("name")))
       // These variants require the validator object to be cloned
       .def("__init__",
-           make_constructor(createPropertyWithValidator, default_call_policies(), args("name", "validator")))
+           make_constructor(&createPropertyWithValidator, default_call_policies(), args("name", "validator")))
       .def("__init__", make_constructor(&createPropertyWithValidatorAndDirection, default_call_policies(),
                                         args("name", "validator", "direction")));
 }

@@ -575,6 +575,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Rele
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/UninstallTrace.cpp:16
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:45
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:70
+constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmProperty.cpp:30
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMDHistoWorkspace.cpp:50
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMaskWorkspace.cpp:45
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ISplittersWorkspace.cpp:25
