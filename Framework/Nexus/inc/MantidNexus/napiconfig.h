@@ -4,9 +4,6 @@
 #include <windows.h>
 #endif /* _WIN32 */
 
-#define HAVE_HDF4
-#define WITH_HDF4
-
 #define HAVE_HDF5
 #define WITH_HDF5
 

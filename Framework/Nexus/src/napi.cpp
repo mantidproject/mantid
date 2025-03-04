@@ -245,9 +245,6 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
 #ifdef WITH_HDF5
 #include "MantidNexus/napi5.h"
 #endif
-#ifdef WITH_HDF4
-#include "MantidNexus/napi4.h"
-#endif
 /* ----------------------------------------------------------------------
 
    Definition of NeXus API
@@ -269,12 +266,6 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
   iRet = H5Fis_hdf5(static_cast<const char *>(filename));
   if (iRet > 0) {
     return NXACC_CREATE5;
-  }
-#endif
-#ifdef WITH_HDF4
-  iRet = Hishdf(static_cast<const char *>(filename));
-  if (iRet > 0) {
-    return NXACC_CREATE4;
   }
 #endif
   /*
@@ -401,24 +392,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   NXstatus retstat = NXstatus::NX_ERROR;
   if (backend_type == NXACC_CREATE4) {
     /* HDF4 type */
-#ifdef WITH_HDF4
-    NXhandle hdf4_handle = NULL;
-    retstat = NX4open(static_cast<const char *>(filename), am, &hdf4_handle);
-    if (retstat != NXstatus::NX_OK) {
-      free(fHandle);
-      free(filename);
-      return retstat;
-    }
-    fHandle->pNexusData = hdf4_handle;
-    fHandle->access_mode = backend_type || (NXACC_READ && am);
-    NX4assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
-#else
     NXReportError("ERROR: Attempt to create HDF4 file when not linked with HDF4");
     retstat = NXstatus::NX_ERROR;
-#endif /* HDF4 */
-    free(filename);
-    return retstat;
   } else if (backend_type == NXACC_CREATE5) {
     /* HDF5 type */
 #ifdef WITH_HDF5

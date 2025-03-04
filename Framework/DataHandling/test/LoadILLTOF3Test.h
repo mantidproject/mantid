@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -10,36 +10,36 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataHandling/LoadILLTOF2.h"
+#include "MantidDataHandling/LoadILLTOF3.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadILLTOF2;
+using Mantid::DataHandling::LoadILLTOF3;
 
-class LoadILLTOF2Test : public CxxTest::TestSuite {
+class LoadILLTOF3Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLTOF2Test *createSuite() { return new LoadILLTOF2Test(); }
-  static void destroySuite(LoadILLTOF2Test *suite) { delete suite; }
+  static LoadILLTOF3Test *createSuite() { return new LoadILLTOF3Test(); }
+  static void destroySuite(LoadILLTOF3Test *suite) { delete suite; }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testName() {
-    LoadILLTOF2 loader;
+    LoadILLTOF3 loader;
     TS_ASSERT_EQUALS(loader.name(), "LoadILLTOF")
   }
 
   void testVersion() {
-    LoadILLTOF2 loader;
-    TS_ASSERT_EQUALS(loader.version(), 2)
+    LoadILLTOF3 loader;
+    TS_ASSERT_EQUALS(loader.version(), 3)
   }
 
   void testInit() {
-    LoadILLTOF2 loader;
+    LoadILLTOF3 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
@@ -52,7 +52,7 @@ public:
   MatrixWorkspace_sptr loadDataFile(const std::string &dataFile, const size_t numberOfHistograms,
                                     const size_t numberOfMonitors, const size_t numberOfChannels, const double tofDelay,
                                     const double tofChannelWidth, const bool convertToTOF) {
-    LoadILLTOF2 loader;
+    LoadILLTOF3 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", dataFile))
@@ -84,7 +84,7 @@ public:
       if (convertToTOF) {
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
           const double binEdge = tofDelay + static_cast<double>(channelIndex) * tofChannelWidth + tofChannelWidth / 2;
-          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3);
+          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
         }
       } else {
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
@@ -146,22 +146,6 @@ public:
     TS_ASSERT_EQUALS(runList->value(), "104007");
   }
 
-  void test_IN5_hdf4_load() {
-    // From the input test file.
-    const double tofDelay = 5129.9414;     // ?
-    const double tofChannelWidth = 6.9084; // ?
-    const size_t channelCount = 1024;
-    const size_t histogramCount = 98305;
-    const size_t monitorCount = 1;
-    const bool convertToTOF = true;
-    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN5/095893.nxs", histogramCount, monitorCount, channelCount, tofDelay,
-                                           tofChannelWidth, convertToTOF);
-    auto const run = ws->run();
-    TS_ASSERT(run.hasProperty("run_list"))
-    const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), "95893");
-  }
-
   void test_IN6_load() {
     // From the input test file.
     const double tofDelay = 430;
@@ -188,7 +172,7 @@ public:
 
     // mostly the same code as loadDataFile, but some of the TOF features cant
     // be called
-    LoadILLTOF2 loader;
+    LoadILLTOF3 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs"))
@@ -291,7 +275,7 @@ public:
   void test_IN5_omega_scan() {
     // Tests the omega-scan case for IN5
 
-    LoadILLTOF2 alg;
+    LoadILLTOF3 alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     alg.setRethrows(true);
@@ -340,7 +324,7 @@ public:
   void test_PANTHER_omega_scan() {
     // Tests the omega-scan case for PANTHER
 
-    LoadILLTOF2 alg;
+    LoadILLTOF3 alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     alg.setRethrows(true);
@@ -389,7 +373,7 @@ public:
   void test_SHARP_omega_scan() {
     // Tests the omega-scan case for SHARP
 
-    LoadILLTOF2 alg;
+    LoadILLTOF3 alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     alg.setRethrows(true);
@@ -440,12 +424,12 @@ public:
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadILLTOF2TestPerformance : public CxxTest::TestSuite {
+class LoadILLTOF3TestPerformance : public CxxTest::TestSuite {
 public:
-  LoadILLTOF2TestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
+  LoadILLTOF3TestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
 
   void testDefaultLoad() {
-    Mantid::DataHandling::LoadILLTOF2 loader;
+    Mantid::DataHandling::LoadILLTOF3 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dataFile))
