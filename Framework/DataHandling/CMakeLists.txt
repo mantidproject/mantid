@@ -508,7 +508,6 @@ set(TEST_FILES
     LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
-    LoadInstrumentFromNexusTest.h
     LoadInstrumentFromRawTest.h
     LoadInstrumentTest.h
     LoadIsawDetCalTest.h
@@ -518,7 +517,6 @@ set(TEST_FILES
     LoadMaskTest.h
     LoadMcStasNexusTest.h
     LoadMcStasTest.h
-    LoadMuonLogTest.h
     LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h
