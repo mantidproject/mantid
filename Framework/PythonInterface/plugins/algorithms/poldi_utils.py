@@ -18,14 +18,11 @@ if TYPE_CHECKING:
 def exec_alg(alg_name: str, **kwargs):
     alg = AlgorithmManager.create(alg_name)
     alg.initialize()
-    alg.setAlwaysStoreInADS(True)
+    alg.setAlwaysStoreInADS(False)
     alg.setLogging(True)
     alg.setProperties(kwargs)
     alg.execute()
-    out_props = tuple(
-        ADS.retrieve(alg.getPropertyValue(prop)) if prop == "OutputWorkspace" else alg.getProperty(prop).value
-        for prop in alg.outputProperties()
-    )
+    out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
     return out_props[0] if len(out_props) == 1 else out_props
 
 
@@ -47,28 +44,27 @@ def load_poldi(
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
     """
-    ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf, OutputWorkspace=output_workspace)
+    ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
     dat = np.loadtxt(fpath_data)
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
     bin_width = cycle_time / dat.shape[-1]
-    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}", OutputWorkspace=ws.name())
+    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
     for ispec in range(ws.getNumberHistograms()):
         ws.setY(ispec, dat[ispec, :])
-    ws = exec_alg("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=ws.name())
+    ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
-    exec_alg("AddSampleLog", Workspace=ws.name(), LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
+    exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
     # set t0 (would normally live in parameter file)
-    exec_alg(
-        "SetInstrumentParameter", Workspace=ws.name(), ComponentName="chopper", ParameterName="t0", ParameterType="Number", Value=str(t0)
-    )
+    exec_alg("SetInstrumentParameter", Workspace=ws, ComponentName="chopper", ParameterName="t0", ParameterType="Number", Value=str(t0))
     exec_alg(
         "SetInstrumentParameter",
-        Workspace=ws.name(),
+        Workspace=ws,
         ComponentName="chopper",
         ParameterName="t0_const",
         ParameterType="Number",
         Value=str(t0_const),
     )
+    ADS.addOrReplace(output_workspace, ws)
     return ws
 
 
@@ -162,11 +158,11 @@ def simulate_2d_data(
     """
     is_dspac = ws_1d.getXDimension().name.replace("-", "") == "dSpacing"
     if not is_dspac:
-        ws_1d = exec_alg("ConvertUnits", InputWorkspace=ws_1d, Target="dSpacing", OutputWorkspace="__temp")
-        ws_1d = exec_alg("ConvertToPointData", InputWorkspace=ws_1d, OutputWorkspace=ws_1d.name())
+        ws_1d = exec_alg("ConvertUnits", InputWorkspace=ws_1d, Target="dSpacing")
+        ws_1d = exec_alg("ConvertToPointData", InputWorkspace=ws_1d)
     if output_workspace is None:
         output_workspace = ws_2d.name() + "_simulated"
-    ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d, OutputWorkspace=output_workspace)
+    ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d)
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
@@ -187,6 +183,5 @@ def simulate_2d_data(
         tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
         ds = tofs / tof_d1Ang
         ws_sim.setY(ispec, np.interp(ds, ws_1d.readX(0), ws_1d.readY(0)).sum(axis=1))
-    if not is_dspac:
-        exec_alg("DeleteWorkspace", Workspace=ws_1d)
+    ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
