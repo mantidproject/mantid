@@ -33,8 +33,13 @@ from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 import numpy as np
 from scipy.ndimage import distance_transform_edt, label
-from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
-from plugins.algorithms.IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
+from plugins.algorithms.peakdata_utils import (
+    InstrumentArrayConverter,
+    get_fwhm_from_back_to_back_params,
+    PeakData,
+    get_bin_width_at_tof,
+    set_peak_intensity,
+)
 from enum import Enum
 from typing import Sequence, Tuple
 
