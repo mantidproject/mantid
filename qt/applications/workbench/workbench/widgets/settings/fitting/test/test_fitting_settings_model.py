@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import unittest
 from unittest.mock import MagicMock, patch, call
 
 from workbench.widgets.settings.fitting.fitting_settings_model import FittingSettingsModel, FittingProperties
@@ -91,3 +92,7 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_tolerance, ["0.5", "1"], FittingProperties.TOLERANCE.value
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

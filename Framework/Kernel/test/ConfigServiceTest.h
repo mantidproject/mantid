@@ -659,6 +659,35 @@ public:
     }
   }
 
+  void testsetDataSearchDirs() {
+    std::string dirs;
+    std::string expected = "/test/a/;/test/b/;/test/c/";
+
+    // separated all by ;
+    dirs = "/test/a/;/test/b/;/test/c/";
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
+    ConfigService::Instance().reset();
+
+    // separated all by ,
+    dirs = "/test/a/,/test/b/,/test/c/";
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
+    ConfigService::Instance().reset();
+
+    // separated all by , and ;
+    dirs = "/test/a/,/test/b/;/test/c/";
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
+    ConfigService::Instance().reset();
+
+    // one path
+    dirs = "/test/a/";
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
+    ConfigService::Instance().reset();
+  }
+
 protected:
   bool m_valueChangedSent;
   std::string m_key;

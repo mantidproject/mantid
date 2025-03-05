@@ -90,15 +90,21 @@ Assuming the whole table is processed:
 Polarisation Corrections
 ------------------------
 
-Polarisation corrections settings are under the ``Experiment Settings`` tab in the interface. These should only work with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
+Polarisation corrections settings are under the ``Experiment Settings`` tab in the interface. These should only work
+with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
 
 #. In the Runs tab set the instrument to ``INTER``.
 #. On the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should be greyed out.
 #. Go back to the Runs tab and set the instrument to ``OFFSPEC``.
-#. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the ``Polarization Efficiencies`` combo box should be disabled.
-#. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box should still be disabled.
-#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box should become enabled and show a list of all loaded workspaces.
-#. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
+#. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the
+   ``Polarization Efficiencies`` combo box should be disabled.
+#. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo
+   box should still be disabled.
+#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Fredrikze Input Spin State Order`` and
+   ``Polarization Efficiencies`` combo boxes should become enabled. The latter should show a list of all loaded
+   workspaces.
+#. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now
+   appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
 #. Switch back to the ``ParameterFile`` setting from the ``Polarisation Corrections`` combo box.
 #. Back on the ``Runs`` tab, delete all rows in the table (this can be done by pressing ``Ctrl-A`` and then ``Delete``).
 #. Note that this will leave an empty row. In that row enter run number ``44956`` and angle ``0.4``.
@@ -213,9 +219,10 @@ Preview tab
    - Another run of ``ReflectometryISISLoadAndProcess`` will be logged in the Messages bar.
    - The 1D plot should update (although this is usually only noticeable when changes are made to the Signal region).
 
-#. Check that moving and resizing regions triggers a re-run of the reduction.
+#. Check that moving and vertically resizing regions triggers a re-run of the reduction (note that changing only the width of the rectangular selectors on the slice viewer plot will **not** trigger a new reduction).
 #. Check that you can delete one of the Background regions by selecting it and pressing the ``Delete`` key on your keyboard.
 #. Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
+#. Click the ``Load`` button to reload the same run. The slice viewer plot should display selectors for the regions of interest that you saved in the previous step. The instrument view plot currently does not do this so should not display any selectors. If you click ``Apply`` without making any changes then the ``ROI Detector IDs`` entry in the Experiment Settings lookup table should be unchanged (i.e. it shouldn't be cleared).
 #. Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
 #. Right-click the workspace and select ``Show History``:
 

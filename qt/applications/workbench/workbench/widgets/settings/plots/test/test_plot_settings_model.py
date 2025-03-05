@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import unittest
 from unittest.mock import MagicMock, call, patch
 
 from workbench.widgets.settings.plots.model import PlotsSettingsModel, PlotProperties
@@ -520,3 +521,7 @@ class PlotsSettingsModelTest(BaseSettingsModelTest):
         self._assert_setter_with_different_values(
             add_change_mock, self.model.set_color_map, ["jet_r", "greyscale"], PlotProperties.COLORMAP.value
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

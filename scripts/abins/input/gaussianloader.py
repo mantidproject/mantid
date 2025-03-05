@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import io
 from io import BufferedReader
+from pathlib import Path
 import re
 from typing import Iterable, List
 
@@ -22,11 +23,11 @@ class GAUSSIANLoader(AbInitioLoader):
     Class for loading GAUSSIAN ab initio vibrational data.
     """
 
-    def __init__(self, input_ab_initio_filename) -> None:
+    def __init__(self, input_ab_initio_filename: str, cache_directory: Path | None = None) -> None:
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.log or foo.LOG)
         """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename, cache_directory=cache_directory)
         self._active_atoms = None
         self._num_atoms = None
         self._num_read_freq = 0

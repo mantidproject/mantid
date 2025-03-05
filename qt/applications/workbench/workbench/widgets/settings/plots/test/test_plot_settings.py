@@ -98,6 +98,7 @@ class MockPlotsSettingsModel:
 @start_qapplication
 class PlotsSettingsTest(unittest.TestCase):
     MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.plots.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+    NOTIFY_CHANGES_PATH = "workbench.widgets.settings.plots.presenter.PlotSettings.notify_changes"
 
     def setUp(self) -> None:
         self.mock_model = MockPlotsSettingsModel()
@@ -152,104 +153,140 @@ class PlotsSettingsTest(unittest.TestCase):
         self.mock_model.get_legend_font_size.assert_called_once()
         self.mock_model.get_color_map.assert_called_once()
 
-    def test_action_normalization_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_normalization_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_normalization_changed(Qt.Checked)
         self.mock_model.set_normalize_by_bin_width.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_normalize_by_bin_width.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_normalization_changed(Qt.Unchecked)
         self.mock_model.set_normalize_by_bin_width.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_title_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_title_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_title_changed(Qt.Checked)
         self.mock_model.set_show_title.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_title.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_title_changed(Qt.Unchecked)
         self.mock_model.set_show_title.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_default_x_axes_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_default_x_axes_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_default_x_axes_changed("Linear")
         self.mock_model.set_x_axes_scale.assert_called_once_with("Linear")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_x_axes_scale.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_default_x_axes_changed("Log")
         self.mock_model.set_x_axes_scale.assert_called_once_with("Log")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_default_y_axes_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_default_y_axes_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_default_y_axes_changed("Linear")
         self.mock_model.set_y_axes_scale.assert_called_once_with("Linear")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_y_axes_scale.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_default_y_axes_changed("Log")
         self.mock_model.set_y_axes_scale.assert_called_once_with("Log")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_axes_line_width_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_axes_line_width_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_axes_line_width_changed(2)
         self.mock_model.set_axes_line_width.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_axes_line_width.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_axes_line_width_changed(3.5)
         self.mock_model.set_axes_line_width.assert_called_once_with("3.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_x_min_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_x_min_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_x_min_changed(3.2)
         self.mock_model.set_x_min.assert_called_once_with("3.2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_x_min.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_x_min_changed(1.5)
         self.mock_model.set_x_min.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_x_max_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_x_max_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_x_max_changed(3.2)
         self.mock_model.set_x_max.assert_called_once_with("3.2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_x_max.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_x_max_changed(1.5)
         self.mock_model.set_x_max.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_y_min_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_y_min_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_y_min_changed(3.2)
         self.mock_model.set_y_min.assert_called_once_with("3.2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_y_min.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_y_min_changed(1.5)
         self.mock_model.set_y_min.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_y_max_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_y_max_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_y_max_changed(3.2)
         self.mock_model.set_y_max.assert_called_once_with("3.2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_y_max.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_y_max_changed(1.5)
         self.mock_model.set_y_max.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
     def test_x_min_box_and_check_box_disabled_if_no_value(self):
         self.mock_model.get_x_min.return_value = ""
@@ -315,309 +352,414 @@ class PlotsSettingsTest(unittest.TestCase):
         self.assertTrue(presenter.get_view().y_max.isEnabled())
         self.assertTrue(presenter.get_view().y_max_box.isChecked())
 
-    def test_x_min_checkbox_clears_property_when_disabled(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_x_min_checkbox_clears_property_when_disabled(self, mock_notify_changes: MagicMock):
         self.mock_model.get_x_min.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
         presenter.action_x_min_box_changed(False)
 
         self.mock_model.set_x_min.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
-    def test_x_max_checkbox_clears_property_when_disabled(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_x_max_checkbox_clears_property_when_disabled(self, mock_notify_changes: MagicMock):
         self.mock_model.get_x_max.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
         presenter.action_x_max_box_changed(False)
 
         self.mock_model.set_x_max.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
-    def test_y_min_checkbox_clears_property_when_disabled(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_y_min_checkbox_clears_property_when_disabled(self, mock_notify_changes: MagicMock):
         self.mock_model.get_y_min.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
         presenter.action_y_min_box_changed(False)
 
         self.mock_model.set_y_min.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
-    def test_y_max_checkbox_clears_property_when_disabled(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_y_max_checkbox_clears_property_when_disabled(self, mock_notify_changes: MagicMock):
         self.mock_model.get_y_max.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
         presenter.action_y_max_box_changed(False)
 
         self.mock_model.set_y_max.assert_called_once_with("")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_enable_grid(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_enable_grid(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_enable_grid_changed(Qt.Checked)
         self.mock_model.set_enable_grid.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_enable_grid.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_enable_grid_changed(Qt.Unchecked)
         self.mock_model.set_enable_grid.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_ticks_left(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_ticks_left(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_ticks_left_changed(Qt.Checked)
         self.mock_model.set_show_ticks_left.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_ticks_left.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_ticks_left_changed(Qt.Unchecked)
         self.mock_model.set_show_ticks_left.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_ticks_bottom(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_ticks_bottom(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_ticks_bottom_changed(Qt.Checked)
         self.mock_model.set_show_ticks_bottom.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_ticks_bottom.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_ticks_bottom_changed(Qt.Unchecked)
         self.mock_model.set_show_ticks_bottom.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_ticks_right(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_ticks_right(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_ticks_right_changed(Qt.Checked)
         self.mock_model.set_show_ticks_right.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_ticks_right.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_ticks_right_changed(Qt.Unchecked)
         self.mock_model.set_show_ticks_right.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_ticks_top(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_ticks_top(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_ticks_top_changed(Qt.Checked)
         self.mock_model.set_show_ticks_top.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_ticks_top.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_ticks_top_changed(Qt.Unchecked)
         self.mock_model.set_show_ticks_top.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_labels_left(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_labels_left(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_labels_left_changed(Qt.Checked)
         self.mock_model.set_show_labels_left.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_labels_left.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_labels_left_changed(Qt.Unchecked)
         self.mock_model.set_show_labels_left.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_labels_bottom(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_labels_bottom(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_labels_bottom_changed(Qt.Checked)
         self.mock_model.set_show_labels_bottom.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_labels_bottom.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_labels_bottom_changed(Qt.Unchecked)
         self.mock_model.set_show_labels_bottom.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_labels_right(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_labels_right(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_labels_right_changed(Qt.Checked)
         self.mock_model.set_show_labels_right.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_labels_right.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_labels_right_changed(Qt.Unchecked)
         self.mock_model.set_show_labels_right.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_labels_top(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_labels_top(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_labels_top_changed(Qt.Checked)
         self.mock_model.set_show_labels_top.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_labels_top.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_labels_top_changed(Qt.Unchecked)
         self.mock_model.set_show_labels_top.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_line_style_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_line_style_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_line_style_changed("dashed")
         self.mock_model.set_line_style.assert_called_once_with("dashed")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_line_style.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_line_style_changed("dotted")
         self.mock_model.set_line_style.assert_called_once_with("dotted")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_line_width_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_line_width_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_line_width_changed(2)
         self.mock_model.set_line_width.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_line_width.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_line_width_changed(3.5)
         self.mock_model.set_line_width.assert_called_once_with("3.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_marker_style_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_marker_style_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_marker_style_changed("circle")
         self.mock_model.set_marker_style.assert_called_once_with("circle")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_marker_style.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_marker_style_changed("octagon")
         self.mock_model.set_marker_style.assert_called_once_with("octagon")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_marker_size_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_marker_size_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_marker_size_changed("8.0")
         self.mock_model.set_marker_size.assert_called_once_with("8.0")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_marker_size.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_marker_size_changed("5.0")
         self.mock_model.set_marker_size.assert_called_once_with("5.0")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_error_width_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_error_width_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_error_width_changed(2)
         self.mock_model.set_error_width.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_error_width.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_error_width_changed(1.5)
         self.mock_model.set_error_width.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_capsize_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_capsize_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_capsize_changed(2)
         self.mock_model.set_capsize.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_capsize.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_capsize_changed(1.5)
         self.mock_model.set_capsize.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_cap_thickness_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_cap_thickness_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_cap_thickness_changed(2)
         self.mock_model.set_cap_thickness.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_cap_thickness.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_cap_thickness_changed(1.5)
         self.mock_model.set_cap_thickness.assert_called_once_with("1.5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_error_every_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_error_every_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_error_every_changed(2)
         self.mock_model.set_error_every.assert_called_once_with("2")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_error_every.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_error_every_changed(5)
         self.mock_model.set_error_every.assert_called_once_with("5")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_minor_ticks_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_minor_ticks_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_minor_ticks_changed(Qt.Checked)
         self.mock_model.set_show_minor_ticks.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_minor_ticks.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_minor_ticks_changed(Qt.Unchecked)
         self.mock_model.set_show_minor_ticks.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_minor_gridlines_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_minor_gridlines_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_minor_gridlines_changed(Qt.Checked)
         self.mock_model.set_show_minor_gridlines.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_minor_gridlines.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_minor_gridlines_changed(Qt.Unchecked)
         self.mock_model.set_show_minor_gridlines.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_show_legend_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_show_legend_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_show_legend_changed(Qt.Checked)
         self.mock_model.set_show_legend.assert_called_once_with("On")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_show_legend.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_show_legend_changed(Qt.Unchecked)
         self.mock_model.set_show_legend.assert_called_once_with("Off")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_legend_every_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_legend_every_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_legend_location_changed("best")
         self.mock_model.set_legend_location.assert_called_once_with("best")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_legend_location.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_legend_location_changed("upper left")
         self.mock_model.set_legend_location.assert_called_once_with("upper left")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_legend_size_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_legend_size_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_legend_size_changed(10)
         self.mock_model.set_legend_font_size.assert_called_once_with("10")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_legend_font_size.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_legend_size_changed(8)
         self.mock_model.set_legend_font_size.assert_called_once_with("8")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_default_colormap_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_default_colormap_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
         presenter.get_view().default_colormap_combo_box.setCurrentIndex(4)
         colormap = presenter.get_view().default_colormap_combo_box.currentText()
 
         self.mock_model.set_color_map.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_default_colormap_changed()
         self.mock_model.set_color_map.assert_called_once_with(colormap)
+        mock_notify_changes.assert_called_once()
 
         presenter.get_view().default_colormap_combo_box.setCurrentIndex(5)
         colormap = presenter.get_view().default_colormap_combo_box.currentText()
         presenter.get_view().reverse_colormap_check_box.setChecked(True)
 
         self.mock_model.set_color_map.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_default_colormap_changed()
         self.mock_model.set_color_map.assert_called_once_with(colormap + "_r")
+        mock_notify_changes.assert_called_once()
 
-    def test_action_font_combo_changed(self):
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_font_combo_changed(self, mock_notify_changes: MagicMock):
         presenter = PlotSettings(None, model=self.mock_model)
 
         presenter.action_font_combo_changed("Helvetica")
         self.mock_model.set_plot_font.assert_called_once_with("Helvetica")
+        mock_notify_changes.assert_called_once()
 
         self.mock_model.set_plot_font.reset_mock()
+        mock_notify_changes.reset_mock()
 
         presenter.action_font_combo_changed("Something that is not a font")
         self.mock_model.set_plot_font.assert_called_once_with("Something that is not a font")
+        mock_notify_changes.assert_called_once()
 
 
 if __name__ == "__main__":

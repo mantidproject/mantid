@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from unittest import TestCase
+import unittest
 from unittest.mock import patch, call
 
 from workbench.widgets.settings.base_classes.config_settings_changes_model import ConfigSettingsChangesModel
@@ -12,7 +12,7 @@ from workbench.widgets.settings.test_utilities.mock_config_service import MockCo
 
 
 @patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
-class ConfigSettingsChangesModelTest(TestCase):
+class ConfigSettingsChangesModelTest(unittest.TestCase):
     def setUp(self) -> None:
         self.model = ConfigSettingsChangesModel()
 
@@ -88,3 +88,7 @@ class ConfigSettingsChangesModelTest(TestCase):
 
         mock_config_service.setString.assert_has_calls([call("property.1", "blue"), call("property.2", "apple")])
         self.assertEqual(self.model.get_changes(), {})
+
+
+if __name__ == "__main__":
+    unittest.main()

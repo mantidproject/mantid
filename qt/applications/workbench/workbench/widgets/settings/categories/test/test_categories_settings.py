@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest.mock import call, Mock, ANY, MagicMock
+from unittest.mock import call, Mock, ANY, MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_qt import MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictMock
@@ -117,7 +117,8 @@ class CategoriesSettingsTest(unittest.TestCase):
         child_item1.setCheckState.assert_called_once_with(0, Qt.Checked)
         parent_item.setCheckState.assert_called_once_with(0, Qt.PartiallyChecked)
 
-    def test_set_hidden_algorithms_string(self):
+    @patch("workbench.widgets.settings.categories.presenter.CategoriesSettings.notify_changes")
+    def test_set_hidden_algorithms_string(self, notify_changes_mock: MagicMock):
         presenter = CategoriesSettings(None, view=self.mock_view, model=self.mock_model)
         hidden_algorithim_string = [
             i for i in sorted(self.mock_model.algorithm_and_states.keys()) if self.mock_model.algorithm_and_states[i] is True
@@ -126,6 +127,7 @@ class CategoriesSettingsTest(unittest.TestCase):
 
         presenter.set_hidden_algorithms_string(None)
         self.mock_model.set_hidden_algorithms.assert_called_once_with(";".join(hidden_algorithim_string))
+        notify_changes_mock.assert_called_once()
 
     def test_interface_state_correct_when_created(self):
         mock_main_window = MockMainWindow()
@@ -142,7 +144,8 @@ class CategoriesSettingsTest(unittest.TestCase):
 
         self.mock_view.add_checked_widget_item.assert_has_calls(expected_calls)
 
-    def test_set_hidden_interface_string(self):
+    @patch("workbench.widgets.settings.categories.presenter.CategoriesSettings.notify_changes")
+    def test_set_hidden_interface_string(self, notify_changes_mock: MagicMock):
         self.mock_model.get_hidden_interfaces.return_value = ""
         presenter = CategoriesSettings(None, view=self.mock_view, model=self.mock_model)
         hidden_interface_string = "Indirect; Muon; Reflectometry"
@@ -150,3 +153,8 @@ class CategoriesSettingsTest(unittest.TestCase):
         presenter._create_hidden_categories_string = Mock(return_value=hidden_interface_string)
         presenter.set_hidden_interfaces_string(None)
         self.mock_model.set_hidden_interfaces.assert_called_once_with(";".join(hidden_interface_string))
+        notify_changes_mock.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()
