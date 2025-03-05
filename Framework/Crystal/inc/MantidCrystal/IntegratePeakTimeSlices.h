@@ -284,11 +284,11 @@ private:
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.
    */
-  void PreFit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
+  void PreFit(const API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
               std::vector<double> &params, std::vector<double> &errs, double lastRow, double lastCol,
               double neighborRadius);
 
-  void Fit(API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
+  void Fit(const API::MatrixWorkspace_sptr &Data, double &chisqOverDOF, bool &done, std::vector<std::string> &names,
            std::vector<double> &params, std::vector<double> &errs, double lastRow, double lastCol,
            double neighborRadius);
 

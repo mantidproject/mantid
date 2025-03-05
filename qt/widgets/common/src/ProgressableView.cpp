@@ -28,7 +28,6 @@ void ProgressableView::setAsEndlessIndicator() {
   m_style = Style::ENDLESS;
   // To get QProgressBar to display as an endless progress indicator, we need
   // to set start=end=0 in the derived view class
-  if (m_style == Style::ENDLESS)
-    setProgressRange(0, 0);
+  setProgressRange(0, 0);
 }
 } // namespace MantidQt::MantidWidgets
