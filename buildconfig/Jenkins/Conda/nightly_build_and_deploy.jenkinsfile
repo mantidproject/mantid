@@ -368,7 +368,7 @@ pipeline {
 
               package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}")
-              package_standalone()
+              package_standalone("${PLATFORM}")
               archive_standalone_package("${PLATFORM}")
             }
             post {
@@ -622,23 +622,23 @@ def generate_git_tag() {
   return git_tag
 }
 
-def package_standalone() {
+def package_standalone(platform) {
   packagescript_path = "${CISCRIPT_DIR}/package-standalone"
   if(isUnix()) {
-    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options()}"
+    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options(platform)}"
   } else {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
-      ${package_standalone_options()}\""
+      ${package_standalone_options(platform)}\""
   }
 }
 
-def package_standalone_options() {
+def package_standalone_options(platform) {
   package_options = ""
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
-  return package_options.trim()
+  return package_options.trim() + " --platform ${platform}"
 }
 
 // Determine whether this build should be marked as a prerelease on GitHub.
