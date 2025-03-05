@@ -42,7 +42,7 @@ public:
     removeFile(FILENAME);
 
     { // write tests
-      H5File file(FILENAME, H5F_ACC_EXCL);
+      H5File file(FILENAME, H5F_ACC_EXCL, H5Util::defaultFileAcc());
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
       H5Util::write(group, DATA_NAME, DATA_VALUE);
       file.close();
@@ -83,7 +83,7 @@ public:
 
     // Act
     { // write tests
-      H5File file(FILENAME, H5F_ACC_EXCL);
+      H5File file(FILENAME, H5F_ACC_EXCL, H5Util::defaultFileAcc());
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
       H5Util::writeScalarDataSetWithStrAttributes(group, DATA_NAME, DATA_VALUE, stringAttributesScalar);
       auto data = group.openDataSet(DATA_NAME);
@@ -124,7 +124,7 @@ public:
     removeFile(FILENAME);
 
     { // write tests
-      H5File file(FILENAME, H5F_ACC_EXCL);
+      H5File file(FILENAME, H5F_ACC_EXCL, H5Util::defaultFileAcc());
       auto group = H5Util::createGroupNXS(file, GRP_NAME, "NXentry");
       H5Util::writeArray1D(group, "array1d_float", array1d_float);
       H5Util::writeArray1D(group, "array1d_double", array1d_double);
@@ -136,7 +136,7 @@ public:
     TS_ASSERT(std::filesystem::exists(FILENAME));
 
     { // ---------- simple read tests
-      H5File file(FILENAME, H5F_ACC_RDONLY);
+      H5File file(FILENAME, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       auto group = file.openGroup(GRP_NAME);
 
       // without conversion
@@ -223,7 +223,7 @@ public:
     const char *wdata[5] = {"Lets", "see", "how", "it", "goes"};
 
     // write a test file
-    H5File file(filename, H5F_ACC_TRUNC);
+    H5File file(filename, H5F_ACC_TRUNC, H5Util::defaultFileAcc());
     Group group = file.createGroup("entry");
     DataSpace dataspace(1, dims);
     StrType datatype(0, H5T_VARIABLE);
@@ -237,7 +237,7 @@ public:
     TS_ASSERT(std::filesystem::exists(filename));
 
     // open and read the vector
-    H5File file_read(filename, H5F_ACC_RDONLY);
+    H5File file_read(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
     Group group_read = file_read.openGroup("entry");
 
     readout = H5Util::readStringVector(group_read, dataname);
@@ -255,7 +255,7 @@ public:
 
   void test_groupExists() {
     FileResource testInput("groupExists_test.h5");
-    H5File h5(testInput.fullPath(), H5F_ACC_TRUNC);
+    H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
     h5.createGroup("/one");
     h5.createGroup("/two");
     Group g = h5.openGroup("/two");
@@ -264,7 +264,7 @@ public:
     h5.close();
 
     TS_ASSERT(std::filesystem::exists(testInput.fullPath()));
-    H5File h5_ro(testInput.fullPath(), H5F_ACC_RDONLY);
+    H5File h5_ro(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     TS_ASSERT(H5Util::groupExists(h5_ro, "/one"));
     TS_ASSERT(H5Util::groupExists(h5_ro, "/two/three"));
@@ -281,7 +281,7 @@ public:
     FileResource testInput("keyHasValue_test.h5");
 
     {
-      H5File h5(testInput.fullPath(), H5F_ACC_TRUNC);
+      H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
 
       // 1: Create groups with specific key: value attributes
       Group g1 = h5.createGroup("/one");
@@ -294,7 +294,7 @@ public:
     }
 
     TS_ASSERT(std::filesystem::exists(testInput.fullPath()));
-    H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
+    H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     Group g1 = h5.openGroup("/one");
     Group g2 = g1.openGroup("two");
@@ -322,14 +322,14 @@ public:
   void test_copyGroup_same_file() {
     FileResource testInput("copy_group_same_file.h5");
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
       input1.createGroup("/one");
       Group g2 = input1.createGroup("/two");
       g2.createGroup("three");
     }
     {
       // WARNING: `H5File::reopen` doesn't work for some reason.
-      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       // verify the starting structure
       _assert_group_structure(input1,
                               {
@@ -340,12 +340,12 @@ public:
       TS_ASSERT(!_groupExists(input1, "/one/two/three"));
     }
     {
-      H5File output1(testInput.fullPath(), H5F_ACC_RDWR);
+      H5File output1(testInput.fullPath(), H5F_ACC_RDWR, H5Util::defaultFileAcc());
       H5Util::copyGroup(output1, "/one/two", output1, "/two");
       H5Util::copyGroup(output1, "/four", output1, "/two");
     }
     {
-      H5File output1(testInput.fullPath(), H5F_ACC_RDONLY);
+      H5File output1(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       // verify the final structure
       _assert_group_structure(output1, {"/one/two/three", "/two/three", "/four/three"},
                               "copyGroup: same file: final structure");
@@ -356,13 +356,13 @@ public:
     FileResource testInput1("copy_group_different_file1.h5");
     FileResource testInput2("copy_group_different_file2.h5");
     {
-      H5File input1(testInput1.fullPath(), H5F_ACC_TRUNC);
+      H5File input1(testInput1.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
       input1.createGroup("/one");
       Group g2 = input1.createGroup("/two");
       g2.createGroup("three");
     }
     {
-      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY);
+      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       // verify the starting structure
       _assert_group_structure(input1,
                               {
@@ -374,14 +374,14 @@ public:
       input1.close();
     }
     {
-      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY);
-      H5File output1(testInput2.fullPath(), H5F_ACC_TRUNC);
+      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
+      H5File output1(testInput2.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
       H5Util::copyGroup(output1, "/one", input1, "/one");
       H5Util::copyGroup(output1, "/two", input1, "/two");
       H5Util::copyGroup(output1, "/four", input1, "/two");
     }
     {
-      H5File output1(testInput2.fullPath(), H5F_ACC_RDONLY);
+      H5File output1(testInput2.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       // verify the final structure
       _assert_group_structure(output1, {"/one", "/two/three", "/four/three"},
                               "copyGroup: different file: final structure");
@@ -391,13 +391,13 @@ public:
   void test_deleteObjectLink_subgroup() {
     FileResource testInput("delete_object_link_subgroup.h5");
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
       input1.createGroup("/one");
       Group g2 = input1.createGroup("/two");
       g2.createGroup("three");
     }
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_RDWR);
+      H5File input1(testInput.fullPath(), H5F_ACC_RDWR, H5Util::defaultFileAcc());
       // verify the starting structure
       _assert_group_structure(input1,
                               {
@@ -408,7 +408,7 @@ public:
       H5Util::deleteObjectLink(input1, "/two/three");
     }
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       _assert_group_structure(input1,
                               {
                                   "/one",
@@ -422,13 +422,13 @@ public:
   void test_deleteObjectLink_rootgroup() {
     FileResource testInput("delete_object_link_rootgroup.h5");
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC, H5Util::defaultFileAcc());
       input1.createGroup("/one");
       Group g2 = input1.createGroup("/two");
       g2.createGroup("three");
     }
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_RDWR);
+      H5File input1(testInput.fullPath(), H5F_ACC_RDWR, H5Util::defaultFileAcc());
       // verify the starting structure
       _assert_group_structure(input1,
                               {
@@ -439,7 +439,7 @@ public:
       H5Util::deleteObjectLink(input1, "/two");
     }
     {
-      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
       TS_ASSERT(_groupExists(input1, "/one"));
       TS_ASSERT(!_groupExists(input1, "/two"));
     }
@@ -458,7 +458,7 @@ private:
     TS_ASSERT(std::filesystem::exists(filename));
 
     // read tests
-    H5File file(filename, H5F_ACC_RDONLY);
+    H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     auto fullCheck = H5Util::readString(file, "/" + groupName + "/" + dataName);
     TS_ASSERT_EQUALS(fullCheck, dataValue);

@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cmath>
@@ -63,7 +64,7 @@ const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"
 int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the SINQ (to date Loader only valid for focus)
-  if (descriptor.pathExists("/entry1/FOCUS/SINQ")) {
+  if (descriptor.isEntry("/entry1/FOCUS/SINQ")) {
     return 80;
   } else {
     return 0;
@@ -119,7 +120,7 @@ void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
   }
   m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
   size_t pos = m_instrumentName.find(' ');
-  m_instrumentName = m_instrumentName.substr(0, pos);
+  m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
 
 void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {

@@ -196,7 +196,7 @@ public:
   }
 
   /// Resizes the workspace.
-  void setRowCount(size_t count) override;
+  void setRowCount(size_t count) final; // Marked as final because used in constructors
   /// Inserts a row before row pointed to by index and fills it with default
   /// vales.
   size_t insertRow(size_t index) override;

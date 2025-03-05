@@ -119,4 +119,26 @@ public:
     TS_ASSERT(fitP.getTie().compare("") == 0);
     TS_ASSERT(fitP.getConstraint().compare("3 < name < 8") == 0);
   }
+
+  void testConstraintMinEmptyandMaxNotEmpty() {
+    FitParameter fitP;
+
+    std::istringstream input("9.1 , function , name ,3 ,  , , , , ,    ");
+
+    input >> fitP;
+
+    auto foo = fitP.getConstraint();
+
+    TS_ASSERT(fitP.getConstraint().compare("3 < name") == 0);
+  }
+
+  void testConstraintMinNotEmptyandMaxEmpty() {
+    FitParameter fitP;
+
+    std::istringstream input("9.1 , function , name , ,8 , , , , ,    ");
+
+    input >> fitP;
+
+    TS_ASSERT(fitP.getConstraint().compare("name < 8") == 0);
+  }
 };

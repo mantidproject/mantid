@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from unittest import TestCase
+import unittest
 
 from unittest.mock import call, MagicMock, Mock, patch
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
@@ -17,6 +17,7 @@ class FakeMVP(object):
         self._view = MockQWidget()
         self.update_properties = MagicMock()
         self.get_view = MagicMock(return_value=self._view)
+        self.subscribe_parent_presenter = MagicMock()
 
 
 class FakeSectionsListWidget:
@@ -54,7 +55,7 @@ class MockSettingsView(object):
         self.ask_before_close = MagicMock()
 
 
-class SettingsPresenterTest(TestCase):
+class SettingsPresenterTest(unittest.TestCase):
     def setUp(self) -> None:
         self.mock_view = MockSettingsView()
         self.mock_model = MagicMock()
@@ -100,10 +101,33 @@ class SettingsPresenterTest(TestCase):
         self.presenter.action_apply_button_pushed()
         self.presenter.view.notify_changes_need_restart.assert_called_once_with(settings_needing_restart)
 
-    def test_action_apply_button_pushed(self):
+    def test_update_apply_button(self):
+        for changes in ({}, {"a": "change"}):
+            self.mock_view.apply_button.setEnabled.reset_mock()
+            self.mock_model.unsaved_changes.return_value = changes
+            self.presenter.update_apply_button()
+            self.mock_view.apply_button.setEnabled.assert_called_once_with(changes != {})
+
+    def test_changes_updated(self):
+        self.mock_view.apply_button.setEnabled.reset_mock()
+        self.presenter.changes_updated(False)
+        self.mock_view.apply_button.setEnabled.assert_called_once_with(False)
+        self.mock_view.apply_button.setEnabled.reset_mock()
+        self.presenter.changes_updated(True)
+        self.mock_view.apply_button.setEnabled.assert_called_once_with(True)
+
+    def test_presenter_signals_setup(self):
+        self.mock_view.general_settings.subscribe_parent_presenter.assert_called_once_with(self.presenter)
+        self.mock_view.plot_settings.subscribe_parent_presenter.assert_called_once_with(self.presenter)
+        self.mock_view.fitting_settings.subscribe_parent_presenter.assert_called_once_with(self.presenter)
+        self.mock_view.categories_settings.subscribe_parent_presenter.assert_called_once_with(self.presenter)
+
+    @patch("workbench.widgets.settings.presenter.SettingsPresenter.update_apply_button")
+    def test_action_apply_button_pushed(self, update_apply_mock: MagicMock):
         self.presenter.action_apply_button_pushed()
         self.mock_model.apply_all_settings.assert_called_once()
         self.mock_parent.config_updated.assert_called_once()
+        update_apply_mock.assert_called_once()
 
     @patch("workbench.widgets.settings.presenter.SettingsPresenter.view_closing")
     def test_action_okay_button_pushed(self, mock_view_closing: MagicMock):
@@ -140,3 +164,7 @@ class SettingsPresenterTest(TestCase):
         closed = self.presenter.view_closing()
 
         self.assertFalse(closed)
+
+
+if __name__ == "__main__":
+    unittest.main()

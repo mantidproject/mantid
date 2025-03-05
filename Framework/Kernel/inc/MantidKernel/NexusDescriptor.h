@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -9,97 +9,95 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <map>
-#include <memory>
+#include <set>
 #include <string>
 #include <unordered_set>
-#include <utility>
 #include <vector>
-
-namespace NeXus {
-class File;
-}
 
 namespace Mantid {
 namespace Kernel {
 
-/**
-    Defines a wrapper around a file whose internal structure can be accessed
-   using the NeXus API
-
-    On construction the simple details about the layout of the file are cached
-   for faster querying later.
- */
 class MANTID_KERNEL_DLL NexusDescriptor {
-public:
-  /// Enumerate HDF possible versions
-  enum Version { Version4, Version5, AnyVersion };
-
-  static const size_t HDFMagicSize;
-  /// HDF cookie that is stored in the first 4 bytes of the file.
-  static const unsigned char HDFMagic[4];
-  /// Size of HDF5 signature
-  static size_t HDF5SignatureSize;
-  /// signature identifying a HDF5 file.
-  static const unsigned char HDF5Signature[8];
-
-  /// Returns true if the file is considered to store data in a hierarchy
-  static bool isReadable(const std::string &filename, const Version version = AnyVersion);
 
 public:
-  /// Constructor accepting a filename
-  NexusDescriptor(const std::string &filename, const bool init = true);
-  /// Destructor
-  ~NexusDescriptor();
+  /**
+   * Unique constructor
+   * @param filename input HDF5 Nexus file name
+   */
+  NexusDescriptor(std::string filename);
 
-  /// Disable default constructor
   NexusDescriptor() = delete;
 
-  /// Disable copy operator
-  NexusDescriptor(const NexusDescriptor &) = delete;
-
-  /// Disable assignment operator
-  NexusDescriptor &operator=(const NexusDescriptor &) = delete;
+  /**
+   * Using RAII components, no need to deallocate explicitly
+   */
+  ~NexusDescriptor() = default;
 
   /**
-   * Access the filename
-   * @returns A reference to a const string containing the filename
+   * Returns a copy of the current file name
+   * @return
    */
-  inline const std::string &filename() const { return m_filename; }
+  const std::string &filename() const noexcept;
+
   /**
    * Access the file extension. Defined as the string after and including the
    * last period character
    * @returns A reference to a const string containing the file extension
    */
   inline const std::string &extension() const { return m_extension; }
-  /**
-   * Access the open NeXus File object
-   * @returns A reference to the open ::NeXus file object
-   */
-  inline ::NeXus::File &data() { return *m_file; }
 
   /// Returns the name & type of the first entry in the file
-  const std::pair<std::string, std::string> &firstEntryNameType() const;
+  const std::pair<std::string, std::string> &firstEntryNameType() const { return m_firstEntryNameType; };
+
   /// Query if the given attribute exists on the root node
   bool hasRootAttr(const std::string &name) const;
-  /// Query if a path exists
-  bool pathExists(const std::string &path) const;
-  /// Query if a path exists of a given type
-  bool pathOfTypeExists(const std::string &path, const std::string &type) const;
-  /// return the path of a given type
-  std::string pathOfType(const std::string &type) const;
-  /// return a vector of all paths of a given type
+
+  /**
+   * Returns a const reference of the internal map holding all entries in the
+   * NeXus HDF5 file
+   * @return map holding all entries by group class
+   * <pre>
+   *   key: group_class (e.g. NXentry, NXlog)
+   *   value: set with absolute entry names for the group_class key
+   *          (e.g. /entry/log)
+   * </pre>
+   */
+  const std::map<std::string, std::set<std::string>> &getAllEntries() const noexcept;
+
+  /**
+   * Checks if a full-path entry exists for a particular groupClass in a Nexus
+   * dataset
+   * @param groupClass e.g. NxLog , Nexus entry attribute
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists for a groupClass, otherwise false
+   */
+  bool isEntry(const std::string &entryName, const std::string &groupClass) const noexcept;
+
+  /**
+   * Checks if a full-path entry exists in a Nexus dataset
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists, otherwise false
+   */
+  bool isEntry(const std::string &entryName) const noexcept;
+
+  /**
+   * @param type A string specifying the required type
+   * @return path A vector of strings giving paths using UNIX-style path
+   * separators (/), e.g. /raw_data_1, /entry/bank1
+   */
   std::vector<std::string> allPathsOfType(const std::string &type) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(const std::string &classType) const;
 
 private:
-  /// Initialize object with filename
-  void initialize(const std::string &filename);
-  /// Walk the tree and cache the structure
-  void walkFile(::NeXus::File &file, const std::string &rootPath, const std::string &className,
-                std::map<std::string, std::string> &pmap, int level);
+  /**
+   * Sets m_allEntries, called in HDF5 constructor.
+   * m_filename must be set
+   */
+  std::map<std::string, std::set<std::string>> initAllEntries();
 
-  /// Full filename
+  /** NeXus HDF5 file name */
   std::string m_filename;
   /// Extension
   std::string m_extension;
@@ -107,11 +105,16 @@ private:
   std::pair<std::string, std::string> m_firstEntryNameType;
   /// Root attributes
   std::unordered_set<std::string> m_rootAttrs;
-  /// Map of full path strings to types. Can check if path exists quickly
-  std::map<std::string, std::string> m_pathsToTypes;
 
-  /// Open NeXus handle
-  std::unique_ptr<::NeXus::File> m_file;
+  /**
+   * All entries metadata
+   * <pre>
+   *   key: group_class (e.g. NXentry, NXlog)
+   *   value: set with absolute entry names for the group_class key
+   *          (e.g. /entry/log)
+   * </pre>
+   */
+  const std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
 } // namespace Kernel

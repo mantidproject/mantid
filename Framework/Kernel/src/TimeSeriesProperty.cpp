@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <json/value.h>
 
@@ -2045,7 +2045,7 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *fi
   }
 
   std::vector<int> dims{static_cast<int>(values.size()), static_cast<int>(maxlen)};
-  file->makeData("value", ::NeXus::CHAR, dims, true);
+  file->makeData("value", NXnumtype::CHAR, dims, true);
   file->putData(strs.data());
   file->closeData();
   saveTimeVector(file);

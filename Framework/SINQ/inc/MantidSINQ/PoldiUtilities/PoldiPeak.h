@@ -30,7 +30,7 @@ class MANTID_SINQ_DLL PoldiPeak {
 public:
   enum FwhmRelation { AbsoluteQ, AbsoluteD, Relative };
 
-  PoldiPeak_sptr clone() const;
+  PoldiPeak_sptr clonePeak() const;
 
   const MillerIndices &hkl() const;
   void setHKL(MillerIndices hkl);

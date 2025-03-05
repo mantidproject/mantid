@@ -242,9 +242,9 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Make and open the data
     if (m_CoordSize == 4)
-      m_File->makeCompData("event_data", ::NeXus::FLOAT32, m_BlockSize, ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", NXnumtype::FLOAT32, m_BlockSize, ::NeXus::NONE, chunk, true);
     else
-      m_File->makeCompData("event_data", ::NeXus::FLOAT64, m_BlockSize, ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", NXnumtype::FLOAT64, m_BlockSize, ::NeXus::NONE, chunk, true);
 
     // A little bit of description for humans to read later
     m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);
@@ -257,21 +257,17 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   // Open the data
   m_File->openData("event_data");
-  // There are rummors that this is faster. Not sure if it is important
-  //      int type = ::NeXus::FLOAT32;
-  //      int rank = 0;
-  //      NXgetinfo(file->getHandle(), &rank, dims, &type);
 
   NeXus::Info info = m_File->getInfo();
-  int Type = info.type;
+  NXnumtype Type = info.type;
 
   m_ReadConversion = noConversion;
   switch (Type) {
-  case (::NeXus::FLOAT64):
+  case (NXnumtype::FLOAT64):
     if (m_CoordSize == 4)
       m_ReadConversion = doubleToFolat;
     break;
-  case (::NeXus::FLOAT32):
+  case (NXnumtype::FLOAT32):
     if (m_CoordSize == 8)
       m_ReadConversion = floatToDouble;
     break;

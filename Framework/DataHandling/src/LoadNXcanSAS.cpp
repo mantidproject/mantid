@@ -23,7 +23,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
 
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -509,7 +509,7 @@ int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   int confidence(0);
 
-  ::NeXus::File &file = descriptor.data();
+  ::NeXus::File file(descriptor.filename());
   // Check if there is an entry root/SASentry/definition->NXcanSAS
   try {
     bool foundDefinition = findDefinition(file);
@@ -544,7 +544,7 @@ void LoadNXcanSAS::init() {
 void LoadNXcanSAS::exec() {
   const std::string fileName = getPropertyValue("Filename");
   const bool loadTransmissions = getProperty("LoadTransmission");
-  H5::H5File file(fileName, H5F_ACC_RDONLY);
+  H5::H5File file(fileName, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   // Setup progress bar
   const int numberOfSteps = loadTransmissions ? 4 : 3;

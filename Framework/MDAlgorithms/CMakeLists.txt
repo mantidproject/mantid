@@ -86,6 +86,7 @@ set(SRC_FILES
     src/MDWSDescription.cpp
     src/MDWSTransform.cpp
     src/MagneticFormFactorCorrectionMD.cpp
+    src/DebyeWallerFactorCorrectionMD.cpp
     src/MaskMD.cpp
     src/MergeMD.cpp
     src/MergeMDFiles.cpp
@@ -208,6 +209,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDWSDescription.h
     inc/MantidMDAlgorithms/MDWSTransform.h
     inc/MantidMDAlgorithms/MagneticFormFactorCorrectionMD.h
+    inc/MantidMDAlgorithms/DebyeWallerFactorCorrectionMD.h
     inc/MantidMDAlgorithms/MaskMD.h
     inc/MantidMDAlgorithms/MergeMD.h
     inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -323,6 +325,7 @@ set(TEST_FILES
     MDWSDescriptionTest.h
     MDWSTransfTest.h
     MagneticFormFactorCorrectionMDTest.h
+    DebyeWallerFactorCorrectionMDTest.h
     MaskMDTest.h
     MergeMDFilesTest.h
     MergeMDTest.h

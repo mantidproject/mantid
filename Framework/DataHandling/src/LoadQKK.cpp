@@ -40,7 +40,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
  */
 int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
   const auto &firstEntryName = descriptor.firstEntryNameType().first;
-  if (descriptor.pathExists("/" + firstEntryName + "/data/hmm_xy"))
+  if (descriptor.isEntry("/" + firstEntryName + "/data/hmm_xy"))
     return 80;
   else
     return 0;

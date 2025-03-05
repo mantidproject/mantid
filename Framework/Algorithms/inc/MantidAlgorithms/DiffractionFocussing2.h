@@ -29,7 +29,7 @@ namespace Algorithms {
  detector,
  the third column corresponds to an offset in Deltad/d (not applied, usually
  applied using
- the AlignDetectors algorithm). The forth column is a flag to indicate whether
+ the ConvertUnits algorithm). The forth column is a flag to indicate whether
  the detector
  is selected. The fifth column indicates the group this detector belongs to
  (number >=1),
@@ -74,9 +74,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AlignDetectors", "AlignAndFocusPowder", "LoadCalFile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AlignAndFocusPowder", "LoadCalFile"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Diffraction\\Focussing"; }
 

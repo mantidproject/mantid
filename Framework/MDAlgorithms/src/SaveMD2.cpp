@@ -135,7 +135,7 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
     auto nbounds = dim->getNBoundaries();
     for (size_t n = 0; n < nbounds; n++)
       axis.emplace_back(dim->getX(n));
-    file->makeData(axis_title, ::NeXus::FLOAT64, static_cast<int>(dim->getNBoundaries()), true);
+    file->makeData(axis_title, NXnumtype::FLOAT64, static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
@@ -160,21 +160,21 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   chunks[0] = 1; // Drop the largest stride for chunking, I don't know
                  // if this is the best but appears to work
 
-  file->makeCompData("signal", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("signal", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getSignalArray());
   file->putAttr("signal", 1);
   file->putAttr("axes", axes_label);
   file->closeData();
 
-  file->makeCompData("errors_squared", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("errors_squared", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeCompData("num_events", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("num_events", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeCompData("mask", ::NeXus::INT8, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("mask", NXnumtype::INT8, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

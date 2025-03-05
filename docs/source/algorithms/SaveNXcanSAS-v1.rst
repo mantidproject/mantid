@@ -17,6 +17,8 @@ Formats Working Group `schema <http://cansas-org.github.io/NXcanSAS/classes/cont
 If the input workspace is 2D then the vertical axis needs to be a numeric axis in momentum transfer units. The created
 file can be reloaded using the :ref:`algm-LoadNXcanSAS` algorithm.
 
+If the input workspace is a group, every compatible workspace member of the group will be saved in a separate file.
+
 In addition, it is possible to save the transmission workspaces obtained from a reduction.
 
 

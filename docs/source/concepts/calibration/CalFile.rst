@@ -35,8 +35,7 @@ The file is a simple text file with the following format
 
 - ``number``: ignored
 - ``UDET``: detector ID
-- ``offset``: calibration offset used in :ref:`AlignDetectors
-  <algm-AlignDetectors>`. Comes from the ``OffsetsWorkspace``, or 0.0
+- ``offset``: calibration offset. Comes from the ``OffsetsWorkspace``, or 0.0
   if none is given.
 - ``select``: 1 if selected (use the pixel). Comes from the ``MaskWorkspace``,
   or 1 if none is given.

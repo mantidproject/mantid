@@ -51,11 +51,13 @@ pipeline {
   agent none
   options { checkoutToSubdirectory(CHECKOUT_DIR) }
   parameters {
+      string(name: 'DESCRIPTION', defaultValue: '',
+             description: 'Description to be displayed on the Jenkins build page.')
       // Check these match the PLATFORM matrix values below (without all).
       choice(name: 'BUILD_DEVEL', choices: PLATFORM_CHOICES,
-              description: 'Choose a platform to build & test the developer configuration.')
+             description: 'Choose a platform to build & test the developer configuration.')
       choice(name: 'BUILD_PACKAGE', choices: PLATFORM_CHOICES,
-              description: 'Choose a platform to build just this standalone package')
+             description: 'Choose a platform to build just this standalone package')
       string(name: 'PACKAGE_SUFFIX', defaultValue: PACKAGE_SUFFIX_DEFAULT,
              description: 'A string to append to the standalone package name')
       booleanParam(name: 'PUBLISH_TO_ANACONDA', defaultValue: PUBLISH_TO_ANACONDA_DEFAULT,
@@ -84,6 +86,8 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
+          currentBuild.setDescription(env.DESCRIPTION)
+
           if(env.PUBLISH_TO_ANACONDA == 'true') {
             if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
               error("You must specify an Anaconda label to publish packages.")
@@ -442,24 +446,28 @@ pipeline {
       }
       steps {
         script {
-          // Keep this build. If it reaches this stage then it passed all other stages.
-          currentBuild.keepLog = true
+          // If a build has a description already, we don't want to overwrite it,
+          // and can safely assume it's not a nightly run.
+          if(env.DESCRIPTION.isEmpty()) {
+            // Keep this build. If it reaches this stage then it passed all other stages.
+            currentBuild.keepLog = true
 
-          // Set the keep description to a known value so we know which previous builds to discard.
-          // This will allow builds to be manually kept and preserved by setting a custom description.
-          keepDescription = "Automatically preserving the most recent successful nightly"
-          currentBuild.setDescription(keepDescription)
+            // Set the keep description to a known value so we know which previous builds to discard.
+            // This will allow builds to be manually kept and preserved by setting a custom description.
+            keepDescription = "Automatically preserving the most recent successful nightly"
+            currentBuild.setDescription(keepDescription)
 
-          // Remove the "keep" status for all previous successful runs.
-          build = currentBuild.getPreviousSuccessfulBuild()
-          while(build != null)
-          {
-            if(build.build().getDescription() == keepDescription)
+            // Remove the "keep" status for all previous successful runs.
+            build = currentBuild.getPreviousSuccessfulBuild()
+            while(build != null)
             {
-              build.build().setDescription("")
-              build.build().keepLog(false)
+              if(build.build().getDescription() == keepDescription)
+              {
+                build.build().setDescription("")
+                build.build().keepLog(false)
+              }
+              build = build.getPreviousSuccessfulBuild()
             }
-            build = build.getPreviousSuccessfulBuild()
           }
         }
       }

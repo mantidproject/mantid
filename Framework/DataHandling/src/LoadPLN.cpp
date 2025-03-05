@@ -833,13 +833,12 @@ int LoadPLN::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.extension() != ".hdf")
     return 0;
 
-  if (descriptor.pathExists("/entry1/site_name") && descriptor.pathExists("/entry1/instrument/fermi_chopper") &&
-      descriptor.pathExists("/entry1/instrument/aperture/sh1") &&
-      descriptor.pathExists("/entry1/instrument/ag1010/MEAS/Temperature") &&
-      descriptor.pathExists("/entry1/instrument/detector/daq_dirname") &&
-      descriptor.pathExists("/entry1/instrument/detector/dataset_number") &&
-      descriptor.pathExists("/entry1/data/hmm") && descriptor.pathExists("/entry1/data/time_of_flight") &&
-      descriptor.pathExists("/entry1/data/total_counts")) {
+  if (descriptor.isEntry("/entry1/site_name") && descriptor.isEntry("/entry1/instrument/fermi_chopper") &&
+      descriptor.isEntry("/entry1/instrument/aperture/sh1") &&
+      descriptor.isEntry("/entry1/instrument/ag1010/MEAS/Temperature") &&
+      descriptor.isEntry("/entry1/instrument/detector/daq_dirname") &&
+      descriptor.isEntry("/entry1/instrument/detector/dataset_number") && descriptor.isEntry("/entry1/data/hmm") &&
+      descriptor.isEntry("/entry1/data/time_of_flight") && descriptor.isEntry("/entry1/data/total_counts")) {
     return 80;
   } else {
     return 0;

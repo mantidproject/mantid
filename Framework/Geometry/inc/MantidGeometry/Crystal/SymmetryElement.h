@@ -42,7 +42,7 @@ public:
   virtual std::shared_ptr<SymmetryElement> clone() const = 0;
 
   /// Returns the internally stored Hermann-Mauguin symbol.
-  std::string hmSymbol() const { return m_hmSymbol; }
+  const std::string &hmSymbol() const { return m_hmSymbol; }
 
 protected:
   SymmetryElement(std::string symbol);

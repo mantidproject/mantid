@@ -37,6 +37,7 @@ public:
 signals:
   void changed();
 
+  // cppcheck-suppress unknownMacro
 private slots:
   void handleMouseDown(const QPoint &point);
   void handleMouseMove(const QPoint &point);

@@ -70,19 +70,19 @@ public:
   void parse(const std::string &multiFileName);
 
   /// Return the vector of vectors of parsed file names.
-  std::vector<std::vector<unsigned int>> runs() const { return m_runs; }
+  const std::vector<std::vector<unsigned int>> &runs() const { return m_runs; }
   /// Return the vector of vectors of parsed file names.
-  std::vector<std::vector<std::string>> fileNames() const { return m_fileNames; }
+  const std::vector<std::vector<std::string>> &fileNames() const { return m_fileNames; }
   /// Return the parsed directory string.
-  std::string dirString() const { return m_dirString; }
+  const std::string &dirString() const { return m_dirString; }
   /// Return the parsed instrument string.
-  std::string instString() const { return m_instString; }
+  const std::string &instString() const { return m_instString; }
   /// Return the parsed underscore string.
-  std::string underscoreString() const { return m_underscoreString; }
+  const std::string &underscoreString() const { return m_underscoreString; }
   /// Return the parsed run string.
-  std::string runString() const { return m_runString; }
+  const std::string &runString() const { return m_runString; }
   /// Return the parsed extension string.
-  std::string extString() const { return m_extString; }
+  const std::string &extString() const { return m_extString; }
   /// Parses a string consisting of only run number info, into a vector of vector
   /// of run numbers.
   std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
@@ -150,7 +150,7 @@ public:
   RunRangeList();
 
   // Returns the list of run ranges.
-  std::set<std::pair<unsigned int, unsigned int>> rangeList() const { return m_rangeList; };
+  const std::set<std::pair<unsigned int, unsigned int>> &rangeList() const { return m_rangeList; };
 
   /// Add a run to the list of run ranges.
   void addRun(const unsigned int run);

@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid::DataHandling {
 

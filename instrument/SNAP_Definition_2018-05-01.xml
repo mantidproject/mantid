@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="SNAP" valid-from   ="2018-05-01 00:00:01"
+                        valid-to     ="2025-01-31 09:59:59"
+		        last-modified="2025-02-07 16:26:00">
+  <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
+  <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
+  <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+      <theta-sign axis="x"/>
+    </reference-frame>
+  </defaults>
+
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-15.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+  <!--MONITORS-->
+  <idlist idname="Downstream_monitor">
+    <id val="-2"/>
+  </idlist>
+  <component type="Downstream_monitor" idlist="Downstream_monitor">
+    <properties />
+    <location  />
+  </component>
+  <type is="monitor" name="Downstream_monitor">
+   <component type="monitor">
+    <location x="0.0" y="0.0" z="0.3" name="monitor2" />
+   </component>
+  </type>
+
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type is="monitor" name="monitors">
+    <component type="monitor">
+      <location x="0.0" y="0.0" z="-3.0" name="monitor1"/>
+    </component>
+  </type>
+
+  <!--DETECTORS-->
+  <component type="East">
+    <location >
+      <parameter name="roty">
+        <logfile id="det_arc2" eq="180.0+value"/>
+      </parameter>
+      <parameter name="r-position">
+        <logfile id="det_lin2" eq="0.5+value" />
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="det_arc2" />
+      </parameter>
+    </location>
+  </component>
+  <component type="West">
+    <location >
+      <parameter name="roty">
+        <logfile id="det_arc1" eq="180.0+value"/>
+      </parameter>
+      <parameter name="r-position">
+        <logfile id="det_lin1" eq="0.5+value" />
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="det_arc1" />
+      </parameter>
+    </location>
+  </component>
+
+  <type name="East">
+    <component type="Column1">
+      <location/>
+    </component>
+    <component type="Column2">
+      <location/>
+    </component>
+    <component type="Column3">
+      <location/>
+    </component>
+  </type>
+  <type name="West">
+    <component type="Column4">
+      <location/>
+    </component>
+    <component type="Column5">
+      <location/>
+    </component>
+    <component type="Column6">
+      <location/>
+    </component>
+  </type>
+
+  <type name="Column1">
+    <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank13">  <!-- was bank1 - 720896 -->
+        <trans x="-0.167548" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank12">  <!-- was bank4 - 655360 -->
+        <trans x="-0.167548" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"   idstart="0" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank11">  <!-- was bank7 - 589824 -->
+        <trans x="-0.167548" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+  <type name="Column2">
+    <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank23">  <!-- was bank2 - 917504 -->
+        <trans x="0.0" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"  idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank22">  <!-- was bank5 - 851968 -->
+        <trans x="0.0" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank21">  <!-- was bank8 - 786432 -->
+        <trans x="0.0" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+  <type name="Column3">
+    <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank33">  <!-- was bank3 - 1114112 -->
+        <trans x="0.167548" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank32">  <!-- was bank6 - 1048576 -->
+        <trans x="0.167548" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank31">  <!-- was bank9 - 983040 -->
+        <trans x="0.167548" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+  <type name="Column4">
+    <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank63">  <!-- was bank10 - 524288 -->
+        <trans x="0.167548" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank62">  <!-- was bank13 - 458752 -->
+        <trans x="0.167548" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank61">  <!-- was bank16 - 393216 -->
+        <trans x="0.167548" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+  <type name="Column5">
+    <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank53">  <!-- was bank11 - 327680 -->
+        <trans x="0.0" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"   idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank52">  <!-- was bank14 - 262144 -->
+        <trans x="0.0" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank51">  <!-- was bank17 - 196608 -->
+        <trans x="0.0" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+  <type name="Column6">
+    <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank43">  <!-- was bank12 - 131072 -->
+        <trans x="-0.167548" y="0.167548" />
+      </location>
+    </component>
+    <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank42">  <!-- was bank15 - 65536 -->
+        <trans x="-0.167548" y="0.0" />
+      </location>
+    </component>
+    <component type="panel"  idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank41">  <!-- was bank18 - 0 -->
+        <trans x="-0.167548" y="-0.167548" />
+      </location>
+    </component>
+  </type>
+
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel"
+    xpixels="256" xstart="-0.078795" xstep="+0.000618"
+    ypixels="256" ystart="-0.078795" ystep="+0.000618" >
+  <properties/>
+</type>
+
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
+      <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
+      <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+</instrument>

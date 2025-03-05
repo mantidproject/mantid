@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/operators.hpp>
@@ -63,7 +64,7 @@ void export_SpaceGroup() {
 
   class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
       .def("getNumber", &SpaceGroup::number, arg("self"))
-      .def("getHMSymbol", &SpaceGroup::hmSymbol, arg("self"))
+      .def("getHMSymbol", &SpaceGroup::hmSymbol, arg("self"), return_value_policy<copy_const_reference>())
       .def("getEquivalentPositions", &getEquivalentPositions, (arg("self"), arg("point")),
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")

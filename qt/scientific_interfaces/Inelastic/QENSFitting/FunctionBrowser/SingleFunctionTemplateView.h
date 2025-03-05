@@ -29,7 +29,7 @@ class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateView : public FunctionTemplat
   Q_OBJECT
 public:
   explicit SingleFunctionTemplateView(TemplateBrowserCustomizations customizations);
-  virtual ~SingleFunctionTemplateView() = default;
+  virtual ~SingleFunctionTemplateView() override = default;
 
   void updateParameterNames(const std::map<int, std::string> &parameterNames) override;
   void setGlobalParametersQuiet(std::vector<std::string> const &globals) override;

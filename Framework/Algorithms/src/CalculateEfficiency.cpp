@@ -155,8 +155,8 @@ void CalculateEfficiency::sumUnmaskedDetectors(const MatrixWorkspace_sptr &rebin
       continue;
 
     // Retrieve the spectrum into a vector
-    auto &YValues = rebinnedWS->y(i);
-    auto &YErrors = rebinnedWS->e(i);
+    const auto &YValues = rebinnedWS->y(i);
+    const auto &YErrors = rebinnedWS->e(i);
 
     sum += YValues[0];
     error += YErrors[0] * YErrors[0];

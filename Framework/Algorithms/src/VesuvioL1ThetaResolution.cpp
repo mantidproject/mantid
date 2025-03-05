@@ -317,7 +317,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
 /** Loads the instrument into a workspace.
  */
 void VesuvioL1ThetaResolution::calculateDetector(const IDetector &detector,
-                                                 std::function<double()> &flatRandomVariateGen,
+                                                 const std::function<double()> &flatRandomVariateGen,
                                                  std::vector<double> &l1Values, std::vector<double> &thetaValues) {
   const int numEvents = getProperty("NumEvents");
   l1Values.reserve(numEvents);

@@ -13,9 +13,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusIOHelper.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -184,7 +184,7 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus
   auto event_id = std::make_unique<std::vector<uint32_t>>(dim0);
 
   if (!m_loadError) {
-    Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
+    Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::Narrowing::Prevent>(
         *event_id, file, m_detIdFieldName, m_loadStart, m_loadSize);
     file.closeData();
 
@@ -248,7 +248,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   // explicitly allow downcasting using the additional AllowDowncasting
   // template argument.
   // the memory is allocated earlier in the function
-  Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::AllowNarrowing>(
+  Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::Narrowing::Allow>(
       *event_time_of_flight, file, m_timeOfFlightFieldName, m_loadStart, m_loadSize);
   std::string tof_unit;
   file.getAttr("units", tof_unit);
@@ -290,7 +290,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(::NeX
   }
 
   // Check that the type is what it is supposed to be
-  if (weight_info.type == ::NeXus::FLOAT32)
+  if (weight_info.type == NXnumtype::FLOAT32)
     file.getSlab(event_weight->data(), m_loadStart, m_loadSize);
   else {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name

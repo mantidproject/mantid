@@ -172,7 +172,7 @@ public:
 
   void testClone() {
     PoldiPeak_sptr peak = PoldiPeak::create(1.0, 200.00);
-    PoldiPeak_sptr clone = peak->clone();
+    PoldiPeak_sptr clone = peak->clonePeak();
 
     TS_ASSERT_EQUALS(peak->d(), clone->d());
     TS_ASSERT_EQUALS(peak->fwhm(), clone->fwhm());

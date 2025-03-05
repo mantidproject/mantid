@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from unittest import TestCase
+import unittest
 from unittest.mock import patch, MagicMock, call, mock_open
 
 from workbench.widgets.settings.model import SettingsModel
@@ -46,7 +46,7 @@ class MockConfigModel(ConfigSettingsChangesModel):
         self.properties_to_be_changed = MagicMock(return_value=[])
 
 
-class SettingsModelTest(TestCase):
+class SettingsModelTest(unittest.TestCase):
     def setUp(self) -> None:
         self.mock_settings_category_model_1 = MockConfigModel()
         self.mock_settings_category_model_2 = MockConfigModel()
@@ -112,3 +112,7 @@ class SettingsModelTest(TestCase):
         open_mock.assert_called_once_with("filepath", "r")
         mock_configService.setString.assert_has_calls([call(prop, str(value)) for prop, value in test_config_settings.items()])
         mock_conf.set.assert_has_calls([call(prop, value) for prop, value in test_CONF_settings.items()])
+
+
+if __name__ == "__main__":
+    unittest.main()

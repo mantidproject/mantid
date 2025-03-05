@@ -16,7 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -67,7 +67,7 @@ void LoadTOFRawNexus::init() {
  */
 int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
-  if (descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
+  if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)
@@ -187,7 +187,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
-          std::vector<int64_t> dims = file.getInfo().dims;
+          ::NeXus::DimVector const dims = file.getInfo().dims;
           file.closeData();
 
           if (!dims.empty()) {
@@ -200,11 +200,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");
-          std::vector<int64_t> xdim = file.getInfo().dims;
+          ::NeXus::DimVector const xdim = file.getInfo().dims;
           file.closeData();
 
           file.openData("y_pixel_offset");
-          std::vector<int64_t> ydim = file.getInfo().dims;
+          ::NeXus::DimVector const ydim = file.getInfo().dims;
           file.closeData();
 
           if (!xdim.empty() && !ydim.empty()) {
@@ -215,7 +215,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
           file.openData(m_axisField);
-          std::vector<int64_t> dims = file.getInfo().dims;
+          ::NeXus::DimVector const dims = file.getInfo().dims;
           // Find the units, if available
           if (file.hasAttr("units"))
             file.getAttr("units", m_xUnits);
@@ -282,7 +282,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file.openGroup("instrument", "NXinstrument");
   file.openGroup(bankName, "NXdetector");
 
-  size_t m_numPixels = 0;
+  m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
@@ -354,7 +354,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   // Load the TOF vector
   std::vector<float> tof;
   file.readData(m_axisField, tof);
-  size_t m_numBins = tof.size() - 1;
+  m_numBins = tof.size() - 1;
   if (tof.size() <= 1) {
     file.close();
     m_fileMutex.unlock();
@@ -487,7 +487,7 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
-  Kernel::NexusHDF5Descriptor descriptor(filename);
+  Kernel::NexusDescriptor descriptor(filename);
 
   try {
     LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);

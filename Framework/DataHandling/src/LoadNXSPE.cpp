@@ -20,9 +20,9 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/regex.hpp>
 

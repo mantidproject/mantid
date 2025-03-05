@@ -48,7 +48,7 @@ public:
 class MANTIDQT_INDIRECT_DLL IETModel : public IIETModel {
 public:
   IETModel();
-  ~IETModel() = default;
+  ~IETModel() override = default;
 
   void setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData) override;
 

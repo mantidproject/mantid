@@ -1,1 +1,0 @@
-- Add support for histogram :ref:`ragged workspaces <Ragged_Workspace>` to :ref:`ConvertUnits <algm-ConvertUnits>`. Ragged workspaces with bin centers (Point rather than BinEdges) still generate errors.

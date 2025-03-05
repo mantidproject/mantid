@@ -19,13 +19,14 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -34,9 +35,173 @@
 
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+
+/**  Implements NXlog Nexus class.
+ */
+class NXLog : public NXClass {
+public:
+  /**  Constructor.
+   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
+   * containing the NXClass.
+   *   @param name :: The name of the NXClass relative to its parent
+   */
+  NXLog(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
+  /// Nexus class id
+  std::string NX_class() const override { return "NXlog"; }
+
+  /** createTimeSeries
+   * Create a TimeSeries property form the records of the NXLog group. Times are
+   * in dataset "time"
+   * and the values are in dataset "value"
+   * @param start_time :: If the "time" dataset does not have the "start"
+   * attribute sets the
+   *   start time for the series.
+   * @param new_name :: If not empty it is used as the TimeSeries property name
+   *   @return The property or NULL
+   */
+  Mantid::Kernel::Property *createTimeSeries(const std::string &start_time = "", const std::string &new_name = "") {
+    const std::string &logName = new_name.empty() ? name() : new_name;
+    NXInfo vinfo = getDataSetInfo("time");
+    if (vinfo.type == NXnumtype::FLOAT64) {
+      NXDouble times(*this, "time");
+      times.openLocal();
+      times.load();
+      std::string units = times.attributes("units");
+      if (units == "minutes") {
+        using std::placeholders::_1;
+        std::transform(times(), times() + times.dim0(), times(), std::bind(std::multiplies<double>(), _1, 60));
+      } else if (!units.empty() && units.substr(0, 6) != "second") {
+        return nullptr;
+      }
+      return parseTimeSeries(logName, times, start_time);
+    } else if (vinfo.type == NXnumtype::FLOAT32) {
+      NXFloat times(*this, "time");
+      times.openLocal();
+      times.load();
+      std::string units = times.attributes("units");
+      if (units == "minutes") {
+        std::for_each(times(), times() + times.dim0(), [](float &val) { val *= 60.0f; });
+      } else if (!units.empty() && units.substr(0, 6) != "second") {
+        return nullptr;
+      }
+      return parseTimeSeries(logName, times, start_time);
+    }
+
+    return nullptr;
+  }
+
+private:
+  /** Creates a single value property of the log
+   * @returns A pointer to a newly created property wrapped around the log entry
+   */
+  Mantid::Kernel::Property *createSingleValueProperty() {
+    const std::string valAttr("value");
+    NXInfo vinfo = getDataSetInfo(valAttr);
+    Mantid::Kernel::Property *prop;
+    NXnumtype nxType = vinfo.type;
+    if (nxType == NXnumtype::FLOAT64) {
+      prop = new Mantid::Kernel::PropertyWithValue<double>(name(), getDouble(valAttr));
+    } else if (nxType == NXnumtype::INT32) {
+      prop = new Mantid::Kernel::PropertyWithValue<int>(name(), getInt(valAttr));
+    } else if (nxType == NXnumtype::CHAR) {
+      prop = new Mantid::Kernel::PropertyWithValue<std::string>(name(), getString(valAttr));
+    } else if (nxType == NXnumtype::UINT8) {
+      NXDataSetTyped<unsigned char> value(*this, valAttr);
+      value.load();
+      bool state = value[0] != 0;
+      prop = new Mantid::Kernel::PropertyWithValue<bool>(name(), state);
+    } else {
+      prop = nullptr;
+    }
+
+    return prop;
+  }
+  /// Parse a time series
+  template <class TYPE>
+  Mantid::Kernel::Property *parseTimeSeries(const std::string &logName, const TYPE &times,
+                                            const std::string &time0 = "") {
+    std::string start_time = (!time0.empty()) ? time0 : times.attributes("start");
+    if (start_time.empty()) {
+      start_time = "2000-01-01T00:00:00";
+    }
+    auto start_t = Mantid::Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
+    NXInfo vinfo = getDataSetInfo("value");
+    if (!vinfo)
+      return nullptr;
+
+    if (vinfo.dims[0] != times.dim0())
+      return nullptr;
+
+    if (vinfo.type == NXnumtype::CHAR) {
+      auto logv = new Mantid::Kernel::TimeSeriesProperty<std::string>(logName);
+      NXChar value(*this, "value");
+      value.openLocal();
+      value.load();
+      for (int i = 0; i < value.dim0(); i++) {
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
+        for (int j = 0; j < value.dim1(); j++) {
+          char *c = &value(i, j);
+          if (!isprint(*c))
+            *c = ' ';
+        }
+        logv->addValue(t, std::string(value() + i * value.dim1(), value.dim1()));
+      }
+      return logv;
+    } else if (vinfo.type == NXnumtype::FLOAT64) {
+      if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
+        auto logv = new Mantid::Kernel::TimeSeriesProperty<bool>(logName);
+        NXDouble value(*this, "value");
+        value.openLocal();
+        value.load();
+        for (int i = 0; i < value.dim0(); i++) {
+          auto t = start_t + boost::posix_time::seconds(int(times[i]));
+          logv->addValue(t, (value[i] == 0 ? false : true));
+        }
+        return logv;
+      }
+      NXDouble value(*this, "value");
+      return loadValues<NXDouble, TYPE>(logName, value, start_t, times);
+    } else if (vinfo.type == NXnumtype::FLOAT32) {
+      NXFloat value(*this, "value");
+      return loadValues<NXFloat, TYPE>(logName, value, start_t, times);
+    } else if (vinfo.type == NXnumtype::INT32) {
+      NXInt value(*this, "value");
+      return loadValues<NXInt, TYPE>(logName, value, start_t, times);
+    }
+    return nullptr;
+  }
+
+  /// Loads the values in the log into the workspace
+  ///@param logName :: the name of the log
+  ///@param value :: the value
+  ///@param start_t :: the start time
+  ///@param times :: the array of time offsets
+  ///@returns a property pointer
+  template <class NX_TYPE, class TIME_TYPE>
+  Mantid::Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
+                                       Mantid::Types::Core::DateAndTime start_t, const TIME_TYPE &times) {
+    value.openLocal();
+    auto logv = new Mantid::Kernel::TimeSeriesProperty<double>(logName);
+    value.load();
+    for (int i = 0; i < value.dim0(); i++) {
+      if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
+        logv->addValue(t, value[i]);
+      }
+    }
+    return logv;
+  }
+};
+
+// static method to create an NXlog from nexus
+NXLog openNXLog(const NXClass &nxclass, const std::string &name) { return nxclass.openNXClass<NXLog>(name); }
+} // namespace
+
 namespace Mantid::Algorithms {
+
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
@@ -45,7 +210,7 @@ using Geometry::Instrument;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
-using namespace Mantid::NeXus;
+using namespace Mantid::LegacyNexus;
 using Mantid::Types::Core::DateAndTime;
 
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
@@ -75,7 +240,7 @@ void LoadMuonNexus2::exec() {
   if (entry.containsGroup("run")) {
     try {
       m_numberOfPeriods = entry.getInt("run/number_periods");
-    } catch (::NeXus::Exception &) {
+    } catch (LegacyNexus::Exception &) {
       // assume 1
       m_numberOfPeriods = 1;
     }
@@ -84,7 +249,7 @@ void LoadMuonNexus2::exec() {
   }
 
   // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
+  const Property *ws = getProperty("OutputWorkspace");
   std::string localWSName = ws->value();
   // If multiperiod, will need to hold the Instrument & Sample for copying
   std::shared_ptr<Instrument> instrument;
@@ -101,9 +266,9 @@ void LoadMuonNexus2::exec() {
   }
   NXData dataGroup = entry.openNXData(detectorName);
 
-  Mantid::NeXus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
+  LegacyNexus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
   spectrum_index.load();
-  m_numberOfSpectra = spectrum_index.dim0();
+  m_numberOfSpectra = static_cast<specnum_t>(spectrum_index.dim0());
 
   // Load detector mapping
   const auto &detMapping = loadDetectorMapping(spectrum_index);
@@ -113,7 +278,7 @@ void LoadMuonNexus2::exec() {
 
   NXFloat raw_time = dataGroup.openNXFloat("raw_time");
   raw_time.load();
-  int nBins = raw_time.dim0();
+  auto nBins = raw_time.dim0();
   std::vector<double> timeBins;
   timeBins.assign(raw_time(), raw_time() + nBins);
   timeBins.emplace_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
@@ -165,7 +330,7 @@ void LoadMuonNexus2::exec() {
   // Mantid::NeXus::NXInt period_index = dataGroup.openNXInt("period_index");
   // period_index.load();
 
-  Mantid::NeXus::NXInt counts = dataGroup.openIntData();
+  Mantid::LegacyNexus::NXInt counts = dataGroup.openIntData();
   counts.load();
 
   NXInstrument instr = entry.openNXInstrument("instrument");
@@ -265,8 +430,9 @@ void LoadMuonNexus2::exec() {
 /** loadData
  *  Load the counts data from an NXInt into a workspace
  */
-Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::NeXus::NXInt &counts, int period, int spec) {
-  int nBins = 0;
+Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::LegacyNexus::NXInt &counts, int period,
+                                   int spec) {
+  int64_t nBins = 0;
   const int *data = nullptr;
 
   if (counts.rank() == 3) {
@@ -288,18 +454,18 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::NeXus::N
  *   @param entry :: The Nexus entry
  *   @param period :: The period of this workspace
  */
-void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws, NXEntry &entry, int period) {
+void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws, const NXEntry &entry, int period) {
   // Avoid compiler warning
-  (void)period;
+  UNUSED_ARG(period);
 
   std::string start_time = entry.getString("start_time");
 
   std::string sampleName = entry.getString("sample/name");
-  NXMainClass runlogs = entry.openNXClass<NXMainClass>("sample");
+  NXClass runlogs = entry.openNXClass<NXClass>("sample");
   ws->mutableSample().setName(sampleName);
 
   for (std::vector<NXClassInfo>::const_iterator it = runlogs.groups().begin(); it != runlogs.groups().end(); ++it) {
-    NXLog nxLog = runlogs.openNXLog(it->nxname);
+    NXLog nxLog = openNXLog(runlogs, it->nxname);
     Kernel::Property *logv = nxLog.createTimeSeries(start_time);
     if (!logv)
       continue;
@@ -368,7 +534,7 @@ void LoadMuonNexus2::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMuonNexus2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
   const auto &firstEntryNameType = descriptor.firstEntryNameType();
   const std::string root = "/" + firstEntryNameType.first;
   if (!descriptor.pathExists(root + "/definition"))
@@ -421,9 +587,9 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @returns :: map of index -> detector IDs
  * @throws std::runtime_error if fails to read data from file
  */
-std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
+std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::LegacyNexus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
-  const int nSpectra = spectrumIndex.dim0();
+  auto const nSpectra = spectrumIndex.dim0();
 
   // Find and open the data group
   NXRoot root(getPropertyValue("Filename"));
@@ -452,25 +618,25 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
       const auto detIndex = dataGroup.openNXInt("detector_index");
       const auto detCount = dataGroup.openNXInt("detector_count");
       const auto detList = dataGroup.openNXInt("detector_list");
-      const int nDet = detIndex.dim0();
-      for (int i = 0; i < nDet; ++i) {
-        const int start = detIndex[i];
-        const int nDetectors = detCount[i];
-        std::set<int> detIDs;
-        for (int jDet = 0; jDet < nDetectors; ++jDet) {
+      const detid_t nDet = static_cast<detid_t>(detIndex.dim0());
+      for (detid_t i = 0; i < nDet; ++i) {
+        const auto start = static_cast<detid_t>(detIndex[i]);
+        const auto nDetectors = detCount[i];
+        std::set<detid_t> detIDs;
+        for (detid_t jDet = 0; jDet < nDetectors; ++jDet) {
           detIDs.insert(detList[start + jDet]);
         }
         mapping[i] = detIDs;
       }
-    } catch (const ::NeXus::Exception &err) {
+    } catch (const LegacyNexus::Exception &err) {
       // Throw a more user-friendly message
       std::ostringstream message;
       message << "Failed to read detector mapping: " << err.what();
       throw std::runtime_error(message.str());
     }
   } else {
-    for (int i = 0; i < nSpectra; ++i) {
-      mapping[i] = std::set<int>{spectrumIndex[i]};
+    for (specnum_t i = 0; i < nSpectra; ++i) {
+      mapping[i] = std::set<detid_t>{spectrumIndex[i]};
     }
   }
 

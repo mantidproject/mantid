@@ -46,13 +46,13 @@ public:
   /// Return the name of the instrument
   const std::string name() const;
   /// Return the short name of the instrument
-  const std::string shortName() const;
+  const std::string &shortName() const;
   /// Returns zero padding for this instrument and a run number
   int zeroPadding(unsigned int runNumber) const;
   /// Returns file prefix for this instrument and a run number
   std::string filePrefix(unsigned int runNumber) const;
   /// Returns the default delimiter between instrument name and run number
-  std::string delimiter() const;
+  const std::string &delimiter() const;
   /// Return list of techniques
   const std::set<std::string> &techniques() const;
   /// The facility to which this instrument belongs

@@ -16,8 +16,8 @@
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -64,7 +64,7 @@ public:
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus", "SaveISISNexus"}; }
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose

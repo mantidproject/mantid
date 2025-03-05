@@ -799,7 +799,7 @@ public:
 
     // Remove the coordinate_system entry so it falls back on the log. NeXus
     // can't do this so use the HDF5 API directly
-    H5::H5File h5file(filePath.c_str(), H5F_ACC_RDWR);
+    H5::H5File h5file(filePath.c_str(), H5F_ACC_RDWR, H5Util::defaultFileAcc());
     H5Util::deleteObjectLink(h5file, "/mantid_workspace_1/peaks_workspace/coordinate_system");
     h5file.close();
 

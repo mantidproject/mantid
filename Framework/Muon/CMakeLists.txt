@@ -13,6 +13,7 @@ set(SRC_FILES
     src/LoadMuonNexus.cpp
     src/LoadMuonNexus1.cpp
     src/LoadMuonNexus2.cpp
+    src/LoadMuonNexus3.cpp
     src/MuonAlgorithmHelper.cpp
     src/MuonAsymmetryHelper.cpp
     src/MuonGroupDetectors.cpp
@@ -25,6 +26,7 @@ set(SRC_FILES
     src/PlotAsymmetryByLogValue.cpp
     src/RemoveExpDecay.cpp
     src/RRFMuon.cpp
+    src/MuonNexusReader.cpp
 )
 
 set(INC_FILES
@@ -41,6 +43,7 @@ set(INC_FILES
     inc/MantidMuon/LoadMuonNexus.h
     inc/MantidMuon/LoadMuonNexus1.h
     inc/MantidMuon/LoadMuonNexus2.h
+    inc/MantidMuon/LoadMuonNexus3.h
     inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
     inc/MantidMuon/MuonAlgorithmHelper.h
     inc/MantidMuon/MuonAsymmetryHelper.h
@@ -54,6 +57,7 @@ set(INC_FILES
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
     inc/MantidMuon/RRFMuon.h
+    inc/MantidMuon/MuonNexusReader.h
 )
 
 set(TEST_FILES
@@ -69,6 +73,7 @@ set(TEST_FILES
     LoadAndApplyMuonDetectorGroupingTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadMuonNexus3Test.h
     MuonAlgorithmHelperTest.h
     EstimateMuonAsymmetryFromCountsTest.h
     MuonGroupDetectorsTest.h
@@ -112,7 +117,7 @@ set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   Muon
   PUBLIC Mantid::API Mantid::Kernel Mantid::Geometry
-  PRIVATE Mantid::DataObjects Mantid::Indexing Mantid::Nexus
+  PRIVATE Mantid::DataObjects Mantid::Indexing
 )
 # Add the unit tests directory
 add_subdirectory(test)

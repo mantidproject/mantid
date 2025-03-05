@@ -83,8 +83,8 @@ public:
   /// Move a peak object into this peaks workspace
   void addPeak(LeanElasticPeak &&peak);
   void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) override;
-  LeanElasticPeak &getPeak(int peakNum) override;
-  const LeanElasticPeak &getPeak(int peakNum) const override;
+  LeanElasticPeak &getPeak(size_t const peakNum) override;
+  const LeanElasticPeak &getPeak(size_t const peakNum) const override;
 
   std::unique_ptr<Geometry::IPeak> createPeak(const Kernel::V3D &QLabFrame,
                                               std::optional<double> detectorDistance = std::nullopt) const override;

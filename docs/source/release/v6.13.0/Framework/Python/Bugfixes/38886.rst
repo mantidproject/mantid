@@ -1,0 +1,1 @@
+- Fixed a bug where the method :meth:`mantid.api.Run.addProperty` was ignoring the ``name`` and ``units`` parameters if the ``value`` was of type :class:`mantid.kernel.Property`. Now only if the ``name`` and ``units`` are empty will the existing values on the ``Property`` be used.

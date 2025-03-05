@@ -20,6 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cmath>
@@ -100,8 +101,7 @@ void LoadMLZ::exec() {
  */
 int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the MLZ
-  if (descriptor.pathExists("/Scan/wavelength") && descriptor.pathExists("/Scan/title") &&
-      descriptor.pathExists("/Scan/mode")) {
+  if (descriptor.isEntry("/Scan/wavelength") && descriptor.isEntry("/Scan/title") && descriptor.isEntry("/Scan/mode")) {
     return 80;
   } else {
     return 0;

@@ -15,6 +15,10 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidNexus/H5Util.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 
@@ -33,7 +37,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
 int LoadILLLagrange::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/IN1")) {
+  if (descriptor.isEntry("/entry0/IN1")) {
     return 80;
   } else {
     return 0;
@@ -91,7 +95,7 @@ void LoadILLLagrange::exec() {
 void LoadILLLagrange::loadData() {
 
   // open the H5 file
-  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY);
+  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   H5::DataSet dataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
 
@@ -168,13 +172,14 @@ void LoadILLLagrange::loadData() {
 void LoadILLLagrange::loadMetaData() {
 
   // Open NeXus file
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen((getPropertyValue("Filename")).c_str(), NXACC_READ, &nxHandle);
-
-  if (nxStat != NX_ERROR) {
+  try {
+    ::NeXus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
-    NXclose(&nxHandle);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << getPropertyValue("Filename") << "\" in read mode: " << e.what()
+                  << "\n";
   }
+
   // Add scanned variable: energy to the sample logs so it can be used for merging workspaces as X axis
   TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("Ei");
   int index = 0;

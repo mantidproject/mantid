@@ -15,11 +15,12 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 #include <cmath>
 #include <memory>
@@ -84,7 +85,7 @@ void LoadNexus::exec() {
   // documentation of this algorithm.
 
   std::vector<std::string> entryName, definition;
-  int count = Mantid::NeXus::getNexusEntryTypes(m_filename, entryName, definition);
+  int count = getNexusEntryTypes(m_filename, entryName, definition);
   if (count <= -1) {
     g_log.error("Error reading file " + m_filename);
     throw Exception::FileError("Unable to read data in File:", m_filename);
@@ -99,10 +100,10 @@ void LoadNexus::exec() {
   } else if (entryName[0] == "raw_data_1") {
     runLoadIsisNexus();
   } else {
-    Mantid::NeXus::NXRoot root(m_filename);
-    Mantid::NeXus::NXEntry entry = root.openEntry(root.groups().front().nxname);
+    Mantid::LegacyNexus::NXRoot root(m_filename);
+    Mantid::LegacyNexus::NXEntry entry = root.openEntry(root.groups().front().nxname);
     try {
-      Mantid::NeXus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+      Mantid::LegacyNexus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
       throw Exception::FileError("Unable to read File:", m_filename);
@@ -256,6 +257,74 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
       setProperty(propName, wkspace);
     }
   }
+}
+
+/** Get all the Nexus entry types for a file
+ *
+ * Try to open named Nexus file and return all entries plus the definition found
+ *for each.
+ * If definition not found, try and return "analysis" field (Muon V1 files)
+ * Closes file on exit.
+ *
+ * @param fileName :: file to open
+ * @param entryName :: vector that gets filled with strings with entry names
+ * @param definition :: vector that gets filled with the "definition" or
+ *"analysis" string.
+ * @return count of entries if OK, -1 failed to open file.
+ */
+int LoadNexus::getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
+                                  std::vector<std::string> &definition) {
+  std::unique_ptr<Mantid::LegacyNexus::File> fileH;
+
+  try {
+    fileH = std::make_unique<Mantid::LegacyNexus::File>(fileName);
+  } catch (Mantid::LegacyNexus::Exception &) {
+    return -1;
+  }
+  entryName.clear();
+  definition.clear();
+
+  //
+  // Loop through all entries looking for the definition section in each (or
+  // analysis for MuonV1)
+  //
+  std::vector<std::string> entryList;
+
+  std::pair<std::string, std::string> entry;
+  while (true) {
+    entry = fileH->getNextEntry();
+    if (entry == LegacyNexus::EOD_ENTRY)
+      break;
+
+    if (entry.second == "NXentry")
+      entryList.emplace_back(entry.first);
+  }
+
+  // for each entry found, look for "analysis" or "definition" text data fields
+  // and return value plus entry name
+
+  for (auto &item : entryList) {
+    fileH->openGroup(item, "NXentry");
+    // loop through field names in this entry
+    while (true) {
+      entry = fileH->getNextEntry();
+      if (entry == LegacyNexus::EOD_ENTRY)
+        break;
+      // if a data field
+      if (entry.second == "SDS") {
+        // if one of the two names we are looking for
+        if (entry.first == "definition" || entry.first == "analysis") {
+          std::string value;
+          fileH->readData(entry.first, value);
+          definition.emplace_back(value);
+          entryName.emplace_back(item);
+        }
+      }
+    }
+    fileH->closeGroup();
+  }
+
+  return (static_cast<int>(entryName.size()));
 }
 
 } // namespace Mantid::DataHandling

@@ -11,7 +11,7 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -220,7 +220,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     tsp->setUnits(value_units);
     log.debug() << "   done reading \"value\" array\n";
     return tsp;
-  } else if (info.type == ::NeXus::CHAR) {
+  } else if (info.type == NXnumtype::CHAR) {
     std::string values;
     const int64_t item_length = info.dims[1];
     try {
@@ -248,7 +248,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     tsp->setUnits(value_units);
     log.debug() << "   done reading \"value\" array\n";
     return tsp;
-  } else if (info.type == ::NeXus::FLOAT32 || info.type == ::NeXus::FLOAT64) {
+  } else if (info.type == NXnumtype::FLOAT32 || info.type == NXnumtype::FLOAT64) {
     std::vector<double> values;
     try {
       file.getDataCoerce(values);
@@ -983,7 +983,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
       // take the first entry
       file.openData("value");
       ::NeXus::Info info = file.getInfo();
-      if (info.type == ::NeXus::FLOAT32) {
+      if (info.type == NXnumtype::FLOAT32) {
         boost::scoped_array<float> value(new float[info.dims[0]]);
         file.getData(value.get());
         file.closeData();

@@ -11,7 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 #include <utility>
 

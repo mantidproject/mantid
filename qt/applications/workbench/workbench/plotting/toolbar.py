@@ -35,7 +35,6 @@ def _create_script_action(self, text, tooltip_text, mdi_icon, *args):
 class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal(bool)
-    sig_crosshair_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
@@ -85,7 +84,6 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool("Fill Area", "Fill area under curves", "mdi.format-color-fill", "waterfall_fill_area", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool("Help", "Open plotting help documentation", "mdi.help", "launch_plot_help", None),
-        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.plus", "toggle_crosshair", False),
         MantidNavigationTool("Hide", "Hide the plot", "mdi.eye", "hide_plot", None),
     )
 
@@ -95,13 +93,6 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
-
-    def toggle_crosshair(self, enable=None):
-        if enable is None:
-            enable = self._actions["toggle_crosshair"].isChecked()
-        else:
-            self._actions["toggle_crosshair"].setChecked(enable)
-        self.sig_crosshair_toggle_triggered.emit(enable)
 
     def hide_plot(self):
         self.sig_hide_plot_triggered.emit()

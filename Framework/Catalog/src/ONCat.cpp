@@ -173,7 +173,7 @@ bool ONCat::isUserLoggedIn() const {
   return m_tokenStore->getToken().has_value();
 }
 
-std::string ONCat::url() const { return m_url; }
+const std::string &ONCat::url() const { return m_url; }
 
 void ONCat::logout() {
   // Currently, ONCat OAuth does *not* allow clients to revoke tokens

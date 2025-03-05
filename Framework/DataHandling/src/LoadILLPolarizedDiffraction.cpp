@@ -26,6 +26,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 
@@ -53,7 +56,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
 int LoadILLPolarizedDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/D7")) {
+  if (descriptor.isEntry("/entry0/D7")) {
     return 80;
   } else {
     return 0;
@@ -208,10 +211,8 @@ void LoadILLPolarizedDiffraction::loadData() {
 void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
-
-  if (nxStat != NX_ERROR) {
+  try {
+    ::NeXus::File nxHandle(m_fileName, NXACC_READ);
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);
@@ -221,7 +222,8 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
         workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }
     }
-    NXclose(&nxHandle);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << m_fileName << "\" in read mode: " << e.what() << "\n";
   }
 }
 

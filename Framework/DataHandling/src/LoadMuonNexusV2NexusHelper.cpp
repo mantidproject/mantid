@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cctype>
@@ -164,10 +165,10 @@ double LoadMuonNexusV2NexusHelper::loadFirstGoodDataFromNexus() {
     std::string firstGoodBin = counts.attributes(NeXusEntry::FIRSTGOODBIN);
     double resolution;
     switch (infoResolution.type) {
-    case NX_FLOAT32:
+    case NXnumtype::FLOAT32:
       resolution = static_cast<double>(detectorEntry.getFloat(NeXusEntry::RESOLUTION));
       break;
-    case NX_INT32:
+    case NXnumtype::INT32:
       resolution = static_cast<double>(detectorEntry.getInt(NeXusEntry::RESOLUTION));
       break;
     default:
@@ -189,10 +190,10 @@ double LoadMuonNexusV2NexusHelper::loadLastGoodDataFromNexus() {
     std::string lastGoodBin = counts.attributes(NeXusEntry::LASTGOODBIN);
     double resolution;
     switch (infoResolution.type) {
-    case NX_FLOAT32:
+    case NXnumtype::FLOAT32:
       resolution = static_cast<double>(detectorEntry.getFloat(NeXusEntry::RESOLUTION));
       break;
-    case NX_INT32:
+    case NXnumtype::INT32:
       resolution = static_cast<double>(detectorEntry.getInt(NeXusEntry::RESOLUTION));
       break;
     default:

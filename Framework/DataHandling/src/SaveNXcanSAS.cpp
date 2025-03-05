@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/SaveNXcanSAS.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-
-#include <Poco/File.h>
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/NXcanSASHelper.h"
 
 using namespace Mantid::API;
 
@@ -23,32 +24,38 @@ void SaveNXcanSAS::init() { initStandardProperties(); }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() { return validateStandardInputs(); }
 
-void SaveNXcanSAS::exec() {
-
-  std::string &&filename = getPropertyValue("Filename");
-  // Remove the file if it already exists
-  if (Poco::File(filename).exists()) {
-    Poco::File(filename).remove();
-  }
-
-  H5::H5File file(filename, H5F_ACC_EXCL);
-
-  Progress progress(this, 0.1, 1.0, 3);
-  progress.report("Adding a new entry.");
-
-  Mantid::API::MatrixWorkspace_sptr &&workspace = getProperty("InputWorkspace");
-  // add sas entry
-  const std::string suffix("01");
-  auto sasEntry = addSasEntry(file, workspace, suffix);
-
-  // Add metadata for canSAS file: Instrument, Sample, Process
-  progress.report("Adding standard metadata");
-  addStandardMetadata(workspace, sasEntry);
-
-  // Add the data
-  progress.report("Adding data.");
-  addData(sasEntry, workspace);
-
-  file.close();
+bool SaveNXcanSAS::checkGroups() {
+  const Mantid::API::Workspace_sptr &workspace = getProperty("InputWorkspace");
+  if (workspace && workspace->isGroup())
+    return true;
+  return false;
 }
+
+bool SaveNXcanSAS::processGroups() {
+  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
+  auto const &group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
+  std::ranges::for_each(group.cbegin(), group.cend(), [&](auto const &wsChild) {
+    m_workspaces.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(wsChild));
+  });
+
+  processAllWorkspaces();
+  return true;
+}
+
+void SaveNXcanSAS::processAllWorkspaces() {
+  m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3 * m_workspaces.size());
+  auto baseFilename = getPropertyValue("Filename");
+  for (auto wksIndex = 0; wksIndex < static_cast<int>(m_workspaces.size()); wksIndex++) {
+    saveSingleWorkspaceFile(m_workspaces.at(wksIndex),
+                            NXcanSAS::prepareFilename(baseFilename, wksIndex, m_workspaces.size() > 1));
+  }
+}
+
+void SaveNXcanSAS::exec() {
+  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
+  m_workspaces.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+
+  processAllWorkspaces();
+}
+
 } // namespace Mantid::DataHandling

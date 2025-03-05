@@ -56,3 +56,7 @@ class SettingsViewTest(unittest.TestCase, QtWidgetFinder):
         QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
+
+
+if __name__ == "__main__":
+    unittest.main()

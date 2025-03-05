@@ -24,8 +24,7 @@ DIFC is used in the equation
 
 .. math:: TOF = DIFC \times d
 
-This algorithm uses the same underlying calculation as :ref:`algm-ConvertUnits`
-and :ref:`algm-AlignDetectors`.
+This algorithm uses the same underlying calculation as :ref:`algm-ConvertUnits`.
 
 When specifying the ``CalibrationWorkspace``, this algorithm copies the
 values in the ``detid`` and ``difc`` columns of the calibration workspace.

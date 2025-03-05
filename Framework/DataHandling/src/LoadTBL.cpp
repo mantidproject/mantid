@@ -130,7 +130,7 @@ size_t LoadTBL::findQuotePairs(const std::string &line, std::vector<std::vector<
  * cell-delimiting commas) is found
  */
 void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
-                       std::vector<std::vector<size_t>> &quoteBounds, size_t expectedCommas) const {
+                       const std::vector<std::vector<size_t>> &quoteBounds, size_t expectedCommas) const {
   size_t pairID = 0;
   size_t lastComma = 0;
   size_t pos = 0;

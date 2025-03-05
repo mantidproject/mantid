@@ -156,32 +156,6 @@ Linux only. Install it from your distro's repository.
 Wonder Shaper allows the user to limit the bandwidth of one or more network adapters. This is useful for debugging
 issues when a network interface is still active but very slow. More details can be found at http://xmodulo.com/limit-network-bandwidth-linux.html.
 
-Convert Wiki Docs to Sphinx
----------------------------
-
-``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use
-in ``Sphinx``. The code attempts to take all images and internal links and re-create the
-documentation structure in the ``Sphinx`` format.
-
-Use
-~~~
-
-- Having added ``mantid`` to your Python path ``wiki2rst`` is run by:
-
-.. code:: sh
-
-    python wiki2rst.py -o <output_file.rst> <url_extension>
-
-- The ``<url_extension>`` is the part of the url after the main address (``https://www.mantidproject.org/``).
-- There are several additional options:
-	- ``--index_url`` change the name of the main url address
-	- ``--images-dir`` set a relative location for the images directory
-	- ``--ref-link`` give a reference link
-	- ``--ref-link-prefix`` give a link prefix
-	- ``--add_handle`` add a handle for linking to the page
-	- ``--page_handle`` the page handle to use [default page name]
-	- ``--add_heading`` add a heading to the page (uses the page name)
-
 Clang-tidy
 ----------
 
@@ -250,3 +224,17 @@ To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS
 For example, to convert all loops classified as *risky* or above, we would append::
 
     ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
+Cmake chart of target dependencies
+----------------------------------
+
+Cmake has the ability to make graphviz dot files of the dependencies for targets in mantid.
+This is useful for understanding why compilation will wait for individual libraries to link before compiling more files.
+
+.. code:: sh
+
+    cmake --graphviz=dependencies.dot .
+    dot -O -Tsvg dependencies.dot.WorkflowAlgorithms
+
+
+`Cmake reference <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_ for configuring the tool options.

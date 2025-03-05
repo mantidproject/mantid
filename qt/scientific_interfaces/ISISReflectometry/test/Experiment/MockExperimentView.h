@@ -76,6 +76,8 @@ public:
   MOCK_METHOD0(disablePolarizationCorrections, void());
   MOCK_METHOD0(enablePolarizationEfficiencies, void());
   MOCK_METHOD0(disablePolarizationEfficiencies, void());
+  MOCK_METHOD(void, enableFredrikzeSpinStateOrder, (), (override));
+  MOCK_METHOD(void, disableFredrikzeSpinStateOrder, (), (override));
   MOCK_METHOD0(enableFloodCorrectionInputs, void());
   MOCK_METHOD0(disableFloodCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());
@@ -98,6 +100,8 @@ public:
   MOCK_CONST_METHOD0(getPolarizationEfficienciesFilePath, std::string());
   MOCK_METHOD1(setPolarizationEfficienciesWorkspace, void(std::string const &));
   MOCK_METHOD1(setPolarizationEfficienciesFilePath, void(std::string const &));
+  MOCK_METHOD(std::string, getFredrikzeSpinStateOrder, (), (const, override));
+  MOCK_METHOD(void, setFredrikzeSpinStateOrder, (std::string const &), (override));
   MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());
   MOCK_METHOD1(setFloodCorrectionType, void(std::string const &));
   MOCK_METHOD0(setFloodCorrectionWorkspaceMode, void());

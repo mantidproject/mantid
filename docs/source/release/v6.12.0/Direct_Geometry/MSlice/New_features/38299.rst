@@ -1,1 +1,0 @@
-- MSlice is now installed via Conda as part of Mantid workbench and not compiled as an external project anymore.

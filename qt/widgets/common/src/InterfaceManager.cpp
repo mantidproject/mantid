@@ -240,27 +240,32 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
 
 void InterfaceManager::showHelpPage(const QString &url) {
   auto window = createHelpWindow();
-  window->showPage(url);
+  if (window)
+    window->showPage(url);
 }
 
 void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
   auto window = createHelpWindow();
-  window->showAlgorithm(name, version);
+  if (window)
+    window->showAlgorithm(name, version);
 }
 
 void InterfaceManager::showConceptHelp(const QString &name) {
   auto window = createHelpWindow();
-  window->showConcept(name);
+  if (window)
+    window->showConcept(name);
 }
 
 void InterfaceManager::showFitFunctionHelp(const QString &name) {
   auto window = createHelpWindow();
-  window->showFitFunction(name);
+  if (window)
+    window->showFitFunction(name);
 }
 
 void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
   auto window = createHelpWindow();
-  window->showCustomInterface(name, area, section);
+  if (window)
+    window->showCustomInterface(name, area, section);
 }
 
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
@@ -268,6 +273,7 @@ void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::
 void InterfaceManager::closeHelpWindow() {
   if (MantidHelpWindow::helpWindowExists()) {
     auto window = createHelpWindow();
-    window->shutdown();
+    if (window)
+      window->shutdown();
   }
 }

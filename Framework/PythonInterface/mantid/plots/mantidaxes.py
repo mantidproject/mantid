@@ -7,7 +7,6 @@
 #  This file is part of the mantid package
 from collections.abc import Iterable
 import copy
-from enum import IntEnum
 from functools import wraps
 
 import numpy as np
@@ -42,9 +41,6 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
-class AxisArgType(IntEnum):
-    WORKSPACE = 0
-    LINE = 1
 
 
 def plot_decorator(func):
@@ -55,7 +51,6 @@ def plot_decorator(func):
         # Saves saving it on array objects
         if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
-            kwargs["argType"] = AxisArgType.WORKSPACE
 
             kwargs["workspaces"] = args[0].name()
             kwargs["function"] = func_name
@@ -65,9 +60,8 @@ def plot_decorator(func):
             if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
-        elif func_name in ["axhline", "axvline"]:
-            new_creation_args = {"function": func_name, "args": args, "kwargs": kwargs, "argType": AxisArgType.LINE}
-            self.creation_args.append(new_creation_args)
+        elif func_name == "axhline" or func_name == "axvline":
+            self.creation_args.append({"function": func_name, "args": args, "kwargs": kwargs})
 
         return func_value
 
@@ -488,9 +482,9 @@ class MantidAxes(Axes):
         """
 
         for cargs in self.creation_args:
-            argType = cargs["argType"]
-            # for workspace creation args, since lines dont have "workspaces"
-            if argType == AxisArgType.WORKSPACE and cargs["workspaces"] == old_name:
+            # If a workspace plot is overplotted with a line (e.g ax.axvline), the second set of creation args
+            # will not have a "workspaces" key
+            if cargs.get("workspaces") == old_name:
                 cargs["workspaces"] = new_name
         for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
             for ws_artist in ws_artist_list:
