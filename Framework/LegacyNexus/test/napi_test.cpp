@@ -51,12 +51,12 @@ std::string relativePathOf(const std::string &filename) { return std::filesystem
 int main(int argc, char *argv[]) {
   std::cout << "determining file type" << std::endl;
   std::string nxFile;
-  Mantid::LegacyNexus::NXaccess_mode nx_creation_code;
+  NXaccess_mode nx_creation_code;
   if (strstr(argv[0], "hdf4_test_hdf5") != NULL) {
-    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE5;
+    nx_creation_code = NXACC_CREATE5;
     nxFile = "NXtest.h5";
   } else if (strstr(argv[0], "hdf4_test_hdf4") != NULL) {
-    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE4;
+    nx_creation_code = NXACC_CREATE4;
     nxFile = "NXtest.hdf";
   } else {
     ON_ERROR(std::string(argv[0]) + " is not supported");
@@ -342,6 +342,8 @@ int main(int argc, char *argv[]) {
       }
     }
   } while (attr_status == NXstatus::NX_OK);
+  // cppcheck-suppress argumentSize there is a mismatch between size of NXName and group_name, class_name. Supress as
+  // this is legacy c-style code.
   if (NXgetgroupinfo(fileid, &i, group_name, class_name) != NXstatus::NX_OK)
     return TEST_FAILED;
   std::cout << "Group: " << group_name << "(" << class_name << ") contains " << i << " items\n";
@@ -581,8 +583,8 @@ int testLoadPath() {
   if (getenv("NX_LOAD_PATH") != NULL) {
     // TODO create file and cleanup
     // std::string filename("data/dmc01.h5");
-    Mantid::LegacyNexus::NXhandle h;
-    if (NXopen("dmc01.hdf", Mantid::LegacyNexus::NXACC_RDWR, &h) != Mantid::LegacyNexus::NXstatus::NX_OK) {
+    NXhandle h;
+    if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NXstatus::NX_OK) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
     } else {
