@@ -42,6 +42,8 @@ using LegacyNexusTest::removeFile;
 using LegacyNexusTest::write_dmc01;
 using LegacyNexusTest::write_dmc02;
 
+using namespace Mantid::LegacyNexus;
+
 namespace { // anonymous namespace
 std::string relativePathOf(const std::string &filename) { return std::filesystem::path(filename).filename().string(); }
 } // anonymous namespace

@@ -7,9 +7,17 @@
 
 #include <hdf5.h>
 
+using Mantid::LegacyNexus::CONSTCHAR;
+using Mantid::LegacyNexus::NXaccess;
+using Mantid::LegacyNexus::NXhandle;
+using Mantid::LegacyNexus::NXlink;
+using Mantid::LegacyNexus::NXname;
+using Mantid::LegacyNexus::NXnumtype;
+using Mantid::LegacyNexus::NXstatus;
+
 /* HDF5 interface */
 
-extern NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
+extern NXstatus NX5open(Mantid::LegacyNexus::CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
 extern NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
 
 extern NXstatus NX5close(NXhandle *pHandle);
