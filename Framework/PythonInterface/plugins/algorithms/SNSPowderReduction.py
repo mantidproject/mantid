@@ -1538,6 +1538,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._num_wl_bins,
                 material={"ChemicalFormula": "V", "SampleNumberDensity": absorptioncorrutils.VAN_SAMPLE_DENSITY},
                 geometry={"Shape": "Cylinder", "Height": 7.0, "Radius": self._vanRadius, "Center": [0.0, 0.0, 0.0]},
+                beam_height=self._beamHeight,
                 find_environment=False,
                 opt_wl_min=self._wavelengthMin,
                 opt_wl_max=self._wavelengthMax,
@@ -1566,6 +1567,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             )
             api.RenameWorkspace(abs_v_wsn, "__V_corr_abs")
 
+            # Here, we are using a combo of absorption correction with the numerical integration approach and multiple
+            # scattering correction with the Carpenter approach - `Absorption` param set to `False` below, making sure
+            # only `__V_corr_ms` will be created without overwriting the already calculated `__V_corr_abs`.
             api.CalculateCarpenterSampleCorrection(
                 InputWorkspace=absWksp, OutputWorkspaceBaseName="__V_corr", CylinderSampleRadius=self._vanRadius, Absorption=False
             )
