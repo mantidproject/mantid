@@ -4,19 +4,23 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import base64
 import json
 import os
+import zlib
 from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
+from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
+from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_from_coredump_file
 
 
 class ErrorReporterPresenter(object):
     SENDING_ERROR_MESSAGE = "There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly"
 
-    def __init__(self, view, exit_code: str, application: str, traceback: Optional[str] = None):
+    def __init__(self, view, exit_code: str, application: str, workbench_pid: str, traceback: Optional[str] = None):
         """
         :param view: A reference to the view managed by this presenter
         :param exit_code: A string containing the exit_code of the failing application
@@ -28,6 +32,7 @@ class ErrorReporterPresenter(object):
         self._exit_code = exit_code
         self._application = application
         self._traceback = traceback if traceback else ""
+        self._cpp_traces = b""
         self._view.set_report_callback(self.error_handler)
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)
 
@@ -39,6 +44,8 @@ class ErrorReporterPresenter(object):
                         self._traceback = file.readlines()
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
+                elif is_linux():
+                    self._cpp_traces = retrieve_thread_traces_from_coredump_file(workbench_pid)
             except OSError:
                 pass
 
@@ -100,7 +107,15 @@ class ErrorReporterPresenter(object):
             )
 
         errorReporter = ErrorReporter(
-            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box), stacktrace
+            self._application,
+            uptime,
+            self._exit_code,
+            share_identifiable,
+            str(name),
+            str(email),
+            str(text_box),
+            stacktrace,
+            self._cpp_traces,
         )
 
         status = errorReporter.sendErrorReport()
@@ -133,11 +148,16 @@ class ErrorReporterPresenter(object):
             str(self._view.input_name_line_edit.text()),
             str(self._view.input_email_line_edit.text()),
             str(self._view.input_free_text.toPlainText()),
-            "".join(self._traceback),
+            "",
+            "",
         )
 
         error_message_json = json.loads(error_reporter.generateErrorMessage())
-        stacktrace_text = error_message_json["stacktrace"]
+        if self._cpp_traces:
+            stacktrace_text = zlib.decompress(base64.standard_b64decode(self._cpp_traces)).decode("utf-8")
+        else:
+            stacktrace_text = "".join(self._traceback)
         del error_message_json["stacktrace"]  # remove this entry so it doesn't appear twice.
+        del error_message_json["cppCompressedTraces"]
         user_information = "".join("{}: {}\n".format(key, error_message_json[key]) for key in error_message_json)
         self._view.display_more_details(user_information, stacktrace_text)
