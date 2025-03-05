@@ -26,7 +26,7 @@ const std::string DMC02("dmc02cpp");
 
 } // anonymous namespace
 
-static void writeTest(const string &filename, NXaccess create_code) {
+static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess create_code) {
   std::cout << "writeTest(" << filename << ") started\n";
   Mantid::LegacyNexus::File file(filename, create_code);
   // create group
@@ -43,7 +43,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   array_dims.push_back(4);
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
-  file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
+  file.makeData("c1_data", Mantid::LegacyNexus::NXnumtype::CHAR, array_dims, true);
   file.putData(c1_array);
   file.closeData();
 
@@ -80,7 +80,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   for (size_t i = 0; i < 5 * 4; i++) {
     r8_array.push_back(static_cast<double>(i + 20));
   }
-  file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
+  file.makeData("r8_data", Mantid::LegacyNexus::NXnumtype::FLOAT64, array_dims, true);
   vector<int> slab_start;
   slab_start.push_back(4);
   slab_start.push_back(0);
@@ -102,7 +102,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   std::cout << "... done" << std::endl;
 
   // set up for creating a link
-  NXlink link = file.getDataID();
+  Mantid::LegacyNexus::NXlink link = file.getDataID();
   file.closeData();
 
   // int64 tests
@@ -111,7 +111,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 #else
   vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-  if (create_code != NXACC_CREATE4) {
+  if (create_code != Mantid::LegacyNexus::NXACC_CREATE4) {
     file.writeData("grosszahl", grossezahl);
   }
 
@@ -187,7 +187,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.writeData("ch_data", "NeXus sample");
 
   // make more links
-  NXlink glink = file.getGroupID();
+  Mantid::LegacyNexus::NXlink glink = file.getGroupID();
   file.openPath("/");
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
@@ -219,7 +219,7 @@ int readTest(const string &filename) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
-      if (it->type == NXnumtype::CHAR) {
+      if (it->type == Mantid::LegacyNexus::NXnumtype::CHAR) {
         cout << file.getStrAttr(*it);
       }
       cout << endl;
@@ -232,7 +232,7 @@ int readTest(const string &filename) {
   cout << "Number of group attributes: " << attr_infos.size() << endl;
   for (vector<Mantid::LegacyNexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
-    if (it->type == NXnumtype::CHAR) {
+    if (it->type == Mantid::LegacyNexus::NXnumtype::CHAR) {
       cout << file.getStrAttr(*it);
     }
     cout << endl;
@@ -395,10 +395,10 @@ int testLoadPath(const string &filename) {
 }
 
 int main(int argc, char **argv) {
-  NXaccess nx_creation_code;
+  Mantid::LegacyNexus::NXaccess nx_creation_code;
   string fileext;
   if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
-    nx_creation_code = NXACC_CREATE5;
+    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE5;
     fileext = ".h5";
   } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
     cout << "napi_test_cpp-xml-table is not supported" << endl;
@@ -407,7 +407,7 @@ int main(int argc, char **argv) {
     cout << "napi_test_cpp-xml is not supported" << endl;
     return TEST_FAILED;
   } else {
-    nx_creation_code = NXACC_CREATE4;
+    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE4;
     fileext = ".hdf";
   }
   const string filename("napi_test_cpp" + fileext);
