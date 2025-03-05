@@ -86,7 +86,7 @@ class LoadSINQFile(PythonAlgorithm):
 
         elif inst == "TRICS":
             ws = mantid.simpleapi.LoadFlexiNexus(fname, dicname, OutputWorkspace=wname)
-            ws = mantid.simpleapi.SINQTranspose3D(ws, OutputWorkspace=wname)
+            ws = mantid.simpleapi.TransposeMD(ws, OutputWorkspace=wname)
 
         # Attach workspace to the algorithm property
         self.setProperty("OutputWorkspace", ws)
