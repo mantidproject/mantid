@@ -19,6 +19,7 @@ endif()
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
 option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+option(ENABLE_QTASSISTANT "If enabled, add a target to build the qthelp documentation for qtassistant" ON)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)

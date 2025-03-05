@@ -159,6 +159,11 @@ set(SRC_FILES
     src/Python/QHashToDict.cpp
 )
 
+if(NOT ENABLE_QTASSISTANT)
+  list(APPEND SRC_FILES src/PythonHelpBridge.cpp)
+  list(APPEND SRC_FILES src/PythonHelpWindow.cpp)
+endif()
+
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
@@ -261,6 +266,11 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
+
+if(NOT ENABLE_QTASSISTANT)
+  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpBridge.h)
+  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpWindow.h)
+endif()
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
@@ -637,7 +647,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # Add option to the compiler to register MantidHelpWindow
-if(DOCS_QTHELP)
+if(ENABLE_QTASSISTANT)
   add_definitions(-DDOCS_QTHELP)
 endif()
 
@@ -739,6 +749,10 @@ set(TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
+
+if(NOT ENABLE_QTASSISTANT)
+  list(APPEND TEST_FILES test/PythonHelpWindowTest.h)
+endif()
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
