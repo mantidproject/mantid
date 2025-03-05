@@ -20,18 +20,18 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidMuon/LoadMuonLog.h"
 #include <Poco/Path.h>
 #include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
-using Mantid::DataHandling::LoadMuonLog;
+using Mantid::Muon::LoadMuonLog;
 
 class LoadMuonLogTest : public CxxTest::TestSuite {
 public:

@@ -118,7 +118,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             else:
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
-                    suggested_path = path_list[0].replace(self.source_root, "")
+                    suggested_path = path_list[0].relative_to(self.source_root)
                 raise SourceLinkError(
                     "Found multiple possibilities for "
                     + file_name
@@ -136,7 +136,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                     + "      :"
                     + extension
                     + ": "
-                    + suggested_path
+                    + suggested_path.as_posix()
                 )
 
             return self.file_lookup[file_name][extension]
