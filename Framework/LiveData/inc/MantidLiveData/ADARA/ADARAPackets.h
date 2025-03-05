@@ -86,6 +86,16 @@ private:
   /* Don't allow the default constructor or assignment operator */
   Packet();
   Packet &operator=(const Packet &pkt);
+
+  double extractDouble(uint32_t index, uint32_t fieldOffset) const {
+    if (index < detBankSetCount()) {
+      double value;
+      std::memcpy(&value, &m_fields[fieldOffset], sizeof(double));
+      return value;
+    } else {
+      return 0.0;
+    }
+  }
 };
 
 class MANTID_LIVEDATA_DLL RawDataPkt : public Packet {
@@ -484,16 +494,6 @@ public:
   }
 
 private:
-  double extractDouble(uint32_t index, uint32_t fieldOffset) const {
-    if (index < beamMonCount()) {
-      double value;
-      std::memcpy(&value, &m_fields[(index * 6) + fieldOffset], sizeof(double));
-      return value;
-    } else {
-      return 0.0;
-    }
-  }
-
   double distance(uint32_t index) const { return extractDouble(index, 5); }
 
 private:
@@ -524,16 +524,6 @@ private:
   }
 
 private:
-  double extractDouble(uint32_t index, uint32_t fieldOffset) const {
-    if (index < detBankSetCount()) {
-      double value;
-      std::memcpy(&value, &m_fields[fieldOffset], sizeof(double));
-      return value;
-    } else {
-      return 0.0;
-    }
-  }
-
   enum Flags {
     EVENT_FORMAT = 0x0001,
     HISTO_FORMAT = 0x0002,
@@ -679,11 +669,7 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const {
-    double result;
-    std::memcpy(&result, &m_fields[3], sizeof(double));
-    return result;
-  }
+  double value() const { return extractDouble(index, 3); }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
