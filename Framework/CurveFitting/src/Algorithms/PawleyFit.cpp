@@ -283,13 +283,13 @@ void PawleyFit::exec() {
   double startX = xData.front();
   double endX = xData.back();
 
-  Property *startXProperty = getPointerToProperty("StartX");
+  const Property *startXProperty = getPointerToProperty("StartX");
   if (!startXProperty->isDefault()) {
     double startXInput = getProperty("StartX");
     startX = std::max(startX, startXInput);
   }
 
-  Property *endXProperty = getPointerToProperty("EndX");
+  const Property *endXProperty = getPointerToProperty("EndX");
   if (!endXProperty->isDefault()) {
     double endXInput = getProperty("EndX");
     endX = std::min(endX, endXInput);

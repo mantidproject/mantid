@@ -16,10 +16,10 @@ tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focu
 
 class FocusPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(view.FocusView)
-        self.model = mock.create_autospec(model.FocusModel)
+        self.view = mock.create_autospec(view.FocusView, instance=True)
+        self.model = mock.create_autospec(model.FocusModel, instance=True)
         self.presenter = presenter.FocusPresenter(self.model, self.view)
-        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo)
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo, instance=True)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")

@@ -17,8 +17,8 @@ dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.
 
 class SettingsPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.model = mock.create_autospec(settings_model.SettingsModel)
-        self.view = mock.create_autospec(settings_view.SettingsView)
+        self.model = mock.create_autospec(settings_model.SettingsModel, instance=True)
+        self.view = mock.create_autospec(settings_view.SettingsView, instance=True)
         self.presenter = settings_presenter.SettingsPresenter(self.model, self.view)
         self.presenter.settings = {}
         self.settings = {

@@ -56,13 +56,13 @@ bool OAuthToken::isExpired() const { return isExpired(DateAndTime::getCurrentTim
 
 bool OAuthToken::isExpired(const DateAndTime &currentTime) const { return currentTime > m_expiresAt; }
 
-std::string OAuthToken::tokenType() const { return m_tokenType; }
+const std::string &OAuthToken::tokenType() const { return m_tokenType; }
 
 int OAuthToken::expiresIn() const { return m_expiresIn; }
 
-std::string OAuthToken::accessToken() const { return m_accessToken; }
+const std::string &OAuthToken::accessToken() const { return m_accessToken; }
 
-std::string OAuthToken::scope() const { return m_scope; }
+const std::string &OAuthToken::scope() const { return m_scope; }
 
 std::optional<std::string> OAuthToken::refreshToken() const { return m_refreshToken; }
 

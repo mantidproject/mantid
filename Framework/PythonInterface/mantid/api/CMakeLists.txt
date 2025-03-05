@@ -8,6 +8,7 @@ set(EXPORT_FILES
     src/Exports/IAlgorithm.cpp
     src/Exports/AlgorithmObserver.cpp
     src/Exports/AlgorithmHistory.cpp
+    src/Exports/AlgoTimeRegister.cpp
     src/Exports/CatalogManager.cpp
     src/Exports/CatalogSession.cpp
     src/Exports/DeprecatedAlgorithmChecker.cpp
@@ -89,10 +90,6 @@ set(EXPORT_FILES
     src/Exports/PreviewManager.cpp
     src/Exports/RegionSelectorObserver.cpp
 )
-
-if(PROFILE_ALGORITHM_LINUX)
-  set(EXPORT_FILES "${EXPORT_FILES}" "src/Exports/AlgoTimeRegister.cpp")
-endif()
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})

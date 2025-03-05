@@ -1,6 +1,7 @@
 set(SRC_FILES
     src/ADSValidator.cpp
     src/Algorithm.cpp
+    src/AlgorithmExecuteProfile.cpp
     src/AlgorithmFactory.cpp
     src/AlgorithmFactoryObserver.cpp
     src/AlgorithmHasProperty.cpp
@@ -10,6 +11,7 @@ set(SRC_FILES
     src/AlgorithmProperties.cpp
     src/AlgorithmProperty.cpp
     src/AlgorithmRuntimeProps.cpp
+    src/AlgoTimeRegister.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -375,6 +377,7 @@ set(TEST_FILES
     AlgorithmPropertyTest.h
     AlgorithmRuntimePropsTest.h
     AlgorithmTest.h
+    AlgoTimeRegisterTest.h
     AnalysisDataServiceObserverTest.h
     AnalysisDataServiceTest.h
     AsynchronousTest.h
@@ -483,15 +486,6 @@ set(TEST_FILES
     WorkspacePropertyUtilsTest.h
     WorkspaceUnitValidatorTest.h
 )
-
-option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
-if(PROFILE_ALGORITHM_LINUX)
-  set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecuteProfile.cpp" "src/AlgoTimeRegister.cpp")
-  set(INC_FILES "${INC_FILES}" "inc/MantidAPI/AlgoTimeRegister.h")
-  set(TEST_FILES "${TEST_FILES}" "AlgoTimeRegisterTest.h")
-else()
-  set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
-endif()
 
 set(GMOCK_TEST_FILES ImplicitFunctionFactoryTest.h ImplicitFunctionParameterParserFactoryTest.h MatrixWorkspaceTest.h)
 

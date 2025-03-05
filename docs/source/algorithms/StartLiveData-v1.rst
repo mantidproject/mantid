@@ -151,15 +151,15 @@ Usage
 
     oldFacility = ConfigService.getFacility().name()
     thread = Thread(target = startFakeDAE)
-    thread.start()
-    time.sleep(2) # give it a small amount of time to get ready
-    if not thread.is_alive():
-        raise RuntimeError("Unable to start FakeDAE")
 
     try:
+        thread.start()
+        time.sleep(2) # give it a small amount of time to get ready
+        if not thread.is_alive():
+            raise RuntimeError("Unable to start FakeDAE")
         captureLive()
-    except Exception:
-        print("Error occurred starting live data")
+    except Exception as e:
+        print(f"Error occurred starting live data: {str(e)}")
     finally:
         thread.join() # this must get hit
 
@@ -216,15 +216,15 @@ Output:
 
     oldFacility = ConfigService.getFacility().name()
     thread = Thread(target = startFakeDAE)
-    thread.start()
-    time.sleep(2) # give it a small amount of time to get ready
-    if not thread.is_alive():
-        raise RuntimeError("Unable to start FakeDAE")
 
     try:
+        thread.start()
+        time.sleep(2) # give it a small amount of time to get ready
+        if not thread.is_alive():
+            raise RuntimeError("Unable to start FakeDAE")
         captureLive()
-    except Exception:
-        print("Error occurred starting live data")
+    except Exception as e:
+        print(f"Error occurred starting live data: {str(e)}")
     finally:
         thread.join() # this must get hit
 

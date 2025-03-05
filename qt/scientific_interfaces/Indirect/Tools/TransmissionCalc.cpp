@@ -27,7 +27,7 @@ TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &TransmissionCalc::algorithmComplete);
 
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());

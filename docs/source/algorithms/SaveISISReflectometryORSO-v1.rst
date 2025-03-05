@@ -35,8 +35,11 @@ A dataset name is generated automatically for each individual workspace in the i
 - If it is not a stitched dataset then, if available in the workspace reduction history, the value of theta that was used for conversion to Q is given as the dataset name.
 - If a dataset name cannot be generated from either of the above, then the workspace name is used as the dataset name.
 
-For a workspace that is a member of a workspace group, if the generated dataset name is either "Stitched" or the theta value, then the individual workspace name is also included in the dataset name.
-This is done to ensure a unique name.
+For a workspace that is a member of a workspace group, if the generated dataset name is either "Stitched" or the theta value, we include the following additional
+information in the name to make it unique:
+
+- If the data is polarized, then we include the spin state using the ORSO notation for polarization.
+- If the data is not polarized, then we include the individual workspace name.
 
 Depending on the combination of workspaces and workspace groups passed in, it is possible that duplicate dataset names will be generated. If this happens then the algorithm will give an error and
 fail to save out a file.
@@ -98,6 +101,9 @@ the file is saved without this metadata included.
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          |
 |                     | correction workspace or file name and the calibration file name from                          |
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
++---------------------+-----------------------------------------------------------------------------------------------+
+|polarization         | For input workspaces containing the ``spin_state_ORSO`` sample log, polarization information  |
+|                     | will be added to the header using the ORSO format [#ORSO]_.                                   |
 +---------------------+-----------------------------------------------------------------------------------------------+
 
 Usage

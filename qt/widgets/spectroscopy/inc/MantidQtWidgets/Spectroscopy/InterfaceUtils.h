@@ -8,7 +8,10 @@
 #include "DllConfig.h"
 #include <MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h>
+#include <MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h>
 #include <MantidQtWidgets/Plotting/RangeSelector.h>
+
+#include <QMap>
 #include <QString>
 #include <QStringList>
 #include <string>
@@ -66,6 +69,13 @@ MANTID_SPECTROSCOPY_DLL void setRangeSelectorMin(QtDoublePropertyManager *dblPro
 MANTID_SPECTROSCOPY_DLL void setRangeSelectorMax(QtDoublePropertyManager *dblPropertyManager, QtProperty *minProperty,
                                                  QtProperty *maxProperty, MantidWidgets::RangeSelector *rangeSelector,
                                                  double newValue);
+
+MANTID_SPECTROSCOPY_DLL bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting,
+                                                          const bool warn = true);
+
+/// Reformats the tree property browser, including indentation and colour.
+MANTID_SPECTROSCOPY_DLL void formatTreeWidget(QtTreePropertyBrowser *treeWidget,
+                                              QMap<QString, QtProperty *> const &properties);
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces

@@ -155,9 +155,9 @@ void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name, 
   m_cursorShapeToValue[shape] = value;
 }
 
-QStringList QtCursorDatabase::cursorShapeNames() const { return m_cursorNames; }
+const QStringList &QtCursorDatabase::cursorShapeNames() const { return m_cursorNames; }
 
-QMap<int, QIcon> QtCursorDatabase::cursorShapeIcons() const { return m_cursorIcons; }
+const QMap<int, QIcon> &QtCursorDatabase::cursorShapeIcons() const { return m_cursorIcons; }
 
 QString QtCursorDatabase::cursorToShapeName(const QCursor &cursor) const {
   int val = cursorToValue(cursor);

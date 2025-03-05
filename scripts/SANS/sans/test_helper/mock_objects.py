@@ -19,26 +19,26 @@ from ui.sans_isis.beam_centre import BeamCentre
 
 
 def create_mock_settings_diagnostic_tab():
-    view = mock.create_autospec(SettingsDiagnosticTab, spec_set=False)
+    view = mock.create_autospec(SettingsDiagnosticTab, spec_set=False, instance=True)
     view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
 def create_mock_masking_table():
-    view = mock.create_autospec(MaskingTable, spec_set=False)
+    view = mock.create_autospec(MaskingTable, spec_set=False, instance=True)
     view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
 def create_mock_beam_centre_tab():
-    view = mock.create_autospec(BeamCentre, spec_set=False)
+    view = mock.create_autospec(BeamCentre, spec_set=False, instance=True)
     view.r_min_line_edit = mock.Mock()
     view.r_max_line_edit = mock.Mock()
     return view
 
 
 def create_mock_diagnostics_tab():
-    view = mock.create_autospec(DiagnosticsPage, spec_set=False)
+    view = mock.create_autospec(DiagnosticsPage, spec_set=False, instance=True)
     return view
 
 
@@ -90,7 +90,7 @@ def add_listener_mock(listener):
 def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""):
     get_cell_mock_with_path = partial(get_cell_mock, user_file_path=row_user_file_path)
 
-    view = mock.create_autospec(SANSDataProcessorGui, spec_set=False)
+    view = mock.create_autospec(SANSDataProcessorGui, spec_set=False, instance=True)
     view.get_user_file_path = mock.Mock(return_value=user_file_path)
     view.get_cell = mock.MagicMock(side_effect=get_cell_mock_with_path)
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
@@ -258,7 +258,7 @@ def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress
 
 
 def create_run_tab_presenter_mock(use_fake_state=True):
-    presenter = mock.create_autospec(RunTabPresenter, spec_set=False)
+    presenter = mock.create_autospec(RunTabPresenter, spec_set=False, instance=True)
     presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 3])
     presenter._table_model = mock.MagicMock()
     presenter._facility = SANSFacility.ISIS

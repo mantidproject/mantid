@@ -93,6 +93,17 @@ To set up CMake:
 #. Set the build directory to the ``build`` directory if it is not the default (you'll need to use the full path if its outside the source directory)
 #. The configurations drop-down at the top should show all of the build targets. If not, the CMake project is probably not loaded. Go to ``File > Reload CMake Project``. The configurations should be populated
 
+Additional Build Configuration
+------------------------------
+This (optional) additional configuration allows one to start Clion from the JetBrains Toolbox or
+from a terminal without having to activate the conda environment in the terminal.
+This is useful when you're working on both Mantid and other projects in CLion simultaneously.
+
+#. Navigate to ``File > Settings > Build, Execution, Deployment > CMake``
+#. Under ``environment``, add new environment variable ``CONDA_PREFIX`` with value ``/path/to/mambaforge/envs/mantid-developer``.
+#. Navigate to ``File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment``, then select ``mantid-developer``.
+
+
 Building with CLion
 ###################
 
@@ -119,23 +130,34 @@ Debugging with CLion
 
 To debug workbench, you'll need to edit the ``workbench`` CMake Application configuration.
 
-#. Set the executable to be the ``python.exe`` in your conda installation
+#. Set the executable to be the ``python`` executable in your conda installation:
 
    .. hlist::
       :columns: 1
 
-      - On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/python.exe``
+      - On Linux & macOS: ``/path/to/mambaforge/envs/mantid-developer/bin/python``
       - On Windows: ``/path/to/mambaforge/envs/mantid-developer/python.exe``
 
-#. Set the program arguments
+#. Set the program arguments:
 
    .. hlist::
       :columns: 1
 
-      - On Linux: ``workbench --single-process``
-      - On Windows: ``workbench-script.pyw --single-process``
+      - On Linux, macOS and Windows: ``-m workbench --single-process``
 
-#. Set the working directory to be the full path to your ``build/bin`` directory
+#. Set the working directory:
+
+   .. hlist::
+      :columns: 1
+
+      - All OS: ``path/to/mambaforge/envs/md/bin/``
+
+#. Set any relevant environment variables:
+
+   .. hlist::
+      :columns: 1
+
+      - On macOS: ``PYTHONPATH=${PYTHONPATH}:/full/path/to/build/bin/``
 
 The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
 

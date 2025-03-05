@@ -72,5 +72,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
     ParamMapEntry(ext_name="incl_file_ext_in_wsname", int_name="incl_file_ext_in_wsname", optional=True),
     ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
+    ParamMapEntry(ext_name="trans_mod_nums", int_name="trans_mod_nums", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)

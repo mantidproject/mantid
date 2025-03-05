@@ -16,7 +16,7 @@ from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_widget import QuickEdi
 @start_qapplication
 class QuickEditWidgetTest(unittest.TestCase):
     def setUp(self):
-        self.pres = mock.create_autospec(QuickEditPresenter)
+        self.pres = mock.create_autospec(QuickEditPresenter, instance=True)
         self.widget = QuickEditWidget()
         self.slot = mock.Mock()
         self.widget.set_mock(self.pres)

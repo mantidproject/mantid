@@ -122,6 +122,8 @@ Manual Testing
    `Ensemble Manual Testing <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`__.
    In short, testing teams of around 3-5 developers, spread across sub-teams
    are assigned tasks with the code expert in that testing team.
+*  It is important to ensure that for each operating system, there is at least one person responsible for installing
+   the conda version and one person responsible for installing the non-conda version of Mantid.
 
 Beta Testing Ends - Prepare for Smoke Testing
 #############################################

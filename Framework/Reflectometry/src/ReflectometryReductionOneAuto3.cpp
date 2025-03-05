@@ -558,7 +558,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
 
   // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
-
   if (correctionAlgorithm == "PolynomialCorrection") {
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
@@ -590,20 +589,22 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
         alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
         alg->setProperty("Polynomial", polyVec[0]);
       } else if (correctionStr == "exponential") {
-        const auto c0Vec = instrument->getStringParameter("C0");
+        const auto c0Vec = instrument->getNumberParameter("C0");
         if (c0Vec.empty())
           throw std::runtime_error("Could not find parameter 'C0' in parameter "
                                    "file. Cannot apply exponential correction.");
-        const auto c1Vec = instrument->getStringParameter("C1");
+        const auto c1Vec = instrument->getNumberParameter("C1");
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
+
+        alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
         alg->setProperty("C0", c0Vec[0]);
         alg->setProperty("C1", c1Vec[0]);
       }
       alg->setProperty("NormalizeByIntegratedMonitors", false);
     } catch (std::runtime_error &e) {
-      g_log.error() << e.what() << ". Polynomial correction will not be performed.";
+      g_log.error() << e.what() << ". Algorithmic correction will not be performed.";
       alg->setProperty("CorrectionAlgorithm", "None");
     }
   } else {
@@ -1084,6 +1085,7 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
+  polAlg->setProperty("AddSpinStateToLog", true);
 
   if (correctionMethod == "Fredrikze") {
     polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);

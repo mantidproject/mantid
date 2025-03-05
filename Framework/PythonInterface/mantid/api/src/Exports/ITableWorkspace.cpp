@@ -248,6 +248,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_FUNCTION_OVERLOADS(setPlotType_overloads, setPlotType, 3, 4)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")

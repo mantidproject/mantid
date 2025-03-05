@@ -201,6 +201,8 @@ void CalculateCountRate::calcRateLog(DataObjects::EventWorkspace_sptr &InputWork
 
   auto dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
   auto dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+  // The variable is used by a parallel code so this behaviour is desired
+  // cppcheck-suppress variableScope
   std::vector<MantidVec> Buff;
 
 #pragma omp parallel
@@ -666,7 +668,7 @@ void CalculateCountRate::buildVisWSNormalization(std::vector<double> &normalizat
     return;
   }
   // visualization workspace should be present and initialized at this stage:
-  auto ax = dynamic_cast<API::NumericAxis *>(m_visWs->getAxis(1));
+  const auto ax = dynamic_cast<const API::NumericAxis *>(m_visWs->getAxis(1));
   if (!ax)
     throw std::runtime_error("Can not retrieve Y-axis from visualization workspace");
 

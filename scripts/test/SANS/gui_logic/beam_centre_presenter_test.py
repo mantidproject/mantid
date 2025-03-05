@@ -25,7 +25,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter = BeamCentrePresenter(self.parent_presenter, beam_centre_model=self.BeamCentreModel)
         self.presenter.connect_signals = mock.Mock()
         self.presenter.set_view(self.view)
-        self.presenter._worker = mock.create_autospec(self.presenter._worker)
+        self.presenter._worker = mock.create_autospec(self.presenter._worker, instance=True)
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.on_run_clicked()

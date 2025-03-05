@@ -659,7 +659,7 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(map<string, Para
   mcgroups.emplace_back(geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (auto &geomparam : geomparams)
+  for (const auto &geomparam : geomparams)
     dboutss << geomparam << "\t\t";
   dboutss << '\n';
 
@@ -989,7 +989,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map
   // 3. Set values
   map<string, Parameter>::iterator pariter;
   for (pariter = parameters.begin(); pariter != parameters.end(); ++pariter) {
-    Parameter &param = pariter->second;
+    const Parameter &param = pariter->second;
     TableRow newrow = tablews->appendRow();
 
     string fitortie;
@@ -1161,7 +1161,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
 
     if (paramiter != params.end()) {
       // Found, set up the parameter
-      Parameter &param = paramiter->second;
+      const Parameter &param = paramiter->second;
       if (param.fit) {
         // If fit.  Unfix it and set up constraint
         function->unfix(i);
@@ -1198,10 +1198,10 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
  * exacly same as
  * source;
  */
-void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target) {
+void duplicateParameters(const map<string, Parameter> &source, map<string, Parameter> &target) {
   target.clear();
 
-  map<string, Parameter>::iterator miter;
+  map<string, Parameter>::const_iterator miter;
   for (miter = source.begin(); miter != source.end(); ++miter) {
     string parname = miter->first;
     Parameter param = miter->second;
@@ -1216,20 +1216,18 @@ void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &
  * exacly same as
  * source;
  */
-void copyParametersValues(map<string, Parameter> source, map<string, Parameter> &target) {
+void copyParametersValues(const map<string, Parameter> &source, map<string, Parameter> &target) {
   // 1. Check
   if (source.size() != target.size())
     throw runtime_error("Source and Target should have the same size.");
 
   // 2. Copy the value
-  map<string, Parameter>::iterator miter;
-  map<string, Parameter>::iterator titer;
-  for (miter = source.begin(); miter != source.end(); ++miter) {
+  for (auto miter = source.begin(); miter != source.end(); ++miter) {
     string parname = miter->first;
     Parameter param = miter->second;
     double paramvalue = param.curvalue;
 
-    titer = target.find(parname);
+    auto titer = target.find(parname);
     if (titer == target.end())
       throw runtime_error("Source and target should have exactly the same keys.");
 
@@ -1297,7 +1295,6 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
 
     if (miter != parvaluemap.end()) {
       double parvalue = miter->second.first;
-      double parerror = miter->second.second;
 
       // 1. Function
       function->setParameter(parname, parvalue);
@@ -1307,7 +1304,7 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
       if (pariter != parammap.end()) {
         // Find the entry
         pariter->second.curvalue = parvalue;
-        pariter->second.fiterror = parerror;
+        pariter->second.fiterror = miter->second.second;
       }
     }
   }

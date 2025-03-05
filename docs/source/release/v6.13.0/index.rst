@@ -57,28 +57,21 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-
-..
-  These sections don't exist yet:
-  - :doc:`Mantid Workbench <mantidworkbench>`
-  - :doc:`Diffraction <diffraction>`
-  - :doc:`Muon Analysis <muon>`
-
+- :doc:`Mantid Workbench <mantidworkbench>`
+- :doc:`Diffraction <diffraction>`
+- :doc:`Muon Analysis <muon>`
 - Low Q
 
-..
-  These sections don't exist yet:
   - :doc:`Reflectometry <reflectometry>`
-  - :doc:`SANS <sans>`
 
+  - :doc:`SANS <sans>`
 - Spectroscopy
 
-..
-  These sections don't exist yet:
   - :doc:`Direct Geometry <direct_geometry>`
-  - :doc:`Indirect Geometry <indirect_geometry>`
-  - :doc:`Inelastic <inelastic>`
 
+  - :doc:`Indirect Geometry <indirect_geometry>`
+
+  - :doc:`Inelastic <inelastic>`
 
 Full Change Listings
 --------------------

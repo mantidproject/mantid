@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** ExperiementView : Provides an interface for the "Experiement" tab in the
+/** ExperimentView : Provides an interface for the "Experiment" tab in the
 ISIS Reflectometry interface.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget, public IExperimentView {

@@ -16,7 +16,7 @@ using namespace Mantid::Instrumentation;
 using namespace boost::python;
 using Mantid::Kernel::time_point_ns;
 
-void addTimeWrapper(const std::string &name, long int begin, long int end) {
+void addTimeWrapper(const std::string &name, size_t begin, size_t end) {
 
   std::chrono::nanoseconds begin_ns(begin);
   std::chrono::nanoseconds end_ns(end);

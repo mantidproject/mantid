@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+   <!-- parameters for testing polynomial efficiency corrections-->
+  <parameter name="correction" type="string">
+    <value val="polynomial"/>
+  </parameter>
+
+  <parameter name="polystring" type="string">
+    <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
+    <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
+  </parameter>
+
+</component-link>
+
+</parameter-file>

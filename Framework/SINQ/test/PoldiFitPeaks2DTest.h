@@ -116,7 +116,7 @@ public:
     // checking the actual integration result agains reference.
     PoldiPeakCollection_sptr integratedReference(new PoldiPeakCollection(PoldiPeakCollection::Integral));
     for (size_t i = 0; i < testPeaks->peakCount(); ++i) {
-      PoldiPeak_sptr peak = testPeaks->peak(i)->clone();
+      PoldiPeak_sptr peak = testPeaks->peak(i)->clonePeak();
 
       double oldIntensity = peak->intensity();
       double fwhm = peak->fwhm(PoldiPeak::AbsoluteD);

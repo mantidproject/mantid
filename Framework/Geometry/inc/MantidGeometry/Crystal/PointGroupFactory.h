@@ -21,9 +21,9 @@ class MANTID_GEOMETRY_DLL PointGroupGenerator {
 public:
   PointGroupGenerator(std::string hmSymbol, std::string generatorInformation, std::string description);
 
-  inline std::string getHMSymbol() const { return m_hmSymbol; }
-  inline std::string getGeneratorString() const { return m_generatorString; }
-  inline std::string getDescription() const { return m_description; }
+  const inline std::string &getHMSymbol() const { return m_hmSymbol; }
+  const inline std::string &getGeneratorString() const { return m_generatorString; }
+  const inline std::string &getDescription() const { return m_description; }
 
   PointGroup_sptr getPrototype();
 

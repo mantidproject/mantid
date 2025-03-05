@@ -48,7 +48,7 @@ public:
   SpaceGroup(size_t itNumber, std::string hmSymbol, const Group &group);
 
   size_t number() const;
-  std::string hmSymbol() const;
+  const std::string &hmSymbol() const;
 
   template <typename T> std::vector<T> getEquivalentPositions(const T &position) const {
     const std::vector<SymmetryOperation> &symmetryOperations = getSymmetryOperations();

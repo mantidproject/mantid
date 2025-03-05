@@ -5,14 +5,47 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileProperty, FileAction, WorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction
+from mantid.kernel import Direction, V3D
 from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory
 from os import path, makedirs
+import numpy as np
 
 
 class SaveINS(PythonAlgorithm):
     LATT_TYPE_MAP = {type: itype + 1 for itype, type in enumerate(["P", "I", "R", "F", "A", "B", "C"])}
+    IDENTIY_OP = SymmetryOperationFactory.createSymOp("x,y,z")
     INVERSION_OP = SymmetryOperationFactory.createSymOp("-x,-y,-z")
+    ROTATION_OPS = {1: [IDENTIY_OP, INVERSION_OP], -1: [IDENTIY_OP]}
+    A_CENTERING_OP = SymmetryOperationFactory.createSymOp("x,y+1/2,z+1/2")
+    B_CENTERING_OP = (SymmetryOperationFactory.createSymOp("x+1/2,y,z+1/2"),)
+    C_CENTERING_OP = SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z")
+    CENTERING_OPS = {
+        1: [IDENTIY_OP],
+        2: [
+            IDENTIY_OP,
+            SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z+1/2"),
+        ],
+        3: [
+            IDENTIY_OP,
+            SymmetryOperationFactory.createSymOp("x+1/3,y+2/3,z+2/3"),
+            SymmetryOperationFactory.createSymOp("x+2/3,y+1/3,z+1/3"),
+        ],
+        4: [
+            IDENTIY_OP,
+            A_CENTERING_OP,
+            B_CENTERING_OP,
+            C_CENTERING_OP,
+        ],
+        5: [
+            IDENTIY_OP,
+            A_CENTERING_OP,
+        ],
+        6: [IDENTIY_OP, B_CENTERING_OP],
+        7: [
+            IDENTIY_OP,
+            C_CENTERING_OP,
+        ],
+    }
     DUMMY_WAVELENGTH = 1.0
 
     def category(self):
@@ -113,7 +146,7 @@ class SaveINS(PythonAlgorithm):
             f_handle.write(f"LATT {latt_type}\n")
 
             # print sym operations
-            for sym_str in spgr.getSymmetryOperationStrings():
+            for sym_str in self._get_shelx_symmetry_operators(spgr, latt_type):
                 f_handle.write(f"SYMM {sym_str}\n")
 
             # print atom info
@@ -139,6 +172,85 @@ class SaveINS(PythonAlgorithm):
             f_handle.write("MERG 0\n")  # do not merge same reflection at different lambda
             f_handle.write("HKLF 2\n")  # tells SHELX the columns saved in the reflection file
             f_handle.write("END")
+
+    def _symmetry_operation_key(self, rot1_mat, trans1_vec, rot2_mat=np.eye(3), trans2_vec=np.zeros(3)):
+        """
+        Generate a key for symmetry operation comparison.
+        Combines rotation and translation into a unique tuple representation.
+        Ex: "x,y,z+1/2" is equivalent to "x,y,z+0.5"
+        """
+        rot_mat = rot1_mat @ rot2_mat
+        trans_vec = rot1_mat @ trans2_vec + trans1_vec
+        trans_vec = np.mod(trans_vec, 1)  # Ensure trans_vec is within [0, 1)
+        return tuple(np.round(rot_mat, 0).astype(int).flatten().tolist() + np.round(trans_vec, 3).tolist())
+
+    def _symmetry_matrix_vector(self, symop):
+        """
+        Extract the rotation matrix (rot_mat) and translation vector (trans_vec) from a symmetry element.
+        This symmetry operation transform any point via a matrix/translation pair.
+        """
+        rot_mat = np.linalg.inv(np.vstack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
+        trans_vec = np.array(symop.transformCoordinates(V3D(0, 0, 0)))
+        return rot_mat, trans_vec
+
+    def _generate_equivalent_operators(self, rotation_ops, centering_ops):
+        """
+        Generate all equivalent symmetry operators for the given lattice rotation and centering operations.
+        """
+        equivalent_ops = set()
+        for rot in rotation_ops:
+            rot2_mat, _ = self._symmetry_matrix_vector(rot)
+            for cent in centering_ops:
+                _, trans2_vec = self._symmetry_matrix_vector(cent)
+                key = self._symmetry_operation_key(np.eye(3), np.zeros(3), rot2_mat, trans2_vec)
+                equivalent_ops.add(key)
+        return equivalent_ops
+
+    def _update_symmetry_dict(self, rot1_mat, trans1_vec, sym3, sym_key, sym_ops_dict, rot_mat_dict, trans_vec_dict):
+        """
+        Update the symmetry operations dictionary with priority for closeness to identity/origin.
+        This bias improves readability.
+        # Ex: lattice type 3; "-x+y,-x,z" is simpler than "-x+y+1/3,-x+2/3,z+2/3"
+        """
+        if sym3 not in sym_ops_dict or (
+            np.linalg.det(rot1_mat) > np.linalg.det(rot_mat_dict[sym3])  # identity preferred
+            or np.linalg.norm(trans1_vec) < np.linalg.norm(trans_vec_dict[sym3])  # origin preferred
+        ):
+            sym_ops_dict[sym3] = sym_key
+            rot_mat_dict[sym3] = rot1_mat
+            trans_vec_dict[sym3] = trans1_vec
+
+    def _get_shelx_symmetry_operators(self, spgr, latt_type):
+        """
+        Get SHELX symmetry operators for the given space group and lattice type.
+        Returns symmetry set.
+        """
+        latt_numb = abs(latt_type)
+        latt_sign = 1 if latt_type > 0 else -1
+
+        # Generate equivalent lattice type operators common to lattice type.
+        latt_type_ops_set = self._generate_equivalent_operators(self.ROTATION_OPS[latt_sign], self.CENTERING_OPS[latt_numb])
+
+        sym_ops = spgr.getSymmetryOperations()
+        sym_ops_dict = {}
+        rot_mat_dict = {}
+        trans_vec_dict = {}
+
+        for sym_op in sym_ops:
+            rot1_mat, trans1_vec = self._symmetry_matrix_vector(sym_op)
+            sym_key = sym_op.getIdentifier()
+            sym1 = self._symmetry_operation_key(rot1_mat, trans1_vec)
+
+            if sym1 not in latt_type_ops_set:
+                # re-iterate over lattice operators to map equivalently generated
+                for rot in self.ROTATION_OPS[latt_sign]:
+                    rot2_mat, _ = self._symmetry_matrix_vector(rot)
+                    for cent in self.CENTERING_OPS[latt_numb]:
+                        _, trans2_vec = self._symmetry_matrix_vector(cent)
+                        sym3 = self._symmetry_operation_key(rot1_mat, trans1_vec, rot2_mat, trans2_vec)  # sym3 = sym1 X sym2
+                        self._update_symmetry_dict(rot1_mat, trans1_vec, sym3, sym_key, sym_ops_dict, rot_mat_dict, trans_vec_dict)
+
+        return set(sym_ops_dict.values())
 
 
 AlgorithmFactory.subscribe(SaveINS)

@@ -72,7 +72,7 @@ void ScopedFile::doCreateFile(const std::string &fileContents, const Poco::Path 
 Getter for the filename with path.
 @return File name and path.
 */
-std::string ScopedFile::getFileName() const { return m_filename; }
+const std::string &ScopedFile::getFileName() const { return m_filename; }
 
 /// Free up resources.
 ScopedFile::~ScopedFile() {

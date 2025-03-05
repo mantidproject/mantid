@@ -31,7 +31,7 @@ SpaceGroup::SpaceGroup(size_t itNumber, std::string hmSymbol, const Group &group
 size_t SpaceGroup::number() const { return m_number; }
 
 /// Returns the stored Hermann-Mauguin symbol
-std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
+const std::string &SpaceGroup::hmSymbol() const { return m_hmSymbol; }
 
 /**
  * Returns whether the given reflection is allowed or not in this space group

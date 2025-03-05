@@ -21,8 +21,25 @@ from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
+def get_idf_filename_for_instrument(instrument_name):
+    """For the given instrument, return the file name for the version of the IDF that we're using in these tests."""
+    if instrument_name == "LOQ":
+        return "LOQ_Definition_20151016.xml"
+
+    if instrument_name == "SANS2D":
+        return "SANS2D_Definition_Tubes.xml"
+
+    if instrument_name == "LARMOR":
+        return "LARMOR_Definition_SEMSANS_SESANS.xml"
+
+    if instrument_name == "ZOOM":
+        return "ZOOM_Definition.xml"
+
+    raise ValueError(f"Cannot get IDF filename for instrument name: {instrument_name}")
+
+
 def load_empty_instrument(instrument_name):
-    sans_move_test_workspace = LoadEmptyInstrument(InstrumentName=instrument_name)
+    sans_move_test_workspace = LoadEmptyInstrument(Filename=get_idf_filename_for_instrument(instrument_name))
     return sans_move_test_workspace
 
 

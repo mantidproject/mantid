@@ -62,6 +62,7 @@ from IndirectReductionCommon import (
 )
 
 import os
+import numpy as np
 
 
 def _str_or_none(s):
@@ -471,6 +472,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         if self._grouping_method != "File" and self._grouping_file is not None:
             logger.warning("GroupingFile will be ignored by selected GroupingMethod")
+
+        if self._calibration_ws is not None:
+            is_zero_calibration = [np.all(self._calibration_ws.dataY(i) == 0) for i in range(self._calibration_ws.getNumberHistograms())]
+            zero_indices = np.where(is_zero_calibration)[0]
+            if len(zero_indices) > 0:
+                logger.warning(f"Calibration data is zero for workspace indices {str(zero_indices)}")
 
         # The list of workspaces being processed
         self._workspace_names = []

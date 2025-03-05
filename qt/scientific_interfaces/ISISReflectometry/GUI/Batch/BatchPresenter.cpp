@@ -72,8 +72,8 @@ BatchPresenter::BatchPresenter(
  */
 void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void BatchPresenter::initInstrumentList(const std::string &selectedInstrument) {
-  m_runsPresenter->initInstrumentList(selectedInstrument);
+std::string BatchPresenter::initInstrumentList(const std::string &selectedInstrument) {
+  return m_runsPresenter->initInstrumentList(selectedInstrument);
 }
 
 bool BatchPresenter::requestClose() const { return true; }

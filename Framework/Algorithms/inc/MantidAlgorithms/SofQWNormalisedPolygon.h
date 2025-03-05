@@ -52,6 +52,7 @@ public:
   /// validate the inputs
   std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's version for identification
+  // cppcheck-suppress uselessOverride
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"SofQW", "SofQWPolygon", "Rebin2D"}; }
   /// Algorithm's category for identification

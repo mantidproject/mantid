@@ -1,1 +1,0 @@
-- A crosshair toggle option has been added in mantidplots

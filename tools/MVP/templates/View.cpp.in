@@ -1,0 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "View.h"
+
+#include "Presenter.h"
+
+#include <string>
+#include <QString>
+
+
+View::View(QWidget *parent) : QWidget(parent), m_presenter() {
+  m_uiForm.setupUi(this);
+
+  connect(m_uiForm.pbIncrement, &QPushButton::clicked, this, &View::notifyButtonClicked);
+}
+
+void View::subscribe(IPresenter *presenter) {
+  m_presenter = presenter;
+}
+
+void View::notifyButtonClicked() {
+  // An example event slot which notifies the presenter
+  m_presenter->handleButtonClicked();
+}
+
+void View::setLabel(std::string const &text) {
+  m_uiForm.lbCount->setText(QString::fromStdString(text));
+}

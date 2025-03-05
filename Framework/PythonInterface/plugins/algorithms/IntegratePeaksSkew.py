@@ -26,6 +26,7 @@ from mantid.kernel import (
     logger,
     CompositeValidator,
     CompositeRelation,
+    SpecialCoordinateSystem,
 )
 import numpy as np
 from scipy.signal import convolve2d
@@ -34,6 +35,7 @@ from scipy.stats import moment
 from mantid.geometry import RectangularDetector, GridDetector
 import re
 from enum import Enum
+from mantid.dataobjects import PeakShapeDetectorBin
 
 
 class PEAK_MASK_STATUS(Enum):
@@ -1026,7 +1028,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # check that peak is in a valid detector
             detid = detids[ipk]
             detector_info = ws.detectorInfo()
-            invalid_detector = False
             try:
                 det_idx = detector_info.indexOf(detid)
                 invalid_detector = detector_info.isMonitor(det_idx) or detector_info.isMasked(det_idx)
@@ -1089,6 +1090,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 # set peak object intensity
                 pk.setIntensity(L * peak_data.intens)
                 pk.setSigmaIntensity(L * peak_data.sig)
+
+                # Set PeakShapeDetectorBin shape for valid peaks
+                self._set_peak_shapes(ws, pk, peak_data)
             else:
                 pk.setIntensity(0.0)
                 pk.setSigmaIntensity(0.0)
@@ -1172,6 +1176,25 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
 
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
+
+    def _set_peak_shapes(self, ws, peak, peak_data):
+        """
+        Sets PeakShapeDetectorBin shape for a peak
+        @param ws - Input workspace
+        @param peak - peak to add the shape
+        @param peak_data - PeakData object containing details of the integrated peak
+        """
+        if not peak_data.peak_mask.any():
+            return
+        det_bin_list = []
+        for det in peak_data.detids[peak_data.peak_mask]:
+            ispec = ws.getIndicesFromDetectorIDs([int(det)])[0]
+            x_start = ws.readX(ispec)[peak_data.ixmin_opt]
+            x_end = ws.readX(ispec)[peak_data.ixmax_opt]
+            det_bin_list.append((int(det), x_start, x_end))
+        if len(det_bin_list) > 0:
+            peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
+            peak.setPeakShape(peak_shape)
 
     @staticmethod
     def estimate_linear_params(x, y):

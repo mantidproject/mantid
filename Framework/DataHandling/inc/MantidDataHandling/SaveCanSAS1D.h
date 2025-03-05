@@ -81,7 +81,7 @@ Required properties:
 */
 class MANTID_DATAHANDLING_DLL SaveCanSAS1D : public API::Algorithm {
 public:
-  virtual ~SaveCanSAS1D() = default;
+  ~SaveCanSAS1D() override = default;
   const std::string name() const override { return "SaveCanSAS1D"; }
   const std::string summary() const override {
     return "Save a MatrixWorkspace to a file in the CanSAS1D XML format (for 1D data).";

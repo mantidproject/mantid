@@ -202,7 +202,7 @@ API::IFunction_sptr PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &r
   totalProfile->initialize();
 
   std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
-  for (auto &peak : peaks) {
+  for (const auto &peak : peaks) {
     totalProfile->addFunction(getPeakProfile(peak));
   }
 

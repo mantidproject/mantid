@@ -47,19 +47,19 @@ SqwPresenter::SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgo
  *
  */
 void SqwPresenter::handleDataReady(std::string const &dataName) {
-  if (m_view->validate()) {
-    m_model->setInputWorkspace(dataName);
-    auto &ads = AnalysisDataService::Instance();
-    if (auto const eFixed = getEFixed(ads.retrieveWS<MatrixWorkspace>(dataName))) {
-      m_model->setEFixed(*eFixed);
-    } else {
-      m_view->showMessageBox("An 'Efixed' value could not be found in the provided workspace.");
-      return;
-    }
-
-    plotRqwContour();
-    m_view->setDefaultQAndEnergy();
+  if (!m_view->validate()) {
+    return;
   }
+  m_model->setInputWorkspace(dataName);
+  if (auto const eFixed = getEFixed(m_model->inputWorkspace())) {
+    m_model->setEFixed(*eFixed);
+  } else {
+    m_view->showMessageBox("An 'Efixed' value could not be found in the provided workspace.");
+    return;
+  }
+
+  plotRqwContour();
+  m_view->setDefaultQAndEnergy();
 }
 
 void SqwPresenter::handleValidation(IUserInputValidator *validator) const {

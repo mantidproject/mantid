@@ -31,7 +31,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         setup_context_for_ea_tests(self)
 
-        self.view = mock.create_autospec(LoadRunWidgetView, autospec=True)
+        self.view = mock.create_autospec(LoadRunWidgetView, instance=True)
         self.model = mock.Mock(LoadRunWidgetModel, autospec=True)
         self.presenter = LoadRunWidgetPresenterEA(self.view, self.model)
 

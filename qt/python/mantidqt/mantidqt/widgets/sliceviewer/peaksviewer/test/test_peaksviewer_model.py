@@ -23,14 +23,14 @@ from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import creat
 class PeaksViewerModelTest(unittest.TestCase):
     # -------------------------- Success Tests --------------------------------
     def test_peaks_workspace_returns_same_workspace_given_to_model(self):
-        peaks_workspace = create_autospec(PeaksWorkspace)
+        peaks_workspace = create_autospec(PeaksWorkspace, instance=True)
         model = PeaksViewerModel(peaks_workspace, "b", "1.0")
 
         self.assertEqual(peaks_workspace, model.peaks_workspace)
 
     def test_color_returns_string_identifier_given_to_model(self):
         fg_color, bg_color = "b", "0.5"
-        model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, bg_color)
+        model = PeaksViewerModel(create_autospec(PeaksWorkspace, instance=True), fg_color, bg_color)
 
         self.assertEqual(fg_color, model.fg_color)
         self.assertEqual(bg_color, model.bg_color)
@@ -114,7 +114,7 @@ class PeaksViewerModelTest(unittest.TestCase):
         self.assertEqual((None, None), ylim)
 
     def test_peaks_workspace_add_peak(self):
-        peaks_workspace = create_autospec(PeaksWorkspace)
+        peaks_workspace = create_autospec(PeaksWorkspace, instance=True)
         model = PeaksViewerModel(peaks_workspace, "b", "1.0")
 
         model.add_peak([1, 1, 1], SpecialCoordinateSystem.QLab)
@@ -126,7 +126,7 @@ class PeaksViewerModelTest(unittest.TestCase):
 
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):
-        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), "w", "1.0")
+        self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace, instance=True), "w", "1.0")
 
 
 if __name__ == "__main__":

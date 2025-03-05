@@ -14,7 +14,7 @@
 
 namespace Mantid {
 namespace Kernel {
-class PseudoRandomNumberGenerator;
+class MersenneTwister;
 }
 namespace Algorithms {
 
@@ -80,7 +80,7 @@ private:
   /// Limits for the range of mu*r values to cover
   const std::pair<double, double> m_muRrange;
   /// Random number generator
-  std::unique_ptr<Kernel::PseudoRandomNumberGenerator> m_rng;
+  std::unique_ptr<Kernel::MersenneTwister> m_rng;
 };
 
 } // namespace Algorithms

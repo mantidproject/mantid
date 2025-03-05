@@ -22,6 +22,7 @@
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
+#include "MantidDataObjects/PeakShapeDetectorBinFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -1165,10 +1166,12 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
 
       PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
       PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryDetectorBin = std::make_shared<PeakShapeDetectorBinFactory>();
       PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
 
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
-      peakFactorySphere->setSuccessor(peakFactoryNone);
+      peakFactorySphere->setSuccessor(peakFactoryDetectorBin);
+      peakFactoryDetectorBin->setSuccessor(peakFactoryNone);
 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
@@ -1457,10 +1460,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 
       PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
       PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryDetectorBin = std::make_shared<PeakShapeDetectorBinFactory>();
       PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
 
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
-      peakFactorySphere->setSuccessor(peakFactoryNone);
+      peakFactorySphere->setSuccessor(peakFactoryDetectorBin);
+      peakFactoryDetectorBin->setSuccessor(peakFactoryNone);
 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
