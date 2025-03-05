@@ -26,7 +26,7 @@ set(INC_FILES
     inc/MantidNexus/nxstack.h
 )
 
-set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h)
+set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h NeXusFileTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
