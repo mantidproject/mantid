@@ -574,16 +574,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Unin
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:45
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:70
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmProperty.cpp:30
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IAlgorithm.cpp:224
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IAlgorithm.cpp:254
-missingReturn:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IAlgorithm.cpp:319
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IEventList.cpp:75
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IEventList.cpp:77
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IEventList.cpp:79
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IFunction1D.cpp:23
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMDHistoWorkspace.cpp:50
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMaskWorkspace.cpp:45
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeakFunction.cpp:23
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ISplittersWorkspace.cpp:25
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MDGeometry.cpp:96
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MultipleExperimentInfos.cpp:36

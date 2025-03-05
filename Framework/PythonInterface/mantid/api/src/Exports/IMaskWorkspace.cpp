@@ -41,6 +41,7 @@ void export_IMaskWorkspace() {
       .def("isMasked", isMaskedFromList, (arg("self"), arg("detector_id_list")),
            "Returns whether all of the given detector ID list are masked");
 
-  // register pointers
+  // register pointers - required to map between C++ type T and python type
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<IMaskWorkspace>();
 }
