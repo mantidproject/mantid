@@ -4,13 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
-from typing import Annotated, TypeAlias, Tuple, Sequence, Optional
+from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 
-# Forward declarations
-Workspace2D: TypeAlias = Annotated[type, "Workspace2D"]
+
+if TYPE_CHECKING:
+    from mantid.dataobjects import Workspace2D
 
 
 def exec_alg(alg_name: str, **kwargs):
