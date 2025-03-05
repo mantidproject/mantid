@@ -59,7 +59,7 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(Mantid::API::Algorit
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressDialogPresenter::updateProgressBarSlot(Mantid::API::AlgorithmID alg, const double progress,
-                                                             const QString message, const double estimatedTime,
+                                                             const QString &message, const double estimatedTime,
                                                              const int progressPrecision) {
   // if the algorithm isn't contained in the progress bar tree, then pretend it
   // just started

@@ -142,16 +142,16 @@ void EditLocalParameterDialog::setAllValues(double value) {
 }
 
 /// Get the list of new parameter values.
-QList<double> EditLocalParameterDialog::getValues() const { return m_values; }
+const QList<double> &EditLocalParameterDialog::getValues() const { return m_values; }
 
 /// Get a list with the "fixed" attribute.
-QList<bool> EditLocalParameterDialog::getFixes() const { return m_fixes; }
+const QList<bool> &EditLocalParameterDialog::getFixes() const { return m_fixes; }
 
 /// Get a list of the ties.
-QStringList EditLocalParameterDialog::getTies() const { return m_ties; }
+const QStringList &EditLocalParameterDialog::getTies() const { return m_ties; }
 
 /// Get a list of the constraints
-QStringList EditLocalParameterDialog::getConstraints() const { return m_constraints; }
+const QStringList &EditLocalParameterDialog::getConstraints() const { return m_constraints; }
 
 /// Fix/unfix a single parameter.
 /// @param index :: Index of a paramter to fix or unfix.

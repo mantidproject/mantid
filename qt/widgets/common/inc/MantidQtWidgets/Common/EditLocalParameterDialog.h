@@ -34,11 +34,11 @@ public:
                            const std::vector<std::string> &datasetDomainNames, const QList<double> &values,
                            const QList<bool> &fixes, const QStringList &ties, const QStringList &constraints);
 
-  std::string getParameterName() const { return m_parName; }
-  QList<double> getValues() const;
-  QList<bool> getFixes() const;
-  QStringList getTies() const;
-  QStringList getConstraints() const;
+  const std::string &getParameterName() const { return m_parName; }
+  const QList<double> &getValues() const;
+  const QList<bool> &getFixes() const;
+  const QStringList &getTies() const;
+  const QStringList &getConstraints() const;
   double getValue(int i) const { return m_values[i]; }
   bool isFixed(int i) const { return m_fixes[i]; }
   QString getTie(int i) const { return m_ties[i]; }
