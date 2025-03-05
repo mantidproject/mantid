@@ -41,7 +41,7 @@ void AlgorithmProgressPresenter::algorithmEndedSlot(Mantid::API::AlgorithmID alg
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressPresenter::updateProgressBarSlot(Mantid::API::AlgorithmID algorithm, const double progress,
-                                                       const QString message, const double estimatedTime,
+                                                       const QString &message, const double estimatedTime,
                                                        const int progressPrecision) {
   if (algorithm == this->m_algorithm) {
     // this needs to be a call to the view
