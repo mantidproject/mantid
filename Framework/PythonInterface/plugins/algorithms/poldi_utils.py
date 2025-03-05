@@ -40,7 +40,7 @@ def load_poldi(
     :param fpath_data: filepath of ASCII file with counts
     :param fpath_idf: filepath to instrument definition file
     :param chopper_speed: chopper speed used on instrument (rpm)
-    :param t0: time offset to applied to slit openings (fraction of cycle time)
+    :param t0: time offset applied to slit openings (fraction of cycle time)
     :param t0_const: TZERO diffractometer constant for instrument
     :param output_workspace: output workspace name
     :return ws: workspace containing POLDI data
@@ -92,7 +92,7 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     t0_const = chopper.getNumberParameter("t0_const")[0]
     chopper_speed = ws.run().getPropertyAsSingleValue("chopperspeed")  # rpm
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
-    # get chopper offsets in time
+    # get chopper offsets in time (stored as x position of child components of chopper)
     nslits = chopper.nelements()
     slit_offsets = np.array([(chopper[islit].getPos()[0] + t0) * cycle_time for islit in range(nslits)])
     return cycle_time, slit_offsets, t0_const, l1_chop
@@ -114,7 +114,7 @@ def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_m
 
 def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, time_max: float) -> np.ndarray[float]:
     """
-    Function to d-spacing bins given time bin width and maximum arrival time
+    Function to calculate d-spacing bins given time bin width and maximum arrival time
     :param bin_width: bin width in time (mus) in workspace
     :param dspac_min: minimum d-spacing to consider
     :param dspac_max: maximum d-spacing to consider
@@ -146,11 +146,17 @@ def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tt
     return time_max
 
 
-def simulate_2d_data(ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0):
+def simulate_2d_data(
+    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0
+) -> Workspace2D:
     """
     Function to simulate 2D pulse overlap data given 1D spectrum in d-spacing (i.e. powder pattern).
-    :param ws_2d: w
-    :return time_max: arrival time (mus) of longest wavelength neutron from first slit opening
+    :param ws_2d: MatrixWorkspace containing POLDI data (raw instrument)
+    :param ws_1d: MatrixWorkspace containing 1 spectrum corresponding to powder spectrum to simulate, with the same
+                  x-range (d-spacing or |Q|) as produced by PoldiAutoCorrelation.
+    :param output_workspace: String with name for output workspace
+    :param lambda_max: maximum wavelength (Ang) to consider
+    :return: MatrixWorkspace containing simulated POLDI data (raw instrument)
     """
     is_dspac = ws_1d.getXDimension().name.replace("-", "") == "dSpacing"
     if not is_dspac:
