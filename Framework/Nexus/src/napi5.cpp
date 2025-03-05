@@ -2441,10 +2441,7 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxnativeexternallink = NX5nativeexternallink;
   fHandle->nxnativeinquirefile = NX5nativeinquirefile;
   fHandle->nxnativeisexternallink = NX5nativeisexternallink;
-  fHandle->nxputattra = NX5putattra;
   fHandle->nxgetnextattra = NX5getnextattra;
-  fHandle->nxgetattra = NX5getattra;
-  fHandle->nxgetattrainfo = NX5getattrainfo;
 }
 
 #endif /* HDF5 */
