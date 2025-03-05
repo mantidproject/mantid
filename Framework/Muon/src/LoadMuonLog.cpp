@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadMuonLog.h"
+#include "MantidMuon/LoadMuonLog.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -20,7 +20,7 @@ void toLower(std::string &name) {
 }
 } // namespace
 
-namespace Mantid::DataHandling {
+namespace Mantid::Muon {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
@@ -32,9 +32,6 @@ using API::MatrixWorkspace_sptr;
 using API::Progress;
 using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
-
-/// Empty default constructor
-LoadMuonLog::LoadMuonLog() = default;
 
 /// Initialisation method.
 void LoadMuonLog::init() {
@@ -70,9 +67,9 @@ void LoadMuonLog::exec() {
   localWorkspace->mutableSample().setName(nxload.getSampleName());
 
   std::set<std::string> logNames;
-  auto logs = localWorkspace->mutableRun().getLogData();
+  const auto &logs = localWorkspace->mutableRun().getLogData();
   // need to remove case
-  for (auto log : logs) {
+  for (const auto &log : logs) {
     std::string logName = log->name();
     toLower(logName);
     logNames.insert(logName);
@@ -156,4 +153,4 @@ bool LoadMuonLog::isDateTimeString(const std::string &str) {
   return false;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Muon

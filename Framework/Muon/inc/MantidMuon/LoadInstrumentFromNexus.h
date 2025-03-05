@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 
@@ -20,9 +20,9 @@ class Component;
 class Instrument;
 } // namespace Geometry
 
-namespace DataHandling {
+namespace Muon {
 /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h
-DataHandling/LoadInstrumentFromNexus.h
+Muon/LoadInstrumentFromNexus.h
 
 Attempts to load information about the instrument from a ISIS NeXus file. In
 particular attempt to
@@ -37,7 +37,7 @@ other Loadxxx algorithms, rather than being used directly.
 It is used by LoadMuonNexus version 1.
 
 LoadInstrumentFromNexus is an algorithm and as such inherits
-from the Algorithm class, via DataHandlingCommand, and overrides
+from the Algorithm class, and overrides
 the init() & exec()  methods.
 
 Required Properties:
@@ -51,7 +51,7 @@ data to be added.</LI>
 @date 2/5/2008
 @author Ronald Fowler, ISIS, RAL (LoadInstrumentFromNexus)
 */
-class MANTID_DATAHANDLING_DLL LoadInstrumentFromNexus final : public API::Algorithm {
+class MANTID_MUON_DLL LoadInstrumentFromNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadInstrumentFromNexus();
@@ -73,7 +73,7 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadInstrument", "Load"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "DataHandling\\Instrument"; }
+  const std::string category() const override { return "Muon\\DataHandling"; }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
@@ -86,5 +86,5 @@ private:
   std::string m_filename;
 };
 
-} // namespace DataHandling
+} // namespace Muon
 } // namespace Mantid

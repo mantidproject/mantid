@@ -10,10 +10,12 @@ set(SRC_FILES
     src/ConvertFitFunctionForMuonTFAsymmetry.cpp
     src/EstimateMuonAsymmetryFromCounts.cpp
     src/LoadAndApplyMuonDetectorGrouping.cpp
+    src/LoadInstrumentFromNexus.cpp
     src/LoadMuonNexus.cpp
     src/LoadMuonNexus1.cpp
     src/LoadMuonNexus2.cpp
     src/LoadMuonNexus3.cpp
+    src/LoadMuonLog.cpp
     src/MuonAlgorithmHelper.cpp
     src/MuonAsymmetryHelper.cpp
     src/MuonGroupDetectors.cpp
@@ -40,10 +42,12 @@ set(INC_FILES
     inc/MantidMuon/CalMuonDetectorPhases.h
     inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
     inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h
+    inc/MantidMuon/LoadInstrumentFromNexus.h
     inc/MantidMuon/LoadMuonNexus.h
     inc/MantidMuon/LoadMuonNexus1.h
     inc/MantidMuon/LoadMuonNexus2.h
     inc/MantidMuon/LoadMuonNexus3.h
+    inc/MantidMuon/LoadMuonLog.h
     inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
     inc/MantidMuon/MuonAlgorithmHelper.h
     inc/MantidMuon/MuonAsymmetryHelper.h
@@ -71,9 +75,11 @@ set(TEST_FILES
     CalMuonDetectorPhasesTest.h
     ConvertFitFunctionForMuonTFAsymmetryTest.h
     LoadAndApplyMuonDetectorGroupingTest.h
+    LoadInstrumentFromNexusTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
     LoadMuonNexus3Test.h
+    LoadMuonLogTest.h
     MuonAlgorithmHelperTest.h
     EstimateMuonAsymmetryFromCountsTest.h
     MuonGroupDetectorsTest.h
