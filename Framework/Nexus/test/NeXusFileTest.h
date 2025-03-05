@@ -343,3 +343,128 @@ public:
     removeFile(DMC02 + fileext);
   }
 };
+
+/**
+ * These correspond to former napi tests
+ * - leak_test1
+ * - leak_test2
+ * - leak_test3
+ */
+class NeXusFileLeakTest : public CxxTest::TestSuite {
+public:
+  static NeXusFileLeakTest *createSuite() { return new NeXusFileLeakTest(); }
+  static void destroySuite(NeXusFileLeakTest *suite) { delete suite; }
+
+  NeXusFileLeakTest() : CxxTest::TestSuite() { Mantid::API::FrameworkManager::Instance(); }
+
+  void test_leak1() {
+    int const nReOpen = 1000;
+    cout << "Running for " << nReOpen << " iterations\n";
+    std::string const szFile("leak_test1.nxs");
+
+    removeFile(szFile); // in case it was left over from previous run
+
+    File file_obj(szFile, NXACC_CREATE5);
+    file_obj.close();
+
+    for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
+      if (0 == iReOpen % 100) {
+        cout << "loop count " << iReOpen << "\n";
+      }
+
+      file_obj = File(szFile, NXACC_RDWR);
+      file_obj.close();
+    }
+
+    removeFile(szFile); // cleanup
+  }
+
+  void test_leak2() {
+    int const nFiles = 10;
+    int const nEntry = 10;
+    int const nData = 10;
+    vector<short int> const i2_array{1000, 2000, 3000, 4000};
+
+    cout << strmakef("Running for %d iterations", nFiles);
+    NXaccess access_mode = NXACC_CREATE5;
+    std::string strFile;
+
+    for (int iFile = 0; iFile < nFiles; iFile++) {
+      strFile = strmakef("leak_test2_%03d.nxs", iFile);
+      removeFile(strFile);
+      cout << "file " << strFile << "\n";
+
+      File fileid(strFile, access_mode);
+
+      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
+        std::string oss(strmakef("entry_%d", iEntry));
+        fileid.makeGroup(oss, "NXentry");
+        fileid.openGroup(oss, "NXentry");
+        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
+          std::string oss2(strmakef("data_%d", iNXdata));
+          fileid.makeGroup(oss2, "NXdata");
+          fileid.openGroup(oss2, "NXdata");
+          for (int iData = 0; iData < nData; iData++) {
+            std::string oss3(strmakef("i2_data_%d", iData));
+            DimVector dims({(int64_t)i2_array.size()});
+            fileid.makeData(oss3, NXnumtype::INT16, dims);
+            fileid.openData(oss3);
+            fileid.putData(&i2_array);
+            fileid.closeData();
+          }
+          fileid.closeGroup();
+        }
+        fileid.closeGroup();
+      }
+      fileid.close();
+      removeFile(strFile);
+    }
+  }
+
+  void test_leak3() {
+    const int nFiles = 10;
+    const int nEntry = 2;
+    const int nData = 2;
+    DimVector array_dims({512, 512});
+    std::string const szFile("leak_test.nxs");
+    const int iBinarySize = 512 * 512;
+    int aiBinaryData[iBinarySize];
+
+    for (int i = 0; i < iBinarySize; i++) {
+      aiBinaryData[i] = rand();
+    }
+
+    for (int iFile = 0; iFile < nFiles; iFile++) {
+      cout << "file " << iFile << "\n";
+
+      File fileid(szFile, NXACC_CREATE5);
+
+      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
+        std::string oss(strmakef("entry_%d", iEntry));
+
+        fileid.makeGroup(oss, "NXentry");
+        fileid.openGroup(oss, "NXentry");
+        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
+          std::string oss2(strmakef("data_%d", iNXdata));
+          fileid.makeGroup(oss2, "NXdata");
+          fileid.openGroup(oss2, "NXdata");
+          fileid.getGroupID();
+          for (int iData = 0; iData < nData; iData++) {
+            std::string oss3(strmakef("i2_data_%d", iData));
+            fileid.makeCompData(oss3, NXnumtype::INT16, array_dims, NXcompression::LZW, array_dims);
+            fileid.openData(oss3);
+            fileid.putData(&aiBinaryData);
+            fileid.closeData();
+          }
+          fileid.closeGroup();
+        }
+        fileid.closeGroup();
+      }
+
+      fileid.close();
+
+      // Delete file
+      removeFile(szFile);
+    }
+  }
+};
