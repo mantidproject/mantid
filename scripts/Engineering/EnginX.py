@@ -21,7 +21,7 @@ class EnginX:
         prm_path: Optional[str] = None,
         ceria_run: Optional[str] = None,
         group: Optional[GROUP] = None,
-        calfile_path: Optional[str] = None,
+        groupingfile_path: Optional[str] = None,
         spectrum_num: Optional[str] = None,
     ) -> None:
         # init attributes
@@ -42,8 +42,8 @@ class EnginX:
             # make new calibration
             self.calibration.set_group(group)
             self.calibration.set_calibration_paths("ENGINX", ceria_run)
-            if group == GROUP.CUSTOM and calfile_path:
-                self.calibration.set_cal_file(calfile_path)
+            if group == GROUP.CUSTOM and groupingfile_path:
+                self.calibration.set_grouping_file(groupingfile_path)
             elif group == GROUP.CROPPED and spectrum_num:
                 self.calibration.set_spectra_list(spectrum_num)
 
