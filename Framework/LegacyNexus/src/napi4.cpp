@@ -389,13 +389,13 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   /* mask off any options for now */
   am = (NXaccess)(am & NXACCMASK_REMOVEFLAGS);
   /* map Nexus NXaccess types to HDF4 types */
-  if (am == NXACC_CREATE) {
+  if (am == Mantid::LegacyNexus::NXACC_CREATE) {
     am1 = DFACC_CREATE;
-  } else if (am == NXACC_CREATE4) {
+  } else if (am == Mantid::LegacyNexus::NXACC_CREATE4) {
     am1 = DFACC_CREATE;
-  } else if (am == NXACC_READ) {
+  } else if (am == Mantid::LegacyNexus::NXACC_READ) {
     am1 = DFACC_READ;
-  } else if (am == NXACC_RDWR) {
+  } else if (am == Mantid::LegacyNexus::NXACC_RDWR) {
     am1 = DFACC_RDWR;
   }
   /* get memory */
@@ -445,7 +445,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
    * need to create global attributes         file_name file_time NeXus_version
    * at some point for new files
    */
-  if (am == NXACC_CREATE || am == NXACC_CREATE4) {
+  if (am == Mantid::LegacyNexus::NXACC_CREATE || am == Mantid::LegacyNexus::NXACC_CREATE4) {
     /* set the NeXus_version attribute*/
     if (SDsetattr(pNew->iSID, "NeXus_version", DFNT_CHAR8, static_cast<int32>(strlen(NEXUS_VERSION)), NEXUS_VERSION) <
         0) {
@@ -494,13 +494,13 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
    * Throw up on us.
    */
   // cppcheck-suppress duplicateCondition
-  if (am == NXACC_CREATE || am == NXACC_CREATE4) {
-    am = NXACC_RDWR;
+  if (am == Mantid::LegacyNexus::NXACC_CREATE || am == Mantid::LegacyNexus::NXACC_CREATE4) {
+    am = Mantid::LegacyNexus::NXACC_RDWR;
     am1 = DFACC_RDWR;
   }
 
   /* Set Vgroup access mode */
-  if (am == NXACC_READ) {
+  if (am == Mantid::LegacyNexus::NXACC_READ) {
     strcpy(pNew->iAccess, "r");
   } else {
     strcpy(pNew->iAccess, "w");
@@ -1211,9 +1211,9 @@ NXstatus NX4flush(NXhandle *pHandle) {
     return NXstatus::NX_ERROR;
   }
   if (pFile->iAccess[0] == 'r') {
-    ac = NXACC_READ;
+    ac = Mantid::LegacyNexus::NXACC_READ;
   } else if (pFile->iAccess[0] == 'w') {
-    ac = NXACC_RDWR;
+    ac = Mantid::LegacyNexus::NXACC_RDWR;
   } else {
     NXReportError("ERROR: NX4flush failed to determine file access mode");
     return NXstatus::NX_ERROR;

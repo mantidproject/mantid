@@ -34,6 +34,7 @@
 #include "napi_test_util.h"
 
 using LegacyNexusTest::print_data;
+using namespace Mantid::LegacyNexus;
 
 NXstatus createAttrs(const NXhandle file) {
   int array_dims[2] = {5, 4};

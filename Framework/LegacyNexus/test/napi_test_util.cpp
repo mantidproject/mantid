@@ -4,40 +4,40 @@
 #include <iostream>
 
 namespace LegacyNexusTest {
-void print_data(const std::string &prefix, std::ostream &stream, const void *data, const NXnumtype type,
-                const int num) {
+void print_data(const std::string &prefix, std::ostream &stream, const void *data,
+                const Mantid::LegacyNexus::NXnumtype type, const int num) {
   stream << prefix << " ";
   for (int i = 0; i < num; i++) {
     switch (type) {
-    case NXnumtype::CHAR:
+    case Mantid::LegacyNexus::NXnumtype::CHAR:
       stream << (static_cast<const char *>(data))[i];
       break;
 
-    case NXnumtype::INT8:
+    case Mantid::LegacyNexus::NXnumtype::INT8:
       stream << (static_cast<const unsigned char *>(data))[i];
       break;
 
-    case NXnumtype::INT16:
+    case Mantid::LegacyNexus::NXnumtype::INT16:
       stream << (static_cast<const short *>(data))[i];
       break;
 
-    case NXnumtype::INT32:
+    case Mantid::LegacyNexus::NXnumtype::INT32:
       stream << (static_cast<const int *>(data))[i];
       break;
 
-    case NXnumtype::INT64:
+    case Mantid::LegacyNexus::NXnumtype::INT64:
       stream << static_cast<const int64_t *>(data)[i];
       break;
 
-    case NXnumtype::UINT64:
+    case Mantid::LegacyNexus::NXnumtype::UINT64:
       stream << static_cast<const uint64_t *>(data)[i];
       break;
 
-    case NXnumtype::FLOAT32:
+    case Mantid::LegacyNexus::NXnumtype::FLOAT32:
       stream << (static_cast<const float *>(data))[i];
       break;
 
-    case NXnumtype::FLOAT64:
+    case Mantid::LegacyNexus::NXnumtype::FLOAT64:
       stream << (static_cast<const double *>(data))[i];
       break;
 

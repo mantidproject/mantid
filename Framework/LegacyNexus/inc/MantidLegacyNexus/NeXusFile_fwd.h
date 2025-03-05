@@ -13,6 +13,7 @@ typedef const char CONSTCHAR;
 
 typedef void *NXhandle; /* really a pointer to a NexusFile structure */
 
+// Should this be 64 in line with NX_MAXNAMELEN?
 typedef char NXname[128];
 
 /** \enum NXaccess_mode
