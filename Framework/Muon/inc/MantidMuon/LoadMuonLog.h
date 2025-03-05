@@ -43,7 +43,7 @@ Required Properties:
 class MANTID_MUON_DLL LoadMuonLog final : public API::Algorithm {
 public:
   /// Default constructor
-  LoadMuonLog();
+  LoadMuonLog() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonLog"; };
   /// Summary of algorithms purpose

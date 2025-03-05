@@ -33,9 +33,6 @@ using API::Progress;
 using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
 
-/// Empty default constructor
-LoadMuonLog::LoadMuonLog() = default;
-
 /// Initialisation method.
 void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
@@ -70,9 +67,9 @@ void LoadMuonLog::exec() {
   localWorkspace->mutableSample().setName(nxload.getSampleName());
 
   std::set<std::string> logNames;
-  auto logs = localWorkspace->mutableRun().getLogData();
+  const auto &logs = localWorkspace->mutableRun().getLogData();
   // need to remove case
-  for (auto log : logs) {
+  for (const auto &log : logs) {
     std::string logName = log->name();
     toLower(logName);
     logNames.insert(logName);
