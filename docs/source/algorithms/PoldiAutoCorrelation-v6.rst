@@ -23,12 +23,16 @@ due to the overlapping pulses measured.
 
    Raw POLDI 1.2 data (i.e. post 2D detector upgrade) for silicon powder standard.
 
-PoldiAutoCorrelation is an algorithm that performs a type of average of the intensity over different arrival times from
-each pulse corresponding to a given d-spacing for each detector. It produces a correlation spectrum, similar to the
-the spectrum of a conventional TOF diffractometer.
-Bragg reflections will appear in this correlation spectrum as peaks surrounded by a dip in the background.
+The output of PoldiAutoCorrelation is a correlation spectrum, similar to the spectrum of a conventional TOF
+diffractometer. Bragg reflections will appear in this correlation spectrum as peaks surrounded by a dip in the background.
 The positions of the Bragg peaks can be determined to a high accuracy in the correlation spectrum and indexed
 accordingly.
+
+PoldiAutoCorrelation performs a type of average of the intensity over different arrival times from
+each pulse corresponding to a given d-spacing for each detector: the correlation intensity at a given
+d-spacing is the inverse of the sum of the inverse intensities at each possible arrival time (see Eq. 8 in [1]_).
+A high correlation intensity implies a consistently high intensity was measured at all arrival times due to all
+possible chopper openings/pulses.
 
 Note by convention the correlation spectrum is converted from d-spacing into momentum transfer.
 
