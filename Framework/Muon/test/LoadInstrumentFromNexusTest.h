@@ -26,7 +26,7 @@ public:
 
   void testLoadInstrumentFromNexus() {
     // setup and run the algorithm (includes basic checks)
-    LoadInstrumentFromNexus alg;
+    Muon::LoadInstrumentFromNexus alg;
     const MatrixWorkspace_sptr ws = setupAlgorithm(alg, "MUSR00015189.nxs");
     runAlgorithm(alg);
 
@@ -59,7 +59,7 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
-  const MatrixWorkspace_sptr setupAlgorithm(LoadInstrumentFromNexus &alg, const std::string &filename) {
+  const MatrixWorkspace_sptr setupAlgorithm(Muon::LoadInstrumentFromNexus &alg, const std::string &filename) {
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
@@ -73,7 +73,7 @@ private:
   }
 
   // Run the algorithm and do some basic checks
-  void runAlgorithm(LoadInstrumentFromNexus &alg) {
+  void runAlgorithm(Muon::LoadInstrumentFromNexus &alg) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
