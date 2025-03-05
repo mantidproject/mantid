@@ -32,7 +32,7 @@ private:
   std::string m_filename;
   NXaccess m_access;
   /** The handle for the C-API. */
-  NXhandle m_file_id;
+  std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
 
