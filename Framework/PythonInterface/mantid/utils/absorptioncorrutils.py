@@ -697,7 +697,11 @@ def create_absorption_input(
             <radius val="{1:7.5F}" />
             <height val="{2:4.2F}" />
             </cylinder>"""
-        gauge_vol = gauge_vol.format(beam_height / 200.0, geometry["Radius"].value / 100.0, beam_height / 100.0)
+        if isinstance(geometry["Radius"], float):
+            sam_rad = geometry["Radius"]
+        else:
+            sam_rad = geometry["Radius"].value
+        gauge_vol = gauge_vol.format(beam_height / 200.0, sam_rad / 100.0, beam_height / 100.0)
 
     if gauge_vol:
         DefineGaugeVolume(absName, gauge_vol)
