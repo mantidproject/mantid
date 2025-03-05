@@ -136,7 +136,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                     + "      :"
                     + extension
                     + ": "
-                    + suggested_path
+                    + suggested_path.as_posix()
                 )
 
             return self.file_lookup[file_name][extension]
