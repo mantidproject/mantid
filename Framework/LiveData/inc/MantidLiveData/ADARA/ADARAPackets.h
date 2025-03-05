@@ -669,7 +669,7 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const { return extractDouble(index, 3); }
+  double value() const { return extractDouble(index, &m_fields[3]); }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
