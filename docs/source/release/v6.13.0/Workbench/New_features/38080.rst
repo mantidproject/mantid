@@ -1,1 +1,1 @@
-Mantid's Python code editor now supports F-string syntax highlighting
+- The :ref:`Python script editor <WorkbenchScriptWindow>` now supports f-string syntax highlighting.
