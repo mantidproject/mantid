@@ -66,7 +66,6 @@ def create_run_details_object(
 
     # Sample empty if there is one as this is instrument specific
     sample_empty = getattr(inst_settings, "sample_empty", None)
-    print(f"#### sample_empty returned from instr settings {sample_empty}")
 
     # By default, offset file sits in the calibration folder, but it can also be given as an absolute path
     if os.path.exists(offset_file_name):
