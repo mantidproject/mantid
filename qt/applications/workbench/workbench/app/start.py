@@ -21,10 +21,6 @@ import mantidqt.utils.qt as qtutils
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-# This import is needed for new PythonHelpWindow implementation,
-# these imports are needed before starting the application
-from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings  # noqa: F401, E402
-
 from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
