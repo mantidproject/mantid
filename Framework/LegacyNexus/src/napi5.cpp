@@ -377,7 +377,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   }
 
   /* start HDF5 interface */
-  if (am == Mantid::LegacyNexus::NXACC_CREATE5) {
+  if (am == NXACC_CREATE5) {
 
     /* set the cache size for the file */
     if (set_file_cache(fapl, filename) < 0) {
@@ -388,7 +388,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     am1 = H5F_ACC_TRUNC;
     pNew->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
   } else {
-    if (am == Mantid::LegacyNexus::NXACC_READ)
+    if (am == NXACC_READ)
       am1 = H5F_ACC_RDONLY;
     else
       am1 = H5F_ACC_RDWR;
@@ -411,7 +411,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
    * at some point for new files
    */
 
-  if (am == Mantid::LegacyNexus::NXACC_CREATE5) {
+  if (am == NXACC_CREATE5) {
     root_id = H5Gopen(pNew->iFID, "/", H5P_DEFAULT);
     if (set_str_attribute(root_id, "NeXus_version", NEXUS_VERSION) < 0) {
       H5Gclose(root_id);
@@ -1366,7 +1366,7 @@ NXstatus NX5flush(NXhandle *pHandle) {
 
 herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
   UNUSED_ARG(statbuf);
-  Mantid::LegacyNexus::pinfo self = static_cast<Mantid::LegacyNexus::pinfo>(op_data);
+  pinfo self = static_cast<pinfo>(op_data);
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
   H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
@@ -1517,41 +1517,41 @@ static int hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
   H5T_sign_t sign;
 
   if (tclass == H5T_STRING) {
-    iPtype = Mantid::LegacyNexus::NX_CHAR;
+    iPtype = NX_CHAR;
   } else if (tclass == H5T_INTEGER) {
     size = H5Tget_size(atype);
     sign = H5Tget_sign(atype);
     if (size == 1) {
       if (sign == H5T_SGN_2) {
-        iPtype = Mantid::LegacyNexus::NX_INT8;
+        iPtype = NX_INT8;
       } else {
-        iPtype = Mantid::LegacyNexus::NX_UINT8;
+        iPtype = NX_UINT8;
       }
     } else if (size == 2) {
       if (sign == H5T_SGN_2) {
-        iPtype = Mantid::LegacyNexus::NX_INT16;
+        iPtype = NX_INT16;
       } else {
-        iPtype = Mantid::LegacyNexus::NX_UINT16;
+        iPtype = NX_UINT16;
       }
     } else if (size == 4) {
       if (sign == H5T_SGN_2) {
-        iPtype = Mantid::LegacyNexus::NX_INT32;
+        iPtype = NX_INT32;
       } else {
-        iPtype = Mantid::LegacyNexus::NX_UINT32;
+        iPtype = NX_UINT32;
       }
     } else if (size == 8) {
       if (sign == H5T_SGN_2) {
-        iPtype = Mantid::LegacyNexus::NX_INT64;
+        iPtype = NX_INT64;
       } else {
-        iPtype = Mantid::LegacyNexus::NX_UINT64;
+        iPtype = NX_UINT64;
       }
     }
   } else if (tclass == H5T_FLOAT) {
     size = H5Tget_size(atype);
     if (size == 4) {
-      iPtype = Mantid::LegacyNexus::NX_FLOAT32;
+      iPtype = NX_FLOAT32;
     } else if (size == 8) {
-      iPtype = Mantid::LegacyNexus::NX_FLOAT64;
+      iPtype = NX_FLOAT64;
     }
   }
   if (iPtype == -1) {
@@ -1622,7 +1622,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
   herr_t iRet;
   hsize_t idx;
   H5T_class_t tclass;
-  Mantid::LegacyNexus::info_type op_data;
+  info_type op_data;
   herr_t iRet_iNX = -1;
 
   pFile = NXI5assert(fid);
@@ -1941,7 +1941,7 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
      */
     int mtype = 0;
     if (tclass == H5T_STRING) {
-      mtype = Mantid::LegacyNexus::NX_CHAR;
+      mtype = NX_CHAR;
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
@@ -1965,7 +1965,7 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
       return NXstatus::NX_ERROR;
     }
     /* read slab */
-    if (mtype == Mantid::LegacyNexus::NX_CHAR) {
+    if (mtype == NX_CHAR) {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
       char const *data1;
       data1 = tmp_data + myStart[0];

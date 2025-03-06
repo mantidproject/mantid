@@ -4,12 +4,7 @@
 
 #include "mfhdf.h"
 
-using Mantid::LegacyNexus::CONSTCHAR;
-using Mantid::LegacyNexus::NXaccess;
-using Mantid::LegacyNexus::NXhandle;
-using Mantid::LegacyNexus::NXlink;
-using Mantid::LegacyNexus::NXname;
-using Mantid::LegacyNexus::NXnumtype;
+using namespace Mantid::LegacyNexus;
 
 /*
  * HDF4 interface

@@ -36,6 +36,8 @@
 #include "MantidLegacyNexus/napiconfig.h"
 #include "MantidLegacyNexus/nxstack.h"
 
+using namespace Mantid::LegacyNexus;
+
 /*---------------------------------------------------------------------
  Recognized and handled napimount URLS
  -----------------------------------------------------------------------*/
@@ -352,13 +354,13 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
 #ifdef WITH_HDF5
   iRet = H5Fis_hdf5(static_cast<const char *>(filename));
   if (iRet > 0) {
-    return Mantid::LegacyNexus::NXACC_CREATE5;
+    return NXACC_CREATE5;
   }
 #endif
 #ifdef WITH_HDF4
   iRet = Hishdf(static_cast<const char *>(filename));
   if (iRet > 0) {
-    return Mantid::LegacyNexus::NXACC_CREATE4;
+    return NXACC_CREATE4;
   }
 #endif
   /*
@@ -426,27 +428,27 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
      test the strip flag. Elimnate it for the rest of the tests to work
    */
   fHandle->stripFlag = 1;
-  if (am & Mantid::LegacyNexus::NXACC_NOSTRIP) {
+  if (am & NXACC_NOSTRIP) {
     fHandle->stripFlag = 0;
-    am = (NXaccess)(am & ~Mantid::LegacyNexus::NXACC_NOSTRIP);
+    am = (NXaccess)(am & ~NXACC_NOSTRIP);
   }
   fHandle->checkNameSyntax = 0;
-  if (am & Mantid::LegacyNexus::NXACC_CHECKNAMESYNTAX) {
+  if (am & NXACC_CHECKNAMESYNTAX) {
     fHandle->checkNameSyntax = 1;
-    am = (NXaccess)(am & ~Mantid::LegacyNexus::NXACC_CHECKNAMESYNTAX);
+    am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if (my_am == Mantid::LegacyNexus::NXACC_CREATE4) {
+  if (my_am == NXACC_CREATE4) {
     /* HDF4 will be used ! */
-    backend_type = Mantid::LegacyNexus::NXACC_CREATE4;
+    backend_type = NXACC_CREATE4;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
     strcpy(filename, userfilename);
-  } else if ((my_am == Mantid::LegacyNexus::NXACC_CREATE) || (my_am == Mantid::LegacyNexus::NXACC_CREATE5)) {
+  } else if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5)) {
     /* HDF5 will be used ! */
-    backend_type = Mantid::LegacyNexus::NXACC_CREATE5;
+    backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
     strcpy(filename, userfilename);
-  } else if (my_am == Mantid::LegacyNexus::NXACC_CREATEXML) {
+  } else if (my_am == NXACC_CREATEXML) {
     snprintf(error, 1023, "xml backend not supported for %s", userfilename);
     NXReportError(error);
     free(fHandle);
@@ -483,7 +485,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
   }
 
   NXstatus retstat = NXstatus::NX_ERROR;
-  if (backend_type == Mantid::LegacyNexus::NXACC_CREATE4) {
+  if (backend_type == NXACC_CREATE4) {
     /* HDF4 type */
 #ifdef WITH_HDF4
     NXhandle hdf4_handle = NULL;
@@ -494,7 +496,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
       return retstat;
     }
     fHandle->pNexusData = hdf4_handle;
-    fHandle->access_mode = backend_type || (Mantid::LegacyNexus::NXACC_READ && am);
+    fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX4assignFunctions(fHandle);
     pushFileStack(fileStack, fHandle, filename);
 #else
@@ -503,7 +505,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
 #endif /* HDF4 */
     free(filename);
     return retstat;
-  } else if (backend_type == Mantid::LegacyNexus::NXACC_CREATE5) {
+  } else if (backend_type == NXACC_CREATE5) {
     /* HDF5 type */
 #ifdef WITH_HDF5
     NXhandle hdf5_handle = NULL;
@@ -514,7 +516,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
       return retstat;
     }
     fHandle->pNexusData = hdf5_handle;
-    fHandle->access_mode = backend_type || (Mantid::LegacyNexus::NXACC_READ && am);
+    fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
     pushFileStack(fileStack, fHandle, filename);
 #else
@@ -523,7 +525,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
 #endif /* HDF5 */
     free(filename);
     return retstat;
-  } else if (backend_type == Mantid::LegacyNexus::NXACC_CREATEXML) {
+  } else if (backend_type == NXACC_CREATEXML) {
     /*
        XML type
      */
@@ -663,7 +665,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  NXaccess access = Mantid::LegacyNexus::NXACC_READ;
+  NXaccess access = NXACC_READ;
   NXlink breakID;
   pFileLgcyStack fileStack;
   pLgcyFunction pFunc = NULL;
@@ -785,7 +787,7 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  NXaccess access = Mantid::LegacyNexus::NXACC_READ;
+  NXaccess access = NXACC_READ;
   NXlink breakID;
   pFileLgcyStack fileStack;
   pLgcyFunction pFunc = NULL;

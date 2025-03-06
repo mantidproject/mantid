@@ -20,15 +20,17 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+using namespace Mantid::LegacyNexus;
+
 namespace { // anonymous namespace
 const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
 
 } // anonymous namespace
 
-static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess create_code) {
+static void writeTest(const string &filename, NXaccess create_code) {
   std::cout << "writeTest(" << filename << ") started\n";
-  Mantid::LegacyNexus::File file(filename, create_code);
+  File file(filename, create_code);
   // create group
   file.makeGroup("entry", "NXentry", true);
   // group attributes
@@ -43,7 +45,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   array_dims.push_back(4);
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
-  file.makeData("c1_data", Mantid::LegacyNexus::NXnumtype::CHAR, array_dims, true);
+  file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
   file.putData(c1_array);
   file.closeData();
 
@@ -80,7 +82,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   for (size_t i = 0; i < 5 * 4; i++) {
     r8_array.push_back(static_cast<double>(i + 20));
   }
-  file.makeData("r8_data", Mantid::LegacyNexus::NXnumtype::FLOAT64, array_dims, true);
+  file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
   vector<int> slab_start;
   slab_start.push_back(4);
   slab_start.push_back(0);
@@ -102,7 +104,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   std::cout << "... done" << std::endl;
 
   // set up for creating a link
-  Mantid::LegacyNexus::NXlink link = file.getDataID();
+  NXlink link = file.getDataID();
   file.closeData();
 
   // int64 tests
@@ -111,7 +113,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
 #else
   vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-  if (create_code != Mantid::LegacyNexus::NXACC_CREATE4) {
+  if (create_code != NXACC_CREATE4) {
     file.writeData("grosszahl", grossezahl);
   }
 
@@ -133,7 +135,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   vector<int> cdims;
   cdims.push_back(20);
   cdims.push_back(20);
-  file.writeCompData("comp_data", comp_array, array_dims, Mantid::LegacyNexus::LZW, cdims);
+  file.writeCompData("comp_data", comp_array, array_dims, LZW, cdims);
 
   // ---------- Test write Extendible Data --------------------------
   std::vector<int> data(10, 123);
@@ -170,7 +172,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   file.flush();
 
   // real flush test
-  file.makeData("flush_data", Mantid::LegacyNexus::getType<int>(), NX_UNLIMITED, true);
+  file.makeData("flush_data", getType<int>(), NX_UNLIMITED, true);
   vector<int> slab_array;
   slab_array.push_back(0);
   for (int i = 0; i < 7; i++) {
@@ -187,7 +189,7 @@ static void writeTest(const string &filename, Mantid::LegacyNexus::NXaccess crea
   file.writeData("ch_data", "NeXus sample");
 
   // make more links
-  Mantid::LegacyNexus::NXlink glink = file.getGroupID();
+  NXlink glink = file.getGroupID();
   file.openPath("/");
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
@@ -212,14 +214,14 @@ int readTest(const string &filename) {
   std::cout << "readTest(" << filename << ") started\n";
   const string SDS("SDS");
   // top level file information
-  Mantid::LegacyNexus::File file(filename);
-  vector<Mantid::LegacyNexus::AttrInfo> attr_infos = file.getAttrInfos();
+  File file(filename);
+  vector<AttrInfo> attr_infos = file.getAttrInfos();
   cout << "Number of global attributes: " << attr_infos.size() << endl;
-  for (vector<Mantid::LegacyNexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
+  for (vector<AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
-      if (it->type == Mantid::LegacyNexus::NXnumtype::CHAR) {
+      if (it->type == NXnumtype::CHAR) {
         cout << file.getStrAttr(*it);
       }
       cout << endl;
@@ -230,9 +232,9 @@ int readTest(const string &filename) {
   file.openGroup("entry", "NXentry");
   attr_infos = file.getAttrInfos();
   cout << "Number of group attributes: " << attr_infos.size() << endl;
-  for (vector<Mantid::LegacyNexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
+  for (vector<AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
-    if (it->type == Mantid::LegacyNexus::NXnumtype::CHAR) {
+    if (it->type == NXnumtype::CHAR) {
       cout << file.getStrAttr(*it);
     }
     cout << endl;
@@ -241,56 +243,56 @@ int readTest(const string &filename) {
   // print out the entry level fields
   map<string, string> entries = file.getEntries();
   cout << "Group contains " << entries.size() << " items" << endl;
-  Mantid::LegacyNexus::Info info;
+  Info info;
   for (map<string, string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
     cout << "   " << it->first;
     if (it->second == SDS) {
       file.openData(it->first);
       info = file.getInfo();
       cout << toString(info.dims) << " = ";
-      if (info.type == Mantid::LegacyNexus::NXnumtype::CHAR) {
+      if (info.type == NXnumtype::CHAR) {
         if (info.dims.size() == 1) {
           cout << file.getStrData();
         } else {
           cout << "2d character array";
         }
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT32) {
+      } else if (info.type == NXnumtype::FLOAT32) {
         vector<float> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT64) {
+      } else if (info.type == NXnumtype::FLOAT64) {
         vector<double> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::INT8) {
+      } else if (info.type == NXnumtype::INT8) {
         vector<int8_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::UINT8) {
+      } else if (info.type == NXnumtype::UINT8) {
         vector<uint8_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::INT16) {
+      } else if (info.type == NXnumtype::INT16) {
         vector<int16_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::UINT16) {
+      } else if (info.type == NXnumtype::UINT16) {
         vector<uint16_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::INT32) {
+      } else if (info.type == NXnumtype::INT32) {
         vector<int32_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::UINT32) {
+      } else if (info.type == NXnumtype::UINT32) {
         vector<uint32_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::INT64) {
+      } else if (info.type == NXnumtype::INT64) {
         vector<int64_t> result;
         file.getData(result);
         cout << toString(result);
-      } else if (info.type == Mantid::LegacyNexus::NXnumtype::UINT64) {
+      } else if (info.type == NXnumtype::UINT64) {
         vector<uint64_t> result;
         file.getData(result);
         cout << toString(result);
@@ -384,7 +386,7 @@ int readTest(const string &filename) {
 
 int testLoadPath(const string &filename) {
   if (getenv("NX_LOAD_PATH") != NULL) {
-    Mantid::LegacyNexus::File file(filename);
+    File file(filename);
     cout << "Success loading NeXus file from path" << endl;
     // cout << file.inquireFile() << endl; // DEBUG print
     return TEST_SUCCEED;
@@ -395,10 +397,10 @@ int testLoadPath(const string &filename) {
 }
 
 int main(int argc, char **argv) {
-  Mantid::LegacyNexus::NXaccess nx_creation_code;
+  NXaccess nx_creation_code;
   string fileext;
   if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
-    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE5;
+    nx_creation_code = NXACC_CREATE5;
     fileext = ".h5";
   } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
     cout << "napi_test_cpp-xml-table is not supported" << endl;
@@ -407,7 +409,7 @@ int main(int argc, char **argv) {
     cout << "napi_test_cpp-xml is not supported" << endl;
     return TEST_FAILED;
   } else {
-    nx_creation_code = Mantid::LegacyNexus::NXACC_CREATE4;
+    nx_creation_code = NXACC_CREATE4;
     fileext = ".hdf";
   }
   const string filename("napi_test_cpp" + fileext);
