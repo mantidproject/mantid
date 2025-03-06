@@ -53,9 +53,6 @@ int main(int argc, char *argv[]) {
   if (strstr(argv[0], "napi_test_hdf5") != NULL) {
     nx_creation_code = NXACC_CREATE5;
     nxFile = "NXtest.h5";
-  } else if (strstr(argv[0], "napi_test_hdf4") != NULL) {
-    nx_creation_code = NXACC_CREATE4;
-    nxFile = "NXtest.hdf";
   } else {
     ON_ERROR(std::string(argv[0]) + " is not supported");
   }
@@ -64,7 +61,7 @@ int main(int argc, char *argv[]) {
 #ifdef WIN32 // these have issues on windows
   UNUSED_ARG(nx_creation_code);
   UNUSED_ARG(argc);
-#else // WIN32
+#else  // WIN32
   // ------------------------------------------> TODO fine up to here "nexuscpptest-c-hdf5-test"
   int i, j, NXlen;
   float r;
@@ -100,6 +97,7 @@ int main(int argc, char *argv[]) {
       return TEST_FAILED;
     }
   }
+  // open group entry
   if (NXmakegroup(fileid, "entry", "NXentry") != NXstatus::NX_OK)
     ON_ERROR("NXmakegroup(fileid, \"entry\", \"NXentry\")");
   if (NXopengroup(fileid, "entry", "NXentry") != NXstatus::NX_OK)
@@ -157,6 +155,8 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclosedata(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+
+  // BEGIN DOUBLE SLAB
   if (NXmakedata(fileid, "r8_data", NXnumtype::FLOAT64, 2, array_dims) != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXopendata(fileid, "r8_data") != NXstatus::NX_OK)
@@ -187,22 +187,10 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclosedata(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
-  if (nx_creation_code != NXACC_CREATE4) {
-#if HAVE_LONG_LONG_INT
-    const int64_t grossezahl[4] = {12, 555555555555LL, 23, 777777777777LL};
-#else
-    const int64_t grossezahl[4] = {12, 555555, 23, 77777};
-#endif /* HAVE_LONG_LONG_INT */
-    int dims[1] = {4};
-    if (NXmakedata(fileid, "grosse_zahl", NXnumtype::INT64, 1, dims) == NXstatus::NX_OK) {
-      if (NXopendata(fileid, "grosse_zahl") != NXstatus::NX_OK)
-        return TEST_FAILED;
-      if (NXputdata(fileid, grossezahl) != NXstatus::NX_OK)
-        return TEST_FAILED;
-      if (NXclosedata(fileid) != NXstatus::NX_OK)
-        return TEST_FAILED;
-    }
-  }
+  // END DOUBLE SLAB
+
+  // BEGIN LINK TEST
+  // open group entry/data
   if (NXmakegroup(fileid, "data", "NXdata") != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXopengroup(fileid, "data", "NXdata") != NXstatus::NX_OK)
@@ -240,6 +228,8 @@ int main(int argc, char *argv[]) {
   }
   if (NXclosegroup(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+  // close group entry/data
+  // open group entry/sample
   if (NXmakegroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
@@ -257,8 +247,11 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclosegroup(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+  // close group entry/sample
   if (NXclosegroup(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+  // close group entry
+  // open group link
   if (NXmakegroup(fileid, "link", "NXentry") != NXstatus::NX_OK)
     return TEST_FAILED;
   if (NXopengroup(fileid, "link", "NXentry") != NXstatus::NX_OK)
@@ -271,8 +264,11 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclosegroup(fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+  // close group link
   if (NXclose(&fileid) != NXstatus::NX_OK)
     return TEST_FAILED;
+  // close file
+  //  END LINK TEST
 
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
     return TEST_SUCCEED; /* create only */
