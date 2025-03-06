@@ -11,7 +11,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -34,14 +33,14 @@ class LoadNexusMonitorsTest : public CxxTest::TestSuite {
 public:
   void testExec() {
     Mantid::API::FrameworkManager::Instance();
-    LoadNexusMonitors ld;
+    LoadNexusMonitors2 ld2;
     std::string outws_name = "cncs";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
 
-    ld.execute();
-    TS_ASSERT(ld.isExecuted());
+    ld2.execute();
+    TS_ASSERT(ld2.isExecuted());
 
     MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
@@ -70,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
     TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)), 1.426, 1e-6);
     // Check if filename is saved
-    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"), WS->run().getProperty("Filename")->value());
+    TS_ASSERT_EQUALS(ld2.getPropertyValue("Filename"), WS->run().getProperty("Filename")->value());
   }
 
   void test_with_custom_top_level_entry_name() {
@@ -88,14 +87,14 @@ public:
 
   void testExecEvent() {
     Mantid::API::FrameworkManager::Instance();
-    LoadNexusMonitors ld;
+    LoadNexusMonitors2 ld2;
     std::string outws_name = "hyspec";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
 
-    ld.execute();
-    TS_ASSERT(ld.isExecuted());
+    ld2.execute();
+    TS_ASSERT(ld2.isExecuted());
     EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
     TS_ASSERT(WS);
@@ -109,25 +108,25 @@ public:
   void testOldFile() {
     // Just need to make sure it runs.
     Mantid::API::FrameworkManager::Instance();
-    LoadNexusMonitors ld;
+    LoadNexusMonitors2 ld2;
     std::string outws_name = "ARCS_2963_monitors";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "ARCS_2963.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    TS_ASSERT_THROWS_NOTHING(ld.execute());
-    TS_ASSERT(ld.isExecuted());
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", "ARCS_2963.nxs");
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
+    TS_ASSERT_THROWS_NOTHING(ld2.execute());
+    TS_ASSERT(ld2.isExecuted());
   }
 
   void testBrokenISISFile() {
     // Just need to make sure it runs.
     Mantid::API::FrameworkManager::Instance();
-    LoadNexusMonitors ld;
+    LoadNexusMonitors2 ld2;
     std::string outws_name = "LOQ_49886_monitors";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "LOQ49886.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    TS_ASSERT_THROWS_NOTHING(ld.execute());
-    TS_ASSERT(ld.isExecuted());
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", "LOQ49886.nxs");
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
+    TS_ASSERT_THROWS_NOTHING(ld2.execute());
+    TS_ASSERT(ld2.isExecuted());
 
     MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
@@ -188,13 +187,13 @@ public:
 
     createFakeFile(filename);
 
-    LoadNexusMonitors ld;
+    LoadNexusMonitors2 ld2;
     std::string outws_name = "10monitors";
-    ld.initialize();
-    ld.setPropertyValue("Filename", filename);
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    ld.execute();
-    TS_ASSERT(ld.isExecuted());
+    ld2.initialize();
+    ld2.setPropertyValue("Filename", filename);
+    ld2.setPropertyValue("OutputWorkspace", outws_name);
+    ld2.execute();
+    TS_ASSERT(ld2.isExecuted());
 
     MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
@@ -222,7 +221,7 @@ public:
     std::string outws_name = "ws_group";
 
     // Version 1 of algorithm
-    LoadNexusMonitors ld1;
+    LoadNexusMonitors2 ld1;
     ld1.initialize();
     ld1.setPropertyValue("Filename", filename);
     ld1.setPropertyValue("OutputWorkspace", outws_name);
@@ -309,30 +308,11 @@ public:
 
   static void destroySuite(LoadNexusMonitorsTestPerformance *suite) { delete suite; }
 
-  void setUp() override {
-    ld.initialize();
-    ld2.initialize();
-  }
+  void setUp() override { ld2.initialize(); }
 
   void tearDown() override {
     AnalysisDataService::Instance().remove("cncs");
     AnalysisDataService::Instance().remove("hyspec");
-  }
-
-  void testExecV1() {
-    Mantid::API::FrameworkManager::Instance();
-    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace", "cncs");
-
-    ld.execute();
-  }
-
-  void testExecEventV1() {
-    Mantid::API::FrameworkManager::Instance();
-    ld.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
-    ld.setPropertyValue("OutputWorkspace", "hyspec");
-
-    ld.execute();
   }
 
   void testExecV2() {
@@ -352,6 +332,5 @@ public:
   }
 
 private:
-  LoadNexusMonitors ld;
   LoadNexusMonitors2 ld2;
 };
