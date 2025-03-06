@@ -102,20 +102,20 @@ File::File(const char *filename, const NXaccess access) : m_filename(filename), 
 }
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_file_id(f.m_file_id), m_close_handle(false) {}
+    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_file_id(pf->m_file_id), m_close_handle(false) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
-    this->m_file_id = f.m_file_id;
+    this->m_pfile_id = f.m_pfile_id;
     this->m_close_handle = f.m_close_handle;
   }
   return *this;
@@ -126,18 +126,21 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
     throw Exception("Filename specified is empty constructor");
   }
 
-  NXstatus status = NXopen(filename.c_str(), access, &(this->m_file_id));
+  NXhandle temp;
+  NXstatus status = NXopen(filename.c_str(), access, &(temp));
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopen(" << filename << ", " << access << ") failed";
     throw Exception(msg.str(), status);
+  } else {
+    this->m_pfile_id = std::make_shared<NXhandle>(temp);
   }
 }
 
 File::~File() {
-  if (m_close_handle && m_file_id != NULL) {
-    NXstatus status = NXclose(&(this->m_file_id));
-    this->m_file_id = NULL;
+  if (m_close_handle && m_pfile_id != NULL) {
+    NXstatus status = NXclose(&(*this->m_pfile_id));
+    this->m_pfile_id = NULL;
     if (status != NXstatus::NX_OK) {
       stringstream msg;
       msg << "NXclose failed with status: " << status << "\n";
@@ -147,9 +150,9 @@ File::~File() {
 }
 
 void File::close() {
-  if (this->m_file_id != NULL) {
-    NXstatus status = NXclose(&(this->m_file_id));
-    this->m_file_id = NULL;
+  if (this->m_pfile_id != NULL) {
+    NXstatus status = NXclose(&(*this->m_pfile_id));
+    this->m_pfile_id = NULL;
     if (status != NXstatus::NX_OK) {
       throw Exception("NXclose failed", status);
     }
@@ -157,7 +160,7 @@ void File::close() {
 }
 
 void File::flush() {
-  NXstatus status = NXflush(&(this->m_file_id));
+  NXstatus status = NXflush(&(*this->m_pfile_id));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXflush failed", status);
   }
@@ -170,7 +173,7 @@ void File::makeGroup(const string &name, const string &class_name, bool open_gro
   if (class_name.empty()) {
     throw Exception("Supplied empty class name to makeGroup");
   }
-  NXstatus status = NXmakegroup(this->m_file_id, name.c_str(), class_name.c_str());
+  NXstatus status = NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str());
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXmakegroup(" << name << ", " << class_name << ") failed";
@@ -188,7 +191,7 @@ void File::openGroup(const string &name, const string &class_name) {
   if (class_name.empty()) {
     throw Exception("Supplied empty class name to openGroup");
   }
-  NXstatus status = NXopengroup(this->m_file_id, name.c_str(), class_name.c_str());
+  NXstatus status = NXopengroup(*(this->m_pfile_id), name.c_str(), class_name.c_str());
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopengroup(" << name << ", " << class_name << ") failed";
@@ -200,7 +203,7 @@ void File::openPath(const string &path) {
   if (path.empty()) {
     throw Exception("Supplied empty path to openPath");
   }
-  NXstatus status = NXopenpath(this->m_file_id, path.c_str());
+  NXstatus status = NXopenpath(*(this->m_pfile_id), path.c_str());
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopenpath(" << path << ") failed";
@@ -212,7 +215,7 @@ void File::openGroupPath(const string &path) {
   if (path.empty()) {
     throw Exception("Supplied empty path to openGroupPath");
   }
-  NXstatus status = NXopengrouppath(this->m_file_id, path.c_str());
+  NXstatus status = NXopengrouppath(*(this->m_pfile_id), path.c_str());
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopengrouppath(" << path << ") failed";
@@ -224,7 +227,7 @@ std::string File::getPath() {
   char cPath[2048];
 
   memset(cPath, 0, sizeof(cPath));
-  NXstatus status = NXgetpath(this->m_file_id, cPath, sizeof(cPath) - 1);
+  NXstatus status = NXgetpath(*(this->m_pfile_id), cPath, sizeof(cPath) - 1);
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXgetpath() failed";
@@ -234,7 +237,7 @@ std::string File::getPath() {
 }
 
 void File::closeGroup() {
-  NXstatus status = NXclosegroup(this->m_file_id);
+  NXstatus status = NXclosegroup(*(this->m_pfile_id.get()));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXclosegroup failed", status);
   }
@@ -244,7 +247,7 @@ void File::makeData(const string &name, NXnumtype type, const vector<int> &dims,
   this->makeData(name, type, toDimSize(dims), open_data);
 }
 
-void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &dims, bool open_data) {
+void File::makeData(const string &name, NXnumtype type, const DimVector &dims, bool open_data) {
   // error check the parameters
   if (name.empty()) {
     throw Exception("Supplied empty label to makeData");
@@ -254,7 +257,7 @@ void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &d
   }
 
   // do the work
-  NXstatus status = NXmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
+  NXstatus status = NXmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
                                  const_cast<int64_t *>(&(dims[0])));
   // report errors
   if (status != NXstatus::NX_OK) {
@@ -360,7 +363,7 @@ void File::makeCompData(const string &name, const NXnumtype type, const vector<i
 }
 
 void File::makeCompData(const string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-                        const vector<int64_t> &bufsize, bool open_data) {
+                        const DimSizeVector &bufsize, bool open_data) {
   // error check the parameters
   if (name.empty()) {
     throw Exception("Supplied empty name to makeCompData");
@@ -381,7 +384,7 @@ void File::makeCompData(const string &name, const NXnumtype type, const DimVecto
   // do the work
   int i_type = static_cast<int>(type);
   int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
+  NXstatus status = NXcompmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
                                      const_cast<int64_t *>(&(dims[0])), i_comp, const_cast<int64_t *>(&(bufsize[0])));
 
   // report errors
@@ -414,14 +417,14 @@ void File::openData(const string &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openData");
   }
-  NXstatus status = NXopendata(this->m_file_id, name.c_str());
+  NXstatus status = NXopendata(*(this->m_pfile_id), name.c_str());
   if (status != NXstatus::NX_OK) {
     throw Exception("NXopendata(" + name + ") failed", status);
   }
 }
 
 void File::closeData() {
-  NXstatus status = NXclosedata(this->m_file_id);
+  NXstatus status = NXclosedata(*(this->m_pfile_id).get());
   if (status != NXstatus::NX_OK) {
     throw Exception("NXclosedata() failed", status);
   }
@@ -431,7 +434,7 @@ void File::putData(const void *data) {
   if (data == NULL) {
     throw Exception("Data specified as null in putData");
   }
-  NXstatus status = NXputdata(this->m_file_id, const_cast<void *>(data));
+  NXstatus status = NXputdata(*(this->m_pfile_id), const_cast<void *>(data));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXputdata(void *) failed", status);
   }
@@ -451,7 +454,7 @@ void File::putAttr(const AttrInfo &info, const void *data) {
   if (info.name.empty()) {
     throw Exception("Supplied empty name to putAttr");
   }
-  NXstatus status = NXputattr(this->m_file_id, info.name.c_str(), data, static_cast<int>(info.length), info.type);
+  NXstatus status = NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type);
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
@@ -509,7 +512,7 @@ void File::putSlab(const void *data, const DimSizeVector &start, const DimSizeVe
     msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size() << "in putSlab";
     throw Exception(msg.str());
   }
-  NXstatus status = NXputslab64(this->m_file_id, data, &(start[0]), &(size[0]));
+  NXstatus status = NXputslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0]));
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXputslab64(data, " << toString(start) << ", " << toString(size) << ") failed";
@@ -542,7 +545,7 @@ template <typename NumT> void File::putSlab(const vector<NumT> &data, dimsize_t 
 
 NXlink File::getDataID() {
   NXlink link;
-  NXstatus status = NXgetdataID(this->m_file_id, &link);
+  NXstatus status = NXgetdataID(*(this->m_pfile_id), &link);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetdataID failed", status);
   }
@@ -551,7 +554,7 @@ NXlink File::getDataID() {
 
 bool File::isDataSetOpen() {
   NXlink id;
-  if (NXgetdataID(this->m_file_id, &id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
     return false;
   } else {
     return true;
@@ -560,7 +563,7 @@ bool File::isDataSetOpen() {
 /*----------------------------------------------------------------------*/
 
 void File::makeLink(NXlink &link) {
-  NXstatus status = NXmakelink(this->m_file_id, &link);
+  NXstatus status = NXmakelink(*(this->m_pfile_id), &link);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXmakelink failed", status);
   }
@@ -570,7 +573,7 @@ void File::getData(void *data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData");
   }
-  NXstatus status = NXgetdata(this->m_file_id, data);
+  NXstatus status = NXgetdata(*(this->m_pfile_id), data);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetdata failed", status);
   }
@@ -728,7 +731,7 @@ Info File::getInfo() {
   int64_t dims[NX_MAXRANK];
   NXnumtype type;
   int rank;
-  NXstatus status = NXgetinfo64(this->m_file_id, &rank, dims, &type);
+  NXstatus status = NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetinfo failed", status);
   }
@@ -745,7 +748,7 @@ Entry File::getNextEntry() {
   NXname name, class_name;
   NXnumtype datatype;
 
-  NXstatus status = NXgetnextentry(this->m_file_id, name, class_name, &datatype);
+  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, &datatype);
   if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
@@ -796,7 +799,7 @@ void File::getSlab(void *data, const DimSizeVector &start, const DimSizeVector &
     throw Exception(msg.str());
   }
 
-  NXstatus status = NXgetslab64(this->m_file_id, data, &(start[0]), &(size[0]));
+  NXstatus status = NXgetslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0]));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetslab failed", status);
   }
@@ -809,7 +812,7 @@ AttrInfo File::getNextAttr() {
 
   int rank;
   int dim[NX_MAXRANK];
-  NXstatus status = NXgetnextattra(this->m_file_id, name, &rank, dim, &type);
+  NXstatus status = NXgetnextattra(*(this->m_pfile_id), name, &rank, dim, &type);
   if (status == NXstatus::NX_OK) {
     AttrInfo info;
     info.type = type;
@@ -859,7 +862,7 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   if (length < 0) {
     length = static_cast<int>(info.length);
   }
-  NXstatus status = NXgetattr(this->m_file_id, name, data, &length, &type);
+  NXstatus status = NXgetattr(*(this->m_pfile_id), name, data, &length, &type);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetattr(" + info.name + ") failed", status);
   }
@@ -952,7 +955,7 @@ bool File::hasAttr(const std::string &name) {
 
 NXlink File::getGroupID() {
   NXlink link;
-  NXstatus status = NXgetgroupID(this->m_file_id, &link);
+  NXstatus status = NXgetgroupID(*(this->m_pfile_id), &link);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXgetgroupID failed", status);
   }
@@ -960,14 +963,14 @@ NXlink File::getGroupID() {
 }
 
 void File::initGroupDir() {
-  NXstatus status = NXinitgroupdir(this->m_file_id);
+  NXstatus status = NXinitgroupdir(*(this->m_pfile_id));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXinitgroupdir failed", status);
   }
 }
 
 void File::initAttrDir() {
-  NXstatus status = NXinitattrdir(this->m_file_id);
+  NXstatus status = NXinitattrdir(*(this->m_pfile_id));
   if (status != NXstatus::NX_OK) {
     throw Exception("NXinitattrdir failed", status);
   }
