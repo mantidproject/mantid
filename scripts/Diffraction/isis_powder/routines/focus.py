@@ -66,6 +66,9 @@ def _focus_one_ws(
     # Subtract empty instrument runs, as long as this run isn't an empty, user hasn't turned empty subtraction off, or
     # The user has not supplied a sample empty
     is_run_empty = common.runs_overlap(run_number, run_details.empty_inst_runs)
+
+    print(f"====>_focus_one_ws is run empty={run_details.sample_empty}")
+
     summed_empty = None
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
         if os.path.isfile(run_details.summed_empty_inst_file_path):
