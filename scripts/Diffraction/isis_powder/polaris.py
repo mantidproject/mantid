@@ -29,6 +29,7 @@ class Polaris(AbstractInst):
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
         self._sample_details = None
+        self._instr_settings_kwargs_cache = {}
 
     # Public API
 
@@ -188,14 +189,24 @@ class Polaris(AbstractInst):
     def _get_run_details(self, run_number_string):
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string, self._inst_settings.file_extension)
 
-        if run_number_string_key in self._run_details_cached_obj:
+        if run_number_string_key in self._instr_settings_kwargs_cache:
+            current_kwargs_hash = self._inst_settings.get_kwargs_as_hash()
+            if self._instr_settings_kwargs_cache[run_number_string_key] == current_kwargs_hash:
+                return self._run_details_cached_obj[run_number_string_key]
+            else:
+                # Instrument settings kwargs have been updated after last run
+                # update both self._instr_settings_kwargs_cache and self._run_details_cached_obj maps
+                self._instr_settings_kwargs_cache[run_number_string_key] = current_kwargs_hash
+                self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+                    run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
+                )
+                return self._run_details_cached_obj[run_number_string_key]
+        else:
+            self._instr_settings_kwargs_cache[run_number_string_key] = self._inst_settings.get_kwargs_as_hash()
+            self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+                run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
+            )
             return self._run_details_cached_obj[run_number_string_key]
-
-        self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
-            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
-        )
-
-        return self._run_details_cached_obj[run_number_string_key]
 
     def _switch_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "mode"):

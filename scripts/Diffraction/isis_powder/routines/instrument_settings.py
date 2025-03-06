@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.routines import yaml_parser
 import warnings
+import json
+import hashlib
 
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
@@ -23,7 +25,7 @@ class InstrumentSettings(object):
     def __init__(self, param_map, adv_conf_dict=None, kwargs=None):
         self._param_map = param_map
         self._adv_config_dict = adv_conf_dict
-        self._kwargs = kwargs
+        self._kwargs = None
         self._basic_conf_dict = None
 
         # Check if we have kwargs otherwise this work cannot be completed (e.g. using automated testing)
@@ -43,6 +45,11 @@ class InstrumentSettings(object):
         self._parse_attributes(dict_to_parse=adv_conf_dict)
         self._parse_attributes(dict_to_parse=self._basic_conf_dict)
         self._parse_attributes(dict_to_parse=kwargs)
+
+    def get_kwargs_as_hash(self):
+        # get self._kwargs dictionary as a hash value
+        encoded = json.dumps(self._kwargs, sort_keys=True).encode()
+        return hashlib.sha256(encoded).hexdigest()
 
     # __getattr__ is only called if the attribute was not set so we already know
     #  were going to throw at this point unless the attribute was optional.
@@ -74,6 +81,9 @@ class InstrumentSettings(object):
     def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False):
         self._adv_config_dict = advanced_config if advanced_config else self._adv_config_dict
         self._basic_conf_dict = basic_config if basic_config else self._basic_conf_dict
+
+        # Delete the attibutes that fall into the set difference between old self._kwargs and new kwargs
+        self._remove_attributes(self._kwargs, kwargs, suppress_warnings)
         self._kwargs = kwargs if kwargs else self._kwargs
 
         # Only update if one in hierarchy below it has been updated
@@ -87,6 +97,31 @@ class InstrumentSettings(object):
             self._parse_attributes(self._basic_conf_dict, suppress_warnings=(not basic_config or suppress_warnings))
         if advanced_config or basic_config or kwargs:
             self._parse_attributes(self._kwargs, suppress_warnings=(not kwargs or suppress_warnings))
+
+    def _remove_attributes(self, old_attrib_dict, new_attrib_dict, suppress_warnings=False):
+        # This make sure at a given time, the attributes of this object that originally came
+        # from self._kwargs are in sync with self._kwargs
+        if old_attrib_dict is None or new_attrib_dict is None:
+            return
+
+        attributes_to_be_removed = set(old_attrib_dict.keys()).difference(new_attrib_dict.keys())
+        for attrib in attributes_to_be_removed:
+            found_param_entry = next((param_entry for param_entry in self._param_map if attrib == param_entry.ext_name), None)
+            if found_param_entry:
+                # check whether the same param is found in self._basic_conf_dict
+                # If yes, skip deleting the attribute, rather reload the value as read from config file
+                if self._basic_conf_dict and (attrib in self._basic_conf_dict):
+                    self._update_attribute(
+                        param_map=found_param_entry, param_val=self._basic_conf_dict[attrib], suppress_warnings=suppress_warnings
+                    )
+                    continue
+
+                if hasattr(self, found_param_entry.int_name):
+                    if not suppress_warnings:
+                        warnings.warn(
+                            f"Deleting attribute:{attrib} which was previously set to:{str(getattr(self, found_param_entry.int_name))}"
+                        )
+                    delattr(self, found_param_entry.int_name)
 
     def _parse_attributes(self, dict_to_parse, suppress_warnings=False):
         if not dict_to_parse:
@@ -125,7 +160,6 @@ class InstrumentSettings(object):
 
     def _update_attribute(self, param_map, param_val, suppress_warnings):
         attribute_name = param_map.int_name
-
         if param_map.enum_class:
             # Check value falls within valid enum range and get the correct capital version
             param_val = _check_value_is_in_enum(param_val, param_map.enum_class)

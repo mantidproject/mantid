@@ -49,6 +49,7 @@ def _get_current_mode_dictionary(run_number_string, inst_settings):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+    print(f"\n---------->Creating run details for run number str={run_number_string} setting={inst_settings}, isvanadium={is_vanadium_run}")
     mode_run_numbers = _get_current_mode_dictionary(run_number_string, inst_settings)
 
     # Get empty and vanadium

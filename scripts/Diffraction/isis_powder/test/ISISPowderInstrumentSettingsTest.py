@@ -46,6 +46,50 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry], kwargs=keyword_args)
         self.assertEqual(inst_settings_obj.script_facing_name, expected_value)
 
+    def test_update_attributes_and_kwargs_hash(self):
+        param_entries = [
+            param_map_entry.ParamMapEntry(ext_name="user_facing_name1", int_name="script_facing_name1"),
+            param_map_entry.ParamMapEntry(ext_name="user_facing_name2", int_name="script_facing_name2"),
+            param_map_entry.ParamMapEntry(ext_name="user_facing_name3", int_name="script_facing_name3"),
+        ]
+
+        keyword_args = {"user_facing_name1": 100, "user_facing_name2": "val2"}
+        inst_settings_obj = instrument_settings.InstrumentSettings(param_map=param_entries, kwargs=keyword_args)
+
+        self.assertEqual(inst_settings_obj._kwargs, None)
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name1"))
+        self.assertEqual(inst_settings_obj.script_facing_name1, keyword_args["user_facing_name1"])
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name2"))
+        self.assertEqual(inst_settings_obj.script_facing_name2, keyword_args["user_facing_name2"])
+        self.assertFalse(hasattr(inst_settings_obj, "script_facing_name3"))
+
+        hash1 = inst_settings_obj.get_kwargs_as_hash()
+
+        # Do the first update_attributes
+        keyword_args_new = {"user_facing_name3": "val3"}
+        inst_settings_obj.update_attributes(kwargs=keyword_args_new)
+        self.assertDictEqual(inst_settings_obj._kwargs, keyword_args_new)
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name1"))  # set via constructor
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name2"))  # set via constructor
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name3"))  # set via update_attributes
+        self.assertEqual(inst_settings_obj.script_facing_name3, keyword_args_new["user_facing_name3"])
+
+        hash2 = inst_settings_obj.get_kwargs_as_hash()
+        self.assertNotEqual(hash1, hash2)
+
+        # Do the second update_attributes
+        keyword_args_new = {"user_facing_name1": "val1"}
+        inst_settings_obj.update_attributes(kwargs=keyword_args_new)
+        self.assertDictEqual(inst_settings_obj._kwargs, keyword_args_new)
+
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name1"))  # set via update_attributes
+        self.assertTrue(hasattr(inst_settings_obj, "script_facing_name2"))  # set via constructor
+        self.assertFalse(hasattr(inst_settings_obj, "script_facing_name3"))  # deleted when update_attributes
+        self.assertEqual(inst_settings_obj.script_facing_name1, keyword_args_new["user_facing_name1"])
+
+        hash3 = inst_settings_obj.get_kwargs_as_hash()
+        self.assertNotEqual(hash2, hash3)
+
     def test_updating_attributes_produces_warning_on_init(self):
         original_value = 123
         new_value = 456
