@@ -9,7 +9,7 @@
 """SANSSave algorithm performs saving of SANS reduction data."""
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
-from mantid.kernel import Direction, logger
+from mantid.kernel import Direction, logger, PropertyManagerProperty
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
 from sans.common.file_information import convert_to_shape
 from sans.common.general_functions import get_detector_names_from_instrument
@@ -143,9 +143,7 @@ class SANSSave(DataProcessorAlgorithm):
             doc="The scale factor the BackgroundSubtractionWorkspace is multiplied by before subtraction. Can be blank.",
         )
         self.declareProperty(
-            "PolarizationProperties",
-            dict(),
-            direction=Direction.Input,
+            PropertyManagerProperty("PolarizationProps", dict()),
             doc="A dictionary of properties to values for all of the metadata used in a polarized reduction. Supported "
             "properties are:\n"
             "InputSpinStates (str),\n"
@@ -254,6 +252,22 @@ class SANSSave(DataProcessorAlgorithm):
                     " only. This requires all axes to be numeric."
                 }
             )
+        polarization_props = self.getProperty("PolarizationProps").value
+        if len(polarization_props) > 0:
+            # TODO: Get these directly from the algorithm.
+            mandatory_props = [
+                "InputSpinStates",
+                "PolarizerComponentName",
+                "AnalyzerComponentName",
+                "FlipperComponentNames",
+                "MagneticFieldStrengthLogName",
+                "MagneticFieldDirection",
+            ]
+            if not all(prop in polarization_props for prop in mandatory_props):
+                missing_props = set(mandatory_props) - set(polarization_props.keys())
+                errors.update(
+                    {"PolarizationProps": f"Missing property for SavePolarizedNXCanSAS. These properties are missing: {missing_props}"}
+                )
         return errors
 
     def _get_file_formats(self):
