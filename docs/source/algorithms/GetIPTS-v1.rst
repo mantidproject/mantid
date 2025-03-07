@@ -13,6 +13,9 @@ Description
 This returns a string the full path to the IPTS shared folder to allow
 for saving of files in accessible user folders (e.g. ``shared``).
 
+The algorithm has a cache of runnumbers that is stores while mantid is running.
+This cache can be reset using the ``ClearCache`` argument or by restarting mantid.
+
 .. warning::
 
     This only works at ORNL.
