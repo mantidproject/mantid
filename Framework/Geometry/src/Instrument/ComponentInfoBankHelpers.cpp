@@ -105,20 +105,15 @@ bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor, 
  */
 Eigen::Vector3d offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo, const size_t ancestorIdx,
                                    const size_t currentIdx) {
-
   if ((ancestorIdx <= currentIdx)) {
-    throw std::invalid_argument("Index of ancestor component is not higher than current Index.");
+    throw std::invalid_argument("Index of ancestor component is not higher than the current Index.");
   }
 
-  if (ancestorIdx == currentIdx) {
-    return Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
-  } else {
-    const auto ancestorPos = Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
-    auto transformation = Eigen::Affine3d(
-        Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx)).conjugate()); // Inverse ancestor rotation
-    transformation.translate(-ancestorPos);
-    return transformation * Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
-  }
+  const auto ancestorPos = Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
+  auto transformation = Eigen::Affine3d(
+      Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx)).conjugate()); // Inverse ancestor rotation
+  transformation.translate(-ancestorPos);
+  return transformation * Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
 }
 
 } // namespace Mantid::Geometry::ComponentInfoBankHelpers

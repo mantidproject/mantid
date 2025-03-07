@@ -113,7 +113,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   if (hdr_base.pack_format != 0)
     throw std::runtime_error("only packed binary format is supported");
 
-  if (hdr_base.clock_scale == 0)
+  if (hdr_base.clock_scale == 0 && def_clock_scale == 0)
     throw std::runtime_error("clock scale cannot be zero");
 
   // note: in the old format 0x00010001, the evt_stg_nbits_wa did not exist and
