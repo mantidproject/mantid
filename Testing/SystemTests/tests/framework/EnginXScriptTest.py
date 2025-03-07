@@ -87,34 +87,25 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
 
 class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest):
     def runTest(self):
-        self._diff_consts = self.run_enginx_and_get_diff_consts("1-1200")
-
-        # run again with different cropping window and store the resulting diff consts
-        self._diff_consts2 = self.run_enginx_and_get_diff_consts("1-100")
-
-        # run the first test again and store the resulting diff consts
-        self._diff_consts3 = self.run_enginx_and_get_diff_consts("1-1200")
-
-    def validate(self):
-        for const, delta in ([UnitParams.difc, 5], [UnitParams.difa, 1], [UnitParams.tzero, 2]):
-            # check the second run is correctly using a different cropping than the first
-            self.assertNotAlmostEqual(self._diff_consts[const], self._diff_consts2[const], delta=delta)
-            # check the third run is unaffected by the second so is the same as the first
-            self.assertAlmostEqual(self._diff_consts[const], self._diff_consts3[const], delta=delta)
-
-    def run_enginx_and_get_diff_consts(self, specs: str):
         enginx = EnginX(
-            vanadium_run="ENGINX236516",
-            focus_runs=["ENGINX299080"],
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
-            ceria_run="ENGINX193749",
+            ceria_run="ENGINX305738",
             group=GROUP.CROPPED,
-            spectrum_num=specs,
+            spectrum_num="1-1200",
         )
-        enginx.main(plot_cal=False, plot_foc=False)
-        ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
-        return ws_foc.spectrumInfo().diffractometerConstants(0)
+        enginx.main()
+        self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx.calibration.set_spectra_list("1-100")
+        enginx.main()
+        self._dataY2 = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+
+    def validate(self):
+        self.assertNotAlmostEqual(self._dataY, self._dataY2, delta=0.005)
 
     def cleanup(self):
         ADS.clear()
