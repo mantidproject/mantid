@@ -59,6 +59,7 @@ set(TEST_PY_FILES
     GenerateGroupingSNSInelasticTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
+    GetIPTSTest.py
     GroupBySampleChangerPositionTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
