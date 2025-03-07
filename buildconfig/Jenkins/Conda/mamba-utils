@@ -16,7 +16,7 @@ setup_mamba () {
   if [ $# -eq 3 ]; then
     clean=$3
   fi
-  $SCRIPT_DIR/download-and-install-mambaforge $install_prefix $clean
+  $SCRIPT_DIR/download-and-install-miniforge $install_prefix $clean
   source $install_prefix/etc/profile.d/conda.sh
   source $install_prefix/etc/profile.d/mamba.sh
 

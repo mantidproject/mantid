@@ -82,7 +82,7 @@ done
 
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true
+setup_mamba $WORKSPACE/miniforge "" true
 mamba activate base
 mamba install --yes boa conda-verify versioningit
 
