@@ -81,12 +81,6 @@ protected:
   const uint8_t *m_data;
   uint32_t m_len;
   bool m_allocated;
-
-private:
-  /* Don't allow the default constructor or assignment operator */
-  Packet();
-  Packet &operator=(const Packet &pkt);
-
   double extractDouble(uint32_t index, uint32_t fieldOffset) const {
     if (index < detBankSetCount()) {
       double value;
@@ -96,6 +90,13 @@ private:
       return 0.0;
     }
   }
+
+private:
+  /* Don't allow the default constructor or assignment operator */
+  Packet();
+  Packet &operator=(const Packet &pkt);
+  const uint32_t *m_fields;
+  uint32_t detBankSetCount() const { return m_fields[0]; }
 };
 
 class MANTID_LIVEDATA_DLL RawDataPkt : public Packet {
@@ -669,7 +670,8 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const { return extractDouble(index, &m_fields[3]); }
+  double result;
+  double value() const { return extractDouble(result, m_fields[3]); }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));

@@ -67,6 +67,7 @@ struct TCPStreamEventHeader {
   /// whenever layout of this or
   /// further packets changes
   uint32_t majorVersion() const { return version >> 16; }
+  uint32_t minorVersion() const { return version & 0xffff; }
 };
 
 /// header for initial data packet send on initial connection and on a state
