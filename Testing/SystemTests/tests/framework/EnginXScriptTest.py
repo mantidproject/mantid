@@ -85,6 +85,33 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
         _try_delete_cal_and_focus_dirs(CWDIR)
 
 
+class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest):
+    def runTest(self):
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CROPPED,
+            spectrum_num="1-1200",
+        )
+        enginx.main()
+        self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx.calibration.set_spectra_list("1-100")
+        enginx.main()
+        self._dataY2 = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+
+    def validate(self):
+        self.assertNotAlmostEqual(self._dataY, self._dataY2, delta=0.005)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
 class FocusTexture(systemtesting.MantidSystemTest):
     def runTest(self):
         enginx = EnginX(

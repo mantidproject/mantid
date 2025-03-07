@@ -51,7 +51,7 @@ class CalibrationPresenter(object):
             # loading calibration from path to .prm
             self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename())
         else:
-            # make a new calibration
+            # update current calibration with new data
             sample_file = self.view.get_sample_filename()
             self.current_calibration.set_calibration_paths(self.instrument, sample_file)
             # set group and any additional parameters needed
@@ -64,6 +64,8 @@ class CalibrationPresenter(object):
             else:
                 # default if no cropping
                 self.current_calibration.set_group(GROUP.BOTH)
+            # ensure the updated group is translated to an updated group_ws
+            self.current_calibration.update_group_ws_from_group()
 
     def on_calibrate_clicked(self):
         if self.view.get_new_checked() and self._validate():

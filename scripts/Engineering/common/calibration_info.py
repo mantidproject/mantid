@@ -249,13 +249,17 @@ class CalibrationInfo:
         :return: group workspace
         """
         if not self.group_ws or not ADS.doesExist(self.group_ws.name()):
+            self.update_group_ws_from_group()
+        return self.group_ws
+
+    def update_group_ws_from_group(self) -> None:
+        if self.group:
             if self.group.banks:
                 self.create_bank_grouping_workspace()
             elif self.group == GROUP.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
             elif self.group == GROUP.CUSTOM:
                 self.create_grouping_workspace_from_file()
-        return self.group_ws
 
     def create_grouping_workspace_from_file(self) -> None:
         """
