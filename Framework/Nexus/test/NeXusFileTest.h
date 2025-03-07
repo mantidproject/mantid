@@ -423,9 +423,17 @@ public:
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
-    DimVector array_dims({512, 512});
+#ifdef __WIN32
+    // NOTE the Windows runners do not have enough stack space for the full test
+    // rather than skip the entire test, we can use a smaller array size
+    // it is no longer testing the same behavior on Windows with this choice.
+    std::size_t const TEST_SIZE(8);
+#else
+    std::size_t const TEST_SIZE(512);
+#endif
+    DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("leak_test.nxs");
-    const int iBinarySize = 512 * 512;
+    const int iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     int aiBinaryData[iBinarySize];
 
