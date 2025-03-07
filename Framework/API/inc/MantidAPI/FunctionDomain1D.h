@@ -86,7 +86,7 @@ public:
   /// Copy assignment operator.
   FunctionDomain1DVector &operator=(const FunctionDomain1DVector &);
   /// Get the underlying vector
-  std::vector<double> getVector() { return m_X; }
+  const std::vector<double> &getVector() { return m_X; }
 
 protected:
   std::vector<double> m_X; ///< vector of function arguments
