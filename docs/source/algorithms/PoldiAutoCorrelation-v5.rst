@@ -50,7 +50,7 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
     LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
 
     # Call the actual algorithm.
-    correlated_6904 = PoldiAutoCorrelation(raw_6904)
+    correlated_6904 = PoldiAutoCorrelation(raw_6904, Version=5)
 
     # The first spectrum contains the correlation data. In this case there should be 5531 bins.
     # On other data or different wavelength limits, this number will be different.

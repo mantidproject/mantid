@@ -38,7 +38,7 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
     truncated = PoldiLoadRuns(2013, 6904)
 
     # Perform correlation, peak search and fit
-    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
+    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904", Version=5)
     peaks_6904 = PoldiPeakSearch(correlated_6904)
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
@@ -70,7 +70,7 @@ In general, there is a background in POLDI data that depends on :math:`2\theta`.
     truncated = PoldiLoadRuns(2013, 6904)
 
     # Perform correlation, peak search and fit
-    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
+    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904", Version=5)
     peaks_6904 = PoldiPeakSearch(correlated_6904)
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
@@ -116,7 +116,7 @@ The following example shows an example for refinement of lattice parameters usin
     truncated = PoldiLoadRuns(2013, 6903, 6904, 2)
 
     # Perform correlation, peak search and fit
-    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
+    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904", Version=5)
     peaks_6904 = PoldiPeakSearch(correlated_6904)
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
