@@ -31,7 +31,7 @@ if $SCRIPT_DIR/../check_for_changes cpp; then
 fi
 
 # Setup conda environment
-setup_mamba $WORKSPACE/mambaforge
+setup_mamba $WORKSPACE/miniforge
 create_and_activate_mantid_developer_env $WORKSPACE
 
 ###############################################################################

@@ -22,7 +22,7 @@ LABEL=$4
 shift 4
 
 # Setup Mamba
-setup_mamba $WORKSPACE/mambaforge "publish-anaconda"
+setup_mamba $WORKSPACE/miniforge "publish-anaconda"
 mamba install --yes anaconda-client
 
 for package in "$@"

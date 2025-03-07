@@ -35,19 +35,19 @@ Clone the mantid source code
     * Using git bash and cloning the codebase by calling ``git clone git@github.com:mantidproject/mantid.git`` in the directory you want the code to clone to. This sets you up with accessing the remote repository via SSH so make sure to setup git properly using this `startup guide <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_ and ensure your ssh key is setup using this `guide to Github with SSH <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_.
     * Or using `GitKraken <https://www.gitkraken.com/>`_.
 
-Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
+Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
 
-* Choose the latest version of ``Mambaforge-Windows-x86_64.exe``
-* Run your downloaded ``Mambaforge-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds Conda to your path.
+* Choose the latest version of ``Miniforge3-Windows-x86_64.exe``
+* Run your downloaded ``Miniforge3-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds Conda to your path.
 
 Setup the mantid conda environment
 ----------------------------------
 
 Open a terminal or powershell with conda enabled. Here are two ways to do this:
 
-* Open an Anaconda prompt (Mambaforge).
-* Add the path of your Mambaforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
+* Open an Anaconda prompt (Miniforge).
+* Add the path of your Miniforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
 
 .. include:: ./MantidDeveloperSetup.rst
 

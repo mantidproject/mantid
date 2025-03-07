@@ -50,16 +50,16 @@ To set up your toolchain:
    .. hlist::
       :columns: 1
 
-      * On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/cmake``
-      * On Windows: ``/path/to/mambaforge/envs/mantid-developer/Library/bin/cmake.exe``
+      * On Linux: ``/path/to/miniforge/envs/mantid-developer/bin/cmake``
+      * On Windows: ``/path/to/miniforge/envs/mantid-developer/Library/bin/cmake.exe``
 
 #. Edit the Build Tool field to point to your conda installed ``ninja``
 
    .. hlist::
       :columns: 1
 
-      * On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/ninja``
-      * On Windows: ``/path/to/mambaforge/envs/mantid-developer/Library/bin/ninja.exe``
+      * On Linux: ``/path/to/miniforge/envs/mantid-developer/bin/ninja``
+      * On Windows: ``/path/to/miniforge/envs/mantid-developer/Library/bin/ninja.exe``
 
 #. For the C Compiler and C++ Compiler fields,
 
@@ -100,7 +100,7 @@ from a terminal without having to activate the conda environment in the terminal
 This is useful when you're working on both Mantid and other projects in CLion simultaneously.
 
 #. Navigate to ``File > Settings > Build, Execution, Deployment > CMake``
-#. Under ``environment``, add new environment variable ``CONDA_PREFIX`` with value ``/path/to/mambaforge/envs/mantid-developer``.
+#. Under ``environment``, add new environment variable ``CONDA_PREFIX`` with value ``/path/to/miniforge/envs/mantid-developer``.
 #. Navigate to ``File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment``, then select ``mantid-developer``.
 
 
@@ -119,7 +119,7 @@ It is also useful to have your terminals in CLion to run with this environment:
    .. code-block:: sh
 
       source ~/.bashrc
-      source ~/mambaforge/bin/activate mantid-developer
+      source ~/miniforge/bin/activate mantid-developer
 
 #. Start CLion using the above steps
 #. Navigate to ``File > Settings > Tools > Terminal``
@@ -135,8 +135,8 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
    .. hlist::
       :columns: 1
 
-      - On Linux & macOS: ``/path/to/mambaforge/envs/mantid-developer/bin/python``
-      - On Windows: ``/path/to/mambaforge/envs/mantid-developer/python.exe``
+      - On Linux & macOS: ``/path/to/miniforge/envs/mantid-developer/bin/python``
+      - On Windows: ``/path/to/miniforge/envs/mantid-developer/python.exe``
 
 #. Set the program arguments:
 
@@ -150,7 +150,7 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
    .. hlist::
       :columns: 1
 
-      - All OS: ``path/to/mambaforge/envs/md/bin/``
+      - All OS: ``path/to/miniforge/envs/md/bin/``
 
 #. Set any relevant environment variables:
 

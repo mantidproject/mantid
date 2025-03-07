@@ -99,19 +99,19 @@ do
 done
 
 # Clean the source tree to remove stale configured files. Only remove
-# the build and mambaforge directories if this is a clean build
+# the build and Miniforge directories if this is a clean build
 pushd $WORKSPACE
 if [[ $CLEAN_BUILD  == true ]]; then
     # git clean will delete most things in build but leave subrepositories such as build/_deps/span-src
     # so we need to remove the whole of build/ by hand
     rm -fr $BUILD_DIR
 else
-    git_clean_excludes_extra="--exclude=build --exclude=mambaforge"
+    git_clean_excludes_extra="--exclude=build --exclude=miniforge"
 fi
 git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
+setup_mamba $WORKSPACE/miniforge "" $CLEAN_BUILD
 create_and_activate_mantid_developer_env $WORKSPACE
 
 # Check whether this is an incremental build that only changes rst files

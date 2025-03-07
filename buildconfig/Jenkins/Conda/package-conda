@@ -82,7 +82,7 @@ done
 
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "package-conda" true
+setup_mamba $WORKSPACE/miniforge "package-conda" true
 mamba install --yes boa conda-verify versioningit
 
 # Clean up any legacy conda-recipes git clones

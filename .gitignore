@@ -207,6 +207,7 @@ rel/
 # in source installed conda
 mambaforge/
 miniconda3/
+miniforge/
 
 # in source build of conda pacakges
 conda/recipes/channeldata.json
