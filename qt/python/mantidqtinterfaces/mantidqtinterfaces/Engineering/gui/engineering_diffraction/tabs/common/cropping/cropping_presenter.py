@@ -65,9 +65,8 @@ class CroppingPresenter(object):
             self.set_custom_widgets_visibility(False, False)
 
     def on_groupingfile_changed(self):
-        valid = self.view.finder_custom.isValid()
-        self.groupingfile_valid = valid
-        if valid:
+        self.groupingfile_valid = self.view.finder_custom.isValid()
+        if self.groupingfile_valid:
             self.custom_groupingfile = self.view.get_custom_groupingfile()
         else:
             self.custom_groupingfile = None
