@@ -9,6 +9,8 @@
 
 #define PSZ(s) (s).c_str()
 
+using namespace Mantid::LegacyNexus;
+
 const int nFiles = 10;
 const int nEntry = 10;
 const int nData = 10;

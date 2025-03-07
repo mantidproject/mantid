@@ -4,6 +4,8 @@
 
 #include "mfhdf.h"
 
+using namespace Mantid::LegacyNexus;
+
 /*
  * HDF4 interface
  */

@@ -36,6 +36,8 @@
 #include "MantidLegacyNexus/napiconfig.h"
 #include "MantidLegacyNexus/nxstack.h"
 
+using namespace Mantid::LegacyNexus;
+
 /*---------------------------------------------------------------------
  Recognized and handled napimount URLS
  -----------------------------------------------------------------------*/

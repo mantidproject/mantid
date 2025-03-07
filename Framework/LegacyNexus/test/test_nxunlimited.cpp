@@ -33,6 +33,8 @@
 
 #define DATA_SIZE 200000
 
+using namespace Mantid::LegacyNexus;
+
 int test_unlimited(int file_type, const char *filename) {
   // cppcheck-suppress constVariable
   static double d[DATA_SIZE];
