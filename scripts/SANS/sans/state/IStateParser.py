@@ -16,6 +16,7 @@ from sans.state.StateObjects.StateData import StateData, get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMask
 from sans.state.StateObjects.StateMoveDetectors import StateMove
 from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -40,6 +41,7 @@ class IStateParser(metaclass=ABCMeta):
         all_states.compatibility = self.get_state_compatibility()
         all_states.data = self.get_state_data(file_information)
         all_states.instrument_info = StateInstrumentInfo.build_from_data_info(all_states.data)
+        all_states.polarization = self.get_state_polarization()
 
         return all_states
 
@@ -100,4 +102,8 @@ class IStateParser(metaclass=ABCMeta):
 
     @abstractmethod
     def get_state_wavelength_and_pixel_adjustment(self) -> StateWavelengthAndPixelAdjustment:
+        pass
+
+    @abstractmethod
+    def get_state_polarization(self) -> StatePolarization:
         pass
