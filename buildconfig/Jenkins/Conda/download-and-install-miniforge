@@ -1,0 +1,87 @@
+#!/bin/bash -ex
+
+# This script will download and install Miniforge if it's not present where expected
+#
+# Expected args:
+#   1. MINIFORGE_INSTALL_PATH: path to where Miniforge should be installed
+#   2. CLEAN_BUILD: whether or not to force Miniforge to be removed before attempting to install it again
+
+MINIFORGE_INSTALL_PATH=$1
+CLEAN_BUILD=$2
+MINIFORGE_VERSION=24.11.3-0
+
+LINUX_SHA256="2e1ad2188fe69fcdd522c2b20c08c800a5c7411b775eca768318b1540ed32e53  ./Miniforge3-24.11.3-0-Linux-x86_64.sh"
+MACX86_SHA256="1f8e16f2f8e7538c2ef1d08cbb8f2feadc75907e31dbcde75a10ca788fc03abb  ./Miniforge3-24.11.3-0-MacOSX-x86_64.sh"
+MACARM_SHA256="dbead9822b1932ecc1b3238311a843400462b38e302bbd067ef373aa39dedd4f  ./Miniforge3-24.11.3-0-MacOSX-arm64.sh"
+WINDOWS_SHA256="4a17db28f7599c61ba0ec537f73882b746cde262d7ac8a4865e82af2f5fba126 *./Miniforge3-24.11.3-0-Windows-x86_64.exe"
+
+MAMBA_EXE=$MINIFORGE_INSTALL_PATH/bin/mamba
+if [[ $OSTYPE == 'msys'* ]]; then
+    MINIFORGE_SCRIPT_NAME=Miniforge3-$MINIFORGE_VERSION-Windows-x86_64.exe
+    EXPECTED_INSTALLER_SHA=$WINDOWS_SHA256
+    MAMBA_EXE=$MINIFORGE_INSTALL_PATH/condabin/mamba.bat
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    if [[ $(uname -p) == 'arm' ]]; then
+      MINIFORGE_SCRIPT_NAME=Miniforge3-$MINIFORGE_VERSION-MacOSX-arm64.sh
+      EXPECTED_INSTALLER_SHA=$MACARM_SHA256
+      # add sbin to path to provide access to md5 for Miniforge install script
+      if [ $(echo $PATH | grep -c "/sbin:") -eq 0 ]; then
+        export PATH=/sbin:$PATH
+      fi
+    else
+      MINIFORGE_SCRIPT_NAME=Miniforge3-$MINIFORGE_VERSION-MacOSX-x86_64.sh
+      EXPECTED_INSTALLER_SHA=$MACX86_SHA256
+    fi
+else
+    MINIFORGE_SCRIPT_NAME=Miniforge3-$MINIFORGE_VERSION-$(uname)-x86_64.sh
+    EXPECTED_INSTALLER_SHA=$LINUX_SHA256
+fi
+URL=https://github.com/conda-forge/miniforge/releases/download/$MINIFORGE_VERSION/$MINIFORGE_SCRIPT_NAME
+
+if [[ $CLEAN_BUILD  == true ]]; then
+    rm -rf $MINIFORGE_INSTALL_PATH
+    if [[ -f $MINIFORGE_SCRIPT_NAME ]]; then
+        rm $MINIFORGE_SCRIPT_NAME
+    fi
+fi
+
+# Ensure conda is installed
+if [ ! -f $MAMBA_EXE ]; then
+    echo "Miniforge not found. Installing version ${MINIFORGE_VERSION}"
+    if [ ! -f $MINIFORGE_SCRIPT_NAME ]; then
+        # Download Miniforge
+        if [ -x "$(which curl)" ]; then
+            curl -L -O $URL
+        elif [ -x "$(which wget)" ] ; then
+            wget $URL
+        else
+            echo "Could not download Conda as wget and curl are not installed."
+            exit 1
+        fi
+    fi
+
+    # Compare the sha256 of the downloaded file to the expected sha256
+    if [[ $OSTYPE == 'darwin'* ]]; then
+        SHA256_DOWNLOADED=$(shasum -a 256 $MINIFORGE_SCRIPT_NAME)
+    else
+        SHA256_DOWNLOADED=$(sha256sum $MINIFORGE_SCRIPT_NAME)
+    fi
+
+    if [[ $SHA256_DOWNLOADED != $EXPECTED_INSTALLER_SHA ]]; then
+        echo "sha256 of downloaded file does not match expected sha256, failing..."
+        exit 1
+    fi
+
+    if [[ $OSTYPE == 'msys'* ]]; then
+        # Replace all / with \ for windows batch support before passing in $MINIFORGE_INSTALL_PATH
+        cmd.exe //C "START /wait "" $MINIFORGE_SCRIPT_NAME /InstallationType=JustMe /S /D=${MINIFORGE_INSTALL_PATH////\\}"
+        # The paths in the Conda environment shell environments are Windows style. Convert to cygwin style
+        cp $MINIFORGE_INSTALL_PATH/etc/profile.d/conda.sh{,.orig}
+        cat $MINIFORGE_INSTALL_PATH/etc/profile.d/conda.sh.orig | \
+          sed -e '/^export\ CONDA_/s/\\/\//g' | \
+          sed -e '/^export\ CONDA_/s/\(\w\)\:/\/\1/g' > $MINIFORGE_INSTALL_PATH/etc/profile.d/conda.sh
+    else
+        bash $MINIFORGE_SCRIPT_NAME -b -p $MINIFORGE_INSTALL_PATH -u
+    fi
+    rm $MINIFORGE_SCRIPT_NAME
+fi
