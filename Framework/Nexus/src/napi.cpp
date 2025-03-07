@@ -1551,22 +1551,9 @@ NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
   return NXstatus::NX_OK;
 }
 
-NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                    const NXnumtype iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxputattra(pFunc->pNexusData, name, data, rank, dim, iType));
-}
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   pNexusFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType));
-}
-NXstatus NXgetattra(NXhandle handle, const char *name, void *data) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetattra(pFunc->pNexusData, name, data));
-}
-NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetattrainfo(pFunc->pNexusData, pName, rank, dim, iType));
 }
 
 /*--------------------------------------------------------------------

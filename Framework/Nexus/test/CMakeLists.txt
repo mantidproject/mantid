@@ -19,10 +19,6 @@ add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL napi_test.cpp napi_test_util.cpp 
 target_link_libraries(napi_test_hdf5 PRIVATE Mantid::Nexus)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND napi_test_hdf5)
 
-add_executable(napi_attra_test_hdf5 EXCLUDE_FROM_ALL napi_attra_test.cpp napi_test_util.cpp napi_test_util.h)
-target_link_libraries(napi_attra_test_hdf5 PRIVATE Mantid::Nexus)
-add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
-
 add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL napi_test_cpp.cpp napi_test_util.cpp napi_test_util.h)
 target_link_libraries(napi_test_cpp-hdf5 PRIVATE Mantid::Nexus)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
@@ -48,14 +44,8 @@ add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-3" COMMAND napi_leak_test3)
 
 # #### phony target to drag in all tests
 add_custom_target(
-  "${TEST_PREFIX}"
-  DEPENDS napi_test_hdf5
-          napi_attra_test_hdf5
-          napi_test_cpp-hdf5
-          napi_test_nxunlimited
-          napi_leak_test1
-          napi_leak_test2
-          napi_leak_test3
+  "${TEST_PREFIX}" DEPENDS napi_test_hdf5 napi_test_cpp-hdf5 napi_test_nxunlimited napi_leak_test1 napi_leak_test2
+                           napi_leak_test3
 )
 
 add_dependencies(FrameworkTests "${TEST_PREFIX}")

@@ -51,8 +51,6 @@ typedef struct {
   NXstatus (*nxclosedata)(NXhandle handle);
   NXstatus (*nxputdata)(NXhandle handle, const void *data);
   NXstatus (*nxputattr)(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
-  NXstatus (*nxputattra)(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                         const NXnumtype iType);
   NXstatus (*nxputslab64)(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
   NXstatus (*nxgetdataID)(NXhandle handle, NXlink *pLink);
   NXstatus (*nxmakelink)(NXhandle handle, NXlink *pLink);
@@ -64,8 +62,6 @@ typedef struct {
   NXstatus (*nxgetnextattr)(NXhandle handle, NXname pName, int *iLength, NXnumtype *iType);
   NXstatus (*nxgetnextattra)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
   NXstatus (*nxgetattr)(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType);
-  NXstatus (*nxgetattra)(NXhandle handle, const char *name, void *data);
-  NXstatus (*nxgetattrainfo)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
   NXstatus (*nxgetattrinfo)(NXhandle handle, int *no_items);
   NXstatus (*nxgetgroupID)(NXhandle handle, NXlink *pLink);
   NXstatus (*nxgetgroupinfo)(NXhandle handle, int *no_items, NXname name, NXname nxclass);

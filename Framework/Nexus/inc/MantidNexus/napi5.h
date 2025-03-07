@@ -48,10 +48,7 @@ extern NXstatus NX5getgroupinfo(NXhandle handle, int *no_items, NXname name, NXn
 extern NXstatus NX5initgroupdir(NXhandle handle);
 extern NXstatus NX5initattrdir(NXhandle handle);
 
-extern NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                            const NXnumtype iType);
 extern NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
-extern NXstatus NX5getattra(NXhandle handle, const char *name, void *data);
 extern NXstatus NX5getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
 void NX5assignFunctions(pNexusFunction fHandle);
