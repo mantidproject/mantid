@@ -276,6 +276,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/NormaliseByThickness.py
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
+    algorithms/peakdata_utils.py
     algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py
     algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
     algorithms/WorkflowAlgorithms/PowderILLDetectorScan.py
