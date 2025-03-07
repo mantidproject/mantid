@@ -24,7 +24,7 @@ shift 1
 cd $WORKSPACE
 
 # Setup Mamba. Create and activate environment
-setup_mamba $WORKSPACE/mambaforge "" true
+setup_mamba $WORKSPACE/miniforge "" true
 create_and_activate_mantid_developer_env $WORKSPACE
 
 # Create the build directory if it doesn't exist

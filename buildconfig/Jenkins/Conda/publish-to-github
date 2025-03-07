@@ -40,7 +40,7 @@ github_release_cmd() {
 }
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge publish-gh
+setup_mamba $WORKSPACE/miniforge publish-gh
 mamba install --yes gh
 
 # Create a release and attach the given assets.

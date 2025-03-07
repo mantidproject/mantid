@@ -18,10 +18,10 @@ Clone the mantid source code
     * Using git in the terminal and cloning the codebase by calling ``git clone git@github.com:mantidproject/mantid.git`` in the directory you want the code to clone to. This sets you up with accessing the remote repository via SSH so make sure to setup git properly using this `startup guide <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_ and ensure your ssh key is setup using this `guide to Github with SSH <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_.
     * Or by using `GitKraken <https://www.gitkraken.com/>`_.
 
-Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
+Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
-* Choose the latest version of ``Mambaforge-Linux-x86_64.sh``
-* Run your downloaded script from the terminal using ``bash Mambaforge-Linux-x86_64.sh``. If it asks whether or not you want to initialise conda with conda init, choose to do so.
+* Choose the latest version of ``Miniforge3-Linux-x86_64.sh``
+* Run your downloaded script from the terminal using ``bash Miniforge3-Linux-x86_64.sh``. If it asks whether or not you want to initialise conda with conda init, choose to do so.
 * Restart your terminal.
 
 (ILL) Setup proxy
