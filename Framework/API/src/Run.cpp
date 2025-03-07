@@ -339,8 +339,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     const_cast<Run *>(this)->setProtonCharge(total);
     // Mark gd_prtn_chrg as filtered as this method accounts for period filtering
     const auto proton_charge_unfiltered_name = getProtonChargeUnfilteredName();
-    if (m_manager->existsProperty(proton_charge_unfiltered_name) &&
-        m_manager->getProperty(proton_charge_unfiltered_name)) {
+    if (m_manager->existsProperty(proton_charge_unfiltered_name)) {
       m_manager->setProperty(proton_charge_unfiltered_name, false);
     }
 
