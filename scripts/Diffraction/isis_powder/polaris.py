@@ -29,12 +29,13 @@ class Polaris(AbstractInst):
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
         self._sample_details = None
+        self._instr_settings_kwargs_cache = {}
 
     # Public API
 
     def focus(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         return self._focus(
             run_number_string=self._inst_settings.run_number,
             do_van_normalisation=self._inst_settings.do_van_normalisation,
@@ -46,7 +47,7 @@ class Polaris(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         if not self._inst_settings.multiple_scattering or not self._inst_settings.do_absorb_corrections:
             raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the vanadium run.")
 
@@ -77,7 +78,7 @@ class Polaris(AbstractInst):
             )
 
     def create_total_scattering_pdf(self, **kwargs):
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         if not hasattr(self._inst_settings, "pdf_type") or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
             self._inst_settings.pdf_type = "G(r)"
             logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
@@ -188,14 +189,24 @@ class Polaris(AbstractInst):
     def _get_run_details(self, run_number_string):
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string, self._inst_settings.file_extension)
 
-        if run_number_string_key in self._run_details_cached_obj:
+        if run_number_string_key in self._instr_settings_kwargs_cache:
+            current_kwargs_hash = self._inst_settings.get_kwargs_as_hash()
+            if self._instr_settings_kwargs_cache[run_number_string_key] == current_kwargs_hash:
+                return self._run_details_cached_obj[run_number_string_key]
+            else:
+                # Instrument settings kwargs have been updated after last run
+                # update both self._instr_settings_kwargs_cache and self._run_details_cached_obj maps
+                self._instr_settings_kwargs_cache[run_number_string_key] = current_kwargs_hash
+                self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+                    run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
+                )
+                return self._run_details_cached_obj[run_number_string_key]
+        else:
+            self._instr_settings_kwargs_cache[run_number_string_key] = self._inst_settings.get_kwargs_as_hash()
+            self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+                run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
+            )
             return self._run_details_cached_obj[run_number_string_key]
-
-        self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
-            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
-        )
-
-        return self._run_details_cached_obj[run_number_string_key]
 
     def _switch_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "mode"):
