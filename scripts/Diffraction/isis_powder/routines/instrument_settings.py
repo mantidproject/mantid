@@ -78,12 +78,13 @@ class InstrumentSettings(object):
                 "mapping file. \nPlease contact the development team."
             )
 
-    def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False):
+    def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False, delete_old_kwargs=False):
         self._adv_config_dict = advanced_config if advanced_config else self._adv_config_dict
         self._basic_conf_dict = basic_config if basic_config else self._basic_conf_dict
 
-        # Delete the attibutes that fall into the set difference between old self._kwargs and new kwargs
-        self._remove_attributes(self._kwargs, kwargs, suppress_warnings)
+        if delete_old_kwargs:
+            # Delete the attibutes that fall into the set difference between old self._kwargs and new kwargs
+            self._remove_attributes(self._kwargs, kwargs, suppress_warnings)
         self._kwargs = kwargs if kwargs else self._kwargs
 
         # Only update if one in hierarchy below it has been updated

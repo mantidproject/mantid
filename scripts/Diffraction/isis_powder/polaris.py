@@ -35,7 +35,7 @@ class Polaris(AbstractInst):
 
     def focus(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         return self._focus(
             run_number_string=self._inst_settings.run_number,
             do_van_normalisation=self._inst_settings.do_van_normalisation,
@@ -47,7 +47,7 @@ class Polaris(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         if not self._inst_settings.multiple_scattering or not self._inst_settings.do_absorb_corrections:
             raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the vanadium run.")
 
@@ -78,7 +78,7 @@ class Polaris(AbstractInst):
             )
 
     def create_total_scattering_pdf(self, **kwargs):
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs, delete_old_kwargs=True)
         if not hasattr(self._inst_settings, "pdf_type") or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
             self._inst_settings.pdf_type = "G(r)"
             logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
