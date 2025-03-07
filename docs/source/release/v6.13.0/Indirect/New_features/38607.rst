@@ -1,0 +1,1 @@
+- :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>` now supports an output label that is appended to the output name and doesn't override previous outputs

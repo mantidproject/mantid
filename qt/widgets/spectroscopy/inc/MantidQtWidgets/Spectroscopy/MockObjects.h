@@ -233,6 +233,7 @@ public:
   MOCK_CONST_METHOD1(setOutputNameLabel, void(std::string const &text));
   MOCK_CONST_METHOD0(getCurrentLabel, std::string());
   MOCK_CONST_METHOD0(getCurrentOutputName, std::string());
+  MOCK_CONST_METHOD0(hideOutputNameBox, void());
 };
 
 class MockOutputNameModel : public IOutputNameModel {
