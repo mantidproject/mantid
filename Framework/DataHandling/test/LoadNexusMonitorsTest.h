@@ -220,30 +220,6 @@ public:
     std::string filename = "LARMOR00003368.nxs";
     std::string outws_name = "ws_group";
 
-    // Version 1 of algorithm
-    LoadNexusMonitors2 ld1;
-    ld1.initialize();
-    ld1.setPropertyValue("Filename", filename);
-    ld1.setPropertyValue("OutputWorkspace", outws_name);
-    ld1.execute();
-
-    // Count output workspaces
-    int ws_count = 0;
-    auto props = ld1.getProperties();
-    for (auto &prop : props)
-      if (prop->type() == "Workspace")
-        ws_count++;
-
-    // Version 1 has an issue that produces additional output workspaces for
-    // every child workspace in the output WorkspaceGroup. This causes the
-    // Python interface to return a tuple with 5 elements rather than a group
-    // workspace.
-    TS_ASSERT_EQUALS(ws_count, 5);
-
-    // Names of child workspaces are also missing the outws_name prefix
-    auto child = ld1.getPropertyValue("OutputWorkspace_1");
-    TS_ASSERT_EQUALS(child, "_1");
-
     // Version 2 of algorithm
     LoadNexusMonitors2 ld2;
     ld2.initialize();
@@ -252,8 +228,8 @@ public:
     ld2.execute();
 
     // Count output workspaces
-    ws_count = 0;
-    props = ld2.getProperties();
+    int ws_count = 0;
+    auto props = ld2.getProperties();
     for (auto &prop : props)
       if (prop->type() == "Workspace")
         ws_count++;
