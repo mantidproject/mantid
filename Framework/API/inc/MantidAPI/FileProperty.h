@@ -87,7 +87,7 @@ public:
   std::string isValid() const override;
 
   /// Returns the main file extension that's used
-  std::string getDefaultExt() const { return m_defaultExt; }
+  const std::string &getDefaultExt() const { return m_defaultExt; }
 
   // Unhide the PropertyWithValue assignment operator
   using Kernel::PropertyWithValue<std::string>::operator=;

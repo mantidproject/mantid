@@ -68,10 +68,10 @@ public:
   /// Returns true if the expression is a function (i.e. has arguments)
   bool isFunct() const { return !m_terms.empty(); }
   /// Returns the name of the expression which is a function or variable name.
-  std::string name() const { return m_funct; }
+  const std::string &name() const { return m_funct; }
   /// Returns the expression's binary operator on its left. Can be an empty
   /// string.
-  std::string operator_name() const { return m_op; }
+  const std::string &operator_name() const { return m_op; }
   /// Returns the top level terms of the expression (function arguments). For a
   /// variable it empty.
   const std::vector<Expression> &terms() const { return m_terms; }

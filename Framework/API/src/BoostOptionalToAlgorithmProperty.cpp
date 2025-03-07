@@ -8,10 +8,10 @@
 
 namespace Mantid::API {
 template <>
-std::string checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
+std::string checkForMandatoryInstrumentDefault(const Mantid::API::Algorithm *const alg, const std::string &propName,
                                                const Mantid::Geometry::Instrument_const_sptr &instrument,
                                                const std::string &idf_name) {
-  auto algProperty = alg->getPointerToProperty(propName);
+  const auto *algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getStringParameter(idf_name);
     if (defaults.empty()) {
@@ -26,13 +26,13 @@ std::string checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg
 }
 
 template <>
-std::optional<std::string> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg,
+std::optional<std::string> checkForOptionalInstrumentDefault(const Mantid::API::Algorithm *const alg,
                                                              const std::string &propName,
                                                              const Mantid::Geometry::Instrument_const_sptr &instrument,
                                                              const std::string &idf_name) {
-  auto algProperty = alg->getPointerToProperty(propName);
+  const auto *algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
-    auto defaults = instrument->getStringParameter(idf_name);
+    const auto defaults = instrument->getStringParameter(idf_name);
     if (!defaults.empty()) {
       return std::optional<std::string>(defaults[0]);
     } else {
