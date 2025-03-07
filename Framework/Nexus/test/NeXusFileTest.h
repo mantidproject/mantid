@@ -77,7 +77,7 @@ void removeFile(const std::string &filename) {
 class NeXusFileTest : public CxxTest::TestSuite {
 public:
   void do_test_write(const string &filename, NXaccess create_code) {
-    std::cout << "writeTest(" << filename << ") started\n";
+    cout << "writeTest(" << filename << ") started\n";
     NeXus::File file(filename, create_code);
     // create group
     file.makeGroup("entry", "NXentry", true);
@@ -145,11 +145,11 @@ public:
     file.putSlab(&(r8_array[0]), slab_start, slab_size);
 
     // add some attributes
-    std::cout << "writing attributes to r8_data" << std::endl;
+    cout << "writing attributes to r8_data" << std::endl;
     file.putAttr("ch_attribute", "NeXus");
     file.putAttr("i4_attribute", 42);
     file.putAttr("r4_attribute", 3.14159265);
-    std::cout << "... done" << std::endl;
+    cout << "... done" << std::endl;
 
     // set up for creating a link
     NXlink link = file.getDataID();
@@ -241,13 +241,13 @@ public:
     file.openPath("/");
     file.makeGroup("link", "NXentry", true);
     file.makeLink(glink);
-    std::cout << "writeTest(" << filename << ") successful\n";
+    cout << "writeTest(" << filename << ") successful\n";
 
     TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
   }
 
   void do_test_read(const string &filename) {
-    std::cout << "readTest(" << filename << ") started\n";
+    cout << "readTest(" << filename << ") started\n";
     const string SDS("SDS");
     // top level file information
     NeXus::File file(filename);
@@ -308,7 +308,7 @@ public:
     cout << "NXopenpath checks OK\n";
 
     // everything went fine
-    std::cout << "readTest(" << filename << ") successful\n";
+    cout << "readTest(" << filename << ") successful\n";
   }
 
   void do_test_loadPath(const string &filename) {
@@ -321,6 +321,7 @@ public:
   }
 
   void test_readwrite_hdf5() {
+    cout << " Nexus File Tests\n";
     NXaccess const nx_creation_code = NXACC_CREATE5;
     string const fileext = ".h5";
     string const filename("napi_test_cpp" + fileext);
@@ -352,8 +353,8 @@ public:
 
   void test_leak1() {
     int const nReOpen = 1000;
-    cout << "Running for " << nReOpen << " iterations\n";
-    std::string const szFile("leak_test1.nxs");
+    cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
+    string const szFile("leak_test1.nxs");
 
     removeFile(szFile); // in case it was left over from previous run
 
@@ -370,6 +371,7 @@ public:
     }
 
     removeFile(szFile); // cleanup
+    cout << "Leak Test 1 Success!\n";
   }
 
   void test_leak2() {
@@ -378,7 +380,8 @@ public:
     int const nData = 10;
     vector<short int> const i2_array{1000, 2000, 3000, 4000};
 
-    cout << strmakef("Running for %d iterations", nFiles);
+    cout << "Running Leak Test 2: " << nFiles << " iterations\n";
+
     NXaccess access_mode = NXACC_CREATE5;
     std::string strFile;
 
@@ -412,20 +415,24 @@ public:
       fileid.close();
       removeFile(strFile);
     }
+    cout << "Leak Test 2 Success!\n";
   }
 
   void test_leak3() {
+    cout << "Running Leak Test 3\n";
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
     DimVector array_dims({512, 512});
     std::string const szFile("leak_test.nxs");
     const int iBinarySize = 512 * 512;
+    cout << "Creating array of " << iBinarySize << " integers\n";
     int aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
       aiBinaryData[i] = rand();
     }
+    cout << "Created " << iBinarySize << " random integers\n";
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
       cout << "file " << iFile << "\n";
@@ -458,6 +465,7 @@ public:
 
       // Delete file
       removeFile(szFile);
+      cout << "Leak Test 3 Success!\n";
     }
   }
 
@@ -471,7 +479,7 @@ private:
   File do_prep_files(std::string const nxFile) {
     removeFile(nxFile); // in case previous run didn't clean up
 
-    std::cout << "Creating \"" << nxFile << "\"" << std::endl;
+    cout << "Creating \"" << nxFile << "\"" << std::endl;
     // create file
     File fileid(nxFile, NXACC_CREATE5);
 
@@ -646,6 +654,7 @@ private:
 
 public:
   void test_napi_old() {
+    cout << "Starting NAPI Old Test\n";
     std::string const nxFile("NXtest.h5");
     File fileid = do_prep_files(nxFile);
 
@@ -693,7 +702,7 @@ public:
 
     // cleanup and return
     fileid.close();
-    std::cout << "all ok - done\n";
+    cout << "all ok - done\n";
     removeFile(nxFile);
   }
 
@@ -865,7 +874,7 @@ public:
   // }
 
   void test_openPath() {
-    std::cout << "tests for openPath\n";
+    cout << "tests for openPath\n";
 
     string const filename("openpathtest.nxs");
     File fileid(filename, NXACC_CREATE5);
@@ -915,7 +924,7 @@ public:
     // cleanup
     fileid.close();
     removeFile(filename);
-    std::cout << "NXopenpath checks OK\n";
+    cout << "NXopenpath checks OK\n";
   }
 
   // void do_link_test(File &fileid) {
