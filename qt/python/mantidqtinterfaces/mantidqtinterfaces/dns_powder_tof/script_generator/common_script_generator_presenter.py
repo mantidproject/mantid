@@ -10,6 +10,7 @@ Common presenter for DNS script generators.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
+from mantid.simpleapi import logger
 
 
 class DNSScriptGeneratorPresenter(DNSObserver):
@@ -46,6 +47,11 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         script, error = self.model.script_maker(options, paths, file_selector)
         self.raise_error(error, critical=True, do_raise=error)
         if script != [""] and not error:
+            logger.warning(
+                "Warning: In order to consolidate the data reduction workflow, detector and sample "
+                "rotation angles of selected sample and standard data are rounded to the nearest tenth "
+                "of a degree, which corresponds to actual resolution of the detector."
+            )
             self._script_text = "\n".join(script)
             self.view.set_script_output(self._script_text)
             self.view.process_events()
