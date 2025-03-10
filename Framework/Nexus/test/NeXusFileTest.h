@@ -423,19 +423,12 @@ public:
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
-#ifdef __WIN32
-    // NOTE the Windows runners do not have enough stack space for the full test
-    // rather than skip the entire test, we can use a smaller array size
-    // it is no longer testing the same behavior on Windows with this choice.
-    std::size_t const TEST_SIZE(8);
-#else
     std::size_t const TEST_SIZE(512);
-#endif
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("leak_test.nxs");
     const int iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
-    int aiBinaryData[iBinarySize];
+    int64_t aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
       aiBinaryData[i] = rand();
@@ -535,92 +528,57 @@ private:
   }
 
   template <typename T> void do_rwslabvec_test(File &fileid, std::string const dataname, vector<T> const &data) {
-    //   cout << "Testing slab" << dataname << "\n";
+    cout << "Testing slab " << dataname << "\n";
 
-    //   // write
-    //   dimsize_t start(0), size(data.size());
-    //   fileid.makeData(dataname, getType<T>(), size);
-    //   fileid.openData(dataname);
-    //   fileid.putSlab(data, start, size);
-    //   fileid.closeData();
+    // write
+    dimsize_t dimsize = data.size();
+    DimSizeVector const start({0}), size({dimsize});
+    fileid.makeData(dataname, getType<T>(), dimsize);
+    fileid.openData(dataname);
+    fileid.putSlab(data, start, size);
+    fileid.closeData();
 
-    //   // read
-    //   vector<T> output;
-    //   fileid.openData(dataname);
-    //   fileid.getSlab(&output, start, size);
+    // read
+    T output[5];
+    fileid.openData(dataname);
+    fileid.getSlab(&output, start, size);
 
-    //   // compare
-    //   TS_ASSERT_EQUALS(data, output);
-    // }
+    // compare
+    for (int i = 0; i < 5; i++) {
+      TS_ASSERT_EQUALS(data[i], output[i])
+    }
+  }
 
-    // void do_rwslab_double_test(File &fileid, std::string const &dataname) {
+  template <size_t N, size_t M, typename T>
+  void do_rwslab_test(File &fileid, std::string const dataname, T const (&data)[N][M]) {
+    cout << "Testing slab " << dataname << "\n";
 
-    // //   cout << "Testing slab" << dataname << "\n";
+    // write
+    DimSizeVector start({0, 0}), size({N, M});
+    DimVector const dims({N, M});
+    fileid.makeData(dataname, getType<T>(), dims);
+    fileid.openData(dataname);
+    fileid.putSlab(&(data[0][0]), start, size);
+    fileid.closeData();
 
-    //   double const r8_array[5][4] = {
-    //     {1.l, 2.l, 3.l, 4.l},
-    //     {5.l, 6.l, 7.l, 8.l},
-    //     {9.l, 10.l, 11.l, 12.l},
-    //     {13.l, 14.l, 15.l, 16.l},
-    //     {17.l, 18.l, 19.l, 20.l}
-    //   };
+    // prepare to read/compare
+    T output[N][M];
+    fileid.openData(dataname);
 
-    //   // write
-    //   dimsize_t start(0), size(data.size());
-    //   fileid.makeData(dataname, getType<T>(), size);
-    //   fileid.openData(dataname);
-    //   fileid.putSlab(r8_array, start, size);
-    //   fileid.closeData();
-
-    //   // read
-    //   vector<T> output;
-    //   fileid.openData(dataname);
-    //   fileid.getSlab(&output, start, size);
-
-    //   // compare
-    //   TS_ASSERT_EQUALS(data, output);
-
-    //   fileid.putAttr("ch_attribute", ch_test_data, strlen(ch_test_data), NXnumtype::CHAR);
-
-    //   int i = 42;
-    //   fileid.putAttr("i4_attribute", &i, 1, NXnumtype::INT32);
-    //   float r = 3.14159265f;
-    //   fileid.putattr("r4_attribute", &r, 1, NXnumtype::FLOAT32);
-    //   dlink = fileid.getDataID();
-    //   fileid.closeData();
-
-    //   slab_start = {0, 0};
-    //   slab_size = {1, 4};
-    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   print_data("\n      ", std::cout, data_buffer, NXtype, 4);
-    //   slab_start[0] = TEST_FAILED;
-    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
-    //   slab_start[0] = 2;
-    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
-    //   slab_start[0] = 3;
-    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
-    //   slab_start[0] = 4;
-    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
-    //   if (NXgetattrinfo(fileid, &i) != NXstatus::NX_OK)
-    //     return TEST_FAILED;
-    //   if (i > 0) {
-    //     printf("      Number of attributes : %d\n", i);
-    //   }
+    // read, compare, row-by-row
+    for (size_t i = 1; i <= N; i++) {
+      size = {(dimsize_t)i, (dimsize_t)M};
+      fileid.getSlab(&output, start, size);
+      for (size_t j = 0; j < M; j++) {
+        TS_ASSERT_EQUALS(data[0][j], output[0][j]);
+      }
+    }
   }
 
 public:
-  void test_napi_old() {
-    cout << "Starting NAPI Old Test\n";
-    std::string const nxFile("NXtest.h5");
+  void test_napi_char() {
+    cout << "Starting NAPI CHAR Test\n";
+    std::string const nxFile("NXtest_char.h5");
     File fileid = do_prep_files(nxFile);
 
     // tests of string/char read/write
@@ -636,6 +594,35 @@ public:
     do_rw2darray_test(fileid, "c3_data", c3_array);
     do_rw2darray_test(fileid, "c4_data", c4_array);
 
+    // check all attributes
+    auto attrs = fileid.getAttrInfos();
+    vector<string> exp_attr_names({"hugo", "cucumber"});
+    vector<string> attr_names;
+    for (auto x : attrs) {
+      attr_names.push_back(x.name);
+    }
+    TS_ASSERT_EQUALS(attr_names, exp_attr_names);
+
+    // check all entries
+    vector<string> entry_names({"c1_data", "c2_data", "c3_data", "c4_data", "ch_data"});
+    Entries exp_entries;
+    for (string x : entry_names) {
+      exp_entries[x] = "SDS";
+    }
+    Entries entries = fileid.getEntries();
+    TS_ASSERT_EQUALS(entries, exp_entries);
+
+    // cleanup and return
+    fileid.close();
+    cout << "all ok - done\n";
+    removeFile(nxFile);
+  }
+
+  void test_napi_vec() {
+    cout << "Starting NAPI VEC Test\n";
+    std::string const nxFile("NXtest_vec.h5");
+    File fileid = do_prep_files(nxFile);
+
     // tests of integer read/write
     vector<unsigned char> const i1_array{1, 2, 3, 4};
     vector<short int> const i2_array{1000, 2000, 3000, 4000};
@@ -644,6 +631,7 @@ public:
     do_rw_test(fileid, "i2_data", i2_array);
     do_rw_test(fileid, "i4_data", i4_array);
 
+    // tests of float read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
     vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
     float const r4_array[5][4] = {
@@ -655,18 +643,46 @@ public:
     do_rw2darray_test(fileid, "r4_data", r4_array);
     do_rw2darray_test(fileid, "r8_data", r8_array);
 
-    // do_rwslabvec_test(fileid, "r4_slab", r4_vec);
-    // do_rwslabvec_test(fileid, "r8_slab", r8_vec);
+    // check all entries
+    vector<string> entry_names({"i1_data", "i2_data", "i4_data", "r4_data", "r4_vec_data", "r8_data", "r8_vec_data"});
+    Entries exp_entries;
+    for (string x : entry_names) {
+      exp_entries[x] = "SDS";
+    }
+    Entries entries = fileid.getEntries();
+    TS_ASSERT_EQUALS(entries, exp_entries);
 
-    // int array_dims[2] = {5, 4};
-    // int unlimited_dims[1] = {NX_UNLIMITED};
-    // int chunk_size[2] = {5, 4};
-    // int slab_start[2], slab_size[2];
-    // NXlink glink, dlink;
-    // int comp_array[100][20];
+    // cleanup and return
+    fileid.close();
+    cout << "all ok - done\n";
+    removeFile(nxFile);
+  }
 
-    // GET ALL ATTRIBUTES, CHECK NAMES
-    // GET ALL ENTRIES, CHECK NAMES
+  void test_napi_slab() {
+    cout << "Starting NAPI SLAB Test\n";
+    std::string const nxFile("NXtest_vec.h5");
+    File fileid = do_prep_files(nxFile);
+
+    // test of slab read/write
+    vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
+    vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
+    float const r4_array[5][4] = {
+        {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
+    double const r8_array[5][4] = {
+        {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
+    do_rwslabvec_test(fileid, "r4_slab", r4_vec);
+    do_rwslabvec_test(fileid, "r8_slab", r8_vec);
+    do_rwslab_test(fileid, "r4_slab2d", r4_array);
+    do_rwslab_test(fileid, "r8_slab2d", r8_array);
+
+    // check all entries
+    vector<string> entry_names({"r4_slab", "r4_slab2d", "r8_slab", "r8_slab2d"});
+    Entries exp_entries;
+    for (string x : entry_names) {
+      exp_entries[x] = "SDS";
+    }
+    Entries entries = fileid.getEntries();
+    TS_ASSERT_EQUALS(entries, exp_entries);
 
     // cleanup and return
     fileid.close();
@@ -740,12 +756,14 @@ public:
     fileid.putData(&somedata);
     NXlink datalink = fileid.getDataID();
     fileid.closeData();
+    fileid.flush();
     // Create a group, and link it to that data
     cout << "create group at /entry/data to link to the data\n";
     fileid.makeGroup("data", "NXdata");
     fileid.openGroup("data", "NXdata");
     fileid.makeLink(datalink);
     fileid.closeGroup();
+    fileid.flush();
 
     // check data link
     fileid.openPath("/entry/data/some_data");
@@ -782,17 +800,4 @@ public:
     TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
     printf("group link works\n");
   }
-
-  // void do_flush_test(File &fileid) {
-  //   //
-  //   fileid.makeData("flush_data", NXnumtype::INT32, 1, unlimited_dims);
-  //   slab_size[0] = 1;
-  //   for (int i = 0; i < 7; i++) {
-  //     slab_start[0] = i;
-  //     fileid.openData("flush_data");
-  //     fileid.putSlab(&i, slab_start, slab_size);
-  //     fileid.flush();
-  //   }
-  //   fileid.closeData();
-  // }
 };
