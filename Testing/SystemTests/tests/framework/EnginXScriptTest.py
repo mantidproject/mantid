@@ -71,7 +71,7 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
         )  # North
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
-        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped_1-1200")
 
     def validate(self):
         # only assert diff constants (both banks tests normalisation etc.)
@@ -97,12 +97,13 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
             spectrum_num="1-1200",
         )
         enginx.main()
-        self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+        self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-1200").extractY().max()
 
         # run again with different cropping window and store the resulting diff consts
         enginx.calibration.set_spectra_list("1-100")
+        enginx.calibration.update_group_ws_from_group()
         enginx.main()
-        self._dataY2 = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped").extractY().max()
+        self._dataY2 = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-100").extractY().max()
 
     def validate(self):
         self.assertNotAlmostEqual(self._dataY, self._dataY2, delta=0.005)

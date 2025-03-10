@@ -50,7 +50,7 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
             ("ENGINX_123456_Texture20.prm", GROUP.TEXTURE20),
             ("ENGINX_123456_Texture30.prm", GROUP.TEXTURE30),
             ("ENGINX_123456_Custom.prm", GROUP.CUSTOM),
-            ("ENGINX_123456_Cropped.prm", GROUP.CROPPED),
+            ("ENGINX_123456_Cropped_1-1200.prm", GROUP.CROPPED),
         ]
 
         for filename, group in test_cases:
@@ -166,6 +166,20 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
                 calibration = CalibrationInfo()
                 calibration.group = group
                 calibration.grouping_filepath = fp
+
+                self.assertEqual(calibration.get_group_suffix(), target)
+
+    def test_get_group_suffix_cropped(self):
+        test_cases = [
+            (GROUP.CROPPED, "1-100", "Cropped_1-100"),
+            (GROUP.CROPPED, None, "Cropped"),  # if no grouping fp can be found still should work
+        ]
+
+        for group, spec_list_str, target in test_cases:
+            with self.subTest(group=group, spec_list_str=spec_list_str, target=target):
+                calibration = CalibrationInfo()
+                calibration.group = group
+                calibration.set_spectra_list(spec_list_str)
 
                 self.assertEqual(calibration.get_group_suffix(), target)
 

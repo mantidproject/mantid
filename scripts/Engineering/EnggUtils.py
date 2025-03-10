@@ -503,8 +503,8 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
 def process_vanadium(vanadium_path, calibration, full_calib):
     van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
-    if ADS.doesExist(van_foc_name) and calibration.group != GROUP.CROPPED:
-        if calibration.group == GROUP.CUSTOM:
+    if ADS.doesExist(van_foc_name):
+        if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
             logger.warning(
                 f"Focussed Vanadium Data: '{van_foc_name}' has been loaded from the ADS from a previous focussing run. "
                 f"If the custom calibration has not changed, this is not a problem. "
