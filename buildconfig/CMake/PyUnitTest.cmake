@@ -62,11 +62,45 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
-      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT}
+      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT} LABELS
+                                          "UnitTest"
     )
     if(PYUNITTEST_RUN_SERIAL)
       set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)
     endif()
+  endforeach(part ${ARGN})
+endfunction()
+
+# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
+# This adds the named system test do they can be run individually
+
+function(PYSYSTEMTEST_ADD_TEST)
+
+  # Add all of the individual tests so that they can be run in parallel
+  foreach(part ${ARGN})
+    set(_test_name ${part})
+    if(NOT PR_JOB)
+      set(_system_test_options "")
+    else()
+      set(_system_test_options "--exclude-in-pull-requests")
+    endif()
+
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name}
+                                          --output-on-failure -l information ${_system_test_options}
+      )
+    else()
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name} --output-on-failure
+                                          -l information ${_system_test_options}
+      )
+    endif()
+
+    set_tests_properties(${_test_name} PROPERTIES LABELS "SystemTest")
+
+    if(PYUNITTEST_RUN_SERIAL)
+      set_tests_properties(${_test_name} PROPERTIES RUN_SERIAL 1)
+    endif()
+
   endforeach(part ${ARGN})
 endfunction()
 

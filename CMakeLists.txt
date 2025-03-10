@@ -185,6 +185,7 @@ endif()
 
 if(BUILD_MANTIDFRAMEWORK)
   add_subdirectory(scripts)
+  add_subdirectory(Testing/SystemTests/tests)
 endif()
 
 # Docs requirements
@@ -209,7 +210,7 @@ if(ENABLE_DOCS)
   add_subdirectory(docs)
 endif()
 
-# System test data target
+# System test targets
 add_subdirectory(Testing/SystemTests/scripts)
 
 if(COVERAGE)
