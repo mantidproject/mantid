@@ -1,0 +1,1 @@
+- ``getProtonCharge`` method of ``Run`` object was modified to account for period filtering on multi-period NeXus files.
