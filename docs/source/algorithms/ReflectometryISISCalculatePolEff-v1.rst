@@ -17,13 +17,25 @@ The ``NonMagInputRuns`` property takes a list of one or more run numbers related
 
 Likewise, the ``MagInputRuns`` property takes a list of one or more run numbers related to magnetic runs.
 
-If a ``FloodWorkspace`` is provided then a flood correction is performed as part of :ref:`algm-ReflectometryISISCreateTransmission` for both magnetic and non-magnetic input runs.
-
 If workspace indices are provided to the either of the ``BackgroundProcessingInstructions`` or ``MagBackgroundProcessingInstructions`` properties then a background subtraction is performed as part of :ref:`algm-ReflectometryISISCreateTransmission` for the relevant input runs.
 
-If both non-magnetic and magnetic inputs runs are provided, they must have the same number of x-values (spectra). If this is not the case then a sub-section of the spectra can be specified for processing through the ``ProcessingInstructions`` and ``MagProcessingInstructions`` properties.
+If both non-magnetic and magnetic inputs runs are provided, they must have the same number of spectra. If this is not the case then a sub-section of the spectra can be specified for processing through the ``ProcessingInstructions`` and ``MagProcessingInstructions`` properties.
 
-If diagnostic workspaces created as part of the :ref:`algm-PolarizationEfficienciesWildes` are required then the ``IncludeDiagnosticOutputs`` property can be used to enable output.
+The following parameters are passed directly to the child algorithms.  See documentation for the relevant algorithm for detail on each.
+
+:ref:`algm-ReflectometryISISCreateTransmission` for both magnetic and non-magnetic runs:
+
+- ``FloodWorkspace``
+- ``IOMonitorIndex``
+- ``MonitorIntegrationWavelengthMin``
+- ``MonitorIntegrationWavelengthMax``
+
+:ref:`algm-PolarizationEfficienciesWildes`:
+
+- ``IncludeDiagnosticOutputs``
+- ``Flippers``
+- ``InputPolariserEfficiency``
+- ``InputAnalyserEfficiency``
 
 Usage
 -----

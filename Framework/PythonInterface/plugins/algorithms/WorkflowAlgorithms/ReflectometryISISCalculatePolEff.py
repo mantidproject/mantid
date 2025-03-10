@@ -14,7 +14,10 @@ from mantid.kernel import (
 )
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantid.api import MatrixWorkspace
 
 _ALGS = {
     "TRANS_ALG": "ReflectometryISISCreateTransmission",
@@ -37,7 +40,7 @@ class PropData(DataName):
     get_value: Optional[Callable] = None
 
 
-def _int_array_to_string(raw_value):
+def _int_array_to_string(raw_value: list[int]) -> str:
     if len(raw_value) == 0:
         return ""
     min_val = min(raw_value)
@@ -81,7 +84,7 @@ _PROP_DATA = {
     "OUT_ALPHA": PropData(name="OutputAlpha", alg=_ALGS["EFF_ALG"]),
     "OUT_TWO_P_MINUS_ONE": PropData(name="OutputTwoPMinusOne", alg=_ALGS["EFF_ALG"]),
     "OUT_TWO_A_MINUS_ONE": PropData(name="OutputTwoAMinusOne", alg=_ALGS["EFF_ALG"]),
-    "OUT_WS": PropData(name="OutputWorkspace"),
+    "OUT_WS": PropData(name="OutputWorkspace", default="calc_pol_eff_out"),
 }
 
 _NON_PROP_DATA = {
@@ -119,8 +122,8 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
     def summary(self):
         """Return a summary of the algorithm."""
         return (
-            "A wrapper algorithm around `ReflectometryISISCreateTransmission`, `PolarizationEfficienciesWildes`"
-            " and `JoinISISPolarizationEfficiencies`."
+            "A wrapper algorithm that calculates polarization efficiencies using `ReflectometryISISCreateTransmission`, "
+            "`PolarizationEfficienciesWildes` and `JoinISISPolarizationEfficiencies`."
         )
 
     def seeAlso(self):
@@ -167,6 +170,12 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
             doc="A set of workspace indices to be passed as the ProcessingInstructions property when calculating the magnetic transmission"
             " workspace. If this property is not set then no background subtraction is performed.",
         )
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                _PROP_DATA["OUT_WS"].name, _PROP_DATA["OUT_WS"].default, direction=Direction.Output, optional=PropertyMode.Optional
+            ),
+            doc="The name of the workspace to be output as a result of the algorithm.",
+        )
         for alg, props in {
             _ALGS["TRANS_ALG"]: ["I0_MON_IDX", "MON_WAV_MIN", "MON_WAV_MAX", "FLOOD_WS"],
             _ALGS["EFF_ALG"]: [
@@ -182,12 +191,6 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
             ],
         }.items():
             self.copyProperties(alg, [_PROP_DATA[prop].name for prop in props])
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                _PROP_DATA["OUT_WS"].name, "calc_pol_eff_out", direction=Direction.Output, optional=PropertyMode.Optional
-            ),
-            doc="The name of the workspace to be output as a result of the algorithm.",
-        )
 
     def PyExec(self):
         # Set class member variables and perform post-start validation
@@ -198,6 +201,7 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
             _ALGS["JOIN_ALG"], {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"]
         )
         self._set_output_properties(join_output[0], eff_output)
+        self._clean_up([trans_output, trans_output_mag])
 
     def _create_transmission_workspaces(self) -> (list, list):
         trans_output = self._run_algorithm(_ALGS["TRANS_ALG"], self._populate_args_dict(_ALGS["TRANS_ALG"]), ["OutputWorkspace"])
@@ -267,10 +271,14 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
         eff_args.update(self._populate_args_dict(_ALGS["EFF_ALG"]))
         return eff_args
 
-    def _set_output_properties(self, join_ws, eff_output):
+    def _set_output_properties(self, join_ws: "MatrixWorkspace", eff_output: list):
         self.setProperty(_PROP_DATA["OUT_WS"].name, join_ws)
         for key in self.m_eff_alg_output_diag:
             self.setProperty(key.name, eff_output[key.alias])
+
+    def _clean_up(self, workspaces: list["MatrixWorkspace"]):
+        for ws in workspaces:
+            self._run_algorithm("DeleteWorkspace", {"Workspace": ws}, [])
 
 
 AlgorithmFactory.subscribe(ReflectometryISISCalculatePolEff)
