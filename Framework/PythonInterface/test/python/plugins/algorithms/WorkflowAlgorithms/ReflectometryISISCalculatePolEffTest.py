@@ -246,7 +246,13 @@ class ReflectometryISISCalculatePolEffTest(unittest.TestCase):
         alg.PyExec()
         mock_create_transmission_workspaces.assert_called_once()
         mock_calc_wildes.assert_called_once_with(non_mag_trans, None)
-        mock_run_alg.assert_called_once_with(_ALGS["JOIN_ALG"], {"test1_key": "test1_val", "test2_key": "test2_val"}, ["OutputWorkspace"])
+
+        call_list = [
+            call(_ALGS["JOIN_ALG"], {"test1_key": "test1_val", "test2_key": "test2_val"}, ["OutputWorkspace"]),
+            call("DeleteWorkspace", {"Workspace": "test_out_non_mag"}, []),
+        ]
+        self.assertEqual(call_list, mock_run_alg.call_args_list)
+
         mock_set_output.assert_called_once_with("test_out", eff_out)
 
 
