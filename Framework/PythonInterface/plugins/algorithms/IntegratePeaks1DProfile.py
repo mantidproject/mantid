@@ -28,6 +28,7 @@ from mantid.kernel import (
     PropertyCriterion,
     StringArrayProperty,
     UnitParams,
+    SpecialCoordinateSystem,
 )
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
@@ -42,6 +43,7 @@ from plugins.algorithms.peakdata_utils import (
 )
 from enum import Enum
 from typing import Sequence, Tuple
+from mantid.dataobjects import PeakShapeDetectorBin
 
 
 class PEAK_STATUS(Enum):
@@ -279,6 +281,10 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
+        import pydevd_pycharm
+
+        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+
         # get input
         ws = self.getProperty("InputWorkspace").value
         peaks = self.getProperty("PeaksWorkspace").value
@@ -334,7 +340,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
             peak_intens, peak_sigma = 0.0, 0.0
-            status = PEAK_STATUS.NO_PEAK
+            peak_status = PEAK_STATUS.NO_PEAK
 
             detid = peak.getDetectorID()
             bank_name = peaks.column("BankName")[ipk]
@@ -375,7 +381,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                 continue  # skip peak
 
             # update peak mask based on I/sig from fit
-            *_, i_over_sigma = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
             non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
             non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
             peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
@@ -384,7 +390,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
             is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
             if is_on_edge:
-                status = PEAK_STATUS.ON_EDGE
+                peak_status = PEAK_STATUS.ON_EDGE
                 if not integrate_on_edge:
                     self.delete_fit_result_workspaces(fit_result)
                     continue  # skip peak
@@ -406,10 +412,12 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             peak_mask.flat[initial_peak_mask] = fit_mask
 
             # calculate intensity
-            status = PEAK_STATUS.VALID
-            intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+            peak_status = PEAK_STATUS.VALID
+            intens, sigma, _, peak_limits = calc_intens_and_sigma_arrays(fit_result, error_strategy)
             peak_intens = np.sum(intens[fit_mask])
             peak_sigma = np.sqrt(np.sum(sigma[fit_mask] ** 2))
+
+            self._set_peak_shape(peak, peak_data.detids[peak_mask], peak_limits[fit_mask])
 
             if output_file:
                 intens_over_sig = peak_intens / peak_sigma if peak_sigma > 0 else 0.0
@@ -418,7 +426,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                         ipk,
                         peak,
                         intens_over_sig,
-                        status,
+                        peak_status,
                         peak_mask,
                         fit_mask,
                         func_generator.ysum,
@@ -438,6 +446,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
+
+    def _set_peak_shape(self, peak, det_ids, fit_limits):
+        det_bin_list = []
+        for detid, (startx, endx) in zip(det_ids, fit_limits):
+            det_bin_list.append((int(detid), startx, endx))
+        if len(det_bin_list) > 0:
+            peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
+            peak.setPeakShape(peak_shape)
 
     def exec_child_alg(self, alg_name, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
@@ -478,7 +494,7 @@ class PeakFunctionGenerator:
         self.cen_par_name: str = None
         self.intens_par_name: str = None
         self.width_par_name: str = None
-        self.width_max: float = None
+        self.width_min: float = None
         self.width_max: float = None
         self.peak_params_to_fix: Sequence[str] = peak_params_to_fix
         self.peak_mask: np.ndarray[float] = None
@@ -732,7 +748,7 @@ def calc_sigma_from_summation(xdat, edat_sq, ypeak, cutoff=0.025):
     ilo = np.clip(np.argmin(abs(ypeak_cumsum - cutoff)), a_min=0, a_max=nbins // 2)
     ihi = np.clip(np.argmin(abs(ypeak_cumsum - (1 - cutoff))), a_min=nbins // 2, a_max=nbins - 1) + 1
     bin_width = np.diff(xdat[ilo : ihi + 1])
-    return np.sqrt(np.sum(edat_sq[ilo:ihi] * (bin_width**2)))
+    return np.sqrt(np.sum(edat_sq[ilo:ihi] * (bin_width**2))), (xdat[ilo], xdat[ihi])
 
 
 def calc_intens_and_sigma_arrays(fit_result, error_strategy):
@@ -741,6 +757,7 @@ def calc_intens_and_sigma_arrays(fit_result, error_strategy):
     sigma = np.zeros(intens.shape)
     intens_over_sig = np.zeros(intens.shape)
     peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
+    peak_limits = np.full(intens.shape, None)
     for idom, comp_func in enumerate(function):
         [peak_func.setParameter(iparam, comp_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
         intens[idom] = peak_func.intensity()
@@ -749,10 +766,10 @@ def calc_intens_and_sigma_arrays(fit_result, error_strategy):
             sigma[idom] = peak_func.intensityError()
         else:
             ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom)
-            sigma[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
+            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
     ivalid = ~np.isclose(sigma, 0)
     intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
-    return intens, sigma, intens_over_sig
+    return intens, sigma, intens_over_sig, peak_limits
 
 
 def get_eval_ws(out_ws_name, idom):
