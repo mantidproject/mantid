@@ -109,6 +109,7 @@ set(TEST_PY_FILES
     PDConvertReciprocalSpaceTest.py
     PeakMatchingTest.py
     RebinRaggedTest.py
+    PoldiAutoCorrelation6Test.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py

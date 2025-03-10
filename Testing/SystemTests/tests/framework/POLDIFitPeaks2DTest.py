@@ -113,7 +113,7 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
 class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
-        corr = PoldiAutoCorrelation("si_data_6904")
+        corr = PoldiAutoCorrelation("si_data_6904", Version=5)
         peaks = PoldiPeakSearch(corr)
         peaks_ref, fit_plots = PoldiFitPeaks1D(corr, PoldiPeakTable="peaks")
         si_refs = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0", a=5.431, LatticeSpacingMin=0.7)
@@ -147,7 +147,7 @@ class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
 class POLDIFitPeaks2DIntegratedIntensities(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
-        corr = PoldiAutoCorrelation("si_data_6904")
+        corr = PoldiAutoCorrelation("si_data_6904", Version=5)
         peaks = PoldiPeakSearch(corr, MaximumPeakNumber=8)
         peaks_ref, fit_plots = PoldiFitPeaks1D(corr, PoldiPeakTable="peaks")
 
