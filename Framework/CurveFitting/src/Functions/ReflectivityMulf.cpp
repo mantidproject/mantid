@@ -270,9 +270,7 @@ void ReflectivityMulf::setAttribute(const std::string &attName, const API::IFunc
     m_nlayer_old = m_nlayer;
 
     // set the reflectivity layers
-    if (m_nlayer >= 0) {
-      clearAllParameters();
-    }
+    clearAllParameters();
 
     declareParameter("Theta", coeff[0]);
     declareParameter("ScaleFactor", coeff[1]);
