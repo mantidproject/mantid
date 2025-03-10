@@ -487,7 +487,7 @@ private:
   File do_prep_files(std::string const nxFile) {
     removeFile(nxFile); // in case previous run didn't clean up
 
-    cout << "Creating \"" << nxFile << "\"" << std::endl;
+    cout << "Creating \"" << nxFile << "\"" << endl;
     // create file
     File fileid(nxFile, NXACC_CREATE5);
 
@@ -499,7 +499,7 @@ private:
   }
 
   template <typename T> void do_rw_test(File &fileid, std::string const &dataname, T const &data) {
-    cout << "Testing attribute " << dataname << "\n";
+    cout << "Testing data " << dataname << "\n";
     // write
     fileid.writeData(dataname, data);
 
@@ -534,131 +534,88 @@ private:
     }
   }
 
-  // template<typename T>
-  // void do_rwslabvec_test(File &fileid, std::string const dataname, vector<T> const &data) {
-  //   cout << "Testing attribute " << dataname << "\n";
+  template <typename T> void do_rwslabvec_test(File &fileid, std::string const dataname, vector<T> const &data) {
+    //   cout << "Testing slab" << dataname << "\n";
 
-  //   // write
-  //   dimsize_t start(0), size(data.size());
-  //   fileid.makeData(dataname, getType<T>(), size);
-  //   fileid.openData(dataname);
-  //   fileid.putSlab(data, start, size);
-  //   fileid.closeData();
+    //   // write
+    //   dimsize_t start(0), size(data.size());
+    //   fileid.makeData(dataname, getType<T>(), size);
+    //   fileid.openData(dataname);
+    //   fileid.putSlab(data, start, size);
+    //   fileid.closeData();
 
-  //   // read
-  //   vector<T> output;
-  //   fileid.openData(dataname);
-  //   fileid.getSlab(&output, start, size);
+    //   // read
+    //   vector<T> output;
+    //   fileid.openData(dataname);
+    //   fileid.getSlab(&output, start, size);
 
-  //   // compare
-  //   TS_ASSERT_EQUALS(data, output);
+    //   // compare
+    //   TS_ASSERT_EQUALS(data, output);
+    // }
 
-  // fileid.putAttr("ch_attribute", ch_test_data, strlen(ch_test_data), NXnumtype::CHAR);
+    // void do_rwslab_double_test(File &fileid, std::string const &dataname) {
 
-  // int i = 42;
-  // fileid.putAttr("i4_attribute", &i, 1, Nxnumtype::INT32);
-  // float r = 3.14159265f;
-  // fileid.putattr("r4_attribute", &r, 1, NXnumtype::FLOAT32);
-  // dlink = fileid.getDataID();
-  // fileid.closeData();
-  // }
+    // //   cout << "Testing slab" << dataname << "\n";
 
-  // // read test
-  // void do_read_test(std::string const nxFile) {
+    //   double const r8_array[5][4] = {
+    //     {1.l, 2.l, 3.l, 4.l},
+    //     {5.l, 6.l, 7.l, 8.l},
+    //     {9.l, 10.l, 11.l, 12.l},
+    //     {13.l, 14.l, 15.l, 16.l},
+    //     {17.l, 18.l, 19.l, 20.l}
+    //   };
 
-  //   char name[NX_MAXNAMELEN], char_class[NX_MAXNAMELEN], char_buffer[128];
-  //   char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
-  //   char path[512];
+    //   // write
+    //   dimsize_t start(0), size(data.size());
+    //   fileid.makeData(dataname, getType<T>(), size);
+    //   fileid.openData(dataname);
+    //   fileid.putSlab(r8_array, start, size);
+    //   fileid.closeData();
 
-  //   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  //   File fileid(nxFile, NXACC_RDWR);
+    //   // read
+    //   vector<T> output;
+    //   fileid.openData(dataname);
+    //   fileid.getSlab(&output, start, size);
 
-  //   NXnumtype NXtype;
-  //   NXstatus entry_status, attr_status;
-  //   int NXrank, NXdims[32];
-  //   for (auto ainfo : fileid.getAttrInfos()) {
-  //     if (ainfo.type == NXnumtype::CHAR) {
-  //       NXlen = sizeof(char_buffer);
-  //       fileid.getAttr(ainfo.name, char_buffer, &NXlen, &NXtype);
-  //     }
-  //   }
-  //   fileid.openGroup("entry", "NXentry");
-  //   for (auto ainfo : fileid.getAttrInfos()) {
-  //     if (ainfo.type == NXnumtype::CHAR) {
-  //       NXlen = sizeof(char_buffer);
-  //       fileid.getAttr(ainfo,name, char_buffer, &NXlen, ainfo.type);
-  //     }
-  //   }
-  //   for (auto entry : fileid.getEntries()) {
-  //     if (entry.class.substr("SDS") != 0) {
-  //       if (entry_status != NXstatus::NX_EOD) {
-  //         printf("   Subgroup: %s(%s)\n", name, char_class);
-  //         entry_status = NXstatus::NX_OK;
-  //       }
-  //     } else {
-  //       void *data_buffer;
-  //       if (entry_status == NXstatus::NX_OK) {
-  //         fileid.openData(name);
-  //         fileid.getPath(path, 512);
-  //         fileid.getInfo(&NXrank, NXdims, &NXtype);
+    //   // compare
+    //   TS_ASSERT_EQUALS(data, output);
 
-  //         int n = 1;
-  //         for (int k = 0; k < NXrank; k++) {
-  //           n *= NXdims[k];
-  //         }
-  //         if (entry.type == NXnumtype::CHAR) {
-  //           fileid.getData(data_buffer);
-  //         } else if (entry.type != NXnumtype::FLOAT32 && entry.type != NXnumtype::FLOAT64) {
-  //           fileid.getData(data_buffer);
-  //         } else {
-  //           slab_start = {0, 0};
-  //           slab_size = {1, 4};
-  //           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           print_data("\n      ", std::cout, data_buffer, NXtype, 4);
-  //           slab_start[0] = TEST_FAILED;
-  //           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           print_data("      ", std::cout, data_buffer, NXtype, 4);
-  //           slab_start[0] = 2;
-  //           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           print_data("      ", std::cout, data_buffer, NXtype, 4);
-  //           slab_start[0] = 3;
-  //           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           print_data("      ", std::cout, data_buffer, NXtype, 4);
-  //           slab_start[0] = 4;
-  //           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           print_data("      ", std::cout, data_buffer, NXtype, 4);
-  //           if (NXgetattrinfo(fileid, &i) != NXstatus::NX_OK)
-  //             return TEST_FAILED;
-  //           if (i > 0) {
-  //             printf("      Number of attributes : %d\n", i);
-  //           }
-  //           for (auto ainfo : fileid.getAttrInfos()) {
-  //             switch (ainfo.type) {
-  //             case NXnumtype::INT32:
-  //               fileid.getAttr(ainfo.name, &i, &NXlen, ainfo.type);
-  //               break;
-  //             case NXnumtype::FLOAT32:
-  //               fileid.getAttr(ainfo.name, &r, &NXlen, ainfo.type);
-  //               break;
-  //             case NXnumtype::CHAR:
-  //               NXlen = sizeof(char_buffer);
-  //               fileid.getAttr(name, char_bufer, &NXlen, ainfo.type);
-  //               break;
-  //             default:
-  //               continue;
-  //             }
-  //         }
-  //       }
-  //       fileid.closeData();
-  //     }
-  //   }
-  //   fileid.closeGroup();
-  // }
+    //   fileid.putAttr("ch_attribute", ch_test_data, strlen(ch_test_data), NXnumtype::CHAR);
+
+    //   int i = 42;
+    //   fileid.putAttr("i4_attribute", &i, 1, NXnumtype::INT32);
+    //   float r = 3.14159265f;
+    //   fileid.putattr("r4_attribute", &r, 1, NXnumtype::FLOAT32);
+    //   dlink = fileid.getDataID();
+    //   fileid.closeData();
+
+    //   slab_start = {0, 0};
+    //   slab_size = {1, 4};
+    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   print_data("\n      ", std::cout, data_buffer, NXtype, 4);
+    //   slab_start[0] = TEST_FAILED;
+    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
+    //   slab_start[0] = 2;
+    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
+    //   slab_start[0] = 3;
+    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
+    //   slab_start[0] = 4;
+    //   if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   print_data("      ", std::cout, data_buffer, NXtype, 4);
+    //   if (NXgetattrinfo(fileid, &i) != NXstatus::NX_OK)
+    //     return TEST_FAILED;
+    //   if (i > 0) {
+    //     printf("      Number of attributes : %d\n", i);
+    //   }
+  }
 
 public:
   void test_napi_old() {
@@ -708,188 +665,21 @@ public:
     // NXlink glink, dlink;
     // int comp_array[100][20];
 
+    // GET ALL ATTRIBUTES, CHECK NAMES
+    // GET ALL ENTRIES, CHECK NAMES
+
     // cleanup and return
     fileid.close();
     cout << "all ok - done\n";
     removeFile(nxFile);
   }
 
-  //   void test_link(File fileid) {
-  //     cout << "Link Test\n";
-  //     // BEGIN LINK TEST
-  //     fileid.makeGroup("data", "NXdata");
-  //     fileid.openGroup("data", "NXdata");
-  //     NXlink dlink;
-  //     fileid.makeLink(dlink);
-  //     int dims[2] = {100, 20};
-  //     int comp_array[100, 20];
-  //     for (i = 0; i < 100; i++) {
-  //       for (j = 0; j < 20; j++) {
-  //         comp_array[i][j] = i;
-  //       }
-  //     }
-  //     int cdims[2] = {20, 20};
-  //     if (NXcompmakedata(fileid, "comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, cdims) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopendata(fileid, "comp_data") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXputdata(fileid, comp_array) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosedata(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXflush(&fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakedata(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     slab_size[0] = 1;
-  //     for (i = 0; i < 7; i++) {
-  //       slab_start[0] = i;
-  //       if (NXopendata(fileid, "flush_data") != NXstatus::NX_OK)
-  //         return TEST_FAILED;
-  //       if (NXputslab(fileid, &i, slab_start, slab_size) != NXstatus::NX_OK)
-  //         return TEST_FAILED;
-  //       if (NXflush(&fileid) != NXstatus::NX_OK)
-  //         return TEST_FAILED;
-  //     }
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakegroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     NXlen = 12;
-  //     if (NXmakedata(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopendata(fileid, "ch_data") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXputdata(fileid, "NeXus sample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosedata(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetgroupID(fileid, &glink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakegroup(fileid, "link", "NXentry") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopengroup(fileid, "link", "NXentry") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakelink(fileid, &glink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakenamedlink(fileid, "renLinkGroup", &glink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXmakenamedlink(fileid, "renLinkData", &dlink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclose(&fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     // END LINK TEST
-  //     // check links
-  //     std::cout << "check links\n";
-  //     NXlink blink;
-  //     if (NXopengroup(fileid, "entry", "NXentry") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetgroupID(fileid, &glink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopengroup(fileid, "data", "NXdata") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopendata(fileid, "r8_data") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetdataID(fileid, &dlink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosedata(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopendata(fileid, "r8_data") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetdataID(fileid, &blink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosedata(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-  //       std::cout << "Link check FAILED (r8_data)\n"
-  //                 << "original data\n";
-  //       NXIprintlink(fileid, &dlink);
-  //       std::cout << "linked data\n";
-  //       NXIprintlink(fileid, &blink);
-  //       return TEST_FAILED;
-  //     }
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-
-  //     if (NXopengroup(fileid, "link", "NXentry") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetpath(fileid, path, 512) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     std::cout << "Group path " << path << "\n";
-  //     if (NXgetgroupID(fileid, &blink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-  //       std::cout << "Link check FAILED (sample)\n"
-  //                 << "original group\n";
-  //       NXIprintlink(fileid, &glink);
-  //       std::cout << "linked group\n";
-  //       NXIprintlink(fileid, &blink);
-  //       return TEST_FAILED;
-  //     }
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-
-  //     std::cout << "renLinkGroup NXsample test\n";
-  //     if (NXopengroup(fileid, "renLinkGroup", "NXsample") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetgroupID(fileid, &blink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-  //       std::cout << "Link check FAILED (renLinkGroup)\n"
-  //                 << "original group\n";
-  //       NXIprintlink(fileid, &glink);
-  //       std::cout << "linked group\n";
-  //       NXIprintlink(fileid, &blink);
-  //       return TEST_FAILED;
-  //     }
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-
-  //     std::cout << "renLinkData test\n";
-  //     if (NXopendata(fileid, "renLinkData") != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXgetdataID(fileid, &blink) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-  //       std::cout << "Link check FAILED (renLinkData)\n"
-  //                 << "original group\n";
-  //       NXIprintlink(fileid, &glink);
-  //       std::cout << "linked group\n";
-  //       NXIprintlink(fileid, &blink);
-  //       return TEST_FAILED;
-  //     }
-  //     if (NXclosedata(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     if (NXclosegroup(fileid) != NXstatus::NX_OK)
-  //       return TEST_FAILED;
-  //     std::cout << "Link check OK\n";
-  // }
-
   void test_openPath() {
     cout << "tests for openPath\n";
 
+    // make file with path /entry
     string const filename("openpathtest.nxs");
-    File fileid(filename, NXACC_CREATE5);
-
-    // make path /entry
-    fileid.makeGroup("entry", "NXentry");
-    fileid.openGroup("entry", "NXentry");
+    File fileid = do_prep_files(filename);
 
     // make path /entry/data1
     fileid.writeData("data1", '1');
@@ -935,25 +725,66 @@ public:
     cout << "NXopenpath checks OK\n";
   }
 
-  // void do_link_test(File &fileid) {
-  //   fileid.makeGroup("data", "NXdata");
-  //   fileid.openGroup("data", "NXdata");
-  //   fileid.makeLink(dlink);
-  //   int dims[2] = {100, 20};
-  //   for (i = 0; i < 100; i++) {
-  //     for (j = 0; j < 20; j++) {
-  //       comp_array[i][j] = i;
-  //     }
-  //   }
-  //   int cdims[2] = {20, 20};
-  //   fileid.makeCompData("comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, dims);
-  //   fileid.openData("comp_data");
-  //   fileid.putData(comp_array);
-  //   fileid.closeData();
-  //   fileid.flush();
-  // }
+  void test_links() {
+    cout << "tests of linkature\n";
+
+    string const filename("nexuslinktest.nxs");
+    removeFile(filename);
+    File fileid = do_prep_files(filename);
+
+    // Create some data with a link
+    cout << "create entry at /entry/some_data\n";
+    string const somedata("this is some data");
+    fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
+    fileid.openData("some_data");
+    fileid.putData(&somedata);
+    NXlink datalink = fileid.getDataID();
+    fileid.closeData();
+    // Create a group, and link it to that data
+    cout << "create group at /entry/data to link to the data\n";
+    fileid.makeGroup("data", "NXdata");
+    fileid.openGroup("data", "NXdata");
+    fileid.makeLink(datalink);
+    fileid.closeGroup();
+
+    // check data link
+    fileid.openPath("/entry/data/some_data");
+    // TODO why can't we get the data through the link?
+    // string output1;
+    // fileid.getData(&output1);
+    // TS_ASSERT_EQUALS(somedata, output1);
+    NXlink res1 = fileid.getDataID();
+    TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
+    TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
+    printf("data link works\n");
+    fileid.closeGroup();
+
+    // Create two groups, group1 and group2
+    // Make a link inside group2 to group1
+    // make group1
+    cout << "create group /entry/group1\n";
+    std::string const strdata("NeXus sample data");
+    fileid.makeGroup("group1", "NXentry");
+    fileid.openGroup("group1", "NXentry");
+    NXlink grouplink = fileid.getGroupID();
+    fileid.closeGroup();
+    // make group 2
+    cout << "create group /entry/group2/group1\n";
+    fileid.makeGroup("group2", "NXentry");
+    fileid.openGroup("group2", "NXentry");
+    fileid.makeLink(grouplink);
+    fileid.closeGroup();
+
+    // check group link
+    fileid.openPath("/entry/group2/group1");
+    NXlink res2 = fileid.getGroupID();
+    TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
+    TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
+    printf("group link works\n");
+  }
 
   // void do_flush_test(File &fileid) {
+  //   //
   //   fileid.makeData("flush_data", NXnumtype::INT32, 1, unlimited_dims);
   //   slab_size[0] = 1;
   //   for (int i = 0; i < 7; i++) {
@@ -962,22 +793,6 @@ public:
   //     fileid.putSlab(&i, slab_start, slab_size);
   //     fileid.flush();
   //   }
-  //   fileid.closeGroup();
-
-  //   fileid.makeGroup("sample", "NXsample");
-  //   fileid.openGroup("sample", "NXsample");
-  //   NXlen = 12;
-  //   fileid.makeData("ch_data", NXnumtype::CHAR, 1, &NXlen);
-  //   fileid.openData("ch_data");
-  //   fileid.putData("NeXus sample");
   //   fileid.closeData();
-  //   glink = fileid.getGroupID();
-  //   fileid.closeGroup();
-  //   fileid.closeGroup();
-
-  //   fileid.makeGroup("link", "NXentry");
-  //   fileid.openGroup("link", "NXentry");
-  //   fileid.makeLink(glink);
-  //   fileid.closeGroup();
   // }
 };
