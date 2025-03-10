@@ -8,6 +8,7 @@ from isis_powder.routines import yaml_parser
 import warnings
 import json
 import hashlib
+import numpy as np
 
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
@@ -48,7 +49,9 @@ class InstrumentSettings(object):
 
     def get_kwargs_as_hash(self):
         # get self._kwargs dictionary as a hash value
-        encoded = json.dumps(self._kwargs, sort_keys=True).encode()
+        encoded = json.dumps(
+            self._kwargs, sort_keys=True, default=lambda arg: arg.tolist() if isinstance(arg, np.ndarray) else arg
+        ).encode()
         return hashlib.sha256(encoded).hexdigest()
 
     # __getattr__ is only called if the attribute was not set so we already know
