@@ -112,6 +112,7 @@ set(TEST_PY_FILES
     PeakMatchingTest.py
     RebinRaggedTest.py
     RefineSingleCrystalGoniometerTest.py
+    PoldiAutoCorrelation6Test.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py
