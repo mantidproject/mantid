@@ -1,0 +1,1 @@
+- When Calibrating/Focusing, either within the interface or in a script, the calibration information is now updately more reliably. Previously, when swapping custom roi or spectra lists after a calibration/focusing had already been run, the new roi wasn't being properly updated when recalibrated/refocused.
