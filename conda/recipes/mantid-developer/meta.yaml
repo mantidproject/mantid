@@ -6,7 +6,7 @@ package:
 
 requirements:
   run:
-    - ccache
+    - ccache==4.10.1
     - cmake {{ cmake }}
     - conda-verify
     - conda-wrappers # [win]
@@ -15,7 +15,7 @@ requirements:
     - euphonic {{ euphonic }}
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
-    - h5py
+    - h5py==3.12.1
     - hdf4 {{ hdf4 }}
     - hdf5 {{ hdf5 }}
     - jemalloc {{ jemalloc }} # [linux]
@@ -30,7 +30,7 @@ requirements:
     - muparser {{ muparser }}
     - ninja {{ ninja }}
     - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
-    - occt {{ occt }}
+    - occt==7.8.1
     - pip {{ pip }}
     - poco {{ poco }}
     - psutil {{ psutil }}
@@ -60,6 +60,10 @@ requirements:
     - zlib
     - joblib
     - orsopy {{ orsopy }}
+    - ipython==8.33.0
+    - libsystemd0==257.3
+    - spglib==2.6.0
+    - tinyxml==210.0.0
 
     # Not Windows, OpenGL implementation:
     - mesa-libgl-devel-cos7-x86_64>=18.3.4 # [linux]

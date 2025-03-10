@@ -610,6 +610,7 @@ void LoadNexusLogs::execLoader() {
     try {
       file.openData("proton_charge");
       std::vector<double> values;
+      std::cout << "change to trigger cppcheck";
       file.getDataCoerce(values);
       std::string units;
       file.getAttr("units", units);
