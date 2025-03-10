@@ -63,7 +63,7 @@ requirements:
     - ipython==8.33.0
     - libsystemd0==257.3
     - spglib==2.5.0
-    - tinyxml==210.0.0
+    - tinyxml2==10.0.0
 
     # Not Windows, OpenGL implementation:
     - mesa-libgl-devel-cos7-x86_64>=18.3.4 # [linux]
