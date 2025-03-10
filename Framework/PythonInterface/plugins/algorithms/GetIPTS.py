@@ -9,6 +9,9 @@ from mantid.kernel import ConfigService, Direction, IntBoundedValidator, StringL
 
 
 class GetIPTS(PythonAlgorithm):
+    # cache of run descriptions to filepath. It starts with no information when mantid is started
+    cache = dict()
+
     def category(self):
         return "Utility\\ORNL"
 
@@ -29,6 +32,8 @@ class GetIPTS(PythonAlgorithm):
         return instruments
 
     def findFile(self, instrument, runnumber):
+        """Static method to get the path for an instrument/runnumber.
+        This assumes that within the runtime of mantid the mapping will be consistent."""
         # start with run and check the five before it
         runIds = list(range(runnumber, runnumber - 6, -1))
         # check for one after as well
@@ -39,12 +44,22 @@ class GetIPTS(PythonAlgorithm):
         # prepend non-empty instrument name for FileFinder
         if len(instrument) > 0:
             runIds = ["%s_%s" % (instrument, runId) for runId in runIds]
+        else:
+            instrument_default = ConfigService.getInstrument().name()
+            self.log().information(f"Using default instrument: {instrument_default}")
 
         # look for a file
         for runId in runIds:
             self.log().information("Looking for '%s'" % runId)
+            # see if it is in the cache
+            cached_value = self.cache.get(runId, "")
+            if cached_value:
+                return cached_value
+            # use filefinder to look
             try:
-                return FileFinder.findRuns(runId)[0]
+                found_value = FileFinder.findRuns(runId)[0]
+                self.cache[runId] = found_value
+                return found_value
             except RuntimeError:
                 pass  # just keep looking
 
@@ -73,12 +88,17 @@ class GetIPTS(PythonAlgorithm):
 
         instruments = self.getValidInstruments()
         self.declareProperty("Instrument", "", StringListValidator(instruments), "Empty uses default instrument")
+        self.declareProperty("ClearCache", False, "Remove internal cache of run descriptions to file paths")
 
         self.declareProperty("Directory", "", direction=Direction.Output)
 
     def PyExec(self):
         instrument = self.getProperty("Instrument").value
         runnumber = self.getProperty("RunNumber").value
+
+        if self.getProperty("ClearCache"):
+            # drop the local cache of file information
+            self.cache.clear()
 
         direc = self.getIPTSLocal(instrument, runnumber)
         self.setPropertyValue("Directory", direc)
