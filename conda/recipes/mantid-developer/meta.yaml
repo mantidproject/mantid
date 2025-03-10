@@ -62,7 +62,7 @@ requirements:
     - orsopy {{ orsopy }}
     - ipython==8.33.0
     - libsystemd0==257.3
-    - spglib==2.6.0
+    - spglib==2.5.0
     - tinyxml==210.0.0
 
     # Not Windows, OpenGL implementation:
