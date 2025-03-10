@@ -273,13 +273,13 @@ def load_existing_calibration_files(calibration):
         msg = f"Could not open GSAS calibration file: {prm_filepath}"
         logger.warning(msg)
         return None
+    calibration.load_relevant_calibration_files()
     try:
         # read diff constants from prm
         write_diff_consts_to_table_from_prm(prm_filepath)
     except RuntimeError:
         logger.error(f"Invalid file selected: {prm_filepath}")
         return None
-    calibration.load_relevant_calibration_files()
     return prm_filepath
 
 
@@ -315,10 +315,8 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
-    :param bank: The bank to crop to, both if none.
-    :param calfile: The custom calibration file to crop to, not used if none.
-    :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
-    :return: dict containing calibrated diffractometer constants, and copy of the raw ceria workspace
+    :param calibration: CalibrationInfo object with details of calibration and grouping
+    :param full_instrument_cal_ws: The workspace with the full instrument calibration
     """
 
     # initial process of ceria ws
@@ -506,6 +504,14 @@ def process_vanadium(vanadium_path, calibration, full_calib):
     van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
     if ADS.doesExist(van_foc_name):
+        if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
+            logger.warning(
+                f"Focussed Vanadium Data: '{van_foc_name}' has been loaded from the ADS from a previous focussing run. "
+                f"If the custom calibration has not changed, this is not a problem. "
+                f"If the calibration has changed, check that the different groupings are not giving the same calibration file name. "
+                f"If they are, it is recommended that you rename them or clear the previous "
+                f"Focussed Vanadium Data from the ADS before you rerun Focus. "
+            )
         ws_van_foc = ADS.retrieve(van_foc_name)
     else:
         if ADS.doesExist(van_run):
