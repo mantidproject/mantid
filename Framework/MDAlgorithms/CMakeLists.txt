@@ -252,7 +252,6 @@ set(TEST_FILES
     BooleanBinaryOperationMDTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
-    CentroidPeaksMDTest.h
     ChangeQConventionTest.h
     CloneMDWorkspaceTest.h
     CompactMDTest.h
