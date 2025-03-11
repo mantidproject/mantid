@@ -68,6 +68,14 @@ const std::string sasDataI = "I";
 const std::string sasDataIdev = "Idev";
 const std::string sasDataMask = "Mask";
 
+// SASdata polarization
+// WIP: Initial proposal: https://wiki.cansas.org/index.php?title=NXcanSAS_v1.1
+const std::string sasDataPout = "Pout";
+const std::string sasDataPin = "Pin";
+const std::string sasDataPoutIndicesAttr = "Pout_indices";
+const std::string sasDataPinIndicesAttr = "Pin_indices";
+const std::string sasDataPolarizationUnitAttr = "none";
+
 // SASinstrument
 const std::string sasInstrumentClassAttr = "SASinstrument";
 const std::string nxInstrumentClassAttr = "NXinstrument";
@@ -111,6 +119,32 @@ const std::string sasInstrumentSampleThickness = "thickness";
 const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
 
 const std::string sasInstrumentIDF = "idf";
+
+struct InstrumentPolarizer {
+  explicit InstrumentPolarizer(const std::string &type, const std::string &name) : m_type(type), m_name(name) {};
+  std::string sasPolarizerClassAttr() const { return "SAS" + m_type; }
+  std::string sasPolarizerGroupAttr() const { return "sas" + m_type; }
+  std::string nxPolarizerClassAttr() const { return (m_type == "flipper") ? "NX" + m_type : "NXpolarizer"; }
+  static std::string sasPolarizerName() { return "name"; }
+  static std::string sasPolarizerDeviceType() { return "type"; }
+  static std::string sasPolarizerIDFDeviceType() { return "device-type"; }
+  static std::string sasPolarizerDistance() { return "distance"; }
+  static std::string sasPolarizerDistanceUnitAttr() { return "m"; }
+  std::string getComponentName() const { return m_name; }
+  std::string getComponentType() const { return m_type; }
+
+private:
+  std::string m_type;
+  std::string m_name;
+};
+
+const std::string sasSampleMagneticField = "magnetic_field";
+const std::string sasSampleEMFieldDirectionAttr = "direction";
+const std::string sasSampleEMFieldDirectionSphericalAttr = "direction_spherical";
+const std::string sasSampleEMFieldDirectionPolar = "polar_angle";
+const std::string sasSampleEMFieldDirectionAzimuthal = "azimuthal_angle";
+const std::string sasSampleEMFieldDirectionRotation = "rotation_angle";
+const std::string sasSampleEMFieldDirectionUnitsAttr = "degrees";
 
 // SASprocess
 const std::string sasProcessClassAttr = "SASprocess";
