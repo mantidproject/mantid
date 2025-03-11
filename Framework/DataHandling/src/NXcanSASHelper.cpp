@@ -5,10 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/NXcanSASHelper.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -28,8 +30,14 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
+using namespace Mantid::NeXus;
 
 namespace {
+//------ utility
+// For h5 -> hsize_t = unsigned long long
+constexpr int COMPRESSION_DEFLATE_LEVEL = 6;
+static const std::vector<std::string> DEFAULT_SPIN_ORDER = {"-1-1", "+1-1", "-1+1", "+1+1"};
+
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
@@ -93,7 +101,7 @@ void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName,
                                 std::string const &sasTerm) {
   if (run.hasProperty(propertyName)) {
     const auto *property = run.getProperty(propertyName);
-    Mantid::NeXus::H5Util::write(sasGroup, sasTerm, property->value());
+    H5Util::write(sasGroup, sasTerm, property->value());
   }
 }
 
@@ -135,10 +143,10 @@ bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
 template <typename NumT>
 void writeArray1DWithStrAttributes(H5::Group &group, const std::string &dataSetName, const std::vector<NumT> &values,
                                    const std::map<std::string, std::string> &attributes) {
-  Mantid::NeXus::H5Util::writeArray1D(group, dataSetName, values);
+  H5Util::writeArray1D(group, dataSetName, values);
   auto dataSet = group.openDataSet(dataSetName);
   for (const auto &attribute : attributes) {
-    Mantid::NeXus::H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
+    H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
   }
 }
 
@@ -198,6 +206,70 @@ void write2DWorkspace(H5::Group &group, Mantid::API::MatrixWorkspace_sptr worksp
   }
 }
 
+template <typename WorkspaceExtractorFunctor>
+void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces, WorkspaceExtractorFunctor func,
+                        const std::string &dataSetName, const SpinPairs &pairs,
+                        const std::map<std::string, std::string> &attributes = {}) {
+  using namespace H5Util;
+  using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
+  auto stateConverter = [](int spin) -> std::string { return (spin == 1) ? "+1" : std::to_string(spin); };
+
+  // Check First Workspace of group for dimensionality
+  auto ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(workspaces->getItem(0));
+  auto dimSignal = static_cast<hsize_t>(ws0->dataY(0).size());
+  auto dimHistogram = static_cast<hsize_t>(ws0->getNumberHistograms());
+
+  auto dataShape = std::vector<hsize_t>({2, 2, dimSignal});
+  auto slabShape = std::vector<hsize_t>({1, 1, dimSignal});
+  if (dimHistogram > 1) {
+    dataShape.insert(dataShape.begin() + 2, dimHistogram);
+    slabShape.insert(slabShape.begin() + 2, 1);
+  }
+
+  // Set the dimension
+  const int rank = static_cast<int>(dataShape.size());
+  // Get the Data Space definition for the 2D Data Set in the file
+  auto fileSpace = H5::DataSpace(rank, dataShape.data());
+  H5::DataType dataType(getType<double>());
+
+  // compression
+  H5::DSetCreatPropList propList;
+  propList.setChunk(rank, slabShape.data());
+  propList.setDeflate(COMPRESSION_DEFLATE_LEVEL);
+
+  // create index of position in hypermatrix
+  auto pos = std::vector<hsize_t>(static_cast<hsize_t>(rank), 0);
+
+  // Create the data set
+  auto dataSet = group.createDataSet(dataSetName, dataType, fileSpace, propList);
+  H5::DataSpace memSpace(rank, slabShape.data());
+  for (unsigned int i = 0; i < pairs.first.size(); i++) {
+    for (unsigned int j = 0; j < pairs.second.size(); j++) {
+      // Need the data space
+      auto state = stateConverter(pairs.first[i]) + stateConverter(pairs.second[j]);
+      auto index = indexOfWorkspaceForSpinState(DEFAULT_SPIN_ORDER, state);
+      pos.at(0) = i;
+      pos.at(1) = j;
+
+      if (dimHistogram == 1) {
+        fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), pos.data());
+        dataSet.write(func(workspaces, static_cast<int>(*index)), dataType, memSpace, fileSpace);
+      } else {
+        for (unsigned int n = 0; n < dimHistogram; n++) {
+          pos.at(2) = n;
+          fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), pos.data());
+          dataSet.write(func(workspaces, static_cast<int>(*index), n), dataType, memSpace, fileSpace);
+        }
+      }
+    }
+  }
+
+  // Add attributes to data set
+  for (const auto &[nameAttr, valueAttr] : attributes) {
+    writeStrAttribute(dataSet, nameAttr, valueAttr);
+  }
+}
+
 class SpectrumAxisValueProvider {
 public:
   explicit SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) : m_workspace(std::move(workspace)) {
@@ -231,6 +303,18 @@ private:
   Mantid::MantidVec m_currentAxisValues;
 };
 
+template <typename T> class WorkspaceGroupDataExtractor {
+public:
+  explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace) : m_workspace(workspace) {};
+  T *operator()(const Mantid::API::WorkspaceGroup_sptr & /*unused*/, int groupIndex, int spectraIndex = 0) {
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace->getItem(groupIndex));
+    return ws->dataY(spectraIndex).data();
+  }
+
+private:
+  WorkspaceGroup_sptr m_workspace;
+};
+
 /**
  * QxExtractor functor which allows us to convert 2D Qx data into point data.
  */
@@ -248,6 +332,51 @@ public:
 
   std::vector<T> qxPointData;
 };
+
+void addQ1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
+  std::map<std::string, std::string> qAttributes;
+  // Prepare units
+  auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
+  qUnit = getMomentumTransferLabel(qUnit);
+  qAttributes.emplace(sasUnitAttr, qUnit);
+
+  // Add Qdev with units if available
+  if (workspace->hasDx(0)) {
+    H5Util::writeStrAttribute(data, sasDataQUncertaintyAttr, sasDataQdev);
+    H5Util::writeStrAttribute(data, sasDataQUncertaintiesAttr, sasDataQdev);
+
+    qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
+    qAttributes.emplace(sasUncertaintiesAttr, sasDataQdev);
+
+    const auto qResolution = workspace->pointStandardDeviations(0);
+    std::map<std::string, std::string> xUncertaintyAttributes;
+    xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
+    writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(), xUncertaintyAttributes);
+  }
+
+  // We finally add the Q data with necessary attributes
+  const auto &qValue = workspace->points(0);
+  writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
+}
+
+void addQ2D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
+  // Store the 2D Qx data + units
+  std::map<std::string, std::string> qxAttributes;
+  auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
+  qxUnit = getMomentumTransferLabel(qxUnit);
+  qxAttributes.emplace(sasUnitAttr, qxUnit);
+  QxExtractor<double> qxExtractor;
+  write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
+
+  // Get 2D Qy data and store it
+  std::map<std::string, std::string> qyAttributes;
+  auto qyUnit = getUnitFromMDDimension(workspace->getDimension(1));
+  qyUnit = getMomentumTransferLabel(qyUnit);
+  qyAttributes.emplace(sasUnitAttr, qyUnit);
+
+  SpectrumAxisValueProvider spectrumAxisValueProvider(workspace);
+  write2DWorkspace(data, workspace, sasDataQy, spectrumAxisValueProvider, qyAttributes);
+}
 
 } // namespace
 
@@ -301,11 +430,10 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
         const auto distance = component->getDistance(*sample);
         std::map<std::string, std::string> sddAttributes;
         sddAttributes.insert(std::make_pair(sasUnitAttr, sasInstrumentDetectorSddUnitAttrValue));
-        auto detector = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasDetectorName, nxInstrumentDetectorClassAttr,
-                                                                 sasInstrumentDetectorClassAttr);
-        Mantid::NeXus::H5Util::write(detector, sasInstrumentDetectorName, detectorName);
-        Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(detector, sasInstrumentDetectorSdd, distance,
-                                                                   sddAttributes);
+        auto detector = H5Util::createGroupCanSAS(group, sasDetectorName, nxInstrumentDetectorClassAttr,
+                                                  sasInstrumentDetectorClassAttr);
+        H5Util::write(detector, sasInstrumentDetectorName, detectorName);
+        H5Util::writeScalarDataSetWithStrAttributes(detector, sasInstrumentDetectorSdd, distance, sddAttributes);
       }
     }
   }
@@ -327,41 +455,122 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
                    const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
-  auto instrument = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup, nxInstrumentClassAttr,
-                                                             sasInstrumentClassAttr);
+  auto instrument =
+      H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup, nxInstrumentClassAttr, sasInstrumentClassAttr);
   auto instrumentName = getInstrumentName(workspace);
-  Mantid::NeXus::H5Util::write(instrument, sasInstrumentName, instrumentName);
+  H5Util::write(instrument, sasInstrumentName, instrumentName);
 
   // Setup the detector
   addDetectors(instrument, workspace, detectorNames);
 
   // Setup source
   const std::string sasSourceName = sasInstrumentSourceGroupName;
-  auto source = Mantid::NeXus::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
-                                                         sasInstrumentSourceClassAttr);
-  Mantid::NeXus::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
+  auto source =
+      H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr, sasInstrumentSourceClassAttr);
+  H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
 
   // Setup Aperture
   const std::string sasApertureName = sasInstrumentApertureGroupName;
-  auto aperture = Mantid::NeXus::H5Util::createGroupCanSAS(instrument, sasApertureName, nxInstrumentApertureClassAttr,
-                                                           sasInstrumentApertureClassAttr);
+  auto aperture = H5Util::createGroupCanSAS(instrument, sasApertureName, nxInstrumentApertureClassAttr,
+                                            sasInstrumentApertureClassAttr);
 
-  Mantid::NeXus::H5Util::write(aperture, sasInstrumentApertureShape, geometry);
+  H5Util::write(aperture, sasInstrumentApertureShape, geometry);
 
   std::map<std::string, std::string> beamSizeAttrs;
   beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
   if (beamHeight != 0) {
-    Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight, beamHeight,
-                                                               beamSizeAttrs);
+    H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight, beamHeight, beamSizeAttrs);
   }
   if (beamWidth != 0) {
-    Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth, beamWidth,
-                                                               beamSizeAttrs);
+    H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth, beamWidth, beamSizeAttrs);
   }
 
   // Add IDF information
   auto idf = getIDF(workspace);
-  Mantid::NeXus::H5Util::write(instrument, sasInstrumentIDF, idf);
+  H5Util::write(instrument, sasInstrumentIDF, idf);
+}
+
+//------- SASpolarization
+
+void addPolarizerComponentMetadata(H5::Group &group, const MatrixWorkspace_sptr &workspace,
+                                   const InstrumentPolarizer &polarizer) {
+
+  auto instrument = workspace->getInstrument();
+  auto component = instrument->getComponentByName(polarizer.getComponentName());
+
+  if (component) {
+    const auto sample = instrument->getSample();
+    const auto distance = component->getDistance(*sample);
+    const auto type = component->getStringParameter(polarizer.sasPolarizerIDFDeviceType());
+
+    H5Util::write(group, polarizer.sasPolarizerDeviceType(), type.front());
+    std::map<std::string, std::string> distanceAttrs;
+    distanceAttrs.insert(std::make_pair(sasUnitAttr, polarizer.sasPolarizerDistanceUnitAttr()));
+    NeXus::H5Util::writeScalarDataSetWithStrAttributes(group, polarizer.sasPolarizerDistance(), distance,
+                                                       distanceAttrs);
+  }
+}
+
+void addPolarizer(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                  const std::string &componentName, const std::string &componentType) {
+
+  auto const instrumentAttr = InstrumentPolarizer(componentType, componentName);
+  auto instrumentGroup =
+      group.exists(sasInstrumentGroupName)
+          ? group.openGroup(sasInstrumentGroupName)
+          : H5Util::createGroupCanSAS(group, sasInstrumentGroupName, nxInstrumentClassAttr, sasInstrumentClassAttr);
+
+  auto polarizerGroup =
+      H5Util::createGroupCanSAS(instrumentGroup, instrumentAttr.sasPolarizerGroupAttr(),
+                                instrumentAttr.nxPolarizerClassAttr(), instrumentAttr.sasPolarizerClassAttr());
+
+  H5Util::write(polarizerGroup, instrumentAttr.sasPolarizerName(), componentName);
+  addPolarizerComponentMetadata(polarizerGroup, workspace, instrumentAttr);
+}
+
+void addEMFieldDirection(H5::Group &group, const std::string &emFieldDir) {
+  // expect to recibe a comma separated string with directions polar,azimuthal,rotation.
+  const auto directions = Mantid::Kernel::VectorHelper::splitStringIntoVector<std::string>(emFieldDir);
+  const auto angles = std::vector<std::string>{sasSampleEMFieldDirectionPolar, sasSampleEMFieldDirectionAzimuthal,
+                                               sasSampleEMFieldDirectionRotation};
+
+  if (!directions.empty()) {
+    std::map<std::string, std::string> magFieldAttrs;
+    magFieldAttrs.insert(std::make_pair(sasUnitAttr, sasSampleEMFieldDirectionUnitsAttr));
+    for (size_t i = 0; i < directions.size(); i++)
+      H5Util::writeScalarDataSetWithStrAttributes(group, angles.at(i), directions.at(i), magFieldAttrs);
+  }
+}
+
+void addSampleEMFields(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                       const std::string &emFieldStrengthLog, const std::string &emFieldDir) {
+
+  if (workspace->run().hasProperty(emFieldStrengthLog)) {
+    auto magFStrength = workspace->run().getLogAsSingleValue(emFieldStrengthLog);
+    auto const magFStrengthUnits = workspace->run().getProperty(emFieldStrengthLog)->units();
+
+    std::map<std::string, std::string> magFieldAttrs;
+    magFieldAttrs.insert(std::make_pair(sasUnitAttr, magFStrengthUnits));
+    // need more information about how to set the direction
+
+    auto sampleGroup = group.exists(sasInstrumentSampleGroupAttr)
+                           ? group.openGroup(sasInstrumentSampleGroupAttr)
+                           : H5Util::createGroupCanSAS(group, sasInstrumentSampleGroupAttr, nxInstrumentSampleClassAttr,
+                                                       sasInstrumentSampleClassAttr);
+    H5Util::writeScalarDataSetWithStrAttributes(sampleGroup, sasSampleMagneticField, magFStrength, magFieldAttrs);
+    addEMFieldDirection(sampleGroup, emFieldDir);
+  }
+}
+
+std::pair<std::vector<int>, std::vector<int>> makeSpinVectors(const std::vector<std::string> &inputSpinStates) {
+  std::vector<int> Pout;
+  std::vector<int> Pin;
+  //  TODO spin states for 2 workspace group
+  if (inputSpinStates.size() == 4) {
+    Pin = std::vector<int>({-1, 1});
+    Pout = std::vector<int>({-1, 1});
+  }
+  return std::make_pair(Pin, Pout);
 }
 
 //------- SASsample
@@ -372,13 +581,13 @@ void addSample(H5::Group &group, const double &sampleThickness) {
   }
   std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
 
-  auto sample = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasSampleNameForGroup, nxInstrumentSampleClassAttr,
-                                                         sasInstrumentSampleClassAttr);
+  auto sample = H5Util::createGroupCanSAS(group, sasSampleNameForGroup, nxInstrumentSampleClassAttr,
+                                          sasInstrumentSampleClassAttr);
 
   std::map<std::string, std::string> sampleThicknessAttrs;
   sampleThicknessAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
-  Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness, sampleThickness,
-                                                             sampleThicknessAttrs);
+  H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness, sampleThickness,
+                                              sampleThicknessAttrs);
 }
 
 /**
@@ -390,19 +599,18 @@ void addSample(H5::Group &group, const double &sampleThickness) {
 void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process =
-      Mantid::NeXus::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
+  auto process = H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
   // Add name
-  Mantid::NeXus::H5Util::write(process, sasProcessName, sasProcessNameValue);
+  H5Util::write(process, sasProcessName, sasProcessNameValue);
 
   // Add creation date of the file
   auto date = getDate();
-  Mantid::NeXus::H5Util::write(process, sasProcessDate, date);
+  H5Util::write(process, sasProcessDate, date);
 
   // Add Mantid version
   const auto version = std::string(MantidVersion::version());
-  Mantid::NeXus::H5Util::write(process, sasProcessTermSvn, version);
+  H5Util::write(process, sasProcessTermSvn, version);
 
   // Add log values
   const auto run = workspace->run();
@@ -421,19 +629,18 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
                 const Mantid::API::MatrixWorkspace_sptr &canWorkspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process =
-      Mantid::NeXus::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
+  auto process = H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
   // Add name
-  Mantid::NeXus::H5Util::write(process, sasProcessName, sasProcessNameValue);
+  H5Util::write(process, sasProcessName, sasProcessNameValue);
 
   // Add creation date of the file
   auto date = getDate();
-  Mantid::NeXus::H5Util::write(process, sasProcessDate, date);
+  H5Util::write(process, sasProcessDate, date);
 
   // Add Mantid version
   const auto version = std::string(MantidVersion::version());
-  Mantid::NeXus::H5Util::write(process, sasProcessTermSvn, version);
+  H5Util::write(process, sasProcessTermSvn, version);
 
   const auto run = workspace->run();
   addPropertyFromRunIfExists(run, sasProcessUserFileInLogs, process, sasProcessTermUserFile);
@@ -441,7 +648,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 
   // Add can run number
   const auto canRun = canWorkspace->getRunNumber();
-  Mantid::NeXus::H5Util::write(process, sasProcessTermCan, std::to_string(canRun));
+  H5Util::write(process, sasProcessTermCan, std::to_string(canRun));
 }
 
 /**
@@ -453,7 +660,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
   // Populate process entry
-  Mantid::NeXus::H5Util::write(process, entryName, entryValue);
+  H5Util::write(process, entryName, entryValue);
 }
 
 //------- SAStransmission_spectrum
@@ -461,21 +668,19 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
                      const std::string &transmissionName) {
   // Setup process
   const std::string sasTransmissionName = sasTransmissionSpectrumGroupName + "_" + transmissionName;
-  auto transmission = Mantid::NeXus::H5Util::createGroupCanSAS(
-      group, sasTransmissionName, nxTransmissionSpectrumClassAttr, sasTransmissionSpectrumClassAttr);
+  auto transmission = H5Util::createGroupCanSAS(group, sasTransmissionName, nxTransmissionSpectrumClassAttr,
+                                                sasTransmissionSpectrumClassAttr);
 
   // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty,
   // @T_uncertainties, @name, @timestamp
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasSignal, sasTransmissionSpectrumT);
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT);
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainty,
-                                           sasTransmissionSpectrumTdev);
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainties,
-                                           sasTransmissionSpectrumTdev);
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumNameAttr, transmissionName);
+  H5Util::writeStrAttribute(transmission, sasSignal, sasTransmissionSpectrumT);
+  H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT);
+  H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainty, sasTransmissionSpectrumTdev);
+  H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainties, sasTransmissionSpectrumTdev);
+  H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumNameAttr, transmissionName);
 
   auto date = getDate();
-  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTimeStampAttr, date);
+  H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTimeStampAttr, date);
 
   //-----------------------------------------
   // Add T with units + uncertainty definition
@@ -514,31 +719,13 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
 
 void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // Add attributes for @signal, @I_axes, @Q_indices,
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataQ);
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
-  Mantid::NeXus::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0});
+  H5Util::writeStrAttribute(data, sasSignal, sasDataI);
+  H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataQ);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
+  H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0});
 
-  if (workspace->hasDx(0)) {
-    Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataQUncertaintyAttr, sasDataQdev);
-    Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataQUncertaintiesAttr, sasDataQdev);
-  }
-
-  //-----------------------------------------
-  // Add Q with units  + uncertainty definition
-  const auto &qValue = workspace->points(0);
-  std::map<std::string, std::string> qAttributes;
-  auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
-  qUnit = getMomentumTransferLabel(qUnit);
-  qAttributes.emplace(sasUnitAttr, qUnit);
-  if (workspace->hasDx(0)) {
-    qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
-    qAttributes.emplace(sasUncertaintiesAttr, sasDataQdev);
-  }
-
-  writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
-
+  addQ1D(data, workspace);
   //-----------------------------------------
   // Add I with units + uncertainty definition
   const auto &intensity = workspace->y(0);
@@ -558,16 +745,6 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
   eAttributes.insert(std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
 
   writeArray1DWithStrAttributes(data, sasDataIdev, intensityUncertainty.rawData(), eAttributes);
-
-  //-----------------------------------------
-  // Add Qdev with units if available
-  if (workspace->hasDx(0)) {
-    const auto qResolution = workspace->pointStandardDeviations(0);
-    std::map<std::string, std::string> xUncertaintyAttributes;
-    xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
-
-    writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(), xUncertaintyAttributes);
-  }
 }
 
 /**
@@ -615,31 +792,15 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
     throw std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs to have 2 numeric axes.");
   }
   // Add attributes for @signal, @I_axes, @Q_indices,
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
+  H5Util::writeStrAttribute(data, sasSignal, sasDataI);
   const std::string sasDataIAxesAttr2D = sasDataQ + sasSeparator + sasDataQ;
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataIAxesAttr2D);
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
-  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
+  H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataIAxesAttr2D);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
   // Write the Q Indices as Int Array
-  Mantid::NeXus::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1});
+  H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1});
 
-  // Store the 2D Qx data + units
-  std::map<std::string, std::string> qxAttributes;
-  auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
-  qxUnit = getMomentumTransferLabel(qxUnit);
-  qxAttributes.emplace(sasUnitAttr, qxUnit);
-  QxExtractor<double> qxExtractor;
-  write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
-
-  // Get 2D Qy data and store it
-  std::map<std::string, std::string> qyAttributes;
-  auto qyUnit = getUnitFromMDDimension(workspace->getDimension(1));
-  qyUnit = getMomentumTransferLabel(qyUnit);
-  qyAttributes.emplace(sasUnitAttr, qyUnit);
-
-  SpectrumAxisValueProvider spectrumAxisValueProvider(workspace);
-  write2DWorkspace(data, workspace, sasDataQy, spectrumAxisValueProvider, qyAttributes);
-
+  addQ2D(data, workspace);
   // Get 2D I data and store it
   std::map<std::string, std::string> iAttributes;
   auto iUnit = getIntensityUnit(workspace);
@@ -659,6 +820,44 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
   write2DWorkspace(data, workspace, sasDataIdev, iDevExtractor, eAttributes);
 }
 
+void addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &wsGroup,
+                      const std::string &inputSpinStates) {
+  //  Add attributes for @signal, @I_axes, @Q_indices,
+  H5Util::writeStrAttribute(data, sasSignal, sasDataI);
+  const std::string sasDataIAxesAttrSpin = sasDataPin + sasSeparator + sasDataPout + sasSeparator + sasDataQ;
+  H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataIAxesAttrSpin);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
+  H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
+  //  Write the Q Indices as Int Array
+  H5Util::writeNumAttribute(data, sasDataPinIndicesAttr, 0);
+  H5Util::writeNumAttribute(data, sasDataPoutIndicesAttr, 1);
+  H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1, 2});
+
+  // store Pin/ Pout
+  std::map<std::string, std::string> polAttributes;
+  polAttributes.emplace(sasUnitAttr, sasDataPolarizationUnitAttr);
+  auto const inputSpinOrder = Algorithms::PolarizationCorrectionsHelpers::splitSpinStateString(inputSpinStates);
+  auto const spinPairs = makeSpinVectors(inputSpinOrder);
+  writeArray1DWithStrAttributes(data, sasDataPin, spinPairs.first, polAttributes);
+  writeArray1DWithStrAttributes(data, sasDataPout, spinPairs.second, polAttributes);
+
+  // add Q
+  auto const ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+  auto dim = getWorkspaceDimensionality(ws0);
+  if (dim == WorkspaceDimensionality::oneD) {
+    addQ1D(data, ws0);
+  } else {
+    // Store the 2D Qx data + units
+    addQ2D(data, ws0);
+  }
+
+  // add signal
+  WorkspaceGroupDataExtractor<double> wsGroupExtractor(wsGroup);
+
+  writePolarizedData(data, wsGroup, wsGroupExtractor, sasDataI, spinPairs);
+  // TODO add signal error 1D + 2D
+}
+
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto numberOfHistograms = workspace->getNumberHistograms();
   WorkspaceDimensionality dimensionality(WorkspaceDimensionality::other);
@@ -668,23 +867,6 @@ WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWork
     dimensionality = WorkspaceDimensionality::twoD;
   }
   return dimensionality;
-}
-
-std::vector<std::string> splitDetectorNames(std::string detectorNames) {
-  const std::string delimiter = ",";
-  std::vector<std::string> detectors;
-  size_t pos(0);
-
-  while ((pos = detectorNames.find(delimiter)) != std::string::npos) {
-    std::string detectorName = detectorNames.substr(0, pos);
-    boost::algorithm::trim(detectorName);
-    detectors.emplace_back(detectorName);
-    detectorNames.erase(0, pos + delimiter.length());
-  }
-  // Push remaining element
-  boost::algorithm::trim(detectorNames);
-  detectors.emplace_back(detectorNames);
-  return detectors;
 }
 
 } // namespace Mantid::DataHandling::NXcanSAS
