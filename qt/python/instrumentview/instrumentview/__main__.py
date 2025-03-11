@@ -4,6 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from .InstrumentView import InstrumentView
+from instrumentview.InstrumentView import InstrumentView
+import argparse
+from pathlib import Path
 
-InstrumentView.main()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Displays the 3D view of an instrument, given a file.")
+    parser.add_argument("--file", help="File path", type=str, required=True)
+    args = parser.parse_args()
+    InstrumentView.main(Path(args.file))
