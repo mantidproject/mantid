@@ -13,7 +13,8 @@ constexpr int TEST_SUCCEED{0};
   }
 
 namespace LegacyNexusTest {
-void print_data(const std::string &prefix, std::ostream &stream, const void *data, const NXnumtype type, const int num);
+void print_data(const std::string &prefix, std::ostream &stream, const void *data,
+                const Mantid::LegacyNexus::NXnumtype type, const int num);
 void write_dmc01(const std::string &filename);
 void write_dmc02(const std::string &filename);
 /// remove a file if it exists

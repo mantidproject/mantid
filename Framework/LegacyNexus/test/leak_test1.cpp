@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 using LegacyNexusTest::removeFile;
+using namespace Mantid::LegacyNexus;
 
 int main() {
   NXaccess access_mode = NXACC_CREATE5;
