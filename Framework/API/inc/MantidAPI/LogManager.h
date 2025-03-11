@@ -223,7 +223,7 @@ protected:
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const std::string PROTON_CHARGE_LOG_NAME;
-  /// Flag to signify if a filter has been applied to getProtonCharge
+  /// Flag to signify if a filter has been applied to the proton charge log
   static const std::string PROTON_CHARGE_UNFILTERED_LOG_NAME;
 
 private:
