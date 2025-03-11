@@ -418,22 +418,18 @@ public:
     cout << "Leak Test 2 Success!\n";
   }
 
+#ifndef __WIN32
+  // NOTE this test produces stack overflow errors on the windows runners
   void test_leak3() {
     cout << "Running Leak Test 3\n";
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
-#ifdef __WIN32
-    // NOTE the Windows runners do not have enough stack space for the full test
-    // rather than skip the entire test, we can use a smaller array size
-    // it is no longer testing the same behavior on Windows with this choice.
     std::size_t const TEST_SIZE(8);
-#else
     std::size_t const TEST_SIZE(512);
-#endif
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("leak_test.nxs");
-    int64_t const iBinarySize = TEST_SIZE * TEST_SIZE;
+    int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     int aiBinaryData[iBinarySize];
 
@@ -476,6 +472,7 @@ public:
       cout << "Leak Test 3 Success!\n";
     }
   }
+#endif
 
   /**
    * These tests correspond to tests inside napi_test.cpp
