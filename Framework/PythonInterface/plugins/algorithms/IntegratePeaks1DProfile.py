@@ -281,10 +281,6 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        import pydevd_pycharm
-
-        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
-
         # get input
         ws = self.getProperty("InputWorkspace").value
         peaks = self.getProperty("PeaksWorkspace").value
@@ -449,8 +445,9 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
     def _set_peak_shape(self, peak, det_ids, fit_limits):
         det_bin_list = []
-        for detid, (startx, endx) in zip(det_ids, fit_limits):
-            det_bin_list.append((int(detid), startx, endx))
+        for detid, limits in zip(det_ids, fit_limits):
+            if limits:
+                det_bin_list.append((int(detid), limits[0], limits[-1]))
         if len(det_bin_list) > 0:
             peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
             peak.setPeakShape(peak_shape)
