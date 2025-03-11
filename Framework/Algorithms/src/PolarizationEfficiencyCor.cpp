@@ -102,7 +102,7 @@ void PolarizationEfficiencyCor::init() {
                   "Flipper configurations of the input workspaces  (Wildes method only)");
 
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, true, '+', '-', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, true, "+", "-", true);
   declareProperty(Prop::OUTPUT_WILDES_SPIN_STATES, "", spinStateValidator,
                   "The order of the spin states in the output workspace. (Wildes method only).");
 
@@ -114,7 +114,7 @@ void PolarizationEfficiencyCor::init() {
                   "(Fredrikze method only)");
 
   const auto fredrikzeSpinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, 'p', 'a', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, "p", "a", true);
 
   declareProperty(Prop::INPUT_FRED_SPIN_STATES, "", fredrikzeSpinStateValidator,
                   "The order of spin states in the input workspace group. The possible values are 'pp,pa,ap,aa' or "
