@@ -230,7 +230,7 @@ public:
     fun.setAttributeValue("Ion", "Ce");
     TS_ASSERT(!isFixed(fun, "B20"));
     TS_ASSERT(!isFixed(fun, "B21"));
-    TS_ASSERT(isFixed(fun, "IB21"));
+    TS_ASSERT(!isFixed(fun, "IB21"));
     TS_ASSERT(!isFixed(fun, "B22"));
     TS_ASSERT(!isFixed(fun, "IB22"));
 
