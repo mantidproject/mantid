@@ -80,7 +80,7 @@ void MuonNexusReader::openFirstNXentry(Mantid::LegacyNexus::File &handle) {
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readFromFile(const string &filename) {
-  Mantid::LegacyNexus::File handle(filename, NXACC_READ);
+  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXACC_READ);
   openFirstNXentry(handle);
 
   // find all of the NXdata in the entry
@@ -238,7 +238,7 @@ void MuonNexusReader::readLogData(const string &filename) {
   // reset the count of logs
   m_nexusLogCount = 0;
 
-  Mantid::LegacyNexus::File handle(filename, NXACC_READ);
+  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXACC_READ);
   openFirstNXentry(handle);
 
   // read nexus fields at this level looking for NXlog and loading these into
@@ -299,14 +299,14 @@ bool MuonNexusReader::readMuonLogData(Mantid::LegacyNexus::File &handle) {
   std::string units = "";
 
   Mantid::LegacyNexus::Info info = handle.getInfo();
-  if (info.type == NXnumtype::FLOAT32 && info.dims.size() == 1) {
+  if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT32 && info.dims.size() == 1) {
     isNumeric = true;
     boost::scoped_array<float> dataVals(new float[info.dims[0]]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
     values.assign(dataVals.get(), dataVals.get() + info.dims[0]);
     stringValues.resize(info.dims[0]); // Leave empty
-  } else if (info.type == NXnumtype::CHAR && info.dims.size() == 2) {
+  } else if (info.type == Mantid::LegacyNexus::NXnumtype::CHAR && info.dims.size() == 2) {
     boost::scoped_array<char> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
@@ -333,7 +333,7 @@ bool MuonNexusReader::readMuonLogData(Mantid::LegacyNexus::File &handle) {
 
   info = handle.getInfo();
   boost::scoped_array<float> timeVals(new float[info.dims[0]]);
-  if (info.type == NXnumtype::FLOAT32 && info.dims.size() == 1) {
+  if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT32 && info.dims.size() == 1) {
     handle.getData(timeVals.get());
   } else {
     throw std::runtime_error("Error in MuonNexusReader: expected float array for log times");

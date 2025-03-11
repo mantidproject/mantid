@@ -7,6 +7,8 @@
 
 #include <hdf5.h>
 
+using namespace Mantid::LegacyNexus;
+
 /* HDF5 interface */
 
 extern NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
