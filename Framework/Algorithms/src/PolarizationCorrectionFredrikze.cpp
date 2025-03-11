@@ -297,7 +297,7 @@ void PolarizationCorrectionFredrikze::init() {
       "An output workspace.");
 
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, 'p', 'a', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, "p", "a", true);
 
   declareProperty(Prop::INPUT_SPIN_STATES, "", spinStateValidator,
                   "The order of spin states in the input workspace group. The possible values are 'pp,pa,ap,aa' or "
