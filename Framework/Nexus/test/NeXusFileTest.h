@@ -426,9 +426,9 @@ public:
     std::size_t const TEST_SIZE(512);
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("leak_test.nxs");
-    const int iBinarySize = TEST_SIZE * TEST_SIZE;
+    int64_t const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
-    int64_t aiBinaryData[iBinarySize];
+    int aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
       aiBinaryData[i] = rand();
