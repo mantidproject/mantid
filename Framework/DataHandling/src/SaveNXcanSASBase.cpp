@@ -11,6 +11,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -18,14 +19,37 @@
 #include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
+#include <MantidAPI/AlgorithmRuntimeProps.h>
+#include <MantidKernel/VectorHelper.h>
 #include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
+using namespace Mantid::Kernel::VectorHelper;
 
 namespace {
+
+/// Property names.
+namespace SpinState {
+static const std::string SPIN_PARA = "-1";
+static const std::string SPIN_ANTIPARA = "+1";
+static const std::string SPIN_ZERO = "0";
+} // namespace SpinState
+
+namespace PolProperties {
+static const std::string INPUT_SPIN_STATES = "InputSpinStates";
+static const std::string POLARIZER_COMP_NAME = "PolarizerComponentName";
+static const std::string ANALYZER_COMP_NAME = "AnalyzerComponentName";
+static const std::string FLIPPER_COMP_NAMES = "FlipperComponentNames";
+static const std::string MAG_FIELD_STRENGTH_LOGNAME = "MagneticFieldStrengthLogName";
+static const std::string MAG_FIELD_DIR = "MagneticFieldDirection";
+std::map<std::string, std::string> POL_COMPONENTS = {
+    {POLARIZER_COMP_NAME, "polarizer"}, {ANALYZER_COMP_NAME, "analyzer"}, {FLIPPER_COMP_NAMES, "flipper"}};
+
+} // namespace PolProperties
 
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
   if (ws->axes() == 0) {
@@ -127,6 +151,24 @@ void SaveNXcanSASBase::initStandardProperties() {
                   "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
 }
 
+void SaveNXcanSASBase::initPolarizedProperties() {
+  auto val2 = std::make_shared<Algorithms::SpinStateValidator>(std::unordered_set<int>{2, 3});
+  const auto spinStateValidator = std::make_shared<Algorithms::SpinStateValidator>(
+      std::unordered_set<int>{2, 4}, true, SpinState::SPIN_PARA, SpinState::SPIN_ANTIPARA, true, SpinState::SPIN_ZERO);
+
+  declareProperty(PolProperties::INPUT_SPIN_STATES, "", spinStateValidator,
+                  "The order of the spin states in the input group workspace");
+  declareProperty(PolProperties::POLARIZER_COMP_NAME, "",
+                  "The name of the Polarizer Component. i.e. 'short-polarizer'");
+  declareProperty(PolProperties::ANALYZER_COMP_NAME, "", "The name of the Analyzer Component. i.e. 'helium-analyzer'");
+  declareProperty(PolProperties::FLIPPER_COMP_NAMES, "", "Comma separated list of flipper components i.e. 'RF-flipper");
+  declareProperty(PolProperties::MAG_FIELD_STRENGTH_LOGNAME, "",
+                  "The name of the magnetic field strength field recorded on the sample logs");
+  declareProperty(PolProperties::MAG_FIELD_DIR, "",
+                  "Direction of the magnetic field on the sample, comma separated strings"
+                  "with three values: polar, azimuthal and rotation angles");
+}
+
 std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() {
   std::map<std::string, std::string> result;
 
@@ -167,6 +209,25 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() {
 
   return result;
 }
+std::map<std::string, std::string>
+SaveNXcanSASBase::validatePolarizedInputs(std::map<std::string, std::string> &result) {
+  Mantid::API::Workspace_sptr const workspace = getProperty("InputWorkspace");
+  if (!workspace->isGroup())
+    result.emplace("InputWorkspace", "Input Workspaces for polarized data can only be workspace groups.");
+  else {
+    auto const wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    auto const &entries = wsGroup->getNumberOfEntries();
+    if (entries != 2 && entries != 4) {
+      result.emplace("InputWorkspace", "Input Group Workspace can only contain 2 or 4 workspace members.");
+    }
+    std::string const spins = getProperty("InputSpinStates");
+    if (entries != static_cast<int>(splitStringIntoVector<std::string>(spins).size())) {
+      result.emplace(PolProperties::INPUT_SPIN_STATES, "The number of spin states is different than the number of"
+                                                       " member workspaces on the InputWorkspace group");
+    }
+  }
+  return result;
+}
 
 /**
  * Adds standard metadata to a NXcanSAS file format.
@@ -193,7 +254,7 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
   Mantid::API::MatrixWorkspace_sptr &&transmissionCan = getProperty("TransmissionCan");
 
   // Add the instrument information
-  const auto detectors = splitDetectorNames(detectorNames);
+  const auto detectors = Kernel::VectorHelper::splitStringIntoVector<std::string>(detectorNames);
   addInstrument(sasEntry, workspace, radiationSource, geometry, beamHeight, beamWidth, detectors);
 
   // Add the sample information
@@ -239,6 +300,18 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
   // Add the transmissions for can
   if (transmissionCan) {
     addTransmission(sasEntry, transmissionCan, sasTransmissionSpectrumNameCanAttrValue);
+  }
+}
+
+void SaveNXcanSASBase::addPolarizedMetadata(const MatrixWorkspace_sptr &workspace, H5::Group &sasEntry) {
+
+  for (auto const &[compName, compType] : createComponentMap()) {
+    addPolarizer(sasEntry, workspace, compName, compType);
+  }
+  std::string const &sasSampleMagneticField = getProperty(PolProperties::MAG_FIELD_STRENGTH_LOGNAME);
+  if (!sasSampleMagneticField.empty()) {
+    std::string const &magneticFieldDirStr = getProperty(PolProperties::MAG_FIELD_DIR);
+    addSampleEMFields(sasEntry, workspace, sasSampleMagneticField, magneticFieldDirStr);
   }
 }
 
@@ -293,6 +366,41 @@ void SaveNXcanSASBase::addData(H5::Group &group, const Mantid::API::MatrixWorksp
   }
 }
 
+/**
+ * Sorts out dimensionality of data and spin states and calls addPolarizedData
+ * @param group: Handle to the NXcanSAS group
+ * @param wsGroup: Group workspace containing polarized workspaces
+ */
+void SaveNXcanSASBase::addPolarizedData(H5::Group &group, const Mantid::API::WorkspaceGroup_sptr &wsGroup) {
+  auto data = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasDataGroupName, nxDataClassAttr, sasDataClassAttr);
+  NXcanSAS::addPolarizedData(data, wsGroup, getProperty("InputSpinStates"));
+}
+
+void SaveNXcanSASBase::savePolarizedGroup(const WorkspaceGroup_sptr &wsGroup, const std::filesystem::path &path) {
+  // Prepare file
+  if (!path.empty()) {
+    std::filesystem::remove(path);
+  }
+  H5::H5File file(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
+
+  // Necessary metdata will be taken from first workspace of the group
+  auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+
+  const std::string suffix("01");
+  m_progress->report("Adding a new entry.");
+  auto sasEntry = addSasEntry(file, workspace, suffix);
+
+  // Add metadata for canSAS file: Instrument, Sample, Process
+  m_progress->report("Adding standard metadata");
+  addStandardMetadata(workspace, sasEntry);
+  addPolarizedMetadata(workspace, sasEntry);
+
+  m_progress->report("Adding data.");
+  addPolarizedData(sasEntry, wsGroup);
+
+  file.close();
+}
+
 void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace,
                                                const std::filesystem::path &path) {
   // Prepare file
@@ -313,6 +421,21 @@ void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &
   addData(sasEntry, workspace);
 
   file.close();
+}
+
+std::map<std::string, std::string> SaveNXcanSASBase::createComponentMap() {
+  // assumption here is that we will pass the IDFcomponent names as comma separated lists
+  std::map<std::string, std::string> componentMap;
+  for (auto const &[compName, compType] : PolProperties::POL_COMPONENTS) {
+    std::string componentName = getProperty(compName);
+    if (!componentName.empty()) {
+      auto const components = splitStringIntoVector<std::string>(componentName);
+      for (auto const &component : components) {
+        componentMap.emplace(std::make_pair(component, compType));
+      }
+    }
+  }
+  return componentMap;
 }
 
 } // namespace Mantid::DataHandling
