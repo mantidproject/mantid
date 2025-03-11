@@ -95,7 +95,7 @@ echo "Removing jq from conda env"
 echo "jq removed from conda env"
 
 # Pip install quickBayes until there's a conda package
-$CONDA_ENV_PATH/python.exe -m pip install quickBayes==1.0.1b0
+$CONDA_ENV_PATH/python.exe -m pip install quickBayes==1.0.0b15
 
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
