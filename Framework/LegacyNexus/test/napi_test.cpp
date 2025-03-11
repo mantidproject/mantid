@@ -42,6 +42,8 @@ using LegacyNexusTest::removeFile;
 using LegacyNexusTest::write_dmc01;
 using LegacyNexusTest::write_dmc02;
 
+using namespace Mantid::LegacyNexus;
+
 namespace { // anonymous namespace
 std::string relativePathOf(const std::string &filename) { return std::filesystem::path(filename).filename().string(); }
 } // anonymous namespace
@@ -340,6 +342,8 @@ int main(int argc, char *argv[]) {
       }
     }
   } while (attr_status == NXstatus::NX_OK);
+  // cppcheck-suppress argumentSize there is a mismatch between size of NXName and group_name, class_name. Supress as
+  // this is legacy c-style code.
   if (NXgetgroupinfo(fileid, &i, group_name, class_name) != NXstatus::NX_OK)
     return TEST_FAILED;
   std::cout << "Group: " << group_name << "(" << class_name << ") contains " << i << " items\n";
