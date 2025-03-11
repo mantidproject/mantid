@@ -425,7 +425,6 @@ public:
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
-    std::size_t const TEST_SIZE(8);
     std::size_t const TEST_SIZE(512);
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("leak_test.nxs");
