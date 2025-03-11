@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <H5Cpp.h>
+#include <MantidAPI/WorkspaceGroup_fwd.h>
 #include <filesystem>
 
 namespace Mantid {
@@ -17,6 +18,7 @@ namespace DataHandling {
 namespace NXcanSAS {
 // Helper functions for algorithms saving in NXcanSAS format.
 enum class WorkspaceDimensionality;
+typedef std::pair<std::vector<int>, std::vector<int>> SpinPairs;
 
 std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
 std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename, int index,
@@ -38,10 +40,16 @@ void MANTID_DATAHANDLING_DLL addTransmission(H5::Group &group, const Mantid::API
 
 void MANTID_DATAHANDLING_DLL addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
 void MANTID_DATAHANDLING_DLL addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
+void MANTID_DATAHANDLING_DLL addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &wsGroup,
+                                              const std::string &inputSpinStates);
+void MANTID_DATAHANDLING_DLL addPolarizer(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                          const std::string &componentName, const std::string &componentType);
+void MANTID_DATAHANDLING_DLL addSampleEMFields(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                               const std::string &emFieldStrengthLog, const std::string &emFieldDir);
+void MANTID_DATAHANDLING_DLL addEMFieldDirection(H5::Group &group, const std::string &emFieldDir);
 
 WorkspaceDimensionality MANTID_DATAHANDLING_DLL
 getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace);
-std::vector<std::string> MANTID_DATAHANDLING_DLL splitDetectorNames(std::string detectorNames);
 
 } // namespace NXcanSAS
 } // namespace DataHandling
