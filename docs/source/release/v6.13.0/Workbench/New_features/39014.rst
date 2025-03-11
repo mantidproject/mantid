@@ -1,1 +1,0 @@
-- The ``quickbayes`` package distributed in the installer has been updated from version 1.0.0b15 to 1.0.1b0.
