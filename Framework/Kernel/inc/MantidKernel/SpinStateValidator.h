@@ -23,7 +23,8 @@ particular ordering.
 class MANTID_KERNEL_DLL SpinStateValidator : public Kernel::TypedValidator<std::string> {
 public:
   SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false,
-                     const char paraIndicator = '0', const char antiIndicator = '1', const bool optional = false);
+                     const std::string &paraIndicator = "0", const std::string &antiIndicator = "1",
+                     const bool optional = false, const std::string &extraIndicator = "");
   Kernel::IValidator_sptr clone() const override;
 
   static bool anyOfIsInSet(const std::vector<std::string> &anyOf, const std::unordered_set<std::string> &set);
@@ -40,5 +41,7 @@ private:
   const std::string m_para;
   const std::string m_anti;
   bool m_optional = false;
+  // Extra value to indicate a third spin state (for example 0)
+  const std::string m_extra;
 };
 } // namespace Mantid::Kernel

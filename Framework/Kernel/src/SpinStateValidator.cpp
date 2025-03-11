@@ -13,10 +13,11 @@
 namespace Mantid::Kernel {
 
 SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
-                                       const char paraIndicator, const char antiIndicator, const bool optional)
+                                       const std::string &paraIndicator, const std::string &antiIndicator,
+                                       const bool optional, const std::string &extraIndicator)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
-      m_acceptSingleStates(acceptSingleStates), m_para(std::string(1, paraIndicator)),
-      m_anti(std::string(1, antiIndicator)), m_optional(optional) {}
+      m_acceptSingleStates(acceptSingleStates), m_para(paraIndicator), m_anti(antiIndicator), m_optional(optional),
+      m_extra(extraIndicator) {}
 
 Kernel::IValidator_sptr SpinStateValidator::clone() const {
   return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates);
@@ -77,9 +78,18 @@ bool SpinStateValidator::anyOfIsInSet(const std::vector<std::string> &anyOf,
 }
 
 const std::unordered_set<std::string> SpinStateValidator::getAllowedPairStates() const {
-  return {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
+  if (m_extra.empty()) {
+    return {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
+  }
+  return {m_extra + m_para, m_extra + m_anti,  m_para + m_extra, m_para + m_anti,
+          m_anti + m_para,  m_extra + m_extra, m_para + m_para,  m_anti + m_anti};
 }
 
-const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const { return {m_para, m_anti}; }
+const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const {
+  if (m_extra.empty()) {
+    return {m_para, m_anti};
+  }
+  return {m_para, m_anti, m_extra};
+}
 
 } // namespace Mantid::Kernel
