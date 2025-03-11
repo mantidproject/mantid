@@ -201,7 +201,6 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
             _ALGS["JOIN_ALG"], {key.alias: eff_output[key.alias] for key in _EFF_ALG_OUTPUT}, ["OutputWorkspace"]
         )
         self._set_output_properties(join_output[0], eff_output)
-        self._clean_up([ws for ws in [trans_output, trans_output_mag] if ws])
 
     def _create_transmission_workspaces(self) -> (list, list):
         trans_output = self._run_algorithm(_ALGS["TRANS_ALG"], self._populate_args_dict(_ALGS["TRANS_ALG"]), ["OutputWorkspace"])
@@ -275,10 +274,6 @@ class ReflectometryISISCalculatePolEff(DataProcessorAlgorithm):
         self.setProperty(_PROP_DATA["OUT_WS"].name, join_ws)
         for key in self.m_eff_alg_output_diag:
             self.setProperty(key.name, eff_output[key.alias])
-
-    def _clean_up(self, workspaces: list["MatrixWorkspace"]):
-        for ws in workspaces:
-            self._run_algorithm("DeleteWorkspace", {"Workspace": ws}, [])
 
 
 AlgorithmFactory.subscribe(ReflectometryISISCalculatePolEff)
