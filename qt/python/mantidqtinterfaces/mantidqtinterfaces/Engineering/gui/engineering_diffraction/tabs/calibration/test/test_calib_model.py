@@ -23,7 +23,7 @@ enggutils_path = "Engineering.EnggUtils"
 class CalibrationModelTest(unittest.TestCase):
     def setUp(self):
         self.model = CalibrationModel()
-        self.calibration_info = create_autospec(CalibrationInfo())
+        self.calibration_info = create_autospec(CalibrationInfo(), instance=True)
         mock.NonCallableMock.assert_any_call_partial = assert_any_call_partial
 
     @patch(enggutils_path + ".path")
@@ -49,7 +49,8 @@ class CalibrationModelTest(unittest.TestCase):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
         presenter = settings_presenter.SettingsPresenter(
-            mock.create_autospec(settings_model.SettingsModel), mock.create_autospec(settings_view.SettingsView)
+            mock.create_autospec(settings_model.SettingsModel, instance=True),
+            mock.create_autospec(settings_view.SettingsView, instance=True),
         )
         presenter.settings = {  # "save_location" is not defined
             "full_calibration": "cal",

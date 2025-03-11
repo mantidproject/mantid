@@ -9,7 +9,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <numeric>
+#include <stdexcept>
 
 namespace {
 
@@ -247,7 +249,7 @@ size_t DataBlockComposite::getNumberOfChannels() const {
   return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfChannels();
 }
 
-int DataBlockComposite::getNumberOfPeriods() const {
+size_t DataBlockComposite::getNumberOfPeriods() const {
   return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfPeriods();
 }
 

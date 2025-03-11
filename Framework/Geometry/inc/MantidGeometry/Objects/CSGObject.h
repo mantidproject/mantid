@@ -86,9 +86,7 @@ public:
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
   int setObject(const int objName, const std::string &lineStr);
-  int procString(const std::string &lineStr);
-  int complementaryObject(const int cellNum,
-                          std::string &lineStr); ///< Process a complementary object
+  void procString(const std::string &lineStr);
   int hasComplement() const;
 
   int populate(const std::map<int, std::shared_ptr<Surface>> &);

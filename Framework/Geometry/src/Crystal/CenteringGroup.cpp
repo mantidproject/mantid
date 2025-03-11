@@ -23,7 +23,7 @@ CenteringGroup::CenteringType CenteringGroup::getType() const { return m_type; }
 
 /// Returns the centering symbol, does not distinguish between Rhombohedral
 /// obverse and reverse.
-std::string CenteringGroup::getSymbol() const { return m_symbol; }
+const std::string &CenteringGroup::getSymbol() const { return m_symbol; }
 
 /// Returns centering type enum value if centering symbol exists, throws
 /// std::invalid_argument exception otherwise.

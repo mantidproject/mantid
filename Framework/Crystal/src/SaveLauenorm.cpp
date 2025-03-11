@@ -161,7 +161,7 @@ void SaveLauenorm::exec() {
   double minD = EMPTY_DBL();
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
-    Peak &p = peaks[wi];
+    const Peak &p = peaks[wi];
     double intensity = p.getIntensity();
     double sigI = p.getSigmaIntensity();
     if (intensity == 0.0 || !(std::isfinite(sigI)))
@@ -231,7 +231,7 @@ void SaveLauenorm::exec() {
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
-    Peak &p = peaks[wi];
+    const Peak &p = peaks[wi];
     double intensity = p.getIntensity();
     double sigI = p.getSigmaIntensity();
     if (intensity == 0.0 || !(std::isfinite(sigI)))

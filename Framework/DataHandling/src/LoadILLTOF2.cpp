@@ -15,22 +15,301 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusException.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NexusClasses.h"
 
 namespace {
 /// An array containing the supported instrument names
 const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
+
+/// static logger
+Mantid::Kernel::Logger legacyhelperlog("LegacyLoadHelper");
+
+const std::string NXINSTRUMENT("NXinstrument");
+const std::string SDS("SDS"); // denotes data field
+const std::string EMPTY_STR("");
+
 } // namespace
 
 namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace LegacyNexus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
+
+namespace LegacyLoadHelper { // these methods are copied from LoadHelper
+/**
+ * Finds the path for the instrument name in the nexus file
+ * Usually of the form: entry0/\<NXinstrument class\>/name
+ */
+std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
+  std::string result("");
+  std::vector<NXClassInfo> v = firstEntry.groups();
+  const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
+  if (it != v.cend())
+    result = it->nxname;
+
+  return result;
+}
+
+/**
+ * Fetches NXInt data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXInt data object
+ */
+NXInt getIntDataset(const NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openIntData();
+}
+
+/**
+ * Fetches NXDouble data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXDouble data object
+ */
+NXDouble getDoubleDataset(const NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openDoubleData();
+}
+
+/**
+ * Fills workspace with histogram data from provided data structure
+ * @param ws A MatrixWorkspace to be filled with data
+ * @param data Data object to extract counts from
+ * @param xAxis X axis values to be assigned to each spectrum
+ * @param initialSpectrum Initial spectrum number, optional and defaults to 0
+ * @param pointData Switch to decide whether the data is going to be a histogram or point data, defaults to false
+ * (histogram)
+ * @param detectorIDs Vector of detector IDs to override the default spectrum number, defaults to empty (IDs equal to
+ * index)
+ * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
+ * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
+ */
+void fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const NXInt &data, const std::vector<double> &xAxis,
+                         int64_t initialSpectrum = 0, bool pointData = false,
+                         const std::vector<int> &detectorIDs = std::vector<int>(),
+                         const std::set<int> &acceptedDetectorIDs = std::set<int>(),
+                         const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2)) {
+  const bool customDetectorIDs = detectorIDs.size() != 0;
+  const bool excludeDetectorIDs = acceptedDetectorIDs.size() != 0;
+
+  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  const auto nTubes = dims[std::get<0>(axisOrder)];
+  const auto nPixels = dims[std::get<1>(axisOrder)];
+  const auto nChannels = dims[std::get<2>(axisOrder)];
+
+  int loadOrder[3] = {0, 1, 2};
+  LoadHelper::loadingOrder(axisOrder, loadOrder);
+
+  HistogramData::Points histoPoints;
+  HistogramData::BinEdges binEdges;
+  if (pointData)
+    histoPoints = HistogramData::Points(xAxis);
+  else
+    binEdges = HistogramData::BinEdges(xAxis);
+  int nSkipped = 0;
+
+#pragma omp parallel for if (!excludeDetectorIDs && Kernel::threadSafe(*ws))
+  for (specnum_t tube_no = 0; tube_no < static_cast<specnum_t>(nTubes); ++tube_no) {
+    for (specnum_t pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      specnum_t currentSpectrum =
+          static_cast<specnum_t>(initialSpectrum) + tube_no * static_cast<specnum_t>(nPixels) + pixel_no;
+      if (excludeDetectorIDs != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                               currentSpectrum) == acceptedDetectorIDs.end()) {
+        nSkipped++;
+        continue;
+      }
+      currentSpectrum -= nSkipped;
+
+      std::vector<int> spectrum(nChannels);
+      for (auto channel_no = 0; channel_no < nChannels; ++channel_no) {
+        const int dataIndices[3] = {tube_no, pixel_no, channel_no};
+        spectrum[channel_no] = data(dataIndices[loadOrder[0]], dataIndices[loadOrder[1]], dataIndices[loadOrder[2]]);
+      }
+      const HistogramData::Counts counts(spectrum.begin(), spectrum.end());
+      const HistogramData::CountVariances countVariances(spectrum.begin(), spectrum.end());
+      if (pointData) {
+        ws->setCounts(currentSpectrum, counts);
+        ws->setCountVariances(currentSpectrum, countVariances);
+        ws->setPoints(currentSpectrum, histoPoints);
+      } else {
+        ws->setHistogram(currentSpectrum, binEdges, counts);
+      }
+      const specnum_t detectorID = customDetectorIDs ? detectorIDs[currentSpectrum] : currentSpectrum;
+      ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorID);
+    }
+  }
+}
+
+template <typename NumericType>
+void addNumericProperty(LegacyNexus::File &filehandle, const LegacyNexus::Info &nxinfo,
+                        const std::string &property_name, API::Run &runDetails) {
+  if (!runDetails.hasProperty(property_name)) {
+    legacyhelperlog.warning() << "Property " << property_name
+                              << " was set twice. Please check the Nexus file and your inputs.";
+  }
+  // this assumes all values are rank==1
+
+  // Look for "units"
+  std::string units; // empty string
+  if (filehandle.hasAttr("units"))
+    filehandle.getAttr("units", units);
+
+  // read the field
+  std::vector<NumericType> data_vec;
+  data_vec.reserve(nxinfo.dims.front());
+  filehandle.getDataCoerce(data_vec);
+
+  // create the property on the run objects
+  const auto dim1size = data_vec.size();
+  if (dim1size == 1) {
+    if (units.empty())
+      runDetails.addProperty(property_name, data_vec.front());
+    else
+      runDetails.addProperty(property_name, data_vec.front(), units);
+  } else {
+    // create a bunch of little properties
+    for (size_t index = 0; index < dim1size; ++index) {
+      const auto property_name_indexed = property_name + "_" + std::to_string(index);
+      if (units.empty())
+        runDetails.addProperty(property_name_indexed, data_vec[index]);
+      else
+        runDetails.addProperty(property_name_indexed, data_vec[index], units);
+    }
+  }
+}
+
+/**
+ * Recursively add properties from a nexus file to the workspace run.
+ *
+ * @param filehandle    :: Nexus file handle to be parsed, just after an NXopengroup
+ * @param runDetails  :: where to add properties
+ * @param parent_name :: nexus caller name
+ * @param parent_class :: nexus caller class
+ * @param level       :: current level in nexus tree
+ */
+void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &runDetails,
+                                     const std::string &parent_name, const std::string &parent_class, int level) {
+  for (const auto &entry : filehandle.getEntries()) {
+    const auto nxname = entry.first;
+    const auto nxclass = entry.second;
+    if (nxclass == SDS) {
+      if ((parent_class != "NXData") && parent_class != "NXMonitor" && (nxname != "data")) { // create a property
+        filehandle.openData(nxname);
+        const auto nxinfo = filehandle.getInfo(); // get information about the open data
+        const auto rank = nxinfo.dims.size();
+
+        // Note, we choose to only build properties on small float arrays filter logic is below
+        bool read_property = (rank == 1);
+        switch (nxinfo.type) {
+        case (NXnumtype::CHAR):
+          break; // everything is fine
+        case (NXnumtype::FLOAT32):
+        case (NXnumtype::FLOAT64):
+          // some 1d float arrays may be loaded
+          read_property = (nxinfo.dims[0] <= 9);
+          break;
+        case (NXnumtype::INT16):
+        case (NXnumtype::INT32):
+        case (NXnumtype::UINT16):
+          // only read scalar values for everything else - e.g. integers
+          read_property = (nxinfo.dims.front() == 1);
+          break;
+        default:
+          read_property = false;
+        }
+
+        if (read_property) {
+          // generate a name for the property
+          const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
+
+          switch (nxinfo.type) {
+          case (NXnumtype::CHAR): {
+            std::string property_value = filehandle.getStrData();
+            if (property_name.ends_with("_time")) {
+              // That's a time value! Convert to Mantid standard
+              property_value = LoadHelper::dateTimeInIsoFormat(property_value);
+              if (runDetails.hasProperty(property_name))
+                runDetails.getProperty(property_name)->setValue(property_value);
+              else
+                runDetails.addProperty(property_name, property_value);
+            } else {
+              if (!runDetails.hasProperty(property_name)) {
+                runDetails.addProperty(property_name, property_value);
+              } else {
+                legacyhelperlog.warning()
+                    << "Property " << property_name << " was set twice. Please check the Nexus file and your inputs.\n";
+              }
+            }
+            break;
+          }
+          case (NXnumtype::FLOAT32):
+          case (NXnumtype::FLOAT64):
+            addNumericProperty<double>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          case (NXnumtype::INT16):
+          case (NXnumtype::INT32):
+          case (NXnumtype::UINT16):
+            addNumericProperty<int>(filehandle, nxinfo, property_name, runDetails);
+            break;
+          default:
+            std::stringstream msg;
+            msg << "Encountered unknown type: " << static_cast<int>(nxinfo.type);
+            throw std::runtime_error(msg.str());
+            break;
+          }
+        }
+        filehandle.closeData();
+      }
+    } else {
+      if ((nxclass != "ILL_data_scan_vars") && (nxclass != "NXill_data_scan_vars")) {
+        // open the group and recurse down, if the group is known to nexus
+        filehandle.openGroup(nxname, nxclass);
+
+        // current names can be useful for next level
+        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, nxname, nxclass, level + 1);
+
+        filehandle.closeGroup();
+      }
+    }
+  }
+}
+
+/**
+ * Add properties from a nexus file to the workspace run.
+ * API entry for recursive routine below
+ *
+ * @param filehandle  :: Nexus file handle to be parsed, just after an NXopengroup
+ * @param runDetails  :: where to add properties
+ */
+void addNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &runDetails) {
+  // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
+  // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
+  // follows
+  std::string entryNameActual("");
+  try {
+    const auto entryNameAndClass = filehandle.getNextEntry();
+    entryNameActual = entryNameAndClass.first;
+  } catch (const LegacyNexus::Exception &) { /* ignore */
+  }
+
+  // open the group and parse down
+  if (!entryNameActual.empty()) {
+    constexpr int LEVEL_RECURSE{1};
+    filehandle.openGroup(entryNameActual, "NXentry");
+    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE);
+    filehandle.closeGroup();
+  }
+}
+
+} // namespace LegacyLoadHelper
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -40,25 +319,25 @@ DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLTOF2)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLTOF2::confidence(Kernel::LegacyNexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
-       descriptor.isEntry("/entry0/mode") && !descriptor.isEntry("/entry0/dataSD") // This one is for
-                                                                                   // LoadILLIndirect
-       && !descriptor.isEntry("/entry0/instrument/VirtualChopper")                 // This one is for
-                                                                                   // LoadILLReflectometry
-       && !descriptor.isEntry("/entry0/instrument/Tx"))                            // This eliminates SALSA data
-      || (descriptor.isEntry("/entry0/data_scan") &&
-          descriptor.isEntry("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
+  if ((descriptor.pathExists("/entry0/wavelength") && descriptor.pathExists("/entry0/experiment_identifier") &&
+       descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for
+                                                                                         // LoadILLIndirect
+       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
+                                                                                         // LoadILLReflectometry
+       && !descriptor.pathExists("/entry0/instrument/Tx"))                               // This eliminates SALSA data
+      || (descriptor.pathExists("/entry0/data_scan") &&
+          descriptor.pathExists("/entry0/instrument/Detector")) // The last one is scan mode of PANTHER and SHARP
   ) {
-    return 80;
+    return 79; // return 79 since LoadILLTOF3 will return 80 if file is hdf5 based
   } else {
     return 0;
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusHDF5Descriptor>() {}
+LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::LegacyNexusDescriptor>() {}
 
 /**
  * Initialises the algorithm
@@ -81,7 +360,7 @@ void LoadILLTOF2::exec() {
   bool convertToTOF = getProperty("convertToTOF");
 
   // open the root node
-  NeXus::NXRoot dataRoot(filenameData);
+  LegacyNexus::NXRoot dataRoot(filenameData);
   NXEntry dataFirstEntry = dataRoot.openFirstEntry();
   m_isScan = dataFirstEntry.containsGroup("data_scan");
 
@@ -115,7 +394,7 @@ void LoadILLTOF2::exec() {
  *
  * @return List of monitor data
  */
-std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
+std::vector<std::string> LoadILLTOF2::getMonitorInfo(const LegacyNexus::NXEntry &firstEntry) {
   std::vector<std::string> monitorList;
   if (m_isScan) {
     // in case of a scan, there is only one monitor and its data are stored per scan step
@@ -139,15 +418,15 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &first
  *
  * @param firstEntry The NeXus entry
  */
-void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
+void LoadILLTOF2::loadInstrumentDetails(const LegacyNexus::NXEntry &firstEntry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  m_instrumentPath = LegacyLoadHelper::findInstrumentNexusPath(firstEntry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = firstEntry.getString(m_instrumentPath + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {
@@ -174,11 +453,11 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  *
  * @param entry The NeXus entry
  */
-void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
+void LoadILLTOF2::initWorkspace(const LegacyNexus::NXEntry &entry) {
 
   // read in the data
   const std::string dataName = m_isScan ? "data_scan/detector_data/data" : "data";
-  auto data = LoadHelper::getIntDataset(entry, dataName);
+  auto data = LegacyLoadHelper::getIntDataset(entry, dataName);
 
   // default order is: tubes - pixels - channels, but for scans it is scans - tubes - pixels
   m_numberOfTubes = static_cast<size_t>(m_isScan ? data.dim1() : data.dim0());
@@ -190,7 +469,7 @@ void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
    */
   size_t numberOfTubesInRosace = 0;
   if (m_instrumentName == "IN4") {
-    auto dataRosace = LoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
+    auto dataRosace = LegacyLoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
     numberOfTubesInRosace += static_cast<size_t>(dataRosace.dim0());
   }
 
@@ -228,11 +507,11 @@ void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadILLTOF2::loadTimeDetails(const NeXus::NXEntry &entry) {
+void LoadILLTOF2::loadTimeDetails(const LegacyNexus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
-  NeXus::NXClass monitorEntry = entry.openNXGroup(m_monitorName);
+  LegacyNexus::NXClass monitorEntry = entry.openNXGroup(m_monitorName);
 
   if (monitorEntry.containsDataSet("time_of_flight")) {
 
@@ -264,9 +543,9 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   // Open NeXus file
   try {
-    ::NeXus::File nxfileID(filename, NXACC_READ);
-    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  } catch (const ::NeXus::Exception &) {
+    LegacyNexus::File nxfileID(filename, NXACC_READ);
+    LegacyLoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const LegacyNexus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
@@ -331,7 +610,7 @@ void LoadILLTOF2::addPulseInterval() {
  * @param convertToTOF Should the bin edges be converted to time of flight or keep the channel indices
  * @return Vector of doubles containing bin edges or point centres positions
  */
-std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF) {
+std::vector<double> LoadILLTOF2::prepareAxis(const LegacyNexus::NXEntry &entry, bool convertToTOF) {
 
   std::vector<double> xAxis(m_localWorkspace->readX(0).size());
   if (m_isScan) {
@@ -345,7 +624,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool c
         break;
       }
     }
-    auto axis = LoadHelper::getDoubleDataset(entry, "data_scan/scanned_variables/data");
+    auto axis = LegacyLoadHelper::getDoubleDataset(entry, "data_scan/scanned_variables/data");
     axis.load();
     for (int index = 0; index < axis.dim1(); index++) {
       xAxis[index] = axis(scannedVarId, index);
@@ -380,7 +659,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool c
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
+void LoadILLTOF2::fillStaticWorkspace(const LegacyNexus::NXEntry &entry, const std::vector<std::string> &monitorList,
                                       bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
@@ -389,13 +668,13 @@ void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::ve
   auto xAxis = prepareAxis(entry, convertToTOF);
 
   // The binning for monitors is considered the same as for detectors
-  int spec = 0;
+  int64_t spec = 0;
   std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
 
-  auto data = LoadHelper::getIntDataset(entry, "data");
+  auto data = LegacyLoadHelper::getIntDataset(entry, "data");
   data.load();
 
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, spec, false, detectorIDs);
+  LegacyLoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, spec, false, detectorIDs);
   spec = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube);
 
   // IN4 Rosace detectors are in a different NeXus entry
@@ -403,17 +682,17 @@ void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::ve
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
     // load the counts from the file into memory
-    auto dataRosace = LoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
+    auto dataRosace = LegacyLoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
     dataRosace.load();
-    LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, false, detectorIDs);
+    LegacyLoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, false, detectorIDs);
     spec += dataRosace.dim0();
   }
 
   for (const auto &monitorName : monitorList) {
     detectorIDs[spec] = static_cast<int>(spec) + 1;
-    auto monitorData = LoadHelper::getIntDataset(entry, monitorName);
+    auto monitorData = LegacyLoadHelper::getIntDataset(entry, monitorName);
     monitorData.load();
-    LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, false, detectorIDs);
+    LegacyLoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, false, detectorIDs);
     spec++;
   }
 }
@@ -423,21 +702,21 @@ void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::ve
  * @param entry The Nexus entry to load the data from
  * @param monitorList Vector containing paths to monitor data
  */
-void LoadILLTOF2::fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
+void LoadILLTOF2::fillScanWorkspace(const LegacyNexus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array
   auto xAxis = prepareAxis(entry, false);
-  auto data = LoadHelper::getIntDataset(entry, "data_scan/detector_data/data");
+  auto data = LegacyLoadHelper::getIntDataset(entry, "data_scan/detector_data/data");
   data.load();
 
   // Load scan data
   const std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
   const std::tuple<int, int, int> dimOrder{1, 2, 0};
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
+  LegacyLoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
 
   // Load monitor data, there is only one monitor
   const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();
   const auto spectrumNo = data.dim1() * data.dim2();
-  auto monitorData = LoadHelper::getDoubleDataset(entry, monitorList[0]);
+  auto monitorData = LegacyLoadHelper::getDoubleDataset(entry, monitorList[0]);
   monitorData.load();
   for (int index = 0; index < monitorData.dim1(); index++) {
     // monitor is always the 4th row, if that ever changes, a name search for 'monitor1' would be necessary among

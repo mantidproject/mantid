@@ -152,6 +152,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(getDescriptors_overloads, getDescriptors, 1, 3)
 

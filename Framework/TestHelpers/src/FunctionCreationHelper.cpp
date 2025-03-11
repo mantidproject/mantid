@@ -29,11 +29,10 @@ void FunctionChangesNParams::iterationFinished() {
 void FunctionChangesNParams::function1D(double *out, const double *xValues, const size_t nData) const {
   auto np = nParams();
   for (size_t i = 0; i < nData; ++i) {
-    double x = xValues[i];
     double y = getParameter(np - 1);
     if (np > 1) {
       for (size_t ip = np - 1; ip > 0; --ip) {
-        y = getParameter(ip - 1) + x * y;
+        y = getParameter(ip - 1) + xValues[i] * y;
       }
     }
     out[i] = y;
@@ -43,12 +42,11 @@ void FunctionChangesNParams::function1D(double *out, const double *xValues, cons
 void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) {
   auto np = nParams();
   for (size_t i = 0; i < nData; ++i) {
-    double x = xValues[i];
     double y = 1.0;
     out->set(i, 0, y);
     if (np > 1) {
       for (size_t ip = 1; ip < np; ++ip) {
-        y = x * y;
+        y = xValues[i] * y;
         out->set(i, ip, y);
       }
     }

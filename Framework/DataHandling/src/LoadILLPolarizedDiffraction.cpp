@@ -26,8 +26,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 
@@ -49,10 +50,10 @@ constexpr size_t TOF_MODE_ON = 1;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLPolarizedDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLPolarizedDiffraction::confidence(NexusHDF5Descriptor &descriptor) const {
+int LoadILLPolarizedDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   if (descriptor.isEntry("/entry0/D7")) {
@@ -79,7 +80,7 @@ const std::string LoadILLPolarizedDiffraction::summary() const {
 /**
  * Constructor
  */
-LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction() : IFileLoader<NexusHDF5Descriptor>() {}
+LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction() : IFileLoader<NexusDescriptor>() {}
 
 /**
  * Initialize the algorithm's properties.

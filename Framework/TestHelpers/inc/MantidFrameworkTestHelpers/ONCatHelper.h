@@ -31,7 +31,7 @@ class MockONCatAPI : public Mantid::Kernel::InternetHelper {
 public:
   MockONCatAPI() = delete;
   MockONCatAPI(const MockResponseMap &responseMap);
-  ~MockONCatAPI();
+  ~MockONCatAPI() override;
 
   bool allResponsesCalledOnce() const;
   bool allResponsesCalled() const;

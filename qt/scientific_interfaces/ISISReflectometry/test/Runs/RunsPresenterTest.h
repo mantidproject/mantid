@@ -84,8 +84,15 @@ public:
 
   void testInitInstrumentListUpdatesView() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, setInstrumentList(m_instruments, _)).Times(1);
+    expectInstrumentListUpdated();
     presenter.initInstrumentList();
+  }
+
+  void testInitInstrumentListUpdatesViewWithSelectedValue() {
+    auto presenter = makePresenter();
+    std::string const &selectedInstrument = m_instruments[2];
+    expectInstrumentListUpdated(selectedInstrument);
+    TS_ASSERT_EQUALS(presenter.initInstrumentList(selectedInstrument), selectedInstrument);
   }
 
   void testCreatePresenterUpdatesView() {
@@ -883,6 +890,12 @@ private:
     props->setPropertyValue("InputWorkspace", "TOF_live");
     props->setPropertyValue("Instrument", instrument);
     return props;
+  }
+
+  void expectInstrumentListUpdated(std::string const &requestedInstrument = "") {
+    EXPECT_CALL(m_view, setInstrumentList(m_instruments, requestedInstrument)).Times(1);
+    std::string const &selectedInstrument = requestedInstrument.empty() ? m_instruments[0] : requestedInstrument;
+    EXPECT_CALL(m_view, getSearchInstrument()).Times(1).WillOnce(Return(selectedInstrument));
   }
 
   void expectRunsTableWithContent(RunsTable &runsTable) {

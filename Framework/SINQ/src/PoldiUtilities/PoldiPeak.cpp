@@ -12,7 +12,7 @@
 
 namespace Mantid::Poldi {
 
-PoldiPeak_sptr PoldiPeak::clone() const { return PoldiPeak_sptr(new PoldiPeak(*this)); }
+PoldiPeak_sptr PoldiPeak::clonePeak() const { return PoldiPeak_sptr(new PoldiPeak(*this)); }
 
 const MillerIndices &PoldiPeak::hkl() const { return m_hkl; }
 

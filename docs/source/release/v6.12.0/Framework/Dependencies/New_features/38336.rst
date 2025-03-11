@@ -1,1 +1,0 @@
-- Updated compiler on Linux to gcc version 13, which should improve performance in some circumstances. The release notes can be found here https://gcc.gnu.org/gcc-13/changes.html

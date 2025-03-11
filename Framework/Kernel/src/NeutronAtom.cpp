@@ -710,7 +710,7 @@ NeutronAtom operator*(const double left, const NeutronAtom &right) {
 NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number) {
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
 
-  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  const auto result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
   if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number || result->a_number != a_number) {
     std::stringstream msg;
     msg << "Failed to find a NeutronAtom with z=" << z_number << " and a=" << a_number;
@@ -725,7 +725,7 @@ NeutronAtom getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_num
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN,
                    NAN); // set to junk value
 
-  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  const auto result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
   if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number || result->a_number != a_number) {
     return temp;
   } else

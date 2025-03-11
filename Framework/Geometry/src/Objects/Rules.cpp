@@ -392,7 +392,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
     if (LevelTwo) /// Not the top level
     {
       // Decide which of the pairs is to be copied
-      Rule *PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
+      const Rule *PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
       //
       const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
       LevelTwo->setLeaf(PObj->clone(), side);
@@ -443,6 +443,7 @@ Rule::Rule(Rule *A)
 */
 {}
 
+// cppcheck-suppress operatorEqVarError
 Rule &Rule::operator=(const Rule & /*unused*/)
 /**
   Assignment operator=
@@ -666,8 +667,7 @@ int Rule::Eliminate()
           Base[baseKeys[ic]] = baseVal[ic];
       }
     }
-    if (keyChange < 0) // Success !!!!!
-      deadKeys.emplace_back(targetKey);
+    deadKeys.emplace_back(targetKey);
   }
   return static_cast<int>(deadKeys.size());
 }

@@ -33,7 +33,7 @@ public:
   std::optional<std::vector<std::string>> peakPrefixes() const { return m_peakPrefixes; }
   std::optional<std::string> fitTypePrefix() const { return m_fitTypePrefix; }
 
-  std::string resolutionWorkspace() const { return m_resolutionWorkspace; }
+  const std::string &resolutionWorkspace() const { return m_resolutionWorkspace; }
   int resolutionWorkspaceIndex() const { return m_resolutionWorkspaceIndex; }
 
 private:

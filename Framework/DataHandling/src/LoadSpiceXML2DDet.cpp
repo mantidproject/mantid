@@ -116,25 +116,25 @@ bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
  * @brief SpiceXMLNode::getName
  * @return
  */
-const std::string SpiceXMLNode::getName() const { return m_name; }
+const std::string &SpiceXMLNode::getName() const { return m_name; }
 
 /** Get unit of XML node
  * @brief SpiceXMLNode::getUnit
  * @return
  */
-const std::string SpiceXMLNode::getUnit() const { return m_unit; }
+const std::string &SpiceXMLNode::getUnit() const { return m_unit; }
 
 /** Get node's description
  * @brief SpiceXMLNode::getDescription
  * @return
  */
-const std::string SpiceXMLNode::getDescription() const { return m_description; }
+const std::string &SpiceXMLNode::getDescription() const { return m_description; }
 
 /** Get node's value in string
  * @brief SpiceXMLNode::getValue
  * @return
  */
-const std::string SpiceXMLNode::getValue() const { return m_value; }
+const std::string &SpiceXMLNode::getValue() const { return m_value; }
 
 /** Constructor
  */
@@ -734,13 +734,13 @@ LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(const std::vector<Spic
 
   if (outws) {
     // Add the property to output workspace
-    for (auto &log_entry : str_log_map) {
+    for (const auto &log_entry : str_log_map) {
       outws->mutableRun().addProperty(new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
     }
-    for (auto &log_entry : int_log_map) {
+    for (const auto &log_entry : int_log_map) {
       outws->mutableRun().addProperty(new PropertyWithValue<int>(log_entry.first, log_entry.second));
     }
-    for (auto &log_entry : dbl_log_map) {
+    for (const auto &log_entry : dbl_log_map) {
       outws->mutableRun().addProperty(new PropertyWithValue<double>(log_entry.first, log_entry.second));
     }
   }
@@ -769,7 +769,7 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(const std::str
   // file records data in column major)
   size_t num_empty_line = 0;
   size_t num_weird_line = 0;
-  for (auto &vecLine : vecLines) {
+  for (const auto &vecLine : vecLines) {
     if (vecLine.empty())
       ++num_empty_line;
     else if (vecLine.size() < 100)
@@ -806,13 +806,9 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(const std::str
   for (size_t i = first_regular_line; i < vecLines.size(); ++i) {
     std::string &line = vecLines[i];
 
-    // skip empty lines
-    if (line.size() < 100)
-      continue;
-
-    // Skip empty line
-    if (line.empty()) {
-      g_log.debug() << "\tFound empty Line at " << i << "\n";
+    // skip lines with length less than 100
+    if (line.size() < 100) {
+      g_log.debug() << "\tSkipped line of size " << line.size() << " at " << i << "\n";
       continue;
     }
 
@@ -894,8 +890,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(const MatrixWorkspace_sptr 
     // set the properties to matrix workspace including all columns
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double logvalue = spicetablews->cell<double>(ir, ic);
-      std::string &logname = colnames[ic];
-      auto newlogproperty = new TimeSeriesProperty<double>(logname);
+      auto newlogproperty = new TimeSeriesProperty<double>(colnames[ic]);
       newlogproperty->addValue(anytime, logvalue);
       matrixws->mutableRun().addProperty(std::move(newlogproperty));
     }

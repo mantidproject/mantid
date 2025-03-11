@@ -4,23 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
-#
-#
-from mantid.api import AlgorithmFactory
-from mantid.kernel import ConfigService
+from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
+from workbench.widgets.settings.categories.categories_settings_model import CategoriesSettingsModel
 from workbench.widgets.settings.categories.view import CategoriesSettingsView
 
 from qtpy.QtCore import Qt
-from enum import Enum
 
 
-class CategoryProperties(Enum):
-    HIDDEN_ALGORITHMS = "algorithms.categories.hidden"
-    HIDDEN_INTERFACES = "interfaces.categories.hidden"
-
-
-class CategoriesSettings(object):
+class CategoriesSettings(SettingsPresenterBase):
     """
     Presenter of the visible categories settings section. It handles all changes to options
     within the section, and updates the ConfigService and workbench CONF accordingly.
@@ -29,24 +20,30 @@ class CategoriesSettings(object):
     be handled here.
     """
 
-    def __init__(self, parent, view=None):
-        self.view = view if view else CategoriesSettingsView(parent, self)
+    def __init__(self, parent, model: CategoriesSettingsModel, view=None):
+        super().__init__(model)
         self.parent = parent
-        self.view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
-        self.view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
+        self._view = view if view else CategoriesSettingsView(parent, self)
+        self._view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
+        self._view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
         self.set_algorithm_tree_categories()
         self.set_interface_tree_categories()
-        self.view.algorithm_tree_widget.itemClicked.connect(self.nested_box_clicked)
-        self.view.algorithm_tree_widget.itemChanged.connect(self.set_hidden_algorithms_string)
-        self.view.interface_tree_widget.itemChanged.connect(self.set_hidden_interfaces_string)
+        self._view.algorithm_tree_widget.itemClicked.connect(self.nested_box_clicked)
+        self._view.algorithm_tree_widget.itemChanged.connect(self.set_hidden_algorithms_string)
+        self._view.interface_tree_widget.itemChanged.connect(self.set_hidden_interfaces_string)
+
+    def get_view(self):
+        return self._view
 
     def set_hidden_algorithms_string(self, _):
-        categories_string = ";".join(self._create_hidden_categories_string(self.view.algorithm_tree_widget))
-        ConfigService.setString(CategoryProperties.HIDDEN_ALGORITHMS.value, categories_string)
+        categories_string = ";".join(self._create_hidden_categories_string(self._view.algorithm_tree_widget))
+        self._model.set_hidden_algorithms(categories_string)
+        self.notify_changes()
 
     def set_hidden_interfaces_string(self, _):
-        categories_string = ";".join(self._create_hidden_categories_string(self.view.interface_tree_widget))
-        ConfigService.setString(CategoryProperties.HIDDEN_INTERFACES.value, categories_string)
+        categories_string = ";".join(self._create_hidden_categories_string(self._view.interface_tree_widget))
+        self._model.set_hidden_interfaces(categories_string)
+        self.notify_changes()
 
     def nested_box_clicked(self, item_clicked, column):
         new_state = item_clicked.checkState(column)
@@ -85,11 +82,11 @@ class CategoriesSettings(object):
         return results
 
     def set_interface_tree_categories(self):
-        widget = self.view.interface_tree_widget
+        widget = self._view.interface_tree_widget
         interfaces = []
         if self.parent:
             interfaces = self.parent.interface_list
-        hidden_interfaces = ConfigService.getString(CategoryProperties.HIDDEN_INTERFACES.value).split(";")
+        hidden_interfaces = self._model.get_hidden_interfaces().split(";")
         interface_map = {}
         for interface in interfaces:
             if interface in hidden_interfaces:
@@ -100,8 +97,8 @@ class CategoriesSettings(object):
         self._set_tree_categories(widget, interface_map, False)
 
     def set_algorithm_tree_categories(self):
-        widget = self.view.algorithm_tree_widget
-        category_map = AlgorithmFactory.Instance().getCategoriesandState()
+        widget = self._view.algorithm_tree_widget
+        category_map = self._model.get_algorithm_factory_category_map()
         self._set_tree_categories(widget, category_map)
 
     def update_properties(self):
@@ -116,7 +113,7 @@ class CategoriesSettings(object):
             if len(split_cat) == 1:
                 # This is a top level category
                 category_name = str(split_cat[0])
-                category_item = self.view.add_checked_widget_item(widget, category_name, category_and_states[category_location])
+                category_item = self._view.add_checked_widget_item(widget, category_name, category_and_states[category_location])
                 seen_categories[category_name] = category_item
             else:
                 for i in range(0, len(split_cat) - 1):
@@ -129,13 +126,13 @@ class CategoriesSettings(object):
                         for k in range(i - 1, -1, -1):
                             if split_cat[k] in seen_categories:
                                 grand_parent_cat = seen_categories[split_cat[k]]
-                        parent_category = self.view.add_checked_widget_item(
+                        parent_category = self._view.add_checked_widget_item(
                             widget, parent_name, category_and_states[category_location], grand_parent_cat
                         )
                         seen_categories[parent_name] = parent_category
 
                 child_name = str(split_cat[-1])
-                child_item = self.view.add_checked_widget_item(
+                child_item = self._view.add_checked_widget_item(
                     widget, child_name, category_and_states[category_location], seen_categories[parent_name]
                 )
                 seen_categories[child_name] = child_item

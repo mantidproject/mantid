@@ -169,9 +169,6 @@ using namespace Mantid::LegacyNexus;
  *
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 /**
  * Open a NeXus file.
  * NXopen honours full path file names. But it also searches
@@ -823,10 +820,6 @@ MANTID_LEGACYNEXUS_DLL char *NXIformatNeXusTime();
  * \ingroup c_init
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsetcache(long newVal);
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
 
 /**
  * Freddie Akeroyd 11/8/2009

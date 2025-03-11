@@ -26,9 +26,9 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.view = mock.create_autospec(DNSFileSelectorView)
-        cls.model = mock.create_autospec(DNSFileSelectorModel)
-        cls.watcher = mock.create_autospec(DNSFileSelectorWatcher)
+        cls.view = mock.create_autospec(DNSFileSelectorView, instance=True)
+        cls.model = mock.create_autospec(DNSFileSelectorModel, instance=True)
+        cls.watcher = mock.create_autospec(DNSFileSelectorWatcher, instance=True)
 
         # view signals
         cls.view.sig_expanded = mock.Mock()

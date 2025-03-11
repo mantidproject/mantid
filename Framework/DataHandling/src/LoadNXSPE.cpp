@@ -20,9 +20,9 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/regex.hpp>
 
@@ -35,7 +35,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNXSPE)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -66,7 +66,7 @@ int LoadNXSPE::identiferConfidence(const std::string &value) {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNXSPE::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   using string_map_t = std::map<std::string, std::string>;
   try {

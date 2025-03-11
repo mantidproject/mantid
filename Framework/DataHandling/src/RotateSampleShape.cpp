@@ -76,14 +76,14 @@ void RotateSampleShape::exec() {
     g_log.warning() << "Empty goniometer created; will always return an "
                        "identity rotation matrix.\n";
 
-  const auto sampleShapeRotation = gon.getR();
+  const auto &sampleShapeRotation = gon.getR();
   if (sampleShapeRotation == Kernel::Matrix<double>(3, 3, true)) {
     // If the resulting rotationMatrix is Identity, ignore the calculatrion
     g_log.warning("Rotation matrix set via RotateSampleShape is an Identity matrix. Ignored rotating sample shape");
     return;
   }
 
-  const auto oldRotation = ei->run().getGoniometer().getR();
+  const auto &oldRotation = ei->run().getGoniometer().getR();
   auto newSampleShapeRot = sampleShapeRotation * oldRotation;
   if (isMeshShape) {
     auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
@@ -126,8 +126,9 @@ void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon) {
         throw std::invalid_argument("Wrong number of arguments to parameter " + propName.str() +
                                     ". Expected 5 comma-separated arguments.");
 
-      std::transform(tokens.begin(), tokens.end(), tokens.begin(), [](std::string str) { return Strings::strip(str); });
-      if (!std::all_of(tokens.begin(), tokens.end(), [](std::string tokenStr) { return !tokenStr.empty(); })) {
+      std::transform(tokens.begin(), tokens.end(), tokens.begin(),
+                     [](const std::string &str) { return Strings::strip(str); });
+      if (!std::all_of(tokens.begin(), tokens.end(), [](const std::string &tokenStr) { return !tokenStr.empty(); })) {
         throw std::invalid_argument("Empty axis parameters found!");
       }
 

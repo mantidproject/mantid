@@ -18,9 +18,8 @@ Sassena::Sassena(QWidget *parent) : SimulationTab(parent) {
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmFinish(bool)));
-
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Sassena::handleAlgorithmFinish);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Sassena::saveClicked);
 }
 
 void Sassena::handleValidation(IUserInputValidator *validator) const {

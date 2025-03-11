@@ -18,8 +18,8 @@
 
 #include "MantidKernel/StringTokenizer.h"
 
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 
@@ -412,14 +412,14 @@ void CreateChunkingFromInstrument::exec() {
       throw std::runtime_error("Failed to find any banks in the instrument");
 
     // fill in the table workspace
-    for (auto &group : grouping) {
+    for (const auto &group : grouping) {
       stringstream banks;
       for (const auto &bank : group.second) {
         banks << bank << ",";
       }
       // remove the trailing comma
       string banksStr = banks.str();
-      banksStr = banksStr.substr(0, banksStr.size() - 1);
+      banksStr.pop_back();
 
       // add it to the table
       TableRow row = strategy->appendRow();

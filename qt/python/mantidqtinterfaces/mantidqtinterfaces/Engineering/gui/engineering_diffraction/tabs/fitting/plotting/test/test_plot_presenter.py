@@ -16,8 +16,8 @@ dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitt
 
 class FittingPlotPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.model = mock.create_autospec(plot_model.FittingPlotModel)
-        self.view = mock.create_autospec(plot_view.FittingPlotView)
+        self.model = mock.create_autospec(plot_model.FittingPlotModel, instance=True)
+        self.view = mock.create_autospec(plot_view.FittingPlotView, instance=True)
         self.presenter = plot_presenter.FittingPlotPresenter(None, self.model, self.view)
         self.call_in_progress = mock.call(
             status="fitting...", minimum=0, maximum=0, value=0, style_sheet=plot_presenter.IN_PROGRESS_STYLE_SHEET

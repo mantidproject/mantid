@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ name="LARMOR" valid-from   ="2025-01-01 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2024-12-18 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>  
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF LARMOR INSTRUMENT: 
+  
+      Data provided by Richard Heenan (and Freddie) for the SANS2D instrument
+      12/06/09 this version has X & Y coords detector swapped so orientation
+      is correct for temporary wiring table.
+      18/06/09 better distances for detectors and both at L2=4m, front at X=-1.1m
+      26/06/09 swap front & rear as names wrong, translate front in opposite direction
+	  21/07/09 remove the 150mm sideways shift (i.e. back to symmetrical detector coords)
+	  to simplify manipulations in Mantid and help allow for detector mapping not quite 
+	  as expected.
+	  01/02/10 very small chang eto pixel size 191*5.1=974.2=2*487.05 (was 487.4)
+	  - note have to swap x= and y= in Anders output list !
+      02/04/12 Put in 'no shape monitors' for possible in the future monitors
+      with ID 5-8
+	  21/02/24 include the SESANS and SEMSANS detector
+	  18/12/24 adding polarizing neutron optics to IDF
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location />
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location z="25.300"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+ 
+  <!-- polarisation optics components, distances from McStas file -->
+  
+  <type name="polarizer" />
+
+  <component type="polarizer" name="short-polarizer"> 
+      <location y="0.0" x="-0.5" z="17.95"/> 
+      <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter> 
+  </component> 
+
+  <component type="polarizer" name="long-polarizer"> 
+    <location y="0.0" x="+0.5" z="17.95"/> 
+    <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter> 
+  </component> 
+  
+  <type name="flipper" />  
+  
+  <component type="flipper" name="RF-flipper"> 
+    <location y="0.0" x="-0.5" z="19.64"/> 
+    <parameter name="device-type" type="string"> <value val="coil" /> </parameter> 
+  </component>    
+
+  <type name="analyzer" />   
+  
+  <component type="analyzer" name="helium-analyzer">
+    <location y="0.0" x="-0.5" z="26.260"/> 
+    <parameter name="device-type" type="string"> <value val="MEOP" /> </parameter> 
+    <parameter name="cell-length"> <value val="0.010" /> </parameter> 
+  </component> 
+  
+  <component type="analyzer" name="SE-analyzer"> 
+    <!-- better positions and shapes will be defined later -->
+    <location y="0.0" x="-0.5" z="29"/>
+    <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter>
+  </component> 
+  
+  <!-- detector components (including monitors) -->
+  
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <type name="monitors">
+    <component type="monitor-tbd">
+      <!-- better positions and shapes will be defined later -->
+      <location z="9.8195" name="monitor1"/>
+      <location z="20.313" name="monitor2"/>
+      <location z="24.056" name="monitor3"/>
+    </component>
+    <component type="Moderator-Monitor4">
+      <!-- transmisssion detector, either in or out of beam -->
+      <location z="25.760" name="monitor4"/>
+    </component>
+    <component type="monitor-tbd">
+      <!-- better positions and shapes will be defined later -->
+      <location z="29.6500" name="monitor5"/>
+    </component>    
+    
+    <!-- Putting in monitors, which are defined in raw/neuxs
+         files, and have detector IDs, but currently not physically present 
+         on the instrument. Defined with no geometric shape, as they do not 
+         physically exist, and with a dummy position -->
+    <component type="no shape monitor">
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>      
+    </component>  
+    
+  </type>
+  
+  <type name="monitor-tbd" is="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>   
+  </type>
+  
+  <type name="Moderator-Monitor4" is="monitor">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+
+  <type name="no shape monitor" is="monitor" />   
+
+  <component type="DetectorBench">
+    <location x="0" y="0" z="25.300"/> 
+  </component>
+
+  <type name="DetectorBench">
+   <component type="LARMORSANSDetector" idlist="LARMORSANSDetector">
+     <location z="4.406" /> 
+   </component>   
+  </type>
+
+ <type name="LARMORSANSDetector">
+ <component type="LARMORUptube">
+<location  x=" -0.3206709  " name="tube1"/>
+<location  x=" -0.3040129  " name="tube3"/>
+<location  x=" -0.2873549  " name="tube5"/>
+<location  x=" -0.2706969  " name="tube7"/>
+<location  x=" -0.2540389  " name="tube9"/>
+<location  x=" -0.2373809  " name="tube11"/>
+<location  x=" -0.2207229  " name="tube13"/>
+<location  x=" -0.2040649  " name="tube15"/>
+<location  x=" -0.1874069  " name="tube17"/>
+<location  x=" -0.1707489  " name="tube19"/>
+<location  x=" -0.1540909  " name="tube21"/>
+<location  x=" -0.1374329  " name="tube23"/>
+<location  x=" -0.1207749  " name="tube25"/>
+<location  x=" -0.1041169  " name="tube27"/>
+<location  x=" -0.0874589  " name="tube29"/>
+<location  x=" -0.0708009  " name="tube31"/>
+<location  x=" -0.0541429  " name="tube33"/>
+<location  x=" -0.0374849  " name="tube35"/>
+<location  x=" -0.0208269  " name="tube37"/>
+<location  x=" -0.0041689  " name="tube39"/>
+<location  x=" 0.0124891   " name="tube41"/>
+<location  x=" 0.0291471   " name="tube43"/>
+<location  x=" 0.0458051   " name="tube45"/>
+<location  x=" 0.0624631   " name="tube47"/>
+<location  x=" 0.0791211   " name="tube49"/>
+<location  x=" 0.0957791   " name="tube51"/>
+<location  x=" 0.1124371   " name="tube53"/>
+<location  x=" 0.1290951   " name="tube55"/>
+<location  x=" 0.1457531   " name="tube57"/>
+<location  x=" 0.1624111   " name="tube59"/>
+<location  x=" 0.1790691   " name="tube61"/>
+<location  x=" 0.1957271   " name="tube63"/>
+<location  x=" 0.2123851   " name="tube65"/>
+<location  x=" 0.2290431   " name="tube67"/>
+<location  x=" 0.2457011   " name="tube69"/>
+<location  x=" 0.2623591   " name="tube71"/>
+<location  x=" 0.2790171   " name="tube73"/>
+<location  x=" 0.2956751   " name="tube75"/>
+<location  x=" 0.3123331   " name="tube77"/>
+<location  x=" 0.3289911   " name="tube79"/>
+</component>
+ <component type="LARMORDowntube">
+<location  x=" -0.3123799  " name="tube2"/>
+<location  x=" -0.2957219  " name="tube4"/>
+<location  x=" -0.2790639  " name="tube6"/>
+<location  x=" -0.2624059  " name="tube8"/>
+<location  x=" -0.2457479  " name="tube10"/>
+<location  x=" -0.2290899  " name="tube12"/>
+<location  x=" -0.2124319  " name="tube14"/>
+<location  x=" -0.1957739  " name="tube16"/>
+<location  x=" -0.1791159  " name="tube18"/>
+<location  x=" -0.1624579  " name="tube20"/>
+<location  x=" -0.1457999  " name="tube22"/>
+<location  x=" -0.1291419  " name="tube24"/>
+<location  x=" -0.1124839  " name="tube26"/>
+<location  x=" -0.0958259  " name="tube28"/>
+<location  x=" -0.0791679  " name="tube30"/>
+<location  x=" -0.0625099  " name="tube32"/>
+<location  x=" -0.0458519  " name="tube34"/>
+<location  x=" -0.0291939  " name="tube36"/>
+<location  x=" -0.0125359  " name="tube38"/>
+<location  x=" 0.0041221   " name="tube40"/>
+<location  x=" 0.0207801   " name="tube42"/>
+<location  x=" 0.0374381   " name="tube44"/>
+<location  x=" 0.0540961   " name="tube46"/>
+<location  x=" 0.0707541   " name="tube48"/>
+<location  x=" 0.0874121   " name="tube50"/>
+<location  x=" 0.1040701   " name="tube52"/>
+<location  x=" 0.1207281   " name="tube54"/>
+<location  x=" 0.1373861   " name="tube56"/>
+<location  x=" 0.1540441   " name="tube58"/>
+<location  x=" 0.1707021   " name="tube60"/>
+<location  x=" 0.1873601   " name="tube62"/>
+<location  x=" 0.2040181   " name="tube64"/>
+<location  x=" 0.2206761   " name="tube66"/>
+<location  x=" 0.2373341   " name="tube68"/>
+<location  x=" 0.2539921   " name="tube70"/>
+<location  x=" 0.2706501   " name="tube72"/>
+<location  x=" 0.2873081   " name="tube74"/>
+<location  x=" 0.3039661   " name="tube76"/>
+<location  x=" 0.3206241   " name="tube78"/>
+<location  x=" 0.3372821   " name="tube80"/>
+</component>
+ </type>
+ 
+ <type name="LARMORUptube" outline="yes">
+ <component type="pixel">
+   <locations y="-0.32" y-end="0.32" n-elements="512" />
+ </component>
+ </type>
+ 
+ <type name="LARMORDowntube" outline="yes">
+ <component type="pixel">
+   <locations y="-0.32" y-end="0.32" n-elements="512" />
+ </component>
+ </type>
+  
+  <type name="pixel" is="detector">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.2" z="0.0" />
+      <radius val="0.004" />
+      <height val="   1.25E-3" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+
+  <type name="SEMSANSWLSF-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-3.25e-4" y="-0.0175" z="0.0"  />
+      <left-front-top-point  x="-3.25e-4" y="0.0175" z="0.0"  />
+      <left-back-bottom-point  x="-3.25e-4" y="-0.0175" z="0.01"  />
+      <right-front-bottom-point  x="3.25e-4" y="-0.0175" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+ <type name="SEMSANSWLSF-panel">
+   <component type="SEMSANSWLSF-pixel">
+     <locations x="0.0208" x-end="-0.0208" n-elements="64" />
+   </component>
+ </type>
+
+ <component type="SEMSANSWLSFDetector" idlist="SEMSANSWLSFDetector">
+     <location z="29.65" x="-0.5"/> 
+ </component>   
+
+  <type name="SESANSSlab-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-6.25e-3" y="-0.025" z="0.0"  />
+      <left-front-top-point  x="-6.25e-3" y="0.025" z="0.0"  />
+      <left-back-bottom-point  x="-6.25e-4" y="-0.025" z="0.01"  />
+      <right-front-bottom-point  x="6.25e-4" y="-0.025" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+ <type name="SESANSSlab-panel">
+   <component type="SESANSSlab-pixel">
+     <locations x="-0.01875" x-end="0.01875" n-elements="4" />
+   </component>
+ </type>
+
+ <component type="SESANSSlabDetector" idlist="SESANSSlabDetector">
+     <location z="29.65" x="-0.6"/> 
+ </component>   
+
+  <type name="WLSF-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.001046875" y="-0.0955" z="0.0"  />
+      <left-front-top-point  x="-0.001046875" y="0.0955" z="0.0"  />
+      <left-back-bottom-point  x="-0.001046875" y="-0.0955" z="0.01"  />
+      <right-front-bottom-point  x="0.001046875" y="-0.0955" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+ <type name="WLSF-panel">
+   <component type="WLSF-pixel">
+     <locations x="0.03245" x-end="-0.03245" n-elements="32" />
+   </component>
+ </type>
+
+  <component type="DetectorTrolley">
+    <location x="0" y="0" z="25.300" rot="45.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/> 
+  </component>
+
+  <type name="DetectorTrolley">
+   <component type="LARMORWLSFDetector" idlist="LARMORWLSFDetector">
+     <location z="0.0" /> 
+   </component>   
+  </type>
+ 
+ <type name="LARMORWLSFDetector">
+	<component type="WLSF-panel">
+		<location  x="0.2345" z="1.090062" name="WLSF-Panel1"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="0.1675" z="1.102347" name="WLSF-Panel2"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="0.1005" z="1.110462" name="WLSF-Panel3"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="0.0335" z="1.114497" name="WLSF-Panel4"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="-0.0335" z="1.114497" name="WLSF-Panel5"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="-0.1005" z="1.110462" name="WLSF-Panel6"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="-0.1675" z="1.102347" name="WLSF-Panel7"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+	<component type="WLSF-panel">
+		<location  x="-0.2345" z="1.090062" name="WLSF-Panel8"> <facing x="0" y="0" z="25.3"/> </location>
+	</component>
+ </type>
+
+ <type name="SEMSANSWLSFDetector">
+	<component type="SEMSANSWLSF-panel">
+		<location  x="0.0" z="0.0" name="SEMSANSWLSF-Panel1"> </location>
+	</component>
+ </type>
+
+ <type name="SESANSSlabDetector">
+	<component type="SESANSSlab-panel">
+		<location  x="0.0" z="0.0" name="SESANSSlab-Panel1"> </location>
+	</component>
+ </type>
+
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitors">
+    <id start="1" end="10" />  
+  </idlist>   
+  
+  <idlist idname="LARMORSANSDetector">
+   <id start="1108000" end="1108511" />
+   <id start="1110000" end="1110511" />
+   <id start="1112000" end="1112511" />
+   <id start="1114000" end="1114511" />
+   <id start="1116000" end="1116511" />
+   <id start="1118000" end="1118511" />
+   <id start="1120000" end="1120511" />
+   <id start="1122000" end="1122511" />
+   <id start="1200000" end="1200511" />
+   <id start="1202000" end="1202511" />
+   <id start="1204000" end="1204511" />
+   <id start="1206000" end="1206511" />
+   <id start="1208000" end="1208511" />
+   <id start="1210000" end="1210511" />
+   <id start="1212000" end="1212511" />
+   <id start="1214000" end="1214511" />
+   <id start="1216000" end="1216511" />
+   <id start="1218000" end="1218511" />
+   <id start="1220000" end="1220511" />
+   <id start="1222000" end="1222511" />
+   <id start="1300000" end="1300511" />
+   <id start="1302000" end="1302511" />
+   <id start="1304000" end="1304511" />
+   <id start="1306000" end="1306511" />
+   <id start="1308000" end="1308511" />
+   <id start="1310000" end="1310511" />
+   <id start="1312000" end="1312511" />
+   <id start="1314000" end="1314511" />
+   <id start="1316000" end="1316511" />
+   <id start="1318000" end="1318511" />
+   <id start="1320000" end="1320511" />
+   <id start="1322000" end="1322511" />
+   <id start="1400000" end="1400511" />
+   <id start="1402000" end="1402511" />
+   <id start="1404000" end="1404511" />
+   <id start="1406000" end="1406511" />
+   <id start="1408000" end="1408511" />
+   <id start="1410000" end="1410511" />
+   <id start="1412000" end="1412511" />
+   <id start="1414000" end="1414511" />
+
+   <id start="1109000" end="1109511" />
+   <id start="1111000" end="1111511" />
+   <id start="1113000" end="1113511" />
+   <id start="1115000" end="1115511" />
+   <id start="1117000" end="1117511" />
+   <id start="1119000" end="1119511" />
+   <id start="1121000" end="1121511" />
+   <id start="1123000" end="1123511" />
+   <id start="1201000" end="1201511" />
+   <id start="1203000" end="1203511" />
+   <id start="1205000" end="1205511" />
+   <id start="1207000" end="1207511" />
+   <id start="1209000" end="1209511" />
+   <id start="1211000" end="1211511" />
+   <id start="1213000" end="1213511" />
+   <id start="1215000" end="1215511" />
+   <id start="1217000" end="1217511" />
+   <id start="1219000" end="1219511" />
+   <id start="1221000" end="1221511" />
+   <id start="1223000" end="1223511" />
+   <id start="1301000" end="1301511" />
+   <id start="1303000" end="1303511" />
+   <id start="1305000" end="1305511" />
+   <id start="1307000" end="1307511" />
+   <id start="1309000" end="1309511" />
+   <id start="1311000" end="1311511" />
+   <id start="1313000" end="1313511" />
+   <id start="1315000" end="1315511" />
+   <id start="1317000" end="1317511" />
+   <id start="1319000" end="1319511" />
+   <id start="1321000" end="1321511" />
+   <id start="1323000" end="1323511" />
+   <id start="1401000" end="1401511" />
+   <id start="1403000" end="1403511" />
+   <id start="1405000" end="1405511" />
+   <id start="1407000" end="1407511" />
+   <id start="1409000" end="1409511" />
+   <id start="1411000" end="1411511" />
+   <id start="1413000" end="1413511" />
+   <id start="1415000" end="1415511" />
+  </idlist>
+
+  <idlist idname="LARMORWLSFDetector">
+   <id start="2000016" end="2000031" />
+   <id start="2000032" end="2000047" />
+   <id start="2000048" end="2000063" />
+   <id start="2000000" end="2000015" />
+   <id start="2000080" end="2000095" />
+   <id start="2000096" end="2000111" />
+   <id start="2000112" end="2000127" />
+   <id start="2000064" end="2000079" />
+
+   <id start="2000144" end="2000159" />
+   <id start="2000160" end="2000175" />
+   <id start="2000176" end="2000191" />
+   <id start="2000128" end="2000143" />
+   <id start="2000208" end="2000223" />
+   <id start="2000224" end="2000239" />
+   <id start="2000240" end="2000255" />
+   <id start="2000192" end="2000207" />
+  </idlist>
+  
+  <idlist idname="SEMSANSWLSFDetector">
+   <id start="3000000" end="3000063" />
+  </idlist>
+
+  <idlist idname="SESANSSlabDetector">
+   <id start="4000000" end="4000003" />
+  </idlist>
+
+</instrument>

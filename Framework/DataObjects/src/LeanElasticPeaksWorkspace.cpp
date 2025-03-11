@@ -13,7 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <cmath>
 
@@ -169,8 +169,8 @@ void LeanElasticPeaksWorkspace::addPeak(LeanElasticPeak &&peak) { m_peaks.emplac
  * @param peakNum :: index of the peak to get.
  * @return a reference to a Peak object.
  */
-LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
+LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(size_t const peakNum) {
+  if (peakNum >= m_peaks.size()) {
     throw std::invalid_argument("LeanElasticPeaksWorkspace::getPeak(): peakNum is out of range.");
   }
   return m_peaks[peakNum];
@@ -181,8 +181,8 @@ LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) {
  * @param peakNum :: index of the peak to get.
  * @return a reference to a Peak object.
  */
-const LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) const {
-  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
+const LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(size_t const peakNum) const {
+  if (peakNum >= m_peaks.size()) {
     throw std::invalid_argument("LeanElasticPeaksWorkspace::getPeak(): peakNum is out of range.");
   }
   return m_peaks[peakNum];

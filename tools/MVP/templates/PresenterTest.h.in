@@ -1,0 +1,78 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
+#include "Presenter.h"
+#include "View.h"
+#include "Model.h"
+
+#include "MantidKernel/WarningSuppressions.h"
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockView : public IView {
+public:
+  virtual ~MockView() = default;
+  MOCK_METHOD1(subscribe, void(IPresenter *presenter));
+  MOCK_METHOD1(setLabel, void(std::string const &text));
+};
+
+class MockModel: public IModel {
+public:
+  virtual ~MockModel() = default;
+  MOCK_CONST_METHOD0(count, std::size_t());
+  MOCK_METHOD1(setCount, void(std::size_t const value));
+};
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+
+using namespace testing;
+
+class PresenterTest : public CxxTest::TestSuite {
+public:
+  static PresenterTest *createSuite() { return new PresenterTest(); }
+
+  static void destroySuite(PresenterTest *suite) { delete suite; }
+
+  void setUp() override {
+    m_view = std::make_unique<NiceMock<MockView>>();
+    auto model = std::make_unique<NiceMock<MockModel>>();
+    m_model = model.get();
+
+    EXPECT_CALL(*m_view, subscribe(_)).Times(Exactly(1));
+    m_presenter = std::make_unique<Presenter>(std::move(model), m_view.get());
+  }
+
+  void tearDown() override {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+
+    m_presenter.reset();
+    m_view.reset();
+  }
+
+  ///----------------------------------------------------------------------
+  /// Unit Tests that test the methods of the presenter
+  ///----------------------------------------------------------------------
+
+  void test_handleButtonClicked_will_update_model_count_and_set_the_view_label() {
+    ON_CALL(*m_model, count).WillByDefault(Return(1));
+
+    EXPECT_CALL(*m_model, setCount(2)).Times(Exactly(1));
+    EXPECT_CALL(*m_view, setLabel("1")).Times(Exactly(1));
+
+    m_presenter->handleButtonClicked();
+  }
+
+private:
+std::unique_ptr<Presenter> m_presenter;
+std::unique_ptr<NiceMock<MockView>> m_view;
+NiceMock<MockModel>* m_model;
+};

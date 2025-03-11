@@ -51,7 +51,7 @@ void AddLogDerivative::init() {
  * @return
  */
 Mantid::Kernel::TimeSeriesProperty<double> *
-AddLogDerivative::makeDerivative(API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input,
+AddLogDerivative::makeDerivative(API::Progress &progress, const Mantid::Kernel::TimeSeriesProperty<double> *input,
                                  const std::string &name, int numDerivatives) {
   if (input->size() < numDerivatives + 1)
     throw std::runtime_error("Log " + input->name() + " only has " + Strings::toString(input->size()) +
@@ -69,9 +69,9 @@ AddLogDerivative::makeDerivative(API::Progress &progress, Mantid::Kernel::TimeSe
     double t0 = times[0];
     double y0 = values[0];
     for (size_t i = 0; i < times.size() - 1; i++) {
-      double y1 = values[i + 1];
       double t1 = times[i + 1];
       if (t1 != t0) {
+        double y1 = values[i + 1];
         // Avoid repeated time values giving infinite derivatives
         double dy = (y1 - y0) / (t1 - t0);
         double t = (t0 + t1) / 2.0;

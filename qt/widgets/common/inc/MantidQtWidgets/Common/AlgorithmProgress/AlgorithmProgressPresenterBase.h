@@ -47,7 +47,7 @@ public:
   void setProgressBar(QProgressBar *, const double, const QString &, const double, const int);
 
   virtual void algorithmStartedSlot(Mantid::API::AlgorithmID) = 0;
-  virtual void updateProgressBarSlot(Mantid::API::AlgorithmID, const double, const QString, const double,
+  virtual void updateProgressBarSlot(Mantid::API::AlgorithmID, const double, const QString &, const double,
                                      const int) = 0;
   virtual void algorithmEndedSlot(Mantid::API::AlgorithmID) = 0;
 

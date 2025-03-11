@@ -97,7 +97,7 @@ PoldiAutoCorrelationCore::finalizeCalculation(const std::vector<double> &correct
  * @param countData :: Instance of Workspace2D with POLDI data.
  * @return A workspace containing the correlation spectrum.
  */
-DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr &countData,
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(const DataObjects::Workspace2D_sptr &countData,
                                                                   const DataObjects::Workspace2D_sptr &normCountData) {
   m_logger.information() << "Starting Autocorrelation method...\n";
 

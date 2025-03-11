@@ -819,7 +819,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             mainWS = LoadAndMerge(
                 Filename=inputFiles,
                 OutputWorkspace=mergedWSName,
-                LoaderName="LoadILLTOF",
                 LoaderOptions={"ConvertToTOF": True},
                 EnableLogging=self._subalgLogging,
             )

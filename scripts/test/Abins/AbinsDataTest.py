@@ -22,8 +22,14 @@ from abins.test_helpers import assert_kpoint_almost_equal
 
 class TestAbinsData(unittest.TestCase):
     def setUp(self):
+        self._tempdir = TemporaryDirectory()
+        self.cache_directory = Path(self._tempdir.name)
+
         self.mock_ad = MagicMock(spec=abins.AtomsData)
         self.mock_kpd = MagicMock(spec=abins.KpointsData)
+
+    def tearDown(self):
+        self._tempdir.cleanup()
 
     def test_init_typeerror(self):
         with self.assertRaisesRegex(ValidationError, "Input should be an instance of KpointsData"):
@@ -34,7 +40,9 @@ class TestAbinsData(unittest.TestCase):
     def test_init_noloader(self):
         with self.assertRaises(ValueError):
             AbinsData.from_calculation_data(
-                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"), ab_initio_program="fake_program"
+                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"),
+                ab_initio_program="fake_program",
+                cache_directory=self.cache_directory,
             )
 
     def test_data_content(self):
@@ -45,8 +53,9 @@ class TestAbinsData(unittest.TestCase):
 
 
 class DummyLoader:
-    def __init__(self, *, input_ab_initio_filename):
+    def __init__(self, *, input_ab_initio_filename, cache_directory):
         self.filename = input_ab_initio_filename
+        self.cache_directory = cache_directory
 
     def get_formatted_data(self):
         return "FORMATTED DATA"
@@ -54,13 +63,18 @@ class DummyLoader:
 
 class TestAbinsDataFromCalculation(unittest.TestCase):
     def setUp(self):
+        self._tempdir = TemporaryDirectory()
+        self.cache_directory = Path(self._tempdir.name)
+
         all_loaders["DUMMYLOADER"] = DummyLoader
 
     def tearDown(self):
+        self._tempdir.cleanup()
+
         del all_loaders["DUMMYLOADER"]
 
     def test_with_dummy_loader(self):
-        data = AbinsData.from_calculation_data("dummy_file.ext", "DummyLoader")
+        data = AbinsData.from_calculation_data("dummy_file.ext", "DummyLoader", cache_directory=self.cache_directory)
         self.assertEqual(data, "FORMATTED DATA")
 
 

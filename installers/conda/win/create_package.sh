@@ -72,9 +72,17 @@ rm -rf $CONDA_ENV_PATH
 
 mkdir $COPY_DIR
 
+# The mantid channel is required as the source for installing mslice
+MANTID_CHANNEL=mantid
+# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
+# the nightly version of mslice
+if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
+  MANTID_CHANNEL=mantid/label/nightly
+fi
+
 echo "Creating conda env from mantidworkbench and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
-  --copy --channel $CONDA_CHANNEL --channel conda-forge --channel mantid -y \
+  --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
   mantidworkbench \
   m2w64-jq
 echo "Conda env created"

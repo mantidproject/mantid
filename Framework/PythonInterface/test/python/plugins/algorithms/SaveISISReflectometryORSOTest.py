@@ -10,17 +10,15 @@ import tempfile
 import numpy as np
 from unittest.mock import Mock, patch
 from pathlib import Path
+from datetime import datetime, timezone, date, time
+from collections import namedtuple
 
 from mantid import config
-from mantid.simpleapi import (
-    CreateSampleWorkspace,
-    SaveISISReflectometryORSO,
-    ConvertToPointData,
-    GroupWorkspaces,
-)
+from mantid.simpleapi import CreateSampleWorkspace, SaveISISReflectometryORSO, ConvertToPointData, GroupWorkspaces, AddSampleLog
 from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime
 from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
+from mantid.utils.reflectometry import SpinStatesORSO
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -105,6 +103,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_file_populates_software_version_and_reduction_timestamp(self, mock_alg_histories):
         input_ws = self._create_sample_workspace()
         history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"}, [Mock()])
+        expected_value = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
         history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
         mock_alg_histories.return_value = [history]
 
@@ -113,7 +112,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_file_header(
             [
                 f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n"
-                f"#   timestamp: 2024-02-13T12:14:36+00:00\n#"
+                f"#   timestamp: {expected_value.isoformat()}\n#"
             ]
         )
 
@@ -482,7 +481,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_unstitched_data_gets_dataset_name_from_ref_roi(self, mock_alg_histories):
-        angle = "2.3"
+        angle = "2.300"
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
 
@@ -497,7 +496,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._run_save_alg(ws, write_resolution=False)
 
-        self._check_file_header([self._get_dataset_name_entry(f"'{self._get_theta_value(ws)}'")])
+        self._check_file_header([self._get_dataset_name_entry(f"'{self._get_theta_value(ws):.3f}'")])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_unstitched_data_sets_dataset_name_to_ws_name_as_default(self, mock_alg_histories):
@@ -578,6 +577,42 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         mock_save_orso_nexus.assert_called_once()
         mock_save_orso_ascii.assert_not_called()
 
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_dataset_name_is_correctly_generated_for_different_angle_polarization_settings_in_ws_groups(self, mock_alg_histories):
+        theta = 0.5
+        w_name = "ws"
+        angle_pol = namedtuple("angle_pol", "angle polarization")
+        angle_polarization_inputs = [
+            angle_pol(None, SpinStatesORSO.PP),
+            angle_pol(theta, ""),
+            angle_pol(theta, SpinStatesORSO.PP),
+            angle_pol(None, ""),
+        ]
+        dataset_name_outputs = [f"{w_name} {SpinStatesORSO.PP}", f"{w_name} {theta:.3f}", f"{theta:.3f} {SpinStatesORSO.PP}", w_name]
+        for in_params, out_dataset_name in zip(angle_polarization_inputs, dataset_name_outputs):
+            with self.subTest(test_case=in_params):
+                ws = self._create_sample_workspace()
+                AddSampleLog(Workspace=ws, LogName=SpinStatesORSO.LOG_NAME, LogText=in_params.polarization)
+                if in_params.angle is not None:
+                    self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": in_params.angle})
+                GroupWorkspaces(InputWorkspaces=[w_name], OutputWorkspace=f"{w_name}_group")
+
+                self._run_save_alg(f"{w_name}_group")
+
+                self._check_file_header([self._get_dataset_name_entry(out_dataset_name)])
+                mock_alg_histories.reset_mock(return_value=True)
+
+    def test_data_with_spin_state_logs_adds_polarization_metadata_in_instrument_settings_header(self):
+        spin_states = [SpinStatesORSO.PP, SpinStatesORSO.MM, SpinStatesORSO.MP, SpinStatesORSO.PM]
+        ws_grp = self._create_sample_workspace_group_with_spin_state(spin_states)
+
+        self._run_save_alg(ws_grp, write_resolution=False, include_extra_cols=False)
+
+        self._check_file_header(["instrument_settings:\n#       incident_angle: null\n#       wavelength: null"])
+        for state in spin_states:
+            with self.subTest(test_case=state):
+                self._check_file_header([f"#       polarization: {state}"])
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
@@ -591,6 +626,15 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         for ws_name in member_ws_names:
             self._create_sample_workspace(ws_name=ws_name, instrument_name=instrument_name)
         return GroupWorkspaces(InputWorkspaces=",".join(member_ws_names), OutputWorkspace=group_name)
+
+    def _create_sample_workspace_group_with_spin_state(self, spin_states):
+        group_member_names = []
+        for state in spin_states:
+            ws_name = "ws_" + state
+            group_member_names.append(ws_name)
+            self._create_sample_workspace(ws_name=ws_name)
+            AddSampleLog(Workspace=ws_name, LogName=SpinStatesORSO.LOG_NAME, LogText=state)
+        return GroupWorkspaces(InputWorkspaces=",".join(group_member_names), OutputWorkspace="group_pol")
 
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
         files_entry = [f"{self._DATA_FILES_HEADING}\n"]

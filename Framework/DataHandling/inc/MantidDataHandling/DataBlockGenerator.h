@@ -8,6 +8,7 @@
 
 #include "MantidDataHandling/DataBlock.h"
 #include <optional>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

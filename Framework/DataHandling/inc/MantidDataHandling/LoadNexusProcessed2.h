@@ -11,7 +11,7 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidIndexing/SpectrumNumber.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include <string>
 #include <unordered_map>
 
@@ -41,7 +41,7 @@ public:
   // const std::string name() const override;
 
   int version() const override;
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws) override;

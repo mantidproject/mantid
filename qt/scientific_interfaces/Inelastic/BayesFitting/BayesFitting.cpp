@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BayesFitting.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
-#include "Quasi.h"
+#include "QuasiModel.h"
+#include "QuasiPresenter.h"
+#include "QuasiView.h"
 #include "ResNormPresenter.h"
-#include "Stretch.h"
+#include "StretchPresenter.h"
 
 #include <MantidQtWidgets/Common/QtJobRunner.h>
-
-using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(BayesFitting)
@@ -25,17 +25,30 @@ BayesFitting::BayesFitting(QWidget *parent)
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
-  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
-  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+  auto resNormRunner = createAlgorithmRunner();
 
   // insert each tab into the interface on creation
   auto resNormModel = std::make_unique<ResNormModel>();
   auto resNormWidget = m_uiForm.bayesFittingTabs->widget(RES_NORM);
-  m_bayesTabs.emplace(RES_NORM, new ResNormPresenter(resNormWidget, std::move(algorithmRunner), std::move(resNormModel),
+  m_bayesTabs.emplace(RES_NORM, new ResNormPresenter(resNormWidget, std::move(resNormRunner), std::move(resNormModel),
                                                      new ResNormView(resNormWidget)));
 
-  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
-  m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.bayesFittingTabs->widget(STRETCH)));
+  auto quasiRunner = createAlgorithmRunner();
+  auto quasiModel = std::make_unique<QuasiModel>();
+  auto quasiWidget = m_uiForm.bayesFittingTabs->widget(QUASI);
+  m_bayesTabs.emplace(QUASI, new QuasiPresenter(quasiWidget, std::move(quasiRunner), std::move(quasiModel),
+                                                new QuasiView(quasiWidget)));
+
+  auto stretchRunner = createAlgorithmRunner();
+
+  auto tabContent = m_uiForm.bayesFittingTabs->widget(STRETCH);
+  m_bayesTabs.emplace(STRETCH, new StretchPresenter(tabContent, new StretchView(tabContent),
+                                                    std::make_unique<StretchModel>(), std::move(stretchRunner)));
+}
+
+std::unique_ptr<MantidQt::API::AlgorithmRunner> BayesFitting::createAlgorithmRunner() const {
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  return std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
 }
 
 void BayesFitting::initLayout() {

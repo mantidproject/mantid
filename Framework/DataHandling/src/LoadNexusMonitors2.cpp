@@ -169,7 +169,7 @@ void LoadNexusMonitors2::exec() {
   m_top_entry_name = this->getPropertyValue("NXentryName");
   // must be done here before the NeXus::File, HDF5 files can't have 2
   // simultaneous handlers
-  Kernel::NexusHDF5Descriptor descriptor(m_filename);
+  Kernel::NexusDescriptor descriptor(m_filename);
 
   // top level file information
   ::NeXus::File file(m_filename);
@@ -449,8 +449,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   std::unique_ptr<::NeXus::File> filePointer;
   try {
     filePointer = std::make_unique<::NeXus::File>(fname);
-    if (filePointer)
-      filePointer->getEntries();
+    filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
     res = false;

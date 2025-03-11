@@ -36,9 +36,9 @@ public:
 
   PointGroup(const std::string &symbolHM, const Group &group, const std::string &description = "");
   /// Name of the point group
-  std::string getName() const { return m_name; }
+  const std::string &getName() const { return m_name; }
   /// Hermann-Mauguin symbol
-  std::string getSymbol() const;
+  const std::string &getSymbol() const;
 
   CrystalSystem crystalSystem() const { return m_crystalSystem; }
   LatticeSystem latticeSystem() const { return m_latticeSystem; }

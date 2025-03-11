@@ -147,7 +147,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void clear() override {
+  void clear() override final {
     std::lock_guard<std::mutex> lock(m_queueLock);
 
     // Empty out the queue and delete the pointers!

@@ -43,6 +43,7 @@ void export_FacilityInfo() {
            "Returns a list of instruments of this facility as defined in the "
            "Facilities.xml file")
       .def("instruments",
+           // cppcheck-suppress cstyleCast
            (std::vector<InstrumentInfo>(FacilityInfo::*)(const std::string &) const) & FacilityInfo::instruments,
            (arg("self"), arg("technique")), "Returns a list of instruments of given technique")
       .def("instrument", &FacilityInfo::instrument, (arg("self"), arg("instrumentName")),

@@ -46,7 +46,7 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   // determine if should trim the front end to remove empty pulses
   auto firstPulseIndex = m_roi.front();
   auto eventRange = this->getEventIndexRange(firstPulseIndex);
-  while (eventRange.first == eventRange.second) {
+  while (eventRange.first == eventRange.second && eventRange.first < m_numEvents) {
     ++firstPulseIndex;
     eventRange = this->getEventIndexRange(firstPulseIndex);
   }
@@ -54,7 +54,7 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   // determine if should trim the back end to remove empty pulses
   auto lastPulseIndex = m_roi.back();
   eventRange = this->getEventIndexRange(lastPulseIndex - 1);
-  while (eventRange.first == eventRange.second) {
+  while (eventRange.first == eventRange.second && eventRange.second > 0) {
     --lastPulseIndex;
     eventRange = this->getEventIndexRange(lastPulseIndex - 1);
   }
@@ -146,7 +146,7 @@ size_t PulseIndexer::getLastPulseIndex() const { return m_roi.back(); }
 std::pair<size_t, size_t> PulseIndexer::getEventIndexRange(const size_t pulseIndex) const {
   const auto start = this->getStartEventIndex(pulseIndex);
   // return early if the start is too big
-  if (start > m_numEvents)
+  if (start >= m_numEvents)
     return std::make_pair(start, m_numEvents);
 
   // get the end index

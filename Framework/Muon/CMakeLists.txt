@@ -26,7 +26,6 @@ set(SRC_FILES
     src/PlotAsymmetryByLogValue.cpp
     src/RemoveExpDecay.cpp
     src/RRFMuon.cpp
-    src/LegacyNexusClasses.cpp
     src/MuonNexusReader.cpp
 )
 
@@ -58,7 +57,6 @@ set(INC_FILES
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
     inc/MantidMuon/RRFMuon.h
-    inc/MantidMuon/LegacyNexusClasses.h
     inc/MantidMuon/MuonNexusReader.h
 )
 

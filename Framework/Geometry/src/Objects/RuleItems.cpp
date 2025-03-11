@@ -699,7 +699,7 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int /*unused*/)
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
 
-  auto *newX = dynamic_cast<SurfPoint *>(nR.get());
+  const auto *newX = dynamic_cast<const SurfPoint *>(nR.get());
   if (newX)
     *this = *newX;
 }
@@ -712,7 +712,7 @@ void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> /*unus
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
-  auto *newX = dynamic_cast<SurfPoint *>(aR.get());
+  const auto *newX = dynamic_cast<const SurfPoint *>(aR.get());
   if (newX)
     *this = *newX;
 }
@@ -979,7 +979,7 @@ void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
   @param :: Null side point
 */
 {
-  auto *newX = dynamic_cast<CompObj *>(aR.get());
+  const auto *newX = dynamic_cast<const CompObj *>(aR.get());
   // Make a copy
   if (newX)
     *this = *newX;
@@ -995,7 +995,7 @@ void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 {
   (void)oR; // Avoid compiler warning
 
-  auto *newX = dynamic_cast<CompObj *>(aR.get());
+  const auto *newX = dynamic_cast<const CompObj *>(aR.get());
   if (newX)
     *this = *newX;
 }
@@ -1227,7 +1227,7 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int /*unused*/)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<'\n';
-  auto *newX = dynamic_cast<BoolValue *>(aR.get());
+  const auto *newX = dynamic_cast<const BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
 }
@@ -1242,7 +1242,7 @@ void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 {
   (void)oR; // Avoid compiler warning
   // std::cerr<<"Calling BoolValue setLeaves"<<'\n';
-  auto *newX = dynamic_cast<BoolValue *>(aR.get());
+  const auto *newX = dynamic_cast<const BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
 }

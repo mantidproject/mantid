@@ -32,7 +32,7 @@ public:
   virtual ~IBatchPresenter() = default;
 
   virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
-  virtual void initInstrumentList(const std::string &selectedInstrument = "") = 0;
+  virtual std::string initInstrumentList(const std::string &selectedInstrument = "") = 0;
 
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;

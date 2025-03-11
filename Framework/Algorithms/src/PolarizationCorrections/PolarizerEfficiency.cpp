@@ -125,6 +125,7 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     errorList[PropertyNames::SPIN_STATES] =
         "The number of workspaces in the input WorkspaceGroup (" + std::to_string(inputWsCount) +
         ") does not match the number of spin states provided (" + std::to_string(spinStates.size()) + ").";
+    return errorList;
   }
   const auto &t01WsIndex =
       PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_ON);

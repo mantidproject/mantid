@@ -9,8 +9,10 @@ the ``__init__`` function of the view will add a line edit:
 
 .. code-block:: python
 
-   self.text = QtWidgets.QLineEdit()
-   grid.addWidget(self.text)
+   from qtpy.QWidgets import QLineEdit
+
+   self._line_edit = QLineEdit()
+   grid.addWidget(self._line_edit)
 
 It is possible to have a default value within the line edit. It is
 also possible to make it impossible for the user to modify the line

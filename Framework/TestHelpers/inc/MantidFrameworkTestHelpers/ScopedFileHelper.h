@@ -28,7 +28,7 @@ public:
   ScopedFile &operator=(const ScopedFile &other);
   ScopedFile(const ScopedFile &other);
   void release() const;
-  std::string getFileName() const;
+  const std::string &getFileName() const;
   ~ScopedFile();
 
 private:

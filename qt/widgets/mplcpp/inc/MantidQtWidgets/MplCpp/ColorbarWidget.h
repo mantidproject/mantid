@@ -65,6 +65,7 @@ signals:
   void maxValueEdited(double /*_t1*/);
   ///@}
 
+  // cppcheck-suppress unknownMacro
 private slots:
   void scaleMinimumEdited();
   void scaleMaximumEdited();

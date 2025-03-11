@@ -318,6 +318,7 @@ class MainWindow(QMainWindow):
         action_mantid_concepts = create_action(self, "Mantid Concepts", on_triggered=self.open_mantid_concepts_help)
         action_mantid_homepage = create_action(self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
         action_mantid_forum = create_action(self, "Mantid Forum", on_triggered=self.open_mantid_forum)
+        action_support_email = create_action(self, "Email mantid-help@mantidproject.org", on_triggered=self.mantidhelp_mailto)
         action_about = create_action(self, "About Mantid Workbench", on_triggered=self.open_about)
 
         self.help_menu_actions = [
@@ -327,6 +328,7 @@ class MainWindow(QMainWindow):
             None,
             action_mantid_homepage,
             action_mantid_forum,
+            action_support_email,
             None,
             action_about,
         ]
@@ -680,6 +682,9 @@ class MainWindow(QMainWindow):
 
     def open_mantid_forum(self):
         self.interface_manager.showWebPage("https://forum.mantidproject.org/")
+
+    def mantidhelp_mailto(self):
+        self.interface_manager.showWebPage("mailto:mantid-help@mantidproject.org")
 
     def open_about(self):
         about = AboutPresenter(self)

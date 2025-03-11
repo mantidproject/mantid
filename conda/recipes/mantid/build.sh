@@ -8,12 +8,6 @@ bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantid'
 mkdir build
 cd build
 
-# Check if the system is Linux and set the extra CMake flag if true
-extra_cmake_flags=""
-if [[ "$(uname)" == "Linux" ]]; then
-    extra_cmake_flags="-DPROFILE_ALGORITHM_LINUX=ON"
-fi
-
 cmake \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
@@ -28,7 +22,6 @@ cmake \
   -DMANTID_QT_LIB=OFF \
   -DENABLE_WORKBENCH=OFF \
   -DPython_EXECUTABLE=$PYTHON \
-  ${extra_cmake_flags} \
   -GNinja \
   ../
 

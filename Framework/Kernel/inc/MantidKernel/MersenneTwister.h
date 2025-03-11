@@ -38,7 +38,7 @@ public:
   MersenneTwister &operator=(const MersenneTwister &) = delete;
 
   /// Set the random number seed
-  void setSeed(const size_t seedValue) override;
+  void setSeed(const size_t seedValue);
   /// Sets the range of the subsequent calls to next
   void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range

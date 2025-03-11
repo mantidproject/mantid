@@ -8,6 +8,7 @@
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
+#include <algorithm>
 
 namespace Mantid::DataHandling {
 

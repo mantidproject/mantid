@@ -97,7 +97,7 @@ def _load_test_file():
 class EngineeringDiffractionEncoderTest(unittest.TestCase):
     def setUp(self):
         self.fitprop_browser = None
-        self.mock_view = mock.create_autospec(EngineeringDiffractionGui)
+        self.mock_view = mock.create_autospec(EngineeringDiffractionGui, instance=True)
         self.presenter = EngineeringDiffractionPresenter()
         self.create_test_calibration_presenter()
         self.create_test_focus_presenter()
@@ -113,26 +113,26 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def create_test_focus_presenter(self):
         focus_model = FocusModel()
-        focus_view = mock.create_autospec(FocusView)
+        focus_view = mock.create_autospec(FocusView, instance=True)
         self.presenter.focus_presenter = FocusPresenter(focus_model, focus_view)
 
     def create_test_calibration_presenter(self):
         cal_model = CalibrationModel()
-        cal_view = mock.create_autospec(CalibrationView)
+        cal_view = mock.create_autospec(CalibrationView, instance=True)
         self.presenter.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
 
     def create_test_fitting_presenter(self):
-        fitting_view = mock.create_autospec(FittingView)
+        fitting_view = mock.create_autospec(FittingView, instance=True)
         self.presenter.fitting_presenter = FittingPresenter(fitting_view)
         self.presenter.focus_presenter.add_focus_subscriber(self.presenter.fitting_presenter.data_widget.presenter.focus_run_observer)
-        fitting_plot_view = mock.create_autospec(FittingPlotView)
-        self.fitprop_browser = mock.create_autospec(EngDiffFitPropertyBrowser)
+        fitting_plot_view = mock.create_autospec(FittingPlotView, instance=True)
+        self.fitprop_browser = mock.create_autospec(EngDiffFitPropertyBrowser, instance=True)
         fitting_plot_view.fit_browser = self.fitprop_browser
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = mock.create_autospec(SettingsModel)
-        settings_view = mock.create_autospec(SettingsView)
+        settings_model = mock.create_autospec(SettingsModel, instance=True)
+        settings_view = mock.create_autospec(SettingsView, instance=True)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
         settings_presenter.settings = SETTINGS_DICT

@@ -170,6 +170,7 @@ class PyChopGui(QMainWindow):
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, "n_frame") else 1
         self.repfig_nframe_edit.setText(str(nframe))
         self.repfig_nframe_rep1only.setChecked(False)
+        self.flux_units = self.engine.moderator.flux_units
         if hasattr(self.engine.chopper_system, "default_frequencies"):
             cb = [self.widgets["FrequencyCombo"]["Combo"], self.widgets["PulseRemoverCombo"]["Combo"]]
             for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
@@ -368,7 +369,7 @@ class PyChopGui(QMainWindow):
                     if not self.flux[ie]:
                         continue
                     (line,) = self.resaxes.plot(en, self.res[ie])
-                    label_text = "%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s" % (inst, Ei, freq, self.flux[ie])
+                    label_text = "%s_%3.2fmeV_%dHz_Flux=%f%s" % (inst, Ei, freq, self.flux[ie], self.flux_units)
                     line.set_label(label_text)
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
@@ -378,7 +379,7 @@ class PyChopGui(QMainWindow):
             en = np.linspace(0, 0.95 * ei, 200)
             (line,) = self.resaxes.plot(en, self.res)
             chopper = self.engine.getChopper()
-            label_text = "%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s" % (inst, chopper, ei, freq, self.flux)
+            label_text = "%s_%s_%3.2fmeV_%dHz_Flux=%f%s" % (inst, chopper, ei, freq, self.flux, self.flux_units)
             line.set_label(label_text)
             if self.tabs.isTabEnabled(self.qetabID):
                 self.plot_qe(ei, label_text, overplot)
@@ -471,7 +472,7 @@ class PyChopGui(QMainWindow):
         self.flxaxes1.set_xlim([mn, mx])
         self.flxaxes2.set_xlim([mn, mx])
         self.flxaxes1.set_xlabel("Incident Energy (meV)")
-        self.flxaxes1.set_ylabel("Flux (n/cm$^2$/s)")
+        self.flxaxes1.set_ylabel("Flux (%s)" % (self.flux_units.replace("cm^2", "cm$^2$")))
         self.flxaxes1.set_xlabel("Incident Energy (meV)")
         self.flxaxes2.set_ylabel("Elastic Resolution FWHM (meV)")
         lg = self.flxaxes2.legend()
@@ -530,7 +531,7 @@ class PyChopGui(QMainWindow):
             self.frqaxes2.clear()
         self.setFreq(manual_freq=freq0)
         self.frqaxes1.set_xlabel("Chopper Frequency (Hz)")
-        self.frqaxes1.set_ylabel("Flux (n/cm$^2$/s)")
+        self.frqaxes1.set_ylabel("Flux (%s)" % (self.flux_units.replace("cm^2", "cm$^2$")))
         (line,) = self.frqaxes1.plot(freqs, flux, "o-")
         self.frqaxes1.set_xlim([0, np.max(freqs)])
         self.frqaxes2.set_xlabel("Chopper Frequency (Hz)")
@@ -651,7 +652,7 @@ class PyChopGui(QMainWindow):
             first_component = "chopper 1"
         txt = "# ------------------------------------------------------------- #\n"
         txt += "# Ei = %8.2f meV\n" % (ei)
-        txt += "# Flux = %8.2f n/cm2/s\n" % (flux)
+        txt += "# Flux = %8.2f %s\n" % (flux, self.flux_units)
         txt += "# Elastic resolution = %6.2f meV\n" % (res[0])
         txt += "# Time width at sample = %6.2f us, of which:\n" % (1e6 * np.sqrt(tsqvan[0]))
         for ky, val in list(tsqdic.items()):

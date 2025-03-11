@@ -7,7 +7,6 @@
 #pragma once
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

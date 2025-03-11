@@ -207,7 +207,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
     def test_move_sets_shift_correctly_m4(self):
         mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D], TransId.SPEC_4_SHIFT: [-10.0]}
-        adapter = mock.create_autospec(UserFileReader)
+        adapter = mock.create_autospec(UserFileReader, instance=True)
         adapter.read_user_file.return_value = mocked_values
         parser = UserFileReaderAdapter(file_information=None, user_file_name=None, txt_user_file_reader=adapter)
         state_move = parser.get_state_move(file_information=None)
@@ -216,7 +216,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
     def test_move_ignores_m5_for_non_zoom(self):
         mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D], TransId.SPEC_5_SHIFT: [-10.0]}
-        adapter = mock.create_autospec(UserFileReader)
+        adapter = mock.create_autospec(UserFileReader, instance=True)
         adapter.read_user_file.return_value = mocked_values
         parser = UserFileReaderAdapter(file_information=None, user_file_name=None, txt_user_file_reader=adapter)
         state_move = parser.get_state_move(file_information=None)
@@ -225,7 +225,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
     def test_move_m5_works_on_zoom(self):
         mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.ZOOM], TransId.SPEC_5_SHIFT: [-5.0]}
-        adapter = mock.create_autospec(UserFileReader)
+        adapter = mock.create_autospec(UserFileReader, instance=True)
         adapter.read_user_file.return_value = mocked_values
         parser = UserFileReaderAdapter(file_information=None, user_file_name=None, txt_user_file_reader=adapter)
         state_move = parser.get_state_move(file_information=None)
