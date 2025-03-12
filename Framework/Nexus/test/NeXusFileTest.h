@@ -354,7 +354,7 @@ public:
   void test_leak1() {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    string const szFile("leak_test1.nxs");
+    string const szFile("nexus_leak_test1.nxs");
 
     removeFile(szFile); // in case it was left over from previous run
 
@@ -386,7 +386,7 @@ public:
     std::string strFile;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
-      strFile = strmakef("leak_test2_%03d.nxs", iFile);
+      strFile = strmakef("nexus_leak_test2_%03d.nxs", iFile);
       removeFile(strFile);
       cout << "file " << strFile << "\n";
 
@@ -418,16 +418,15 @@ public:
     cout << "Leak Test 2 Success!\n";
   }
 
-#ifndef __WIN32
-  // NOTE this test produces stack overflow errors on the windows runners
   void test_leak3() {
     cout << "Running Leak Test 3\n";
+#ifndef __WIN32 // NOTE this test produces stack overflow errors on the windows runners
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
     std::size_t const TEST_SIZE(512);
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
-    std::string const szFile("leak_test.nxs");
+    std::string const szFile("nexus_leak_test.nxs");
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     int aiBinaryData[iBinarySize];
@@ -468,10 +467,10 @@ public:
 
       // Delete file
       removeFile(szFile);
-      cout << "Leak Test 3 Success!\n";
     }
+#endif // win32
+    cout << "Leak Test 3 Success!\n";
   }
-#endif
 
   /**
    * These tests correspond to tests inside napi_test.cpp
@@ -581,7 +580,7 @@ private:
 public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
-    std::string const nxFile("NXtest_char.h5");
+    std::string const nxFile("NexusFile_test_char.h5");
     File fileid = do_prep_files(nxFile);
 
     // tests of string/char read/write
@@ -623,7 +622,7 @@ public:
 
   void test_napi_vec() {
     cout << "Starting NAPI VEC Test\n";
-    std::string const nxFile("NXtest_vec.h5");
+    std::string const nxFile("NexusFile_test_vec.h5");
     File fileid = do_prep_files(nxFile);
 
     // tests of integer read/write
@@ -663,7 +662,7 @@ public:
 
   void test_napi_slab() {
     cout << "Starting NAPI SLAB Test\n";
-    std::string const nxFile("NXtest_vec.h5");
+    std::string const nxFile("NExusFile_test_vec.h5");
     File fileid = do_prep_files(nxFile);
 
     // test of slab read/write
@@ -697,7 +696,7 @@ public:
     cout << "tests for openPath\n";
 
     // make file with path /entry
-    string const filename("openpathtest.nxs");
+    string const filename("NexusFile_openpathtest.nxs");
     File fileid = do_prep_files(filename);
 
     // make path /entry/data1
@@ -747,7 +746,7 @@ public:
   void test_links() {
     cout << "tests of linkature\n";
 
-    string const filename("nexuslinktest.nxs");
+    string const filename("NexusFIle_linktest.nxs");
     removeFile(filename);
     File fileid = do_prep_files(filename);
 
