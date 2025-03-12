@@ -426,7 +426,7 @@ public:
     const int nData = 2;
     std::size_t const TEST_SIZE(512);
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
-    std::string const szFile("nexus_leak_test.nxs");
+    std::string const szFile("nexus_leak_test3.nxs");
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     int aiBinaryData[iBinarySize];
@@ -541,12 +541,13 @@ private:
     fileid.closeData();
 
     // read
-    T output[5];
+    int const Ncheck(5); // can't use variable-length arrays, just check this many
+    T output[Ncheck];
     fileid.openData(dataname);
     fileid.getSlab(&output, start, size);
 
     // compare
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < Ncheck; i++) {
       TS_ASSERT_EQUALS(data[i], output[i])
     }
   }
@@ -616,7 +617,7 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "all ok - done\n";
+    cout << "napi slab test done\n";
     removeFile(nxFile);
   }
 
@@ -656,7 +657,7 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "all ok - done\n";
+    cout << "napi slab test done\n";
     removeFile(nxFile);
   }
 
@@ -688,7 +689,7 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "all ok - done\n";
+    cout << "napi slab test done\n";
     removeFile(nxFile);
   }
 
