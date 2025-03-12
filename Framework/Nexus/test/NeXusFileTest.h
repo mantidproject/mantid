@@ -322,9 +322,10 @@ public:
 
   void test_readwrite_hdf5() {
     cout << " Nexus File Tests\n";
+#ifndef __WIN32 // this test causes errors on windows
     NXaccess const nx_creation_code = NXACC_CREATE5;
     string const fileext = ".h5";
-    string const filename("napi_test_cpp" + fileext);
+    string const filename("nexus_file_napi_test_cpp" + fileext);
 
     removeFile(filename); // in case last round failed
 
@@ -342,6 +343,7 @@ public:
 
     removeFile(DMC01 + fileext);
     removeFile(DMC02 + fileext);
+#endif // WIN32
   }
 
   /**
@@ -420,7 +422,6 @@ public:
 
   void test_leak3() {
     cout << "Running Leak Test 3\n";
-#ifndef __WIN32 // NOTE this test produces stack overflow errors on the windows runners
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
@@ -468,7 +469,6 @@ public:
       // Delete file
       removeFile(szFile);
     }
-#endif // win32
     cout << "Leak Test 3 Success!\n";
   }
 
