@@ -42,6 +42,9 @@ hdf4:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
+h5py: # v3.13.0 is currently incompatible with Mantid and causes 300+ test failures
+  - '<3.13.0'
+
 graphviz:
   - '>=2.47.0'
 
