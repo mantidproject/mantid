@@ -94,7 +94,6 @@ set(SRC_FILES
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
     src/LoadNexusLogs.cpp
-    src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
     src/LoadNexusProcessed2.cpp
@@ -313,7 +312,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
     inc/MantidDataHandling/LoadNexusLogs.h
-    inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
     inc/MantidDataHandling/LoadNexusProcessed2.h

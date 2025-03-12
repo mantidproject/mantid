@@ -1,0 +1,1 @@
+- The algorithm `LoadNexusMonitors v1` was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed. Use :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>` instead.
