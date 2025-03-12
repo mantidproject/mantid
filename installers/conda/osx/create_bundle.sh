@@ -231,7 +231,14 @@ echo
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
 # Pip install quickBayes until there's a conda package
-$bundle_conda_prefix/bin/python -m pip install quickBayes==1.0.0b15
+# Version 1.0.0b15 of quickbayes does not have an ARM build, so the pip install will
+# fail in that case. Version 1.0.1b0 is a noarch package, so works on ARM, but it
+# has a pin on numpy<2, so if we pip install that then numpy in the standalone will be
+# downgraded from 2.* to 1.*. Hence we do not install quickbayes into the macOS ARM
+# standalone package.
+if [ "$platform" != "osx-arm64" ]; then
+  $bundle_conda_prefix/bin/python -m pip install quickBayes==1.0.0b15
+fi
 
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
