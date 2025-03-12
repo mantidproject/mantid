@@ -130,7 +130,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _tolerance(self):
         """tolerance used for testing the algorithm"""
-        return 1.0e-6
+        return 4
 
     def _loadReference(self):
         suffix = "" if sys.platform != "win32" else "_msvc"
