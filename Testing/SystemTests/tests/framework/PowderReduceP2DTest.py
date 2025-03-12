@@ -16,11 +16,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
         self.setUp()
 
-    def skipTests(self):
-        # Now working on macOS but producing different outputs on windows.
-        # Skipped while investigation continues.
-        return sys.platform.startswith("win")
-
     def setUp(self):
         self.sample = self._sampleEventData()
         self.vana = self._vanadiumEventData()
