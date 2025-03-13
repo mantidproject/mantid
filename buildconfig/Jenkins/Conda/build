@@ -44,6 +44,12 @@ cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
 
+# if using ninja let ninja control compiling threads
+if [ -f build.ninja ]; then
+    echo "ninja will control number of threads"
+    BUILD_OPTIONS=""
+fi
+
 if [[ $ENABLE_COVERITY == true ]]; then
     conda install -y jq curl
 
@@ -65,15 +71,15 @@ if [[ $ENABLE_BUILD_CODE == true ]]; then
 fi
 
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    cmake --build . --target AllTests $BUILD_OPTIONS
-fi
-
-if [[ $ENABLE_UNIT_TESTS == true || $ENABLE_SYSTEM_TESTS == true || $ENABLE_DOC_TESTS == true ]]; then
+    # this will get the test data
+    cmake --build . --target StandardTestData AllTests $BUILD_OPTIONS
+elif [[ $ENABLE_DOC_TESTS == true ]]; then
+    # doctests need the test data
     cmake --build . --target StandardTestData $BUILD_OPTIONS
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    cmake --build . --target SystemTestData $BUILD_OPTIONS
+    cmake --build . --target StandardTestData SystemTestData $BUILD_OPTIONS
 fi
 
 # Build docs
