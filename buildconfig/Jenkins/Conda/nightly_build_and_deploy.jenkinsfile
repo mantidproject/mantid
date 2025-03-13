@@ -198,6 +198,28 @@ pipeline {
             }
           }
         }
+        stage('build and test: osx-arm64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+              anyOf {
+                expression { env.BUILD_DEVEL == 'all' }
+                expression { env.BUILD_DEVEL == 'osx-arm64' }
+            }
+          }
+          agent { label 'osx-arm64' }
+          options { timestamps () }
+          steps {
+            checkoutSource("${GIT_SHA}")
+            build_and_test('osx-arm64')
+          }
+          post {
+            always {
+              archive_test_logs()
+              publish_test_reports()
+            }
+          }
+        }
         stage('package conda: linux-64') {
           when {
             beforeAgent true
