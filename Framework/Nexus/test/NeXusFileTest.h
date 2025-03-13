@@ -421,14 +421,17 @@ public:
   void test_leak3() {
     cout << "Running Leak Test 3\n";
     fflush(stdout);
-#ifdef WIN32 // this test causes errors on windows
-    cout << "Skipping Leak Test 3 on Windows\n";
-    fflush(stdout);
-#else  // for non-Windows, perform the test
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
+#ifdef WIN32
+    // NOTE the Windows runners do not have enough stack space for the full test (max 1MB stack)
+    // Rather than skip the entire test, we can use a smaller array size
+    // It is no longer testing the same behavior on Windows with this choice.
+    std::size_t const TEST_SIZE(8);
+#else
     std::size_t const TEST_SIZE(512);
+#endif // WIN32
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     std::string const szFile("nexus_leak_test3.nxs");
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
@@ -473,7 +476,6 @@ public:
       // Delete file
       removeFile(szFile);
     }
-#endif // WIN32
     cout << "Leak Test 3 Success!\n";
   }
 
