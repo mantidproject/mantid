@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from __future__ import annotations
+
 import copy
 import itertools
 import os.path
@@ -325,7 +327,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         self._log_tube_calibration_issues()
         self._notify_tube_cvalue_status(cvalues)
 
-    def _match_workspaces_to_strip_positions(self, ws_list) -> dict[int, "MatrixWorkspace"]:
+    def _match_workspaces_to_strip_positions(self, ws_list) -> dict[int, MatrixWorkspace]:
         """Match the strip positions to the workspaces"""
         strip_pos_to_ws = dict()
         for i, position in enumerate(self.getProperty(Prop.STRIP_POSITIONS).value):
@@ -333,7 +335,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return strip_pos_to_ws
 
-    def _calculate_known_strip_edges(self, ws_list) -> dict["MatrixWorkspace", list[float]]:
+    def _calculate_known_strip_edges(self, ws_list) -> dict[MatrixWorkspace, list[float]]:
         if self._rear:
             det_z_logname = self._REAR_DET_Z_LOG
             side_offset = 0.0
@@ -416,7 +418,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return mtd[scaled_ws_name]
 
-    def _merge_workspaces(self, ws_to_known_edges: dict["MatrixWorkspace", list[float]]) -> None:
+    def _merge_workspaces(self, ws_to_known_edges: dict[MatrixWorkspace, list[float]]) -> None:
         """
         Merge the workspaces containing the individual strips into a single workspace containing all the strips.
 
@@ -576,9 +578,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return ws
 
-    def _get_boundaries_for_each_strip(
-        self, ws_to_known_edges: dict["MatrixWorkspace", list[float]]
-    ) -> dict["MatrixWorkspace", tuple[float]]:
+    def _get_boundaries_for_each_strip(self, ws_to_known_edges: dict[MatrixWorkspace, list[float]]) -> dict[MatrixWorkspace, tuple[float]]:
         """Identifies the boundaries that isolate each strip by finding the mid-point between each pair of strip edges.
         Where strips overlap, we find the mid-point of the overlapped region"""
         # Sort the strip edge positions into ascending order
@@ -683,7 +683,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def _calibrate_tube(
         self, ws, tube_name: str, known_positions: list[float], func_form: FuncForm, fit_params: TubeCalibFitParams, calib_table
-    ) -> tuple["TableWorkspace", list[float], float]:
+    ) -> tuple[TableWorkspace, list[float], float]:
         """Define the calibrated positions of the detectors inside the given tube.
 
         :param ws: integrated workspace with tube to be calibrated.
@@ -767,7 +767,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         alg.setProperty("CreateOutput", True)
         return alg
 
-    def _run_fitting_function(self, function: str, input_ws, start_x: float, end_x: float) -> tuple["TableWorkspace", "MatrixWorkspace"]:
+    def _run_fitting_function(self, function: str, input_ws, start_x: float, end_x: float) -> tuple[TableWorkspace, MatrixWorkspace]:
         """
         Create and run the fitting function, returning a tuple with the two output workspaces.
         The first workspace in the tuple is the OutputParameters workspace and the second is the OutputWorkspace.
@@ -779,7 +779,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return params_ws, fit_ws
 
-    def _run_fitting_function_params_only(self, function: str, input_ws, start_x: str, end_x: str) -> "TableWorkspace":
+    def _run_fitting_function_params_only(self, function: str, input_ws, start_x: str, end_x: str) -> TableWorkspace:
         """
         Create and run the fitting function, returning the OutputParameters workspace.
         """
@@ -788,7 +788,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputParameters").value
 
-    def _fit_flat_top_peak(self, peak_centre: float, fit_params: TubeCalibFitParams, ws) -> tuple[float, float, "MatrixWorkspace"]:
+    def _fit_flat_top_peak(self, peak_centre: float, fit_params: TubeCalibFitParams, ws) -> tuple[float, float, MatrixWorkspace]:
         # Find the position
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
@@ -810,7 +810,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return peak_centre, resolution, fit_ws
 
-    def _fit_edges(self, peak_centre: float, fit_params: TubeCalibFitParams, ws) -> tuple[float, float, "MatrixWorkspace"]:
+    def _fit_edges(self, peak_centre: float, fit_params: TubeCalibFitParams, ws) -> tuple[float, float, MatrixWorkspace]:
         # Find the edge position
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
@@ -1006,7 +1006,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def _create_diagnostic_workspaces(
         self, tube_id: int, peak_positions: list[float], known_edges: list[float], caltable
-    ) -> list["MatrixWorkspace"]:
+    ) -> list[MatrixWorkspace]:
         """Produce diagnostic workspaces for the tube"""
         diagnostic_workspaces = []
 
@@ -1098,7 +1098,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _create_calibration_table_ws(self) -> "TableWorkspace":
+    def _create_calibration_table_ws(self) -> TableWorkspace:
         """Create the calibration table and add columns required by ApplyCalibration"""
         alg = self._create_child_alg("CreateEmptyTableWorkspace", True, OutputWorkspace=self._CAL_TABLE_NAME)
         alg.execute()
@@ -1117,7 +1117,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         cal_alg = self._create_child_alg("ApplyCalibration", Workspace=ws_to_calibrate, CalibrationTable=caltable)
         cal_alg.execute()
 
-    def _group_diagnostic_workspaces(self, diagnostic_output: dict[int, list["MatrixWorkspace"]]) -> None:
+    def _group_diagnostic_workspaces(self, diagnostic_output: dict[int, list[MatrixWorkspace]]) -> None:
         """Group the diagnostic output for each tube"""
         alg = self._create_child_alg("GroupWorkspaces", True)
         for tube_id, workspaces in diagnostic_output.items():
