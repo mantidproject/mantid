@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
   add_framework_test_helpers(PSISINQTest)
 
   # Test data
-  add_dependencies(PSISINQTest StandardTestData)
+  add_dependencies(PSISINQTest UnitTestData)
 
   add_dependencies(FrameworkTests PSISINQTest)
   # Add to the 'FrameworkTests' group in VS

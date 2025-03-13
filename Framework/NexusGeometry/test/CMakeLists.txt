@@ -12,7 +12,7 @@ if(CXXTEST_FOUND)
   add_framework_test_helpers(NexusGeometryTest)
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
-  add_dependencies(NexusGeometryTest StandardTestData)
+  add_dependencies(NexusGeometryTest UnitTestData)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET NexusGeometryTest PROPERTY FOLDER "UnitTests")
 endif()
