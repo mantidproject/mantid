@@ -4,10 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy, QComboBox
+from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy, QComboBox, QSplitter
 from qtpy.QtGui import QPalette, QIntValidator
+from qtpy.QtCore import Qt
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.DetectorInfo import DetectorInfo
 from typing import Callable
@@ -65,6 +67,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._setup_projection_options(projection_vbox)
         projection_group_box.setLayout(projection_vbox)
         options_vertical_layout.addWidget(projection_group_box)
+
+        options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
+        self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
+        options_vertical_layout.addWidget(self._detector_figure_canvas)
 
         options_vertical_layout.addStretch()
         central_widget.setLayout(parent_horizontal_layout)
@@ -184,22 +191,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.camera.focal_point = focal_point
 
     def show_plot_for_detectors(self, workspace, workspace_indices: list) -> None:
-        if self._detector_spectrum_fig is None:
-            self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
-            self._detector_spectrum_fig.canvas.mpl_connect("close_event", self.on_figure_close)
-
         self._detector_spectrum_axes.clear()
 
         for d in workspace_indices:
             self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=d)
 
         self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
-        self._detector_spectrum_fig.show()
-        plt.draw()
-
-    def on_figure_close(self, event) -> None:
-        self._detector_spectrum_fig = None
-        self._detector_spectrum_axes = None
+        self._detector_figure_canvas.draw()
 
     def update_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
