@@ -66,9 +66,9 @@ Bug Fixes
 Deprecated
 ##########
 
-- ``AbortRemoteJob`` is deprecated in favour of v2.
-- ``Authenticate``  is deprecated in favour of v2.
-- :ref:`CentroidPeaksMD	 <algm-CentroidPeaksMD>`  is deprecated in favour of v2.
+- ``AbortRemoteJob v1`` is deprecated in favour of v2.
+- ``Authenticate v1``  is deprecated in favour of v2.
+- ``CentroidPeaksMD v1``  is deprecated in favour of v2.
 - ``ConvertEmptyToTof``
 - :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
 - ``DownloadRemoteFile`` is deprecated in favour of v2.
