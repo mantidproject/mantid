@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
   add_dependencies(MuonTest Crystal CurveFitting)
   add_dependencies(FrameworkTests MuonTest)
   # Test data
-  add_dependencies(MuonTest StandardTestData)
+  add_dependencies(MuonTest UnitTestData)
 
   # Add to the 'MuonTest' group in VS
   set_property(TARGET MuonTest PROPERTY FOLDER "UnitTests")

@@ -36,7 +36,7 @@ if(CXXTEST_FOUND)
 
   add_dependencies(FrameworkTests ReflectometryTest)
   # Test data
-  add_dependencies(ReflectometryTest StandardTestData)
+  add_dependencies(ReflectometryTest UnitTestData)
   add_framework_test_helpers(ReflectometryTest)
 
   # Add to the 'ReflectometryTest' group in VS
