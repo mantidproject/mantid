@@ -170,7 +170,6 @@ set(SRC_FILES
     src/SaveDaveGrp.cpp
     src/SaveDetectorsGrouping.cpp
     src/SaveDiffCal.cpp
-    src/SaveDspacemap.cpp
     src/SaveFITS.cpp
     src/SaveFocusedXYE.cpp
     src/SaveFullprofResolution.cpp
@@ -387,7 +386,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveDaveGrp.h
     inc/MantidDataHandling/SaveDetectorsGrouping.h
     inc/MantidDataHandling/SaveDiffCal.h
-    inc/MantidDataHandling/SaveDspacemap.h
     inc/MantidDataHandling/SaveFITS.h
     inc/MantidDataHandling/SaveFocusedXYE.h
     inc/MantidDataHandling/SaveFullprofResolution.h
@@ -590,7 +588,6 @@ set(TEST_FILES
     SaveDaveGrpTest.h
     SaveDetectorsGroupingTest.h
     SaveDiffCalTest.h
-    SaveDspacemapTest.h
     SaveFITSTest.h
     SaveFocusedXYETest.h
     SaveFullprofResolutionTest.h
