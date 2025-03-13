@@ -13,10 +13,10 @@ A flat top peak function is defined as:
 
 .. math:: y = scale * (erfc((centre - 0.5 * width - x) / endGrad) - erfc((centre + 0.5 * width - x) / endGrad)) + background
 
-.. image:: ../../images/FlatTopPeakFnExample.jpg
-    :width: 800px
+.. image:: ../../images/FlatTopPeakFnExample.png
+    :width: 600px
     :align: center
-    :height: 600px
+    :height: 450px
 
 .. attributes::
 
