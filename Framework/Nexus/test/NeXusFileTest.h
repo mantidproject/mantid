@@ -420,7 +420,8 @@ public:
 
   void test_leak3() {
     cout << "Running Leak Test 3\n";
-#ifdef __WIN32__ // this test causes errors on windows
+    fflush(stdout);
+#ifdef WIN32 // this test causes errors on windows
     cout << "Skipping Leak Test 3 on Windows\n";
     fflush(stdout);
 #else  // for non-Windows, perform the test
