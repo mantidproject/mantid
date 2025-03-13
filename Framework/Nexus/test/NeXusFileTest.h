@@ -322,7 +322,6 @@ public:
 
   void test_readwrite_hdf5() {
     cout << " Nexus File Tests\n";
-#ifndef __WIN32 // this test causes errors on windows
     NXaccess const nx_creation_code = NXACC_CREATE5;
     string const fileext = ".h5";
     string const filename("nexus_file_napi_test_cpp" + fileext);
@@ -343,7 +342,6 @@ public:
 
     removeFile(DMC01 + fileext);
     removeFile(DMC02 + fileext);
-#endif // WIN32
   }
 
   /**
@@ -422,6 +420,10 @@ public:
 
   void test_leak3() {
     cout << "Running Leak Test 3\n";
+#ifdef __WIN32__ // this test causes errors on windows
+    cout << "Skipping Leak Test 3 on Windows\n";
+    fflush(stdout);
+#else  // for non-Windows, perform the test
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
@@ -430,6 +432,7 @@ public:
     std::string const szFile("nexus_leak_test3.nxs");
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
+    fflush(stdout);
     int aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
@@ -469,6 +472,7 @@ public:
       // Delete file
       removeFile(szFile);
     }
+#endif // WIN32
     cout << "Leak Test 3 Success!\n";
   }
 
