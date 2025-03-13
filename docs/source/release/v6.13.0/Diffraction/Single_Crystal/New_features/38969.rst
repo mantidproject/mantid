@@ -1,0 +1,2 @@
+- Added ``detectorbin`` peak shape for the peaks integrated with :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` integration algorithm.
+- By accessing the detectorbin peak shape, users can now view the detector IDs and the corresponding range in the X dimension associated with each detector for each successfully integrated peak from the algorithm.
