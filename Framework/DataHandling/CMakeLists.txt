@@ -48,7 +48,6 @@ set(SRC_FILES
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
-    src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
     src/LoadErrorEventsNexus.cpp
@@ -269,7 +268,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
-    inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadErrorEventsNexus.h
@@ -485,7 +483,6 @@ set(TEST_FILES
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
-    LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
     LoadErrorEventsNexusTest.h
