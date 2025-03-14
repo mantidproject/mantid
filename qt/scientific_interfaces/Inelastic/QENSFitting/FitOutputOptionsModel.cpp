@@ -133,14 +133,14 @@ template <typename Predicate> void removeVectorElements(std::vector<std::string>
   strings.erase(std::remove_if(strings.begin(), strings.end(), filter), strings.end());
 }
 
-bool doesStringEndWith(std::string const &str, std::string const &delimiter) {
-  if (str.size() > delimiter.size())
-    return str.substr(str.size() - delimiter.size(), str.size()) == delimiter;
-  return false;
+bool doesStringEndWith(std::string const &str, std::vector<std::string> const &delimiters) {
+  return std::any_of(delimiters.begin(), delimiters.end(),
+                     [&str](std::string const &delimiter) { return str.ends_with(delimiter); });
 }
 
-std::vector<std::string> filterByEndSuffix(std::vector<std::string> &strings, std::string const &delimiter) {
-  removeVectorElements(strings, [&delimiter](std::string const &str) { return !doesStringEndWith(str, delimiter); });
+std::vector<std::string> filterByEndSuffix(std::vector<std::string> &strings,
+                                           std::vector<std::string> const &delimiters) {
+  removeVectorElements(strings, [&delimiters](std::string const &str) { return !doesStringEndWith(str, delimiters); });
   return strings;
 }
 
@@ -160,7 +160,7 @@ std::string filterByContents(std::vector<std::string> &strings, MatrixWorkspace_
 
 std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
   auto workspaceNames = AnalysisDataService::Instance().getObjectNames();
-  auto resultGroups = filterByEndSuffix(workspaceNames, "_Results");
+  auto resultGroups = filterByEndSuffix(workspaceNames, std::vector<std::string>({"_Result", "_Results"}));
   return !resultGroups.empty() ? filterByContents(resultGroups, std::move(workspace)) : "";
 }
 
