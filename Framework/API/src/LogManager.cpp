@@ -79,7 +79,9 @@ bool convertPropertyToDouble(const Property *property, double &value, const Math
 
 /// Name of the log entry containing the proton charge when retrieved using
 /// getProtonCharge
-const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
+const std::string LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
+const std::string LogManager::PROTON_CHARGE_UNFILTERED_LOG_NAME = LogManager::PROTON_CHARGE_LOG_NAME + "_unfiltered";
+
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
