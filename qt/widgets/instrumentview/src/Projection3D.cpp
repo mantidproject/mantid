@@ -287,7 +287,7 @@ void Projection3D::componentSelected(size_t componentIndex) {
   Quat rot;
   try {
     const auto compDir = normalize(pos - componentInfo.samplePosition());
-    V3D up(0, 0, 1);
+    V3D up(0, 1, 0);
     V3D x = up.cross_prod(compDir);
     up = compDir.cross_prod(x);
     InstrumentActor::BasisRotation(x, up, compDir, V3D(-1, 0, 0), V3D(0, 1, 0), V3D(0, 0, -1), rot);
