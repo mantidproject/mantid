@@ -59,7 +59,7 @@ do
 done
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "package-standalone"
+setup_mamba $WORKSPACE/miniforge "package-standalone"
 # Pin conda to known working version. In 24.9 the post-link.bat script doesn't work.
 mamba install --yes mamba=1.5 conda-build conda=24.7
 
