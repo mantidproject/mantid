@@ -29,7 +29,6 @@ ALGS_TO_IGNORE = [
     "SaveDetectorsGrouping",
     "SaveDiffCal",
     "SaveDiffFittingAscii",
-    "SaveDspacemap",
     "SaveFITS",
     "SaveFocusedXYE",
     "SaveFullprofResolution",
