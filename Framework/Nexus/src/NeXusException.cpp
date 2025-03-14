@@ -8,13 +8,9 @@
 
 namespace NeXus {
 
-Exception::Exception(const std::string &msg, const NXstatus status)
-    : std::runtime_error(msg), m_what(msg), m_status(status) {}
+Exception::Exception(const std::string &msg, const std::string &filename)
+    : std::runtime_error(msg), m_filename(filename) {}
 
-const char *Exception::what() const throw() { return this->m_what.c_str(); }
-
-NXstatus Exception::status() const throw() { return this->m_status; }
-
-Exception::~Exception() throw() {}
+const std::string Exception::filename() const throw() { return this->m_filename; }
 
 } // namespace NeXus
