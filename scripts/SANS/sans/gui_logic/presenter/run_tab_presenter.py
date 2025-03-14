@@ -18,7 +18,7 @@ from functools import wraps
 from typing import Optional
 
 from mantidqt.utils.observer_pattern import GenericObserver
-from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
+from sans.user_file.toml_parsers.toml_base_schema import TomlValidationError
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
