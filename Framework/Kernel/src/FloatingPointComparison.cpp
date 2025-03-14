@@ -286,4 +286,45 @@ template DLLExport bool withinRelativeDifference<unsigned long long, double>(uns
                                                                              unsigned long long const, double const);
 ///@endcond
 
+/// Template specialization for V3D
+
+template <>
+DLLExport bool withinAbsoluteDifference<V3D const &, double>(V3D const &V1, V3D const &V2, double const tolerance) {
+  //|||V1-V2||^2 < tol^2 --> ||V1-V2|| < tol, since both are non-negative
+  return ltEquals((V1 - V2).norm2(), tolerance * tolerance);
+}
+
+/**
+ * Compare 3D vectors (class V3D) for relative difference to
+ * within the given tolerance.  The relative difference is calculated as
+ *   rel diff = ||V1 - V2||/sqrt(||V1||*||V2||)
+ * consistent with other normalized vector binary operations.
+ * @param V1 :: first value
+ * @param V2 :: second value
+ * @param tolerance :: the tolerance
+ * @returns True if the vectorsare considered equal within the given tolerance,
+ * false otherwise.  False if any value in either vector is an NaN.
+ */
+template <>
+DLLExport bool withinRelativeDifference<V3D const &, double>(V3D const &V1, V3D const &V2, double const tolerance) {
+  // NOTE we must avoid sqrt as much as possible
+  double const tol2 = tolerance * tolerance;
+  double const diff2 = (V1 - V2).norm2();
+  if (diff2 <= std::numeric_limits<double>::epsilon()) {
+    // if the difference has zero length, the vectors are equal, this test passes
+    return true;
+  } else {
+    // otherwise we must calculate the denominator
+    double const denom4 = static_cast<double>(V1.norm2() * V2.norm2());
+    // if denom <= 1, then |x-y| > tol implies |x-y|/denom > tol, can return early
+    // NOTE can only return early if BOTH denom <= 1. AND |x-y| > tol.
+    if (denom4 <= 1. && !ltEquals(diff2, tol2)) { // NOTE ||V1||^2.||V2||^2 <= 1 --> sqrt(||V1||.||V2||) <= 1
+      return false;
+    } else {
+      // avoid division and sqrt for improved performance
+      // NOTE ||V1-V2||^4 < ||V1||^2.||V2||^2 * tol^4 --> ||V1-V2||/sqrt(||V1||*||V2||) < tol
+      return ltEquals(diff2 * diff2, denom4 * tol2 * tol2);
+    }
+  }
+}
 } // namespace Mantid::Kernel
