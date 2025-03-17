@@ -272,7 +272,7 @@ void GramCharlierComptonProfile::addMassProfile(double *result, const unsigned i
   const double hermiteCoeff = getParameter(os.str());
   const double factorial = gsl_sf_fact(npoly / 2);
   // Intel compiler doesn't overload pow for unsigned types
-  const double denom = ((std::pow(2.0, static_cast<int>(npoly)))*factorial);
+  const double denom = ((std::pow(2.0, static_cast<int>(npoly))) * factorial);
 
   for (int j = 0; j < NFINE_Y; ++j) {
     const double y = m_yfine[j] / M_SQRT2 / wg;

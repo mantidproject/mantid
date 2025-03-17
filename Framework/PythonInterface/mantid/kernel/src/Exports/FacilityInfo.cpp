@@ -44,7 +44,7 @@ void export_FacilityInfo() {
            "Facilities.xml file")
       .def("instruments",
            // cppcheck-suppress cstyleCast
-           (std::vector<InstrumentInfo>(FacilityInfo::*)(const std::string &) const) & FacilityInfo::instruments,
+           (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string &) const) & FacilityInfo::instruments,
            (arg("self"), arg("technique")), "Returns a list of instruments of given technique")
       .def("instrument", &FacilityInfo::instrument, (arg("self"), arg("instrumentName")),
            return_value_policy<copy_const_reference>(), "Returns the instrument with the given name");
