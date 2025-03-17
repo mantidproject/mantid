@@ -4,7 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy, QComboBox, QSplitter
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QVBoxLayout,
+    QHBoxLayout,
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QGroupBox,
+    QSizePolicy,
+    QComboBox,
+    QSplitter,
+    QCheckBox,
+)
 from qtpy.QtGui import QPalette, QIntValidator
 from qtpy.QtCore import Qt
 from pyvistaqt import BackgroundPlotter
@@ -56,9 +68,18 @@ class FullInstrumentViewWindow(QMainWindow):
             contour_range_group_box, self._on_contour_limits_updated, self._on_contour_limits_updated
         )
 
+        multi_select_group_box = QGroupBox("Multi-Select")
+        multi_select_h_layout = QHBoxLayout()
+        self._multi_Select_Check = QCheckBox()
+        self._multi_Select_Check.setText("Select multiple detectors")
+        self._multi_Select_Check.stateChanged.connect(self._on_multi_select_check_box_clicked)
+        multi_select_h_layout.addWidget(self._multi_Select_Check)
+        multi_select_group_box.setLayout(multi_select_h_layout)
+
         options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(time_of_flight_group_box)
         options_vertical_layout.addWidget(contour_range_group_box)
+        options_vertical_layout.addWidget(multi_select_group_box)
 
         self._presenter = FullInstrumentViewPresenter(self, workspace)
 
@@ -122,6 +143,9 @@ class FullInstrumentViewWindow(QMainWindow):
         if type(value) is int:
             self._presenter.projection_option_selected(value)
 
+    def _on_multi_select_check_box_clicked(self, state):
+        self._presenter.set_multi_select_enabled(state == 2)
+
     def set_contour_range_limits(self, contour_limits: list) -> None:
         self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
         self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
@@ -173,8 +197,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, render_points_as_spheres=True, point_size=10)
 
     def enable_point_picking(self, callback=None) -> None:
+        self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
+
+    def enable_rectangle_picking(self, callback=None) -> None:
+        self.main_plotter.disable_picking()
+        if not self.main_plotter.off_screen:
+            self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
 
     def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
         self.projection_plotter.clear()
