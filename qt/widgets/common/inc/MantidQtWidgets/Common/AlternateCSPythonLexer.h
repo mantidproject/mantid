@@ -18,7 +18,9 @@ public:
 
   QColor defaultColor(int style) const override;
   QFont defaultFont(int style) const override;
+  const char *keywords(int set) const override;
 
 private:
   QFont m_font;
+  QStringList m_customKeywords = {"True", "False"};
 };
