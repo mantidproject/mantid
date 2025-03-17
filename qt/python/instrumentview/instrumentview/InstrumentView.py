@@ -8,7 +8,9 @@ from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from mantid.simpleapi import Load
 from pathlib import Path
 from qtpy.QtWidgets import QApplication
+from qtpy.QtGui import QIcon
 import sys
+import os
 
 
 class InstrumentView:
@@ -19,6 +21,8 @@ class InstrumentView:
         app = QApplication(sys.argv)
         ws = Load(str(file_path), StoreInADS=False)
         window = FullInstrumentViewWindow(ws)
+        current_dir = os.path.dirname(__file__)
+        app.setWindowIcon(QIcon(f"{current_dir}/mantidplot.png"))
         window.show()
         app.exec_()
 
