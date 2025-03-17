@@ -16,6 +16,7 @@ from qtpy.QtWidgets import (
     QComboBox,
     QSplitter,
     QCheckBox,
+    QTextEdit,
 )
 from qtpy.QtGui import QPalette, QIntValidator
 from qtpy.QtCore import Qt
@@ -123,7 +124,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QHBoxLayout:
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel(label))
-        line_edit = QLineEdit()
+        line_edit = QTextEdit()
+        line_edit.document().setTextWidth(line_edit.viewport().width())
+        line_edit.setFixedHeight(27)
         line_edit.setReadOnly(True)
         line_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         hbox.addWidget(line_edit)
@@ -247,7 +250,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
 
     def _set_detector_edit_text(
-        self, edit_box: QLineEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
+        self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
     ) -> None:
-        edit_box.setText(",".join(property_lambda(d) for d in detector_infos))
-        edit_box.adjustSize()
+        edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
