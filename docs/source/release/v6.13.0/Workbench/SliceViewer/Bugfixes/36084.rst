@@ -1,0 +1,1 @@
+- Sliceviwer no longer raises an error when exporting a pixel cut from a MDHistoWorkspace
