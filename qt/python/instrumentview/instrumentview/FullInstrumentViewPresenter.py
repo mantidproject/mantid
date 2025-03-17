@@ -32,7 +32,6 @@ class FullInstrumentViewPresenter:
         self._view.add_simple_shape(origin, colour="orange", pickable=False)
 
         self._view.enable_point_picking(callback=self.point_picked)
-        # self.plotter.enable_rectangle_picking(show_message=False, callback=self.rectangle_picked, use_picker=True)
         self._view.show_axes()
         self._view.set_camera_focal_point(self._model.sample_position())
 
@@ -99,11 +98,11 @@ class FullInstrumentViewPresenter:
         self.show_plot_for_detectors([detector_index])
         self.show_info_text_for_detectors([detector_index])
 
-    # def rectangle_picked(self, rectangle):
-    #     selected_points = rectangle.frustum_mesh.points
-    #     points = set([self.m_detector_mesh.find_closest_point(p) for p in selected_points])
-    #     self.show_plot_for_detectors(points)
-    #     self.show_info_text_for_detectors(points)
+    def set_multi_select_enabled(self, is_enabled: bool) -> None:
+        if is_enabled:
+            self._view.enable_rectangle_picking(callback=self.rectangle_picked)
+        else:
+            self._view.enable_point_picking(callback=self.point_picked)
 
     def rectangle_picked(self, rectangle):
         selected_points = rectangle.frustum_mesh.points
