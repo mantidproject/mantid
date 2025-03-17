@@ -294,6 +294,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                     bin_params=data_view.dimensions.get_bin_params(),
                     pos=pos,
                     transpose=data_view.dimensions.transpose,
+                    dimension_indices=data_view.dimensions.get_states(),
                     axis=axis,
                 )
             )

@@ -70,11 +70,11 @@ class SliceViewerModel(SliceViewerBaseModel):
         if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MDE:
             self.export_roi_to_workspace = self.export_roi_to_workspace_mdevent
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdevent
-            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_mdevent
         elif ws_type == WS_TYPE.MDH:
             self.export_roi_to_workspace = self.export_roi_to_workspace_mdhisto
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdhisto
-            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
+            self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_mdhisto
         else:
             self.export_roi_to_workspace = self.export_roi_to_workspace_matrix
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_matrix
@@ -269,6 +269,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose: If true then the limits are transposed w.r.t to the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         :param cut: A string denoting which type to export. Options=s,c,x,y.
         """
         workspace = self._get_ws()
@@ -356,6 +357,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose: If true then the limits are transposed w.r.t to the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         """
         workspace = self._get_ws()
         dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
@@ -391,6 +393,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose: If true then the limits are transposed w.r.t to the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         :param cut: A string denoting which type to export. Options=c,x,y.
         """
         workspace = self._get_ws()
@@ -426,6 +429,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param limits: An optional ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose: If true then the limits are transposed .w.r.t. the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         :param cut: A string denoting which cut to export. Options=c,x,y.
         """
         workspace = self._get_ws()
@@ -452,6 +456,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param limits: An ND sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         """
         if transpose:
             # swap back to model order
@@ -459,12 +464,15 @@ class SliceViewerModel(SliceViewerBaseModel):
         extract_roi_matrix(self._get_ws(), *limits[0], *limits[1], transpose, self._roi_name)
         return f"ROI created: {self._roi_name}"
 
-    def export_pixel_cut_to_workspace_md(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
+    def export_pixel_cut_to_workspace_mdhisto(
+        self, slicepoint, bin_params, pos: tuple, transpose: bool, dimension_indices: Sequence[int], axis: str
+    ):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
         :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
         :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         :param axis: A string 'x' or 'y' identifying the axis to cut along
         """
         # Form single pixel limits for a cut
@@ -472,15 +480,41 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         deltax, deltay = workspace.getDimension(xindex).getBinWidth(), workspace.getDimension(yindex).getBinWidth()
         xpos, ypos = pos
+        if transpose:
+            xpos, ypos = ypos, xpos
         limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
-        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, axis)
+        return self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
 
-    def export_pixel_cut_to_workspace_matrix(self, slicepoint, bin_params, pos: tuple, transpose: bool, axis: str):
+    def export_pixel_cut_to_workspace_mdevent(
+        self, slicepoint, bin_params, pos: tuple, transpose: bool, dimension_indices: Sequence[int], axis: str
+    ):
         """
         Export a single row/column as a workspace. Signature matches other export functions
         slicepoint, bin_params are unused
         :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
         :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
+        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        """
+        # Form single pixel limits for a cut
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
+        workspace = self._get_ws()
+        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), workspace.getDimension(yindex).getBinWidth()
+        xpos, ypos = pos
+        if transpose:
+            xpos, ypos = ypos, xpos
+        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
+        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
+
+    def export_pixel_cut_to_workspace_matrix(
+        self, slicepoint, bin_params, pos: tuple, transpose: bool, dimension_indices: Sequence[int], axis: str
+    ):
+        """
+        Export a single row/column as a workspace. Signature matches other export functions
+        slicepoint, bin_params are unused
+        :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
+        :param transpose:  If true then the limits are transposed .w.r.t. the data
+        :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
         :param axis: A string 'x' or 'y' identifying the axis to cut along
         """
         workspace = self._get_ws()
