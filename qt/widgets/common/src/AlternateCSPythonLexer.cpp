@@ -88,21 +88,21 @@ QFont AlternateCSPythonLexer::defaultFont(int style) const {
 // * @param set The keyword set to retrieve (1 is for keywords)
 // * @return A string containing the keywords
 // */
-// const char *AlternateCSPythonLexer::keywords(int set) const {
-//  if (set == 1) {
-//    // Retrieve default Python keywords from qscintilla
-//    const char *defaultKeywords = QsciLexerPython::keywords(1);
-//    QStringList keywordList = QString::fromUtf8(defaultKeywords).split(" ");
-//
-//    for (const QString &keyword : m_customKeywords) {
-//      if (!keywordList.contains(keyword)) {
-//        keywordList.append(keyword);
-//      }
-//    }
-//
-//    QByteArray m_keywordsBuffer = keywordList.join(" ").toUtf8();
-//    return m_keywordsBuffer.constData();
-//  }
-//
-//  return QsciLexerPython::keywords(set);
-//}
+const char *AlternateCSPythonLexer::keywords(int set) const {
+  if (set == 1) {
+    // Retrieve default Python keywords from qscintilla
+    const char *defaultKeywords = QsciLexerPython::keywords(1);
+    QStringList keywordList = QString::fromUtf8(defaultKeywords).split(" ");
+
+    for (const QString &keyword : m_customKeywords) {
+      if (!keywordList.contains(keyword)) {
+        keywordList.append(keyword);
+      }
+    }
+
+    QByteArray m_keywordsBuffer = keywordList.join(" ").toUtf8();
+    return m_keywordsBuffer.constData();
+  }
+
+  return QsciLexerPython::keywords(set);
+}
