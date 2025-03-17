@@ -25,7 +25,7 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
-constexpr std::string WS_NAME = "wsName";
+static const std::string WS_NAME = "wsName";
 
 MultiDomainFunction_sptr getFunction(std::string const &functionString, size_t domainNumber = 1) {
   return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, domainNumber);
