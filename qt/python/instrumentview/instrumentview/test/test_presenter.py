@@ -96,3 +96,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_get_detector_info_text.return_value = "a"
         self._presenter.show_info_text_for_detectors([0, 1, 2])
         self._mock_view.update_selected_detector_info.assert_called_once_with(["a", "a", "a"])
+
+    def test_set_multi_select_enabled(self):
+        self._presenter.set_multi_select_enabled(True)
+        self._mock_view.enable_rectangle_picking.assert_called_once()
+        self._mock_view.enable_point_picking.assert_not_called()
+
+    def test_set_multi_select_disabled(self):
+        self._presenter.set_multi_select_enabled(False)
+        self._mock_view.enable_rectangle_picking.assert_not_called()
+        self._mock_view.enable_point_picking.assert_called_once()
