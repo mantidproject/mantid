@@ -14,4 +14,6 @@ setup(
     version=os.environ["MANTID_VERSION_STR"],
     entry_points={"gui_scripts": ["instrumentview = InstrumentView:main"]},
     packages=find_packages(exclude=["*.test"]),
+    package_data={"": ["*.png"]},
+    include_package_data=True,
 )
