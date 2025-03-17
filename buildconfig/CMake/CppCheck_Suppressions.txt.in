@@ -409,7 +409,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/Index
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:381
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroupFactory.cpp:29
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/StructureFactorCalculatorSummation.cpp:55
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/IObjComponent.cpp:20
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/IObjComponent.cpp:31
@@ -685,11 +684,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoModelM
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoPresenter.cpp:33
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelector.cpp:38
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeModel.cpp:35
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:171
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:191
-uninitvar:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:248
-uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:248
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:161
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:629
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MessageDisplay.cpp:151
