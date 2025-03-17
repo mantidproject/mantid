@@ -173,8 +173,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
       for (const auto &childWsName : childWsNames) {
-        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) == selectedWsNameSet.end()) {
-          selectedWsNameSet.insert(QString::fromStdString(childWsName));
+        if (selectedWsNameSet.insert(QString::fromStdString(childWsName)).second) {
           selectedWsNameList.emplace_back(QString::fromStdString(childWsName));
         }
       }
