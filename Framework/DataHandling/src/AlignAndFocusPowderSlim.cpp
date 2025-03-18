@@ -451,7 +451,7 @@ void AlignAndFocusPowderSlim::exec() {
   MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
-  const Kernel::NexusHDF5Descriptor descriptor(filename);
+  const Kernel::NexusDescriptor descriptor(filename);
 
   const std::string ENTRY_TOP_LEVEL("entry");
 
