@@ -524,7 +524,10 @@ def calc_1st_absorption_corr_using_wksp(
     elif abs_method == "SampleAndContainer":
         AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_ass", ScatterFrom="Sample", ElementSize=element_size)
         if container_gauge_vol and is_valid_xml(container_gauge_vol):
-            DefineGaugeVolume(donor_wksp, container_gauge_vol)
+            try:
+                DefineGaugeVolume(donor_wksp, container_gauge_vol)
+            except ValueError:
+                pass
         elif container_gauge_vol and beam_height != Property.EMPTY_DBL:
             gauge_vol = """<hollow-cylinder id="container_gauge">
                 <centre-of-bottom-base r="{0:4.2F}" t="90.0" p="270.0" />
