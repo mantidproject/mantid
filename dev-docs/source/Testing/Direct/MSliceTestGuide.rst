@@ -146,8 +146,16 @@ Taking Cuts
 #. In the row labelled ``along``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
 #. In the row labelled ``over``, set the ``from`` value to ``30`` and the ``to`` value to ``60``
 #. Click ``Plot``
+#. Depending on the cutting algorithm, the plot will look similar to the plot below with the integration method
 
 .. figure:: ../../../../docs/source/images/cut_plot.png
+   :alt: cut_plot.png
+   :align: center
+   :width: 80%
+
+and similar to the plot below with the rebin method.
+
+.. figure:: ../../../../docs/source/images/cut_plot_2.png
    :alt: cut_plot.png
    :align: center
    :width: 80%
