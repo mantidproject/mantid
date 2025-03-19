@@ -8,6 +8,8 @@ import numpy as np
 
 
 class DetectorInfo:
+    """Class for wrapping up information relating to a detector. Used for transferring this info to the View to be displayed."""
+
     def __init__(
         self,
         name: str,
