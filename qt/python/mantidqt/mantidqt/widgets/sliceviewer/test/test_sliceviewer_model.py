@@ -683,23 +683,29 @@ class SliceViewerModelTest(unittest.TestCase):
         slicepoint = [None, None, 0.5]
         bin_params = [100, 100, 0.1]
         dimension_indices = [0, 1, None]
-        xpos, ypos = 0.0, 2.0
-
-        dim0_delta = self.ws_MD_3D.getDimension(0).getBinWidth()
-        dim1_delta = self.ws_MD_3D.getDimension(1).getBinWidth()
-
-        xmin, xmax = xpos - 0.5 * dim0_delta, xpos + 0.5 * dim0_delta
-        ymin, ymax = ypos - 0.5 * dim1_delta, ypos + 0.5 * dim1_delta
-        zmin, zmax = 0.45, 0.55
 
         def assert_call_as_expected(transpose, cut_type):
+            xpos, ypos = 0.0, 2.0
             model = SliceViewerModel(self.ws_MD_3D)
-
             help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
+
+            dim0 = self.ws_MD_3D.getDimension(0)
+            dim1 = self.ws_MD_3D.getDimension(1)
+
+            dim0_delta = dim0.getBinWidth()
+            dim1_delta = dim1.getBinWidth()
+
+            if cut_type == "x" and not transpose or cut_type == "y" and transpose:
+                xmin, xmax = dim0.getMinimum(), dim0.getMaximum()
+                ymin, ymax = ypos - 0.5 * dim1_delta, ypos + 0.5 * dim1_delta
+            else:
+                xmin, xmax = xpos - 0.5 * dim0_delta, xpos + 0.5 * dim0_delta
+                ymin, ymax = dim1.getMinimum(), dim1.getMaximum()
+
+            zmin, zmax = 0.45, 0.55
 
             if not transpose:
                 if cut_type == "x":
-                    # X-cut: integrate along X, keep Y dimension
                     xcut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
                         P1Bin=[xmin, 0, xmax],
@@ -710,7 +716,6 @@ class SliceViewerModelTest(unittest.TestCase):
                     mock_intMD.assert_called_once_with(**xcut_params)
                     self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
                 elif cut_type == "y":
-                    # Y-cut: integrate along Y, keep X dimension
                     ycut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
                         P1Bin=[xmin, xmax],
@@ -721,24 +726,21 @@ class SliceViewerModelTest(unittest.TestCase):
                     mock_intMD.assert_called_once_with(**ycut_params)
                     self.assertEqual("Cut along Y created: ws_MD_3D_cut_y", help_msg)
             else:
-                # In transposed mode, dimensions are swapped
                 if cut_type == "x":
-                    # X-cut: integrate along Y, keep X dimension (transposed)
                     xcut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
-                        P1Bin=[ymin, ymax],
-                        P2Bin=[xmin, 0, xmax],
+                        P1Bin=[xmin, xmax],
+                        P2Bin=[ymin, 0, ymax],
                         P3Bin=[zmin, zmax],
                         OutputWorkspace="ws_MD_3D_cut_x",
                     )
                     mock_intMD.assert_called_once_with(**xcut_params)
                     self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
                 elif cut_type == "y":
-                    # Y-cut: integrate along X, keep Y dimension (transposed)
                     ycut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
-                        P1Bin=[ymin, 0, ymax],
-                        P2Bin=[xmin, xmax],
+                        P1Bin=[xmin, 0, xmax],
+                        P2Bin=[ymin, ymax],
                         P3Bin=[zmin, zmax],
                         OutputWorkspace="ws_MD_3D_cut_y",
                     )
@@ -757,21 +759,33 @@ class SliceViewerModelTest(unittest.TestCase):
         slicepoint = [None, None, 0.5]
         bin_params = [100, 100, 0.1]
         dimension_indices = [0, 1, None]
-        xpos, ypos = 0.0, 2.0
-
-        dim0_delta = self.ws_MDE_3D.getDimension(0).getBinWidth()
-        dim1_delta = self.ws_MDE_3D.getDimension(1).getBinWidth()
-
-        xmin, xmax = xpos - 0.5 * dim0_delta, xpos + 0.5 * dim0_delta
-        ymin, ymax = ypos - 0.5 * dim1_delta, ypos + 0.5 * dim1_delta
-        zmin, zmax = 0.45, 0.55
 
         def assert_call_as_expected(transpose, cut_type):
+            xpos, ypos = 0.0, 2.0
             model = SliceViewerModel(self.ws_MDE_3D)
+            help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
 
-            help_msg = model.export_pixel_cut_to_workspace_mdevent(
-                slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type
-            )
+            dim0 = self.ws_MDE_3D.getDimension(0)
+            dim1 = self.ws_MDE_3D.getDimension(1)
+
+            self.assertEqual(dim0.getBinWidth(), 6)
+            self.assertEqual(dim1.getBinWidth(), 8)
+
+            if transpose:
+                xpos, ypos = ypos, xpos
+                dim0, dim1 = dim1, dim0
+
+            dim0_delta = dim0.getBinWidth()
+            dim1_delta = dim1.getBinWidth()
+
+            if cut_type == "x":
+                xmin, xmax = dim0.getMinimum(), dim0.getMaximum()
+                ymin, ymax = ypos - 0.5 * dim1_delta, ypos + 0.5 * dim1_delta
+            else:
+                xmin, xmax = xpos - 0.5 * dim0_delta, xpos + 0.5 * dim0_delta
+                ymin, ymax = dim1.getMinimum(), dim1.getMaximum()
+
+            zmin, zmax = 0.45, 0.55
 
             common_params = dict(
                 InputWorkspace=self.ws_MDE_3D,

@@ -476,13 +476,19 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param axis: A string 'x' or 'y' identifying the axis to cut along
         """
         # Form single pixel limits for a cut
-        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
         workspace = self._get_ws()
-        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), workspace.getDimension(yindex).getBinWidth()
+        xdim = workspace.getDimension(xindex)
+        ydim = workspace.getDimension(yindex)
+        deltax, deltay = xdim.getBinWidth(), ydim.getBinWidth()
+
         xpos, ypos = pos
-        if transpose:
-            xpos, ypos = ypos, xpos
-        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
+
+        if axis == "x" and not transpose or axis == "y" and transpose:
+            limits = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+        else:
+            limits = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
+
         return self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
 
     def export_pixel_cut_to_workspace_mdevent(
@@ -497,13 +503,19 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param axis: A string 'x' or 'y' identifying the axis to cut along
         """
         # Form single pixel limits for a cut
-        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
         workspace = self._get_ws()
-        deltax, deltay = workspace.getDimension(xindex).getBinWidth(), workspace.getDimension(yindex).getBinWidth()
+        xdim = workspace.getDimension(xindex)
+        ydim = workspace.getDimension(yindex)
+        deltax, deltay = xdim.getBinWidth(), ydim.getBinWidth()
+
         xpos, ypos = pos
-        if transpose:
-            xpos, ypos = ypos, xpos
-        limits = (xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ypos - 0.5 * deltay, ypos + 0.5 * deltay)
+
+        if axis == "x" and not transpose or axis == "y" and transpose:
+            limits = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+        else:
+            limits = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
+
         return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
 
     def export_pixel_cut_to_workspace_matrix(
@@ -520,7 +532,6 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         xpos, ypos = pos
         if transpose:
-            # swap back to model order
             xpos, ypos = ypos, xpos
 
         xcut_name, ycut_name, help_msg = self._cut_names(axis)
