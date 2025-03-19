@@ -14,10 +14,13 @@ import os
 
 
 class InstrumentView:
+    """Show the Instrument View in a separate window"""
+
     def main(file_path: Path):
         sys.exit(InstrumentView.start_app_open_window(file_path))
 
     def start_app_open_window(file_path: Path):
+        """Load the given file, then open the Instrument View in a separate window with that workspace displayed"""
         app = QApplication(sys.argv)
         ws = Load(str(file_path), StoreInADS=False)
         window = FullInstrumentViewWindow(ws)
@@ -25,7 +28,3 @@ class InstrumentView:
         app.setWindowIcon(QIcon(f"{current_dir}/mantidplot.png"))
         window.show()
         app.exec_()
-
-
-def open_instrument_view(file_path: str):
-    InstrumentView.start_app_open_window(file_path)
