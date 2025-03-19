@@ -21,7 +21,6 @@
 #include "MantidNexus/H5Util.h"
 
 #include <algorithm>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 #include <functional>
 #include <memory>
@@ -36,8 +35,26 @@ namespace {
 //------ utility
 // For h5 -> hsize_t = unsigned long long
 constexpr int COMPRESSION_DEFLATE_LEVEL = 6;
-static const std::vector<std::string> DEFAULT_SPIN_ORDER = {"-1-1", "+1-1", "-1+1", "+1+1"};
 
+struct SpinStateHelper {
+  explicit SpinStateHelper(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
+    if (spinStateStr.size() == 4) {
+      Pin = std::vector<int>({-1, 1});
+      Pout = std::vector<int>({-1, 1});
+    } else if (spinStateStr.size() == 2) {
+      if (spinStateStr.begin()->starts_with("0")) {
+        Pin = std::vector<int>({0});
+        Pout = std::vector<int>({1, -1});
+      } else {
+        Pin = std::vector<int>({1, -1});
+        Pout = std::vector<int>({0});
+      }
+    }
+  }
+  std::vector<std::string> spinVec;
+  std::vector<int> Pin;
+  std::vector<int> Pout;
+};
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
@@ -208,7 +225,7 @@ void write2DWorkspace(H5::Group &group, Mantid::API::MatrixWorkspace_sptr worksp
 
 template <typename WorkspaceExtractorFunctor>
 void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces, WorkspaceExtractorFunctor func,
-                        const std::string &dataSetName, const SpinPairs &pairs,
+                        const std::string &dataSetName, const SpinStateHelper &spin,
                         const std::map<std::string, std::string> &attributes = {}) {
   using namespace H5Util;
   using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
@@ -219,7 +236,7 @@ void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces,
   auto dimSignal = static_cast<hsize_t>(ws0->dataY(0).size());
   auto dimHistogram = static_cast<hsize_t>(ws0->getNumberHistograms());
 
-  auto dataShape = std::vector<hsize_t>({2, 2, dimSignal});
+  auto dataShape = std::vector<hsize_t>({spin.Pin.size(), spin.Pout.size(), dimSignal});
   auto slabShape = std::vector<hsize_t>({1, 1, dimSignal});
   if (dimHistogram > 1) {
     dataShape.insert(dataShape.begin() + 2, dimHistogram);
@@ -243,11 +260,10 @@ void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces,
   // Create the data set
   auto dataSet = group.createDataSet(dataSetName, dataType, fileSpace, propList);
   H5::DataSpace memSpace(rank, slabShape.data());
-  for (unsigned int i = 0; i < pairs.first.size(); i++) {
-    for (unsigned int j = 0; j < pairs.second.size(); j++) {
-      // Need the data space
-      auto state = stateConverter(pairs.first[i]) + stateConverter(pairs.second[j]);
-      auto index = indexOfWorkspaceForSpinState(DEFAULT_SPIN_ORDER, state);
+  for (unsigned int i = 0; i < spin.Pin.size(); i++) {
+    for (unsigned int j = 0; j < spin.Pout.size(); j++) {
+      auto state = stateConverter(spin.Pin.at(i)) + stateConverter(spin.Pout.at(j));
+      auto index = indexOfWorkspaceForSpinState(spin.spinVec, state);
       pos.at(0) = i;
       pos.at(1) = j;
 
@@ -305,14 +321,18 @@ private:
 
 template <typename T> class WorkspaceGroupDataExtractor {
 public:
-  explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace) : m_workspace(workspace) {};
+  explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace, bool extractError = false)
+      : m_workspace(workspace), m_extractError(extractError) {};
   T *operator()(const Mantid::API::WorkspaceGroup_sptr & /*unused*/, int groupIndex, int spectraIndex = 0) {
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace->getItem(groupIndex));
-    return ws->dataY(spectraIndex).data();
+    return m_extractError ? ws->dataE(spectraIndex).data() : ws->dataY(spectraIndex).data();
   }
+
+  void setExtractErrors(bool extractError) { m_extractError = extractError; }
 
 private:
   WorkspaceGroup_sptr m_workspace;
+  bool m_extractError;
 };
 
 /**
@@ -560,17 +580,6 @@ void addSampleEMFields(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr
     H5Util::writeScalarDataSetWithStrAttributes(sampleGroup, sasSampleMagneticField, magFStrength, magFieldAttrs);
     addEMFieldDirection(sampleGroup, emFieldDir);
   }
-}
-
-std::pair<std::vector<int>, std::vector<int>> makeSpinVectors(const std::vector<std::string> &inputSpinStates) {
-  std::vector<int> Pout;
-  std::vector<int> Pin;
-  //  TODO spin states for 2 workspace group
-  if (inputSpinStates.size() == 4) {
-    Pin = std::vector<int>({-1, 1});
-    Pout = std::vector<int>({-1, 1});
-  }
-  return std::make_pair(Pin, Pout);
 }
 
 //------- SASsample
@@ -837,9 +846,9 @@ void addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &w
   std::map<std::string, std::string> polAttributes;
   polAttributes.emplace(sasUnitAttr, sasDataPolarizationUnitAttr);
   auto const inputSpinOrder = Algorithms::PolarizationCorrectionsHelpers::splitSpinStateString(inputSpinStates);
-  auto const spinPairs = makeSpinVectors(inputSpinOrder);
-  writeArray1DWithStrAttributes(data, sasDataPin, spinPairs.first, polAttributes);
-  writeArray1DWithStrAttributes(data, sasDataPout, spinPairs.second, polAttributes);
+  auto const spinPairs = SpinStateHelper(inputSpinOrder);
+  writeArray1DWithStrAttributes(data, sasDataPin, spinPairs.Pin, polAttributes);
+  writeArray1DWithStrAttributes(data, sasDataPout, spinPairs.Pout, polAttributes);
 
   // add Q
   auto const ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
@@ -853,9 +862,10 @@ void addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &w
 
   // add signal
   WorkspaceGroupDataExtractor<double> wsGroupExtractor(wsGroup);
-
   writePolarizedData(data, wsGroup, wsGroupExtractor, sasDataI, spinPairs);
-  // TODO add signal error 1D + 2D
+  // add signal error
+  wsGroupExtractor.setExtractErrors(true);
+  writePolarizedData(data, wsGroup, wsGroupExtractor, sasDataIdev, spinPairs);
 }
 
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
