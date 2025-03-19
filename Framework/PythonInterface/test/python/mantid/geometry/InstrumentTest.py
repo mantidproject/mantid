@@ -44,6 +44,20 @@ class InstrumentTest(unittest.TestCase):
         frame = self.__testws.getInstrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
 
+    def test_getFilename(self):
+        inst = self.__testws.getInstrument()
+
+        # get the filename
+        NAME_ORIG = inst.getFilename()
+
+        # check that the filename can be set
+        NAME_NEW = "testable"
+        inst.setFilename(NAME_NEW)
+        self.assertEqual(inst.getFilename(), NAME_NEW)
+
+        # put the filename back to what it was
+        inst.setFilename(NAME_ORIG)
+
     def test_ValidDates(self):
         inst = self.__testws.getInstrument()
         valid_from = inst.getValidFromDate()
