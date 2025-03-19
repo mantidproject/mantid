@@ -4,13 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from abc import ABC, abstractmethod
 import numpy as np
 
 
-class projection:
-    _component_info = None
-    _detector_indices = None
-    _sample_position = None
+class projection(ABC):
     _projection_axis = None
     _x_axis = None
     _y_axis = None
@@ -20,10 +18,14 @@ class projection:
     _x_range = None
     _y_range = None
 
-    def __init__(self, workspace, detector_indices):
+    def __init__(self, workspace, detector_indices, axis: np.ndarray):
         self._component_info = workspace.componentInfo()
         self._sample_position = np.array(self._component_info.samplePosition())
         self._detector_indices = detector_indices
+        self._projection_axis = np.array(axis)
+        self._calculate_axes()
+        self._calculate_detector_coordinates()
+        self._find_and_correct_x_gap()
 
     def _calculate_axes(self):
         position = np.array(self._component_info.position(0))
@@ -42,9 +44,21 @@ class projection:
 
         self._y_axis = np.cross(self._projection_axis, self._x_axis)
 
+    @abstractmethod
+    def _calculate_2d_coordinates(self, detector_index: int) -> tuple[float, float]:
+        pass
+
     def _calculate_detector_coordinates(self):
-        self._detector_x_coordinates = np.array([])
-        self._detector_y_coordinates = np.array([])
+        x_values = []
+        y_values = []
+        for det_id in self._detector_indices:
+            x, y = self._calculate_2d_coordinates(det_id)
+            x_values.append(x)
+            y_values.append(y)
+        self._detector_x_coordinates = np.array(x_values)
+        self._detector_y_coordinates = np.array(y_values)
+        self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
+        self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
     def _find_and_correct_x_gap(self):
         if self._u_period == 0:
