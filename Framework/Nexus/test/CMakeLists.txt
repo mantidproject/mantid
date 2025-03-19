@@ -1,11 +1,14 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
+  set(TESTHELPER_SRCS test_helper.cpp)
+
   cxxtest_add_test(NexusTest ${TEST_FILES})
 
-  target_link_libraries(NexusTest PRIVATE Mantid::API Mantid::Nexus gmock)
+  target_link_libraries(NexusTest PRIVATE Mantid::Nexus gmock)
   add_framework_test_helpers(NexusTest)
   add_dependencies(FrameworkTests NexusTest)
+  add_dependencies(NexusTest UnitTestData)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET NexusTest PROPERTY FOLDER "UnitTests")
 endif()
@@ -42,9 +45,18 @@ target_link_libraries(napi_leak_test3 PRIVATE Mantid::Nexus)
 add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-3" COMMAND napi_leak_test3)
 
 # #### phony target to drag in all tests
+
+# cmake-format: off
 add_custom_target(
-  "${TEST_PREFIX}" DEPENDS napi_test_hdf5 napi_test_cpp-hdf5 napi_test_nxunlimited napi_leak_test1 napi_leak_test2
-                           napi_leak_test3
+  "${TEST_PREFIX}"
+  DEPENDS
+    napi_test_hdf5
+    napi_test_cpp-hdf5
+    napi_test_nxunlimited
+    napi_leak_test1
+    napi_leak_test2
+    napi_leak_test3
 )
+# cmake-format: on
 
 add_dependencies(FrameworkTests "${TEST_PREFIX}")

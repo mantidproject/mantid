@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidIndexing/DllConfig.h"
 #include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
