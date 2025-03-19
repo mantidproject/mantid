@@ -75,17 +75,6 @@ bool hasCustomizedRaster(detail::ShapeInfo::GeometryShape shape) {
   return false;
 }
 
-double calcDistanceInShapeNoCheck(const V3D &beamDirection, const IObject &shape, const V3D &position) {
-  // Create track for distance in cylinder before scattering point
-  Track incoming(position, -beamDirection);
-
-  if (shape.interceptSurface(incoming) > 0) {
-    return incoming.totalDistInsideObject();
-  } else {
-    return 0;
-  }
-}
-
 Raster calculateGeneric(const V3D &beamDirection, const IObject &integShape, const IObject &sampleShape,
                         const double cubeSizeInMetre) {
   if (cubeSizeInMetre <= 0.)
@@ -181,13 +170,13 @@ Raster calculate(const V3D &beamDirection, const IObject &integShape, const IObj
       const auto params = shapeInfo.cylinderGeometry();
       const size_t numSlice = std::max<size_t>(1, static_cast<size_t>(params.height / cubeSizeInMetre));
       const size_t numAnnuli = std::max<size_t>(1, static_cast<size_t>(params.radius / cubeSizeInMetre));
-      return calculateCylinder(beamDirection, integShape, numSlice, numAnnuli);
+      return calculateCylinder(beamDirection, integShape, sampleShape, numSlice, numAnnuli);
     } else if (primitive == Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
       const auto params = shapeInfo.hollowCylinderGeometry();
       const size_t numSlice = std::max<size_t>(1, static_cast<size_t>(params.height / cubeSizeInMetre));
       const size_t numAnnuli =
           std::max<size_t>(1, static_cast<size_t>((params.radius - params.innerRadius) / cubeSizeInMetre));
-      return calculateHollowCylinder(beamDirection, integShape, numSlice, numAnnuli);
+      return calculateHollowCylinder(beamDirection, integShape, sampleShape, numSlice, numAnnuli);
     } else {
       throw std::runtime_error("Rasterize::calculate should never get to this point");
     }
@@ -196,9 +185,9 @@ Raster calculate(const V3D &beamDirection, const IObject &integShape, const IObj
   }
 }
 
-Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const size_t numSlices,
-                         const size_t numAnnuli) {
-  if (shape.shape() != detail::ShapeInfo::GeometryShape::CYLINDER)
+Raster calculateCylinder(const V3D &beamDirection, const IObject &integShape, const IObject &sampleShape,
+                         const size_t numSlices, const size_t numAnnuli) {
+  if (integShape.shape() != detail::ShapeInfo::GeometryShape::CYLINDER)
     throw std::invalid_argument("Given shape is not a cylinder.");
 
   if (numSlices == 0)
@@ -207,7 +196,7 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const s
     throw std::runtime_error("Tried to section cylinder into zero annuli");
 
   // convert to the underlying primitive type
-  const auto &shapeInfo = shape.shapeInfo();
+  const auto &shapeInfo = integShape.shapeInfo();
 
   // get the geometry for the volume elements
   const auto params = shapeInfo.cylinderGeometry();
@@ -234,7 +223,7 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const s
   const V3D y_prime = z_prime.cross_prod(x_prime);
   const auto coords = std::array<V3D, 3>{{x_prime, y_prime, z_prime}};
 
-  // loop over the elements of the shape and create everything
+  // loop over the elements of the integShape and create everything
   // loop over slices
   for (size_t i = 0; i < numSlices; ++i) {
     const double z = (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
@@ -256,13 +245,16 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const s
       for (size_t k = 0; k < Ni; ++k) {
         const double phi = 2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
         const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
-
-        assert(shape.isValid(position));
-
-        result.position.emplace_back(position);
-        result.volume.emplace_back(elementVolume);
-        // TODO should be customized for cylinder
-        result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
+        // check element is within the sample shape
+        if (sampleShape.isValid(position)) {
+          Track incoming(position, -beamDirection);
+          // check there is a valid path from the source to this point within the sample
+          if (sampleShape.interceptSurface(incoming) > 0) {
+            result.l1.emplace_back(incoming.totalDistInsideObject());
+            result.position.emplace_back(position);
+            result.volume.emplace_back(elementVolume);
+          }
+        }
       } // loop over k
     } // loop over j
   } // loop over i
@@ -270,9 +262,9 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const s
   return result;
 }
 
-Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, const size_t numSlices,
-                               const size_t numAnnuli) {
-  if (shape.shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER)
+Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &integShape, const IObject &sampleShape,
+                               const size_t numSlices, const size_t numAnnuli) {
+  if (integShape.shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER)
     throw std::invalid_argument("Given shape is not a hollow cylinder.");
 
   if (numSlices == 0)
@@ -281,7 +273,7 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, c
     throw std::runtime_error("Tried to section cylinder into zero annuli");
 
   // convert to the underlying primitive type
-  const auto &shapeInfo = shape.shapeInfo();
+  const auto &shapeInfo = integShape.shapeInfo();
 
   // get the geometry for the volume elements
   const auto params = shapeInfo.hollowCylinderGeometry();
@@ -344,12 +336,16 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, c
 
         const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
 
-        assert(shape.isValid(position));
-
-        result.position.emplace_back(position);
-        result.volume.emplace_back(elementVolume);
-        // TODO should be customized for hollow cylinder
-        result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
+        // check element is within the sample shape
+        if (sampleShape.isValid(position)) {
+          Track incoming(position, -beamDirection);
+          // check there is a valid path from the source to this point within the sample
+          if (sampleShape.interceptSurface(incoming) > 0) {
+            result.l1.emplace_back(incoming.totalDistInsideObject());
+            result.position.emplace_back(position);
+            result.volume.emplace_back(elementVolume);
+          }
+        }
       } // loop over k
     } // loop over j
   } // loop over i
