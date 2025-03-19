@@ -29,6 +29,11 @@ import xml.etree.ElementTree as ET
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
+GV_VALS = {
+    "X": {"x": "0.2", "y": "0.0", "z": "0.0", "t": "90.0", "p": "180.0"},
+    "Y": {"x": "0.0", "y": "0.2", "z": "0.0", "t": "90.0", "p": "270.0"},
+    "Z": {"x": "0.0", "y": "0.0", "z": "0.2", "t": "180.0", "p": "0.0"},
+}
 
 
 # ---------------------------- #
@@ -529,16 +534,30 @@ def calc_1st_absorption_corr_using_wksp(
             except ValueError:
                 pass
         elif container_gauge_vol and beam_height != Property.EMPTY_DBL:
+            ref_frame = donor_wksp.getInstrument().getReferenceFrame()
+            up_direction = ref_frame.pointingUpAxis()
+            info_to_use = GV_VALS[up_direction]
+
+            # Factor '100' here is for unit conversion from cm to m. An extra factor
+            # of '2' in 'beam_height / 200.0' is to make sure the center of the
+            # bottom base of the gauge volume is down from the origin by half of the
+            # gauge volume height so the center of the gauge volume is at the origin.
+            # This is our assumed location of the beam if only beam height is given.
             gauge_vol = """<hollow-cylinder id="container_gauge">
-                <centre-of-bottom-base r="{0:4.2F}" t="90.0" p="270.0" />
-                <axis x="0.0" y="0.2" z="0" />
-                <inner-radius val="{1:7.5F}" />
-                <outer-radius val="{2:7.5F}" />
-                <height val="{3:4.2F}" />
+                <centre-of-bottom-base r="{0:4.2F}" t="{1:s}" p="{2:s}" />
+                <axis x="{3:s}" y="{4:s}" z="{5:s}" />
+                <inner-radius val="{6:7.5F}" />
+                <outer-radius val="{7:7.5F}" />
+                <height val="{8:4.2F}" />
               </hollow-cylinder>
             """
             gauge_vol = gauge_vol.format(
                 beam_height / 200.0,
+                info_to_use["t"],
+                info_to_use["p"],
+                info_to_use["x"],
+                info_to_use["y"],
+                info_to_use["z"],
                 float(container_gauge_vol.split()[0]) / 100.0,
                 float(container_gauge_vol.split()[1]) / 100.0,
                 beam_height / 100.0,
@@ -694,17 +713,35 @@ def create_absorption_input(
     if beam_height != Property.EMPTY_DBL and not gauge_vol:
         # If the gauge volume is not defined, use the beam height to define it,
         # and we will be assuming a cylinder shape of the sample.
+        ref_frame = mtd[absName].getInstrument().getReferenceFrame()
+        up_direction = ref_frame.pointingUpAxis()
+        info_to_use = GV_VALS[up_direction]
         gauge_vol = """<cylinder id="shape">
-            <centre-of-bottom-base r="{0:4.2F}" t="90.0" p="270.0" />
-            <axis x="0.0" y="0.2" z="0.0" />
-            <radius val="{1:7.5F}" />
-            <height val="{2:4.2F}" />
+            <centre-of-bottom-base r="{0:4.2F}" t="{1:s}" p="{2:s}" />
+            <axis x="{3:s}" y="{4:s}" z="{5:s}" />
+            <radius val="{6:7.5F}" />
+            <height val="{7:4.2F}" />
             </cylinder>"""
         if isinstance(geometry["Radius"], float):
             sam_rad = geometry["Radius"]
         else:
             sam_rad = geometry["Radius"].value
-        gauge_vol = gauge_vol.format(beam_height / 200.0, sam_rad / 100.0, beam_height / 100.0)
+
+        # Factor '100' here is for unit conversion from cm to m. An extra factor
+        # of '2' in 'beam_height / 200.0' is to make sure the center of the
+        # bottom base of the gauge volume is down from the origin by half of the
+        # gauge volume height so the center of the gauge volume is at the origin.
+        # This is our assumed location of the beam if only beam height is given.
+        gauge_vol = gauge_vol.format(
+            beam_height / 200.0,
+            info_to_use["t"],
+            info_to_use["p"],
+            info_to_use["x"],
+            info_to_use["y"],
+            info_to_use["z"],
+            sam_rad / 100.0,
+            beam_height / 100.0,
+        )
 
     if gauge_vol:
         DefineGaugeVolume(absName, gauge_vol)
