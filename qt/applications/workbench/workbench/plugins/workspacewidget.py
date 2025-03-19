@@ -305,9 +305,9 @@ class WorkspaceWidget(PluginWidget):
                     view = FullInstrumentViewWindow(ws, parent=parent, off_screen=off_screen)
                     view.show()
                 except Exception as exception:
-                    logger.warning("Could not show instrument for workspace " "'{}':\n{}\n".format(ws.name(), exception))
+                    logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
-                logger.warning("Could not show instrument for workspace '{}':" "\nNo instrument available.\n" "".format(ws.name()))
+                logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
 
     def _do_show_data(self, names):
         # local import to allow this module to be imported without pyplot being imported
