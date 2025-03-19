@@ -1,1 +1,1 @@
-- Removed unnecessary fix for IB21 for C1 and Ci symmetries in the Crystal Field peak base function.
+- Removed unnecessary fix for IB21 for C1 and Ci symmetries in the Crystal Field peak base function to match the documentation: https://docs.mantidproject.org/nightly/concepts/CrystalField.html#appendix-b-tables
