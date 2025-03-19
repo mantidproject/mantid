@@ -14,6 +14,8 @@ from scipy.spatial.transform import Rotation
 
 
 class DetectorPosition(np.ndarray):
+    """A numpy array that uses a tolerance on the data to check for equality"""
+
     def __new__(cls, input_array):
         return np.asarray(input_array).view(cls)
 
@@ -22,6 +24,8 @@ class DetectorPosition(np.ndarray):
 
 
 class FullInstrumentViewModel:
+    """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
+
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
     _invalid_index = -1
@@ -29,6 +33,8 @@ class FullInstrumentViewModel:
     _data_max = 0.0
 
     def __init__(self, workspace, draw_detector_geometry: bool):
+        """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
+        counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
         self._detector_info = workspace.detectorInfo()
 
@@ -97,6 +103,7 @@ class FullInstrumentViewModel:
         self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
 
     def _union_with_current_bin_min_max(self, bin_edge) -> None:
+        """Expand current bin limits to include new bin edge"""
         if not math.isinf(bin_edge):
             if bin_edge < self._bin_min:
                 self._bin_min = bin_edge
@@ -104,6 +111,7 @@ class FullInstrumentViewModel:
                 self._bin_max = bin_edge
 
     def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
+        """Calculate integrated counts for the specified TOF range"""
         integrated_spectra = self._workspace.getIntegratedSpectra(tof_min, tof_max, entire_range)
         self._detector_counts.clear()
         for det_index in self._detector_indices:
@@ -142,6 +150,7 @@ class FullInstrumentViewModel:
         return self._monitor_positions
 
     def drawRectangularBank(self, component_info, component_index: int) -> pv.PolyData:
+        """Create a mesh representing a rectangle"""
         corner_indices = component_info.quadrilateralComponentCornerIndices(component_index)
         corner_positions = [np.array(component_info.position(corner_index)) for corner_index in corner_indices]
         scale = np.array(component_info.scaleFactor(component_index))
@@ -151,6 +160,7 @@ class FullInstrumentViewModel:
         return pv.PolyData(corner_positions, faces)
 
     def drawStructuredBank(self, component_info, component_index: int) -> pv.PolyData:
+        """Create a mesh for a general shape"""
         bank_corner_indices = component_info.quadrilateralComponentCornerIndices(component_index)
         bank_corner_positions = [np.array(component_info.position(corner_index)) for corner_index in bank_corner_indices]
         shape = component_info.shape(component_index)
@@ -186,6 +196,7 @@ class FullInstrumentViewModel:
         return pv.PolyData(vertices)
 
     def drawSingleDetector(self, component_info, component_index: int):
+        """Create an appropriate mesh for a detector based on the shape type"""
         detector_position = np.array(component_info.position(component_index))
         mantid_rotation = component_info.rotation(component_index).getAngleAxis()
         rotation = Rotation.from_rotvec(
@@ -247,6 +258,7 @@ class FullInstrumentViewModel:
                 return pv.PolyData(mesh_points, faces)
 
     def get_detector_info_text(self, detector_index: int) -> DetectorInfo:
+        """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
         workspace_index = self.workspace_index_from_detector_index(detector_index)
         name = self._component_info.name(detector_index)
         detector_id = self._detector_info.detectorIDs()[detector_index]
@@ -267,7 +279,8 @@ class FullInstrumentViewModel:
             name, detector_id, workspace_index, np.array(xyz_position), np.array(spherical_position), component_path, int(pixel_counts)
         )
 
-    def calculate_projection(self, is_spherical: bool, axis: np.ndarray) -> list[float]:
+    def calculate_projection(self, is_spherical: bool, axis: np.ndarray) -> list[list[float]]:
+        """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         projection = (
             iv_spherical.spherical_projection(self._workspace, self._detector_indices, axis)
             if is_spherical

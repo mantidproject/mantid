@@ -11,6 +11,8 @@ import pyvista as pv
 
 
 class FullInstrumentViewPresenter:
+    """Presenter for the Instrument View window"""
+
     _SPHERICAL_X = "Spherical X"
     _SPHERICAL_Y = "Spherical Y"
     _SPHERICAL_Z = "Spherical Z"
@@ -21,6 +23,8 @@ class FullInstrumentViewPresenter:
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
 
     def __init__(self, view, workspace):
+        """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
+        any monitors."""
         pv.global_theme.color_cycler = "default"
         pv.global_theme.allow_empty_mesh = True
 
@@ -57,6 +61,7 @@ class FullInstrumentViewPresenter:
         return self._PROJECTION_OPTIONS
 
     def projection_option_selected(self, selected_index: int) -> None:
+        """Update the projection based on the selected option."""
         projection_type = self._PROJECTION_OPTIONS[selected_index]
         if projection_type.startswith("Spherical"):
             is_spherical = True
@@ -91,6 +96,7 @@ class FullInstrumentViewPresenter:
         self.set_contour_limits(self._model.data_limits()[0], self._model.data_limits()[1])
 
     def point_picked(self, point, picker):
+        """For the given point, get the detector index and show all the information for that detector"""
         if point is None:
             return
         point_index = picker.GetPointId()
@@ -99,22 +105,26 @@ class FullInstrumentViewPresenter:
         self.show_info_text_for_detectors([detector_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:
+        """Change between single and multi point picking"""
         if is_enabled:
             self._view.enable_rectangle_picking(callback=self.rectangle_picked)
         else:
             self._view.enable_point_picking(callback=self.point_picked)
 
     def rectangle_picked(self, rectangle):
+        """Get points within the selection rectangle and display information for those detectors"""
         selected_points = rectangle.frustum_mesh.points
         points = set([self._detector_mesh.find_closest_point(p) for p in selected_points])
         self.show_plot_for_detectors(points)
         self.show_info_text_for_detectors(points)
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
+        """Create a PyVista mesh from the given points and faces"""
         mesh = pv.PolyData(points, faces)
         return mesh
 
     def generateSingleColour(self, points, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
+        """Returns an RGBA colours array for the given set of points, with all points the same colour"""
         rgba = np.zeros((len(points), 4))
         rgba[:, 0] = red
         rgba[:, 1] = green
@@ -123,10 +133,12 @@ class FullInstrumentViewPresenter:
         return rgba
 
     def show_plot_for_detectors(self, detector_indices: Iterable[int]) -> None:
+        """Show line plot for specified detectors"""
         self._view.show_plot_for_detectors(
             self._model.workspace(), [self._model.workspace_index_from_detector_index(d) for d in detector_indices]
         )
 
     def show_info_text_for_detectors(self, detector_indices: Iterable[int]) -> None:
+        """Show text information for specified detectors"""
         detector_infos = [self._model.get_detector_info_text(d) for d in detector_indices]
         self._view.update_selected_detector_info(detector_infos)
