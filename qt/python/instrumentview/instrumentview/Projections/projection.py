@@ -9,6 +9,8 @@ import numpy as np
 
 
 class projection(ABC):
+    """Base class for calculating a 2D projection with a specified axis"""
+
     _projection_axis = None
     _x_axis = None
     _y_axis = None
@@ -19,6 +21,7 @@ class projection(ABC):
     _y_range = None
 
     def __init__(self, workspace, detector_indices, axis: np.ndarray):
+        """For the given workspace and detectors, calculate 2D points with specified projection axis"""
         self._component_info = workspace.componentInfo()
         self._sample_position = np.array(self._component_info.samplePosition())
         self._detector_indices = detector_indices
@@ -28,6 +31,7 @@ class projection(ABC):
         self._find_and_correct_x_gap()
 
     def _calculate_axes(self):
+        """The projection axis is specified, we calculate a 3D coordinate system based on that"""
         position = np.array(self._component_info.position(0))
         z = position.dot(self._projection_axis)
         if z == 0 or np.abs(z) == np.linalg.norm(position):
@@ -49,6 +53,7 @@ class projection(ABC):
         pass
 
     def _calculate_detector_coordinates(self):
+        """Calculate 2D projection coordinates and store data"""
         x_values = []
         y_values = []
         for det_id in self._detector_indices:
@@ -61,6 +66,7 @@ class projection(ABC):
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
     def _find_and_correct_x_gap(self):
+        """Shift points based on the specified period so that they appear within the correct x range when plotted"""
         if self._u_period == 0:
             return
 
@@ -105,6 +111,7 @@ class projection(ABC):
                 self._apply_x_correction(i)
 
     def _apply_x_correction(self, i: int) -> None:
+        """Set x coordinate of specified point to be within the correct range, with the period used as the modulus"""
         x = self._detector_x_coordinates[i]
         if self._u_period == 0:
             return

@@ -9,6 +9,8 @@ import numpy as np
 
 
 class spherical_projection(projection):
+    """2D projection with a spherical coordinate system, see https://en.wikipedia.org/wiki/Spherical_coordinate_system"""
+
     def __init__(self, workspace, detector_indices, axis: np.ndarray):
         super().__init__(workspace, detector_indices, axis)
 
