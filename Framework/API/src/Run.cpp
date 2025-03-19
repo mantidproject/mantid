@@ -261,7 +261,14 @@ double Run::getProtonCharge() const {
 
   if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
+  } else if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME) &&
+             m_manager->getProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
+    const std::vector<double> &protonChargeByPeriod = m_manager->getProperty("proton_charge_by_period");
+    const int currentPeriod = m_manager->getProperty("current_period");
+    m_manager->setProperty(PROTON_CHARGE_LOG_NAME, protonChargeByPeriod[currentPeriod - 1]);
+    m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
   }
+
   if (m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     charge = m_manager->getProperty(PROTON_CHARGE_LOG_NAME);
   } else {
@@ -329,6 +336,11 @@ void Run::integrateProtonCharge(const std::string &logname) const {
                               "been left at the sum of the log values.");
     }
     const_cast<Run *>(this)->setProtonCharge(total);
+    // Mark gd_prtn_chrg as filtered as this method accounts for period filtering
+    if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
+      m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
+    }
+
   } else {
     g_log.warning(logname + " log was not a time series property. The value of the total proton "
                             "charge has not been set");
