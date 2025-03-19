@@ -18,7 +18,6 @@ namespace DataHandling {
 namespace NXcanSAS {
 // Helper functions for algorithms saving in NXcanSAS format.
 enum class WorkspaceDimensionality;
-typedef std::pair<std::vector<int>, std::vector<int>> SpinPairs;
 
 std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
 std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename, int index,
