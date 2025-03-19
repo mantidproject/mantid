@@ -81,8 +81,8 @@ const std::unordered_set<std::string> SpinStateValidator::getAllowedPairStates()
   if (m_extra.empty()) {
     return {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
   }
-  return {m_extra + m_para, m_extra + m_anti,  m_para + m_extra, m_para + m_anti,
-          m_anti + m_para,  m_extra + m_extra, m_para + m_para,  m_anti + m_anti};
+  return {m_extra + m_para,  m_extra + m_anti, m_para + m_extra, m_para + m_anti,  m_anti + m_para,
+          m_extra + m_extra, m_para + m_para,  m_anti + m_anti,  m_para + m_extra, m_anti + m_extra};
 }
 
 const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const {
