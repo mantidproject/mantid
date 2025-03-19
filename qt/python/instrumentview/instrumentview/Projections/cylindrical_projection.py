@@ -9,6 +9,8 @@ import numpy as np
 
 
 class cylindrical_projection(projection):
+    """2D projection with a cylindrical coordinate system, see https://en.wikipedia.org/wiki/Cylindrical_coordinate_system"""
+
     def __init__(self, workspace, detector_indices, axis: np.ndarray):
         super().__init__(workspace, detector_indices, axis)
 
