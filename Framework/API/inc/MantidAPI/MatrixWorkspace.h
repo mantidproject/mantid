@@ -393,7 +393,7 @@ public:
   /// Returns true if the workspace has common, integer X bins
   virtual bool isIntegerBins() const;
 
-  const std::string &YUnit() const;
+  const std::string &YUnit() const { return m_YUnit; }
   void setYUnit(const std::string &newUnit);
   std::string YUnitLabel(bool useLatex = false, bool plotAsDistribution = false) const;
   void setYUnitLabel(const std::string &newLabel);
