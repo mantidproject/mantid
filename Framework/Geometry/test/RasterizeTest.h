@@ -118,7 +118,7 @@ public:
     constexpr size_t NUM_ANNULLI{3};
 
     const auto cylinder = createCylinder(true);
-    const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder, NUM_SLICE, NUM_ANNULLI);
+    const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder, cylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
     constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
@@ -130,7 +130,8 @@ public:
     constexpr size_t NUM_ANNULLI{3};
 
     const auto hollowCylinder = createHollowCylinder(true);
-    const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
+    const auto raster =
+        Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
     size_t NUM_ELEMENTS = 0;
@@ -167,7 +168,7 @@ public:
     constexpr size_t NUM_ANNULLI{3};
 
     const auto cylinder = createCylinder(false);
-    const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder, NUM_SLICE, NUM_ANNULLI);
+    const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder, cylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
     constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
@@ -179,7 +180,8 @@ public:
     constexpr size_t NUM_ANNULLI{3};
 
     const auto hollowCylinder = createHollowCylinder(false);
-    const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
+    const auto raster =
+        Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
     size_t NUM_ELEMENTS = 0;
@@ -203,7 +205,7 @@ public:
 
     std::shared_ptr<CSGObject> hollowCylinder =
         ComponentCreationHelper::createHollowCylinder(RADIUS - ELEMENT_SIZE, RADIUS, HEIGHT, BASE, AXIS, "shape");
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, *hollowCylinder, ELEMENT_SIZE);
 
     const double vol = M_PI * HEIGHT * (RADIUS * RADIUS - (RADIUS - ELEMENT_SIZE) * (RADIUS - ELEMENT_SIZE));
     simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
@@ -220,7 +222,7 @@ public:
     std::shared_ptr<CSGObject> hollowCylinder =
         ComponentCreationHelper::createHollowCylinder(RADIUS - ELEMENT_SIZE, RADIUS, HEIGHT, BASE, AXIS, "shape");
     // test using the generic calculate function
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, *hollowCylinder, ELEMENT_SIZE);
 
     const double vol = M_PI * HEIGHT * (RADIUS * RADIUS - (RADIUS - ELEMENT_SIZE) * (RADIUS - ELEMENT_SIZE));
     simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
@@ -237,7 +239,7 @@ public:
 
     std::shared_ptr<CSGObject> hollowCylinder =
         ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BASE, AXIS, "shape");
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, *hollowCylinder, ELEMENT_SIZE);
 
     const double vol = M_PI * HEIGHT * (OUTER_RADIUS * OUTER_RADIUS - INNER_RADIUS * INNER_RADIUS);
     simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
@@ -245,12 +247,13 @@ public:
 
   void test_calculateCylinderOnSphere() {
     const auto sphere = createSphere(true);
-    TS_ASSERT_THROWS(Rasterize::calculateCylinder(V3D(0., 0., 1.), sphere, 3, 3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(Rasterize::calculateCylinder(V3D(0., 0., 1.), sphere, sphere, 3, 3),
+                     const std::invalid_argument &);
   }
 
   void test_calculateArbitraryOnCylinder() {
     const auto cylinder = createCylinder(true);
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), cylinder, .1);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), cylinder, cylinder, .1);
 
     // all the vector lengths should match
     simpleRasterChecks(raster, cylinder, 180, CYLINDER_VOLUME);
@@ -258,7 +261,7 @@ public:
 
   void test_calculateArbitraryOnSphere() {
     const auto sphere = createSphere(true);
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, .5);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, sphere, .5);
 
     // volume is calculated poorly due to approximating all volume elements as
     // boxes
@@ -267,7 +270,7 @@ public:
 
   void test_calculateArbitraryOnOffsetSphere() {
     const auto sphere = createSphere(false);
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, .5);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, sphere, .5);
 
     // volume is calculated poorly due to approximating all volume elements as
     // boxes
