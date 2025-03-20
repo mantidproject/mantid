@@ -439,7 +439,27 @@ Beamline::ComponentType ComponentInfo::componentType(const size_t componentIndex
 }
 
 std::string ComponentInfo::componentTypeName(const size_t componentIndex) const {
-  return Beamline::componentTypeString(componentType(componentIndex));
+  const auto type = componentType(componentIndex);
+  switch (type) {
+  case Beamline::ComponentType::Generic:
+    return "Generic";
+  case Beamline::ComponentType::Infinite:
+    return "Infinite";
+  case Beamline::ComponentType::Grid:
+    return "Grid";
+  case Beamline::ComponentType::Rectangular:
+    return "Rectangular";
+  case Beamline::ComponentType::Structured:
+    return "Structured";
+  case Beamline::ComponentType::Unstructured:
+    return "Unstructured";
+  case Beamline::ComponentType::Detector:
+    return "Detector";
+  case Beamline::ComponentType::OutlineComposite:
+    return "OutlineComposite";
+  default:
+    throw std::invalid_argument("Unknown ComponentType type");
+  }
 }
 
 void ComponentInfo::setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
