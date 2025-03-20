@@ -267,7 +267,7 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:629
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:642
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:376
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:405
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:129
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:134
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
@@ -388,7 +388,6 @@ unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:80
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:113
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/SpecularReflectionAlgorithm.cpp:183
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiAnalyseResiduals.h:29

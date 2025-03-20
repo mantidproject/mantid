@@ -1029,9 +1029,6 @@ bool MatrixWorkspace::isCommonLogBins() const {
  */
 size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
 
-/// Returns the units of the data in the workspace
-const std::string &MatrixWorkspace::YUnit() const { return m_YUnit; }
-
 /// Sets a new unit for the data (Y axis) in the workspace
 void MatrixWorkspace::setYUnit(const std::string &newUnit) { m_YUnit = newUnit; }
 
