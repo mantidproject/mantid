@@ -397,6 +397,7 @@ set(PYTHON_PLUGINS
     functions/TFMuonium.py
     functions/TeixeiraWater.py
     functions/TeixeiraWaterIqt.py
+    functions/TeixeiraWaterIqtFT.py
     functions/TeixeiraWaterIqtHelper.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
