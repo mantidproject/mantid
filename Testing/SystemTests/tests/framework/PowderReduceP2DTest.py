@@ -13,7 +13,7 @@ import sys
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
-        self.tolerance = 1e-6
+        self.tolerance = 0.5
         self.setUp()
 
     def setUp(self):
@@ -32,7 +32,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.dSpaceBinning = self._dSpaceBinning()
         self.dPerpendicularBinning = self._dPerpendicularBinning()
         self.FWHM = self._FWHM()
-        self.tolerance = self._tolerance()
 
         self.reference = self._loadReference()
         self.outputFile = self._outputFile()
@@ -58,7 +57,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
             dSpaceBinning=self.dSpaceBinning,
             dPerpendicularBinning=self.dPerpendicularBinning,
             FWHM=self.FWHM,
-            Tolerance=self.tolerance,
+            Tolerance=self._tolerance(),
             SystemTest=True,
         )
 
