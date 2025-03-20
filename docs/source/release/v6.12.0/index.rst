@@ -4,7 +4,7 @@
 Mantid 6.12.0 Release Notes
 ===========================
 
-.. figure:: ../../../../images/CreateMonteCarloWorkspace_spectrum.png
+.. figure:: ../../images/CreateMonteCarloWorkspace_spectrum.png
    :class: screenshot
    :width: 385px
    :align: right
