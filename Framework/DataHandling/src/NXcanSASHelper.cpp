@@ -34,27 +34,139 @@ using namespace Mantid::NeXus;
 namespace {
 //------ utility
 // For h5 -> hsize_t = unsigned long long
-constexpr int COMPRESSION_DEFLATE_LEVEL = 6;
+std::string getIntensityUnitLabel(const std::string &intensityUnitLabel) {
+  if (intensityUnitLabel == "I(q) (cm-1)") {
+    return sasIntensity;
+  }
+  return intensityUnitLabel;
+}
 
-struct SpinStateHelper {
-  explicit SpinStateHelper(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
-    if (spinStateStr.size() == 4) {
-      Pin = std::vector<int>({-1, 1});
-      Pout = std::vector<int>({-1, 1});
-    } else if (spinStateStr.size() == 2) {
-      if (spinStateStr.begin()->starts_with("0")) {
-        Pin = std::vector<int>({0});
-        Pout = std::vector<int>({1, -1});
-      } else {
-        Pin = std::vector<int>({1, -1});
-        Pout = std::vector<int>({0});
-      }
+std::string getIntensityUnit(const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  auto iUnit = workspace->YUnit();
+  if (iUnit.empty()) {
+    iUnit = workspace->YUnitLabel();
+  }
+  return iUnit;
+}
+
+std::string getMomentumTransferLabel(const std::string &momentumTransferLabel) {
+  if (momentumTransferLabel == "Angstrom^-1") {
+    return sasMomentumTransfer;
+  }
+  return momentumTransferLabel;
+}
+
+std::string getUnitFromMDDimension(const Mantid::Geometry::IMDDimension_const_sptr &dimension) {
+  const auto unitLabel = dimension->getMDUnits().getUnitLabel();
+  return unitLabel.ascii();
+}
+
+bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  constexpr std::array<int, 2> indices = {0, 1};
+  return std::all_of(indices.cbegin(), indices.cend(),
+                     [workspace](auto const &index) { return workspace->getAxis(index)->isNumeric(); });
+}
+
+template <typename NumT>
+void writeArray1DWithStrAttributes(H5::Group &group, const std::string &dataSetName, const std::vector<NumT> &values,
+                                   const attrMap &attributes) {
+  H5Util::writeArray1D(group, dataSetName, values);
+  auto dataSet = group.openDataSet(dataSetName);
+  for (const auto &attribute : attributes) {
+    H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
+  }
+}
+
+void writeDataSetAttributes(const H5::H5Object &dataSet, const attrMap &attributes) {
+  // Add attributes to data set
+  for (const auto &[nameAttr, valueAttr] : attributes) {
+    H5Util::writeStrAttribute(dataSet, nameAttr, valueAttr);
+  }
+}
+
+H5::DSetCreatPropList setCompression(int rank, const hsize_t *chunkDims, const int deflateLevel = 6) {
+  H5::DSetCreatPropList propList;
+  propList.setChunk(rank, chunkDims);
+  propList.setDeflate(deflateLevel);
+  return propList;
+}
+
+//------- Functors to Extract Data From Workspaces
+
+/**
+ * QxExtractor functor which allows us to convert 2D Qx data into point data.
+ */
+template <typename T> class QxExtractor {
+public:
+  T *operator()(const Mantid::API::MatrixWorkspace_sptr &ws, int index) {
+    if (ws->isHistogramData()) {
+      qxPointData.clear();
+      Mantid::Kernel::VectorHelper::convertToBinCentre(ws->dataX(index), qxPointData);
+      return qxPointData.data();
+    } else {
+      return ws->dataX(index).data();
     }
   }
-  std::vector<std::string> spinVec;
-  std::vector<int> Pin;
-  std::vector<int> Pout;
+
+  std::vector<T> qxPointData;
 };
+
+/**
+ * Spectrum Axis Value provider allows to convert 2D Qy data into point data.
+ */
+class SpectrumAxisValueProvider {
+public:
+  explicit SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) : m_workspace(std::move(workspace)) {
+    setSpectrumAxisValues();
+  }
+
+  Mantid::MantidVec::value_type *operator()(const Mantid::API::MatrixWorkspace_sptr & /*unused*/, int index) {
+    auto isPointData = m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
+    double value = 0;
+    if (isPointData) {
+      value = m_spectrumAxisValues[index];
+    } else {
+      value = (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
+    }
+
+    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(), value);
+    m_currentAxisValues.swap(tempVec);
+    return m_currentAxisValues.data();
+  }
+
+private:
+  void setSpectrumAxisValues() {
+    auto sAxis = m_workspace->getAxis(1);
+    for (size_t index = 0; index < sAxis->length(); ++index) {
+      m_spectrumAxisValues.emplace_back((*sAxis)(index));
+    }
+  }
+
+  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  Mantid::MantidVec m_spectrumAxisValues;
+  Mantid::MantidVec m_currentAxisValues;
+};
+
+/**
+ * WorkspaceGroupDataExtractor allows to extract signal or error signal from a spectra in a workspace within a group.
+ * Used in extracting polarized data.
+ */
+template <typename T> class WorkspaceGroupDataExtractor {
+public:
+  explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace, bool extractError = false)
+      : m_workspace(workspace), m_extractError(extractError) {};
+  T *operator()(int groupIndex, int spectraIndex = 0) {
+    auto const ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace->getItem(groupIndex));
+    return m_extractError ? ws->dataE(spectraIndex).data() : ws->dataY(spectraIndex).data();
+  }
+
+  void setExtractErrors(bool extractError) { m_extractError = extractError; }
+
+private:
+  WorkspaceGroup_sptr m_workspace;
+  bool m_extractError;
+};
+
 //------- SASFileName
 
 bool isCanSASCompliant(bool isStrict, const std::string &input) {
@@ -122,112 +234,32 @@ void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName,
   }
 }
 
-//------- SASData
+//------- SASpolarization
 
-std::string getIntensityUnitLabel(const std::string &intensityUnitLabel) {
-  if (intensityUnitLabel == "I(q) (cm-1)") {
-    return sasIntensity;
+struct SpinStateHelper {
+  explicit SpinStateHelper(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
+    auto const spinVec = std::vector<int>({-1, 1});
+    if (spinStateStr.size() == 4) {
+      Pin = spinVec;
+      Pout = spinVec;
+    } else if (spinStateStr.size() == 2) {
+      if (spinStateStr.begin()->starts_with("0")) {
+        Pin = std::vector<int>(1, 0);
+        Pout = spinVec;
+      } else {
+        Pin = spinVec;
+        Pout = std::vector<int>(1, 0);
+      }
+    }
   }
-  return intensityUnitLabel;
-}
-
-std::string getIntensityUnit(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  auto iUnit = workspace->YUnit();
-  if (iUnit.empty()) {
-    iUnit = workspace->YUnitLabel();
-  }
-  return iUnit;
-}
-
-std::string getMomentumTransferLabel(const std::string &momentumTransferLabel) {
-  if (momentumTransferLabel == "Angstrom^-1") {
-    return sasMomentumTransfer;
-  }
-  return momentumTransferLabel;
-}
-
-std::string getUnitFromMDDimension(const Mantid::Geometry::IMDDimension_const_sptr &dimension) {
-  const auto unitLabel = dimension->getMDUnits().getUnitLabel();
-  return unitLabel.ascii();
-}
-
-bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  const std::array<int, 2> indices = {0, 1};
-  return std::all_of(indices.cbegin(), indices.cend(),
-                     [workspace](auto const &index) { return workspace->getAxis(index)->isNumeric(); });
-}
-
-template <typename NumT>
-void writeArray1DWithStrAttributes(H5::Group &group, const std::string &dataSetName, const std::vector<NumT> &values,
-                                   const std::map<std::string, std::string> &attributes) {
-  H5Util::writeArray1D(group, dataSetName, values);
-  auto dataSet = group.openDataSet(dataSetName);
-  for (const auto &attribute : attributes) {
-    H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
-  }
-}
-
-H5::DSetCreatPropList setCompression2D(const hsize_t *chunkDims, const int deflateLevel = 6) {
-  H5::DSetCreatPropList propList;
-  constexpr int rank = 2;
-  propList.setChunk(rank, chunkDims);
-  propList.setDeflate(deflateLevel);
-  return propList;
-}
-
-template <typename Functor>
-void write2DWorkspace(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace, const std::string &dataSetName,
-                      Functor func, const std::map<std::string, std::string> &attributes) {
-  using namespace Mantid::NeXus::H5Util;
-
-  // Set the dimension
-  const size_t dimension0 = workspace->getNumberHistograms();
-  const size_t dimension1 = workspace->y(0).size();
-  constexpr hsize_t rank = 2;
-  hsize_t dimensionArray[rank] = {static_cast<hsize_t>(dimension0), static_cast<hsize_t>(dimension1)};
-
-  // Start position in the 2D data (indexed) data structure
-  hsize_t start[rank] = {0, 0};
-
-  // Size of a slab
-  hsize_t sizeOfSingleSlab[rank] = {1, dimensionArray[1]};
-
-  // Get the Data Space definition for the 2D Data Set in the file
-  auto fileSpace = H5::DataSpace(rank, dimensionArray);
-  H5::DataType dataType(getType<double>());
-
-  // Get the proplist with compression settings
-  H5::DSetCreatPropList propList = setCompression2D(sizeOfSingleSlab);
-
-  // Create the data set
-  auto dataSet = group.createDataSet(dataSetName, dataType, fileSpace, propList);
-
-  // Create Data Spae for 1D entry for each row in memory
-  hsize_t memSpaceDimension[1] = {dimension1};
-  H5::DataSpace memSpace(1, memSpaceDimension);
-
-  // Insert each row of the workspace as a slab
-  for (unsigned int index = 0; index < dimension0; ++index) {
-    // Need the data space
-    fileSpace.selectHyperslab(H5S_SELECT_SET, sizeOfSingleSlab, start);
-
-    // Write the correct data set to file
-    dataSet.write(func(workspace, index), dataType, memSpace, fileSpace);
-    // Step up the write position
-    ++start[0];
-  }
-
-  // Add attributes to data set
-  for (const auto &[nameAttr, valueAttr] : attributes) {
-    writeStrAttribute(dataSet, nameAttr, valueAttr);
-  }
-}
+  std::vector<std::string> spinVec;
+  std::vector<int> Pin;
+  std::vector<int> Pout;
+};
 
 template <typename WorkspaceExtractorFunctor>
 void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces, WorkspaceExtractorFunctor func,
-                        const std::string &dataSetName, const SpinStateHelper &spin,
-                        const std::map<std::string, std::string> &attributes = {}) {
-  using namespace H5Util;
+                        const std::string &dataSetName, const SpinStateHelper &spin, const attrMap &attributes = {}) {
   using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
   auto stateConverter = [](int spin) -> std::string { return (spin == 1) ? "+1" : std::to_string(spin); };
 
@@ -247,13 +279,10 @@ void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces,
   const int rank = static_cast<int>(dataShape.size());
   // Get the Data Space definition for the 2D Data Set in the file
   auto fileSpace = H5::DataSpace(rank, dataShape.data());
-  H5::DataType dataType(getType<double>());
+  H5::DataType dataType(H5Util::getType<double>());
 
   // compression
-  H5::DSetCreatPropList propList;
-  propList.setChunk(rank, slabShape.data());
-  propList.setDeflate(COMPRESSION_DEFLATE_LEVEL);
-
+  auto const propList = setCompression(rank, slabShape.data());
   // create index of position in hypermatrix
   auto pos = std::vector<hsize_t>(static_cast<hsize_t>(rank), 0);
 
@@ -269,92 +298,65 @@ void writePolarizedData(H5::Group &group, const WorkspaceGroup_sptr &workspaces,
 
       if (dimHistogram == 1) {
         fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), pos.data());
-        dataSet.write(func(workspaces, static_cast<int>(*index)), dataType, memSpace, fileSpace);
+        dataSet.write(func(static_cast<int>(*index)), dataType, memSpace, fileSpace);
       } else {
         for (unsigned int n = 0; n < dimHistogram; n++) {
           pos.at(2) = n;
           fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), pos.data());
-          dataSet.write(func(workspaces, static_cast<int>(*index), n), dataType, memSpace, fileSpace);
+          dataSet.write(func(static_cast<int>(*index), n), dataType, memSpace, fileSpace);
         }
       }
     }
   }
-
-  // Add attributes to data set
-  for (const auto &[nameAttr, valueAttr] : attributes) {
-    writeStrAttribute(dataSet, nameAttr, valueAttr);
-  }
+  writeDataSetAttributes(dataSet, attributes);
 }
 
-class SpectrumAxisValueProvider {
-public:
-  explicit SpectrumAxisValueProvider(Mantid::API::MatrixWorkspace_sptr workspace) : m_workspace(std::move(workspace)) {
-    setSpectrumAxisValues();
+//------- SASData
+
+template <typename Functor>
+void write2DWorkspace(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace, const std::string &dataSetName,
+                      Functor func, const attrMap &attributes) {
+  // Set the dimension
+  const size_t dimension0 = workspace->getNumberHistograms();
+  const size_t dimension1 = workspace->y(0).size();
+  constexpr hsize_t rank = 2;
+  hsize_t dimensionArray[rank] = {static_cast<hsize_t>(dimension0), static_cast<hsize_t>(dimension1)};
+
+  // Start position in the 2D data (indexed) data structure
+  hsize_t start[rank] = {0, 0};
+
+  // Size of a slab
+  hsize_t sizeOfSingleSlab[rank] = {1, dimensionArray[1]};
+
+  // Get the Data Space definition for the 2D Data Set in the file
+  auto fileSpace = H5::DataSpace(rank, dimensionArray);
+  H5::DataType dataType(H5Util::getType<double>());
+
+  // Get the proplist with compression settings
+  auto const propList = setCompression(rank, sizeOfSingleSlab);
+
+  // Create the data set
+  auto dataSet = group.createDataSet(dataSetName, dataType, fileSpace, propList);
+
+  // Create Data Spae for 1D entry for each row in memory
+  hsize_t memSpaceDimension[1] = {dimension1};
+  H5::DataSpace memSpace(1, memSpaceDimension);
+
+  // Insert each row of the workspace as a slab
+  for (unsigned int index = 0; index < dimension0; ++index) {
+    // Need the data space
+    fileSpace.selectHyperslab(H5S_SELECT_SET, sizeOfSingleSlab, start);
+
+    // Write the correct data set to file
+    dataSet.write(func(workspace, index), dataType, memSpace, fileSpace);
+    // Step up the write position
+    ++start[0];
   }
-
-  Mantid::MantidVec::value_type *operator()(const Mantid::API::MatrixWorkspace_sptr & /*unused*/, int index) {
-    auto isPointData = m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
-    double value = 0;
-    if (isPointData) {
-      value = m_spectrumAxisValues[index];
-    } else {
-      value = (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
-    }
-
-    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(), value);
-    m_currentAxisValues.swap(tempVec);
-    return m_currentAxisValues.data();
-  }
-
-private:
-  void setSpectrumAxisValues() {
-    auto sAxis = m_workspace->getAxis(1);
-    for (size_t index = 0; index < sAxis->length(); ++index) {
-      m_spectrumAxisValues.emplace_back((*sAxis)(index));
-    }
-  }
-
-  Mantid::API::MatrixWorkspace_sptr m_workspace;
-  Mantid::MantidVec m_spectrumAxisValues;
-  Mantid::MantidVec m_currentAxisValues;
-};
-
-template <typename T> class WorkspaceGroupDataExtractor {
-public:
-  explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace, bool extractError = false)
-      : m_workspace(workspace), m_extractError(extractError) {};
-  T *operator()(const Mantid::API::WorkspaceGroup_sptr & /*unused*/, int groupIndex, int spectraIndex = 0) {
-    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace->getItem(groupIndex));
-    return m_extractError ? ws->dataE(spectraIndex).data() : ws->dataY(spectraIndex).data();
-  }
-
-  void setExtractErrors(bool extractError) { m_extractError = extractError; }
-
-private:
-  WorkspaceGroup_sptr m_workspace;
-  bool m_extractError;
-};
-
-/**
- * QxExtractor functor which allows us to convert 2D Qx data into point data.
- */
-template <typename T> class QxExtractor {
-public:
-  T *operator()(const Mantid::API::MatrixWorkspace_sptr &ws, int index) {
-    if (ws->isHistogramData()) {
-      qxPointData.clear();
-      Mantid::Kernel::VectorHelper::convertToBinCentre(ws->dataX(index), qxPointData);
-      return qxPointData.data();
-    } else {
-      return ws->dataX(index).data();
-    }
-  }
-
-  std::vector<T> qxPointData;
-};
+  writeDataSetAttributes(dataSet, attributes);
+}
 
 void addQ1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
-  std::map<std::string, std::string> qAttributes;
+  attrMap qAttributes;
   // Prepare units
   auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
   qUnit = getMomentumTransferLabel(qUnit);
@@ -369,7 +371,7 @@ void addQ1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
     qAttributes.emplace(sasUncertaintiesAttr, sasDataQdev);
 
     const auto qResolution = workspace->pointStandardDeviations(0);
-    std::map<std::string, std::string> xUncertaintyAttributes;
+    attrMap xUncertaintyAttributes;
     xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
     writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(), xUncertaintyAttributes);
   }
@@ -381,20 +383,20 @@ void addQ1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
 
 void addQ2D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
   // Store the 2D Qx data + units
-  std::map<std::string, std::string> qxAttributes;
+  attrMap qxAttributes;
   auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
   qxUnit = getMomentumTransferLabel(qxUnit);
   qxAttributes.emplace(sasUnitAttr, qxUnit);
-  QxExtractor<double> qxExtractor;
+  QxExtractor<double> const qxExtractor;
   write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
 
   // Get 2D Qy data and store it
-  std::map<std::string, std::string> qyAttributes;
+  attrMap qyAttributes;
   auto qyUnit = getUnitFromMDDimension(workspace->getDimension(1));
   qyUnit = getMomentumTransferLabel(qyUnit);
   qyAttributes.emplace(sasUnitAttr, qyUnit);
 
-  SpectrumAxisValueProvider spectrumAxisValueProvider(workspace);
+  SpectrumAxisValueProvider const spectrumAxisValueProvider(workspace);
   write2DWorkspace(data, workspace, sasDataQy, spectrumAxisValueProvider, qyAttributes);
 }
 
@@ -448,7 +450,7 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
       if (component) {
         const auto sample = instrument->getSample();
         const auto distance = component->getDistance(*sample);
-        std::map<std::string, std::string> sddAttributes;
+        attrMap sddAttributes;
         sddAttributes.insert(std::make_pair(sasUnitAttr, sasInstrumentDetectorSddUnitAttrValue));
         auto detector = H5Util::createGroupCanSAS(group, sasDetectorName, nxInstrumentDetectorClassAttr,
                                                   sasInstrumentDetectorClassAttr);
@@ -496,7 +498,7 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
 
   H5Util::write(aperture, sasInstrumentApertureShape, geometry);
 
-  std::map<std::string, std::string> beamSizeAttrs;
+  attrMap beamSizeAttrs;
   beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
   if (beamHeight != 0) {
     H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight, beamHeight, beamSizeAttrs);
@@ -510,21 +512,20 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   H5Util::write(instrument, sasInstrumentIDF, idf);
 }
 
-//------- SASpolarization
-
 void addPolarizerComponentMetadata(H5::Group &group, const MatrixWorkspace_sptr &workspace,
                                    const InstrumentPolarizer &polarizer) {
 
-  auto instrument = workspace->getInstrument();
-  auto component = instrument->getComponentByName(polarizer.getComponentName());
+  auto const instrument = workspace->getInstrument();
+  auto const component = instrument->getComponentByName(polarizer.getComponentName());
 
   if (component) {
-    const auto sample = instrument->getSample();
-    const auto distance = component->getDistance(*sample);
-    const auto type = component->getStringParameter(polarizer.sasPolarizerIDFDeviceType());
+    auto const samplePos = instrument->getSample()->getPos();
+    auto const compPos = component->getPos();
+    auto const distance = samplePos.Z() - compPos.Z();
+    auto const type = component->getStringParameter(polarizer.sasPolarizerIDFDeviceType());
 
     H5Util::write(group, polarizer.sasPolarizerDeviceType(), type.front());
-    std::map<std::string, std::string> distanceAttrs;
+    attrMap distanceAttrs;
     distanceAttrs.insert(std::make_pair(sasUnitAttr, polarizer.sasPolarizerDistanceUnitAttr()));
     NeXus::H5Util::writeScalarDataSetWithStrAttributes(group, polarizer.sasPolarizerDistance(), distance,
                                                        distanceAttrs);
@@ -555,7 +556,7 @@ void addEMFieldDirection(H5::Group &group, const std::string &emFieldDir) {
                                                sasSampleEMFieldDirectionRotation};
 
   if (!directions.empty()) {
-    std::map<std::string, std::string> magFieldAttrs;
+    attrMap magFieldAttrs;
     magFieldAttrs.insert(std::make_pair(sasUnitAttr, sasSampleEMFieldDirectionUnitsAttr));
     for (size_t i = 0; i < directions.size(); i++)
       H5Util::writeScalarDataSetWithStrAttributes(group, angles.at(i), directions.at(i), magFieldAttrs);
@@ -569,7 +570,7 @@ void addSampleEMFields(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr
     auto magFStrength = workspace->run().getLogAsSingleValue(emFieldStrengthLog);
     auto const magFStrengthUnits = workspace->run().getProperty(emFieldStrengthLog)->units();
 
-    std::map<std::string, std::string> magFieldAttrs;
+    attrMap magFieldAttrs;
     magFieldAttrs.insert(std::make_pair(sasUnitAttr, magFStrengthUnits));
     // need more information about how to set the direction
 
@@ -593,7 +594,7 @@ void addSample(H5::Group &group, const double &sampleThickness) {
   auto sample = H5Util::createGroupCanSAS(group, sasSampleNameForGroup, nxInstrumentSampleClassAttr,
                                           sasInstrumentSampleClassAttr);
 
-  std::map<std::string, std::string> sampleThicknessAttrs;
+  attrMap sampleThicknessAttrs;
   sampleThicknessAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
   H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness, sampleThickness,
                                               sampleThicknessAttrs);
@@ -694,7 +695,7 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
   //-----------------------------------------
   // Add T with units + uncertainty definition
   const auto transmissionData = workspace->y(0);
-  std::map<std::string, std::string> transmissionAttributes;
+  attrMap transmissionAttributes;
   std::string unit = sasNone;
 
   transmissionAttributes.emplace(sasUnitAttr, unit);
@@ -707,7 +708,7 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
   //-----------------------------------------
   // Add Tdev with units
   const auto &transmissionErrors = workspace->e(0);
-  std::map<std::string, std::string> transmissionErrorAttributes;
+  attrMap transmissionErrorAttributes;
   transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumTdev, transmissionErrors.rawData(),
@@ -716,7 +717,7 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
   //-----------------------------------------
   // Add lambda with units
   const auto lambda = workspace->points(0);
-  std::map<std::string, std::string> lambdaAttributes;
+  attrMap lambdaAttributes;
   auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
     lambdaUnit = sasAngstrom;
@@ -738,7 +739,7 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
   //-----------------------------------------
   // Add I with units + uncertainty definition
   const auto &intensity = workspace->y(0);
-  std::map<std::string, std::string> iAttributes;
+  attrMap iAttributes;
   auto iUnit = getIntensityUnit(workspace);
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
@@ -750,7 +751,7 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
   //-----------------------------------------
   // Add Idev with units
   const auto &intensityUncertainty = workspace->e(0);
-  std::map<std::string, std::string> eAttributes;
+  attrMap eAttributes;
   eAttributes.insert(std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
 
   writeArray1DWithStrAttributes(data, sasDataIdev, intensityUncertainty.rawData(), eAttributes);
@@ -811,7 +812,7 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
 
   addQ2D(data, workspace);
   // Get 2D I data and store it
-  std::map<std::string, std::string> iAttributes;
+  attrMap iAttributes;
   auto iUnit = getIntensityUnit(workspace);
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
@@ -822,7 +823,7 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
   write2DWorkspace(data, workspace, sasDataI, iExtractor, iAttributes);
 
   // Get 2D Idev data and store it
-  std::map<std::string, std::string> eAttributes;
+  attrMap eAttributes;
   eAttributes.insert(std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
 
   auto iDevExtractor = [](const Mantid::API::MatrixWorkspace_sptr &ws, int index) { return ws->dataE(index).data(); };
@@ -843,7 +844,7 @@ void addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &w
   H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1, 2});
 
   // store Pin/ Pout
-  std::map<std::string, std::string> polAttributes;
+  attrMap polAttributes;
   polAttributes.emplace(sasUnitAttr, sasDataPolarizationUnitAttr);
   auto const inputSpinOrder = Algorithms::PolarizationCorrectionsHelpers::splitSpinStateString(inputSpinStates);
   auto const spinPairs = SpinStateHelper(inputSpinOrder);
@@ -877,6 +878,14 @@ WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWork
     dimensionality = WorkspaceDimensionality::twoD;
   }
   return dimensionality;
+}
+
+H5::H5File prepareFile(const std::filesystem::path &path) {
+  // Prepare file
+  if (!path.empty()) {
+    std::filesystem::remove(path);
+  }
+  return H5::H5File(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
 }
 
 } // namespace Mantid::DataHandling::NXcanSAS
