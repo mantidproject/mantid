@@ -46,7 +46,7 @@ const std::string sasEntryDefinitionFormat = "NXcanSAS";
 const std::string sasEntryTitle = "title";
 const std::string sasEntryRun = "run";
 const std::string sasEntryRunInLogs = "run_number";
-const std::String sasEntryDefaultSuffix = "01";
+const std::string sasEntryDefaultSuffix = "01";
 
 // SASdata
 const std::string sasDataClassAttr = "SASdata";
