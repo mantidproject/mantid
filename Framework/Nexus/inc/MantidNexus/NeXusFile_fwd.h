@@ -148,25 +148,34 @@ constexpr int NX_BINARY{21};
  * \li UINT64 uint8_t if available on the machine
  * \ingroup cpp_types
  */
-enum class NXnumtype : const int {
-  FLOAT32 = NX_FLOAT32,
-  FLOAT64 = NX_FLOAT64,
-  INT8 = NX_INT8,
-  UINT8 = NX_UINT8,
-  BOOLEAN = NX_BOOLEAN,
-  INT16 = NX_INT16,
-  UINT16 = NX_UINT16,
-  INT32 = NX_INT32,
-  UINT32 = NX_UINT32,
-  INT64 = NX_INT64,
-  UINT64 = NX_UINT64,
-  CHAR = NX_CHAR,
-  BINARY = NX_BINARY,
-  BAD = -1
-};
+class MANTID_NEXUS_DLL NXnumtype {
+public:
+  static int const FLOAT32 = NX_FLOAT32;
+  static int const FLOAT64 = NX_FLOAT64;
+  static int const INT8 = NX_INT8;
+  static int const UINT8 = NX_UINT8;
+  static int const BOOLEAN = NX_BOOLEAN;
+  static int const INT16 = NX_INT16;
+  static int const UINT16 = NX_UINT16;
+  static int const INT32 = NX_INT32;
+  static int const UINT32 = NX_UINT32;
+  static int const INT64 = NX_INT64;
+  static int const UINT64 = NX_UINT64;
+  static int const CHAR = NX_CHAR;
+  static int const BINARY = NX_BINARY;
+  static int const BAD = -1;
 
-MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXstatus status);
-MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype type);
+private:
+  int m_val;
+  static int validate_val(int const x);
+
+public:
+  NXnumtype();
+  NXnumtype(int const val);
+  NXnumtype &operator=(int const);
+  operator int() const;
+  operator std::string() const;
+};
 
 // forward declare
 namespace NeXus {
