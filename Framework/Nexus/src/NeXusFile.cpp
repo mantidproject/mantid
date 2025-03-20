@@ -44,13 +44,6 @@ static vector<int64_t> toDimSize(const vector<int> &small_v) {
   return DimSizeVector(small_v.begin(), small_v.end());
 }
 
-std::string operator+(std::string const &lhs, NXstatus const status) {
-  return lhs + std::to_string(static_cast<int>(status));
-}
-std::string operator+(std::string const &lhs, NXnumtype const type) {
-  return lhs + std::to_string(static_cast<int>(type));
-}
-
 } // end of anonymous namespace
 
 namespace NeXus {
@@ -148,7 +141,7 @@ File::~File() {
     this->m_pfile_id = NULL;
     if (status != NXstatus::NX_OK) {
       stringstream msg;
-      msg << "NXclose failed with status: " << status << "\n";
+      msg << "NXclose failed for file " << m_filename << "\n";
       NXReportError(const_cast<char *>(msg.str().c_str()));
     }
   }
@@ -156,11 +149,8 @@ File::~File() {
 
 void File::close() {
   if (this->m_pfile_id != NULL) {
-    NXstatus status = NXclose(&(*this->m_pfile_id));
+    NAPI_CALL(NXclose(&(*this->m_pfile_id)), "NXclose failed");
     this->m_pfile_id = NULL;
-    if (status != NXstatus::NX_OK) {
-      throw Exception("NXclose failed", m_filename);
-    }
   }
 }
 
@@ -232,8 +222,8 @@ void File::makeData(const string &name, NXnumtype type, const DimVector &dims, b
   NXstatus status = NXmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
                                  const_cast<int64_t *>(&(dims[0])));
   // report errors
-  NAPI_CALL(status, "NXmakedata(" + name + ", " + type + ", " + std::to_string(dims.size()) + ", " + toString(dims) +
-                        ") failed");
+  NAPI_CALL(status, "NXmakedata(" + name + ", " + (string)type + ", " + std::to_string(dims.size()) + ", " +
+                        toString(dims) + ") failed");
 
   if (open_data) {
     this->openData(name);
@@ -414,7 +404,8 @@ void File::putAttr(const AttrInfo &info, const void *data) {
     throw Exception("Supplied empty name to putAttr", m_filename);
   }
   NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
-            "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + info.type + ") failed");
+            "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
+                ") failed");
 }
 
 template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
@@ -902,9 +893,61 @@ NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 
-// methods to help with debugging
-std::ostream &operator<<(std::ostream &stm, const NXstatus status) { return stm << static_cast<int>(status); }
-std::ostream &operator<<(std::ostream &stm, const NXnumtype type) { return stm << static_cast<int>(type); }
+// -------------------------- NXnumtype ----------------------------------------------------------------------------//
+
+int NXnumtype::validate_val(int const x) {
+  int val = BAD;
+  if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
+      (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
+      (x == BAD)) {
+    val = x;
+  }
+  return val;
+}
+
+NXnumtype::NXnumtype() : m_val(BAD) {};
+NXnumtype::NXnumtype(int const val) : m_val(validate_val(val)) {};
+
+NXnumtype &NXnumtype::operator=(int const val) {
+  this->m_val = validate_val(val);
+  return *this;
+};
+
+NXnumtype::operator int() const { return m_val; };
+
+#define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
+
+NXnumtype::operator std::string() const {
+  std::string ret = NXTYPE_PRINT(BAD);
+  if (m_val == FLOAT32) {
+    ret = NXTYPE_PRINT(FLOAT32);
+  } else if (m_val == FLOAT64) {
+    ret = NXTYPE_PRINT(FLOAT64);
+  } else if (m_val == INT8) {
+    ret = NXTYPE_PRINT(INT8);
+  } else if (m_val == UINT8) {
+    ret = NXTYPE_PRINT(UINT8);
+  } else if (m_val == BOOLEAN) {
+    ret = NXTYPE_PRINT(BOOLEAN);
+  } else if (m_val == INT16) {
+    ret = NXTYPE_PRINT(INT16);
+  } else if (m_val == UINT16) {
+    ret = NXTYPE_PRINT(UINT16);
+  } else if (m_val == INT32) {
+    ret = NXTYPE_PRINT(INT32);
+  } else if (m_val == UINT32) {
+    ret = NXTYPE_PRINT(UINT32);
+  } else if (m_val == INT64) {
+    ret = NXTYPE_PRINT(INT64);
+  } else if (m_val == UINT64) {
+    ret = NXTYPE_PRINT(UINT64);
+  } else if (m_val == CHAR) {
+    ret = NXTYPE_PRINT(CHAR);
+  } else if (m_val == BINARY) {
+    ret = NXTYPE_PRINT(BINARY);
+  }
+  return ret;
+}
 
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */

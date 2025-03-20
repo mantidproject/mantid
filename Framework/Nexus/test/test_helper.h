@@ -2,8 +2,6 @@
 
 namespace NexusTest {
 
-std::string getFullPath(std::string const &filename);
-
 /**
  * Conditionally remove the named file, it is exists
  */

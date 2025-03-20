@@ -24,16 +24,9 @@ set(INC_FILES
     inc/MantidNexus/nxstack.h
 )
 
-# cmake-format: off
-set(TEST_FILES
-    H5UtilTest.h
-    NexusIOHelperTest.h
-    NeXusFileTest.h
-    NeXusFileLeakTest.h
-    NeXusFileNapiTest.h
-    NeXusFileReadWriteTest.h
+set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h
+               NeXusFileReadWriteTest.h
 )
-# cmake-format: on
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})

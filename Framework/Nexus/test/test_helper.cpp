@@ -2,27 +2,6 @@
 #include <cstdarg>
 #include <filesystem>
 
-std::string NexusTest::getFullPath(std::string const &filename) {
-  std::filesystem::path there(filename);
-  if (there.is_relative()) {
-    there = "";
-    std::filesystem::path here = std::filesystem::current_path();
-    auto p = here.begin();
-    for (; p != here.end(); p++) {
-      there /= *p;
-      if (*p == "mantid") {
-        break;
-      }
-    }
-    if (p == here.end()) {
-      throw std::runtime_error("");
-    }
-    there /= "build/ExternalData/Testing/Data/UnitTest/";
-    there /= filename;
-  }
-  return there;
-}
-
 void NexusTest::removeFile(const std::string &filename) {
   if (std::filesystem::exists(filename)) {
     std::filesystem::remove(filename);
