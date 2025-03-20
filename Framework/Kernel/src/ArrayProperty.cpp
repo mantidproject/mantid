@@ -8,7 +8,7 @@
 
 // PropertyWithValue Definition
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 namespace Mantid::Kernel {
 /** Constructor

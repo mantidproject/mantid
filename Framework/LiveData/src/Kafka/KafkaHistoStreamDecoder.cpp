@@ -19,7 +19,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidLiveData/Kafka/IKafkaStreamDecoder.hxx"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
