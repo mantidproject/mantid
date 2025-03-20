@@ -212,6 +212,9 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() {
 std::map<std::string, std::string>
 SaveNXcanSASBase::validatePolarizedInputs(std::map<std::string, std::string> &result) {
   Mantid::API::Workspace_sptr const workspace = getProperty("InputWorkspace");
+  std::string const spins = getProperty("InputSpinStates");
+  auto const spinVec = splitStringIntoVector<std::string>(spins);
+
   if (!workspace->isGroup())
     result.emplace("InputWorkspace", "Input Workspaces for polarized data can only be workspace groups.");
   else {
@@ -220,12 +223,19 @@ SaveNXcanSASBase::validatePolarizedInputs(std::map<std::string, std::string> &re
     if (entries != 2 && entries != 4) {
       result.emplace("InputWorkspace", "Input Group Workspace can only contain 2 or 4 workspace members.");
     }
-    std::string const spins = getProperty("InputSpinStates");
-    if (entries != static_cast<int>(splitStringIntoVector<std::string>(spins).size())) {
+
+    if (entries != static_cast<int>(spinVec.size())) {
       result.emplace(PolProperties::INPUT_SPIN_STATES, "The number of spin states is different than the number of"
                                                        " member workspaces on the InputWorkspace group");
     }
   }
+  // Validating spin strings
+  if ((spinVec.size() == 4) && std::all_of(spinVec.begin(), spinVec.end(), [](std::string const &spinPair) {
+        return (spinPair.find(SpinState::SPIN_ZERO) == std::string::npos);
+      })) {
+    result.emplace(PolProperties::INPUT_SPIN_STATES, "Full polarized group can't contain spin state 0");
+  }
+
   return result;
 }
 
@@ -377,25 +387,23 @@ void SaveNXcanSASBase::addPolarizedData(H5::Group &group, const Mantid::API::Wor
 }
 
 void SaveNXcanSASBase::savePolarizedGroup(const WorkspaceGroup_sptr &wsGroup, const std::filesystem::path &path) {
-  // Prepare file
-  if (!path.empty()) {
-    std::filesystem::remove(path);
-  }
-  H5::H5File file(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
+  auto file = prepareFile(path);
 
   // Necessary metdata will be taken from first workspace of the group
   auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
 
-  const std::string suffix("01");
   m_progress->report("Adding a new entry.");
-  auto sasEntry = addSasEntry(file, workspace, suffix);
+  auto sasEntry = addSasEntry(file, workspace, sasEntryDefaultSuffix);
 
   // Add metadata for canSAS file: Instrument, Sample, Process
   m_progress->report("Adding standard metadata");
   addStandardMetadata(workspace, sasEntry);
+  // Add polarized Metadata
+  m_progress->report("Adding polarized metadata");
   addPolarizedMetadata(workspace, sasEntry);
 
-  m_progress->report("Adding data.");
+  // Add polarized Data
+  m_progress->report("Adding polarized data.");
   addPolarizedData(sasEntry, wsGroup);
 
   file.close();
@@ -403,15 +411,10 @@ void SaveNXcanSASBase::savePolarizedGroup(const WorkspaceGroup_sptr &wsGroup, co
 
 void SaveNXcanSASBase::saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace,
                                                const std::filesystem::path &path) {
-  // Prepare file
-  if (!path.empty()) {
-    std::filesystem::remove(path);
-  }
-  H5::H5File file(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
+  auto file = prepareFile(path);
 
-  const std::string suffix("01");
   m_progress->report("Adding a new entry.");
-  auto sasEntry = addSasEntry(file, workspace, suffix);
+  auto sasEntry = addSasEntry(file, workspace, sasEntryDefaultSuffix);
 
   // Add metadata for canSAS file: Instrument, Sample, Process
   m_progress->report("Adding standard metadata");
