@@ -291,6 +291,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
         self.declareProperty("SampleGeometry", {}, doc="A dictionary of geometry parameters for the sample.")
+        self.declareProperty("ContainerGeometry", {}, doc="A dictionary of geometry parameters for the container.")
+        self.declareProperty("ContainerMaterial", {}, doc="A dictionary of material parameters for the container.")
+        self.declareProperty(
+            "GaugeVolume", "", "A string in XML form for gauge volume definition indicating sample portion visible to the beam."
+        )
+        self.declareProperty(
+            "ContainerGaugeVolume", "", "A string in XML form for gauge volume definition indicating container portion visible to the beam."
+        )
+        self.declareProperty(
+            "BeamHeight",
+            defaultValue=Property.EMPTY_DBL,
+            doc="Height of the neutron beam cross section in cm",
+        )
         self.declareProperty(
             "MeasuredMassDensity",
             defaultValue=0.1,
@@ -423,6 +436,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._absMethod = self.getProperty("TypeOfCorrection").value
         self._sampleFormula = self.getProperty("SampleFormula").value
         self._sampleGeometry = self.getProperty("SampleGeometry").value
+        self._containerGeometry = self.getProperty("ContainerGeometry").value
+        self._containerMaterial = self.getProperty("ContainerMaterial").value
+        self._gaugeVolume = self.getProperty("GaugeVolume").value
+        self._containerGaugeVolume = self.getProperty("ContainerGaugeVolume").value
+        self._beamHeight = self.getProperty("BeamHeight").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
         self._numberDensity = self.getProperty("SampleNumberDensity").value
         self._containerShape = self.getProperty("ContainerShape").value
@@ -524,6 +542,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._sampleFormula,  # Material for absorption correction
             self._massDensity,  # Mass density of the sample
             self._sampleGeometry,  # Geometry parameters for the sample
+            self._containerGeometry,  # Geometry parameters for the container
+            self._containerMaterial,  # Material parameters for the container
+            self._gaugeVolume,  # Gauge volume definition for sample
+            self._containerGaugeVolume,  # Gauge volume definition for container
+            self._beamHeight,  # Height of the neutron beam cross section in cm
             self._numberDensity,  # Optional number density of sample to be added
             self._containerShape,  # Shape definition of container
             self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
@@ -1515,6 +1538,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._num_wl_bins,
                 material={"ChemicalFormula": "V", "SampleNumberDensity": absorptioncorrutils.VAN_SAMPLE_DENSITY},
                 geometry={"Shape": "Cylinder", "Height": 7.0, "Radius": self._vanRadius, "Center": [0.0, 0.0, 0.0]},
+                beam_height=self._beamHeight,
                 find_environment=False,
                 opt_wl_min=self._wavelengthMin,
                 opt_wl_max=self._wavelengthMax,
@@ -1543,6 +1567,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             )
             api.RenameWorkspace(abs_v_wsn, "__V_corr_abs")
 
+            # Here, we are using a combo of absorption correction with the numerical integration approach and multiple
+            # scattering correction with the Carpenter approach - `Absorption` param set to `False` below, making sure
+            # only `__V_corr_ms` will be created without overwriting the already calculated `__V_corr_abs`.
             api.CalculateCarpenterSampleCorrection(
                 InputWorkspace=absWksp, OutputWorkspaceBaseName="__V_corr", CylinderSampleRadius=self._vanRadius, Absorption=False
             )

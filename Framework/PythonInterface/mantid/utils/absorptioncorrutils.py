@@ -8,6 +8,7 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (
     AbsorptionCorrection,
+    DefineGaugeVolume,
     DeleteWorkspace,
     Divide,
     Load,
@@ -24,9 +25,15 @@ import mantid.simpleapi
 import numpy as np
 import os
 from functools import wraps
+import xml.etree.ElementTree as ET
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
+GV_VALS = {
+    "X": {"x": "0.2", "y": "0.0", "z": "0.0", "t": "90.0", "p": "180.0"},
+    "Y": {"x": "0.0", "y": "0.2", "z": "0.0", "t": "90.0", "p": "270.0"},
+    "Z": {"x": "0.0", "y": "0.0", "z": "0.2", "t": "180.0", "p": "0.0"},
+}
 
 
 # ---------------------------- #
@@ -284,6 +291,11 @@ def calculate_absorption_correction(
     sample_formula,
     mass_density,
     sample_geometry={},
+    can_geometry={},
+    can_material={},
+    gauge_vol="",
+    container_gauge_vol="",
+    beam_height=Property.EMPTY_DBL,
     number_density=Property.EMPTY_DBL,
     container_shape="PAC06",
     num_wl_bins=1000,
@@ -323,6 +335,11 @@ def calculate_absorption_correction(
     :param sample_formula: Sample formula to specify the Material for absorption correction
     :param mass_density: Mass density of the sample to specify the Material for absorption correction
     :param sample_geometry: Dictionary to specify the sample geometry for absorption correction
+    :param can_geometry: Dictionary to specify the container geometry for absorption correction
+    :param can_material: Dictionary to specify the container material for absorption correction
+    :param gauge_vol: String in XML form to define the volume of the sample visible to the beam
+    :param container_gauge_vol: String in XML form to define the volume of the container visible to the beam
+    :param beam_height: Optional beam height to use for absorption correction
     :param number_density: Optional number density of sample to be added to the Material for absorption correction
     :param container_shape: Shape definition of container, such as PAC06.
     :param num_wl_bins: Number of bins for calculating wavelength
@@ -344,12 +361,26 @@ def calculate_absorption_correction(
         material["SampleNumberDensity"] = number_density
 
     environment = {}
-    if container_shape:
+    find_env = True
+    if container_shape or (can_geometry and can_material):
         environment["Name"] = "InAir"
-        environment["Container"] = container_shape
+        find_env = False
+        if not (can_geometry and can_material):
+            environment["Container"] = container_shape
 
     donorWS = create_absorption_input(
-        filename, props, num_wl_bins, material=material, geometry=sample_geometry, environment=environment, metaws=metaws
+        filename,
+        props,
+        num_wl_bins,
+        material=material,
+        geometry=sample_geometry,
+        can_geometry=can_geometry,
+        can_material=can_material,
+        gauge_vol=gauge_vol,
+        beam_height=beam_height,
+        environment=environment,
+        find_environment=find_env,
+        metaws=metaws,
     )
 
     # NOTE: Ideally we want to separate cache related task from calculation,
@@ -381,6 +412,8 @@ def calculate_absorption_correction(
         donorWS,
         abs_method,
         element_size,
+        container_gauge_vol=container_gauge_vol,
+        beam_height=beam_height,
         prefix_name=absName,
         cache_dirs=cache_dirs,
         ms_method=ms_method,
@@ -392,6 +425,8 @@ def calc_absorption_corr_using_wksp(
     donor_wksp,
     abs_method,
     element_size=1,
+    container_gauge_vol="",
+    beam_height=Property.EMPTY_DBL,
     prefix_name="",
     cache_dirs=[],
     ms_method="",
@@ -401,7 +436,7 @@ def calc_absorption_corr_using_wksp(
     if cache_dirs:
         log.warning("Empty cache dir found.")
     # 1. calculate first order absorption correction
-    abs_s, abs_c = calc_1st_absorption_corr_using_wksp(donor_wksp, abs_method, element_size, prefix_name)
+    abs_s, abs_c = calc_1st_absorption_corr_using_wksp(donor_wksp, abs_method, element_size, container_gauge_vol, beam_height, prefix_name)
     # 2. calculate 2nd order absorption correction
     if ms_method in ["", None, "None"]:
         log.information("Skip multiple scattering correction as instructed.")
@@ -452,6 +487,8 @@ def calc_1st_absorption_corr_using_wksp(
     donor_wksp,
     abs_method,
     element_size=1,
+    container_gauge_vol="",
+    beam_height=Property.EMPTY_DBL,
     prefix_name="",
 ):
     """
@@ -461,6 +498,8 @@ def calc_1st_absorption_corr_using_wksp(
     :param donor_wksp: Input workspace to compute absorption correction on
     :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
     :param element_size: Size of one side of the integration element cube in mm
+    :param container_gauge_vol: String in XML form to define the volume of container visible to the beam
+    :param beam_height: Beam height for defining the gauge volume for container visible to the beam
     :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
 
     :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
@@ -473,6 +512,13 @@ def calc_1st_absorption_corr_using_wksp(
             raise RuntimeError("Specified donor workspace not found in the ADS")
         donor_wksp = mtd[donor_wksp]
 
+    def is_valid_xml(xml_string):
+        try:
+            ET.fromstring(xml_string)
+            return True
+        except ET.ParseError:
+            return False
+
     absName = donor_wksp.name()
     if prefix_name != "":
         absName = prefix_name
@@ -482,6 +528,42 @@ def calc_1st_absorption_corr_using_wksp(
         return absName + "_ass", ""
     elif abs_method == "SampleAndContainer":
         AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_ass", ScatterFrom="Sample", ElementSize=element_size)
+        if container_gauge_vol and is_valid_xml(container_gauge_vol):
+            try:
+                DefineGaugeVolume(donor_wksp, container_gauge_vol)
+            except ValueError:
+                pass
+        elif container_gauge_vol and beam_height != Property.EMPTY_DBL:
+            ref_frame = donor_wksp.getInstrument().getReferenceFrame()
+            up_direction = ref_frame.pointingUpAxis()
+            info_to_use = GV_VALS[up_direction]
+
+            # Factor '100' here is for unit conversion from cm to m. An extra factor
+            # of '2' in 'beam_height / 200.0' is to make sure the center of the
+            # bottom base of the gauge volume is down from the origin by half of the
+            # gauge volume height so the center of the gauge volume is at the origin.
+            # This is our assumed location of the beam if only beam height is given.
+            gauge_vol = """<hollow-cylinder id="container_gauge">
+                <centre-of-bottom-base r="{0:4.2F}" t="{1:s}" p="{2:s}" />
+                <axis x="{3:s}" y="{4:s}" z="{5:s}" />
+                <inner-radius val="{6:7.5F}" />
+                <outer-radius val="{7:7.5F}" />
+                <height val="{8:4.2F}" />
+              </hollow-cylinder>
+            """
+            gauge_vol = gauge_vol.format(
+                beam_height / 200.0,
+                info_to_use["t"],
+                info_to_use["p"],
+                info_to_use["x"],
+                info_to_use["y"],
+                info_to_use["z"],
+                float(container_gauge_vol.split()[0]) / 100.0,
+                float(container_gauge_vol.split()[1]) / 100.0,
+                beam_height / 100.0,
+            )
+            DefineGaugeVolume(donor_wksp, gauge_vol)
+
         AbsorptionCorrection(donor_wksp, OutputWorkspace=absName + "_acc", ScatterFrom="Container", ElementSize=element_size)
         return absName + "_ass", absName + "_acc"
     elif abs_method == "FullPaalmanPings":
@@ -499,6 +581,10 @@ def create_absorption_input(
     num_wl_bins=1000,
     material={},
     geometry={},
+    can_geometry={},
+    can_material={},
+    gauge_vol="",
+    beam_height=Property.EMPTY_DBL,
     environment={},
     find_environment=True,
     opt_wl_min=0,
@@ -513,6 +599,10 @@ def create_absorption_input(
     :param num_wl_bins: The number of wavelength bins used for absorption correction
     :param material: Optional material to use in SetSample
     :param geometry: Optional geometry to use in SetSample
+    :param can_geometry: Optional container geometry to use in SetSample
+    :param can_material: Optional container material to use in SetSample
+    :param gauge_vol: Optional gauge volume definition, i.e., sample portion visible to the beam.
+    :param beam_height: Optional beam height to define gauge volume
     :param environment: Optional environment to use in SetSample
     :param find_environment: Optional find_environment to control whether to figure out environment automatically.
     :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the props
@@ -611,7 +701,49 @@ def create_absorption_input(
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
         mantid.simpleapi.SetSampleFromLogs(
-            InputWorkspace=absName, Material=material, Geometry=geometry, Environment=environment, FindEnvironment=find_environment
+            InputWorkspace=absName,
+            Material=material,
+            Geometry=geometry,
+            ContainerGeometry=can_geometry,
+            ContainerMaterial=can_material,
+            Environment=environment,
+            FindEnvironment=find_environment,
         )
+
+    if beam_height != Property.EMPTY_DBL and not gauge_vol:
+        # If the gauge volume is not defined, use the beam height to define it,
+        # and we will be assuming a cylinder shape of the sample.
+        ref_frame = mtd[absName].getInstrument().getReferenceFrame()
+        up_direction = ref_frame.pointingUpAxis()
+        info_to_use = GV_VALS[up_direction]
+        gauge_vol = """<cylinder id="shape">
+            <centre-of-bottom-base r="{0:4.2F}" t="{1:s}" p="{2:s}" />
+            <axis x="{3:s}" y="{4:s}" z="{5:s}" />
+            <radius val="{6:7.5F}" />
+            <height val="{7:4.2F}" />
+            </cylinder>"""
+        if isinstance(geometry["Radius"], float):
+            sam_rad = geometry["Radius"]
+        else:
+            sam_rad = geometry["Radius"].value
+
+        # Factor '100' here is for unit conversion from cm to m. An extra factor
+        # of '2' in 'beam_height / 200.0' is to make sure the center of the
+        # bottom base of the gauge volume is down from the origin by half of the
+        # gauge volume height so the center of the gauge volume is at the origin.
+        # This is our assumed location of the beam if only beam height is given.
+        gauge_vol = gauge_vol.format(
+            beam_height / 200.0,
+            info_to_use["t"],
+            info_to_use["p"],
+            info_to_use["x"],
+            info_to_use["y"],
+            info_to_use["z"],
+            sam_rad / 100.0,
+            beam_height / 100.0,
+        )
+
+    if gauge_vol:
+        DefineGaugeVolume(absName, gauge_vol)
 
     return absName
