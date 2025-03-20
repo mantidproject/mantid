@@ -374,6 +374,11 @@ std::string ConvFunctionTemplateModel::buildTeixeiraFunctionString() const {
          "constraints=(Height>0, DiffCoeff>0, Tau>0)";
 }
 
+std::string ConvFunctionTemplateModel::buildTeixeiraIqtFTFunctionString() const {
+  return "name=TeixeiraWaterIqtFT, Amp=1, Tau1=1.25, Gamma=1.2, "
+         "constraints=(Amp>0, Gamma>0, Tau1>0)";
+}
+
 std::string ConvFunctionTemplateModel::buildFickFunctionString() const {
   return "name=FickDiffusionSQE, Height=1, DiffCoeff=2.3, Centre=0, "
          "constraints=(Height>0, DiffCoeff>0)";
@@ -450,6 +455,8 @@ std::string ConvFunctionTemplateModel::buildPeaksFunctionString() const {
   }
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::TeixeiraWaterIqtFT) {
+    functions.append(buildTeixeiraIqtFTFunctionString());
   } else if (m_fitType == FitType::FickDiffusion) {
     functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::ChudleyElliot) {
@@ -497,6 +504,8 @@ std::string ConvFunctionTemplateModel::buildFitTypeString() const {
   std::string functions;
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::TeixeiraWaterIqtFT) {
+    functions.append(buildTeixeiraIqtFTFunctionString());
   } else if (m_fitType == FitType::FickDiffusion) {
     functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::ChudleyElliot) {
