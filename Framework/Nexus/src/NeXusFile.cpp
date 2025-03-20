@@ -13,6 +13,12 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+#define NAPI_CALL(status, msg)                                                                                         \
+  NXstatus tmp = (status);                                                                                             \
+  if (tmp != NXstatus::NX_OK) {                                                                                        \
+    throw NeXus::Exception(msg, m_filename);                                                                           \
+  }
+
 /**
  * \file NeXusFile.cpp
  * The implementation of the NeXus C++ API
@@ -82,14 +88,6 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(uint64_t const) { return NXnumtyp
 #define ARRAY_OFFSET 0 /* can dimension an array with zero elements */
 #endif                 /* _MSC_VER */
 
-/*
-static int check_float_too_big[4 - sizeof(float) + ARRAY_OFFSET]; // error if float > 4 bytes
-static int check_float_too_small[sizeof(float) - 4 + ARRAY_OFFSET]; // error if float < 4 bytes
-static int check_double_too_big[8 - sizeof(double) + ARRAY_OFFSET]; // error if double > 8 bytes
-static int check_double_too_small[sizeof(double) - 8 + ARRAY_OFFSET]; // error if double < 8 bytes
-static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char > 1 byte
-*/
-
 namespace NeXus {
 
 File::File(const string &filename, const NXaccess access)
@@ -143,7 +141,7 @@ File::~File() {
     this->m_pfile_id = NULL;
     if (status != NXstatus::NX_OK) {
       stringstream msg;
-      msg << "NXclose failed with status: " << status << "\n";
+      msg << "NXclose failed for file " << m_filename << "\n";
       NXReportError(const_cast<char *>(msg.str().c_str()));
     }
   }
@@ -151,20 +149,12 @@ File::~File() {
 
 void File::close() {
   if (this->m_pfile_id != NULL) {
-    NXstatus status = NXclose(&(*this->m_pfile_id));
+    NAPI_CALL(NXclose(&(*this->m_pfile_id)), "NXclose failed");
     this->m_pfile_id = NULL;
-    if (status != NXstatus::NX_OK) {
-      throw Exception("NXclose failed", m_filename);
-    }
   }
 }
 
-void File::flush() {
-  NXstatus status = NXflush(&(*this->m_pfile_id));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXflush failed", m_filename);
-  }
-}
+void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
 
 void File::makeGroup(const string &name, const string &class_name, bool open_group) {
   if (name.empty()) {
@@ -173,12 +163,8 @@ void File::makeGroup(const string &name, const string &class_name, bool open_gro
   if (class_name.empty()) {
     throw Exception("Supplied empty class name to makeGroup", m_filename);
   }
-  NXstatus status = NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str());
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXmakegroup(" << name << ", " << class_name << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
+            "NXmakegroup(" + name + ", " + class_name + ") failed");
   if (open_group) {
     this->openGroup(name, class_name);
   }
@@ -191,57 +177,33 @@ void File::openGroup(const string &name, const string &class_name) {
   if (class_name.empty()) {
     throw Exception("Supplied empty class name to openGroup", m_filename);
   }
-  NXstatus status = NXopengroup(*(this->m_pfile_id), name.c_str(), class_name.c_str());
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXopengroup(" << name << ", " << class_name << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXopengroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
+            "NXopengroup(" + name + ", " + class_name + ") failed");
 }
 
 void File::openPath(const string &path) {
   if (path.empty()) {
     throw Exception("Supplied empty path to openPath", m_filename);
   }
-  NXstatus status = NXopenpath(*(this->m_pfile_id), path.c_str());
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXopenpath(" << path << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXopenpath(*(this->m_pfile_id), path.c_str()), "NXopenpath(" + path + ") failed");
 }
 
 void File::openGroupPath(const string &path) {
   if (path.empty()) {
     throw Exception("Supplied empty path to openGroupPath", m_filename);
   }
-  NXstatus status = NXopengrouppath(*(this->m_pfile_id), path.c_str());
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXopengrouppath(" << path << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXopengrouppath(*(this->m_pfile_id), path.c_str()), "NXopengrouppath(" + path + ") failed");
 }
 
 std::string File::getPath() {
   char cPath[2048];
 
   memset(cPath, 0, sizeof(cPath));
-  NXstatus status = NXgetpath(*(this->m_pfile_id), cPath, sizeof(cPath) - 1);
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXgetpath() failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXgetpath(*(this->m_pfile_id), cPath, sizeof(cPath) - 1), "NXgetpath() failed");
   return std::string(cPath);
 }
 
-void File::closeGroup() {
-  NXstatus status = NXclosegroup(*(this->m_pfile_id.get()));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXclosegroup failed", m_filename);
-  }
-}
+void File::closeGroup() { NAPI_CALL(NXclosegroup(*(this->m_pfile_id.get())), "NXclosegroup failed"); }
 
 void File::makeData(const string &name, NXnumtype type, const vector<int> &dims, bool open_data) {
   this->makeData(name, type, toDimSize(dims), open_data);
@@ -260,11 +222,9 @@ void File::makeData(const string &name, NXnumtype type, const DimVector &dims, b
   NXstatus status = NXmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
                                  const_cast<int64_t *>(&(dims[0])));
   // report errors
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXmakedata(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(status, "NXmakedata(" + name + ", " + (string)type + ", " + std::to_string(dims.size()) + ", " +
+                        toString(dims) + ") failed");
+
   if (open_data) {
     this->openData(name);
   }
@@ -417,27 +377,16 @@ void File::openData(const string &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openData", m_filename);
   }
-  NXstatus status = NXopendata(*(this->m_pfile_id), name.c_str());
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXopendata(" + name + ") failed", m_filename);
-  }
+  NAPI_CALL(NXopendata(*(this->m_pfile_id), name.c_str()), "NXopendata(" + name + ") failed");
 }
 
-void File::closeData() {
-  NXstatus status = NXclosedata(*(this->m_pfile_id).get());
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXclosedata() failed", m_filename);
-  }
-}
+void File::closeData() { NAPI_CALL(NXclosedata(*(this->m_pfile_id).get()), "NXclosedata() failed"); }
 
 void File::putData(const void *data) {
   if (data == NULL) {
     throw Exception("Data specified as null in putData", m_filename);
   }
-  NXstatus status = NXputdata(*(this->m_pfile_id), const_cast<void *>(data));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXputdata(void *) failed", m_filename);
-  }
+  NAPI_CALL(NXputdata(*(this->m_pfile_id), const_cast<void *>(data)), "NXputdata(void *) failed");
 }
 
 template <typename NumT> void File::putData(const vector<NumT> &data) {
@@ -454,12 +403,9 @@ void File::putAttr(const AttrInfo &info, const void *data) {
   if (info.name.empty()) {
     throw Exception("Supplied empty name to putAttr", m_filename);
   }
-  NXstatus status = NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type);
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
-    throw Exception(msg.str(), m_filename);
-  }
+  NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
+            "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
+                ") failed");
 }
 
 template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
@@ -545,10 +491,7 @@ template <typename NumT> void File::putSlab(const vector<NumT> &data, dimsize_t 
 
 NXlink File::getDataID() {
   NXlink link;
-  NXstatus status = NXgetdataID(*(this->m_pfile_id), &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetdataID failed", m_filename);
-  }
+  NAPI_CALL(NXgetdataID(*(this->m_pfile_id), &link), "NXgetdataID failed");
   return link;
 }
 
@@ -562,21 +505,13 @@ bool File::isDataSetOpen() {
 }
 /*----------------------------------------------------------------------*/
 
-void File::makeLink(NXlink &link) {
-  NXstatus status = NXmakelink(*(this->m_pfile_id), &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXmakelink failed", m_filename);
-  }
-}
+void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
 
 void File::getData(void *data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData", m_filename);
   }
-  NXstatus status = NXgetdata(*(this->m_pfile_id), data);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetdata failed", m_filename);
-  }
+  NAPI_CALL(NXgetdata(*(this->m_pfile_id), data), "NXgetdata failed");
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -731,10 +666,7 @@ Info File::getInfo() {
   int64_t dims[NX_MAXRANK];
   NXnumtype type;
   int rank;
-  NXstatus status = NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetinfo failed", m_filename);
-  }
+  NAPI_CALL(NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type), "NXgetinfo failed");
   Info info;
   info.type = static_cast<NXnumtype>(type);
   for (int i = 0; i < rank; i++) {
@@ -799,10 +731,7 @@ void File::getSlab(void *data, const DimSizeVector &start, const DimSizeVector &
     throw Exception(msg.str(), m_filename);
   }
 
-  NXstatus status = NXgetslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0]));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetslab failed", m_filename);
-  }
+  NAPI_CALL(NXgetslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0])), "NXgetslab failed");
 }
 
 AttrInfo File::getNextAttr() {
@@ -862,10 +791,7 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   if (length < 0) {
     length = static_cast<int>(info.length);
   }
-  NXstatus status = NXgetattr(*(this->m_pfile_id), name, data, &length, &type);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetattr(" + info.name + ") failed", m_filename);
-  }
+  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name, data, &length, &type), "NXgetattr(" + info.name + ") failed");
   if (type != info.type) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
@@ -955,34 +881,73 @@ bool File::hasAttr(const std::string &name) {
 
 NXlink File::getGroupID() {
   NXlink link;
-  NXstatus status = NXgetgroupID(*(this->m_pfile_id), &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetgroupID failed", m_filename);
-  }
+  NAPI_CALL(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
   return link;
 }
 
-void File::initGroupDir() {
-  NXstatus status = NXinitgroupdir(*(this->m_pfile_id));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXinitgroupdir failed", m_filename);
-  }
-}
+void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(*(this->m_pfile_id)), "NXinitgroupdir failed"); }
 
-void File::initAttrDir() {
-  NXstatus status = NXinitattrdir(*(this->m_pfile_id));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXinitattrdir failed", m_filename);
-  }
-}
+void File::initAttrDir() { NAPI_CALL(NXinitattrdir(*(this->m_pfile_id)), "NXinitattrdir failed"); }
 
 NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 
-// methods to help with debugging
-std::ostream &operator<<(std::ostream &stm, const NXstatus status) { return stm << static_cast<int>(status); }
-std::ostream &operator<<(std::ostream &stm, const NXnumtype type) { return stm << static_cast<int>(type); }
+// -------------------------- NXnumtype ----------------------------------------------------------------------------//
+
+int NXnumtype::validate_val(int const x) {
+  int val = BAD;
+  if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
+      (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
+      (x == BAD)) {
+    val = x;
+  }
+  return val;
+}
+
+NXnumtype::NXnumtype() : m_val(BAD) {};
+NXnumtype::NXnumtype(int const val) : m_val(validate_val(val)) {};
+
+NXnumtype &NXnumtype::operator=(int const val) {
+  this->m_val = validate_val(val);
+  return *this;
+};
+
+NXnumtype::operator int() const { return m_val; };
+
+#define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
+
+NXnumtype::operator std::string() const {
+  std::string ret = NXTYPE_PRINT(BAD);
+  if (m_val == FLOAT32) {
+    ret = NXTYPE_PRINT(FLOAT32);
+  } else if (m_val == FLOAT64) {
+    ret = NXTYPE_PRINT(FLOAT64);
+  } else if (m_val == INT8) {
+    ret = NXTYPE_PRINT(INT8);
+  } else if (m_val == UINT8) {
+    ret = NXTYPE_PRINT(UINT8);
+  } else if (m_val == BOOLEAN) {
+    ret = NXTYPE_PRINT(BOOLEAN);
+  } else if (m_val == INT16) {
+    ret = NXTYPE_PRINT(INT16);
+  } else if (m_val == UINT16) {
+    ret = NXTYPE_PRINT(UINT16);
+  } else if (m_val == INT32) {
+    ret = NXTYPE_PRINT(INT32);
+  } else if (m_val == UINT32) {
+    ret = NXTYPE_PRINT(UINT32);
+  } else if (m_val == INT64) {
+    ret = NXTYPE_PRINT(INT64);
+  } else if (m_val == UINT64) {
+    ret = NXTYPE_PRINT(UINT64);
+  } else if (m_val == CHAR) {
+    ret = NXTYPE_PRINT(CHAR);
+  } else if (m_val == BINARY) {
+    ret = NXTYPE_PRINT(BINARY);
+  }
+  return ret;
+}
 
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
