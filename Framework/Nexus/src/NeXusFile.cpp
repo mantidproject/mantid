@@ -12,6 +12,8 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+typedef std::array<size_t, 4> DimArray;
+
 #define CALL_NAPI(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
   if (tmp != NXstatus::NX_OK) {                                                                                        \
@@ -46,13 +48,13 @@ static vector<int64_t> toDimSize(const vector<int> &small_v) {
   return DimSizeVector(small_v.begin(), small_v.end());
 }
 
-static vector<int64_t> toDimSize(const std::array<int, 4> &small_v) {
+static vector<int64_t> toDimSize(const DimArray &small_v) {
   // copy the dims over to call the int64_t version
   return DimSizeVector(small_v.begin(), small_v.end());
 }
 
-template <typename T> static std::array<size_t, 4> toDimArray(const vector<T> &small_v) {
-  std::array<size_t, 4> ret{0};
+template <typename T> static DimArray toDimArray(const vector<T> &small_v) {
+  DimArray ret{0};
   for (size_t i = 0; i < small_v.size(); i++) {
     ret.at(i) = static_cast<size_t>(small_v[i]);
   }
@@ -209,7 +211,7 @@ void File::makeGroup(const string &name, const string &class_name, bool open_gro
     throw Exception("Supplied empty name to makeGroup", m_filename);
   }
   if (class_name.empty()) {
-    throw Exception("Supplied empty class name to makeGroup");
+    throw Exception("Supplied empty class name to makeGroup", m_filename);
   }
   // make the group
   H5::Group grp = this->getCurrentLocation()->createGroup(name);
@@ -228,7 +230,7 @@ void File::openGroup(const string &name, const string &class_name) {
     throw Exception("Supplied empty name to openGroup", m_filename);
   }
   if (class_name.empty()) {
-    throw Exception("Supplied empty class name to openGroup");
+    throw Exception("Supplied empty class name to openGroup", m_filename);
   }
   auto current = this->getCurrentLocation();
   if (!current->nameExists(name)) {
@@ -268,7 +270,7 @@ string File::getPath() {
       try {
         output = reinterpret_cast<H5::Group *>(loc.get())->getObjName();
       } catch (...) {
-        throw Exception("nope!");
+        throw Exception("nope!", m_filename);
       }
     }
   }
@@ -278,14 +280,14 @@ string File::getPath() {
 void File::closeGroup() {
   auto loc = this->getCurrentLocation();
   if (loc == this) {
-    throw Exception("No group to close\n");
+    throw Exception("No group to close\n", m_filename);
   }
   try {
     H5::Group *grp = static_cast<H5::Group *>(loc);
     grp->close();
     this->m_stack.pop_back();
   } catch (...) {
-    throw Exception("Object at current location is not a group\n");
+    throw Exception("Object at current location is not a group\n", m_filename);
   }
 }
 
@@ -301,19 +303,6 @@ void File::makeData(const string &name, NXnumtype datatype, const DimVector &dim
   if (dims.empty()) {
     throw Exception("Supplied empty dimensions to makeData", m_filename);
   }
-
-  // DataSpace (int rank, const hsize_t *dims, const hsize_t *maxdims=NULL)
-
-  // DataType (const H5T_class_t type_class, size_t size)
-
-  // DataSet createDataSet 	(
-  //  const H5std_string & name,
-  // 	const DataType & data_type,
-  // 	const DataSpace & data_space,
-  // 	const DSetCreatPropList & create_plist = DSetCreatPropList::DEFAULT,
-  // 	const DSetAccPropList & dapl = DSetAccPropList::DEFAULT,
-  // 	const LinkCreatPropList & lcpl = LinkCreatPropList::DEFAULT
-  // ) 		const
 
   // make the data set
   H5::DataSpace ds((int)dims.size(), toDimArray(dims).data());
@@ -495,20 +484,20 @@ void File::openData(const string &name) {
 void File::closeData() {
   auto current = this->getCurrentLocation();
   if (current == this) {
-    throw Exception("No data to close\n");
+    throw Exception("No data to close\n", m_filename);
   }
   try {
     H5::DataSet *data = static_cast<H5::DataSet *>(current);
     data->close();
     this->m_stack.pop_back();
   } catch (...) {
-    throw Exception("Object at current location is not a dataset\n");
+    throw Exception("Object at current location is not a dataset\n", m_filename);
   }
 }
 
 void File::putData(const void *data) {
   if (data == NULL) {
-    throw Exception("Data specified as null in putData");
+    throw Exception("Data specified as null in putData", m_filename);
   }
 
   // void write 	( 	const void *buf,
@@ -519,20 +508,40 @@ void File::putData(const void *data) {
   // ) 		const
 
   auto current = this->getCurrentLocation();
+  H5::DataSet *dataset;
   try {
-    auto ds = current->getSpace();
-    auto rank = ds.getSimpleExtentNDims();
-    std::array<size_t, 4> dims;
-    ds.getSimpleExtentDims(dims.data()) current->write(data, )
+    dataset = reinterpret_cast<H5::DataSet *>(current);
   } catch (...) {
-    throw Exception("Failed to write data", m_filename);
+    throw Exception("Failed to write data, current location is not a DataSet", m_filename);
   }
-  CALL_NAPI(NXputdata(*(this->m_pfile_id), const_cast<void *>(data)), "NXputdata(void *) failed");
+  DimArray dims, maxdims, start, size;
+
+  auto ds = dataset->getSpace();
+  auto rank = ds.getSimpleExtentNdims();
+  bool unlimited = false;
+  ds.getSimpleExtentDims(dims.data(), maxdims.data());
+
+  for (int i = 0; i < rank; i++) {
+    if (maxdims[i] == H5S_UNLIMITED) {
+      unlimited = true;
+      start[i] = static_cast<int64_t>(dims[i] + 1);
+      size[i] = 1;
+    } else {
+      start[i] = 0;
+      size[i] = static_cast<int64_t>(dims[i]);
+    }
+  }
+  if (unlimited) {
+    std::runtime_error("Not implemented");
+  } else {
+    // type =
+    // dataset->write(data, )
+  }
 }
 
 template <typename NumT> void File::putData(const vector<NumT> &data) {
   if (data.empty()) {
-    throw Exception("Supplied empty data to putData");
+    throw Exception("Supplied empty data to putData", m_filename);
   }
   this->putData(data.data());
 }
@@ -1026,7 +1035,6 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 
 // NXstatus setCache(long newVal) { return NAPI_STATUS(NXsetcache(newVal), ""); }
 
-// */
 } // namespace NeXus
 
 // -------------------------- NXnumtype ----------------------------------------------------------------------------//
