@@ -50,14 +50,14 @@ class TomlSchemaValidator(object, metaclass=ABCMeta):
         pass
 
     @staticmethod
-    def _build_nested_keys(d, path="", current_out=None):
+    def _build_nested_keys(nested_dict, path="", current_out=None):
         if not current_out:
             current_out = []
 
         def make_path(current_path, new_key):
             return current_path + "." + new_key if current_path else new_key
 
-        for key, v in d.items():
+        for key, v in nested_dict.items():
             new_path = make_path(path, key)
             if isinstance(v, dict):
                 # Recurse into dict

@@ -30,15 +30,14 @@ class TomlSchemaV2Validator(TomlSchemaValidator):
             "transmission": None,
             "efficiency": None,
         }
-        filter_keys = dict(
-            component_keys,
-            **{
-                "cell_length": None,
-                "gas_pressure": None,
-                "empty_cell": None,
-                "initial_polarization": None,
-            },
-        )
+        filter_keys = {
+            **component_keys,
+            "cell_length": None,
+            "gas_pressure": None,
+            "empty_cell": None,
+            "initial_polarization": None,
+        }
+
         field_keys = {
             "sample_strength_log": None,
             "sample_direction": {"a", "p", "d"},
@@ -54,4 +53,4 @@ class TomlSchemaV2Validator(TomlSchemaValidator):
             "electric_field": field_keys,
         }
 
-        return dict(TomlSchemaV1Validator.reference_schema(), **{"polarization": polarization_keys})
+        return {**TomlSchemaV1Validator.reference_schema(), "polarization": polarization_keys}
