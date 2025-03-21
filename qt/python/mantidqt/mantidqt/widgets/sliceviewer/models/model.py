@@ -473,7 +473,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param pos: A 2-tuple containing the position of the pixel whose row/column should be exported
         :param transpose:  If true then the limits are transposed .w.r.t. the data
         :param dimension_indices: A list where the value (None, 0, or 1) at index i denotes the index of the axis
-        :param axis: A string 'x' or 'y' identifying the axis to cut along
+        :param axis: A string 'x' or 'y' or 'c' identifying the axis to cut along
         """
         # Form single pixel limits for a cut
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
@@ -484,12 +484,24 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         xpos, ypos = pos
 
-        if axis == "x" and not transpose or axis == "y" and transpose:
-            limits = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
-        else:
-            limits = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
+        limits_x = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+        limits_y = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
 
-        return self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
+        if transpose:
+            limits_x, limits_y = limits_y, limits_x
+
+        if axis == "c":
+            self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits_x, transpose, dimension_indices, "x")
+            self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits_y, transpose, dimension_indices, "y")
+
+            xcut_name, ycut_name = self._xcut_name, self._ycut_name
+            return f"Cuts along X/Y created: {xcut_name} & {ycut_name}"
+        elif axis == "x":
+            return self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits_x, transpose, dimension_indices, axis)
+        elif axis == "y":
+            return self.export_cuts_to_workspace_mdhisto(slicepoint, bin_params, limits_y, transpose, dimension_indices, axis)
+        else:
+            raise ValueError("Unexpected Axis Type: expected positive number, possible values are axis=(c, x, y)")
 
     def export_pixel_cut_to_workspace_mdevent(
         self, slicepoint, bin_params, pos: tuple, transpose: bool, dimension_indices: Sequence[int], axis: str
@@ -510,13 +522,24 @@ class SliceViewerModel(SliceViewerBaseModel):
         deltax, deltay = xdim.getBinWidth(), ydim.getBinWidth()
 
         xpos, ypos = pos
+        limits_x = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+        limits_y = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
 
-        if axis == "x" and not transpose or axis == "y" and transpose:
-            limits = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+        if transpose:
+            limits_x, limits_y = limits_y, limits_x
+
+        if axis == "c":
+            self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits_x, transpose, dimension_indices, "x")
+            self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits_y, transpose, dimension_indices, "y")
+
+            xcut_name, ycut_name = self._xcut_name, self._ycut_name
+            return f"Cuts along X/Y created: {xcut_name} & {ycut_name}"
+        elif axis == "x":
+            return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits_x, transpose, dimension_indices, axis)
+        elif axis == "y":
+            return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits_y, transpose, dimension_indices, axis)
         else:
-            limits = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
-
-        return self.export_cuts_to_workspace_mdevent(slicepoint, bin_params, limits, transpose, dimension_indices, axis)
+            raise ValueError("Unexpected Axis Type: expected positive number, possible values are axis=(c, x, y)")
 
     def export_pixel_cut_to_workspace_matrix(
         self, slicepoint, bin_params, pos: tuple, transpose: bool, dimension_indices: Sequence[int], axis: str

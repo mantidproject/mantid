@@ -689,33 +689,27 @@ class SliceViewerModelTest(unittest.TestCase):
             model = SliceViewerModel(self.ws_MD_3D)
             help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
 
-            dim0 = self.ws_MD_3D.getDimension(0)
-            dim1 = self.ws_MD_3D.getDimension(1)
+            xdim = self.ws_MD_3D.getDimension(0)
+            ydim = self.ws_MD_3D.getDimension(1)
 
-            dim0_delta = dim0.getBinWidth()
-            dim1_delta = dim1.getBinWidth()
+            deltax = xdim.getBinWidth()
+            deltay = ydim.getBinWidth()
 
-            if cut_type == "x" and not transpose or cut_type == "y" and transpose:
-                xmin, xmax = dim0.getMinimum(), dim0.getMaximum()
-                ymin, ymax = ypos - 0.5 * dim1_delta, ypos + 0.5 * dim1_delta
-            else:
-                xmin, xmax = xpos - 0.5 * dim0_delta, xpos + 0.5 * dim0_delta
-                ymin, ymax = dim1.getMinimum(), dim1.getMaximum()
+            limits_x = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+            limits_y = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
+
+            if transpose:
+                limits_x, limits_y = limits_y, limits_x
 
             zmin, zmax = 0.45, 0.55
 
+            assert_called = mock_intMD.assert_called_with if cut_type == "c" else mock_intMD.assert_called_once_with
+
             if not transpose:
-                if cut_type == "x":
-                    xcut_params = dict(
-                        InputWorkspace=self.ws_MD_3D,
-                        P1Bin=[xmin, 0, xmax],
-                        P2Bin=[ymin, ymax],
-                        P3Bin=[zmin, zmax],
-                        OutputWorkspace="ws_MD_3D_cut_x",
-                    )
-                    mock_intMD.assert_called_once_with(**xcut_params)
-                    self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
-                elif cut_type == "y":
+                if cut_type == "y" or cut_type == "c":
+                    xmin, xmax = limits_y[0]
+                    ymin, ymax = limits_y[1]
+
                     ycut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
                         P1Bin=[xmin, xmax],
@@ -723,20 +717,24 @@ class SliceViewerModelTest(unittest.TestCase):
                         P3Bin=[zmin, zmax],
                         OutputWorkspace="ws_MD_3D_cut_y",
                     )
-                    mock_intMD.assert_called_once_with(**ycut_params)
-                    self.assertEqual("Cut along Y created: ws_MD_3D_cut_y", help_msg)
+                    assert_called(**ycut_params)
+                elif cut_type == "x" or cut_type == "c":
+                    xmin, xmax = limits_x[0]
+                    ymin, ymax = limits_x[1]
+
+                    xcut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, 0, xmax],
+                        P2Bin=[ymin, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_x",
+                    )
+                    assert_called(**xcut_params)
             else:
-                if cut_type == "x":
-                    xcut_params = dict(
-                        InputWorkspace=self.ws_MD_3D,
-                        P1Bin=[xmin, xmax],
-                        P2Bin=[ymin, 0, ymax],
-                        P3Bin=[zmin, zmax],
-                        OutputWorkspace="ws_MD_3D_cut_x",
-                    )
-                    mock_intMD.assert_called_once_with(**xcut_params)
-                    self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
-                elif cut_type == "y":
+                if cut_type == "y" or cut_type == "c":
+                    xmin, xmax = limits_y[0]
+                    ymin, ymax = limits_y[1]
+
                     ycut_params = dict(
                         InputWorkspace=self.ws_MD_3D,
                         P1Bin=[xmin, 0, xmax],
@@ -744,12 +742,31 @@ class SliceViewerModelTest(unittest.TestCase):
                         P3Bin=[zmin, zmax],
                         OutputWorkspace="ws_MD_3D_cut_y",
                     )
-                    mock_intMD.assert_called_once_with(**ycut_params)
-                    self.assertEqual("Cut along Y created: ws_MD_3D_cut_y", help_msg)
+                    assert_called(**ycut_params)
+
+                elif cut_type == "x" or cut_type == "c":
+                    xmin, xmax = limits_x[0]
+                    ymin, ymax = limits_x[1]
+
+                    xcut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, xmax],
+                        P2Bin=[ymin, 0, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_x",
+                    )
+                    assert_called(**xcut_params)
+
+            if cut_type == "c":
+                self.assertEqual("Cuts along X/Y created: ws_MD_3D_cut_x & ws_MD_3D_cut_y", help_msg)
+            elif cut_type == "x":
+                self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
+            elif cut_type == "y":
+                self.assertEqual("Cut along Y created: ws_MD_3D_cut_y", help_msg)
 
             mock_intMD.reset_mock()
 
-        for cut_type in ("x", "y"):
+        for cut_type in ("x", "y", "c"):
             assert_call_as_expected(transpose=False, cut_type=cut_type)
             assert_call_as_expected(transpose=True, cut_type=cut_type)
 
@@ -798,29 +815,46 @@ class SliceViewerModelTest(unittest.TestCase):
             if not transpose:
                 extents = [xmin, xmax, ymin, ymax, zmin, zmax]
 
-                if cut_type == "x":
+                if cut_type == "x" or cut_type == "c":
                     expected_bins = [100, 1, 1]
                     expected_ws = "ws_MDE_3D_cut_x"
                     expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
-                else:
+
+                    mock_binmd.assert_called_once_with(
+                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
+                    )
+                elif cut_type == "y" or cut_type == "c":
                     expected_bins = [1, 100, 1]
                     expected_ws = "ws_MDE_3D_cut_y"
                     expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
+
+                    mock_binmd.assert_called_once_with(
+                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
+                    )
             else:
                 extents = [ymin, ymax, xmin, xmax, zmin, zmax]
 
-                if cut_type == "x":
+                if cut_type == "x" or cut_type == "c":
                     expected_bins = [1, 100, 1]
                     expected_ws = "ws_MDE_3D_cut_x"
                     expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
-                else:
+                    mock_binmd.assert_called_once_with(
+                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
+                    )
+                elif cut_type == "y" or cut_type == "c":
                     expected_bins = [100, 1, 1]
                     expected_ws = "ws_MDE_3D_cut_y"
                     expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
+                    mock_binmd.assert_called_once_with(
+                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
+                    )
 
-            mock_binmd.assert_called_once_with(
-                **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
-            )
+            if cut_type == "c":
+                expected_msg = "Cuts along X/Y created: ws_MD_3D_cut_x & ws_MD_3D_cut_y"
+            elif cut_type == "x":
+                expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+            elif cut_type == "y":
+                expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
 
             self.assertEqual(expected_msg, help_msg)
             mock_binmd.reset_mock()
