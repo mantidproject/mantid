@@ -18,14 +18,6 @@ using std::vector;
     throw NeXus::Exception(msg, tmp);                                                                                  \
   }
 
-#define NAPI_STATUS(status, msg)                                                                                       \
-  NXstatus tmp = (status);                                                                                             \
-  if (tmp == NXstatus::NX_ERROR) {                                                                                     \
-    throw NeXus::Exception(msg, tmp);                                                                                  \
-  } else {                                                                                                             \
-    return tmp;                                                                                                        \
-  }
-
 /**
  * \file NeXusFile.cpp
  * The implementation of the NeXus C++ API
@@ -162,28 +154,28 @@ void File::verifyGroupClass(H5::Group const &grp, string const &class_name) cons
   string res("");
   attr.read(dt, res);
   if (res == "") {
-    throw Exception("Error reading the group class name\n");
+    throw Exception("Error reading the group class name\n", m_filename);
   }
   if (class_name != res) {
-    throw Exception("Invalid group class name\n");
+    throw Exception("Invalid group class name\n", m_filename);
   }
 }
 
 File::File(string const &filename, H5access const access)
-    : H5File(filename, access, defaultFileAcc()), m_close_handle(true) {
+    : H5File(filename, access, defaultFileAcc()), m_close_handle(true), m_filename(filename) {
   this->m_stack.push_back(nullptr);
 };
 
 File::File(char const *filename, H5access const access)
-    : H5File(filename, access, defaultFileAcc()), m_close_handle(true) {
+    : H5File(filename, access, defaultFileAcc()), m_close_handle(true), m_filename(filename) {
   this->m_stack.push_back(nullptr);
 };
 
 // copy constructors
 
-File::File(File const &f) : H5File(f), m_close_handle(f.m_close_handle) {}
+File::File(File const &f) : H5File(f), m_close_handle(f.m_close_handle), m_filename(f.m_filename) {}
 
-File::File(H5::H5File const &hf) : H5File(hf), m_close_handle(true) {}
+File::File(H5::H5File const &hf) : H5File(hf), m_close_handle(true), m_filename(hf.getFileName()) {}
 
 // File::File(File const *const pf) : m_close_handle(pf->m_close_handle) {}
 
@@ -195,6 +187,7 @@ File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_close_handle = f.m_close_handle;
+    this->m_filename = f.m_filename;
     this->m_stack = f.m_stack;
   }
   return *this;
@@ -237,9 +230,18 @@ void File::openGroup(const string &name, const string &class_name) {
   if (class_name.empty()) {
     throw Exception("Supplied empty class name to openGroup");
   }
-  auto x = std::make_shared<H5::Group>(H5::H5File::openGroup(name));
-  verifyGroupClass(*(x.get()), class_name);
-  this->m_stack.push_back(x);
+  auto current = this->getCurrentLocation();
+  if(!current->nameExists(name)) {
+    throw Exception("The supplied dataset name does not exist", m_filename);
+  }
+  std::shared_ptr<H5::Group> grp;
+  if (current == this) {
+    grp = std::make_shared<H5::Group>(H5::H5File::openGroup(name));
+  } else {
+    grp = std::make_shared<H5::Group>(current->openGroup(name));
+  }
+  verifyGroupClass(*(grp.get()), class_name);
+  this->m_stack.push_back(grp);
 }
 
 // void File::openPath(const string &path) {
@@ -316,10 +318,13 @@ void File::makeData(const string &name, NXnumtype datatype, const DimVector &dim
   // make the data set
   H5::DataSpace ds((int)dims.size(), toDimArray(dims).data());
   H5::DataType type(nxToHDF5Type(datatype), dims.front());
-  H5::DataSet data = this->getCurrentLocation()->createDataSet(name, type, ds);
-
-  if (open_data) {
-    this->m_stack.push_back(std::make_shared<H5::DataSet>(data));
+  try {
+    H5::DataSet data = this->getCurrentLocation()->createDataSet(name, type, ds);
+    if (open_data) {
+      this->m_stack.push_back(std::make_shared<H5::DataSet>(data));
+    }
+  } catch (...) {
+    throw Exception("Datasets cannot be created at current location", m_filename);
   }
 }
 
@@ -330,44 +335,49 @@ void File::makeData(const string &name, const NXnumtype type, const NumT length,
   this->makeData(name, type, dims, open_data);
 }
 
-// template <typename NumT> void File::writeData(const string &name, const NumT &value) {
-//   std::vector<NumT> v(1, value);
-//   this->writeData(name, v);
-// }
+/*
+template <typename NumT> void File::writeData(const string &name, const NumT &value) {
+  std::vector<NumT> v(1, value);
+  this->writeData(name, v);
+}
 
-// void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
+void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
+*/
 
-// void File::writeData(const string &name, const string &value) {
-//   string my_value(value);
-//   // Allow empty strings by defaulting to a space
-//   if (my_value.empty())
-//     my_value = " ";
-//   vector<int> dims;
-//   dims.push_back(static_cast<int>(my_value.size()));
-//   this->makeData(name, NXnumtype::CHAR, dims, true);
+/*
+void File::writeData(const string &name, const string &value) {
+  string my_value(value);
+  // Allow empty strings by defaulting to a space
+  if (my_value.empty())
+    my_value = " ";
+  vector<int> dims;
+  dims.push_back(static_cast<int>(my_value.size()));
+  this->makeData(name, NXnumtype::CHAR, dims, true);
 
-//   this->putData(&(my_value[0]));
+  this->putData(my_value.data());
 
-//   this->closeData();
-// }
+  this->closeData();
+}*/
 
-// template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-//   DimVector dims(1, static_cast<dimsize_t>(value.size()));
-//   this->writeData(name, value, dims);
-// }
+/*
+template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
+  DimVector dims(1, static_cast<dimsize_t>(value.size()));
+  this->writeData(name, value, dims);
+}
 
-// template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const vector<int> &dims)
-// {
-//   this->makeData(name, getType<NumT>(), dims, true);
-//   this->putData(value);
-//   this->closeData();
-// }
+template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const vector<int> &dims)
+{
+  this->makeData(name, getType<NumT>(), dims, true);
+  this->putData(value);
+  this->closeData();
+}
 
-// template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const DimVector &dims) {
-//   this->makeData(name, getType<NumT>(), dims, true);
-//   this->putData(value);
-//   this->closeData();
-// }
+template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const DimVector &dims) {
+  this->makeData(name, getType<NumT>(), dims, true);
+  this->putData(value);
+  this->closeData();
+}
+*/
 
 // template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> &value) {
 //   // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
@@ -470,32 +480,63 @@ void File::makeData(const string &name, const NXnumtype type, const NumT length,
 //   this->closeData();
 // }
 
-/*
-
 void File::openData(const string &name) {
   if (name.empty()) {
-    throw Exception("Supplied empty name to openData");
+    throw Exception("Supplied empty name to openData", m_filename);
   }
-  CALL_NAPI(NXopendata(*(this->m_pfile_id), name.c_str()), "NXopendata(" + name + ") failed");
+  auto current = this->getCurrentLocation();
+  if(!current->nameExists(name)) {
+    throw Exception("The indicated dataset does not exist", m_filename);
+  }
+  auto data = std::make_shared<H5::DataSet>(current->openDataSet(name));
+  this->m_stack.push_back(data);
 }
 
-void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXclosedata() failed"); }
+void File::closeData() {
+  auto current = this->getCurrentLocation();
+  if (current == this) {
+    throw Exception("No data to close\n");
+  }
+  try {
+    H5::DataSet *data = static_cast<H5::DataSet *>(current);
+    data->close();
+    this->m_stack.pop_back();
+  } catch (...) {
+    throw Exception("Object at current location is not a dataset\n");
+  }
+}
 
-*/
+void File::putData(const void *data) {
+  if (data == NULL) {
+    throw Exception("Data specified as null in putData");
+  }
 
-// void File::putData(const void *data) {
-//   if (data == NULL) {
-//     throw Exception("Data specified as null in putData");
-//   }
-//   CALL_NAPI(NXputdata(*(this->m_pfile_id), const_cast<void *>(data)), "NXputdata(void *) failed");
-// }
+  // void write 	( 	const void *buf,
+	// 	const DataType &  	mem_type,
+	// 	const DataSpace &  	mem_space = DataSpace::ALL,
+	// 	const DataSpace &  	file_space = DataSpace::ALL,
+	// 	const DSetMemXferPropList &  	xfer_plist = DSetMemXferPropList::DEFAULT 
+	// ) 		const
 
-// template <typename NumT> void File::putData(const vector<NumT> &data) {
-//   if (data.empty()) {
-//     throw Exception("Supplied empty data to putData");
-//   }
-//   this->putData(&(data[0]));
-// }
+  auto current = this->getCurrentLocation();
+  try {
+    auto ds = current->getSpace();
+    auto rank = ds.getSimpleExtentNDims();
+    std::array<size_t, 4> dims;
+    ds.getSimpleExtentDims (dims.data())
+    current->write(data, )
+  } catch (...) {
+    throw Exception("Failed to write data", m_filename);
+  }
+  CALL_NAPI(NXputdata(*(this->m_pfile_id), const_cast<void *>(data)), "NXputdata(void *) failed");
+}
+
+template <typename NumT> void File::putData(const vector<NumT> &data) {
+  if (data.empty()) {
+    throw Exception("Supplied empty data to putData");
+  }
+  this->putData(data.data());
+}
 
 // void File::putAttr(const AttrInfo &info, const void *data) {
 //   if (info.name == NULL_STR) {
@@ -602,8 +643,9 @@ void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXcl
 // }
 // /*----------------------------------------------------------------------*/
 
-// /*
-// void File::makeLink(NXlink &link) { CALL_NAPI(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
+// void File::makeLink(NXlink &link) { 
+//  CALL_NAPI(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); 
+// }
 
 // void File::getData(void *data) {
 //   if (data == NULL) {
@@ -975,7 +1017,6 @@ void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXcl
 
 // NXlink File::getGroupID() {
 //   NXlink link;
-//   // this->m_h5file_id->
 //   CALL_NAPI(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
 //   return link;
 // }
@@ -987,11 +1028,63 @@ void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXcl
 // NXstatus setCache(long newVal) { return NAPI_STATUS(NXsetcache(newVal), ""); }
 
 // */
-// } // namespace NeXus
+} // namespace NeXus
 
-// // methods to help with debugging
-// std::ostream &operator<<(std::ostream &stm, const NXstatus status) { return stm << static_cast<int>(status); }
-// std::ostream &operator<<(std::ostream &stm, const NXnumtype type) { return stm << static_cast<int>(type); }
+// -------------------------- NXnumtype ----------------------------------------------------------------------------//
+
+int NXnumtype::validate_val(int const x) {
+  int val = BAD;
+  if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
+      (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
+      (x == BAD)) {
+    val = x;
+  }
+  return val;
+}
+
+NXnumtype::NXnumtype() : m_val(BAD) {};
+NXnumtype::NXnumtype(int const val) : m_val(validate_val(val)) {};
+
+NXnumtype &NXnumtype::operator=(int const val) {
+  this->m_val = validate_val(val);
+  return *this;
+};
+
+NXnumtype::operator int() const { return m_val; };
+
+#define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
+
+NXnumtype::operator std::string() const {
+  std::string ret = NXTYPE_PRINT(BAD);
+  if (m_val == FLOAT32) {
+    ret = NXTYPE_PRINT(FLOAT32);
+  } else if (m_val == FLOAT64) {
+    ret = NXTYPE_PRINT(FLOAT64);
+  } else if (m_val == INT8) {
+    ret = NXTYPE_PRINT(INT8);
+  } else if (m_val == UINT8) {
+    ret = NXTYPE_PRINT(UINT8);
+  } else if (m_val == BOOLEAN) {
+    ret = NXTYPE_PRINT(BOOLEAN);
+  } else if (m_val == INT16) {
+    ret = NXTYPE_PRINT(INT16);
+  } else if (m_val == UINT16) {
+    ret = NXTYPE_PRINT(UINT16);
+  } else if (m_val == INT32) {
+    ret = NXTYPE_PRINT(INT32);
+  } else if (m_val == UINT32) {
+    ret = NXTYPE_PRINT(UINT32);
+  } else if (m_val == INT64) {
+    ret = NXTYPE_PRINT(INT64);
+  } else if (m_val == UINT64) {
+    ret = NXTYPE_PRINT(UINT64);
+  } else if (m_val == CHAR) {
+    ret = NXTYPE_PRINT(CHAR);
+  } else if (m_val == BINARY) {
+    ret = NXTYPE_PRINT(BINARY);
+  }
+  return ret;
+}
 
 // /* ---------------------------------------------------------------- */
 // /* Concrete instantiations of template definitions.                 */
@@ -1021,10 +1114,12 @@ void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXcl
 // template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
 // template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
 
-// template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int length,
-//                                               bool open_data);
-// template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int64_t length,
-//                                               bool open_data);
+template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int length,
+                                              bool open_data);
+template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int64_t length,
+                                              bool open_data);
+template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const size_t length,
+                                              bool open_data);
 
 // template MANTID_NEXUS_DLL void File::writeData(const string &name, const float &value);
 // template MANTID_NEXUS_DLL void File::writeData(const string &name, const double &value);
@@ -1285,4 +1380,3 @@ void File::closeData() { CALL_NAPI(NXclosedata(*(this->m_pfile_id).get()), "NXcl
 
 // template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, double &value);
 // template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, int &value);
-} // namespace NeXus
