@@ -47,6 +47,10 @@ class StatePolarizationTest(unittest.TestCase):
         state_field = self.generate_field(a=1, p=2, d=4)
         state_field.validate()
 
+    def test_valid_when_nothing_set(self):
+        state_field = self.generate_field()
+        state_field.validate()
+
     # ------------------------------------------------------------------------------------------------------------------
     # StatePolarization
     # ------------------------------------------------------------------------------------------------------------------

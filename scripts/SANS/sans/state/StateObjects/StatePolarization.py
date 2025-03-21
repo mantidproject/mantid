@@ -101,19 +101,18 @@ class StateField(metaclass=JsonSerializable):
     def validate(self):
         is_invalid = dict()
         direction = [self.sample_direction_a, self.sample_direction_p, self.sample_direction_d]
-        if self.sample_direction_log is not None:
-            if any(coordinate is not None for coordinate in direction):
-                entry = validation_message(
-                    "Too many sample direction parameters.",
-                    "Either set the sample direction log OR set the a, p, and d values.",
-                    {
-                        "SampleDirectionLog": self.sample_direction_log,
-                        "SampleDirectionA": self.sample_direction_a,
-                        "SampleDirectionP": self.sample_direction_p,
-                        "SampleDirectionD": self.sample_direction_d,
-                    },
-                )
-                is_invalid.update(entry)
+        if self.sample_direction_log and any(direction):
+            entry = validation_message(
+                "Too many sample direction parameters.",
+                "Either set the sample direction log OR set the a, p, and d values.",
+                {
+                    "SampleDirectionLog": self.sample_direction_log,
+                    "SampleDirectionA": self.sample_direction_a,
+                    "SampleDirectionP": self.sample_direction_p,
+                    "SampleDirectionD": self.sample_direction_d,
+                },
+            )
+            is_invalid.update(entry)
         elif not is_pure_none_or_not_none(direction):
             entry = validation_message(
                 "Missing field sample direction parameters.",
