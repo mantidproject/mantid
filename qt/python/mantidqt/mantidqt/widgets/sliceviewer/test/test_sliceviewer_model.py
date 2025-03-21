@@ -812,45 +812,40 @@ class SliceViewerModelTest(unittest.TestCase):
                 BasisVector2="l,rlu,0.0,0.0,1.0",
             )
 
+            assert_called = mock_binmd.assert_called_with if cut_type == "c" else mock_binmd.assert_called_once_with
+
             if not transpose:
                 extents = [xmin, xmax, ymin, ymax, zmin, zmax]
 
-                if cut_type == "x" or cut_type == "c":
-                    expected_bins = [100, 1, 1]
-                    expected_ws = "ws_MDE_3D_cut_x"
-                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
-
-                    mock_binmd.assert_called_once_with(
-                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
-                    )
-                elif cut_type == "y" or cut_type == "c":
+                if cut_type == "y" or cut_type == "c":
                     expected_bins = [1, 100, 1]
                     expected_ws = "ws_MDE_3D_cut_y"
                     expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
 
-                    mock_binmd.assert_called_once_with(
-                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
-                    )
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+                elif cut_type == "x" or cut_type == "c":
+                    expected_bins = [100, 1, 1]
+                    expected_ws = "ws_MDE_3D_cut_x"
+                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+
             else:
                 extents = [ymin, ymax, xmin, xmax, zmin, zmax]
 
-                if cut_type == "x" or cut_type == "c":
-                    expected_bins = [1, 100, 1]
-                    expected_ws = "ws_MDE_3D_cut_x"
-                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
-                    mock_binmd.assert_called_once_with(
-                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
-                    )
-                elif cut_type == "y" or cut_type == "c":
+                if cut_type == "y" or cut_type == "c":
                     expected_bins = [100, 1, 1]
                     expected_ws = "ws_MDE_3D_cut_y"
                     expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
-                    mock_binmd.assert_called_once_with(
-                        **common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws
-                    )
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+                elif cut_type == "x" or cut_type == "c":
+                    expected_bins = [1, 100, 1]
+                    expected_ws = "ws_MDE_3D_cut_x"
+                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
 
             if cut_type == "c":
-                expected_msg = "Cuts along X/Y created: ws_MD_3D_cut_x & ws_MD_3D_cut_y"
+                expected_msg = "Cuts along X/Y created: ws_MDE_3D_cut_x & ws_MDE_3D_cut_y"
             elif cut_type == "x":
                 expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
             elif cut_type == "y":
@@ -859,7 +854,7 @@ class SliceViewerModelTest(unittest.TestCase):
             self.assertEqual(expected_msg, help_msg)
             mock_binmd.reset_mock()
 
-        for cut_type in ("x", "y"):
+        for cut_type in ("x", "y", "c"):
             assert_call_as_expected(transpose=False, cut_type=cut_type)
             assert_call_as_expected(transpose=True, cut_type=cut_type)
 
