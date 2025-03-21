@@ -149,13 +149,13 @@ class StatePolarization(metaclass=JsonSerializable):
         self.electric_field = None
 
     def validate(self):
-        if self.analyzer is not None:
-            self.analyzer.validate()
-        if self.polarizer is not None:
-            self.polarizer.validate()
-        if self.magnetic_field is not None:
-            self.magnetic_field.validate()
-        if self.electric_field is not None:
-            self.electric_field.validate()
-        for flipper in self.flippers:
-            flipper.validate()
+        for attribute in vars(self).keys():
+            sub_state = getattr(self, attribute)
+            if isinstance(sub_state, str):
+                pass
+            elif isinstance(sub_state, list):
+                for flipper in sub_state:
+                    flipper.validate()
+            else:
+                if sub_state:
+                    sub_state.validate()
