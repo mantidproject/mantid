@@ -425,10 +425,7 @@ public:
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-  /// Creates a new object in the NeXus file at path path.
-  // virtual void make(const std::string& path) = 0;
-  /// Resets the current position for getNextEntry() to the beginning
-  void reset();
+
   /**
    * Check if a path exists relative to the current class path
    * @param path :: A string representing the path to test
