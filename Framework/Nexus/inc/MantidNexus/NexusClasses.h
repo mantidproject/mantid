@@ -175,8 +175,9 @@ public:
   };
 
 protected:
-  void getData(void *data);
-  void getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
+  template <typename NumT> void getData(NumT *data);
+  template <typename NumT>
+  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -390,6 +391,10 @@ private:
 
 /// The integer dataset type
 using NXInt = NXDataSetTyped<int>;
+/// The integer dataset type
+using NXInt32 = NXDataSetTyped<int32_t>;
+/// The integer dataset type
+using NXInt64 = NXDataSetTyped<int64_t>;
 /// The float dataset type
 using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
@@ -400,6 +405,10 @@ using NXChar = NXDataSetTyped<char>;
 using NXSize = NXDataSetTyped<std::size_t>;
 /// The size_t dataset type
 using NXUInt = NXDataSetTyped<unsigned int>;
+/// The size_t dataset type
+using NXUInt32 = NXDataSetTyped<uint32_t>;
+/// The size_t dataset type
+using NXUInt64 = NXDataSetTyped<uint64_t>;
 
 //-------------------- classes --------------------------//
 

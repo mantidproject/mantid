@@ -416,7 +416,7 @@ nxdimsize_t NXDataSet::dim3() const {
  *   @param data :: The pointer to the buffer accepting the data from the file.
  *   @throw runtime_error if the operation fails.
  */
-void NXDataSet::getData(void *data) {
+template <typename NumT> void NXDataSet::getData(NumT *data) {
   m_fileID->openData(name());
   m_fileID->getData(data);
   m_fileID->closeData();
@@ -433,7 +433,8 @@ void NXDataSet::getData(void *data) {
  * the rank of the data.
  *   @throw runtime_error if the operation fails.
  */
-void NXDataSet::getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
+template <typename NumT>
+void NXDataSet::getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
   m_fileID->openData(name());
   m_fileID->getSlab(data, start, size);
   m_fileID->closeData();
