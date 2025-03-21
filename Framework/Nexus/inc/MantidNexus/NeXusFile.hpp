@@ -32,6 +32,7 @@ class MANTID_NEXUS_DLL File : public H5::H5File {
 private:
   /** should be close handle on exit */
   bool m_close_handle;
+  std::string m_filename;
   std::vector<std::shared_ptr<H5::H5Location>> m_stack;
 
 public:
@@ -350,23 +351,23 @@ public:
   /**
    * \param name The name of the data to open.
    */
-  // void openData(const std::string &name);
+  void openData(const std::string &name);
 
   /**
    * Close the currently open data.
    */
-  // void closeData();
+  void closeData();
 
   /**
    * \param data The data to put in the file.
    */
-  // void putData(const void *data);
+  void putData(const void *data);
 
   /**
    * \param data The data to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void putData(const std::vector<NumT> &data);
+  template <typename NumT> void putData(const std::vector<NumT> &data);
 
   /**
    * Put the supplied data as an attribute into the currently open data.

@@ -180,6 +180,7 @@ public:
 
     // check error conditions
     TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), NeXus::Exception &);
     TS_ASSERT_THROWS(file.openGroup(grp, string()), NeXus::Exception &);
 
     // now open it, check we are at a different location
@@ -207,6 +208,33 @@ public:
     // try to open it with wrong class name
     string notcls("NXshorts");
     TS_ASSERT_THROWS(file.openGroup(grp, notcls), NeXus::Exception &);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_open_group_layers() {
+    cout << "\ntest openGroup layers\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grp_layers.h5");
+    string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
+    removeFile(filename);
+
+    // create a file with group -- open it
+    NeXus::File file(filename, H5ACC_CREATE5);
+    file.makeGroup(grp1, cls1, false);
+    file.openGroup(grp1, cls1);
+    auto layer1 = file.getCurrentLocation();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 0);
+
+    // create a group inside the group -- open it
+    file.makeGroup(grp2, cls2, false);
+    file.openGroup(grp2, cls2);
+    auto layer2 = file.getCurrentLocation();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 1);
+    TS_ASSERT_DIFFERS(layer1, layer2);
 
     // cleanup
     file.close();
@@ -297,23 +325,113 @@ public:
     removeFile(filename);
   }
 
-  // void test_makeData_length() {
-  //   cout << "\ntest make data\n";
-  //   string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data.h5");
-  //   removeFile(filename);
+  void test_makeData_length() {
+    cout << "\ntest make data\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data.h5");
+    removeFile(filename);
 
-  //   NeXus::File file(filename, H5ACC_CREATE5);
-  //   TS_ASSERT_EQUALS(file.getNumObjs(), 0);
+    NeXus::File file(filename, H5ACC_CREATE5);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
 
-  //   string name("some_data");
-  //   NXnumtype type (NXnumtype::CHAR);
+    NXnumtype type (NXnumtype::CHAR);
 
-  //   // check it works when it works
-  //   TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, 3));
-  //   TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    // check it works when it works -- int
+    string name("some_data_int");
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, 3));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
-  //   // cleanup
-  //   file.close();
-  //   removeFile(filename);
-  // }
+    // check it works when it works -- int64_t
+    name = "some_data_int64";
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, 3L));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 2);
+
+    // check it works when it works -- size_t
+    name = "some_data_size";
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, 3UL));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 3);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_open_dataset() {
+    cout << "\ntest openData\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // get location of root file
+    auto root = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", root);
+
+    // create a dataset, to be opened
+    string data("test_group");
+    NXnumtype type (NXnumtype::CHAR);
+    file.makeData(data, type, 3, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+
+    // check error conditions
+    TS_ASSERT_THROWS(file.openData(string()), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openData("tacos1"), NeXus::Exception &);
+
+    // now open it, check we are at a different location
+    TS_ASSERT_THROWS_NOTHING(file.openData(data));
+    auto layer1 = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", layer1);
+    TS_ASSERT_DIFFERS(root, layer1);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_make_data_layers_bad() {
+    cout << "\ntest makeData layers\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data_layers.h5");
+    NXnumtype type (NXnumtype::CHAR);
+    string data1("layer1"), data2("layer2");
+    removeFile(filename);
+
+    // create a file with data -- open data
+    NeXus::File file(filename, H5ACC_CREATE5);
+    file.makeData(data1, type, 1, false);
+    file.openData(data1);
+    auto layer1 = file.getCurrentLocation();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+
+    // try to create a dataset inside the dataset -- this throws an errpr
+    TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_closeData() {
+    cout << "\ntest closeData\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataclose.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+    auto begin = file.getCurrentLocation();
+
+    // check error at root
+    TS_ASSERT_THROWS(file.closeGroup(), NeXus::Exception &);
+
+    // now make group, close it, and check we are back at root
+    string grp("test_group"), cls("NXsample");
+    file.makeGroup(grp, cls, true);
+    auto ingrp = file.getCurrentLocation();
+    file.closeGroup();
+    auto outgrp = file.getCurrentLocation();
+
+    TS_ASSERT_DIFFERS(outgrp, ingrp);
+    TS_ASSERT_EQUALS(outgrp, begin);
+    TS_ASSERT_THROWS(file.closeGroup(), NeXus::Exception &);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
 };
