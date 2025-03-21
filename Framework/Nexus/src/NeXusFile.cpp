@@ -15,7 +15,7 @@ using std::vector;
 #define CALL_NAPI(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
   if (tmp != NXstatus::NX_OK) {                                                                                        \
-    throw NeXus::Exception(msg, tmp);                                                                                  \
+    throw NeXus::Exception(msg, m_filename);                                                                           \
   }
 
 /**
@@ -231,7 +231,7 @@ void File::openGroup(const string &name, const string &class_name) {
     throw Exception("Supplied empty class name to openGroup");
   }
   auto current = this->getCurrentLocation();
-  if(!current->nameExists(name)) {
+  if (!current->nameExists(name)) {
     throw Exception("The supplied dataset name does not exist", m_filename);
   }
   std::shared_ptr<H5::Group> grp;
@@ -485,7 +485,7 @@ void File::openData(const string &name) {
     throw Exception("Supplied empty name to openData", m_filename);
   }
   auto current = this->getCurrentLocation();
-  if(!current->nameExists(name)) {
+  if (!current->nameExists(name)) {
     throw Exception("The indicated dataset does not exist", m_filename);
   }
   auto data = std::make_shared<H5::DataSet>(current->openDataSet(name));
@@ -512,19 +512,18 @@ void File::putData(const void *data) {
   }
 
   // void write 	( 	const void *buf,
-	// 	const DataType &  	mem_type,
-	// 	const DataSpace &  	mem_space = DataSpace::ALL,
-	// 	const DataSpace &  	file_space = DataSpace::ALL,
-	// 	const DSetMemXferPropList &  	xfer_plist = DSetMemXferPropList::DEFAULT 
-	// ) 		const
+  // 	const DataType &  	mem_type,
+  // 	const DataSpace &  	mem_space = DataSpace::ALL,
+  // 	const DataSpace &  	file_space = DataSpace::ALL,
+  // 	const DSetMemXferPropList &  	xfer_plist = DSetMemXferPropList::DEFAULT
+  // ) 		const
 
   auto current = this->getCurrentLocation();
   try {
     auto ds = current->getSpace();
     auto rank = ds.getSimpleExtentNDims();
     std::array<size_t, 4> dims;
-    ds.getSimpleExtentDims (dims.data())
-    current->write(data, )
+    ds.getSimpleExtentDims(dims.data()) current->write(data, )
   } catch (...) {
     throw Exception("Failed to write data", m_filename);
   }
@@ -643,8 +642,8 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 // }
 // /*----------------------------------------------------------------------*/
 
-// void File::makeLink(NXlink &link) { 
-//  CALL_NAPI(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); 
+// void File::makeLink(NXlink &link) {
+//  CALL_NAPI(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed");
 // }
 
 // void File::getData(void *data) {
