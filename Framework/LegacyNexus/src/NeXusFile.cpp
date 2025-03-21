@@ -494,6 +494,13 @@ void File::initAttrDir() {
 
 } // namespace Mantid::LegacyNexus
 
+std::ostream &operator<<(std::ostream &stm, const Mantid::LegacyNexus::NXstatus status) {
+  return stm << static_cast<int>(status);
+}
+std::ostream &operator<<(std::ostream &stm, const Mantid::LegacyNexus::NXnumtype type) {
+  return stm << static_cast<int>(type);
+}
+
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
 /* ---------------------------------------------------------------- */
