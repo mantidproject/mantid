@@ -300,7 +300,7 @@ public:
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
   /// Maximum absolute integer value
-  int maxCoeff();
+  int maxCoeff() const;
   /// Absolute value
   V3D absoluteValue() const;
   /// Calculates the error in hkl
@@ -330,6 +330,8 @@ public:
 
   void saveNexus(::NeXus::File *file, const std::string &name) const;
   void loadNexus(::NeXus::File *file, const std::string &name);
+
+  static bool isnan(V3D vec) { return (std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2])); }
 
 private:
   std::array<double, 3> m_pt;
