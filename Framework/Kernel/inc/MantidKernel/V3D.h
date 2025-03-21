@@ -331,7 +331,7 @@ public:
   void saveNexus(::NeXus::File *file, const std::string &name) const;
   void loadNexus(::NeXus::File *file, const std::string &name);
 
-  static bool isnan(V3D vec) { return (std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2])); }
+  static bool isnan(V3D const &vec) { return (std::isnan(vec.X()) || std::isnan(vec.Y()) || std::isnan(vec.Z())); }
 
 private:
   std::array<double, 3> m_pt;
