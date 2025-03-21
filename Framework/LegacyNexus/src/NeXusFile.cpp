@@ -21,26 +21,6 @@ using std::vector;
 
 namespace { // anonymous namespace to keep it in the file
 const std::string NULL_STR("NULL");
-
-template <typename NumT> static string toString(const vector<NumT> &data) {
-  stringstream result;
-  result << "[";
-  size_t size = data.size();
-  for (size_t i = 0; i < size; i++) {
-    result << data[i];
-    if (i + 1 < size) {
-      result << ",";
-    }
-  }
-  result << "]";
-  return result.str();
-}
-
-static vector<int64_t> toInt64(const vector<int> &small_v) {
-  // copy the dims over to call the int64_t version
-  return vector<int64_t>(small_v.begin(), small_v.end());
-}
-
 } // end of anonymous namespace
 
 namespace Mantid::LegacyNexus {
@@ -57,23 +37,7 @@ template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(char const) { return NXnumt
 // template specialisations for types we know
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(float const) { return NXnumtype::FLOAT32; }
 
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(double const) { return NXnumtype::FLOAT64; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int8_t const) { return NXnumtype::INT8; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint8_t const) { return NXnumtype::UINT8; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int16_t const) { return NXnumtype::INT16; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint16_t const) { return NXnumtype::UINT16; }
-
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int32_t const) { return NXnumtype::INT32; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint32_t const) { return NXnumtype::UINT32; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int64_t const) { return NXnumtype::INT64; }
-
-template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint64_t const) { return NXnumtype::UINT64; }
 
 } // namespace Mantid::LegacyNexus
 
@@ -94,14 +58,8 @@ static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char
 */
 
 namespace Mantid::LegacyNexus {
-File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {}
-
 File::File(const string &filename, const NXaccess access) : m_close_handle(true) {
   this->initOpenFile(filename, access);
-}
-
-File::File(const char *filename, const NXaccess access) : m_close_handle(true) {
-  this->initOpenFile(string(filename), access);
 }
 
 void File::initOpenFile(const string &filename, const NXaccess access) {
@@ -136,31 +94,6 @@ void File::close() {
     if (status != NXstatus::NX_OK) {
       throw Exception("NXclose failed", status);
     }
-  }
-}
-
-void File::flush() {
-  NXstatus status = NXflush(&(this->m_file_id));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXflush failed", status);
-  }
-}
-
-void File::makeGroup(const string &name, const string &class_name, bool open_group) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to makeGroup");
-  }
-  if (class_name.empty()) {
-    throw Exception("Supplied empty class name to makeGroup");
-  }
-  NXstatus status = NXmakegroup(this->m_file_id, name.c_str(), class_name.c_str());
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXmakegroup(" << name << ", " << class_name << ") failed";
-    throw Exception(msg.str(), status);
-  }
-  if (open_group) {
-    this->openGroup(name, class_name);
   }
 }
 
@@ -211,177 +144,6 @@ void File::closeGroup() {
   }
 }
 
-void File::makeData(const string &name, NXnumtype type, const vector<int> &dims, bool open_data) {
-  this->makeData(name, type, toInt64(dims), open_data);
-}
-
-void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &dims, bool open_data) {
-  // error check the parameters
-  if (name.empty()) {
-    throw Exception("Supplied empty label to makeData");
-  }
-  if (dims.empty()) {
-    throw Exception("Supplied empty dimensions to makeData");
-  }
-
-  // do the work
-  NXstatus status = NXmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
-                                 const_cast<int64_t *>(&(dims[0])));
-  // report errors
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXmakedata(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ") failed";
-    throw Exception(msg.str(), status);
-  }
-  if (open_data) {
-    this->openData(name);
-  }
-}
-
-template <typename NumT>
-void File::makeData(const string &name, const NXnumtype type, const NumT length, bool open_data) {
-  vector<int64_t> dims;
-  dims.push_back(static_cast<int64_t>(length));
-  this->makeData(name, type, dims, open_data);
-}
-
-template <typename NumT> void File::writeData(const string &name, const NumT &value) {
-  std::vector<NumT> v(1, value);
-  this->writeData(name, v);
-}
-
-void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
-
-void File::writeData(const string &name, const string &value) {
-  string my_value(value);
-  // Allow empty strings by defaulting to a space
-  if (my_value.empty())
-    my_value = " ";
-  vector<int> dims;
-  dims.push_back(static_cast<int>(my_value.size()));
-  this->makeData(name, NXnumtype::CHAR, dims, true);
-
-  this->putData(&(my_value[0]));
-
-  this->closeData();
-}
-
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-  vector<int64_t> dims(1, static_cast<int64_t>(value.size()));
-  this->writeData(name, value, dims);
-}
-
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const vector<int> &dims) {
-  this->makeData(name, getType<NumT>(), dims, true);
-  this->putData(value);
-  this->closeData();
-}
-
-template <typename NumT>
-void File::writeData(const string &name, const vector<NumT> &value, const vector<int64_t> &dims) {
-  this->makeData(name, getType<NumT>(), dims, true);
-  this->putData(value);
-  this->closeData();
-}
-
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> &value) {
-  // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
-  writeExtendibleData(name, value, 4096);
-}
-
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> &value, const int64_t chunk) {
-  vector<int64_t> dims(1, NX_UNLIMITED);
-  vector<int64_t> chunk_dims(1, chunk);
-  // Use chunking without using compression
-  this->makeCompData(name, getType<NumT>(), dims, NONE, chunk_dims, true);
-  this->putSlab(value, int64_t(0), int64_t(value.size()));
-  this->closeData();
-}
-
-template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> &value, vector<int64_t> &dims,
-                               std::vector<int64_t> &chunk) {
-  // Create the data with unlimited 0th dimensions
-  std::vector<int64_t> unlim_dims(dims);
-  unlim_dims[0] = NX_UNLIMITED;
-  // Use chunking without using compression
-  this->makeCompData(name, getType<NumT>(), unlim_dims, NONE, chunk, true);
-  // And put that slab of that of that given size in there
-  std::vector<int64_t> start(dims.size(), 0);
-  this->putSlab(value, start, dims);
-  this->closeData();
-}
-
-template <typename NumT> void File::writeUpdatedData(const std::string &name, std::vector<NumT> &value) {
-  this->openData(name);
-  this->putSlab(value, int64_t(0), int64_t(value.size()));
-  this->closeData();
-}
-
-template <typename NumT>
-void File::writeUpdatedData(const std::string &name, std::vector<NumT> &value, std::vector<int64_t> &dims) {
-  this->openData(name);
-  std::vector<int64_t> start(dims.size(), 0);
-  this->putSlab(value, start, dims);
-  this->closeData();
-}
-
-void File::makeCompData(const string &name, const NXnumtype type, const vector<int> &dims, const NXcompression comp,
-                        const vector<int> &bufsize, bool open_data) {
-  this->makeCompData(name, type, toInt64(dims), comp, toInt64(bufsize), open_data);
-}
-
-void File::makeCompData(const string &name, const NXnumtype type, const vector<int64_t> &dims, const NXcompression comp,
-                        const vector<int64_t> &bufsize, bool open_data) {
-  // error check the parameters
-  if (name.empty()) {
-    throw Exception("Supplied empty name to makeCompData");
-  }
-  if (dims.empty()) {
-    throw Exception("Supplied empty dimensions to makeCompData");
-  }
-  if (bufsize.empty()) {
-    throw Exception("Supplied empty bufsize to makeCompData");
-  }
-  if (dims.size() != bufsize.size()) {
-    stringstream msg;
-    msg << "Supplied dims rank=" << dims.size() << " must match supplied bufsize rank=" << bufsize.size()
-        << "in makeCompData";
-    throw Exception(msg.str());
-  }
-
-  // do the work
-  int i_type = static_cast<int>(type);
-  int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), type, static_cast<int>(dims.size()),
-                                     const_cast<int64_t *>(&(dims[0])), i_comp, const_cast<int64_t *>(&(bufsize[0])));
-
-  // report errors
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", "
-        << comp << ", " << toString(bufsize) << ") failed";
-    throw Exception(msg.str(), status);
-  }
-  if (open_data) {
-    this->openData(name);
-  }
-}
-
-template <typename NumT>
-void File::writeCompData(const string &name, const vector<NumT> &value, const vector<int> &dims,
-                         const NXcompression comp, const vector<int> &bufsize) {
-  this->writeCompData(name, value, toInt64(dims), comp, toInt64(bufsize));
-}
-
-template <typename NumT>
-void File::writeCompData(const string &name, const vector<NumT> &value, const vector<int64_t> &dims,
-                         const NXcompression comp, const vector<int64_t> &bufsize) {
-  this->makeCompData(name, getType<NumT>(), dims, comp, bufsize, true);
-  this->putData(value);
-  this->closeData();
-}
-
 void File::openData(const string &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openData");
@@ -396,149 +158,6 @@ void File::closeData() {
   NXstatus status = NXclosedata(this->m_file_id);
   if (status != NXstatus::NX_OK) {
     throw Exception("NXclosedata() failed", status);
-  }
-}
-
-void File::putData(const void *data) {
-  if (data == NULL) {
-    throw Exception("Data specified as null in putData");
-  }
-  NXstatus status = NXputdata(this->m_file_id, const_cast<void *>(data));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXputdata(void *) failed", status);
-  }
-}
-
-template <typename NumT> void File::putData(const vector<NumT> &data) {
-  if (data.empty()) {
-    throw Exception("Supplied empty data to putData");
-  }
-  this->putData(&(data[0]));
-}
-
-void File::putAttr(const AttrInfo &info, const void *data) {
-  if (info.name == NULL_STR) {
-    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
-  }
-  if (info.name.empty()) {
-    throw Exception("Supplied empty name to putAttr");
-  }
-  NXstatus status = NXputattr(this->m_file_id, info.name.c_str(), data, static_cast<int>(info.length), info.type);
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
-  AttrInfo info;
-  info.name = name;
-  info.length = 1;
-  info.type = getType<NumT>();
-  this->putAttr(info, &value);
-}
-
-void File::putAttr(const char *name, const char *value) {
-  if (name == NULL) {
-    throw Exception("Specified name as null to putAttr");
-  }
-  if (value == NULL) {
-    throw Exception("Specified value as null to putAttr");
-  }
-  string s_name(name);
-  string s_value(value);
-  this->putAttr(s_name, s_value);
-}
-
-void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
-  string my_value(value);
-  if (my_value.empty() && empty_add_space)
-    my_value = " "; // Make a default "space" to avoid errors.
-  AttrInfo info;
-  info.name = name;
-  info.length = static_cast<unsigned int>(my_value.size());
-  info.type = NXnumtype::CHAR;
-  this->putAttr(info, &(my_value[0]));
-}
-
-void File::putSlab(const void *data, const vector<int> &start, const vector<int> &size) {
-  vector<int64_t> start_big = toInt64(start);
-  vector<int64_t> size_big = toInt64(size);
-  this->putSlab(data, start_big, size_big);
-}
-
-void File::putSlab(const void *data, const vector<int64_t> &start, const vector<int64_t> &size) {
-  if (data == NULL) {
-    throw Exception("Data specified as null in putSlab");
-  }
-  if (start.empty()) {
-    throw Exception("Supplied empty start to putSlab");
-  }
-  if (size.empty()) {
-    throw Exception("Supplied empty size to putSlab");
-  }
-  if (start.size() != size.size()) {
-    stringstream msg;
-    msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size() << "in putSlab";
-    throw Exception(msg.str());
-  }
-  NXstatus status = NXputslab64(this->m_file_id, data, &(start[0]), &(size[0]));
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXputslab64(data, " << toString(start) << ", " << toString(size) << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-template <typename NumT>
-void File::putSlab(const vector<NumT> &data, const vector<int> &start, const vector<int> &size) {
-  vector<int64_t> start_big = toInt64(start);
-  vector<int64_t> size_big = toInt64(size);
-  this->putSlab(data, start_big, size_big);
-}
-
-template <typename NumT>
-void File::putSlab(const vector<NumT> &data, const vector<int64_t> &start, const vector<int64_t> &size) {
-  if (data.empty()) {
-    throw Exception("Supplied empty data to putSlab");
-  }
-  this->putSlab(&(data[0]), start, size);
-}
-
-template <typename NumT> void File::putSlab(const vector<NumT> &data, int start, int size) {
-  this->putSlab(data, static_cast<int64_t>(start), static_cast<int64_t>(size));
-}
-
-template <typename NumT> void File::putSlab(const vector<NumT> &data, int64_t start, int64_t size) {
-  vector<int64_t> start_v(1, start);
-  vector<int64_t> size_v(1, size);
-  this->putSlab(data, start_v, size_v);
-}
-
-NXlink File::getDataID() {
-  NXlink link;
-  NXstatus status = NXgetdataID(this->m_file_id, &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetdataID failed", status);
-  }
-  return link;
-}
-
-bool File::isDataSetOpen() {
-  NXlink id;
-  if (NXgetdataID(this->m_file_id, &id) == NXstatus::NX_ERROR) {
-    return false;
-  } else {
-    return true;
-  }
-}
-/*----------------------------------------------------------------------*/
-
-void File::makeLink(NXlink &link) {
-  NXstatus status = NXmakelink(this->m_file_id, &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXmakelink failed", status);
   }
 }
 
@@ -660,21 +279,6 @@ void File::readData(const std::string &dataName, std::string &data) {
   this->closeData();
 }
 
-bool File::isDataInt() {
-  Info info = this->getInfo();
-  switch (info.type) {
-  case NXnumtype::INT8:
-  case NXnumtype::UINT8:
-  case NXnumtype::INT16:
-  case NXnumtype::UINT16:
-  case NXnumtype::INT32:
-  case NXnumtype::UINT32:
-    return true;
-  default:
-    return false;
-  }
-}
-
 string File::getStrData() {
   string res;
   Info info = this->getInfo();
@@ -754,31 +358,6 @@ void File::getEntries(std::map<std::string, std::string> &result) {
   }
 }
 
-void File::getSlab(void *data, const vector<int> &start, const vector<int> &size) {
-  this->getSlab(data, toInt64(start), toInt64(size));
-}
-
-void File::getSlab(void *data, const vector<int64_t> &start, const vector<int64_t> &size) {
-  if (data == NULL) {
-    throw Exception("Supplied null pointer to getSlab");
-  }
-  if (start.size() <= 0) {
-    stringstream msg;
-    msg << "Supplied empty start offset, rank = " << start.size() << " in getSlab";
-    throw Exception(msg.str());
-  }
-  if (start.size() != size.size()) {
-    stringstream msg;
-    msg << "In getSlab start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str());
-  }
-
-  NXstatus status = NXgetslab64(this->m_file_id, data, &(start[0]), &(size[0]));
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetslab failed", status);
-  }
-}
-
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
   NXname name;
@@ -853,26 +432,12 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   }
 }
 
-template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
-  NumT value;
-  this->getAttr(info, &value);
-  return value;
-}
-
 template <> MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
   AttrInfo info;
   info.type = getType<char>();
   info.length = 2000; ///< @todo need to find correct length of attribute
   info.name = name;
   value = this->getStrAttr(info);
-}
-
-template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-  AttrInfo info;
-  info.type = getType<NumT>();
-  info.length = 1;
-  info.name = name;
-  value = this->getAttr<NumT>(info);
 }
 
 string File::getStrAttr(const AttrInfo &info) {
@@ -899,20 +464,6 @@ string File::getStrAttr(const AttrInfo &info) {
   return res;
 }
 
-vector<AttrInfo> File::getAttrInfos() {
-  vector<AttrInfo> infos;
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
-    }
-    infos.push_back(temp);
-  }
-  return infos;
-}
-
 bool File::hasAttr(const std::string &name) {
   this->initAttrDir();
   AttrInfo temp;
@@ -925,15 +476,6 @@ bool File::hasAttr(const std::string &name) {
       return true;
   }
   return false;
-}
-
-NXlink File::getGroupID() {
-  NXlink link;
-  NXstatus status = NXgetgroupID(this->m_file_id, &link);
-  if (status != NXstatus::NX_OK) {
-    throw Exception("NXgetgroupID failed", status);
-  }
-  return link;
 }
 
 void File::initGroupDir() {
@@ -952,244 +494,9 @@ void File::initAttrDir() {
 
 } // namespace Mantid::LegacyNexus
 
-// methods to help with debugging
-std::ostream &operator<<(std::ostream &stm, const Mantid::LegacyNexus::NXstatus status) {
-  return stm << static_cast<int>(status);
-}
-std::ostream &operator<<(std::ostream &stm, const Mantid::LegacyNexus::NXnumtype type) {
-  return stm << static_cast<int>(type);
-}
-
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
 /* ---------------------------------------------------------------- */
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const float value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const double value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const int8_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const uint8_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const int16_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const uint16_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const int32_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const uint32_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const int64_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const uint64_t value);
-template MANTID_LEGACYNEXUS_DLL void File::putAttr(const string &name, const char value);
-
-template MANTID_LEGACYNEXUS_DLL float File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL double File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
-template MANTID_LEGACYNEXUS_DLL char File::getAttr(const AttrInfo &info);
-
-template MANTID_LEGACYNEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int length,
-                                                    bool open_data);
-template MANTID_LEGACYNEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int64_t length,
-                                                    bool open_data);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const float &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const double &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const int8_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const uint8_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const int16_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const uint16_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const int32_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const uint32_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const int64_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const uint64_t &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const char &value);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<float> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<double> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<char> &value);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<float> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<double> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int8_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint8_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int16_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint16_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int32_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint32_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<int64_t> &value,
-                                                     const std::vector<int> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint64_t> &value,
-                                                     const std::vector<int> &dims);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int8_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint8_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int16_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint16_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int32_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint32_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int64_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint64_t> &value,
-                                                               const int64_t chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value,
-                                                               const int64_t chunk);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int8_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint8_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int16_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint16_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int32_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint32_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<int64_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<uint64_t> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<char> &value,
-                                                               std::vector<int64_t> &dims, std::vector<int64_t> &chunk);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<float> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<double> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint8_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint16_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint32_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint64_t> &value);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<char> &value);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<float> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<double> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int8_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint8_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int16_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint16_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int32_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint32_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<int64_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<uint64_t> &value,
-                                                            std::vector<int64_t> &dims);
-template MANTID_LEGACYNEXUS_DLL void File::writeUpdatedData(const string &name, vector<char> &value,
-                                                            std::vector<int64_t> &dims);
-
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<float> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<float> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<double> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<double> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int8_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int8_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint8_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint8_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int16_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int16_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint16_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint16_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int32_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int32_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint32_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint32_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int64_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<int64_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint64_t> &value,
-                                                         const vector<int> &dims, const NXcompression comp,
-                                                         const vector<int> &bufsize);
-template MANTID_LEGACYNEXUS_DLL void File::writeCompData(const string &name, const vector<uint64_t> &value,
-                                                         const vector<int64_t> &dims, const NXcompression comp,
-                                                         const vector<int64_t> &bufsize);
 
 template MANTID_LEGACYNEXUS_DLL void File::getData(vector<float> &data);
 template MANTID_LEGACYNEXUS_DLL void File::getData(vector<double> &data);
@@ -1225,38 +532,6 @@ template MANTID_LEGACYNEXUS_DLL void File::readData(const std::string &dataName,
 template MANTID_LEGACYNEXUS_DLL void File::readData(const std::string &dataName, uint32_t &data);
 template MANTID_LEGACYNEXUS_DLL void File::readData(const std::string &dataName, int64_t &data);
 template MANTID_LEGACYNEXUS_DLL void File::readData(const std::string &dataName, uint64_t &data);
-
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<float> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<double> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, int start, int size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, int start, int size);
-
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<float> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<double> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
-template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const std::vector<int64_t> &start,
-                                                   const std::vector<int64_t> &size);
 
 template MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, double &value);
 template MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, int &value);
