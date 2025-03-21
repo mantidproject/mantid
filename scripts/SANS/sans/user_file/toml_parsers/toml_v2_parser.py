@@ -72,8 +72,7 @@ class TomlV2ParserImpl(TomlV1ParserImpl):
     def _parse_filter(self, filter_dict: dict) -> StateFilter:
         if filter_dict is None:
             return StateFilter()
-        filter_state = self._parse_component(filter_dict)
-        filter_state.__class__ = StateFilter
+        filter_state = StateFilter.construct_from_component(self._parse_component(filter_dict))
         filter_state.cell_length = self.get_val("cell_length", filter_dict)
         filter_state.gas_pressure = self.get_val("gas_pressure", filter_dict)
         filter_state.empty_cell = self.get_val("empty_cell", filter_dict)

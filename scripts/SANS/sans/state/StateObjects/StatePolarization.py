@@ -26,6 +26,8 @@ class StateComponent(metaclass=JsonSerializable):
     efficiency: None | str
 
     def __init__(self):
+        # Note: Any new attributes added here should also be added to  construct_from_component in StateFilter below.
+
         super(StateComponent, self).__init__()
         # Name of the component in the IDF.
         self.idf_component_name = None
@@ -52,6 +54,19 @@ class StateFilter(StateComponent, metaclass=JsonSerializable):
     cell_length: None | int
     gas_pressure: None | int
     initial_polarization: None | str
+
+    @classmethod
+    def construct_from_component(cls, component: StateComponent):
+        filter_state = StateFilter()
+        filter_state.idf_component_name = component.idf_component_name
+        filter_state.device_name = component.device_name
+        filter_state.device_type = component.device_type
+        filter_state.location_x = component.location_x
+        filter_state.location_y = component.location_y
+        filter_state.location_z = component.location_z
+        filter_state.transmission = component.transmission
+        filter_state.efficiency = component.efficiency
+        return filter_state
 
     def __init__(self):
         super(StateFilter, self).__init__()
