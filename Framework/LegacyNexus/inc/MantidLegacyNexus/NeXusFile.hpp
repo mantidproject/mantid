@@ -104,40 +104,11 @@ public:
    */
   File(const std::string &filename, const NXaccess access = NXACC_READ);
 
-  /**
-   * Create a new File.
-   *
-   * \param filename The name of the file to open.
-   * \param access How to access the file.
-   */
-  File(const char *filename, const NXaccess access = NXACC_READ);
-
-  /**
-   * Use an existing handle returned from NXopen()
-   *
-   * \param handle Handle to connect to
-   * \param close_handle Should the handle be closed on destruction
-   */
-  File(NXhandle handle, bool close_handle = false);
-
   /** Destructor. This does close the file. */
   ~File();
 
   /** Close the file before the constructor is called. */
   void close();
-
-  /** Flush the file. */
-  void flush();
-
-  /**
-   * Create a new group.
-   *
-   * \param name The name of the group to create (i.e. "entry").
-   * \param class_name The type of group to create (i.e. "NXentry").
-   * \param open_group Whether or not to automatically open the group after
-   * creating it.
-   */
-  void makeGroup(const std::string &name, const std::string &class_name, bool open_group = false);
 
   /**
    * Open an existing group.
@@ -169,184 +140,6 @@ public:
   void closeGroup();
 
   /**
-   * \copydoc NeXus::File::makeData(const std::string&, NXnumtype,
-   *                              const std::vector<int64_t>&, bool);
-   */
-  void makeData(const std::string &name, NXnumtype type, const std::vector<int> &dims, bool open_data = false);
-
-  /**
-   * Create a data field with the specified information.
-   *
-   * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
-   * \param dims The dimensions of the field.
-   * \param open_data Whether or not to open the data after creating it.
-   */
-  void makeData(const std::string &name, NXnumtype type, const std::vector<int64_t> &dims, bool open_data = false);
-
-  /**
-   * Create a 1D data field with the specified information.
-   *
-   * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
-   * \param length The number of elements in the field.
-   * \param open_data Whether or not to open the data after creating it.
-   */
-  template <typename NumT>
-  void makeData(const std::string &name, const NXnumtype type, const NumT length, bool open_data = false);
-
-  /**
-   * Create a 1D data field, insert the data, and close the data.
-   *
-   * \param name The name of the field to create.
-   * \param value The string to put into the file.
-   */
-  void writeData(const std::string &name, const std::string &value);
-
-  /**
-   * Create a 1D data field, insert the data, and close the data.
-   *
-   * \param name The name of the field to create.
-   * \param value The string to put into the file.
-   */
-  void writeData(const std::string &name, const char *value);
-
-  /**
-   * Create a 1D data field, insert the data, and close the data.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name The name of the field to create.
-   * \param value The vector to put into the file.
-   */
-  template <typename NumT> void writeData(const std::string &name, const std::vector<NumT> &value);
-
-  /**
-   * Create a 1D data field, insert the data, and close the data.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name The name of the field to create.
-   * \param value The value to put into the file.
-   */
-  template <typename NumT> void writeData(const std::string &name, const NumT &value);
-
-  /**
-   * Create a n-dimension data field, insert the data, and close the data.
-   *
-   * \param name The name of the field to create.
-   * \param value The data to put into the file.
-   * \param dims The dimensions of the data.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT>
-  void writeData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims);
-
-  /**
-   * Create a n-dimension data field, insert the data, and close the data.
-   *
-   * \param name The name of the field to create.
-   * \param value The data to put into the file.
-   * \param dims The dimensions of the data.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT>
-  void writeData(const std::string &name, const std::vector<NumT> &value, const std::vector<int64_t> &dims);
-
-  /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name :: The name of the field to create.
-   * \param value :: The vector to put into the file.
-   */
-  template <typename NumT> void writeExtendibleData(const std::string &name, std::vector<NumT> &value);
-
-  /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name :: The name of the field to create.
-   * \param value :: The vector to put into the file.
-   * \param chunkSize :: chunk size to use when writing
-   */
-  template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const int64_t chunk);
-
-  /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name :: The name of the field to create.
-   * \param value :: The vector to put into the file.
-   * \param dims :: The dimensions of the data.
-   * \param chunk :: chunk size to use when writing
-   */
-  template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, std::vector<int64_t> &dims,
-                           std::vector<int64_t> &chunk);
-
-  /** Updates the data written into an already-created
-   * data vector. If the data was created as extendible, it will be resized.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name :: The name of the field to create.
-   * \param value :: The vector to put into the file.
-   */
-  template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value);
-
-  /** Updates the data written into an already-created
-   * data vector. If the data was created as extendible, it will be resized.
-   *
-   * \tparam NumT numeric data type of \a value
-   * \param name :: The name of the field to create.
-   * \param value :: The vector to put into the file.
-   * \param dims :: The dimensions of the data.
-   */
-  template <typename NumT>
-  void writeUpdatedData(const std::string &name, std::vector<NumT> &value, std::vector<int64_t> &dims);
-
-  /**
-   * \copydoc makeCompData(const std::string&, const NXnumtype,
-   *                       const std::vector<int64_t>&, const NXcompression,
-   *                       const std::vector<int64_t>&, bool)
-   */
-  void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int> &dims,
-                    const NXcompression comp, const std::vector<int> &bufsize, bool open_data = false);
-
-  /**
-   * Create a field with compression.
-   *
-   * \param name The name of the data to create.
-   * \param type The primitive type for the data.
-   * \param dims The dimensions of the data.
-   * \param comp The compression algorithm to use.
-   * \param bufsize The size of the compression buffer to use.
-   * \param open_data Whether or not to open the data after creating it.
-   */
-  void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int64_t> &dims,
-                    const NXcompression comp, const std::vector<int64_t> &bufsize, bool open_data = false);
-
-  /**
-   * \copydoc writeCompData(const std::string & name,
-   *                        const std::vector<NumT> & value,
-   *                        const std::vector<int64_t> & dims, const NXcompression comp,
-   *                        const std::vector<int64_t> & bufsize)
-   */
-  template <typename NumT>
-  void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims,
-                     const NXcompression comp, const std::vector<int> &bufsize);
-
-  /**
-   * Create a compressed data, insert the data, and close it.
-   *
-   * \param name The name of the data to create.
-   * \param value The vector to put into the file.
-   * \param dims The dimensions of the data.
-   * \param comp The compression algorithm to use.
-   * \param bufsize The size of the compression buffer to use.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT>
-  void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int64_t> &dims,
-                     const NXcompression comp, const std::vector<int64_t> &bufsize);
-
-  /**
    * \param name The name of the data to open.
    */
   void openData(const std::string &name);
@@ -355,110 +148,6 @@ public:
    * Close the currently open data.
    */
   void closeData();
-
-  /**
-   * \param data The data to put in the file.
-   */
-  void putData(const void *data);
-
-  /**
-   * \param data The data to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT> void putData(const std::vector<NumT> &data);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  void putAttr(const AttrInfo &info, const void *data);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT> void putAttr(const std::string &name, const NumT value);
-
-  /**
-   * Put a string as an attribute in the file.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   */
-  void putAttr(const char *name, const char *value);
-
-  /**
-   * Put a string as an attribute in the file.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   */
-  void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
-
-  /**
-   * \copydoc NeXus::File::putSlab(void* data, std::vector<int64_t>& start,
-   *                                std::vector<int64_t>& size)
-   */
-  void putSlab(const void *data, const std::vector<int> &start, const std::vector<int> &size);
-
-  /**
-   * Insert an array as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   */
-  void putSlab(const void *data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
-
-  /**
-   * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, std::vector<int64_t>&,
-   *                               std::vector<int64_t>&)
-   */
-  template <typename NumT>
-  void putSlab(const std::vector<NumT> &data, const std::vector<int> &start, const std::vector<int> &size);
-
-  /**
-   * Insert an array as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT>
-  void putSlab(const std::vector<NumT> &data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
-
-  /**
-   * \copydoc NeXus::File::putSlab(std::vector<NumT>&, int64_t, int64_t)
-   */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, int start, int size);
-
-  /**
-   * Insert a number as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, int64_t start, int64_t size);
-
-  /**
-   * \return The id of the data used for linking.
-   */
-  NXlink getDataID();
-
-  /**
-   * Create a link in the current location to the supplied id.
-   *
-   * \param link The object (group or data) in the file to link to.
-   */
-  void makeLink(NXlink &link);
 
   /**
    * Put the currently open data in the supplied pointer.
@@ -491,11 +180,6 @@ public:
    * @param data :: vector to be filled.
    */
   void getDataCoerce(std::vector<double> &data);
-
-  /** Return true if the data opened is of one of the
-   * int data types, 32 bits or less.
-   */
-  bool isDataInt();
 
   /** Put data into the supplied vector. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -553,28 +237,6 @@ public:
   void getEntries(std::map<std::string, std::string> &result);
 
   /**
-   * \copydoc NeXus::File::getSlab(void*, const std::vector<int64_t>&,
-   *                               const std::vector<int64_t>&)
-   */
-  void getSlab(void *data, const std::vector<int> &start, const std::vector<int> &size);
-
-  /**
-   * Get a section of data from the file.
-   *
-   * \param data The pointer to insert that data into.
-   * \param start The offset into the file's data block to start the read
-   * from.
-   * \param size The size of the block to read from the file.
-   */
-  void getSlab(void *data, const std::vector<int64_t> &start, const std::vector<int64_t> &size);
-
-  /**
-   * \return Information about all attributes on the data that is
-   * currently open.
-   */
-  std::vector<AttrInfo> getAttrInfos();
-
-  /**
    *  \return true if the current point in the file has the named attribute
    *  \param name the name of the attribute to look for.
    */
@@ -593,16 +255,6 @@ public:
   /**
    * Get the value of an attribute that is a scalar number.
    *
-   * \param info Designation of which attribute to read.
-   * \tparam NumT numeric data type of result
-   *
-   * \return The attribute value.
-   */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
-
-  /**
-   * Get the value of an attribute that is a scalar number.
-   *
    * \param[in] name Name of attribute to read
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
@@ -617,17 +269,6 @@ public:
    * \return The value of the attribute.
    */
   std::string getStrAttr(const AttrInfo &info);
-
-  /**
-   * \return The id of the group used for linking.
-   */
-  NXlink getGroupID();
-
-  /**
-   * This function checksi if we are in an open dataset
-   * \returns true if we are currently in an open dataset else false
-   */
-  bool isDataSetOpen();
 };
 
 /**
