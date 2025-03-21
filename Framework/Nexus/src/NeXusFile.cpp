@@ -253,7 +253,7 @@ void File::writeData(const string &name, const string &value) {
   dims.push_back(static_cast<int>(my_value.size()));
   this->makeData(name, NXnumtype::CHAR, dims, true);
 
-  this->putData(&(my_value[0]));
+  this->putData(my_value.c_str());
 
   this->closeData();
 }
