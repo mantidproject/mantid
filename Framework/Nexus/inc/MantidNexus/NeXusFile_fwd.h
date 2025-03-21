@@ -66,6 +66,8 @@ typedef enum {
  */
 typedef int NXaccess;
 
+enum H5access : unsigned int { H5ACC_READ = 0x0000u, H5ACC_RDWR = 0x0001u, H5ACC_CREATE5 = 0x0002u };
+
 typedef struct {
   char *iname;
   int type;

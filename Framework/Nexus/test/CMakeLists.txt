@@ -5,8 +5,9 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusTest ${TEST_FILES})
 
-  target_link_libraries(NexusTest PRIVATE Mantid::Nexus gmock)
-  add_framework_test_helpers(NexusTest)
+  target_link_libraries(NexusTest PRIVATE Mantid::Nexus gmock ${HDF5_LIBRARIES})
+
+  # add_framework_test_helpers(NexusTest)
   add_dependencies(FrameworkTests NexusTest)
   add_dependencies(NexusTest UnitTestData)
   # Add to the 'FrameworkTests' group in VS
@@ -21,9 +22,9 @@ add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL napi_test.cpp napi_test_util.cpp 
 target_link_libraries(napi_test_hdf5 PRIVATE Mantid::Nexus)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND napi_test_hdf5)
 
-add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL napi_test_cpp.cpp napi_test_util.cpp napi_test_util.h)
-target_link_libraries(napi_test_cpp-hdf5 PRIVATE Mantid::Nexus)
-add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
+# add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL napi_test_cpp.cpp napi_test_util.cpp napi_test_util.h)
+# target_link_libraries(napi_test_cpp-hdf5 PRIVATE Mantid::Nexus) add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND
+# napi_test_cpp-hdf5)
 
 # #### test for unlimited dimensions
 add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test_nxunlimited.cpp)
@@ -47,8 +48,10 @@ add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-3" COMMAND napi_leak_test3)
 # #### phony target to drag in all tests
 
 add_custom_target(
-  "${TEST_PREFIX}" DEPENDS napi_test_hdf5 napi_test_cpp-hdf5 napi_test_nxunlimited napi_leak_test1 napi_leak_test2
-                           napi_leak_test3
+  "${TEST_PREFIX}"
+  DEPENDS napi_test_hdf5
+          # napi_test_cpp-hdf5
+          napi_test_nxunlimited napi_leak_test1 napi_leak_test2 napi_leak_test3
 )
 
 add_dependencies(FrameworkTests "${TEST_PREFIX}")

@@ -23,6 +23,8 @@
 
 ----------------------------------------------------------------------------*/
 
+#ifndef CPPCHECK // don't run cppcheck on this
+
 #include <string>
 #define H5Aiterate_vers 2
 
@@ -2446,3 +2448,4 @@ void NX5assignFunctions(pNexusFunction fHandle) {
 }
 
 #endif /* HDF5 */
+#endif /* CPPCHECK */

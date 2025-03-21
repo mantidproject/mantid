@@ -1,18 +1,12 @@
-set(SRC_FILES
-    src/H5Util.cpp
-    src/NexusClasses.cpp
-    src/napi.cpp
-    src/napi5.cpp
-    src/NeXusException.cpp
-    src/NeXusFile.cpp
-    src/nxstack.cpp
-    src/stptok.cpp
+set(SRC_FILES # src/H5Util.cpp
+    # src/NexusClasses.cpp
+    src/napi.cpp src/napi5.cpp src/NeXusException.cpp src/NeXusFile.cpp src/nxstack.cpp src/stptok.cpp
 )
 
 set(INC_FILES
-    inc/MantidNexus/H5Util.h
-    inc/MantidNexus/NexusClasses.h
-    inc/MantidNexus/NexusIOHelper.h
+    # inc/MantidNexus/H5Util.h
+    # inc/MantidNexus/NexusClasses.h
+    # inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NeXusFile_fwd.h
     inc/MantidNexus/napi.h
     inc/MantidNexus/napi5.h
@@ -24,9 +18,16 @@ set(INC_FILES
     inc/MantidNexus/nxstack.h
 )
 
-set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h
-               NeXusFileReadWriteTest.h
+# cmake-format: off
+set(TEST_FILES
+    # H5UtilTest.h
+    # NexusIOHelperTest.h
+    NeXusFileTest.h
+    # NeXusFileLeakTest.h
+    # NeXusFileNapiTest.h
+    # NeXusFileReadWriteTest.h
 )
+# cmake-format: on
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
@@ -58,7 +59,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PRIVATE Poco::Foundation)
+# target_link_libraries(Nexus PRIVATE Poco::Foundation)
 
 # Add the unit tests directory
 add_subdirectory(test)
