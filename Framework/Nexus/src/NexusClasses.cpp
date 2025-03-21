@@ -161,7 +161,6 @@ void NXClass::readAllInfo() {
       m_groups->emplace_back(NXClassInfo(entry));
     }
   }
-  reset();
 }
 
 bool NXClass::isValid(const std::string &path) const {
@@ -211,8 +210,6 @@ void NXClass::close() {
   }
   m_open = false;
 }
-
-void NXClass::reset() { m_fileID->initGroupDir(); }
 
 void NXClass::clear() {
   m_groups.reset(new std::vector<NXClassInfo>);
