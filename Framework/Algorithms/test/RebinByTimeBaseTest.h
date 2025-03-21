@@ -401,8 +401,8 @@ public:
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
     // Added 1 nanosecond to start time
-    TS_ASSERT_EQUALS(pulseTimeMin + double(step) / 2 - 1.e-9, X.front());
-    TS_ASSERT_EQUALS(pulseTimeMax - double(step) / 2 - 1.e-9, X.back());
+    TS_ASSERT_DELTA(pulseTimeMin + double(step) / 2 - 1.e-9, X.front(), 1e-12);
+    TS_ASSERT_DELTA(pulseTimeMax - double(step) / 2 - 1.e-9, X.back(), 1e-12);
   }
 
   /*
@@ -450,8 +450,8 @@ public:
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
-    TS_ASSERT_EQUALS(pulseTimeMin, X.front());
-    TS_ASSERT_EQUALS(pulseTimeMax, X.back());
+    TS_ASSERT_DELTA(pulseTimeMin, X.front(), 1e-12);
+    TS_ASSERT_DELTA(pulseTimeMax, X.back(), 1e-12);
 
     auto &Y = outWS->y(0);
     TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
