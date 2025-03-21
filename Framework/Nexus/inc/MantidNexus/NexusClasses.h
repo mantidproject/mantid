@@ -425,7 +425,6 @@ public:
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-
   /**
    * Check if a path exists relative to the current class path
    * @param path :: A string representing the path to test

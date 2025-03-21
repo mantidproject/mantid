@@ -1,10 +1,11 @@
-set(SRC_FILES # src/H5Util.cpp
+set(SRC_FILES 
+    src/H5Util.cpp
     # src/NexusClasses.cpp
     src/napi.cpp src/napi5.cpp src/NeXusException.cpp src/NeXusFile.cpp src/nxstack.cpp src/stptok.cpp
 )
 
 set(INC_FILES
-    # inc/MantidNexus/H5Util.h
+    inc/MantidNexus/H5Util.h
     # inc/MantidNexus/NexusClasses.h
     # inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NeXusFile_fwd.h
