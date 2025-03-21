@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
-#include <Poco/Logger.h>
+// #include <Poco/Logger.h>
 
 #include <H5Cpp.h>
 
@@ -22,7 +22,7 @@ namespace Mantid::NeXus::H5Util {
 
 namespace {
 /// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
-const auto g_log = &Poco::Logger::get("H5Util");
+// const auto g_log = &Poco::Logger::get("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
 const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
@@ -38,6 +38,14 @@ template <> MANTID_NEXUS_DLL DataType getType<float>() { return PredType::NATIVE
 
 template <> MANTID_NEXUS_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
 
+template <> MANTID_NEXUS_DLL DataType getType<int8_t>() { return PredType::NATIVE_SCHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint8_t>() { return PredType::NATIVE_UCHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<int16_t>() { return PredType::NATIVE_INT16; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint16_t>() { return PredType::NATIVE_UINT16; }
+
 template <> MANTID_NEXUS_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
@@ -45,6 +53,10 @@ template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NAT
 template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
+
+template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::NATIVE_CHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::NATIVE_CHAR; }
 
 /** Operations for help with narrowing casts */
 namespace {
@@ -309,10 +321,10 @@ void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vec
     readArray1DCoerce<OutT, narrow>(dataset, output);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
-    g_log->information("Failed to open dataset \"" + name + "\"\n");
+    // g_log->information("Failed to open dataset \"" + name + "\"\n");
   } catch (const H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
+    // g_log->information("DataSet \"" + name + "\" should be double" + "\n");
   }
 }
 
@@ -324,10 +336,10 @@ std::vector<OutT> readArray1DCoerce(const H5::Group &group, const std::string &n
     readArray1DCoerce<OutT, narrow>(dataset, result);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
-    g_log->information("Failed to open dataset \"" + name + "\"\n");
+    // g_log->information("Failed to open dataset \"" + name + "\"\n");
   } catch (const H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
+    // g_log->information("DataSet \"" + name + "\" should be double" + "\n");
   }
 
   return result;

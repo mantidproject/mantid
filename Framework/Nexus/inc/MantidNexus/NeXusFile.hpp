@@ -45,12 +45,13 @@ public:
    */
   AttrInfo getNextAttr();
 
+private:
+
   /**
    * Initialize the pending group search to start again.
    */
   void initGroupDir();
 
-private:
   /**
    * Initialize the pending attribute search to start again.
    */
@@ -361,7 +362,8 @@ public:
   /**
    * \param data The data to put in the file.
    */
-  void putData(const void *data);
+  template <typename NumT>
+  void putData(const NumT *data);
 
   /**
    * \param data The data to put in the file.
@@ -467,7 +469,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  // void getData(void *data);
+  template <typename NumT> void getData(NumT *data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -477,7 +479,7 @@ public:
    * \param data Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void getData(std::vector<NumT> &data);
+  template <typename NumT> void getData(std::vector<NumT> &data);
 
   /** Get data and coerce into an int vector.
    *
@@ -540,7 +542,7 @@ public:
   /**
    * \return The Info structure that describes the currently open data.
    */
-  // Info getInfo();
+  Info getInfo();
 
   /**
    * Return the entries available in the current place in the file.
@@ -637,7 +639,5 @@ public:
  * \tparam NumT numeric data type of \a number to check
  */
 template <typename NumT> MANTID_NEXUS_DLL NXnumtype getType(NumT const number = NumT());
-
-MANTID_NEXUS_DLL NXstatus setCache(long newVal);
 
 }; // namespace NeXus
