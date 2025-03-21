@@ -72,7 +72,7 @@ public:
     int const nFiles = 10;
     int const nEntry = 10;
     int const nData = 10;
-    vector<short int> const i2_array{1000, 2000, 3000, 4000};
+    vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
 
     cout << "Running Leak Test 2: " << nFiles << " iterations\n";
 
@@ -99,7 +99,7 @@ public:
             DimVector dims({(int64_t)i2_array.size()});
             fileid.makeData(oss3, NXnumtype::INT16, dims);
             fileid.openData(oss3);
-            fileid.putData(&i2_array);
+            fileid.putData(i2_array.data());
             fileid.closeData();
           }
           fileid.closeGroup();
@@ -131,10 +131,10 @@ public:
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     fflush(stdout);
-    int aiBinaryData[iBinarySize];
+    int16_t aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
-      aiBinaryData[i] = rand();
+      aiBinaryData[i] = static_cast<int16_t>(rand());
     }
     cout << "Created " << iBinarySize << " random integers\n";
 
@@ -157,7 +157,7 @@ public:
             std::string oss3(strmakef("i2_data_%d", iData));
             fileid.makeCompData(oss3, NXnumtype::INT16, array_dims, NXcompression::LZW, array_dims);
             fileid.openData(oss3);
-            fileid.putData(&aiBinaryData);
+            fileid.putData(&(aiBinaryData[0]));
             fileid.closeData();
           }
           fileid.closeGroup();

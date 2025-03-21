@@ -355,7 +355,7 @@ public:
   /**
    * \param data The data to put in the file.
    */
-  void putData(const void *data);
+  template <typename NumT> void putData(const NumT *data);
 
   /**
    * \param data The data to put in the file.
@@ -400,7 +400,7 @@ public:
    * \copydoc NeXus::File::putSlab(void* data, DimSizeVector& start,
    *                                DimSizeVector& size)
    */
-  void putSlab(const void *data, const std::vector<int> &start, const std::vector<int> &size);
+  template <typename NumT> void putSlab(const NumT *data, const std::vector<int> &start, const std::vector<int> &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -409,7 +409,7 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  void putSlab(const void *data, const DimSizeVector &start, const DimSizeVector &size);
+  template <typename NumT> void putSlab(const NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
    * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, DimSizeVector&,
@@ -461,7 +461,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  void getData(void *data);
+  template <typename NumT> void getData(NumT *data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -549,10 +549,10 @@ public:
   void getEntries(Entries &result);
 
   /**
-   * \copydoc NeXus::File::getSlab(void*, const DimSizeVector&,
+   * \copydoc NeXus::File::getSlab(NumT*, const DimSizeVector&,
    *                               const DimSizeVector&)
    */
-  void getSlab(void *data, const std::vector<int> &start, const std::vector<int> &size);
+  template <typename NumT> void getSlab(NumT *data, const std::vector<int> &start, const std::vector<int> &size);
 
   /**
    * Get a section of data from the file.
@@ -562,7 +562,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  void getSlab(void *data, const DimSizeVector &start, const DimSizeVector &size);
+  template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
    * \return Information about all attributes on the data that is
