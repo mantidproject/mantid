@@ -318,6 +318,7 @@ template <> DLLExport bool withinAbsoluteDifference<V3D, double>(V3D const V1, V
  */
 template <> DLLExport bool withinRelativeDifference<V3D, double>(V3D const V1, V3D const V2, double const tolerance) {
   // NOTE we must avoid sqrt as much as possible
+  // cppcheck-suppress variableScope
   double tol2 = tolerance * tolerance;
   double diff2 = (V1 - V2).norm2(), denom4;
   if (diff2 < 1 && diff2 <= std::numeric_limits<double>::epsilon()) {
