@@ -68,7 +68,7 @@ if(LIBRDKAFKA_FOUND)
       inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
       inc/MantidLiveData/Kafka/IKafkaBroker.h
       inc/MantidLiveData/Kafka/IKafkaStreamDecoder.h
-      inc/MantidLiveData/Kafka/IKafkaStreamDecoder.tcc
+      inc/MantidLiveData/Kafka/IKafkaStreamDecoder.hxx
       inc/MantidLiveData/Kafka/KafkaBroker.h
       inc/MantidLiveData/Kafka/KafkaHistoListener.h
       inc/MantidLiveData/Kafka/KafkaHistoStreamDecoder.h

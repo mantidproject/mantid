@@ -14,7 +14,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 
 // PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 #include <boost/algorithm/string/split.hpp>
 

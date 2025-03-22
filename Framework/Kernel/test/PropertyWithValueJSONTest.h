@@ -9,7 +9,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include <cxxtest/TestSuite.h>
 #include <json/value.h>

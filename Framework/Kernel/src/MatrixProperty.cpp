@@ -9,7 +9,7 @@
 
 // PropertyWithValue implementation
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 namespace Mantid::Kernel {
 /**

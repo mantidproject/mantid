@@ -22,7 +22,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 // PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 namespace Mantid::Kernel {
 

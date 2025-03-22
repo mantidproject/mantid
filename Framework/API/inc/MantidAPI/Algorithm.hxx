@@ -29,15 +29,15 @@ void setWorkspaceProperty(Mantid::API::WorkspaceProperty<T1> *wsProp, const T2 &
 namespace Mantid {
 namespace API {
 /** Declare a property which defines the workspace and allowed index types, as
-* well as a property for capturing the indices all at once. This method is
-* only enabled if T is convertible to MatrixWorkspace.
-@param propertyName Name of property which will be reserved
-@param allowedIndexTypes combination of allowed index types. Default
-IndexType::WorkspaceIndex
-@param wsPropArgs a parameter pack of arguments forwarded to WorkspaceProperty.
-Can contain PropertyMode, LockMode, and validators.
-@param doc Property documentation string.
-*/
+ * well as a property for capturing the indices all at once. This method is
+ * only enabled if T is convertible to MatrixWorkspace.
+ * The AllowedIndexTypes combination of allowed index types. Default IndexType::WorkspaceIndex
+ *
+ * @param propertyName Name of property which will be reserved
+ * @param wsPropArgs a parameter pack of arguments forwarded to WorkspaceProperty.
+ * Can contain PropertyMode, LockMode, and validators.
+ * @param doc Property documentation string.
+ */
 template <typename T, const int AllowedIndexTypes, typename... WSPropArgs, typename>
 void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName, const std::string &doc,
                                                 WSPropArgs &&...wsPropArgs) {

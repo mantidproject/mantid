@@ -16,7 +16,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 // WorkspaceProperty implementation
-#include "MantidAPI/WorkspaceProperty.tcc"
+#include "MantidAPI/WorkspaceProperty.hxx"
 
 namespace Mantid::API {
 ///@cond TEMPLATE

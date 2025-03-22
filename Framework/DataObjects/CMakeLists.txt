@@ -82,24 +82,24 @@ set(INC_FILES
     inc/MantidDataObjects/GroupingWorkspace.h
     inc/MantidDataObjects/Histogram1D.h
     inc/MantidDataObjects/MDBin.h
-    inc/MantidDataObjects/MDBin.tcc
+    inc/MantidDataObjects/MDBin.hxx
     inc/MantidDataObjects/MDBox.h
-    inc/MantidDataObjects/MDBox.tcc
+    inc/MantidDataObjects/MDBox.hxx
     inc/MantidDataObjects/MDBoxBase.h
-    inc/MantidDataObjects/MDBoxBase.tcc
+    inc/MantidDataObjects/MDBoxBase.hxx
     inc/MantidDataObjects/MDBoxFlatTree.h
     inc/MantidDataObjects/MDBoxIterator.h
-    inc/MantidDataObjects/MDBoxIterator.tcc
+    inc/MantidDataObjects/MDBoxIterator.hxx
     inc/MantidDataObjects/MDBoxSaveable.h
     inc/MantidDataObjects/MDDimensionStats.h
     inc/MantidDataObjects/MDEvent.h
     inc/MantidDataObjects/MDEventFactory.h
     inc/MantidDataObjects/MDEventInserter.h
     inc/MantidDataObjects/MDEventWorkspace.h
-    inc/MantidDataObjects/MDEventWorkspace.tcc
+    inc/MantidDataObjects/MDEventWorkspace.hxx
     inc/MantidDataObjects/MDFramesToSpecialCoordinateSystem.h
     inc/MantidDataObjects/MDGridBox.h
-    inc/MantidDataObjects/MDGridBox.tcc
+    inc/MantidDataObjects/MDGridBox.hxx
     inc/MantidDataObjects/MDHistoWorkspace.h
     inc/MantidDataObjects/MDHistoWorkspaceIterator.h
     inc/MantidDataObjects/MDLeanEvent.h

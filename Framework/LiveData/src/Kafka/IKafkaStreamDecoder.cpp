@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidLiveData/Kafka/IKafkaStreamDecoder.hxx"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Logger.h"

@@ -300,9 +300,9 @@ TMDE(void MDBox)::releaseEvents() {
 /** The method to convert events in a box into a table of
  * coordinates/signal/errors casted into coord_t type
  *   Used to save events from plain binary file
- *   @returns coordTable -- vector of events parameters in the form signal,
+ *   @param coordTable -- vector of events parameters in the form signal,
  * error, [detID,rinId], eventsCoordinates....
- *   @return nColumns    -- number of parameters for each event
+ *   @param nColumns    -- number of parameters for each event
  */
 TMDE(void MDBox)::getEventsData(std::vector<coord_t> &coordTable, size_t &nColumns) const {
   double signal, errorSq;
@@ -559,6 +559,7 @@ TMDE(void MDBox)::generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFu
  * @param[out] integratedSignal :: set to the integrated signal
  * @param[out] errorSquared :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
+ * @param useOnePercentBackgroundCorrection :: some bonus correction
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
                                   signal_t &integratedSignal, signal_t &errorSquared, const coord_t innerRadiusSquared,

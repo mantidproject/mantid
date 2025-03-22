@@ -43,7 +43,7 @@
 #include <utility>
 
 // Index property handling template definitions
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.hxx"
 
 using namespace Mantid::Kernel;
 

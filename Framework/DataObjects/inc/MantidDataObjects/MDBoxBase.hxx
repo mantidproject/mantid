@@ -212,7 +212,7 @@ TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices
         }
         outd++;
       } // the dimensions is used in the output.
-    }   // (for each INPUT dimension)
+    } // (for each INPUT dimension)
   }
   return out;
 }
