@@ -30,7 +30,7 @@ We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due 
 - Select the ``Python Interpreter`` option.
 - Click ``Add Interpreter`` on the top right, then ``Add Local Interpreter...``.
 - From the left side of the window select ``Conda Environment``.
-- Add the path to your Conda executable, e.g. ``C:\Users\<username>\AppData\Local\mambaforge\Scripts\conda.exe`` and click ``Load Environments``.
+- Add the path to your Conda executable, e.g. ``C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe`` and click ``Load Environments``.
 - Click the ``Use Existing environment`` radio button and select the ``mantid-developer`` environment in the drop down list.
 - Click OK to close the window.
 - Ensure that next to ``Python Interpreter:`` it says ``mantid-developer``. You will also see a list of the python packages installed in your mantid-developer environment.
