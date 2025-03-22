@@ -423,6 +423,7 @@ signals:
   void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void sampleMaterialClicked(const QStringList &workspaceNames);
   void sampleShapeClicked(const QStringList &workspaceNames);
+  void showNewInstrumentViewClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
