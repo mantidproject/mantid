@@ -498,7 +498,7 @@ V3D V3D::directionAngles(bool inDegrees) const {
   Vector maximum absolute integer value
   @return maxCoeff()
 */
-int V3D::maxCoeff() {
+int V3D::maxCoeff() const {
   int MaxOrder = 0;
   if (std::abs(static_cast<int>(m_pt[0])) > MaxOrder)
     MaxOrder = std::abs(static_cast<int>(m_pt[0]));

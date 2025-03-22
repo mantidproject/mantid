@@ -165,7 +165,7 @@ inline bool withinAbsoluteDifference(T const x, T const y, S const tolerance, MA
   // handle the case of infinities
   if (std::isinf(x) && std::isinf(y))
     // if both are +inf, return true; if both -inf, return true; else false
-    return isnan(static_cast<S>(x - y));
+    return std::isnan(static_cast<S>(x - y));
   return ltEquals(static_cast<S>(absoluteDifference<T>(x, y)), tolerance);
 }
 
@@ -285,5 +285,76 @@ template DLLExport bool withinRelativeDifference<long long, double>(long long co
 template DLLExport bool withinRelativeDifference<unsigned long long, double>(unsigned long long const,
                                                                              unsigned long long const, double const);
 ///@endcond
+
+/// Template specialization for V3D
+
+/**
+ * Compare 3D vectors (class V3D) for absolute difference to
+ * within the given tolerance.  The ansolute difference is calculated as
+ *   abs diff = ||V1 - V2||
+ * consistent with other normalized vector binary operations.
+ * @param V1 :: first value
+ * @param V2 :: second value
+ * @param tolerance :: the tolerance
+ * @returns True if the vectorsare considered equal within the given tolerance,
+ * false otherwise.  False if any value in either vector is an NaN.
+ */
+template <> DLLExport bool withinAbsoluteDifference<V3D, double>(V3D const V1, V3D const V2, double const tolerance) {
+  // we want ||V1-V2|| < tol
+  // NOTE ||V1-V2||^2 < tol^2 --> ||V1-V2|| < tol, since both are non-negative
+  return ltEquals((V1 - V2).norm2(), tolerance * tolerance);
+}
+
+/**
+ * Compare 3D vectors (class V3D) for relative difference to
+ * within the given tolerance.  The relative difference is calculated as
+ *   rel diff = ||V1 - V2||/sqrt(||V1||*||V2||)
+ * consistent with other normalized vector binary operations.
+ * @param V1 :: first value
+ * @param V2 :: second value
+ * @param tolerance :: the tolerance
+ * @returns True if the vectorsare considered equal within the given tolerance,
+ * false otherwise.  False if any value in either vector is an NaN.
+ */
+template <> DLLExport bool withinRelativeDifference<V3D, double>(V3D const V1, V3D const V2, double const tolerance) {
+  // NOTE we must avoid sqrt as much as possible
+  // cppcheck-suppress variableScope
+  double tol2 = tolerance * tolerance;
+  double diff2 = (V1 - V2).norm2(), denom4;
+  if (diff2 < 1 && diff2 <= std::numeric_limits<double>::epsilon()) {
+    // make sure not due to underflow
+    double const scale = std::max({V1.X(), V1.Y(), V1.Z()});
+    if (scale < 1 && scale * scale < std::numeric_limits<double>::epsilon()) {
+      V3D const v1 = V1 / scale, v2 = V2 / scale;
+      diff2 = (v1 - v2).norm();
+      denom4 = std::sqrt(v1.norm()) * sqrt(v2.norm());
+      return ltEquals(diff2, denom4 * tolerance);
+    }
+    // if the difference has zero length, the vectors are equal, this test passes
+    return true;
+  } else {
+    // otherwise we must calculate the denominator
+    denom4 = static_cast<double>(V1.norm2() * V2.norm2());
+    // NOTE for large numbers, risk of overflow -- normalize by max(V1)
+    // ||V1-V2||/sqrt(||V1||*||V2||) * (a/a) = ||(aV1)-(aV2)||/sqrt(||aV1||*||aV2||)
+    if (std::isinf(denom4)) {
+      double const scale = 1.0 / std::max({V1.X(), V1.Y(), V1.Z(), V2.X(), V2.Y(), V2.Z()});
+      V3D const v1 = V1 * scale, v2 = V2 * scale;
+      diff2 = (v1 - v2).norm();
+      denom4 = std::sqrt(v1.norm()) * sqrt(v2.norm());
+      tol2 = tolerance;
+    }
+    // if denom <= 1, then |x-y| > tol implies |x-y|/denom > tol, can return early
+    // NOTE can only return early if BOTH denom <= 1. AND |x-y| > tol.
+    if (denom4 <= 1. && !ltEquals(diff2, tol2)) { // NOTE ||V1||^2.||V2||^2 <= 1 --> sqrt(||V1||.||V2||) <= 1
+      return false;
+    } else {
+      // avoid division and sqrt for improved performance
+      // we want ||V1-V2||/sqrt(||V1||*||V2||) < tol
+      // NOTE ||V1-V2||^4 < ||V1||^2.||V2||^2 * tol^4 --> ||V1-V2||/sqrt(||V1||*||V2||) < tol
+      return ltEquals(diff2 * diff2, denom4 * tol2 * tol2);
+    }
+  }
+}
 
 } // namespace Mantid::Kernel
