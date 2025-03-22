@@ -1,0 +1,1 @@
+- Added new `TeixeiraWaterIqtFT` fitting function, which is the Fourier Transform of `TeixeiraWaterIqt` function. This is now available in the ConvFit tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface.

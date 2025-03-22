@@ -43,6 +43,7 @@ set(TEST_PY_FILES
     StretchedKTTest.py
     TeixeiraWaterTest.py
     TeixeiraWaterIqtTest.py
+    TeixeiraWaterIqtFTTest.py
     TFMuoniumTest.py
     ZFprotonDipoleTest.py
     ZFdipoleTest.py

@@ -70,6 +70,7 @@ private:
   }
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
+  std::string buildTeixeiraIqtFTFunctionString() const;
   std::string buildFickFunctionString() const;
   std::string buildChudleyElliotString() const;
   std::string buildHallRossString() const;
