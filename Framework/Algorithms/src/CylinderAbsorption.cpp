@@ -164,7 +164,7 @@ void CylinderAbsorption::initialiseCachedDistances() {
   const auto *shape = dynamic_cast<const Geometry::CSGObject *>(m_sampleObject);
   if (!shape)
     throw std::runtime_error("Failed to convert shape from IObject to CSGObject");
-  auto raster = Geometry::Rasterize::calculateCylinder(m_beamDirection, *shape, m_numSlices, m_numAnnuli);
+  auto raster = Geometry::Rasterize::calculateCylinder(m_beamDirection, *shape, *shape, m_numSlices, m_numAnnuli);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
