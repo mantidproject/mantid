@@ -2055,6 +2055,7 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 
 /*-------------------------------------------------------------------------*/
 
+// cppcheck-suppress constParameterCallback
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFile5 pFile;
   hid_t vid, iNew;
