@@ -112,6 +112,7 @@ protected:
 
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
+  std::string getResultsSuffix() const;
 
   Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr function,

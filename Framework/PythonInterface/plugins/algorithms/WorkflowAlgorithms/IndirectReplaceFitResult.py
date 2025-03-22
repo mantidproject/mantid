@@ -14,46 +14,46 @@ from mantid.api import (
     PropertyMode,
     WorkspaceGroup,
 )
+from typing import List, Union
 from mantid.kernel import Direction
 
 
-def string_ends_with(string, delimiter):
-    delimiter_length = len(delimiter)
-    return string[-delimiter_length:] == delimiter if len(string) > delimiter_length else False
+def string_ends_with(string: str, delimiters: List[str]) -> bool:
+    return any([string.endswith(delimiter) for delimiter in delimiters])
 
 
-def exists_in_ads(workspace_name):
+def exists_in_ads(workspace_name: str) -> bool:
     return AnalysisDataService.doesExist(workspace_name)
 
 
-def get_ads_workspace(workspace_name):
+def get_ads_workspace(workspace_name: str) -> bool:
     return AnalysisDataService.retrieve(workspace_name) if exists_in_ads(workspace_name) else None
 
 
-def contains_workspace(group, workspace):
+def contains_workspace(group: WorkspaceGroup, workspace) -> bool:
     return group.contains(workspace) if isinstance(group, WorkspaceGroup) else False
 
 
-def filter_by_contents(workspace_names, workspace):
+def filter_by_contents(workspace_names: List[str], workspace: str) -> List[str]:
     return [name for name in workspace_names if contains_workspace(get_ads_workspace(name), workspace)]
 
 
-def filter_by_name_end(workspace_names, delimiter):
-    return [name for name in workspace_names if string_ends_with(name, delimiter)]
+def filter_by_name_end(workspace_names: List[str], delimiters: List[str]) -> List[str]:
+    return [name for name in workspace_names if string_ends_with(name, delimiters)]
 
 
-def find_result_group_containing(workspace_name, group_extension):
-    workspace_names = AnalysisDataService.Instance().getObjectNames()
-    result_groups = filter_by_name_end(workspace_names, group_extension)
+def find_result_group_containing(workspace_name: str, group_extension: List[str]) -> Union[None, MatrixWorkspace]:
+    group_names = [ws for ws in AnalysisDataService.Instance().getObjectNames() if isinstance(get_ads_workspace(ws), WorkspaceGroup)]
+    result_groups = filter_by_name_end(group_names, group_extension)
     groups = filter_by_contents(result_groups, workspace_name)
     return groups[0] if groups else None
 
 
-def is_equal(a, b, tolerance):
+def is_equal(a: float, b: float, tolerance: float) -> bool:
     return abs(a - b) <= tolerance * max(abs(a), abs(b))
 
 
-def get_bin_index_of_value(workspace, value):
+def get_bin_index_of_value(workspace: MatrixWorkspace, value: float) -> int:
     x_axis = workspace.getAxis(0)
     for i in range(0, x_axis.length()):
         if is_equal(x_axis.getValue(i), value, 0.000001):
@@ -62,19 +62,21 @@ def get_bin_index_of_value(workspace, value):
     raise ValueError("The corresponding bin in the input workspace could not be found.")
 
 
-def get_x_insertion_index(input_workspace, single_fit_workspace):
+def get_x_insertion_index(input_workspace: MatrixWorkspace, single_fit_workspace: MatrixWorkspace) -> int:
     single_fit_x_axis = single_fit_workspace.getAxis(0)
     bin_value = float(single_fit_x_axis.label(0))
     return get_bin_index_of_value(input_workspace, bin_value)
 
 
-def get_indices_of_equivalent_labels(input_workspace, destination_workspace):
+def get_indices_of_equivalent_labels(input_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace) -> List[int]:
     input_labels = input_workspace.getAxis(1).extractValues()
     labels = destination_workspace.getAxis(1).extractValues()
     return [index for index, label in enumerate(labels) if label in input_labels]
 
 
-def fit_parameter_missing(single_fit_workspace, destination_workspace, exclude_parameters):
+def fit_parameter_missing(
+    single_fit_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace, exclude_parameters: List[str]
+) -> bool:
     single_parameters = single_fit_workspace.getAxis(1).extractValues()
     destination_parameters = destination_workspace.getAxis(1).extractValues()
     return any([parameter not in destination_parameters and parameter not in exclude_parameters for parameter in single_parameters])
@@ -91,7 +93,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
     _insertion_y_indices = None
 
     _result_group = None
-    _allowed_extension = "_Result"
+    _allowed_ws_extension = "_Result"
+    _allowed_group_extensions = ["_Result", "_Results"]
 
     def category(self):
         return "Workflow\\DataHandling;Inelastic\\Indirect"
@@ -117,7 +120,6 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-
         input_name = self.getPropertyValue("InputWorkspace")
         single_fit_name = self.getPropertyValue("SingleFitWorkspace")
         output_name = self.getPropertyValue("OutputWorkspace")
@@ -125,11 +127,11 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         input_workspace = self.getProperty("InputWorkspace").value
         single_fit_workspace = self.getProperty("SingleFitWorkspace").value
 
-        if not string_ends_with(input_name, self._allowed_extension):
-            issues["InputWorkspace"] = "The input workspace must have a name ending in {0}".format(self._allowed_extension)
+        if not string_ends_with(input_name, self._allowed_ws_extension):
+            issues["InputWorkspace"] = "The input workspace must have a name ending in {0}".format(self._allowed_ws_extension)
 
-        if not string_ends_with(single_fit_name, self._allowed_extension):
-            issues["SingleFitWorkspace"] = "This workspace must have a name ending in {0}".format(self._allowed_extension)
+        if not string_ends_with(single_fit_name, self._allowed_ws_extension):
+            issues["SingleFitWorkspace"] = "This workspace must have a name ending in {0}".format(self._allowed_ws_extension)
 
         if not output_name:
             issues["OutputWorkspace"] = "No OutputWorkspace name was provided."
@@ -177,7 +179,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._row_indices = get_indices_of_equivalent_labels(input_workspace, single_fit_workspace)
         self._insertion_y_indices = get_indices_of_equivalent_labels(single_fit_workspace, input_workspace)
 
-        self._result_group = find_result_group_containing(self._input_workspace, self._allowed_extension + "s")
+        self._result_group = find_result_group_containing(self._input_workspace, self._allowed_group_extensions)
 
     def PyExec(self):
         self._setup()
@@ -192,7 +194,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         for from_index, to_index in zip(self._row_indices[1:], self._insertion_y_indices[1:]):
             self._copy_value(from_index, to_index, self._output_workspace)
 
-    def _copy_value(self, row_index, insertion_index, destination_workspace):
+    def _copy_value(self, row_index: int, insertion_index: int, destination_workspace: MatrixWorkspace):
         copy_algorithm = self.createChildAlgorithm(name="CopyDataRange", startProgress=0.1, endProgress=1.0, enableLogging=True)
         copy_algorithm.setAlwaysStoreInADS(True)
 
