@@ -61,7 +61,7 @@ void export_Quat() {
       .def("__imul__", &Quat::operator*=, boost::python::return_self<>(), (arg("self"), arg("other")))
       .def("__eq__", &Quat::operator==, (arg("self"), arg("other")))
       .def("__ne__", &Quat::operator!=, (arg("self"), arg("other")))
-      .def("__getitem__", (double(Quat::*)(int) const) & Quat::operator[], (arg("self"), arg("index")))
+      .def("__getitem__", (double (Quat::*)(int) const) & Quat::operator[], (arg("self"), arg("index")))
       .def("__str__", &Quat::toString, arg("self"));
   //.def(boost::python::self_ns::str(self));
 }

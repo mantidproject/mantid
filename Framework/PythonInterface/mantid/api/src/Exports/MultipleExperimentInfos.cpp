@@ -32,9 +32,10 @@ void addExperimentInfo(MultipleExperimentInfos &self, const boost::python::objec
 
 void export_MultipleExperimentInfos() {
   class_<MultipleExperimentInfos, boost::noncopyable>("MultipleExperimentInfos", no_init)
-      .def("getExperimentInfo",
-           (ExperimentInfo_sptr(MultipleExperimentInfos::*)(const uint16_t))&MultipleExperimentInfos::getExperimentInfo,
-           (arg("self"), arg("expInfoIndex")), "Return the experiment info at the given index.")
+      .def(
+          "getExperimentInfo",
+          (ExperimentInfo_sptr (MultipleExperimentInfos::*)(const uint16_t))&MultipleExperimentInfos::getExperimentInfo,
+          (arg("self"), arg("expInfoIndex")), "Return the experiment info at the given index.")
       .def("addExperimentInfo", addExperimentInfo, (arg("self"), arg("ExperimentalInfo")),
            "Add a new :class:`~mantid.api.ExperimentInfo` to this "
            ":class:`~mantid.api.IMDWorkspace`")

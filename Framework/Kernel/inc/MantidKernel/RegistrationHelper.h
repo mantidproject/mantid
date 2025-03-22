@@ -19,7 +19,7 @@ namespace Kernel {
  *
  * The MANTID_KERNEL_DLL needs to be available where this helper is imported and used.
  */
-class MANTID_KERNEL_DLL RegistrationHelper{// clang-format off
+class MANTID_KERNEL_DLL RegistrationHelper { // clang-format off
 public:
   /** Constructor. Does nothing.
    * @param i :: Takes an int and does nothing with it

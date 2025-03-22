@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL LoadStlFactory{
+class MANTID_DATAHANDLING_DLL LoadStlFactory {
 
   // clang-format off
 public :
@@ -29,7 +29,7 @@ static std::unique_ptr<LoadStl> createReader(const std::string &filename, ScaleU
   }
   return reader;
 }
-// clang-format on
+  // clang-format on
 
 }; // namespace Mantid
 

@@ -68,24 +68,24 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
 
   def("create2DWorkspace123WithMaskedBin", reinterpret_cast<Signature3_2D>(&create2DWorkspace123WithMaskedBin));
   def("create2DWorkspaceWithGeographicalDetectors",
-      (Workspace2D_sptr(*)(const int, const int, const double, const int, const double, const double,
-                           const std::string &, const std::string &))create2DWorkspaceWithGeographicalDetectors,
+      (Workspace2D_sptr (*)(const int, const int, const double, const int, const double, const double,
+                            const std::string &, const std::string &))create2DWorkspaceWithGeographicalDetectors,
       create2DWorkspaceWithGeographicalDetectors_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
 
   //=================================== Event Workspaces
   //===================================
 
-  def("createEventWorkspace", (EventWorkspace_sptr(*)())createEventWorkspace,
+  def("createEventWorkspace", (EventWorkspace_sptr (*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspace2", &createEventWorkspace2, return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspaceWithNonUniformInstrument",
-      (EventWorkspace_sptr(*)(const int, const bool))createEventWorkspaceWithNonUniformInstrument,
+      (EventWorkspace_sptr (*)(const int, const bool))createEventWorkspaceWithNonUniformInstrument,
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== Peak Workspaces
   //===================================
 
-  def("createPeaksWorkspace", (PeaksWorkspace_sptr(*)(const int, const bool))createPeaksWorkspace,
+  def("createPeaksWorkspace", (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,
       (arg("numPeaks") = 2, arg("createOrientedLattice") = false), return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== MD Workspaces
