@@ -128,7 +128,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
       }
     }
   }
-  double xsMaxEpsilon = *(std::max_element(xs.begin(), xs.end()))*std::numeric_limits<double>::epsilon();
+  double xsMaxEpsilon = *(std::max_element(xs.begin(), xs.end())) * std::numeric_limits<double>::epsilon();
   // elements with i=j will have the largest value
   double hMaxEpsilon = xsMaxEpsilon * 2 / 3;
 

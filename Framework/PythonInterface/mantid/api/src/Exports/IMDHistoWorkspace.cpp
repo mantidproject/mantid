@@ -226,17 +226,17 @@ void export_IMDHistoWorkspace() {
       .def("getInverseVolume", &IMDHistoWorkspace::getInverseVolume, arg("self"),
            return_value_policy<return_by_value>(), "Return the inverse of volume of EACH cell in the workspace.")
 
-      .def("getLinearIndex", (size_t(IMDHistoWorkspace::*)(size_t, size_t) const)&IMDHistoWorkspace::getLinearIndex,
+      .def("getLinearIndex", (size_t (IMDHistoWorkspace::*)(size_t, size_t) const) & IMDHistoWorkspace::getLinearIndex,
            (arg("self"), arg("index1"), arg("index2")), return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 2D array")
 
       .def("getLinearIndex",
-           (size_t(IMDHistoWorkspace::*)(size_t, size_t, size_t) const)&IMDHistoWorkspace::getLinearIndex,
+           (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t) const) & IMDHistoWorkspace::getLinearIndex,
            (arg("self"), arg("index1"), arg("index2"), arg("index3")), return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 3D array")
 
       .def("getLinearIndex",
-           (size_t(IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t) const)&IMDHistoWorkspace::getLinearIndex,
+           (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t) const) & IMDHistoWorkspace::getLinearIndex,
            (arg("self"), arg("index1"), arg("index2"), arg("index3"), arg("index4")),
            return_value_policy<return_by_value>(), "Get the 1D linear index from the 4D array")
 

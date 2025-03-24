@@ -82,13 +82,13 @@ void export_IPeak() {
       .def("setIntHKL", &IPeak::setIntHKL, (arg("self"), arg("hkl")), "Set the integer HKL for this peak")
       .def("getSamplePos", &IPeak::getSamplePos, arg("self"),
            "Get the cached samplePos as a :class:`~mantid.kernel.V3D` object")
-      .def("setHKL", (void(IPeak::*)(double, double, double)) & IPeak::setHKL,
+      .def("setHKL", (void (IPeak::*)(double, double, double))&IPeak::setHKL,
            (arg("self"), arg("h"), arg("k"), arg("l")), "Set the HKL values of this peak")
-      .def("setSamplePos", (void(IPeak::*)(double, double, double)) & IPeak::setSamplePos,
+      .def("setSamplePos", (void (IPeak::*)(double, double, double))&IPeak::setSamplePos,
            (arg("self"), arg("samX"), arg("samY"), arg("samZ")),
            "Set the samplePos value of this peak.  It does not set the "
            "instrument sample position.")
-      .def("setSamplePos", (void(IPeak::*)(const Mantid::Kernel::V3D &)) & IPeak::setSamplePos,
+      .def("setSamplePos", (void (IPeak::*)(const Mantid::Kernel::V3D &))&IPeak::setSamplePos,
            (arg("self"), arg("newPos")),
            "Set the samplePos value of this peak.  It does not set the "
            "instrument sample position.")
@@ -185,7 +185,7 @@ void export_IPeak() {
       .def("setPeakShape", setPeakShape, (arg("self"), arg("shape")), "Set the peak shape")
       .def("getAbsorptionWeightedPathLength", &IPeak::getAbsorptionWeightedPathLength, arg("self"),
            "Get the absorption weighted path length")
-      .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame>(IPeak::*)()) & IPeak::getReferenceFrame,
+      .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame> (IPeak::*)())&IPeak::getReferenceFrame,
            arg("self"), return_value_policy<RemoveConstSharedPtr>(),
            "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
            "defines the instrument axes")
