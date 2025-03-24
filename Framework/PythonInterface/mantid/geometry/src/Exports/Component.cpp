@@ -35,6 +35,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos, Component::getR
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription, Component::getParamShortDescription, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription, Component::getParamDescription, 1, 2)
 
+// }
+
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 } // namespace
@@ -77,6 +79,9 @@ void export_Component() {
       // untill rows below do not work
       .def("getParameterType", &Component::getParameterType,
            Component_getParameterType((arg("self"), arg("pname"), arg("recursive") = true)))
+      .def("getFittingParameter", &Component::getFittingParameter, (arg("self"), arg("pname"), arg("xvalue")),
+           "Get fit parameter from the parameter map."
+           " The value of the parameter is determined from a look up table or a formula")
       //// this does not work for some obvious or not obvious reasons
       //.def("getParameter", &Component::getNumberParameter,
       // Component_getNumberParameter())
