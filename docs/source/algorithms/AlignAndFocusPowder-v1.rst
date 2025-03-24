@@ -32,7 +32,6 @@ The way that algorithms are connected together is better described in the workfl
 - :ref:`algm-RemoveLowResTOF` ``CropWavelengthMin`` and ``CropWavelengthMax`` are prefered
 - :ref:`algm-RemovePromptPulse`
 - :ref:`algm-SortEvents` (event workspace only)
-- :ref:`algm-UnwrapSNS`
 
 
 
