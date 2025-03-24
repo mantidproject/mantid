@@ -255,6 +255,16 @@ public:
   /**
    * Get the value of an attribute that is a scalar number.
    *
+   * \param info Designation of which attribute to read.
+   * \tparam NumT numeric data type of result
+   *
+   * \return The attribute value.
+   */
+  template <typename NumT> NumT getAttr(const AttrInfo &info);
+
+  /**
+   * Get the value of an attribute that is a scalar number.
+   *
    * \param[in] name Name of attribute to read
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
