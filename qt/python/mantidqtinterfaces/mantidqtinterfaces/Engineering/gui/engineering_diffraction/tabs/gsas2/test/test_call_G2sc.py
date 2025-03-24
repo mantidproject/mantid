@@ -25,9 +25,13 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     export_reflections,
     export_refined_instrument_parameters,
     export_lattice_parameters,
+    limited_rglob,
+    find_gsasii,
 )
 
 import numpy as np
+from pathlib import Path
+from types import ModuleType
 
 
 class GSAS2ViewTest(unittest.TestCase):
@@ -268,3 +272,105 @@ class GSAS2ViewTest(unittest.TestCase):
         with open(os.path.join(self.temp_save_directory, "project_cell_parameters_phase_2.txt"), "rt", encoding="utf-8") as file:
             str_2 = file.read()
             self.assertEqual(str_2, """{"Microstrain":10}""")
+
+
+class TestLimitedRglob(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.test_dir)
+
+    def create_test_files(self, files):
+        for file in files:
+            file_path = os.path.join(self.test_dir, file)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, "w") as f:
+                f.write("test")
+
+    def test_limited_rglob_match_at_parent_level(self):
+        files = ["file1.txt", "file2.log"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=0))
+        expected = [Path(self.test_dir) / "file1.txt"]
+        self.assertEqual(result, expected)
+
+    def test_limited_rglob_single_level(self):
+        files = ["dir1/file1.txt", "dir1/file2.txt"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
+        expected = [Path(self.test_dir) / file for file in files]
+        self.assertCountEqual(result, expected)
+
+    def test_limited_rglob_exceeds_max_depth(self):
+        files = ["dir1/dir2/file1.txt", "dir1/dir2/dir3/file2.txt"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
+        self.assertCountEqual(result, [])
+
+    def test_limited_rglob_no_match(self):
+        files = ["dir1/file1.txt", "dir1/file2.log"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.csv", max_depth=1))
+        self.assertEqual(result, [])
+
+    def test_limited_rglob_multiple_levels(self):
+        files = ["dir1/dir2/dir3/file1.txt", "dir1/dir2/dir3/dir4/file2.txt", "dir1/dir2/dir3/dir4/dir5/file3.txt"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=4))
+        expected = [
+            Path(self.test_dir) / "dir1/dir2/dir3/file1.txt",
+            Path(self.test_dir) / "dir1/dir2/dir3/dir4/file2.txt",
+        ]
+        self.assertCountEqual(result, expected)
+
+    def test_limited_rglob_exact_max_depth(self):
+        files = ["dir1/dir2/file1.txt", "dir1/dir2/dir3/file2.txt"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=2))
+        expected = [Path(self.test_dir) / "dir1/dir2/file1.txt"]
+        self.assertCountEqual(result, expected)
+
+    def test_limited_rglob_different_patterns(self):
+        files = ["dir1/file1.txt", "dir1/file2.log", "dir1/file3.csv"]
+        self.create_test_files(files)
+        result_txt = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
+        result_log = list(limited_rglob(Path(self.test_dir), "*.log", max_depth=1))
+        result_csv = list(limited_rglob(Path(self.test_dir), "*.csv", max_depth=1))
+        self.assertCountEqual(result_txt, [Path(self.test_dir) / "dir1/file1.txt"])
+        self.assertCountEqual(result_log, [Path(self.test_dir) / "dir1/file2.log"])
+        self.assertCountEqual(result_csv, [Path(self.test_dir) / "dir1/file3.csv"])
+
+    def test_limited_rglob_empty_directory(self):
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
+        self.assertEqual(result, [])
+
+    def test_limited_rglob_similar_directory_names(self):
+        files = ["dir1/file1.txt", "dir1_2/file2.txt"]
+        self.create_test_files(files)
+        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
+        expected = [
+            Path(self.test_dir) / "dir1/file1.txt",
+            Path(self.test_dir) / "dir1_2/file2.txt",
+        ]
+        self.assertCountEqual(result, expected)
+
+    def test_limited_rglob_invalid_directory(self):
+        with self.assertRaises(FileNotFoundError):
+            list(limited_rglob(Path("/invalid/directory"), "*.txt", max_depth=1))
+
+    def test_find_gsasii_success(self):
+        files = ["GSASIIscriptable.py"]
+        self.create_test_files(files)
+        with mock.patch("builtins.__import__", return_value=mock.Mock(spec=ModuleType)):
+            result = find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
+            self.assertIsInstance(result, ModuleType)
+
+    def test_find_gsasii_not_found(self):
+        with self.assertRaises(ImportError):
+            find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
+
+    def test_find_gsasii_import_error(self):
+        files = ["GSASIIscriptable.py"]
+        self.create_test_files(files)
+        with mock.patch("builtins.__import__", side_effect=ImportError):
+            with self.assertRaises(ImportError):
+                find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
