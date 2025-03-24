@@ -19,7 +19,7 @@
 # 'Remote determination of sample temperature by neutron resonance spectroscopy' - Nuclear Instruments and Methods in
 # Physics Research A 547 (2005) 601-615
 # -----------------------------------------------------------------------
-from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion
+from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion, LogicOperator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, mtd
 from scipy import constants
 import numpy as np
@@ -92,7 +92,6 @@ class PEARLTransfit(PythonAlgorithm):
     # Physical constants
     k = constants.k
     e = constants.e
-    Pi = np.pi
 
     def version(self):
         return 1
@@ -137,13 +136,13 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="True/False - provides more verbose output of procedure for debugging purposes",
         )
+
         self.declareProperty(
             name="EstimateBackground",
             defaultValue=True,
             direction=Direction.Input,
             doc="Estimate background parameters from data.",
         )
-
         self.declareProperty(
             name="Bg0guessFraction",
             defaultValue=0.84,
@@ -163,16 +162,21 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="Starting guess for quadratic term of polynomial background.",
         )
-        enable_bg_params = EnabledWhenProperty("EstimateBackground", PropertyCriterion.IsNotDefault)
-        for prop in ["Bg0guessFraction", "Bg1guess", "Bg2guess"]:
-            self.setPropertySettings(prop, enable_bg_params)
-
         self.declareProperty(
             name="RebinInEnergy",
             defaultValue=True,
             direction=Direction.Input,
             doc="Estimate background parameters from data.",
         )
+        # disable properties
+        is_cal = EnabledWhenProperty("Calibration", PropertyCriterion.IsNotDefault)
+        is_not_cal = EnabledWhenProperty("Calibration", PropertyCriterion.IsDefault)
+        self.setPropertySettings("Debug", is_not_cal)
+        self.setPropertySettings("EstimateBackground", is_cal)
+        is_bg_estimated = EnabledWhenProperty("EstimateBackground", PropertyCriterion.IsNotDefault)
+        enable_user_bg = EnabledWhenProperty(is_bg_estimated, is_cal, LogicOperator.And)
+        for prop in ["Bg0guessFraction", "Bg1guess", "Bg2guess"]:
+            self.setPropertySettings(prop, enable_user_bg)
         enable_Ediv = EnabledWhenProperty("RebinInEnergy", PropertyCriterion.IsDefault)
         self.setPropertySettings("Ediv", enable_Ediv)
 
@@ -219,7 +223,7 @@ class PEARLTransfit(PythonAlgorithm):
         # Factor of 1e3 converting to meV for Mantid
         energy = self.ResParamsDict[foil_type + "_En"]
         mass = self.ResParamsDict[foil_type + "_Mass"]
-        gauss_fwhm_ref_temp = 1000.0 * np.sqrt(4 * energy * self.k * refTemp * mass / (self.e * (1 + mass) ** 2))
+        gauss_fwhm_ref_temp = 1000.0 * np.sqrt(4 * energy * constants.k * refTemp * mass / (constants.e * (1 + mass) ** 2))
 
         # make initial function with constraints
         func = FunctionWrapper("PEARLTransVoigt")
@@ -334,7 +338,7 @@ class PEARLTransfit(PythonAlgorithm):
         }
 
     def calc_effective_temp_and_error(self, fwhm, fwhm_err, energy, energy_err, correlation, mass):
-        const = ((1e-3) * self.e * ((1 + mass) ** 2)) / (4 * self.k * mass)
+        const = ((1e-3) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
         temp = const * (fwhm**2) / energy
         # propagate errors assuming not corellated
         dtemp_by_dfwhm = 2 * fwhm / energy
