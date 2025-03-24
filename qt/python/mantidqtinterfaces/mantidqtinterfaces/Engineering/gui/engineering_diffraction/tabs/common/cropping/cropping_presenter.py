@@ -32,68 +32,49 @@ class CroppingPresenter(object):
 
     # Signal Activated Functions
 
-    def on_combo_changed(self, index):
-        if index == 0:  # custom grouping file
-            self.group = GROUP.CUSTOM
-            self.custom_groupingfile_enabled = True
-            self.custom_spectra_enabled = False
-            self.set_custom_widgets_visibility(True, False)
-        elif index == 1:  # north
-            self.group = GROUP.NORTH
-            self.custom_groupingfile_enabled = False
-            self.custom_spectra_enabled = False
-            self.set_custom_widgets_visibility(False, False)
-        elif index == 2:  # south
-            self.group = GROUP.SOUTH
-            self.custom_groupingfile_enabled = False
-            self.custom_spectra_enabled = False
-            self.set_custom_widgets_visibility(False, False)
-        elif index == 3:  # cropped
-            self.group = GROUP.CROPPED
-            self.custom_groupingfile_enabled = False
-            self.custom_spectra_enabled = True
-            self.set_custom_widgets_visibility(False, True)
-        elif index == 4:  # texture 20 grouping
-            self.group = GROUP.TEXTURE20
-            self.custom_groupingfile_enabled = False
-            self.custom_spectra_enabled = False
-            self.set_custom_widgets_visibility(False, False)
-        else:
-            self.group = GROUP.TEXTURE30
-            self.custom_groupingfile_enabled = False
-            self.custom_spectra_enabled = False
-            self.set_custom_widgets_visibility(False, False)
+    def on_combo_changed(self, index: int) -> None:
+        """
+        Handles the event when the combo box selection is changed.
+        GROUP.TEXTURE30 is the default group if no cropping is requested.
 
-    def on_groupingfile_changed(self):
+        :param index: The index of the selected item in the combo box.
+        """
+        group_mapping = {0: GROUP.CUSTOM, 1: GROUP.NORTH, 2: GROUP.SOUTH, 3: GROUP.CROPPED, 4: GROUP.TEXTURE20, 5: GROUP.TEXTURE30}
+        self.group = group_mapping.get(index, GROUP.TEXTURE30)
+        self.custom_groupingfile_enabled = index == 0
+        self.custom_spectra_enabled = index == 3
+        self.set_custom_widgets_visibility(index == 0, index == 3)
+
+    def on_groupingfile_changed(self) -> None:
         self.groupingfile_valid = self.view.finder_custom.isValid()
         self.custom_groupingfile = self.view.get_custom_groupingfile() if self.groupingfile_valid else None
 
-    def on_spectra_changed(self, text):
+    def on_spectra_changed(self, text: str) -> None:
         error, value = self.model.validate_and_clean_spectrum_numbers(text)
         self.custom_spectra = value if error == "" else None
         self.set_invalid_spectra_status(error)
 
     # Getters
 
-    def get_custom_groupingfile(self):
+    def get_custom_groupingfile(self) -> str:
         return self.custom_groupingfile
 
-    def get_custom_groupingfile_enabled(self):
+    def get_custom_groupingfile_enabled(self) -> bool:
         return self.custom_groupingfile_enabled
 
-    def get_custom_spectra(self):
+    def get_custom_spectra(self) -> str:
         return self.custom_spectra
 
-    def get_custom_spectra_enabled(self):
+    def get_custom_spectra_enabled(self) -> bool:
         return self.custom_spectra_enabled
 
-    def get_group(self):
+    def get_group(self) -> GROUP:
         return self.group
 
-    def is_groupingfile_valid(self):
+    def is_groupingfile_valid(self) -> bool:
         return self.groupingfile_valid
 
-    def is_spectra_valid(self):
+    def is_spectra_valid(self) -> bool:
         return self.spectra_valid
 
     # Setters
@@ -115,7 +96,7 @@ class CroppingPresenter(object):
             self.on_spectra_changed(self.view.get_custom_spectra_text())
             self.view.set_custom_spectra_widget_visible()
 
-    def set_invalid_spectra_status(self, text):
+    def set_invalid_spectra_status(self, text: str) -> None:
         if text:
             self.view.set_crop_invalid_indicator_visible(text)
             self.spectra_valid = False
