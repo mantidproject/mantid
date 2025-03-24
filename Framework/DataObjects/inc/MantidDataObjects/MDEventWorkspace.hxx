@@ -725,10 +725,6 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(const Mantid::Kernel::VMD 
  * @param start :: coordinates of the start point of the line
  * @param end :: coordinates of the end point of the line
  * @param normalize :: how to normalize the signal
- * @param x :: mid points between positions where the line crosses box
- *boundaries
- * @param y :: signal of the box in which corresponding x position lies
- * @param e :: error of the box in which corresponding x position lies
  */
 TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 ::getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
@@ -837,8 +833,7 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(const Kernel::SpecialCoordinate
 
 /**
   Set the display normalization for any subsequently generated histoworkspaces.
-  @param preferredNormalization : Display normalization preference to pass on to
-  generated histo workspaces.
+  @param preferredNormalizationHisto : Display normalization preference to pass on to generated histo workspaces.
 */
 TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
     const Mantid::API::MDNormalization preferredNormalizationHisto) {

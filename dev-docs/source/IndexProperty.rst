@@ -38,7 +38,7 @@ Property declaration is as shown below:
 
 .. code-block:: cpp
 
-  #include "MantidAPI/Algorithm.tcc"
+  #include "MantidAPI/Algorithm.hxx"
 
   // Declare property with default settings
   // IndexType::WorkspaceIndex is default

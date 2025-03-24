@@ -10,7 +10,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
-#include "MantidAPI/IFunction1D.tcc"
+#include "MantidAPI/IFunction1D.hxx"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"

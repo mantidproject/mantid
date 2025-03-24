@@ -164,7 +164,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidAPI/ADSValidator.h
     inc/MantidAPI/Algorithm.h
-    inc/MantidAPI/Algorithm.tcc
+    inc/MantidAPI/Algorithm.hxx
     inc/MantidAPI/AlgorithmFactory.h
     inc/MantidAPI/AlgorithmFactoryObserver.h
     inc/MantidAPI/AlgorithmHasProperty.h
@@ -361,7 +361,7 @@ set(INC_FILES
     inc/MantidAPI/WorkspaceNearestNeighbours.h
     inc/MantidAPI/WorkspaceOpOverloads.h
     inc/MantidAPI/WorkspaceProperty.h
-    inc/MantidAPI/WorkspaceProperty.tcc
+    inc/MantidAPI/WorkspaceProperty.hxx
     inc/MantidAPI/WorkspacePropertyUtils.h
     inc/MantidAPI/WorkspaceUnitValidator.h
     inc/MantidAPI/Workspace_fwd.h
