@@ -128,19 +128,15 @@ class CalibrationInfo:
 
     # setters
     def set_extra_group_suffix(self) -> None:
+        self.extra_group_suffix = ""
+        if not isinstance(self.grouping_filepath, str):
+            raise TypeError("The grouping file path must be a string")
         if self.group == GROUP.CUSTOM:
-            try:
-                self.set_grouping_filepath_from_prm_filepath()
-                self.extra_group_suffix = "_" + path.split(self.grouping_filepath)[1].split(".")[0]
-            except TypeError:
-                self.extra_group_suffix = ""
-        elif self.group == GROUP.CROPPED:
-            if self.spectra_list_str:
-                self.extra_group_suffix = "_" + self.spectra_list_str
-            else:
-                self.extra_group_suffix = ""
-        else:
-            self.extra_group_suffix = ""
+            self.set_grouping_filepath_from_prm_filepath()
+            filename = path.basename(self.grouping_filepath)
+            self.extra_group_suffix = f"_{path.splitext(filename)[0]}"
+        elif self.group == GROUP.CROPPED and self.spectra_list_str:
+            self.extra_group_suffix = f"_{self.spectra_list_str}"
 
     def set_prm_filepath(self, prm_filepath: Optional[str]) -> None:
         self.prm_filepath = prm_filepath
@@ -155,11 +151,10 @@ class CalibrationInfo:
     def set_calibration_from_prm_fname(self, file_path: str) -> None:
         """
         Determine the ROI, instrument and ceria run from the .prm calibration file that is being loaded
-        :param file_path: Path of the .prm file being loaded
+        :param file_path: Path of the .prm file being loaded, has form INSTRUMENT_ceriaRunNo_BANKS.ext
+        where BANKS = "all_banks", "bank_1", "bank_2", "Cropped_{specstr}", "Custom_{grpfp}", "Texture20", "Texture30"
         """
         basepath, fname = path.split(file_path)
-        # fname has form INSTRUMENT_ceriaRunNo_BANKS.ext
-        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped_specstr", "Custom_grpfp", "Texture20", "Texture30"
         inst_bank = fname.split("_")[:2]
         suffix = (fname[len("_".join(inst_bank)) + 1 :]).split(".")[0]  # string after INSTRUMENT_ceriaRunNo_ minus ext
         # for GROUP Enum: all_banks, bank_1 and bank_2 require the part after _, Cropped and Custom the part before _
