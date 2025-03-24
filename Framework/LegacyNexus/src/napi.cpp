@@ -546,7 +546,6 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
   pFileLgcyStack fileStack;
   pLgcyFunction pFunc = NULL;
 
@@ -590,7 +589,6 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
   pFileLgcyStack fileStack;
   pLgcyFunction pFunc = NULL;
 
