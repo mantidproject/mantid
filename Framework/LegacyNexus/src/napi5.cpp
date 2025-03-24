@@ -765,6 +765,33 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
   return NXstatus::NX_OK;
 }
 
+/*-------------------------------------------------------------------------*/
+
+/* Operator function. */
+
+herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
+  UNUSED_ARG(statbuf);
+  pinfo self = static_cast<pinfo>(op_data);
+  H5O_info1_t object_info;
+  // TODO use new version of method rather than v2
+  H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
+  switch ((object_info).type) {
+  case H5O_TYPE_GROUP:
+    self->iname = strdup(name);
+    self->type = H5O_TYPE_GROUP;
+    break;
+  case H5O_TYPE_DATASET:
+    self->iname = strdup(name);
+    self->type = H5O_TYPE_DATASET;
+    break;
+  default:
+    // TODO defaults to group. not what we would want?
+    self->type = 0;
+    break;
+  }
+  return 1;
+}
+
 /* --------------------------------------------------------------------- */
 
 /* Operator function. */
