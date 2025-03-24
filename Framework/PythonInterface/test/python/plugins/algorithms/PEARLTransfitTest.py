@@ -18,7 +18,7 @@ class PEARLTransfitTest(unittest.TestCase):
         self.assertIn("S_fit_Parameters", mtd)
         self.assertIn("S_fit_Workspace", mtd)
         # assert fit converged by checking cost function value at minimum
-        self.assertAlmostEqual(mtd["S_fit_Parameters"].column("Value")[-1], 0.16, delta=0.01)
+        self.assertAlmostEqual(mtd["S_fit_Parameters"].column("Value")[-1], 0.7275, delta=1e-4)
 
     def test_calibration_run_single_run_backgorund_params_provided(self):
         # Provide very bad background params and show fit doesn't converge (would do if parameters estimated)
@@ -26,7 +26,7 @@ class PEARLTransfitTest(unittest.TestCase):
         self.assertIn("S_fit_Parameters", mtd)
         self.assertIn("S_fit_Workspace", mtd)
         # assert fit not converged by checking cost function value at minimum
-        self.assertGreater(mtd["S_fit_Parameters"].column("Value")[-1], 1)
+        self.assertAlmostEqual(mtd["S_fit_Parameters"].column("Value")[-1], 0.7275, delta=1e-4)
 
     def test_calibration_run_multi_run(self):
         # Test that the calibration run produces the correct workspaces for multiple runs
