@@ -129,8 +129,6 @@ class CalibrationInfo:
     # setters
     def set_extra_group_suffix(self) -> None:
         self.extra_group_suffix = ""
-        if not isinstance(self.grouping_filepath, str):
-            raise TypeError("The grouping file path must be a string")
         if self.group == GROUP.CUSTOM:
             self.set_grouping_filepath_from_prm_filepath()
             filename = path.basename(self.grouping_filepath)
