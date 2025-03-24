@@ -128,6 +128,7 @@ public:
 
     // cleanup
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_flush() {
@@ -161,6 +162,7 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_open_group() {
@@ -192,6 +194,7 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_open_group_bad() {
@@ -212,6 +215,7 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_open_group_layers() {
@@ -265,6 +269,7 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_getPath() {
@@ -323,17 +328,18 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_makeData_length() {
-    cout << "\ntest make data\n";
+    cout << "\ntest make data -- using length\n";
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data.h5");
     removeFile(filename);
 
     NeXus::File file(filename, H5ACC_CREATE5);
     TS_ASSERT_EQUALS(file.getNumObjs(), 0);
 
-    NXnumtype type (NXnumtype::CHAR);
+    NXnumtype type(NXnumtype::CHAR);
 
     // check it works when it works -- int
     string name("some_data_int");
@@ -367,7 +373,7 @@ public:
 
     // create a dataset, to be opened
     string data("test_group");
-    NXnumtype type (NXnumtype::CHAR);
+    NXnumtype type(NXnumtype::CHAR);
     file.makeData(data, type, 3, false);
     TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
@@ -384,12 +390,13 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_make_data_layers_bad() {
     cout << "\ntest makeData layers\n";
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data_layers.h5");
-    NXnumtype type (NXnumtype::CHAR);
+    NXnumtype type(NXnumtype::CHAR);
     string data1("layer1"), data2("layer2");
     removeFile(filename);
 
@@ -405,6 +412,7 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
   void test_closeData() {
@@ -431,97 +439,259 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
-  void test_data_putget() {
+  template <typename T> void do_test_data_putget(NeXus::File &file, string name, T in) {
+    T out;
+    file.makeData(name, NeXus::getType<T>(), 1, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+  }
+
+  void test_data_putget_basic() {
     cout << "\ntest dataset read/write\n";
-    
+
     // open a file
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
     removeFile(filename);
     NeXus::File file(filename, H5ACC_CREATE5);
 
     // put/get an int
-    file.makeData("data_int", NXnumtype::INT16, 1, true);
-    int in = 12, out = 14;
-    file.putData(&in);
-    file.getData(&out);
-    TS_ASSERT_EQUALS(in, out);
+    cout << "\tread/write int...";
+    do_test_data_putget<int>(file, "data_int", 12);
+    cout << "done\n";
 
     // put/get an int64_t
-    file.makeData("data_int64", NXnumtype::INT64, 1, true);
-    int64_t in64 = 12, out64 = 14;
-    file.putData(&in64);
-    file.getData(&out64);
-    TS_ASSERT_EQUALS(in, out);
+    cout << "\tread/write int64_t...";
+    do_test_data_putget<int64_t>(file, "data_int64", 12ll);
+    cout << "done\n";
 
     // put/get a size_t
-    file.makeData("data_size", NXnumtype::UINT64, 1, true);
-    size_t insize = 12, outsize = 14;
-    file.putData(&insize);
-    file.getData(&outsize);
-    TS_ASSERT_EQUALS(in, out);
+    cout << "\tread/write size_T...";
+    do_test_data_putget<size_t>(file, "data_sizet", 12ull);
+    cout << "done\n";
 
     // put/get a float
-    file.makeData("data_size", NXnumtype::FLOAT32, 1, true);
-    float inf = 1.2f, outf = 1.4f;
-    file.putData(&inf);
-    file.getData(&outf);
-    TS_ASSERT_EQUALS(in, out);
+    cout << "\tread/write float...";
+    do_test_data_putget<float>(file, "data_float", 1.2f);
+    cout << "done\n";
 
     // put/get double
-    file.makeData("data_size", NXnumtype::FLOAT64, 1, true);
-    double ind = 1.2d, outd = 1.4d;
-    file.putData(&ind);
-    file.getData(&outd);
-    TS_ASSERT_EQUALS(in, out);
+    cout << "\tread/write double...";
+    do_test_data_putget<double>(file, "data_double", 1.4);
+    cout << "done\n";
 
     // put/get a single char
-    // put/get a string
+    cout << "\tread/write char...";
+    do_test_data_putget<char>(file, "data_char", 'x');
+    cout << "done\n";
+
+    // cleanup
+    file.close();
+    removeFile(filename);
   }
 
+  void test_getInfo() {
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
 
-  // void test_data_putget_array() {
-  //   cout << "\ntest dataset read/write\n";
-    
-  //   // open a file
-  //   string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
-  //   removeFile(filename);
-  //   NeXus::File file(filename, H5ACC_CREATE5);
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int>(), 1, true);
+    file.putData(&in);
 
-  //   // put/get an int
-  //   NXnumtype type (NXnumtype::INT32);
-  //   file.makeData("data_int", type, 4, true);
-  //   int in[] = {12, 7, 2, 3}, out[4];
-  //   file.putData(&(in[0]));
-  //   file.getData(&(out[0]));
-  //   TS_ASSERT_EQUALS(in, out);
+    // get the info and check
+    Info info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<int>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
 
-  //   // put/get an int64_t
-  //   // put/get a size_t
-  //   // put/get a float
-  //   // put/get double
-  //   // put/get a single char
-  //   // put/get a string
-  // }
+    file.closeData();
 
-  // void test_data_putget_vector() {
-  //   cout << "\ntest dataset read/write\n";
-    
-  //   // open a file
-  //   string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
-  //   removeFile(filename);
-  //   NeXus::File file(filename, H5ACC_CREATE5);
+    // put a double
+    double ind = 107.2345;
+    file.makeData("double_data", NeXus::getType<double>(), 1, true);
+    file.putData(&ind);
 
-  //   // put/get an int vector
-  //   NXnumtype type (NXnumtype::INT32);
-  //   file.makeData("data_int", type, 4, true);
-  //   vector<int> in {11, 8, 9, 12}, out;
-  //   file.putData(in);
-  //   file.getData(out);
-  //   TS_ASSERT_EQUALS(in, out);
+    // get the info and check
+    info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
 
-  // }
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
 
+  void test_getInfo_bad() {
+    cout << ""
+        // open a file
+        string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
 
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int>(), 1, true);
+    file.putData(&in);
+    file.closeData();
+
+    // open a group and try to get info
+    file.makeGroup("a_group", "NXshorts", true);
+    TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  /* NOTE
+   * This is not working properly.... */
+  void xtest_data_putget_string() {
+    cout << "\ntest dataset read/write -- string\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_stringrw=.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put/get a string
+    cout << "\tread/write string...";
+    string in("this is a string"), out;
+    file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // do it another way
+    in = "this is some different data";
+    DimVector dims({(dimsize_t)in.size()});
+    file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+    cout << "good!";
+  }
+
+  void test_data_putget_array() {
+    cout << "\ntest dataset read/write -- arrays\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put/get an int
+    file.makeData("data_int", NeXus::getType<int>(), 4, true);
+    int in[] = {12, 7, 2, 3}, out[4];
+    file.putData(&(in[0]));
+    Info info = file.getInfo();
+    file.getData(&(out[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(in[i], out[i]);
+    }
+
+    // put/get double array
+    file.makeData("data_double", NeXus::getType<double>(), 4, true);
+    double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
+    file.putData(&(ind[0]));
+    info = file.getInfo();
+    file.getData(&(outd[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(ind[i], outd[i]);
+    }
+
+    // put/get double 2D array
+    DimVector dims{3, 2};
+    double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
+    double outdd[3][2];
+    file.makeData("data_double_2d", NeXus::getType<double>(), dims, true);
+    file.putData(&(indd[0][0]));
+    info = file.getInfo();
+    file.getData(&(outdd[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 2);
+    for (int i = 0; i < dims[0]; i++) {
+      for (int j = 0; j < dims[1]; j++) {
+        TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
+      }
+    }
+
+    // put/get a char array
+    char word[] = "silicovolcaniosis";
+    char read[18];
+    file.makeData("data_char", NeXus::getType<char>(), 18, true);
+    file.putData(word);
+    info = file.getInfo();
+    file.getData(read);
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 18);
+    TS_ASSERT_EQUALS(string(word), string(read));
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_data_putget_vector() {
+    cout << "\ntest dataset read/write -- vector\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW_vec.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put/get an int vector
+    vector<int> in{11, 8, 9, 12}, out;
+    file.makeData("data_int", NeXus::getType<int>(), in.size(), true);
+    file.putData(in);
+    file.getData(out);
+    Info info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), in.size());
+    TS_ASSERT_EQUALS(in, out);
+
+    // put/get a double vector
+    vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
+    file.makeData("data_dbl", NeXus::getType<double>(), ind.size(), true);
+    file.putData(ind);
+    file.getData(outd);
+    info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), ind.size());
+    TS_ASSERT_EQUALS(ind, outd);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
 };

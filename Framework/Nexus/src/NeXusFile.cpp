@@ -1,7 +1,8 @@
 #include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NeXusException.hpp"
 #include <array>
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <numeric>
@@ -75,31 +76,31 @@ static H5::DataType nxToHDF5Type(NXnumtype datatype) {
     type = H5::PredType::NATIVE_CHAR;
     break;
   }
-  case NXnumtype::INT8:{
+  case NXnumtype::INT8: {
     type = H5::PredType::NATIVE_SCHAR;
     break;
   }
-  case NXnumtype::UINT8:{
+  case NXnumtype::UINT8: {
     type = H5::PredType::NATIVE_UCHAR;
     break;
   }
-  case NXnumtype::INT16:{
+  case NXnumtype::INT16: {
     type = H5::PredType::NATIVE_INT16;
     break;
   }
-  case NXnumtype::UINT16:{
+  case NXnumtype::UINT16: {
     type = H5::PredType::NATIVE_UINT16;
     break;
   }
-  case NXnumtype::INT32:{
+  case NXnumtype::INT32: {
     type = H5::PredType::NATIVE_INT32;
     break;
   }
-  case NXnumtype::UINT32:{
+  case NXnumtype::UINT32: {
     type = H5::PredType::NATIVE_UINT32;
     break;
   }
-  case NXnumtype::INT64:{
+  case NXnumtype::INT64: {
     type = H5::PredType::NATIVE_INT64;
     break;
   }
@@ -107,7 +108,7 @@ static H5::DataType nxToHDF5Type(NXnumtype datatype) {
     type = H5::PredType::NATIVE_UINT64;
     break;
   }
-  case NXnumtype::FLOAT32:{
+  case NXnumtype::FLOAT32: {
     type = H5::PredType::NATIVE_FLOAT;
     break;
   }
@@ -120,6 +121,72 @@ static H5::DataType nxToHDF5Type(NXnumtype datatype) {
   }
   }
   return type;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: hdf5ToNXType
+ *
+ * Purpose:	Convert a HDF5 class to a NeXus type;  it handles the following HDF5 classes
+ *  H5T_STRING
+ *  H5T_INTEGER
+ *  H5T_FLOAT
+ *
+ * Return: the NeXus type
+ *
+ *-------------------------------------------------------------------------
+ */
+static NXnumtype hdf5ToNXType(H5::DataType dt) {
+  NXnumtype iPtype = NXnumtype::BAD;
+  size_t size;
+  H5T_sign_t sign;
+
+  auto tclass = dt.getClass();
+
+  if (dt == H5::PredType::NATIVE_CHAR) {
+    iPtype = NXnumtype::CHAR;
+  } else if (tclass == H5T_STRING) {
+    iPtype = NXnumtype::CHAR;
+  } else if (tclass == H5T_INTEGER) {
+    size = dt.getSize();
+    sign = reinterpret_cast<H5::IntType *>(&dt)->getSign();
+    if (size == 1) {
+      if (sign == H5T_SGN_2) {
+        iPtype = NXnumtype::INT8;
+      } else {
+        iPtype = NXnumtype::UINT8;
+      }
+    } else if (size == 2) {
+      if (sign == H5T_SGN_2) {
+        iPtype = NXnumtype::INT16;
+      } else {
+        iPtype = NXnumtype::UINT16;
+      }
+    } else if (size == 4) {
+      if (sign == H5T_SGN_2) {
+        iPtype = NXnumtype::INT32;
+      } else {
+        iPtype = NXnumtype::UINT32;
+      }
+    } else if (size == 8) {
+      if (sign == H5T_SGN_2) {
+        iPtype = NXnumtype::INT64;
+      } else {
+        iPtype = NXnumtype::UINT64;
+      }
+    }
+  } else if (tclass == H5T_FLOAT) {
+    size = dt.getSize(); // H5Tget_size(atype);
+    if (size == 4) {
+      iPtype = NXnumtype::FLOAT32;
+    } else if (size == 8) {
+      iPtype = NXnumtype::FLOAT64;
+    }
+  }
+  if (iPtype == NXnumtype::BAD) {
+    throw Exception("ERROR: hdf5ToNXtype: invalid type");
+  }
+
+  return iPtype;
 }
 
 } // end of anonymous namespace
@@ -355,9 +422,7 @@ template <typename NumT> void File::writeData(const string &name, const NumT &va
 }
 
 void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
-*/
 
-/*
 void File::writeData(const string &name, const string &value) {
   string my_value(value);
   // Allow empty strings by defaulting to a space
@@ -370,9 +435,8 @@ void File::writeData(const string &name, const string &value) {
   this->putData(my_value.data());
 
   this->closeData();
-}*/
+}
 
-/*
 template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
   DimVector dims(1, static_cast<dimsize_t>(value.size()));
   this->writeData(name, value, dims);
@@ -485,7 +549,8 @@ template <typename NumT> void File::writeData(const string &name, const vector<N
 // }
 
 // template <typename NumT>
-// void File::writeCompData(const string &name, const vector<NumT> &value, const DimVector &dims, const NXcompression comp,
+// void File::writeCompData(const string &name, const vector<NumT> &value, const DimVector &dims, const NXcompression
+// comp,
 //                          const DimSizeVector &bufsize) {
 //   this->makeCompData(name, getType<NumT>(), dims, comp, bufsize, true);
 //   this->putData(value);
@@ -518,8 +583,7 @@ void File::closeData() {
   }
 }
 
-template<typename NumT>
-void File::putData(const NumT *data) {
+template <typename NumT> void File::putData(const NumT *data) {
   if (data == NULL) {
     throw Exception("Data specified as null in putData", m_filename);
   }
@@ -675,8 +739,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 //  CALL_NAPI(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed");
 // }
 
-template<typename NumT>
-void File::getData(NumT *data) {
+template <typename NumT> void File::getData(NumT *data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData");
   }
@@ -690,6 +753,12 @@ void File::getData(NumT *data) {
     throw Exception("Failed to get data, current location is not a DataSet", m_filename);
   }
 
+  // make sure the data has the correct type
+  Info info = this->getInfo();
+  if (info.type != getType<NumT>()) {
+    throw Exception("File::getInfo() failed -- inconsistent NXnumtype");
+  }
+
   // now try to read
   try {
     dataset->read(data, Mantid::NeXus::H5Util::getType<NumT>());
@@ -698,12 +767,35 @@ void File::getData(NumT *data) {
   }
 }
 
-template <typename NumT>
-void File::getData(vector<NumT> &data) {
+template <> MANTID_NEXUS_DLL void File::getData<string>(string *data) {
+  Info info = this->getInfo();
+
+  if (info.type != NXnumtype::CHAR) {
+    stringstream msg;
+    msg << "Cannot use File::getData<string>() on non-character data. Found type=" << info.type;
+    throw Exception(msg.str(), m_filename);
+  }
+  if (info.dims.size() != 1) {
+    stringstream msg;
+    msg << "File::getData<string>() only understand rank=1 data. Found rank=" << info.dims.size();
+    throw Exception(msg.str());
+  }
+  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
+  try {
+    this->getData<char>(value);
+  } catch (const Exception &) {
+    delete[] value;
+    throw; // rethrow the original exception
+  }
+  *data = string(value); //, static_cast<size_t>(info.dims[0]));
+  delete[] value;
+}
+
+template <typename NumT> void File::getData(vector<NumT> &data) {
   Info info = this->getInfo();
 
   if (info.type != getType<NumT>()) {
-    throw Exception("NXgetdata failed - invalid vector type");
+    throw Exception("NXgetdata failed - invalid vector type", m_filename);
   }
   // determine the number of elements
   size_t length =
@@ -848,15 +940,27 @@ void File::getData(vector<NumT> &data) {
 // }
 
 Info File::getInfo() {
-  // DimArray dims;
-  // NXnumtype type;
-  // int rank;
-  // CALL_NAPI(NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type), "NXgetinfo failed");
+  auto current = this->getCurrentLocation();
+  // ensure this is a dataset
+  H5::DataSet *dataset;
+  try {
+    dataset = reinterpret_cast<H5::DataSet *>(current);
+  } catch (...) {
+    throw Exception("Trying to read info of non-DataSet location\n");
+  }
+
+  // get the datatype
+  auto dt = dataset->getDataType();
+  auto ds = dataset->getSpace();
+  std::size_t rank = ds.getSimpleExtentNdims();
+  DimArray dims;
+  ds.getSimpleExtentDims(dims.data());
+
   Info info;
-  // info.type = static_cast<NXnumtype>(type);
-  // for (int i = 0; i < rank; i++) {
-  //   info.dims.push_back(dims[i]);
-  // }
+  info.type = hdf5ToNXType(dt);
+  for (size_t i = 0; i < rank; i++) {
+    info.dims.push_back(dims[i]);
+  }
   return info;
 }
 
@@ -1173,7 +1277,7 @@ template MANTID_NEXUS_DLL void File::putData(const string *data);
 
 template MANTID_NEXUS_DLL void File::putData(const vector<int> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<int64_t> &data);
-template MANTID_NEXUS_DLL void File::putData(const vector<size_t> & data);
+template MANTID_NEXUS_DLL void File::putData(const vector<size_t> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<float> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<double> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<string> &data);
