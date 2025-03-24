@@ -66,13 +66,9 @@ const int g_processed_blocksize = 8;
 class MANTID_LEGACYNEXUS_DLL NXAttributes {
 public:
   int n() const { return int(m_values.size()); }         ///< number of attributes
-  std::vector<std::string> names() const;                ///< Returns the list of attribute names
-  std::vector<std::string> values() const;               ///< Returns the list of attribute values
   std::string operator()(const std::string &name) const; ///< returns the value of attribute with name name
   void set(const std::string &name,
            const std::string &value); ///< set the attribute's value
-  void set(const std::string &name,
-           double value); ///< set the attribute's value as a double
 private:
   std::map<std::string, std::string> m_values; ///< the list of attributes
 };
@@ -153,35 +149,12 @@ public:
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
   /**  Load the data from the file. Calling this method with all default
-   * arguments
-   *   makes it to read in all the data.
-   *   @param blocksize :: The size of the block of data that should be read.
-   * Note that this is only used for rank 2 and 3 datasets currently
-   *   @param i :: Calling load with non-negative i reads in a chunk of
-   * dimension rank()-1 and i is the index of the chunk. The rank of the data
-   * must be >= 1
-   *   @param j :: Non-negative value makes it read a chunk of dimension
-   * rank()-2. i and j are its indices.
-   *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indices.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indices.
-   *            The rank of the data must be 4
+   * arguments makes it to read in all the data.
    */
-  virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) {
-    // Avoid compiler warnings
-    (void)blocksize;
-    (void)i;
-    (void)j;
-    (void)k;
-    (void)l;
-  };
+  virtual void load() {};
 
 protected:
   void getData(void *data);
-  void getSlab(void *data, int start[], int size[]);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -259,170 +232,34 @@ public:
   /// Returns the size of the data buffer
   int size() const { return m_n; }
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
-   * data are stored as a 1d array.
-   *   If the data are loaded in chunks the newly read in data replace the old
-   * ones. The actual rank of the loaded
-   *   data is equal or less than the rank of the dataset (returned by rank()
+   * data are stored as a 1d array. If the data are loaded in chunks the newly read in
+   * data replace the old ones. The actual rank of the loaded
+   * data is equal or less than the rank of the dataset (returned by rank()
    * method).
-   *   @param blocksize :: The size of the block of data that should be read.
-   * Note that this is only used for rank 2 and 3 datasets currently
-   *   @param i :: Calling load with non-negative i reads in a chunk of
-   * dimension rank()-1 and i is the index of the chunk. The rank of the data
-   * must be >= 1
-   *   @param j :: Non-negative value makes it read a chunk of dimension
-   * rank()-2. i and j are its indeces.
-   *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indeces.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indeces.
-   *            The rank of the data must be 4
+   * Reads in all data.
    */
-  void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l = -1) override {
+  void load() override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     int n = 0;
-    int start[4];
     if (rank() == 4) {
-      if (i < 0) // load all data
-      {
-        n = dim0() * dim1() * dim2() * dim3();
-        alloc(n);
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (i >= dim0())
-          rangeError();
-        n = dim1() * dim2() * dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = 0;
-        m_size[1] = dim1();
-        start[2] = 0;
-        m_size[2] = dim2();
-        start[3] = 0;
-        m_size[3] = dim2();
-      } else if (k < 0) {
-        if (i >= dim0() || j >= dim1())
-          rangeError();
-        n = dim2() * dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = 0;
-        m_size[2] = dim2();
-        start[3] = 0;
-        m_size[3] = dim2();
-      } else if (l < 0) {
-        if (i >= dim0() || j >= dim1() || k >= dim2())
-          rangeError();
-        n = dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
-        start[3] = 0;
-        m_size[3] = dim2();
-      } else {
-        if (i >= dim0() || j >= dim1() || k >= dim2() || l >= dim3())
-          rangeError();
-        n = dim3();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
-        start[3] = l;
-        m_size[3] = 1;
-      }
+      n = dim0() * dim1() * dim2() * dim3();
+      alloc(n);
+      getData(m_data.data());
     } else if (rank() == 3) {
-      if (i < 0) {
-        n = dim0() * dim1() * dim2();
-        alloc(n);
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (i >= dim0())
-          rangeError();
-        n = dim1() * dim2();
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = 0;
-        m_size[1] = dim1();
-        start[2] = 0;
-        m_size[2] = dim2();
-      } else if (k < 0) {
-        if (i >= dim0() || j >= dim1())
-          rangeError();
-        int m = blocksize;
-        if (j + m > dim1())
-          m = dim1() - j;
-        n = dim2() * m;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = m;
-        start[2] = 0;
-        m_size[2] = dim2();
-      } else {
-        if (i >= dim0() || j >= dim1() || k >= dim2())
-          rangeError();
-        n = 1;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-        start[2] = k;
-        m_size[2] = 1;
-      }
+      n = dim0() * dim1() * dim2();
+      alloc(n);
+      getData(m_data.data());
     } else if (rank() == 2) {
-      if (i < 0) {
-        n = dim0() * dim1();
-        alloc(n);
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (i >= dim0())
-          rangeError();
-        int m = blocksize;
-        if (i + m > dim0())
-          m = dim0() - i;
-        n = dim1() * m;
-        start[0] = i;
-        m_size[0] = m;
-        start[1] = 0;
-        m_size[1] = dim1();
-      } else {
-        if (i >= dim0() || j >= dim1())
-          rangeError();
-        n = 1;
-        start[0] = i;
-        m_size[0] = 1;
-        start[1] = j;
-        m_size[1] = 1;
-      }
+      n = dim0() * dim1();
+      alloc(n);
+      getData(m_data.data());
     } else if (rank() == 1) {
-      if (i < 0) {
-        n = dim0();
-        alloc(n);
-        getData(m_data.data());
-        return;
-      } else {
-        if (i >= dim0())
-          rangeError();
-        n = 1 * blocksize;
-        start[0] = i;
-        m_size[0] = blocksize;
-      }
+      n = dim0();
+      alloc(n);
+      getData(m_data.data());
     }
-    alloc(n);
-    getSlab(m_data.data(), start, m_size);
   }
 
 private:
@@ -497,12 +334,6 @@ public:
   // virtual void make(const std::string& path) = 0;
   /// Resets the current position for getNextEntry() to the beginning
   void reset();
-  /**
-   * Check if a path exists relative to the current class path
-   * @param path :: A string representing the path to test
-   * @return True if it is valid
-   */
-  bool isValid(const std::string &path) const;
   /**  Templated method for creating derived NX classes. It also opens the
    * created class.
    *   @param name :: The name of the class
@@ -591,19 +422,8 @@ public:
   NXInfo getDataSetInfo(const std::string &name) const;
   /// Returns whether an individual dataset is present
   bool containsDataSet(const std::string &query) const;
-  /// Close this class
-  void close();
   /// Opens this NXClass using NXopengrouppath. Can be slow (or is slow)
   void open();
-  /// Opens this NXClass using NXopengroup. It is fast, but the parent of this
-  /// class must be open at
-  /// the time of calling. openNXClass uses open() (the slow one). To open calss
-  /// using openLocal() do:
-  ///     NXTheClass class(parent,name);
-  ///     class.openLocal();
-  ///     // work with class
-  ///     class.close();
-  bool openLocal(const std::string &nxclass = "");
 
 protected:
   std::shared_ptr<std::vector<NXClassInfo>> m_groups; ///< Holds info about the child NXClasses
@@ -728,15 +548,10 @@ class MANTID_LEGACYNEXUS_DLL NXRoot : public NXClass {
 public:
   // Constructor
   NXRoot(std::string fname);
-  // Constructor
-  NXRoot(std::string fname, const std::string &entry);
   /// Destructor
   ~NXRoot() override;
   /// Return the NX class for a class (HDF group) or "SDS" for a data set;
   std::string NX_class() const override { return "NXroot"; }
-  /// True if complies with our understanding of the www.nexusformat.org
-  /// definition.
-  bool isStandard() const;
   /**  Opens an entry -- a topmost Nexus class
    *   @param name :: The name of the entry
    *   @return the entry
