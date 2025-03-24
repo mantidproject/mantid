@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadSINQFocus.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadSINQFocus;
@@ -55,7 +56,7 @@ public:
     MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 375);
-
+    TS_ASSERT_EQUALS(output2D->getInstrument()->getName(), "FOCUS");
     AnalysisDataService::Instance().clear();
   }
 

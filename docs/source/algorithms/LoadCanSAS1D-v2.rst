@@ -6,18 +6,28 @@
 
 .. properties::
 
+.. _version 1.0: http://www.cansas.org/formats/1.0/cansas1d.xsd
+.. _Version 1.1: http://www.cansas.org/formats/1.1/cansas1d.xsd
+.. _canSAS Wiki: http://www.cansas.org/formats/canSAS1d/1.1/doc/
+
 Description
 -----------
 
-Loads the given file, which should be in the CanSAS1d format specified
-by canSAS 1D Data Formats Working Group schema
-http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd and
-creates output workspace. CANSAS has a Wiki page at
-http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups
+Loads the given file, which should be in the canSAS1d XML format specified
+by canSAS 1D Data Formats Working Group schema `Version 1.1`_ and
+creates output workspace. There is a `canSAS Wiki`_ available which provides
+more information about the format.
 
 If the file contains multiple SASentry elements a workspace group will
 be created and each SASentry will be one workspace in the group. Loading
 multiple SASdata elements is not supported.
+
+Versions
+########
+
+This is version 2 of the algorithm, which meets version 1.1 of the canSAS1d specification.
+
+You can load files using `version 1.0`_ of the specification by using :ref:`version 1 of LoadCanSAS1D <algm-LoadCanSAS1D-v1>`.
 
 Usage
 -----

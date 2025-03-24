@@ -16,7 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -24,7 +24,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadTOFRawNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -65,7 +65,7 @@ void LoadTOFRawNexus::init() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
@@ -282,7 +282,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file.openGroup("instrument", "NXinstrument");
   file.openGroup(bankName, "NXdetector");
 
-  size_t m_numPixels = 0;
+  m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
@@ -354,7 +354,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   // Load the TOF vector
   std::vector<float> tof;
   file.readData(m_axisField, tof);
-  size_t m_numBins = tof.size() - 1;
+  m_numBins = tof.size() - 1;
   if (tof.size() <= 1) {
     file.close();
     m_fileMutex.unlock();
@@ -487,7 +487,7 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
-  Kernel::NexusHDF5Descriptor descriptor(filename);
+  Kernel::NexusDescriptor descriptor(filename);
 
   try {
     LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);

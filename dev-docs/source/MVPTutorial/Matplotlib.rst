@@ -9,7 +9,7 @@ manipulate a sine wave plot, is to produce the plot itself.
 
 For the purposes of this tutorial it is assumed that the user is
 familiar with Matplotlib, if not see `Matplotlib documentation
-<https://matplotlib.org/users/pyplot_tutorial.html>`_.
+<https://matplotlib.org/stable/tutorials/pyplot.html>`_.
 
 The Matplotlib functions could be considered to be a model or a view
 and there is no correct answer to which. It could be a model as it
@@ -20,15 +20,19 @@ set of rules. On this occasion it has been decided that it should be a
 view.
 
 This view will exist alongside with the view from the exercise. So we
-will need to call it something different, such as PlotView.
+will need to call it something different, such as PlotView. The python
+file will be named `plot_view.py` for the rest of this tutorial.
 
 The view has the following imports:
 
 .. code-block:: python
 
-    from qtpy import QtWidgets, QtCore, QtGui
-    import matplotlib.pyplot as plt
+    from numpy import ndarray
+    from qtpy.QtWidgets import QWidget, QVBoxLayout
+    from typing import Union
 
+    import matplotlib.pyplot as plt
+    from matplotlib.axes import Axes
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 The fourth line imports Matplotlib and the last line allows it to
@@ -39,19 +43,19 @@ the plot and creating an empty plot (no data).
 
 .. code-block:: python
 
-    class PlotView(QtWidgets.QWidget):
-        def __init__(self, parent=None):
+    class PlotView(QWidget):
+        def __init__(self, parent: Union[QWidget, None]=None):
             super().__init__(parent)
 
-            self.figure = plt.figure()
-            grid = QtWidgets.QVBoxLayout(self)
+            self._figure = plt.figure()
+            grid = QVBoxLayout(self)
             self.draw()
-            self.canvas = self.getWidget()
-            grid.addWidget(self.canvas)
+            self._canvas = FigureCanvas(self._figure)
+            grid.addWidget(self._canvas)
             self.setLayout(grid)
 
-        def draw(self):
-            ax = self.figure.add_subplot(111)
+        def draw(self) -> Axes:
+            ax = self._figure.add_subplot(111)
             ax.clear()
             ax.set_xlim([0.0, 10.5])
             ax.set_ylim([-1.05, 1.05])
@@ -59,16 +63,13 @@ the plot and creating an empty plot (no data).
             ax.set_ylabel("$f(t)$")
             return ax
 
-        def getWidget(self):
-            return FigureCanvas(self.figure)
-
-        def addData(self, xvalues, yvalues, grid_lines, colour, marker):
+        def plot_data(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
             ax = self.draw()
-            ax.grid(grid_lines)
+            ax.grid(visible)
             ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")
-            self.canvas.draw()
+            self._canvas.draw()
 
 The ``draw`` method creates the plot area without any data. The widget
-is obtained from the ``getWidget`` function. The final method adds
-data to the plot area, the ``self.canvas.draw()`` updates the plot
+is created using the ``FigureCanvas`` class. The final method adds
+data to the plot area, the ``self._canvas.draw()`` updates the plot
 area so it will contain the data.

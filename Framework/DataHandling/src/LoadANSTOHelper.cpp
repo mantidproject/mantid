@@ -207,7 +207,8 @@ namespace Tar {
 
 void EntryHeader::writeChecksum() {
   memset(Checksum, ' ', sizeof(Checksum));
-  size_t value = std::accumulate((const char *)this, (const char *)this + sizeof(EntryHeader), (size_t)0);
+  size_t value = std::accumulate(reinterpret_cast<const char *>(this),
+                                 reinterpret_cast<const char *>(this) + sizeof(EntryHeader), static_cast<size_t>(0));
 
   std::ostringstream buffer;
 

@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <Poco/File.h>
 
 using namespace Mantid::API;

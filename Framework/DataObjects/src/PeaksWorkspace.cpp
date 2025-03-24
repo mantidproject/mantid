@@ -13,7 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <cmath>
 
@@ -179,8 +179,8 @@ void PeaksWorkspace::addPeak(Peak &&peak) { m_peaks.emplace_back(peak); }
  * @param peakNum :: index of the peak to get.
  * @return a reference to a Peak object.
  */
-Peak &PeaksWorkspace::getPeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
+Peak &PeaksWorkspace::getPeak(size_t const peakNum) {
+  if (peakNum >= m_peaks.size()) {
     throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
   }
   return m_peaks[peakNum];
@@ -191,8 +191,8 @@ Peak &PeaksWorkspace::getPeak(const int peakNum) {
  * @param peakNum :: index of the peak to get.
  * @return a reference to a Peak object.
  */
-const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
-  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
+const Peak &PeaksWorkspace::getPeak(size_t const peakNum) const {
+  if (peakNum >= m_peaks.size()) {
     throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
   }
   return m_peaks[peakNum];
@@ -309,8 +309,8 @@ std::vector<std::pair<std::string, std::string>> PeaksWorkspace::peakInfo(const 
   int seqNum = -1;
   bool hasOneRunNumber = true;
   int runNum = -1;
-  int NPeaks = getNumberPeaks();
   try {
+    int NPeaks = getNumberPeaks();
     double minDist = 10000000;
     for (int i = 0; i < NPeaks; i++) {
       Peak pk = getPeak(i);

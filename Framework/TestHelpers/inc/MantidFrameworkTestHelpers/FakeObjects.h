@@ -142,14 +142,12 @@ public:
   size_t blocksize() const override {
     if (m_vec.empty()) {
       return 0;
-    } else {
-      size_t numY = m_vec[0].dataY().size();
-      if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.dataY().size() != numY; })) {
-        throw std::logic_error("non-constant number of bins");
-      }
-      return numY;
     }
-    return m_vec.empty() ? 0 : m_vec[0].dataY().size();
+    size_t numY = m_vec[0].dataY().size();
+    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.dataY().size() != numY; })) {
+      throw std::logic_error("non-constant number of bins");
+    }
+    return numY;
   }
 
   std::size_t getNumberBins(const std::size_t &index) const override {
@@ -593,9 +591,6 @@ public:
     UNUSED_ARG(preferredNormalization);
     throw std::runtime_error("Not Implemented");
   }
-
-  // Check if this class has an oriented lattice on any sample object
-  bool hasOrientedLattice() const override { return MultipleExperimentInfos::hasOrientedLattice(); }
 
   size_t getMemorySize() const override { throw std::runtime_error("Not Implemented"); }
 

@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <algorithm>
 #include <cmath>
@@ -29,7 +30,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadSINQFocus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -60,7 +61,7 @@ const std::string LoadSINQFocus::category() const { return "DataHandling\\Nexus"
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSINQFocus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the SINQ (to date Loader only valid for focus)
   if (descriptor.isEntry("/entry1/FOCUS/SINQ")) {
@@ -119,7 +120,7 @@ void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
   }
   m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
   size_t pos = m_instrumentName.find(' ');
-  m_instrumentName = m_instrumentName.substr(0, pos);
+  m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
 
 void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {

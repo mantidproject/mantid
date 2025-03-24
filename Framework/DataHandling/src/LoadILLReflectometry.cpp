@@ -29,8 +29,9 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 namespace {
 
@@ -145,7 +146,7 @@ using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -153,7 +154,7 @@ DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLReflectometry)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLReflectometry::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLReflectometry::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if ((descriptor.isEntry("/entry0/wavelength") || // ILL D17

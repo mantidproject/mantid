@@ -37,7 +37,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -934,7 +934,7 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
  * @param fileInfo :: The file info descriptor corresponding to the provided file
  * @param prefix :: The prefix of the file
  */
-void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusDescriptor &fileInfo,
                                                const std::string &prefix) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
@@ -969,8 +969,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
 }
 
 void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
-                                             std::string &parameterStr,
-                                             const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                             std::string &parameterStr, const Mantid::Kernel::NexusDescriptor &fileInfo,
                                              const std::string &prefix) {
   // TODO
   // load sample and log info
@@ -1225,7 +1224,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon
       paramVisibility =
           paramVisibility.substr(paramVisibility.find(visibilityKey) + visibilityKey.size(), paramVisibility.size());
-      paramValue = paramValue.substr(0, paramValue.find(visibilityKey) - 1);
+      paramValue.erase(paramValue.find(visibilityKey) - 1, paramValue.size());
     }
     const auto paramDescr = std::string("");
     if (paramName == "masked") {
@@ -1351,7 +1350,7 @@ IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(const std::string &
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_const_sptr
 IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

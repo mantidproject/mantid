@@ -17,7 +17,7 @@ from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 @mock.patch("sans.gui_logic.models.async_workers.beam_centre_async.SANSCentreFinder")
 class BeamCentreAsyncTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.mocked_presenter = mock.create_autospec(BeamCentrePresenter)
+        self.mocked_presenter = mock.create_autospec(BeamCentrePresenter, instance=True)
 
         self.worker = BeamCentreAsync(parent_presenter=self.mocked_presenter)
         self.worker.set_unit_test_mode(True)
@@ -104,7 +104,7 @@ class BeamCentreAsyncTest(unittest.TestCase):
         fields = mock.NonCallableMock()
         fields.find_direction = None
 
-        self.worker._logger = mock.create_autospec(self.worker._logger)
+        self.worker._logger = mock.create_autospec(self.worker._logger, instance=True)
         self.worker.find_beam_centre(state, fields)
         self.assertEqual(0, mocked_alg.return_value.call_count)
         self.worker._logger.error.assert_called_once()

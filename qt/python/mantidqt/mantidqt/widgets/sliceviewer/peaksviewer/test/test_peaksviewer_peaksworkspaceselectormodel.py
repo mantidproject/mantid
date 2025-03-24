@@ -19,7 +19,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import PeaksWor
 
 class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
     def test_empty_workspaces_gives_empty_names_list(self):
-        mock_ads = create_autospec(AnalysisDataServiceImpl)
+        mock_ads = create_autospec(AnalysisDataServiceImpl, instance=True)
         mock_ads.getObjectNames.return_value = []
         model = PeaksWorkspaceSelectorModel(mock_ads)
 
@@ -28,7 +28,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
         self.assertEqual([], name_status)
 
     def test_zero_peaks_workspaces_gives_empty_names_list(self):
-        contents = {"matrix": create_autospec(MatrixWorkspace), "table": create_autospec(ITableWorkspace)}
+        contents = {"matrix": create_autospec(MatrixWorkspace, instance=True), "table": create_autospec(ITableWorkspace, instance=True)}
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents))
 
         name_status = model.names_and_statuses()
@@ -38,10 +38,10 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
     def test_mixed_workspaces_gives_only_peaks_workspaces(self):
         peaks_names = ["peaks1", "peaks2"]
         contents = {
-            "matrix": create_autospec(MatrixWorkspace),
-            peaks_names[0]: create_autospec(IPeaksWorkspace),
-            "table": create_autospec(ITableWorkspace),
-            peaks_names[1]: create_autospec(IPeaksWorkspace),
+            "matrix": create_autospec(MatrixWorkspace, instance=True),
+            peaks_names[0]: create_autospec(IPeaksWorkspace, instance=True),
+            "table": create_autospec(ITableWorkspace, instance=True),
+            peaks_names[1]: create_autospec(IPeaksWorkspace, instance=True),
         }
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents))
 
@@ -51,7 +51,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
             self.assertTrue(name in peaks_names)
 
     def test_default_check_status_false(self):
-        contents = {"peaks1": create_autospec(IPeaksWorkspace), "peaks2": create_autospec(IPeaksWorkspace)}
+        contents = {"peaks1": create_autospec(IPeaksWorkspace, instance=True), "peaks2": create_autospec(IPeaksWorkspace, instance=True)}
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents))
 
         name_status = model.names_and_statuses()
@@ -60,7 +60,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
             self.assertFalse(check_status)
 
     def test_supplied_names_checked_by_default(self):
-        contents = {"peaks1": create_autospec(IPeaksWorkspace), "peaks2": create_autospec(IPeaksWorkspace)}
+        contents = {"peaks1": create_autospec(IPeaksWorkspace, instance=True), "peaks2": create_autospec(IPeaksWorkspace, instance=True)}
         checked = ["peaks2"]
         model = PeaksWorkspaceSelectorModel(self._create_mock_ads(contents), checked)
 
@@ -71,7 +71,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
 
     # private
     def _create_mock_ads(self, contents):
-        mock_ads = create_autospec(AnalysisDataServiceImpl)
+        mock_ads = create_autospec(AnalysisDataServiceImpl, instance=True)
         mock_ads.__getitem__.side_effect = contents.__getitem__
         mock_ads.getObjectNames.return_value = contents.keys()
         return mock_ads

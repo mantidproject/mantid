@@ -6,15 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexusCpp/NeXusFile_fwd.h"
+#include "MantidNexus/NeXusFile_fwd.h"
 
+#include <algorithm>
 #include <array>
 #include <boost/container/vector.hpp>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -27,8 +28,7 @@ namespace NeXus {
 @date 28/05/2009
 */
 
-// TODO change to int64_t
-typedef int nxdimsize_t;
+typedef int64_t nxdimsize_t;
 typedef std::array<nxdimsize_t, 4> NXDimArray;
 
 /** Structure for keeping information about a Nexus data set,
@@ -36,8 +36,9 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
+  NXInfo(::NeXus::Info const &info, std::string const &name);
   std::string nxname; ///< name of the object
-  int rank;           ///< number of dimensions of the data -- TODO change to size_t or int64_t
+  std::size_t rank;   ///< number of dimensions of the data
   NXDimArray dims;    ///< sizes along each dimension
   NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
   NXstatus stat;      ///< return status
@@ -47,6 +48,7 @@ struct NXInfo {
 /**  Information about a Nexus class
  */
 struct NXClassInfo {
+  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
   std::string nxname;  ///< name of the object
   std::string nxclass; ///< NX class of the object or "SDS" if a dataset
@@ -90,7 +92,8 @@ class MANTID_NEXUS_DLL NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(const NXhandle fileID, const NXClass *parent, const std::string &name);
+  NXObject(::NeXus::File *fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -104,13 +107,13 @@ public:
   /// Attributes
   NXAttributes attributes;
   /// Nexus file id
-  NXhandle m_fileID;
+  std::shared_ptr<::NeXus::File> m_fileID;
 
 protected:
   std::string m_path; ///< Keeps the absolute path to the object
   bool m_open;        ///< Set to true if the object has been open
 private:
-  NXObject() : m_fileID(), m_open(false) {} ///< Private default constructor
+  NXObject(); ///< Private default constructor
   void getAttributes();
 };
 
@@ -132,8 +135,7 @@ public:
   NXDataSet(NXClass const &parent, std::string const &name);
   /// NX class name. Returns "SDS"
   std::string NX_class() const override { return "SDS"; }
-  /// Opens the data set. Does not read in any data. Call load(...) to load the
-  /// data
+  /// Opens the data set. Does not read in any data. Call load(...) to load the data
   void open();
   /// Opens datasets faster but the parent group must be already open
   void openLocal();
@@ -164,25 +166,17 @@ public:
    *   @param j :: Non-negative value makes it read a chunk of dimension
    * rank()-2. i and j are its indices.
    *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indices.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indices.
-   *            The rank of the data must be 4
    */
-  virtual void load(int const blocksize, int const i, int const j, int const k, int const l) {
+  virtual void load(nxdimsize_t const blocksize, nxdimsize_t const i, nxdimsize_t const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
     UNUSED_ARG(blocksize);
     UNUSED_ARG(i);
     UNUSED_ARG(j);
-    UNUSED_ARG(k);
-    UNUSED_ARG(l);
   };
 
 protected:
   void getData(void *data);
-  void getSlab(void *data, NXDimArray const &start, NXDimArray const &size);
+  void getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -279,119 +273,59 @@ public:
    *   @param j :: Non-negative value makes it read a chunk of dimension
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
-   *   @param k :: Non-negative value makes it read a chunk of dimension
-   * rank()-3. i,j and k are its indeces.
-   *            The rank of the data must be >= 3
-   *   @param l :: Non-negative value makes it read a chunk of dimension
-   * rank()-4. i,j,k and l are its indeces.
-   *            The rank of the data must be 4
    */
-  void load(int const blocksize = 1, int const i = -1, int const j = -1, int const k = -1, int const l = -1) override {
+  void load(nxdimsize_t const blocksize = 1, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j), kd(l), ld(l); // cppcheck-suppress variableScope
-    NXDimArray datastart, datasize;
+    nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
+    std::vector<int64_t> datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
         n = dim0() * dim1() * dim2() * dim3();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2() * dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = 0;
-        datasize[1] = dim1();
-        datastart[2] = 0;
-        datasize[2] = dim2();
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else if (k < 0) {
+        datastart = {i, 0, 0, 0};
+        datasize = {1, dim1(), dim2(), dim2()};
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = dim2() * dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = 0;
-        datasize[2] = dim2();
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else if (l < 0) {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
-        datastart[3] = 0;
-        datasize[3] = dim2();
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2() || ld >= dim3())
-          rangeError();
-        n = dim3();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
-        datastart[3] = l;
-        datasize[3] = 1;
+        datastart = {i, j, 0, 0};
+        datasize = {1, 1, dim2(), dim2()};
       }
     } else if (rank() == 3) {
       if (i < 0) {
         n = dim0() * dim1() * dim2();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
         n = dim1() * dim2();
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = 0;
-        datasize[1] = dim1();
-        datastart[2] = 0;
-        datasize[2] = dim2();
-      } else if (k < 0) {
+        datastart = {i, 0, 0};
+        datasize = {1, dim1(), dim2()};
+      } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         nxdimsize_t m = blocksize;
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = m;
-        datastart[2] = 0;
-        datasize[2] = dim2();
-      } else {
-        if (id >= dim0() || jd >= dim1() || kd >= dim2())
-          rangeError();
-        n = 1;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
-        datastart[2] = k;
-        datasize[2] = 1;
+        datastart = {i, j, 0};
+        datasize = {1, m, dim2()};
       }
     } else if (rank() == 2) {
       if (i < 0) {
         n = dim0() * dim1();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else if (j < 0) {
@@ -401,31 +335,27 @@ public:
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;
-        datastart[0] = i;
-        datasize[0] = m;
-        datastart[1] = 0;
-        datasize[1] = dim1();
+        datastart = {i, 0};
+        datasize = {m, dim1()};
       } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
         n = 1;
-        datastart[0] = i;
-        datasize[0] = 1;
-        datastart[1] = j;
-        datasize[1] = 1;
+        datastart = {i, j};
+        datasize = {1, 1};
       }
     } else if (rank() == 1) {
       if (i < 0) {
         n = dim0();
-        alloc(n);
+        alloc(static_cast<std::size_t>(n));
         getData(m_data.data());
         return;
       } else {
         if (id >= dim0())
           rangeError();
         n = 1 * blocksize;
-        datastart[0] = i;
-        datasize[0] = blocksize;
+        datastart = {i};
+        datasize = {blocksize};
       }
     }
     alloc(n);
@@ -495,10 +425,6 @@ public:
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-  /**  Returns the class information about the next entry (class or dataset) in
-   * this class.
-   */
-  NXClassInfo getNextEntry();
   /// Creates a new object in the NeXus file at path path.
   // virtual void make(const std::string& path) = 0;
   /// Resets the current position for getNextEntry() to the beginning
@@ -621,126 +547,11 @@ private:
   NXClass() : NXObject() { clear(); }
 };
 
-//------------------- auxiliary classes ----------------------------//
-
-/**  Implements NXlog Nexus class.
- */
-class MANTID_NEXUS_DLL NXLog : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXLog(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /// Nexus class id
-  std::string NX_class() const override { return "NXlog"; }
-  /// Creates a property wrapper around the log
-  Kernel::Property *createProperty();
-  /// Creates a TimeSeriesProperty and returns a pointer to it
-  Kernel::Property *createTimeSeries(const std::string &start_time = "", const std::string &new_name = "");
-
-private:
-  /// Creates a single value property of the log
-  Kernel::Property *createSingleValueProperty();
-  /// Parse a time series
-  template <class TYPE>
-  Kernel::Property *parseTimeSeries(const std::string &logName, const TYPE &times, const std::string &time0 = "") {
-    std::string start_time = (!time0.empty()) ? time0 : times.attributes("start");
-    if (start_time.empty()) {
-      start_time = "2000-01-01T00:00:00";
-    }
-    auto start_t = Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
-    NXInfo vinfo = getDataSetInfo("value");
-    if (!vinfo)
-      return nullptr;
-
-    if (vinfo.dims[0] != times.dim0())
-      return nullptr;
-
-    if (vinfo.type == NXnumtype::CHAR) {
-      auto logv = new Kernel::TimeSeriesProperty<std::string>(logName);
-      NXChar value(*this, "value");
-      value.openLocal();
-      value.load();
-      for (nxdimsize_t i = 0; i < value.dim0(); i++) {
-        auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        for (nxdimsize_t j = 0; j < value.dim1(); j++) {
-          char *c = &value(i, j);
-          if (!isprint(*c))
-            *c = ' ';
-        }
-        logv->addValue(t, std::string(value() + i * value.dim1(), value.dim1()));
-      }
-      return logv;
-    } else if (vinfo.type == NXnumtype::FLOAT64) {
-      if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
-        auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
-        NXDouble value(*this, "value");
-        value.openLocal();
-        value.load();
-        for (nxdimsize_t i = 0; i < value.dim0(); i++) {
-          auto t = start_t + boost::posix_time::seconds(int(times[i]));
-          logv->addValue(t, (value[i] == 0 ? false : true));
-        }
-        return logv;
-      }
-      NXDouble value(*this, "value");
-      return loadValues<NXDouble, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NXnumtype::FLOAT32) {
-      NXFloat value(*this, "value");
-      return loadValues<NXFloat, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NXnumtype::INT32) {
-      NXInt value(*this, "value");
-      return loadValues<NXInt, TYPE>(logName, value, start_t, times);
-    }
-    return nullptr;
-  }
-
-  /// Loads the values in the log into the workspace
-  ///@param logName :: the name of the log
-  ///@param value :: the value
-  ///@param start_t :: the start time
-  ///@param times :: the array of time offsets
-  ///@returns a property pointer
-  template <class NX_TYPE, class TIME_TYPE>
-  Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value, Types::Core::DateAndTime start_t,
-                               const TIME_TYPE &times) {
-    value.openLocal();
-    auto logv = new Kernel::TimeSeriesProperty<double>(logName);
-    value.load();
-    for (nxdimsize_t i = 0; i < value.dim0(); i++) {
-      if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
-        auto t = start_t + boost::posix_time::seconds(int(times[i]));
-        logv->addValue(t, value[i]);
-      }
-    }
-    return logv;
-  }
-};
-
 //-------------------- main classes -------------------------------//
-
-/**  Main class is the one that can contain auxiliary classes.
- */
-class MANTID_NEXUS_DLL NXMainClass : public NXClass {
-public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
-   */
-  NXMainClass(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
-  /**  Opens a NXLog class
-   *   @param name :: The name of the NXLog
-   *   @return The log
-   */
-  NXLog openNXLog(const std::string &name) { return openNXClass<NXLog>(name); }
-};
 
 /**  Implements NXdata Nexus class.
  */
-class MANTID_NEXUS_DLL NXData : public NXMainClass {
+class MANTID_NEXUS_DLL NXData : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -782,14 +593,14 @@ public:
 
 /**  Implements NXdetector Nexus class.
  */
-class MANTID_NEXUS_DLL NXDetector : public NXMainClass {
+class MANTID_NEXUS_DLL NXDetector : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXDetector(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXDetector(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXdetector"; }
   /// Opens the dataset containing pixel distances
@@ -802,14 +613,14 @@ public:
 
 /**  Implements NXinstrument Nexus class.
  */
-class MANTID_NEXUS_DLL NXInstrument : public NXMainClass {
+class MANTID_NEXUS_DLL NXInstrument : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXInstrument(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXInstrument(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXinstrument"; }
   /**  Opens a NXDetector
@@ -821,14 +632,14 @@ public:
 
 /**  Implements NXentry Nexus class.
  */
-class MANTID_NEXUS_DLL NXEntry : public NXMainClass {
+class MANTID_NEXUS_DLL NXEntry : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
    * containing the NXClass.
    *   @param name :: The name of the NXClass relative to its parent
    */
-  NXEntry(const NXClass &parent, const std::string &name) : NXMainClass(parent, name) {}
+  NXEntry(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXentry"; }
   /**  Opens a NXData

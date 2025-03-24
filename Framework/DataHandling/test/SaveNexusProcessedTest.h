@@ -29,7 +29,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 

@@ -154,6 +154,7 @@ class MainWindowTest(unittest.TestCase):
             None,
             "Mantid Homepage",
             "Mantid Forum",
+            "Email mantid-help@mantidproject.org",
             None,
             "About Mantid Workbench",
         ]

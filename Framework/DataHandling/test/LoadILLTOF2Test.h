@@ -84,7 +84,7 @@ public:
       if (convertToTOF) {
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
           const double binEdge = tofDelay + static_cast<double>(channelIndex) * tofChannelWidth + tofChannelWidth / 2;
-          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
+          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3);
         }
       } else {
         for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
@@ -130,7 +130,7 @@ public:
     TS_ASSERT_EQUALS(runList->value(), "84446")
   }
 
-  void test_IN5_load() {
+  void test_IN5_hdf5_load() {
     // From the input test file.
     const double tofDelay = 5982.856;
     const double tofChannelWidth = 14.6349;
@@ -143,7 +143,23 @@ public:
     auto const run = ws->run();
     TS_ASSERT(run.hasProperty("run_list"))
     const auto runList = run.getLogData("run_list");
-    TS_ASSERT_EQUALS(runList->value(), "104007")
+    TS_ASSERT_EQUALS(runList->value(), "104007");
+  }
+
+  void test_IN5_hdf4_load() {
+    // From the input test file.
+    const double tofDelay = 5129.9414;     // ?
+    const double tofChannelWidth = 6.9084; // ?
+    const size_t channelCount = 1024;
+    const size_t histogramCount = 98305;
+    const size_t monitorCount = 1;
+    const bool convertToTOF = true;
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN5/095893.nxs", histogramCount, monitorCount, channelCount, tofDelay,
+                                           tofChannelWidth, convertToTOF);
+    auto const run = ws->run();
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "95893");
   }
 
   void test_IN6_load() {

@@ -172,6 +172,7 @@ void export_UnitCell() {
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Returns :math:`d`-spacing for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}`.")
+      // cppcheck-suppress cstyleCast
       .def("d", (double(UnitCell::*)(const V3D &) const) & UnitCell::d, (arg("self"), arg("hkl")),
            "Returns :math:`d`-spacing for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}`.")

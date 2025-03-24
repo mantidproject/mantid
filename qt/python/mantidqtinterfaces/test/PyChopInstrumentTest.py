@@ -387,28 +387,28 @@ class PyChopGuiTests(unittest.TestCase):
     def test_pychop_numerics(self):
         # Tests all instruments resolution and flux values against reference
         instruments = ["ARCS", "CNCS", "HYSPEC", "LET", "MAPS", "MARI", "MERLIN", "SEQUOIA"]
-        choppers = ["ARCS-100-1.5-AST", "High Flux", "OnlyOne", "High Flux", "S", "S", "G", "SEQ-100-2.0-AST"]
+        choppers = ["ARCS-100-1.5-AST", "High Flux", "OnlyOne", "High Flux", "S", "S", "G", "High-Resolution"]
         freqs = [[300], [300, 60], [180], [240, 120], [400, 50], [400], [400], [300]]
         eis = [120, 3.7, 45, 3.7, 120, 80, 120, 120]
         ref_res = [
-            10.278744237772832,
+            6.072831079992827,
             0.13188102618129077,
             3.6751279831313703,
             0.08079912729715726,
             4.9611687063450995,
             2.6049587487601764,
             6.8755979524827255,
-            5.396705255853653,
+            3.599331977438773,
         ]
         ref_flux = [
-            2055.562054927915,
+            22192.86718280959,
             128986.24972543867,
             0.014779264739956933,
             45438.33797146135,
             24196.496233770937,
             5747.118187298609,
             22287.647098883135,
-            4063.3113893387676,
+            16015.853669861977,
         ]
         for inst, ch, frq, ei, res0, flux0 in zip(instruments, choppers, freqs, eis, ref_res, ref_flux):
             res, flux = Instrument.calculate(inst, ch, frq, ei, 0)

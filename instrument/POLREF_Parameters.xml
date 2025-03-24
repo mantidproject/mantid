@@ -83,6 +83,10 @@
     <value val="0.972762,0.001828,-0.000261,0.0"/>
    </parameter>
 
+   <parameter name="WildesFlipperConfig" type="string">
+     <value val="00,01,10,11" />
+   </parameter>
+
 <!-- 1DStitchMany parameters-->
    <parameter name="StitchUseManualScaleFactors" type="string">
     <value val="True"/>

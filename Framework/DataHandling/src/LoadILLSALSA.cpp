@@ -15,13 +15,14 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <iterator>
 #include <sstream>
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLSALSA)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSALSA)
 
 const size_t LoadILLSALSA::VERTICAL_NUMBER_PIXELS = 256;
 const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
@@ -33,7 +34,7 @@ const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
  *
  * @return An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadILLSALSA::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLSALSA::confidence(Kernel::NexusDescriptor &descriptor) const {
   if ((descriptor.isEntry("/entry0/data_scan") || descriptor.isEntry("/entry0/data")) &&
       descriptor.isEntry("/entry0/instrument/Tx") && descriptor.isEntry("/entry0/instrument/Ty") &&
       descriptor.isEntry("/entry0/instrument/Tz"))

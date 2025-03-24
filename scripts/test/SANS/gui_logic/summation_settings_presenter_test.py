@@ -21,7 +21,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.presenter = self._make_presenter(self.summation_settings, self.view)
 
     def _make_mock_view(self):
-        mock_view = mock.create_autospec(SummationSettingsWidget, spec_set=True)
+        mock_view = mock.create_autospec(SummationSettingsWidget, spec_set=True, instance=True)
         mock_view.binningTypeChanged = FakeSignal()
         mock_view.preserveEventsChanged = FakeSignal()
         mock_view.additionalTimeShiftsChanged = FakeSignal()
@@ -29,7 +29,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         return mock_view
 
     def _make_mock_settings(self):
-        return mock.create_autospec(SummationSettingsModel)
+        return mock.create_autospec(SummationSettingsModel, instance=True)
 
     def _make_presenter(self, summation_settings, view):
         return SummationSettingsPresenter(summation_settings, view, None)

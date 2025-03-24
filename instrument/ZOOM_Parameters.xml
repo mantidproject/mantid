@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "ZOOM" valid-from = "2017-06-01 23:59:59" valid-to = "2100-01-31 23:59:59">
+<parameter-file instrument = "ZOOM" valid-from = "2017-06-01 23:59:59" valid-to = "2025-01-01 23:59:58">
 
 <component-link name = "ZOOM">
 

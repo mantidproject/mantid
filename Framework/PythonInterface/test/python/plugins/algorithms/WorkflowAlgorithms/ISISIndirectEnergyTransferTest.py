@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
+from unittest import mock
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CompareWorkspaces, CreateSimulationWorkspace, CreateWorkspace, DeleteWorkspace, ISISIndirectEnergyTransfer
 
@@ -256,6 +257,35 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 6)
+
+    @mock.patch("ISISIndirectEnergyTransfer.logger.warning")
+    def test_zeroes_in_calibration_workspace(self, mock_logger_warning):
+        """
+        If the calibration workspace has zeroes, the algorithm should still run,
+        but with a warning
+        """
+        calibration_ws = _generate_calibration_workspace("IRIS")
+        half_index = int(calibration_ws.getNumberHistograms() / 2 - 1)
+        calibration_ws.setY(half_index, [0])
+        calibration_ws.setY(half_index + 1, [0])
+
+        wks = ISISIndirectEnergyTransfer(
+            InputFiles=["IRS26176.RAW"],
+            Instrument="IRIS",
+            Analyser="graphite",
+            Reflection="002",
+            SpectraRange=[3, 53],
+            CalibrationWorkspace=calibration_ws,
+        )
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
+        self.assertEqual(wks.getNames()[0], "iris26176_graphite002_red")
+
+        red_ws = wks.getItem(0)
+        self.assertEqual(red_ws.getNumberHistograms(), 51)
+        # We want the first argument in a tuple, of the first call to logger.warning
+        warning_call = mock_logger_warning.call_args_list[0][0][0]
+        self.assertEqual(f"Calibration data is zero for workspace indices [{half_index} {half_index + 1}]", warning_call)
 
     def test_multi_files(self):
         """

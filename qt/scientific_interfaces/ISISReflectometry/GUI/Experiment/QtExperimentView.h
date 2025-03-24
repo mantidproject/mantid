@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-/** ExperiementView : Provides an interface for the "Experiement" tab in the
+/** ExperimentView : Provides an interface for the "Experiment" tab in the
 ISIS Reflectometry interface.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget, public IExperimentView {
@@ -83,6 +83,8 @@ public:
   std::string getPolarizationEfficienciesFilePath() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
   void setPolarizationEfficienciesFilePath(std::string const &filePath) override;
+  std::string getFredrikzeSpinStateOrder() const override;
+  void setFredrikzeSpinStateOrder(std::string const &spinStates) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
@@ -123,6 +125,8 @@ public:
   void disablePolarizationCorrections() override;
   void enablePolarizationEfficiencies() override;
   void disablePolarizationEfficiencies() override;
+  void enableFredrikzeSpinStateOrder() override;
+  void disableFredrikzeSpinStateOrder() override;
 
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;

@@ -4,11 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from tempfile import TemporaryDirectory
 import unittest
+
 from numpy.testing import assert_array_almost_equal
 
 from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load
-import abins
 from abins.constants import ATOM_PREFIX, FUNDAMENTALS
 
 
@@ -30,20 +31,12 @@ class AbinsBasicTest(unittest.TestCase):
     _workspace_name = "output_workspace"
     _tolerance = 0.0001
 
+    def setUp(self):
+        self.tempdir = TemporaryDirectory()
+        self._cache_directory = self.tempdir.name
+
     def tearDown(self):
-        abins.test_helpers.remove_output_files(
-            list_of_names=[
-                "explicit",
-                "default",
-                "total",
-                "squaricn_sum_Abins",
-                "squaricn_scale",
-                "benzene_exp",
-                "benzene_Abins",
-                "experimental",
-                "numbered",
-            ]
-        )
+        self.tempdir.cleanup()
         mtd.clear()
 
     def test_wrong_input(self):
@@ -56,6 +49,7 @@ class AbinsBasicTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile="Si2-sc_wrong.phonon",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         # wrong extension of phonon file in case of CASTEP
@@ -65,6 +59,7 @@ class AbinsBasicTest(unittest.TestCase):
             Abins,
             VibrationalOrPhononFile="Si2-sc.wrong_phonon",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         # wrong extension of phonon file in case of CRYSTAL
@@ -75,6 +70,7 @@ class AbinsBasicTest(unittest.TestCase):
             AbInitioProgram="CRYSTAL",
             VibrationalOrPhononFile="MgO.wrong_out",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         # no name for workspace
@@ -88,6 +84,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=self._temperature,
             OutputWorkspace=self._workspace_name + "total",
+            CacheDirectory=self._cache_directory,
         )
 
         # negative temperature in K
@@ -98,6 +95,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._si2 + ".phonon",
             TemperatureInKelvin=-1.0,
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         # negative scale
@@ -108,6 +106,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._si2 + ".phonon",
             Scale=-0.2,
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         # unknown instrument
@@ -118,6 +117,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._si2 + ".phonon",
             Instrument="UnknownInstrument",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     # test if intermediate results are consistent
@@ -132,6 +132,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms="C,C,H",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_non_unique_atoms(self):
@@ -145,6 +146,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms="atom_1,atom_2,atom1",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_non_existing_atoms(self):
@@ -159,6 +161,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms="N",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_atom_index_limits(self):
@@ -172,6 +175,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "0",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
         self.assertRaisesRegex(
             RuntimeError,
@@ -180,6 +184,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "61",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_atom_index_invalid(self):
@@ -193,6 +198,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "-3",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
         self.assertRaisesRegex(
             RuntimeError,
@@ -201,6 +207,7 @@ class AbinsBasicTest(unittest.TestCase):
             VibrationalOrPhononFile=self._squaricn + ".phonon",
             Atoms=ATOM_PREFIX + "_#4",
             OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
     def test_scale(self):
@@ -220,6 +227,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._squaricn + "_ref",
+            CacheDirectory=self._cache_directory,
         )
 
         wrk = Abins(
@@ -234,6 +242,7 @@ class AbinsBasicTest(unittest.TestCase):
             Scale=10,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace="squaricn_scale",
+            CacheDirectory=self._cache_directory,
         )
 
         ref = Scale(wrk_ref, Factor=10)
@@ -255,6 +264,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace="squaricn-lagrange",
+            CacheDirectory=self._cache_directory,
         )
 
     def test_exp(self):
@@ -275,6 +285,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace="benzene_exp",
+            CacheDirectory=self._cache_directory,
         )
 
         # load experimental data
@@ -303,6 +314,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._squaricn + "_ref",
+            CacheDirectory=self._cache_directory,
         )
 
         wks_all_atoms_explicitly = Abins(
@@ -311,6 +323,7 @@ class AbinsBasicTest(unittest.TestCase):
             SumContributions=self._sum_contributions,
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             OutputWorkspace="explicit",
+            CacheDirectory=self._cache_directory,
         )
 
         wks_all_atoms_default = Abins(
@@ -318,6 +331,7 @@ class AbinsBasicTest(unittest.TestCase):
             SumContributions=self._sum_contributions,
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             OutputWorkspace="default",
+            CacheDirectory=self._cache_directory,
         )
 
         # Python 3 has no guarantee of dict order so the workspaces in the group may be in
@@ -348,6 +362,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._squaricn + "_ref",
+            CacheDirectory=self._cache_directory,
         )
 
         numbered_workspace_name = "numbered"
@@ -359,6 +374,7 @@ class AbinsBasicTest(unittest.TestCase):
             QuantumOrderEventsNumber=self._quantum_order_events_number,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=numbered_workspace_name,
+            CacheDirectory=self._cache_directory,
         )
 
         wrk_ref_names = list(wrk_ref.getNames())

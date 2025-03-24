@@ -20,7 +20,9 @@ from mantid.simpleapi import (
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 
-sxd_path = "Diffraction.single_crystal.sxd"
+DIFFRACTION_PATH = "Diffraction.single_crystal"
+SXD_PATH = DIFFRACTION_PATH + ".sxd"
+BASE_SX_PATH = DIFFRACTION_PATH + ".base_sx"
 
 
 class SXDTest(unittest.TestCase):
@@ -46,7 +48,7 @@ class SXDTest(unittest.TestCase):
 
     # --- test BaseSX methods (parent class with abstract methods) that require class instantiation ---
 
-    @patch(sxd_path + ".BaseSX.retrieve")
+    @patch(SXD_PATH + ".BaseSX.retrieve")
     def test_get_ws(self, mock_retrieve):
         runno = 1234
         wsname = "wsname"
@@ -56,7 +58,7 @@ class SXDTest(unittest.TestCase):
         self.assertEqual(wsname, self.sxd.get_ws_name(runno))
         self.assertIsNone(self.sxd.get_ws_name(101))
 
-    @patch(sxd_path + ".BaseSX.retrieve")
+    @patch(SXD_PATH + ".BaseSX.retrieve")
     def test_get_md(self, mock_retrieve):
         runno = 1234
         mdname = "mdname"
@@ -126,7 +128,7 @@ class SXDTest(unittest.TestCase):
         self.sxd.set_goniometer_axes([0, 1, 0, 1], [1, 1, 0, -1])
         self.assertListEqual(["0,1,0,1", "1,1,0,-1"], self.sxd.gonio_axes)
 
-    @patch(sxd_path + ".mantid.IntegratePeaksMD")
+    @patch(SXD_PATH + ".mantid.IntegratePeaksMD")
     def test_integrate_peaks_MD_optimal_radius(self, mock_int_md):
         ws_md = "ws_md"
         peaks = self._make_peaks_detids(detids=[2016, 2016, 10209, 10209], tofs=2 * [5000, 10000], wsname="peaks3")
@@ -144,24 +146,30 @@ class SXDTest(unittest.TestCase):
             for kwarg in int_md_kwargs:
                 self.assertTrue(mock_int_md.call_args_list[icall].kwargs[kwarg])
 
-    @patch(sxd_path + ".BaseSX.retrieve")
-    @patch(sxd_path + ".mantid.SaveReflections")
-    @patch(sxd_path + ".mantid.SaveNexus")
+    @patch(SXD_PATH + ".BaseSX.retrieve")
+    @patch(SXD_PATH + ".mantid.SaveReflections")
+    @patch(SXD_PATH + ".mantid.SaveNexus")
     def test_save_peak_table(self, mock_save_nxs, mock_save_ref, mock_retrieve):
-        runno = 1234
-        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}}
-        pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
         fmt = "SHELX"
-        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
-
-        self.sxd.save_peak_table(runno, pk_type, int_type, self._test_dir, fmt)
+        self._call_save_peak_table(mock_retrieve, save_format=fmt, SplitFiles=False)
 
         fpath = path.join(self._test_dir, "peaks_" + fmt)
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
         mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
 
-    @patch(sxd_path + ".mantid.SaveReflections")
-    @patch(sxd_path + ".mantid.SaveNexus")
+    @patch(SXD_PATH + ".BaseSX.retrieve")
+    @patch(SXD_PATH + ".mantid.SaveReflections")
+    @patch(SXD_PATH + ".mantid.SaveNexus")
+    def test_save_peak_table_save_nxs_False(self, mock_save_nxs, mock_save_ref, mock_retrieve):
+        fmt = "SHELX"
+        self._call_save_peak_table(mock_retrieve, save_format=fmt, save_nxs=False, SplitFiles=False)
+
+        fpath = path.join(self._test_dir, "peaks_" + fmt)
+        mock_save_nxs.assert_not_called()
+        mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+
+    @patch(SXD_PATH + ".mantid.SaveReflections")
+    @patch(SXD_PATH + ".mantid.SaveNexus")
     def test_save_all_peaks(self, mock_save_nxs, mock_save_ref):
         self.sxd.runs = dict()
         for runno in range(1234, 1236):
@@ -171,12 +179,12 @@ class SXDTest(unittest.TestCase):
         pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
         fmt = "SHELX"
 
-        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt)
+        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt, MinIntensOverSigma=3)
 
         all_peaks_name = "1234-1235_found_int_MD_opt"
         fpath = path.join(self._test_dir, f"{all_peaks_name}_{fmt}")
         mock_save_nxs.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".nxs")
-        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, MinIntensOverSigma=3)
         self.assertTrue(HasUB(Workspace=all_peaks_name))
         ClearUB(Workspace=self.peaks)
 
@@ -191,8 +199,8 @@ class SXDTest(unittest.TestCase):
             pred_peaks = self.sxd.get_peaks(runno, pk_type)
             self.assertEqual(pred_peaks.name(), peaks.name() + "_" + pk_type.value)
 
-    @patch(sxd_path + ".SXD.set_md")
-    @patch(sxd_path + ".BaseSX.convert_ws_to_MD")
+    @patch(SXD_PATH + ".SXD.set_md")
+    @patch(SXD_PATH + ".BaseSX.convert_ws_to_MD")
     def test_convert_to_md_sets_ub_if_HKL(self, mock_conv_md, mock_set_md):
         self.peaks = self._make_peaks_detids(wsname="peaks_for_md")
         SetUB(self.peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
@@ -242,14 +250,44 @@ class SXDTest(unittest.TestCase):
 
         self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
 
+    @patch(BASE_SX_PATH + ".path.exists")
+    @patch(BASE_SX_PATH + ".mantid.LoadIsawUB")
+    @patch(BASE_SX_PATH + ".mantid.IndexPeaks")
+    def test_load_isaw_ub(self, mock_index, mock_load_ub, mock_path_exists):
+        runno = 1234
+        self.sxd.set_ws(runno, self.ws)
+        self.sxd.set_peaks(runno, self.peaks, PEAK_TYPE.FOUND)
+        mock_path_exists.return_value = True
+        fname = "UB.mat"
+
+        self.sxd.load_isaw_ub(fname)
+
+        self.assertEqual(mock_load_ub.call_count, 2)
+        mock_load_ub.assert_any_call(InputWorkspace=self.ws.name(), Filename=fname)
+        mock_load_ub.assert_any_call(InputWorkspace=self.peaks.name(), Filename=fname)
+        mock_index.assert_called_once()
+
+    @patch(BASE_SX_PATH + ".path.exists")
+    @patch(BASE_SX_PATH + ".mantid.LoadIsawUB")
+    @patch(BASE_SX_PATH + ".mantid.IndexPeaks")
+    def test_load_isaw_ub_invalid_path(self, mock_index, mock_load_ub, mock_path_exists):
+        runno = 1234
+        self.sxd.set_ws(runno, self.ws)
+        mock_path_exists.return_value = False
+
+        self.sxd.load_isaw_ub("UB.mat")
+
+        mock_load_ub.assert_not_called()
+        mock_index.assert_not_called()
+
     #  --- methods specific to SXD class ---
 
-    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
-    @patch(sxd_path + ".SXD.set_ws")
-    @patch(sxd_path + ".SXD.load_run")
-    @patch(sxd_path + ".SXD._divide_workspaces")
-    @patch(sxd_path + ".mantid.DeleteWorkspace")
-    @patch(sxd_path + ".mantid.ConvertUnits")
+    @patch(BASE_SX_PATH + ".mantid.SetGoniometer")
+    @patch(SXD_PATH + ".SXD.set_ws")
+    @patch(SXD_PATH + ".SXD.load_run")
+    @patch(SXD_PATH + ".SXD._divide_workspaces")
+    @patch(SXD_PATH + ".mantid.DeleteWorkspace")
+    @patch(SXD_PATH + ".mantid.ConvertUnits")
     def test_process_data_with_gonio_angle_strings(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
         sxd = SXD(vanadium_runno=1, empty_runno=2)
         sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
@@ -263,12 +301,12 @@ class SXDTest(unittest.TestCase):
         expected_calls = len(runnos) * [call(Workspace="wsname", EnableLogging=False, Axis0="log1,0,1,0,1", Axis1="log2,1,0,0,0")]
         mock_set_gonio.assert_has_calls(expected_calls)
 
-    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
-    @patch(sxd_path + ".SXD.set_ws")
-    @patch(sxd_path + ".SXD.load_run")
-    @patch(sxd_path + ".SXD._divide_workspaces")
-    @patch(sxd_path + ".mantid.DeleteWorkspace")
-    @patch(sxd_path + ".mantid.ConvertUnits")
+    @patch(BASE_SX_PATH + ".mantid.SetGoniometer")
+    @patch(SXD_PATH + ".SXD.set_ws")
+    @patch(SXD_PATH + ".SXD.load_run")
+    @patch(SXD_PATH + ".SXD._divide_workspaces")
+    @patch(SXD_PATH + ".mantid.DeleteWorkspace")
+    @patch(SXD_PATH + ".mantid.ConvertUnits")
     def test_process_data_with_gonio_angle_sequences(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
         sxd = SXD(vanadium_runno=1, empty_runno=2)
         sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
@@ -343,6 +381,13 @@ class SXDTest(unittest.TestCase):
         for idet, detid in enumerate(detids):
             AddPeak(PeaksWorkspace=peaks, RunWorkspace=self.ws, DetectorID=detid, TOF=tofs[idet], EnableLogging=False)
         return peaks
+
+    def _call_save_peak_table(self, mock_retrieve, **kwargs):
+        runno = 1234
+        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}}
+        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
+
+        self.sxd.save_peak_table(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS, self._test_dir, **kwargs)
 
 
 def make_mock_ws_with_name(name):

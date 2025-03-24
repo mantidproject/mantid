@@ -91,6 +91,15 @@ class BaseSXTest(unittest.TestCase):
         self.assertEqual(1, peaks.getNumberPeaks())
         self.assertEqual(0.0, peaks.getPeak(0).getQLabFrame()[0])
 
+    def test_remove_non_integrated_peaks_min_intens_over_sigma(self):
+        peaks = self._make_peaks_qsample(wsname="peaks5")
+        peaks.getPeak(0).setIntensity(1.0)
+        peaks.getPeak(0).setSigmaIntensity(1.0)
+
+        peaks = BaseSX.remove_non_integrated_peaks(peaks, min_intens_over_sigma=3)
+
+        self.assertEqual(0, peaks.getNumberPeaks())
+
     def test_remove_non_indexed_peaks(self):
         peaks = self._make_peaks_HKL(hs=[1.15, 2], wsname="peaks6")
         IndexPeaks(peaks, Tolerance=0.1)  # will not index first peak

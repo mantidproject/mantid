@@ -273,7 +273,7 @@ void EigenVector::sort(const std::vector<size_t> &indices) {
 }
 
 /// Copy the values to an std vector of doubles
-std::vector<double> EigenVector::toStdVector() const { return m_data; }
+const std::vector<double> &EigenVector::toStdVector() const { return m_data; }
 
 /// return reference to m_data
 std::vector<double> &EigenVector::StdVectorRef() { return m_data; }

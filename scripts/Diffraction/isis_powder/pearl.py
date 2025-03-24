@@ -96,6 +96,19 @@ class Pearl(AbstractInst):
             output_file_paths["output_name"] = output_file_paths["output_name"] + file_ext.replace(".", "_")
         return output_file_paths
 
+    def get_trans_module_indices(self):
+        default_imods = list(range(9))  # all modules 1-9 in transverse banks (tth~90 deg)
+        default_mod_nums_str = "1-9"
+        if self._inst_settings.focus_mode != "trans_custom" or not self._inst_settings.trans_mod_nums:
+            return default_imods, default_mod_nums_str
+        mod_nums = common.generate_run_numbers(run_number_string=self._inst_settings.trans_mod_nums)
+        imods = [int(mod_num - 1) for mod_num in set(mod_nums) if 0 < mod_num < 10]  # remove invalid/duplicates
+        if len(imods) < len(mod_nums):
+            # catches case where no indices in correct range as len(mod_nums) > 1 in this branch
+            logger.warning("Invalid or duplicate modules in trans_mod_nums - using all modules 1-9")
+            return default_imods, default_mod_nums_str
+        return imods, self._inst_settings.trans_mod_nums
+
     def _get_output_formats(self, output_directory, xye_files_directory):
         return {
             "nxs_filename": output_directory,

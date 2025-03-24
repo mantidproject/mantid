@@ -19,8 +19,8 @@ presenter_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tab
 
 class TestGSAS2Presenter(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(view.GSAS2View)
-        self.model = mock.create_autospec(model.GSAS2Model)
+        self.view = mock.create_autospec(view.GSAS2View, instance=True)
+        self.model = mock.create_autospec(model.GSAS2Model, instance=True)
         self.presenter = presenter.GSAS2Presenter(self.model, self.view, test=True)
 
     @patch(presenter_path + ".view.GSAS2View.get_refinement_parameters")

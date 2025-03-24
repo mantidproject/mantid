@@ -15,8 +15,8 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <exception>

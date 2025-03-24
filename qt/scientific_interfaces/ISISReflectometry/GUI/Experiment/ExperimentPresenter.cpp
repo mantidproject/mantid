@@ -174,12 +174,13 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
     return PolarizationCorrections(polCorrType);
   }
+  auto const &fredrikzeSpinStateOrder = m_view->getFredrikzeSpinStateOrder();
   if (polCorrOptionString == "FilePath") {
     auto const &polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
     showPolCorrFilePathValidity(polCorrFilePath);
-    return PolarizationCorrections(polCorrType, polCorrFilePath);
+    return PolarizationCorrections(polCorrType, polCorrFilePath, fredrikzeSpinStateOrder);
   }
-  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace());
+  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace(), fredrikzeSpinStateOrder);
 }
 
 void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
@@ -251,11 +252,13 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   }
   if (polCorrOption == "Workspace") {
     m_view->enablePolarizationEfficiencies();
+    m_view->enableFredrikzeSpinStateOrder();
     m_view->setPolarizationEfficienciesWorkspaceMode();
     return;
   }
   if (polCorrOption == "FilePath") {
     m_view->enablePolarizationEfficiencies();
+    m_view->enableFredrikzeSpinStateOrder();
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
@@ -264,6 +267,7 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
 void ExperimentPresenter::disablePolarizationEfficiencies() {
   m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
+  m_view->disableFredrikzeSpinStateOrder();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
@@ -439,7 +443,8 @@ void ExperimentPresenter::updateViewFromModel() {
       polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
   m_view->setPolarizationEfficienciesFilePath("");
   if (m_model.polarizationCorrections().workspace())
-    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
+    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().value());
+  m_view->setFredrikzeSpinStateOrder(m_model.polarizationCorrections().fredrikzeSpinStateOrder());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());

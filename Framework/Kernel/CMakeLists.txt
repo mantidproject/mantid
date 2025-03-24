@@ -75,7 +75,7 @@ set(SRC_FILES
     src/NDRandomNumberGenerator.cpp
     src/NeutronAtom.cpp
     src/LegacyNexusDescriptor.cpp
-    src/NexusHDF5Descriptor.cpp
+    src/NexusDescriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/ProgressBase.cpp
@@ -233,7 +233,7 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/LegacyNexusDescriptor.h
-    inc/MantidKernel/NexusHDF5Descriptor.h
+    inc/MantidKernel/NexusDescriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/PhysicalConstants.h
@@ -341,6 +341,7 @@ set(TEST_FILES
     DynamicPointerCastHelperTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumeratedStringPropertyTest.h
     EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
@@ -389,7 +390,7 @@ set(TEST_FILES
     NearestNeighboursTest.h
     NeutronAtomTest.h
     LegacyNexusDescriptorTest.h
-    NexusHDF5DescriptorTest.h
+    NexusDescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h
@@ -487,7 +488,7 @@ target_link_libraries(
   Kernel
   PUBLIC Mantid::Types
          Mantid::Json
-         Mantid::NexusCpp
+         Mantid::Nexus
          Mantid::LegacyNexus
          Eigen3::Eigen
          TBB::tbb

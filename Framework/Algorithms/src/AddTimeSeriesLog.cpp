@@ -108,7 +108,7 @@ void AddTimeSeriesLog::exec() {
  * @param logWS The workspace containing the log
  * @param name The name of the log to delete
  */
-void AddTimeSeriesLog::removeExisting(API::MatrixWorkspace_sptr &logWS, const std::string &name) {
+void AddTimeSeriesLog::removeExisting(const API::MatrixWorkspace_sptr &logWS, const std::string &name) {
   auto deleter = createChildAlgorithm("DeleteLog", -1, -1, false);
   deleter->setProperty("Workspace", logWS);
   deleter->setProperty("Name", name);

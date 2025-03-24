@@ -29,7 +29,7 @@ public:
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
   void init() override;

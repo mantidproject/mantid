@@ -358,7 +358,7 @@ and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 This determines which vanadium and empty run numbers
 to use whilst processing.
 
-Accepted values are: **PDF** or **Rietveld**
+Accepted values are: **PDF**, **PDF_NORM** or **Rietveld**
 
 *Note: This parameter is not case sensitive*
 
@@ -371,6 +371,8 @@ Example Input:
 
   polaris_example.create_vanadium(mode="PDF", ...)
   # Or
+  polaris_example.create_vanadium(mode="PDF_NORM", ...)
+  # Or alternatively
   polaris_example.focus(mode="Rietveld", ...)
 
 .. _config_file_polaris_isis-powder-diffraction-ref:

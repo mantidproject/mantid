@@ -8,7 +8,7 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <numeric>

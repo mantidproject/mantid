@@ -60,7 +60,7 @@ void LoadErrorEventsNexus::exec() {
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
 
-  const Kernel::NexusHDF5Descriptor descriptor(filename);
+  const Kernel::NexusDescriptor descriptor(filename);
 
   if (!descriptor.isEntry("/entry/bank_error_events"))
     throw std::runtime_error("entry bank_error_events does not exist");
@@ -132,7 +132,10 @@ void LoadErrorEventsNexus::exec() {
   g_log.information() << "Loaded " << numEvents << " events with TOF min = " << min_tof << ", max = " << max_tof
                       << "\n";
 
-  eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
+  if (min_tof < max_tof)
+    eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
+  else
+    eventWS->setAllX(HistogramData::BinEdges{0, 16666.7});
 
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");

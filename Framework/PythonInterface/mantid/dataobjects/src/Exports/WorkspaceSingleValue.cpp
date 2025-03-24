@@ -21,5 +21,6 @@ void export_WorkspaceSingleValue() {
   class_<WorkspaceSingleValue, bases<MatrixWorkspace>, boost::noncopyable>("WorkspaceSingleValue", no_init);
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<WorkspaceSingleValue>();
 }

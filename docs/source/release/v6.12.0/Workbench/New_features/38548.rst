@@ -1,1 +1,0 @@
-- Matrix Workspaces can now be plotted as plots, markers, or errorbars by specifying the :ref:`plot type <MatrixWorkspace_Plotting>`.

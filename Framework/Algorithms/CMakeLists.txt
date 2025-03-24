@@ -86,6 +86,7 @@ set(SRC_FILES
     src/CreateGroupingWorkspace.cpp
     src/CreateLogPropertyTable.cpp
     src/CreateLogTimeCorrection.cpp
+    src/CreateMonteCarloWorkspace.cpp
     src/CreatePSDBleedMask.cpp
     src/CreatePeaksWorkspace.cpp
     src/CreateSampleWorkspace.cpp
@@ -233,16 +234,16 @@ set(SRC_FILES
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
     src/PoissonErrors.cpp
-    src/PolarizationCorrections/HeliumAnalyserEfficiency.cpp
-    src/PolarizationCorrections/PolarizationCorrectionsHelpers.cpp
-    src/PolarizationCorrections/SpinStateValidator.cpp
-    src/PolarizationCorrections/PolarizerEfficiency.cpp
     src/PolarizationCorrectionFredrikze.cpp
     src/PolarizationCorrectionWildes.cpp
-    src/PolarizationEfficiencyCor.cpp
     src/PolarizationCorrections/DepolarizedAnalyserTransmission.cpp
     src/PolarizationCorrections/FlipperEfficiency.cpp
+    src/PolarizationCorrections/HeliumAnalyserEfficiency.cpp
+    src/PolarizationCorrections/PolarizationCorrectionsHelpers.cpp
     src/PolarizationCorrections/PolarizationEfficienciesWildes.cpp
+    src/PolarizationCorrections/PolarizerEfficiency.cpp
+    src/PolarizationCorrections/SpinStateValidator.cpp
+    src/PolarizationEfficiencyCor.cpp
     src/PolynomialCorrection.cpp
     src/Power.cpp
     src/PowerLawCorrection.cpp
@@ -435,6 +436,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateGroupingWorkspace.h
     inc/MantidAlgorithms/CreateLogPropertyTable.h
     inc/MantidAlgorithms/CreateLogTimeCorrection.h
+    inc/MantidAlgorithms/CreateMonteCarloWorkspace.h
     inc/MantidAlgorithms/CreatePSDBleedMask.h
     inc/MantidAlgorithms/CreatePeaksWorkspace.h
     inc/MantidAlgorithms/CreateSampleWorkspace.h
@@ -586,15 +588,15 @@ set(INC_FILES
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
     inc/MantidAlgorithms/PoissonErrors.h
-    inc/MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h
-    inc/MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h
-    inc/MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h
-    inc/MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h
-    inc/MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h
-    inc/MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h
-    inc/MantidAlgorithms/PolarizationCorrections/PolarizationEfficienciesWildes.h
     inc/MantidAlgorithms/PolarizationCorrectionFredrikze.h
     inc/MantidAlgorithms/PolarizationCorrectionWildes.h
+    inc/MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h
+    inc/MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h
+    inc/MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h
+    inc/MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h
+    inc/MantidAlgorithms/PolarizationCorrections/PolarizationEfficienciesWildes.h
+    inc/MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h
+    inc/MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
     inc/MantidAlgorithms/PolynomialCorrection.h
     inc/MantidAlgorithms/Power.h
@@ -791,6 +793,7 @@ set(TEST_FILES
     CreateGroupingWorkspaceTest.h
     CreateLogPropertyTableTest.h
     CreateLogTimeCorrectionTest.h
+    CreateMonteCarloWorkspaceTest.h
     CreatePSDBleedMaskTest.h
     CreatePeaksWorkspaceTest.h
     CreateSampleWorkspaceTest.h
@@ -934,15 +937,15 @@ set(TEST_FILES
     PlusTest.h
     PointByPointVCorrectionTest.h
     PoissonErrorsTest.h
-    PolarizationCorrections/DepolarizedAnalyserTransmissionTest.h
-    PolarizationCorrections/HeliumAnalyserEfficiencyTest.h
-    PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
-    PolarizationCorrections/SpinStateValidatorTest.h
-    PolarizationCorrections/FlipperEfficiencyTest.h
-    PolarizationCorrections/PolarizerEfficiencyTest.h
-    PolarizationCorrections/PolarizationEfficienciesWildesTest.h
     PolarizationCorrectionFredrikzeTest.h
     PolarizationCorrectionWildesTest.h
+    PolarizationCorrections/DepolarizedAnalyserTransmissionTest.h
+    PolarizationCorrections/FlipperEfficiencyTest.h
+    PolarizationCorrections/HeliumAnalyserEfficiencyTest.h
+    PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
+    PolarizationCorrections/PolarizationEfficienciesWildesTest.h
+    PolarizationCorrections/PolarizerEfficiencyTest.h
+    PolarizationCorrections/SpinStateValidatorTest.h
     PolarizationEfficiencyCorTest.h
     PolynomialCorrectionTest.h
     PowerLawCorrectionTest.h

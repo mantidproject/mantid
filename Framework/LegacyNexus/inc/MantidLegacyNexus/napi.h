@@ -51,8 +51,6 @@
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include <stdint.h>
 
-using namespace Mantid::LegacyNexus;
-
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
 
@@ -169,9 +167,6 @@ using namespace Mantid::LegacyNexus;
  *
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 /**
  * Open a NeXus file.
  * NXopen honours full path file names. But it also searches
@@ -193,15 +188,17 @@ extern "C" {
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopen(CONSTCHAR *filename, NXaccess access_method,
-                                                            NXhandle *pHandle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopen(Mantid::LegacyNexus::CONSTCHAR *filename,
+                                                            Mantid::LegacyNexus::NXaccess access_method,
+                                                            Mantid::LegacyNexus::NXhandle *pHandle);
 
 /**
  * Opens an existing NeXus file a second time for e.g. access from another thread.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXreopen(Mantid::LegacyNexus::NXhandle pOrigHandle,
+                                                              Mantid::LegacyNexus::NXhandle *pNewHandle);
 
 /**
  * close a NeXus file
@@ -210,7 +207,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXreopen(NXhandle pOrigHand
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclose(NXhandle *pHandle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclose(Mantid::LegacyNexus::NXhandle *pHandle);
 
 /**
  * flush data to disk
@@ -218,7 +215,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclose(NXhandle *pHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXflush(NXhandle *pHandle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXflush(Mantid::LegacyNexus::NXhandle *pHandle);
 
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
@@ -229,7 +226,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXflush(NXhandle *pHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakegroup(Mantid::LegacyNexus::NXhandle handle,
+                                                                 Mantid::LegacyNexus::CONSTCHAR *name,
+                                                                 Mantid::LegacyNexus::CONSTCHAR *NXclass);
 
 /**
  * Step into a group. All further access will be within the opened group.
@@ -239,7 +238,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakegroup(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengroup(Mantid::LegacyNexus::NXhandle handle,
+                                                                 Mantid::LegacyNexus::CONSTCHAR *name,
+                                                                 Mantid::LegacyNexus::CONSTCHAR *NXclass);
 
 /**
  * Open the NeXus object with the path specified
@@ -250,7 +251,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengroup(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopenpath(NXhandle handle, CONSTCHAR *path);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopenpath(Mantid::LegacyNexus::NXhandle handle,
+                                                                Mantid::LegacyNexus::CONSTCHAR *path);
 
 /**
  * Opens the group in which the NeXus object with the specified path exists
@@ -261,7 +263,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopenpath(NXhandle handle,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(NXhandle handle, CONSTCHAR *path);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(Mantid::LegacyNexus::NXhandle handle,
+                                                                     Mantid::LegacyNexus::CONSTCHAR *path);
 
 /**
  * Retrieve the current path in the NeXus file
@@ -271,7 +274,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(NXhandle ha
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(NXhandle handle, char *path, int pathlen);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNexus::NXhandle handle, char *path,
+                                                               int pathlen);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
@@ -279,7 +283,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(NXhandle handle, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosegroup(NXhandle handle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosegroup(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Create a multi dimensional data array or dataset. The dataset is NOT opened.
@@ -292,14 +296,18 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosegroup(NXhandle handl
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
-NXmakedata(NXhandle handle, CONSTCHAR *label, Mantid::LegacyNexus::NXnumtype datatype, int rank, int dim[]);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakedata(Mantid::LegacyNexus::NXhandle handle,
+                                                                Mantid::LegacyNexus::CONSTCHAR *label,
+                                                                Mantid::LegacyNexus::NXnumtype datatype, int rank,
+                                                                int dim[]);
 
 /**
  * @copydoc NXmakedata()
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
-NXmakedata64(NXhandle handle, CONSTCHAR *label, Mantid::LegacyNexus::NXnumtype datatype, int rank, int64_t dim[]);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakedata64(Mantid::LegacyNexus::NXhandle handle,
+                                                                  Mantid::LegacyNexus::CONSTCHAR *label,
+                                                                  Mantid::LegacyNexus::NXnumtype datatype, int rank,
+                                                                  int64_t dim[]);
 
 /**
  * Create a compressed dataset. The dataset is NOT opened. Data from this set will automatically be compressed when
@@ -321,14 +329,16 @@ NXmakedata64(NXhandle handle, CONSTCHAR *label, Mantid::LegacyNexus::NXnumtype d
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata(NXhandle handle, CONSTCHAR *label,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata(Mantid::LegacyNexus::NXhandle handle,
+                                                                    Mantid::LegacyNexus::CONSTCHAR *label,
                                                                     Mantid::LegacyNexus::NXnumtype datatype, int rank,
                                                                     int dim[], int comp_typ, int const bufsize[]);
 
 /**
  * @copydoc NXcompmakedata()
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata64(Mantid::LegacyNexus::NXhandle handle,
+                                                                      Mantid::LegacyNexus::CONSTCHAR *label,
                                                                       Mantid::LegacyNexus::NXnumtype datatype, int rank,
                                                                       int64_t dim[], int comp_typ,
                                                                       int64_t const chunk_size[]);
@@ -341,7 +351,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata64(NXhandle h
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopendata(NXhandle handle, CONSTCHAR *label);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopendata(Mantid::LegacyNexus::NXhandle handle,
+                                                                Mantid::LegacyNexus::CONSTCHAR *label);
 
 /**
  * Close access to a dataset.
@@ -349,7 +360,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopendata(NXhandle handle,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosedata(NXhandle handle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosedata(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Write data to a datset which has previouly been opened with NXopendata.
@@ -360,7 +371,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosedata(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputdata(NXhandle handle, const void *data);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputdata(Mantid::LegacyNexus::NXhandle handle, const void *data);
 
 /**
  * Write an attribute. The kind of attribute written depends on the
@@ -377,7 +388,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputdata(NXhandle handle, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const void *data,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattr(Mantid::LegacyNexus::NXhandle handle,
+                                                               Mantid::LegacyNexus::CONSTCHAR *name, const void *data,
                                                                int iDataLen, Mantid::LegacyNexus::NXnumtype iType);
 
 /**
@@ -394,7 +406,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattr(NXhandle handle, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattra(Mantid::LegacyNexus::NXhandle handle,
+                                                                Mantid::LegacyNexus::CONSTCHAR *name, const void *data,
                                                                 const int rank, const int dim[],
                                                                 const Mantid::LegacyNexus::NXnumtype iType);
 
@@ -407,13 +420,13 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattra(NXhandle handle,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab(NXhandle handle, const void *data, const int start[],
-                                                               const int size[]);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab(Mantid::LegacyNexus::NXhandle handle, const void *data,
+                                                               const int start[], const int size[]);
 
 /**
  * @copydoc NXputdata()
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab64(NXhandle handle, const void *data,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab64(Mantid::LegacyNexus::NXhandle handle, const void *data,
                                                                  const int64_t start[], const int64_t size[]);
 
 /**
@@ -425,7 +438,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab64(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(NXhandle handle, Mantid::LegacyNexus::NXlink *pLink);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(Mantid::LegacyNexus::NXhandle handle,
+                                                                 Mantid::LegacyNexus::NXlink *pLink);
 
 /**
  * Create a link to the group or dataset described by pLink in the currently open
@@ -436,7 +450,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakelink(NXhandle handle, Mantid::LegacyNexus::NXlink *pLink);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakelink(Mantid::LegacyNexus::NXhandle handle,
+                                                                Mantid::LegacyNexus::NXlink *pLink);
 
 /**
  * Create a link to the group or dataset described by pLink in the currently open
@@ -448,7 +463,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakelink(NXhandle handle,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakenamedlink(Mantid::LegacyNexus::NXhandle handle,
+                                                                     Mantid::LegacyNexus::CONSTCHAR *newname,
                                                                      Mantid::LegacyNexus::NXlink *pLink);
 
 /**
@@ -458,7 +474,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakenamedlink(NXhandle ha
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopensourcegroup(NXhandle handle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopensourcegroup(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -469,7 +485,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopensourcegroup(NXhandle 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdata(NXhandle handle, void *data);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdata(Mantid::LegacyNexus::NXhandle handle, void *data);
 
 /**
  * Retrieve information about the curretly open dataset.
@@ -482,13 +498,14 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdata(NXhandle handle, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetinfo(NXhandle handle, int *rank, int dimension[],
-                                                               Mantid::LegacyNexus::NXnumtype *datatype);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
+NXgetinfo(Mantid::LegacyNexus::NXhandle handle, int *rank, int dimension[], Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
  * @copydoc NXgetinfo()
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetinfo64(NXhandle handle, int *rank, int64_t dimension[],
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetinfo64(Mantid::LegacyNexus::NXhandle handle, int *rank,
+                                                                 int64_t dimension[],
                                                                  Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
@@ -503,7 +520,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetinfo64(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(NXhandle handle, NXname name, NXname nxclass,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(Mantid::LegacyNexus::NXhandle handle,
+                                                                    Mantid::LegacyNexus::NXname name,
+                                                                    Mantid::LegacyNexus::NXname nxclass,
                                                                     Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
@@ -516,14 +535,14 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(NXhandle han
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab(NXhandle handle, void *data, const int start[],
-                                                               const int size[]);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab(Mantid::LegacyNexus::NXhandle handle, void *data,
+                                                               const int start[], const int size[]);
 
 /**
  * @copydoc NXgetslab()
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab64(NXhandle handle, void *data, const int64_t start[],
-                                                                 const int64_t size[]);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab64(Mantid::LegacyNexus::NXhandle handle, void *data,
+                                                                 const int64_t start[], const int64_t size[]);
 
 /**
  * Read an attribute containing a single string or numerical value.
@@ -536,8 +555,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab64(NXhandle handle
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattr(NXhandle handle, const char *name, void *data,
-                                                               int *iDataLen, Mantid::LegacyNexus::NXnumtype *iType);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattr(Mantid::LegacyNexus::NXhandle handle, const char *name,
+                                                               void *data, int *iDataLen,
+                                                               Mantid::LegacyNexus::NXnumtype *iType);
 
 /**
  * Get the count of attributes in the currently open dataset, group or global attributes when at root level.
@@ -546,7 +566,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattr(NXhandle handle, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrinfo(Mantid::LegacyNexus::NXhandle handle, int *no_items);
 
 /**
  * Iterate over global, group or dataset attributes depending on the currently open group or
@@ -562,8 +582,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrinfo(NXhandle hand
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[],
-                                                                    Mantid::LegacyNexus::NXnumtype *iType);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextattra(Mantid::LegacyNexus::NXhandle handle,
+                                                                    Mantid::LegacyNexus::NXname pName, int *rank,
+                                                                    int dim[], Mantid::LegacyNexus::NXnumtype *iType);
 
 /**
  * Read an arbitrarily shaped attribute.
@@ -573,7 +594,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextattra(NXhandle han
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattra(NXhandle handle, const char *name, void *data);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattra(Mantid::LegacyNexus::NXhandle handle, const char *name,
+                                                                void *data);
 
 /**
  * Get the information about the storage of the named attribute.
@@ -584,8 +606,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattra(NXhandle handle,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[],
-                                                                    Mantid::LegacyNexus::NXnumtype *iType);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrainfo(Mantid::LegacyNexus::NXhandle handle,
+                                                                    Mantid::LegacyNexus::NXname pName, int *rank,
+                                                                    int dim[], Mantid::LegacyNexus::NXnumtype *iType);
 
 /**
  * Retrieve link data for the currently open group. This link data can later on be used to link this
@@ -596,7 +619,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrainfo(NXhandle han
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupID(NXhandle handle, Mantid::LegacyNexus::NXlink *pLink);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupID(Mantid::LegacyNexus::NXhandle handle,
+                                                                  Mantid::LegacyNexus::NXlink *pLink);
 
 /**
  * Retrieve information about the currently open group.
@@ -609,8 +633,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupID(NXhandle handl
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupinfo(NXhandle handle, int *no_items, NXname name,
-                                                                    NXname nxclass);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupinfo(Mantid::LegacyNexus::NXhandle handle, int *no_items,
+                                                                    Mantid::LegacyNexus::NXname name,
+                                                                    Mantid::LegacyNexus::NXname nxclass);
 
 /**
  * Tests if two link data structures describe the same item.
@@ -620,8 +645,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupinfo(NXhandle han
  * \return NX_OK when both link data structures describe the same item, NX_ERROR else.
  * \ingroup c_linking
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
-NXsameID(NXhandle handle, Mantid::LegacyNexus::NXlink const *pFirstID, Mantid::LegacyNexus::NXlink const *pSecondID);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsameID(Mantid::LegacyNexus::NXhandle handle,
+                                                              Mantid::LegacyNexus::NXlink const *pFirstID,
+                                                              Mantid::LegacyNexus::NXlink const *pSecondID);
 
 /**
  * Resets a pending group search to the start again. To be called in a #NXgetnextentry loop when
@@ -630,7 +656,7 @@ NXsameID(NXhandle handle, Mantid::LegacyNexus::NXlink const *pFirstID, Mantid::L
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitgroupdir(NXhandle handle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitgroupdir(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Resets a pending attribute search to the start again. To be called in a #NXgetnextattr loop when
@@ -639,7 +665,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitgroupdir(NXhandle han
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitattrdir(NXhandle handle);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitattrdir(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Inquire the filename of the currently open file. FilenameBufferLength of the file name
@@ -650,7 +676,7 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitattrdir(NXhandle hand
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinquirefile(NXhandle handle, char *filename,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinquirefile(Mantid::LegacyNexus::NXhandle handle, char *filename,
                                                                    int filenameBufferLength);
 
 /**
@@ -664,8 +690,10 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinquirefile(NXhandle hand
  * \return NX_OK when the group is pointing to an external file, NX_ERROR else.
  * \ingroup c_external
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternalgroup(NXhandle handle, CONSTCHAR *name,
-                                                                       CONSTCHAR *nxclass, char *url, int urlLen);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternalgroup(Mantid::LegacyNexus::NXhandle handle,
+                                                                       Mantid::LegacyNexus::CONSTCHAR *name,
+                                                                       Mantid::LegacyNexus::CONSTCHAR *nxclass,
+                                                                       char *url, int urlLen);
 
 /**
  * Test if a dataset is actually pointing to an external file. If so, retrieve the URL of the
@@ -677,8 +705,8 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternalgroup(NXhandle 
  * \return NX_OK when the dataset is pointing to an external file, NX_ERROR else.
  * \ingroup c_external
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternaldataset(NXhandle handle, CONSTCHAR *name, char *url,
-                                                                         int urlLen);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
+NXisexternaldataset(Mantid::LegacyNexus::NXhandle handle, Mantid::LegacyNexus::CONSTCHAR *name, char *url, int urlLen);
 
 /**
  * Create a link to a group in an external file. This works by creating a NeXus group under the current level in
@@ -692,8 +720,10 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternaldataset(NXhandl
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_external
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternal(NXhandle handle, CONSTCHAR *name,
-                                                                    CONSTCHAR *nxclass, CONSTCHAR *url);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternal(Mantid::LegacyNexus::NXhandle handle,
+                                                                    Mantid::LegacyNexus::CONSTCHAR *name,
+                                                                    Mantid::LegacyNexus::CONSTCHAR *nxclass,
+                                                                    Mantid::LegacyNexus::CONSTCHAR *url);
 
 /**
  * Create a link to a dataset in an external file. This works by creating a dataset under the current level in
@@ -706,8 +736,9 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternal(NXhandle han
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_external
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternaldataset(NXhandle handle, CONSTCHAR *name,
-                                                                           CONSTCHAR *url);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternaldataset(Mantid::LegacyNexus::NXhandle handle,
+                                                                           Mantid::LegacyNexus::CONSTCHAR *name,
+                                                                           Mantid::LegacyNexus::CONSTCHAR *url);
 
 /**
  * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
@@ -743,7 +774,7 @@ MANTID_LEGACYNEXUS_DLL const char *NXgetversion();
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXfree(void **data);
 
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXIprintlink(NXhandle fid,
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXIprintlink(Mantid::LegacyNexus::NXhandle fid,
                                                                   Mantid::LegacyNexus::NXlink const *link);
 
 /**
@@ -758,13 +789,15 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXIprintlink(NXhandle fid,
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimension[],
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo(Mantid::LegacyNexus::NXhandle handle, int *rank,
+                                                                  int dimension[],
                                                                   Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
  * @copydoc NXgetrawinfo
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[],
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo64(Mantid::LegacyNexus::NXhandle handle, int *rank,
+                                                                    int64_t dimension[],
                                                                     Mantid::LegacyNexus::NXnumtype *datatype);
 
 /** \typedef void (*ErrFunc)(void *data, const char *text)
@@ -823,10 +856,6 @@ MANTID_LEGACYNEXUS_DLL char *NXIformatNeXusTime();
  * \ingroup c_init
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsetcache(long newVal);
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
 
 /**
  * Freddie Akeroyd 11/8/2009

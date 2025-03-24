@@ -55,8 +55,8 @@ private:
   size_t findQuotePairs(const std::string &line, std::vector<std::vector<size_t>> &quoteBounds) const;
   /// Parse more complex CSV, used when the data involves commas in the data and
   /// quoted values
-  void csvParse(const std::string &line, std::vector<std::string> &cols, std::vector<std::vector<size_t>> &quoteBounds,
-                size_t expectedCommas) const;
+  void csvParse(const std::string &line, std::vector<std::string> &cols,
+                const std::vector<std::vector<size_t>> &quoteBounds, size_t expectedCommas) const;
 };
 
 } // namespace DataHandling

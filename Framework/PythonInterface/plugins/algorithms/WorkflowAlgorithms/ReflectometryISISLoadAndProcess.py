@@ -278,6 +278,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             "the Wildes or Fredrikze correction methods.",
             Direction.Input,
         )
+        self.declareProperty(
+            "FredrikzePolarizationSpinStateOrder",
+            "",
+            "The spin state order of the workspaces in the workspace group to be passed to "
+            'PolarizationCorrectionsFredrikze. See the "Spin State Configurations" -> '
+            '"InputSpinStates" section of the PolarizationCorrectionsFredrikze v1 documentation for '
+            "more details. This is only applied to Fredrikze corrections. Wildes flipper "
+            "configurations are taken from the instrument's parameter file.",
+            Direction.Input,
+        )
 
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
@@ -637,6 +647,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
+        alg.setProperty("FredrikzePolarizationSpinStateOrder", self.getPropertyValue("FredrikzePolarizationSpinStateOrder"))
         alg.execute()
         return alg
 

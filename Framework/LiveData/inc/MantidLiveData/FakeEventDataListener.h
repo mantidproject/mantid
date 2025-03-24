@@ -12,7 +12,7 @@
 #include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/MersenneTwister.h"
 #include <Poco/Timer.h>
 #include <mutex>
 
@@ -41,11 +41,11 @@ public:
 private:
   void generateEvents(Poco::Timer &);
 
-  DataObjects::EventWorkspace_sptr m_buffer;                   ///< Used to buffer events between calls to extractData()
-  std::unique_ptr<Kernel::PseudoRandomNumberGenerator> m_rand; ///< Used in generation of random events
-  Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
-  int m_datarate;      ///< The data rate to (attempt to) generate in events/sec
-  int m_callbackloop;  ///< Number of times to loop within each generateEvents()
+  DataObjects::EventWorkspace_sptr m_buffer;       ///< Used to buffer events between calls to extractData()
+  std::unique_ptr<Kernel::MersenneTwister> m_rand; ///< Used in generation of random events
+  Poco::Timer m_timer;                             ///< Used to call the event-generating function on a schedule
+  int m_datarate;                                  ///< The data rate to (attempt to) generate in events/sec
+  int m_callbackloop;                              ///< Number of times to loop within each generateEvents()
   /// call
   double m_endRunEvery; ///< Make a new run every N seconds
   int m_notyettimes;    ///< Number of calls to extractData for which to throw a

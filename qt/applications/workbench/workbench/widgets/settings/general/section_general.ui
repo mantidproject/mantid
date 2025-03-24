@@ -90,6 +90,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                </widget>
               </item>
              </layout>
@@ -117,6 +120,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                </widget>
               </item>
              </layout>
@@ -130,6 +136,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="use_open_gl">
+              <property name="mouseTracking">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Use OpenGL in Instrument View</string>
               </property>
@@ -308,6 +317,9 @@
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -343,6 +355,9 @@
                   <width>202</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
                 </property>
                 <property name="value">
                  <number>5</number>
@@ -444,6 +459,9 @@
                   <width>202</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
                 </property>
                </widget>
               </item>

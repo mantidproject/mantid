@@ -85,8 +85,10 @@ namespace { // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("ConfigService");
 
+const std::string PATH_DELIMITERS = ";,";
+
 /**
- * Split the supplied string on semicolons.
+ * Split the supplied string on semicolons and commas.
  *
  * @param path The path to split.
  * @returns vector containing the split path.
@@ -94,11 +96,11 @@ Logger g_log("ConfigService");
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
-  if (path.find(';') == std::string::npos) { // don't bother tokenizing
+  if (path.find_first_of(PATH_DELIMITERS) == std::string::npos) { // don't bother tokenizing
     splitted.emplace_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM + Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
-    Mantid::Kernel::StringTokenizer tokenizer(path, ";,", options);
+    Mantid::Kernel::StringTokenizer tokenizer(path, PATH_DELIMITERS, options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
@@ -425,7 +427,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   }
   std::string converted;
   // If we have a list, chop it up and convert each one
-  if (dir.find_first_of(";,") != std::string::npos) {
+  if (dir.find_first_of(PATH_DELIMITERS) != std::string::npos) {
     auto splitted = splitPath(dir);
     auto iend = splitted.cend();
     for (auto itr = splitted.begin(); itr != iend;) {
@@ -1067,7 +1069,7 @@ std::string getValueFromStdOut(const std::string &orig, const std::string &key) 
     return std::string();
   }
 
-  return Mantid::Kernel::Strings::strip(orig.substr(start, stop - start - 1));
+  return Mantid::Kernel::Strings::strip(orig.substr(start, stop - start));
 }
 
 /**
@@ -1695,7 +1697,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 /// Empty the list of facilities, deleting the FacilityInfo objects in the
 /// process
 void ConfigServiceImpl::clearFacilities() {
-  for (auto &facility : m_facilities) {
+  for (const auto &facility : m_facilities) {
     delete facility;
   }
   m_facilities.clear();

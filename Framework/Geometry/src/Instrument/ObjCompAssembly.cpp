@@ -343,7 +343,7 @@ void ObjCompAssembly::testIntersectionWithChildren(Track &testRay,
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
-    else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
+    else if (const auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
       physicalObject->interceptSurface(testRay);
     } else {
     }

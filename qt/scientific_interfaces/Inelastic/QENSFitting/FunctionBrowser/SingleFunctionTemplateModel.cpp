@@ -63,7 +63,7 @@ void SingleFunctionTemplateModel::updateAvailableFunctions(
   m_fitType = m_fitTypeList.front();
 }
 
-std::vector<std::string> SingleFunctionTemplateModel::getFunctionList() { return m_fitTypeList; }
+const std::vector<std::string> &SingleFunctionTemplateModel::getFunctionList() { return m_fitTypeList; }
 
 int SingleFunctionTemplateModel::getEnumIndex() {
   auto const findIter = std::find(m_fitTypeList.cbegin(), m_fitTypeList.cend(), m_fitType);
@@ -100,7 +100,7 @@ void SingleFunctionTemplateModel::setFitType(const std::string &type) {
   estimateFunctionParameters();
 }
 
-std::string SingleFunctionTemplateModel::getFitType() { return m_fitType; }
+const std::string &SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 
 EstimationDataSelector SingleFunctionTemplateModel::getEstimationDataSelector() const {
   return [](const std::vector<double> &x, const std::vector<double> &y,

@@ -20,6 +20,10 @@ Currently, the four direct geometry spectrometers at ISIS (LET, MAPS, MARI, and
 MERLIN) and the four direct geometry spectrometers at SNS (ARCS, CNCS, HYSPEC,
 SEQUOIA) are supported.
 
+.. note::
+  For SNS instruments the flux is given in n/cm\ :sup:`2`/s/MW whereas for
+  ISIS instruments it is n/cm\ :sup:`2`/s at a nominal proton current of 160uA.
+
 For MERLIN and LET, in addition, PyChop will also calculate the allowed Ei's in
 multi-rep mode, and plot the time-distance diagrams for the desired setting.
 

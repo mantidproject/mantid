@@ -96,17 +96,9 @@ void PolarizationEfficiencyCor::init() {
       "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, "
       "Ap, Rho and Alpha for Fredrikze.");
 
-  const std::string full = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON + ", " +
-                           FlipperConfigurations::ON_OFF + ", " + FlipperConfigurations::ON_ON;
-  const std::string missing01 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::ON_OFF +
-                                ", " + FlipperConfigurations::ON_ON;
-  const std::string missing10 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON +
-                                ", " + FlipperConfigurations::ON_ON;
-  const std::string missing0110 = std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::ON_ON;
-  const std::string noAnalyzer = std::string(FlipperConfigurations::OFF) + ", " + FlipperConfigurations::ON;
-  const std::string directBeam = std::string(FlipperConfigurations::OFF);
-  const std::vector<std::string> setups{{"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(Prop::FLIPPERS, "", std::make_shared<Kernel::ListValidator<std::string>>(setups),
+  const auto wildesFlipperValidator =
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true, '0', '1', true);
+  declareProperty(Prop::FLIPPERS, "", wildesFlipperValidator,
                   "Flipper configurations of the input workspaces  (Wildes method only)");
 
   const auto spinStateValidator =

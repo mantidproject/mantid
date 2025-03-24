@@ -48,7 +48,6 @@ set(SRC_FILES
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
-    src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
     src/LoadErrorEventsNexus.cpp
@@ -73,6 +72,7 @@ set(SRC_FILES
     src/LoadILLSALSA.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
+    src/LoadILLTOF3.cpp
     src/LoadISISNexus2.cpp
     src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
@@ -170,7 +170,6 @@ set(SRC_FILES
     src/SaveDaveGrp.cpp
     src/SaveDetectorsGrouping.cpp
     src/SaveDiffCal.cpp
-    src/SaveDspacemap.cpp
     src/SaveFITS.cpp
     src/SaveFocusedXYE.cpp
     src/SaveFullprofResolution.cpp
@@ -268,7 +267,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
-    inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadErrorEventsNexus.h
@@ -293,6 +291,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLSALSA.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
+    inc/MantidDataHandling/LoadILLTOF3.h
     inc/MantidDataHandling/LoadISISNexus2.h
     inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
@@ -387,7 +386,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveDaveGrp.h
     inc/MantidDataHandling/SaveDetectorsGrouping.h
     inc/MantidDataHandling/SaveDiffCal.h
-    inc/MantidDataHandling/SaveDspacemap.h
     inc/MantidDataHandling/SaveFITS.h
     inc/MantidDataHandling/SaveFocusedXYE.h
     inc/MantidDataHandling/SaveFullprofResolution.h
@@ -483,7 +481,6 @@ set(TEST_FILES
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
-    LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
     LoadErrorEventsNexusTest.h
@@ -506,6 +503,7 @@ set(TEST_FILES
     LoadILLSALSATest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
+    LoadILLTOF3Test.h
     LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
@@ -590,7 +588,6 @@ set(TEST_FILES
     SaveDaveGrpTest.h
     SaveDetectorsGroupingTest.h
     SaveDiffCalTest.h
-    SaveDspacemapTest.h
     SaveFITSTest.h
     SaveFocusedXYETest.h
     SaveFullprofResolutionTest.h
@@ -685,7 +682,7 @@ target_link_libraries(
          Mantid::Indexing
          Mantid::Parallel
          Mantid::Muon
-  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
+  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry Mantid::LegacyNexus
 )
 
 # Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.
@@ -701,7 +698,7 @@ add_subdirectory(test)
 target_include_directories(
   DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/DataHandling> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(DataHandling FALSE)
+generate_mantid_export_header(DataHandling TRUE)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)

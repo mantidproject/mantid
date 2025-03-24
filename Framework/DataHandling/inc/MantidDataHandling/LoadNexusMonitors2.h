@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 #include <boost/scoped_array.hpp>
 
 namespace Mantid {

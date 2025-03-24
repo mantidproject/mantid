@@ -22,5 +22,6 @@ void export_MaskWorkspace() {
       .def("getMaskedDetectors", &MaskWorkspace::getMaskedDetectors, arg("self"), "Returns all masked detector IDs.");
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<MaskWorkspace>();
 }

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <sstream>
 #include <utility>

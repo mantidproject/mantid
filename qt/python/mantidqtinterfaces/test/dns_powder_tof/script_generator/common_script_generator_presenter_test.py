@@ -27,8 +27,8 @@ class DNSScriptGeneratorPresenterTest(unittest.TestCase):
     def setUpClass(cls):
         cls.filepath = get_filepath()
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSScriptGeneratorView)
-        cls.model = mock.create_autospec(DNSScriptGeneratorModel)
+        cls.view = mock.create_autospec(DNSScriptGeneratorView, instance=True)
+        cls.model = mock.create_autospec(DNSScriptGeneratorModel, instance=True)
         cls.model.script_maker.return_value = (["test1", "test2"], "")
         cls.model.run_script.return_value = ""
         cls.view._raise_error = mock.Mock()

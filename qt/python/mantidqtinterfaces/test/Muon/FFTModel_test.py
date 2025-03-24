@@ -12,7 +12,7 @@ from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 class FFTModelTest(unittest.TestCase):
     def setUp(self):
-        self.model = mock.create_autospec(fft_model.FFTModel, spec_set=True)
+        self.model = mock.create_autospec(fft_model.FFTModel, spec_set=True, instance=True)
         self.model.setRun = mock.Mock()
         self.model.preAlg = mock.Mock()
         self.model.FFTAlg = mock.Mock()

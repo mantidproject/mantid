@@ -87,10 +87,10 @@ class RunTabPresenterTest(unittest.TestCase):
 
         config["default.facility"] = "ISIS"
 
-        self._mock_model = mock.create_autospec(StateGuiModel, spec_set=True)
-        self.mock_run_tab_model = mock.create_autospec(RunTabModel(), spec_set=True)
-        self._mock_table = mock.create_autospec(TableModel, spec_set=True)
-        self._mock_csv_parser = mock.create_autospec(BatchCsvParser, spec_set=True)
+        self._mock_model = mock.create_autospec(StateGuiModel, spec_set=True, instance=True)
+        self.mock_run_tab_model = mock.create_autospec(RunTabModel(), spec_set=True, instance=True)
+        self._mock_table = mock.create_autospec(TableModel, spec_set=True, instance=True)
+        self._mock_csv_parser = mock.create_autospec(BatchCsvParser, spec_set=True, instance=True)
         self._mock_view = mock.Mock()
 
         self.view_observers = SansGuiObservable()
@@ -279,7 +279,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.mock_run_tab_model.get_save_types.return_value, self._mock_view.save_types)
 
     def test_observers_subscribed_to(self):
-        mocked_view_observers = mock.create_autospec(SansGuiObservable())
+        mocked_view_observers = mock.create_autospec(SansGuiObservable, instance=True)
         self._mock_view.get_observable = mock.Mock(return_value=mocked_view_observers)
         presenter = RunTabPresenter(facility=SANSFacility.ISIS, run_tab_model=self.mock_run_tab_model, view=self._mock_view)
 

@@ -109,7 +109,7 @@ void AlgorithmPropertiesWidget::setAlgorithm(const Mantid::API::IAlgorithm_sptr 
 
 //----------------------------------------------------------------------------------------------
 ///@return the name of the algorithm being displayed
-QString AlgorithmPropertiesWidget::getAlgorithmName() const { return m_algoName; }
+const QString &AlgorithmPropertiesWidget::getAlgorithmName() const { return m_algoName; }
 
 /** Set the algorithm to view using its name
  *

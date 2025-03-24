@@ -96,7 +96,7 @@ void DgsConvertToEnergyTransfer::exec() {
     // SNS has a log called EnergyRequest that can be used to get the
     // incident energy guess.
     if ("SNS" == facility) {
-      TimeSeriesProperty<double> *eiLog = inputWS->run().getTimeSeriesProperty<double>("EnergyRequest");
+      const TimeSeriesProperty<double> *eiLog = inputWS->run().getTimeSeriesProperty<double>("EnergyRequest");
       eiGuess = eiLog->getStatistics().mean;
     } else {
       throw std::runtime_error("Incident energy guess MUST be given!");

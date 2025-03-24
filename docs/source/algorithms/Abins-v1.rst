@@ -4,7 +4,7 @@ Credits
 -------
 
 Author:
-    Krzysztof Dymkowski, Adam Jackson
+    Adam Jackson, Krzysztof Dymkowski
 
 Contributors:
    Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio
@@ -21,17 +21,9 @@ Description
 Abins is a plugin for Mantid which allows scientists to compare experimental and theoretical inelastic neutron
 scattering spectra (INS).
 
-Abins requires a file containing ab-initio phonon data to perform INS analysis.
-Several formats are supported for phonon modes containing frequency and displacement data at given q-points: CASTEP (.phonon), CRYSTAL (.out), GAUSSIAN (.log), DMOL3 (.outmol) or VASP (.xml).
-For VASP XML inputs, it is also permitted to use a "selective dynamics" in which some atoms are frozen.
-In this case, data is only available for the moving atoms and contributions from the other atoms are omitted from the calculated spectrum.
-This may be a suitable model for systems where the frozen atoms form a rigid substrate (e.g. a noble metal surface) for an adsorbed molecule of lightweight atoms.
-It is not recommended where there is significant vibrational coupling between frozen and moving atoms, or where substrate modes would occupy a similar frequency range to the adsorbate.
-
-Alternatively, force-constants data can be provided and a fine q-point mesh will be sampled automatically.
-In this case the supported formats are CASTEP (.castep_bin generated with ``phonon_write_force_constants = True``)
-and Phonopy (*phonopy.yaml* file generated with ``INCLUDE_ALL = .TRUE.``)
-It is also permitted to use a phonopy YAML file which does not contain the force constants, if force constants are stored in a ``FORCE_CONSTANTS`` or ``force_constants.hdf5`` file in the same directory. This is less convenient but may result in significantly faster loading if the force constant matrix is large.
+Abins requires data from existing lattice dynamics calculations to determine the phonon mode frequencies and displacements. These are used to compute INS intensities; higher-order phonons may be approximated as combinations of fundamental modes.
+Several file formats are supported for frequency and displacement data at given :math:`\mathbf{q}`-points. Alternatively, force-constants data can be provided and a fine :math:`\mathbf{q}`-point mesh will be sampled automatically.
+Supported codes include CASTEP (.phonon), CRYSTAL (.out), DMOL3 (.outmol), GAUSSIAN (.log), PHONOPY (.yaml), VASP (.xml) as well as some pre-processed JSON (.json) formats. For more information about the files, features and quirks of these codes see :ref:`AbinsDataFormats`.
 
 The user may also provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.
@@ -66,11 +58,32 @@ Usage
 
 **Example - loading CASTEP phonon data:**
 
+.. testsetup:: *
+
+    # On CI defaultsave.directory may be set to an inappropriate
+    # value, causing the input validator to raise an error.
+    # Set it somewhere that is guaranteed to be suitable.
+
+    from tempfile import TemporaryDirectory
+    from mantid.kernel import ConfigService
+
+    test_dir = TemporaryDirectory()
+
+    initial_defaultsave = ConfigService.getString("defaultsave.directory")
+    ConfigService.setString("defaultsave.directory", test_dir.name)
+
+.. testcleanup:: *
+
+    # Restore the original defaultsave.directory to avoid surprises
+    # when running doctests locally.
+
+    test_dir.cleanup()
+    ConfigService.setString("defaultsave.directory", initial_defaultsave)
+
 .. testcode:: AbinsCastepSimple
 
     benzene_wrk = Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
                         QuantumOrderEventsNumber="1")
-
 
     for name in benzene_wrk.getNames():
         print(name)
@@ -83,11 +96,6 @@ Output:
     benzene_wrk_C
     benzene_wrk_H_total
     benzene_wrk_H
-
-.. testcleanup:: AbinsCastepSimple
-
-    import os
-    os.remove("benzene.hdf5")
 
 **Example - loading CRYSTAL phonon data:**
 
@@ -113,26 +121,28 @@ Output:
     wrk_O_total
     wrk_O
 
-.. testcleanup:: AbinsCrystalSimple
-
-    import os
-    os.remove("b3lyp.hdf5")
-
 **Example - calling AbINS with more arguments:**
 
-.. testcode:: AbinsexplicitParameters
+Here the cache file is directed to a temporary directory and will be cleaned up automatically.
 
-    wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
-                      ExperimentalFile="benzene_experimental.dat",
-                      TemperatureInKelvin=10, BinWidthInWavenumber=1.0, SampleForm="Powder", Instrument="TOSCA",
-                      Atoms="H, atom1, atom2", SumContributions=True, QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
+.. testcode:: AbinsExplicitParameters
+
+    from tempfile import TemporaryDirectory
+
+    with TemporaryDirectory() as tmp_dir:
+
+        wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
+                          ExperimentalFile="benzene_experimental.dat",
+                          TemperatureInKelvin=10, BinWidthInWavenumber=1.0, SampleForm="Powder", Instrument="TOSCA",
+                          Atoms="H, atom1, atom2", SumContributions=True, QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent",
+                          CacheDirectory=tmp_dir)
 
     for name in wrk_verbose.getNames():
         print(name)
 
 Output:
 
-.. testoutput:: AbinsexplicitParameters
+.. testoutput:: AbinsExplicitParameters
 
     experimental_wrk
     wrk_verbose_total
@@ -142,11 +152,6 @@ Output:
     wrk_verbose_atom_1
     wrk_verbose_atom_2_total
     wrk_verbose_atom_2
-
-.. testcleanup:: AbinsexplicitParameters
-
-    import os
-    os.remove("benzene.hdf5")
 
 .. categories::
 

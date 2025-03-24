@@ -15,7 +15,7 @@
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"

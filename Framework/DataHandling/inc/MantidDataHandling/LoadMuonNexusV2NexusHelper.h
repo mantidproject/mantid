@@ -9,9 +9,10 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Mantid {

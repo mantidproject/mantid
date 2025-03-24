@@ -20,6 +20,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 
 // Default parameter function overloads
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames, Component::getParameterNames, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter, Component::hasParameter, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getNumberParameter, Component::getNumberParameter, 1, 2)

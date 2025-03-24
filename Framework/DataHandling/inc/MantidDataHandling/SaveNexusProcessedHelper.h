@@ -14,8 +14,8 @@
 #include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>

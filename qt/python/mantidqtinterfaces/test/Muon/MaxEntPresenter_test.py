@@ -20,7 +20,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context.gui_context.update({"RebinType": "None"})
 
         # View
-        self.view = mock.create_autospec(maxent_view.MaxEntView, spec_set=True)
+        self.view = mock.create_autospec(maxent_view.MaxEntView, spec_set=True, instance=True)
         # signals
         # needed for connect in presenter
         self.view.maxEntButtonSignal = mock.Mock()
@@ -47,7 +47,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter = maxent_presenter.MaxEntPresenter(self.view, self.context)
 
         # make thread
-        self.thread = mock.create_autospec(thread_model.ThreadModel)
+        self.thread = mock.create_autospec(thread_model.ThreadModel, instance=True)
 
     def test_connects(self):
         self.assertEqual(1, self.view.cancelSignal.connect.call_count)

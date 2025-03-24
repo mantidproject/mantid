@@ -140,7 +140,6 @@ void StartLiveDataDialog::initLayout() {
     if (post)
       prefix = "PostProcessing";
     QString algo = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Algorithm");
-    QString algoProps = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Properties");
     QString script = AlgorithmInputHistory::Instance().previousInput("StartLiveData", prefix + "Script");
 
     if (!post) {
@@ -395,7 +394,7 @@ void StartLiveDataDialog::accept() {
 void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
-  for (auto &prop : props) {
+  for (const auto &prop : props) {
     QString propName = QString::fromStdString((*prop).name());
     if (m_algProperties.contains(propName)) {
       m_algProperties.removeAll(propName);

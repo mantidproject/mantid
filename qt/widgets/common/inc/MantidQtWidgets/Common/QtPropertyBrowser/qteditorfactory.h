@@ -668,7 +668,7 @@ class QtCursorEditorFactoryPrivate {
 public:
   QtCursorEditorFactoryPrivate();
 
-  void slotPropertyChanged(QtProperty *property, const QCursor &cursor);
+  void slotPropertyChanged(QtProperty *const property, const QCursor &cursor);
   void slotEnumChanged(QtProperty *property, int value);
   void slotEditorDestroyed(QObject *object);
 

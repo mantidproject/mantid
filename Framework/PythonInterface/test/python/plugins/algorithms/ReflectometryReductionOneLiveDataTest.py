@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm
 from mantid.kernel import config, Direction, StringListValidator, StringMandatoryValidator
-from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces
+from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces, LoadInstrument
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -139,6 +139,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     INPUT_WS_ERROR = "Invalid value for property InputWorkspace"
 
     def setUp(self):
+        self._instrument_name = "INTER"
         self._setup_environment()
         self._setup_workspaces()
 
@@ -186,7 +187,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             ReflectometryReductionOneLiveData,
             InputWorkspace=self._input_ws,
             OutputWorkspace="output",
-            Instrument="INTER",
+            Instrument=self._instrument_name,
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValue",
             BadProperty="badvalue",
         )
@@ -219,42 +220,25 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_defaults()
         self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
 
-    def test_instrument_was_not_set_on_input_workspace(self):
-        self._run_algorithm_with_defaults()
-        # The input workspace should be unchanged
-        self.assertEqual(self._input_ws.getInstrument().getName(), "")
+        load_inst_history = self._get_child_alg_history(workspace, "LoadInstrument")
+        self.assertIsNotNone(load_inst_history)
+        self.assertEqual(load_inst_history.getPropertyValue("RewriteSpectraMap"), "False")
 
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-
-        names = ["THETA", "S1VG", "S2VG"]
-        values = [0.5, 1.001, 0.5]
-        units = ["deg", "m", "m"]
-        logs = workspace.getRun().getProperties()
-        matched_names = list()
-        for log in logs:
-            if log.name in names:
-                matched_names.append(log.name)
-                idx = names.index(log.name)
-                self.assertEqual(log.value, values[idx])
-                self.assertEqual(log.units, units[idx])
-        self.assertEqual(sorted(matched_names), sorted(names))
+        self._check_sample_log_values(workspace)
 
     def test_sample_log_values_were_set_on_output_workspace_for_alternative_block_names(self):
         workspace = self._run_algorithm_with_alternative_names()
+        self._check_sample_log_values(workspace)
 
-        expected_names = ["THETA", "S1VG", "S2VG"]
-        expected_values = [0.5, 1.001, 0.5]
-        expected_units = ["deg", "m", "m"]
-        actual_logs = workspace.getRun().getProperties()
-        matched_names = list()
-        for log in actual_logs:
-            if log.name in expected_names:
-                matched_names.append(log.name)
-                idx = expected_names.index(log.name)
-                self.assertEqual(log.value, expected_values[idx])
-                self.assertEqual(log.units, expected_units[idx])
-        self.assertEqual(sorted(matched_names), sorted(expected_names))
+    def test_sample_log_values_are_not_set_on_input_workspace(self):
+        self._run_algorithm_with_defaults()
+
+        log_names = [log.name for log in self._input_ws.getRun().getProperties()]
+        self.assertNotIn("THETA", log_names)
+        self.assertNotIn("S1VG", log_names)
+        self.assertNotIn("S2VG", log_names)
 
     def test_algorithm_fails_for_invalid_block_names(self):
         self.assertRaisesRegex(
@@ -263,7 +247,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             ReflectometryReductionOneLiveData,
             InputWorkspace=self._input_ws,
             OutputWorkspace="output",
-            Instrument="INTER",
+            Instrument=self._instrument_name,
             GetLiveValueAlgorithm="GetFakeLiveInstrumentValueInvalidNames",
         )
 
@@ -305,7 +289,6 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             self._old_facility = "TEST_LIVE"
         config.setFacility("ISIS")
 
-        self._instrument_name = "INTER"
         self._old_instrument = config["default.instrument"]
         config["default.instrument"] = self._instrument_name
 
@@ -318,7 +301,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._default_args = {
             "InputWorkspace": self._input_ws,
             "OutputWorkspace": "output",
-            "Instrument": "INTER",
+            "Instrument": self._instrument_name,
             "GetLiveValueAlgorithm": "GetFakeLiveInstrumentValue",
         }
 
@@ -545,23 +528,23 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         dataY += y
 
         CreateWorkspace(NSpec=nSpec, UnitX="TOF", DataX=dataX, DataY=dataY, OutputWorkspace=ws_name)
+        LoadInstrument(Workspace=ws_name, RewriteSpectraMap=True, InstrumentName=self._instrument_name)
         return mtd[ws_name]
 
     def _run_algorithm_with_defaults(self):
-        alg = create_algorithm("ReflectometryReductionOneLiveData", **self._default_args)
-        assertRaisesNothing(self, alg.execute)
-        return mtd["output"]
+        return self._run_algorithm(self._default_args)
 
     def _run_algorithm_with_alternative_names(self):
         args = self._default_args
         args["GetLiveValueAlgorithm"] = "GetFakeLiveInstrumentValueAlternativeNames"
-        alg = create_algorithm("ReflectometryReductionOneLiveData", **args)
-        assertRaisesNothing(self, alg.execute)
-        return mtd["output"]
+        return self._run_algorithm(args)
 
     def _run_algorithm_with_zero_theta(self):
         args = self._default_args
         args["GetLiveValueAlgorithm"] = "GetFakeLiveInstrumentValuesWithZeroTheta"
+        return self._run_algorithm(args)
+
+    def _run_algorithm(self, args):
         alg = create_algorithm("ReflectometryReductionOneLiveData", **args)
         assertRaisesNothing(self, alg.execute)
         return mtd["output"]
@@ -583,6 +566,30 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         else:
             algNames = [alg.name() for alg in history]
         self.assertEqual(algNames, expected)
+
+    @staticmethod
+    def _get_child_alg_history(ws, child_name):
+        history = ws.getHistory()
+        reduction_history = history.getAlgorithmHistory(history.size() - 1)
+        for child_history in reduction_history.getChildHistories():
+            if child_history.name() == child_name:
+                return child_history
+
+        return None
+
+    def _check_sample_log_values(self, workspace):
+        expected_logs = {"THETA": (0.5, "deg"), "S1VG": (1.001, "m"), "S2VG": (0.5, "m")}
+        actual_logs = workspace.getRun().getProperties()
+
+        matched_names = []
+        for log in actual_logs:
+            if log.name in expected_logs:
+                matched_names.append(log.name)
+                expected_log_details = expected_logs[log.name]
+                self.assertEqual(log.value, expected_log_details[0])
+                self.assertEqual(log.units, expected_log_details[1])
+
+        self.assertEqual(sorted(matched_names), sorted(expected_logs.keys()))
 
 
 if __name__ == "__main__":

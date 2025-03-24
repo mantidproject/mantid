@@ -12,7 +12,8 @@ from scipy.optimize import leastsq
 from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 
 _MIN_NUM_PEAKS = 6  # minimum required to use FindUBUsingLatticeParameters assuming all linearly indep.
-_MIN_NUM_INDEXED_PEAKS = 3  # minimum indexed peaks required for CalculateUMatrix
+_MIN_NUM_INDEXED_PEAKS = 2  # minimum indexed peaks required for CalculateUMatrix
+_MIN_NUM_VALID_WS = 2  # minimum number of workspaces with satisfactory peak tables
 
 
 class FindGlobalBMatrix(DataProcessorAlgorithm):
@@ -62,17 +63,34 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        ws_list = self.getProperty("PeakWorkspaces").value
         n_valid_ws = 0
+        ws_list = self.getProperty("PeakWorkspaces").value
         for wsname in ws_list:
             ws = AnalysisDataService.retrieve(wsname)
-            if isinstance(ws, IPeaksWorkspace) and ws.getNumberPeaks() >= _MIN_NUM_PEAKS:
+            if not isinstance(ws, IPeaksWorkspace):
+                issues["PeakWorkspaces"] = f"{wsname} is not a PeaksWorkspace."
+                break
+            if ws.sample().hasOrientedLattice():
+                nindexed, *_ = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=True)
+                if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                    issues["PeakWorkspaces"] = (
+                        f"{wsname} has a UB set, therefore it must contain at least {_MIN_NUM_INDEXED_PEAKS} peaks that can be indexed."
+                    )
+                else:
+                    # if it has UB and doesn't have too few peaks it is valid
+                    n_valid_ws += 1
+            elif ws.getNumberPeaks() < _MIN_NUM_PEAKS:
+                issues["PeakWorkspaces"] = f"{wsname} does not have a UB set, therefore it must contain at least {_MIN_NUM_PEAKS} peaks."
+            else:
+                # if it doesn't have a UB but does have more than the min num peaks it is also valid
                 n_valid_ws += 1
-        if n_valid_ws < 2 or n_valid_ws < len(ws_list):
+        if n_valid_ws < _MIN_NUM_VALID_WS:
             issues["PeakWorkspaces"] = (
-                f"Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - "
-                "there must be at least two peak tables provided in total."
+                f"Fewer than the desired number of {_MIN_NUM_VALID_WS} workspaces "
+                f"have valid peak tables. "
+                f"Currently {n_valid_ws}/{len(ws_list)} of provided workspaces are valid"
             )
+
         return issues
 
     def PyExec(self):
@@ -90,7 +108,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
-        self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)  # removes runs from ws_list if can't index
+
+        ws_list = self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)  # removes runs from ws_list if can't index
 
         # optimize the lattice parameters across runs (i.e. B matrix)
         prog_reporter.report(2, "Optimize B")
@@ -99,22 +118,23 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return self.calcResiduals(x, ws_list)
 
         alatt0 = [a, b, c, alpha, beta, gamma]
-        try:
-            alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
-            # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
-            fobj(alatt)
-        except ValueError:
-            logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
-            return
-
+        alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+        # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
+        fobj(alatt)
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
-            dof = sum([self.child_IndexPeaks(ws, RoundHKLs=True) for ws in ws_list]) - len(alatt0)
+            n_peaks = [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=True)[0] for ws in ws_list]
+            dof = sum(n_peaks) - len(alatt0)
             err = np.sqrt(abs(np.diag(cov)) * (info["fvec"] ** 2).sum() / dof)
-            for wsname in ws_list:
+            for iws, wsname in enumerate(ws_list):
                 ws = AnalysisDataService.retrieve(wsname)
                 ws.sample().getOrientedLattice().setError(*err)
+                if n_peaks[iws] < _MIN_NUM_INDEXED_PEAKS:
+                    logger.warning(
+                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks after optimisation, "
+                        f"fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
+                    )
             logger.notice(
                 f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
                 f"Lattice Parameters: {np.array2string(alatt, precision=6)}\n"
@@ -128,67 +148,165 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
-        ws_with_UB = [
-            (iws, self.child_IndexPeaks(ws))
-            for iws, ws in enumerate(ws_list)
-            if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()
-        ]  # [(iws, n_peaks_indexed),...]
-        if ws_with_UB:
-            iref, nindexed = max(ws_with_UB, key=lambda x: x[1])  # get UB which indexes most peaks
-            foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
+
+        # find which of the ws have a ub and how many peaks are indexed
+        iws_have_ub = np.array([iws for iws, ws in enumerate(ws_list) if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()])
+        nindexed = np.array(
+            [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0] for iws in iws_have_ub]
+        )
+
+        # find which of the ws have a sufficient number of indexed peaks to be the reference
+        ref_mask = np.flatnonzero(nindexed > _MIN_NUM_INDEXED_PEAKS)
+        iws_potential_ref_ub = iws_have_ub[ref_mask]
+        nindexed_ref = nindexed[ref_mask]
+        foundUB = len(iws_potential_ref_ub) > 0
+
+        # if none of the ws with UBs index enough peaks try calculating new UB for all from Lattice Params
         if not foundUB:
-            # loop over all ws and try to find a UB
-            for iws, ws in enumerate(ws_list):
-                try:
-                    self.child_FindUBUsingLatticeParameters(
-                        PeaksWorkspace=ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
-                    )
-                    nindexed = self.child_IndexPeaks(PeaksWorkspace=ws, RoundHKLs=True)
-                    foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
-                except ValueError:
-                    pass
-                if foundUB:
-                    iref = iws
-                    break  # stop once found one UB found as FindUBUsingLatticeParameter takes a long time
+            foundUB, iws_potential_ref_ub, nindexed_ref = self.find_ref_ub_from_lattice_parameters(a, b, c, alpha, beta, gamma, ws_list)
         if not foundUB:
             raise RuntimeError("An initial UB could not be found with the provided lattice parameters")
 
-        # index other runs consistent with reference UB
-        iws_with_valid_UB = [iw for iw, npks in ws_with_UB if npks >= _MIN_NUM_INDEXED_PEAKS]
-        iws_unindexed = list(range(len(ws_list)))
-        iws_unindexed.pop(iref)
-        # loop over copy of iws_unindexed so can remove item from it when indexed a ws
-        for iws in iws_unindexed[:]:
-            if iws in iws_with_valid_UB:
-                self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                foundUB = True  # already know npks >= _MIN_NUM_INDEXED_PEAKS
-            else:
-                # copy orientation from sample so as to ensure consistency of indexing
-                self.child_CopySample(InputWorkspace=ws_list[iref], OutputWorkspace=ws_list[iws])
-                nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
-                if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                    # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
-                    self.child_FindUBUsingLatticeParameters(
-                        PeaksWorkspace=ws_list[iws], a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
-                    )
-                    self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                    nindexed = self.child_IndexPeaks(PeaksWorkspace=ws_list[iws], RoundHKLs=True)
-                    foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
-            if foundUB:
-                iws_unindexed.remove(iws)
+        # we'll evaluate possible reference UBs in a separate function
+        # this way it can be swapped out for a different metric
 
-        # remove unindexed runs from workspaces
-        for iws in iws_unindexed:
-            ws = ws_list.pop(iws)
-            logger.warning(f"Consistent UB not found for {ws} - this workspace will be ignored.")
+        ref_ub, n_indexed_by_ref, iref, n_ws_indexed_by_ref_ub = self.evaluate_best_ref_UB(iws_potential_ref_ub, nindexed_ref, ws_list)
+
+        # find which ws still have too few peaks
+        ws_too_few_peaks = np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]
+
+        # make sure we set the reference ws back to correct UB first, before we loop over all
+        # and potentially call make_UB_consistent
+
+        self.exec_child_alg("SetUB", Workspace=ws_list[iref], UB=ref_ub)
+
+        valid_ws_list = []
+        # loop over the ws list
+        for iws, cws in enumerate(ws_list):
+            # if we are looking at the reference we can ignore
+            if iws == iref:
+                valid_ws_list.append(cws)
+            else:
+                # otherwise set ub
+                self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
+                # if it has enough peaks add to valid_ws_list
+                if iws not in ws_too_few_peaks:
+                    valid_ws_list.append(cws)
+                else:
+                    # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
+                    self.exec_child_alg(
+                        "FindUBUsingLatticeParameters",
+                        PeaksWorkspace=ws_list[iws],
+                        a=a,
+                        b=b,
+                        c=c,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                        FixParameters=False,
+                    )
+                    singular_transform = self.make_UB_consistent(ws_list[iref], ws_list[iws])
+                    # if calculate transform is singular
+                    if singular_transform:
+                        logger.warning(f"Singular transform in make_UB_consistent, {ws_list[iws]} removed")
+                    else:
+                        nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
+                        # if now enough peaks, add to the list
+                        if nindexed > _MIN_NUM_INDEXED_PEAKS:
+                            valid_ws_list.append(cws)
+                        # otherwise warn the user
+                        else:
+                            logger.warning(
+                                f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed by the reference UB "
+                                f"for Workspace {iws}. Workspace will NOT be included in the optimisation"
+                            )
+        if len(valid_ws_list) < 2:
+            if n_ws_indexed_by_ref_ub <= 1:
+                err_msg = "Reference UB failed to index peaks in any other run"
+            else:
+                err_msg = "Not enough valid workspaces to run an optimisation"
+            raise RuntimeError(err_msg)
+        else:
+            return valid_ws_list
+
+    def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
+        indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
+
+        # need to get the UBs first as we are setting them in-place
+        pot_ubs = [
+            AnalysisDataService.retrieve(ws_list[iref]).sample().getOrientedLattice().getUB().copy() for iref in iws_potential_ref_ub
+        ]
+
+        # iterate over all the potential reference workspaces and find how many peaks each UB indexes
+        for iub, iref in enumerate(iws_potential_ref_ub):
+            ref_ub = pot_ubs[iub]
+
+            for iws, cws in enumerate(ws_list):
+                if iws == iref:
+                    indexed_peaks[iub, iws] = nindexed_ref[iub]
+                else:
+                    self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
+                    indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=True)[0]
+
+        # find, for each UB, the number of ws that have n_peaks over the threshold and the total sum of these
+        n_ws_over_thresh = np.sum(indexed_peaks >= _MIN_NUM_INDEXED_PEAKS, axis=1)
+        total_indexed_peaks = np.sum(indexed_peaks, axis=1)
+
+        # find which UBs give the most over threshold and then, of these, which fit the most peaks
+        max_over_thresh = np.max(n_ws_over_thresh)
+        where_max_over_thresh = np.argwhere(n_ws_over_thresh == np.max(n_ws_over_thresh))
+        best_iub = where_max_over_thresh[np.argmax(total_indexed_peaks[where_max_over_thresh])][0]
+
+        if max_over_thresh <= 1:
+            logger.warning(
+                f"Best reference UB cannot find more than {_MIN_NUM_INDEXED_PEAKS} "
+                f"peaks in any of the other runs. "
+                f"Will try and fit UB from lattice parameters "
+                f"Check goniometer axes and angles."
+            )
+
+        return pot_ubs[best_iub], indexed_peaks[best_iub], iws_potential_ref_ub[best_iub], max_over_thresh
+
+    def find_ref_ub_from_lattice_parameters(self, a, b, c, alpha, beta, gamma, ws_list):
+        foundUB = False
+        # loop over all ws and try to find a UB
+        for iws, ws in enumerate(ws_list):
+            try:
+                self.exec_child_alg(
+                    "FindUBUsingLatticeParameters",
+                    PeaksWorkspace=ws,
+                    a=a,
+                    b=b,
+                    c=c,
+                    alpha=alpha,
+                    beta=beta,
+                    gamma=gamma,
+                    FixParameters=False,
+                )
+                nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0]
+                foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
+            except ValueError:
+                pass
+            if foundUB:
+                # to reach this point this current UB must be the only potential reference we have
+                # still need to evaluate_best_ref to get n_peaks indexed by this UB
+                # evaluate_best_ref requires lists of ref options
+                iws_potential_ref_ub = [iws]
+                nindexed_ref = [nindexed]
+                break  # stop once found one UB found as FindUBUsingLatticeParameter takes a long time
+        return foundUB, iws_potential_ref_ub, nindexed_ref
 
     def make_UB_consistent(self, ws_ref, ws):
         # compare U matrix to perform TransformHKL to preserve indexing
         U_ref = AnalysisDataService.retrieve(ws_ref).sample().getOrientedLattice().getU()
         U = AnalysisDataService.retrieve(ws).sample().getOrientedLattice().getU()
         # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
-        transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
-        self.child_TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        # check that the transform will be non-singular
+        singular_transform = np.linalg.det(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref)) == 0
+        if not singular_transform:
+            transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
+            self.exec_child_alg("TransformHKL", PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        return singular_transform
 
     def calcResiduals(self, x0, ws_list):
         """
@@ -201,11 +319,24 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
         for wsname in ws_list:
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
-            nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
+            nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)[0]
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                self.child_CalculateUMatrix(wsname, *x0)
+                try:
+                    self.exec_child_alg(
+                        "CalculateUMatrix",
+                        PeaksWorkspace=wsname,
+                        a=x0[0],
+                        b=x0[1],
+                        c=x0[2],
+                        alpha=x0[3],
+                        beta=x0[4],
+                        gamma=x0[5],
+                    )
+                except ValueError:
+                    logger.error(f"Cannot calculate U Matrix for {wsname} - this workspace should be removed.")
+                    return None
                 # don't index with optimisation after this point and don't round HKL (to calc resids)
-                self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False, CommonUBForAll=True)
+                self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=True)
                 ws = AnalysisDataService.retrieve(wsname)
                 UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
                 for ii in range(ws.getNumberPeaks()):
@@ -213,66 +344,17 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     if pk.getHKL().norm2() > 1e-6:
                         residsq[ipk] = np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2)
                         ipk += 1
+        residsq = residsq[np.isfinite(residsq)]
         return np.sqrt(residsq / (ipk + 1))
 
-    def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs=True, CommonUBForAll=False):
-        alg = self.createChildAlgorithm("IndexPeaks", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("Tolerance", self.tol)
-        alg.setProperty("RoundHKLs", RoundHKLs)
-        alg.setProperty("CommonUBForAll", CommonUBForAll)  # if False then optimises a temp UB before indexing
+    def exec_child_alg(self, alg_name: str, **kwargs):
+        alg = self.createChildAlgorithm(alg_name, enableLogging=False)
+        alg.setAlwaysStoreInADS(False)
+        alg.initialize()
+        alg.setProperties(kwargs)
         alg.execute()
-        return alg.getProperty("NumIndexed").value
-
-    def child_FindUBUsingLatticeParameters(self, PeaksWorkspace, a, b, c, alpha, beta, gamma, FixParameters=False):
-        alg = self.createChildAlgorithm("FindUBUsingLatticeParameters", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("a", a)
-        alg.setProperty("b", b)
-        alg.setProperty("c", c)
-        alg.setProperty("alpha", alpha)
-        alg.setProperty("beta", beta)
-        alg.setProperty("gamma", gamma)
-        alg.setProperty("FixParameters", FixParameters)
-        alg.execute()
-
-    def child_CalculateUMatrix(self, PeaksWorkspace, a, b, c, alpha, beta, gamma):
-        alg = self.createChildAlgorithm("CalculateUMatrix", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("a", a)
-        alg.setProperty("b", b)
-        alg.setProperty("c", c)
-        alg.setProperty("alpha", alpha)
-        alg.setProperty("beta", beta)
-        alg.setProperty("gamma", gamma)
-        alg.execute()
-
-    def child_TransformHKL(self, PeaksWorkspace, HKLTransform, FindError=False):
-        alg = self.createChildAlgorithm("TransformHKL", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("HKLTransform", HKLTransform)
-        alg.setProperty("FindError", FindError)
-        alg.execute()
-
-    def child_CopySample(
-        self,
-        InputWorkspace,
-        OutputWorkspace,
-        CopyName=False,
-        CopyMaterial=False,
-        CopyEnvironment=False,
-        CopyShape=False,
-        CopyOrientationOnly=True,
-    ):
-        alg = self.createChildAlgorithm("CopySample", enableLogging=False)
-        alg.setProperty("InputWorkspace", InputWorkspace)
-        alg.setProperty("OutputWorkspace", OutputWorkspace)
-        alg.setProperty("CopyName", CopyName)
-        alg.setProperty("CopyMaterial", CopyMaterial)
-        alg.setProperty("CopyEnvironment", CopyEnvironment)
-        alg.setProperty("CopyShape", CopyShape)
-        alg.setProperty("CopyOrientationOnly", CopyOrientationOnly)
-        alg.execute()
+        out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
+        return out_props[0] if len(out_props) == 1 else out_props
 
 
 # register algorithm with mantid

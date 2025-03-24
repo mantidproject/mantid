@@ -30,7 +30,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidLegacyNexus/NeXusFile.hpp"
-#include "MantidMuon/LegacyNexusClasses.h"
+#include "MantidLegacyNexus/NexusClasses.h"
 #include "MantidMuon/MuonNexusReader.h"
 
 #include <boost/iterator/counting_iterator.hpp>
@@ -65,11 +65,10 @@ namespace Mantid::Algorithms {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
+DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
-using namespace Mantid::LegacyNexus;
 using HistogramData::BinEdges;
 using HistogramData::Counts;
 
@@ -89,11 +88,11 @@ void LoadMuonNexus1::exec() {
   // Retrieve the entry number
   m_entrynumber = getProperty("EntryNumber");
 
-  NXRoot root(m_filename);
-  NXEntry entry = root.openEntry("run/histogram_data_1");
+  LegacyNexus::NXRoot root(m_filename);
+  LegacyNexus::NXEntry entry = root.openEntry("run/histogram_data_1");
   try {
-    NXInfo info = entry.getDataSetInfo("time_zero");
-    if (info.stat != NXstatus::NX_ERROR) {
+    LegacyNexus::NXInfo info = entry.getDataSetInfo("time_zero");
+    if (info.stat != LegacyNexus::NXstatus::NX_ERROR) {
       double dum = root.getFloat("run/histogram_data_1/time_zero");
       setProperty("TimeZero", dum);
     }
@@ -101,17 +100,17 @@ void LoadMuonNexus1::exec() {
   }
 
   try {
-    NXInfo infoResolution = entry.getDataSetInfo("resolution");
-    NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+    LegacyNexus::NXInfo infoResolution = entry.getDataSetInfo("resolution");
+    LegacyNexus::NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string firstGoodBin = counts.attributes("first_good_bin");
-    if (!firstGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
+    if (!firstGoodBin.empty() && infoResolution.stat != LegacyNexus::NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NXnumtype::FLOAT32:
+      case LegacyNexus::NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NXnumtype::INT32:
+      case LegacyNexus::NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -128,17 +127,17 @@ void LoadMuonNexus1::exec() {
   }
 
   try {
-    NXInfo infoResolution = entry.getDataSetInfo("resolution");
-    NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+    LegacyNexus::NXInfo infoResolution = entry.getDataSetInfo("resolution");
+    LegacyNexus::NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string lastGoodBin = counts.attributes("last_good_bin");
-    if (!lastGoodBin.empty() && infoResolution.stat != NXstatus::NX_ERROR) {
+    if (!lastGoodBin.empty() && infoResolution.stat != LegacyNexus::NXstatus::NX_ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NXnumtype::FLOAT32:
+      case LegacyNexus::NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NXnumtype::INT32:
+      case LegacyNexus::NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -154,7 +153,7 @@ void LoadMuonNexus1::exec() {
     g_log.warning() << "Error while loading the LastGoodData value: " << e.what() << "\n";
   }
 
-  NXEntry nxRun = root.openEntry("run");
+  LegacyNexus::NXEntry nxRun = root.openEntry("run");
   std::string title;
   std::string notes;
   try {
@@ -380,19 +379,19 @@ void LoadMuonNexus1::exec() {
  * Loads dead time table for the detector.
  * @param root :: Root entry of the Nexus to read dead times from
  */
-void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
+void LoadMuonNexus1::loadDeadTimes(LegacyNexus::NXRoot &root) {
   // If dead times workspace name is empty - caller doesn't need dead times
   if (getPropertyValue("DeadTimeTable").empty())
     return;
 
-  NXEntry detector = root.openEntry("run/instrument/detector");
+  LegacyNexus::NXEntry detector = root.openEntry("run/instrument/detector");
 
-  NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
-  if (infoDeadTimes.stat != NXstatus::NX_ERROR) {
-    NXFloat deadTimesData = detector.openNXFloat("deadtimes");
+  LegacyNexus::NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
+  if (infoDeadTimes.stat != LegacyNexus::NXstatus::NX_ERROR) {
+    LegacyNexus::NXFloat deadTimesData = detector.openNXFloat("deadtimes");
     deadTimesData.load();
 
-    int numDeadTimes = deadTimesData.dim0();
+    auto numDeadTimes = deadTimesData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<double> deadTimes;
@@ -482,15 +481,16 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
  * @param inst :: Pointer to instrument (to use if IDF needed)
  * @returns :: Grouping table - or tables, if per period
  */
-Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry::Instrument_const_sptr &inst) {
-  NXEntry dataEntry = root.openEntry("run/histogram_data_1");
+Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(LegacyNexus::NXRoot &root,
+                                                    const Geometry::Instrument_const_sptr &inst) {
+  LegacyNexus::NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
-  NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
-  if (infoGrouping.stat != NXstatus::NX_ERROR) {
-    NXInt groupingData = dataEntry.openNXInt("grouping");
+  LegacyNexus::NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
+  if (infoGrouping.stat != LegacyNexus::NXstatus::NX_ERROR) {
+    LegacyNexus::NXInt groupingData = dataEntry.openNXInt("grouping");
     groupingData.load();
 
-    int numGroupingEntries = groupingData.dim0();
+    auto numGroupingEntries = groupingData.dim0();
 
     std::vector<int> specToLoad;
     std::vector<int> grouping;
@@ -707,7 +707,7 @@ void LoadMuonNexus1::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
   auto numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
   runDetails.addProperty("nspectra", numSpectra);
 
-  NXRoot root(m_filename);
+  LegacyNexus::NXRoot root(m_filename);
   try {
     std::string start_time = root.getString("run/start_time");
     runDetails.addProperty("run_start", start_time);
@@ -732,7 +732,7 @@ void LoadMuonNexus1::loadRunDetails(const DataObjects::Workspace2D_sptr &localWo
   }
 
   // Get sample parameters
-  NXEntry runSample = root.openEntry("run/sample");
+  LegacyNexus::NXEntry runSample = root.openEntry("run/sample");
 
   if (runSample.containsDataSet("temperature")) {
     float temperature = runSample.getFloat("temperature");
@@ -765,12 +765,12 @@ void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorksp
   if (!loadLog->isExecuted())
     g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
 
-  NXRoot root(m_filename);
+  LegacyNexus::NXRoot root(m_filename);
 
   // Get main field direction
   std::string mainFieldDirection = "Longitudinal"; // default
   try {
-    NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
+    LegacyNexus::NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
     // some files have no data there
     orientation.load();
 
@@ -813,7 +813,7 @@ void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWork
 void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
 
   // Get handle to nexus file
-  File handle(m_filename, ::NXACC_READ);
+  LegacyNexus::File handle(m_filename, LegacyNexus::NXACC_READ);
 
   // For single-period datasets, read /run/instrument/beam/frames_good
   if (nperiods == 1) {
@@ -849,7 +849,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       handle.openPath("run/instrument/beam/");
       handle.openData("frames_period_daq");
 
-      Info info = handle.getInfo();
+      LegacyNexus::Info info = handle.getInfo();
       // Check that frames_period_daq contains values for
       // every period
       if (period >= info.dims[0]) {

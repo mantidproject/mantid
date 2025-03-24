@@ -1,1 +1,0 @@
-- New container type added in for POWGEN instrument and accordingly the :ref:`SNSPowderReduction <algm-SNSPowderReduction>` interface has been updated to accommodate this new container type.

@@ -10,8 +10,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Quat.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusClasses_fwd.h"
 
 namespace Mantid {
 
@@ -40,13 +40,13 @@ void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string 
                          const std::string &instrumentPath = "");
 
 void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
-                         const std::vector<double> &xAxis, int initialSpectrum = 0, bool pointData = false,
+                         const std::vector<double> &xAxis, int64_t initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
 void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
-                         const std::vector<double> &xAxis, int initialSpectrum = 0,
+                         const std::vector<double> &xAxis, int64_t initialSpectrum = 0,
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::vector<int> &customID = std::vector<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));

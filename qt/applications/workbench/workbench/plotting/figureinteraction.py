@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D
+from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D, LegendProperties
 from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -253,6 +253,30 @@ class FigureInteraction(object):
             self._open_double_click_dialog(self.double_click_event, self.marker_selected_in_double_click_event)
             self.marker_selected_in_double_click_event = None
             self.double_click_event = None
+
+        self.legend_bounds_check(event)
+
+    @staticmethod
+    def legend_bounds_check(event):
+        fig = event.canvas.figure
+
+        for ax in fig.get_axes():
+            legend1 = ax.get_legend()
+            if legend1 is None:
+                continue
+
+            bbox_fig = fig.get_window_extent()
+            bbox_legend = legend1.get_window_extent()
+
+            outside_window = (
+                bbox_legend.x1 < bbox_fig.x0 or bbox_legend.x0 > bbox_fig.x1 or bbox_legend.y1 < bbox_fig.y0 or bbox_legend.y0 > bbox_fig.y1
+            )
+
+            # Snap back legend
+            if outside_window:
+                props = LegendProperties.from_legend(legend1)
+                LegendProperties.create_legend(props, legend1.axes)
+                fig.canvas.draw_idle()
 
     def on_leave(self, event):
         """

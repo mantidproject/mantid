@@ -1,1 +1,0 @@
-- Algorithm SaveNexusESS now supports append mode, allowing multiple workspaces to be written either one at a time, or as a group workspace, to a single NeXus HDF5 file.

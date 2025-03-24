@@ -43,7 +43,7 @@ function fixup_bundle() {
   echo "Fixing up bundle so it is self contained"
   # Fix absolute paths in Qt and our own startup script
   fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
-  sed -i -e "s@$bundle_prefix_absolute/@\$INSTALLDIR/@" $bundle_prefix_absolute/bin/launch_mantidworkbench
+  sed -i -e "s@$bundle_prefix_absolute/@\$INSTALLDIR/@" $bundle_prefix_absolute/bin/mantidworkbench
 }
 
 # Create a tarball out of the installed conda environment
@@ -132,9 +132,17 @@ mkdir -p "$bundle_contents"
 # Create conda environment internally. --copy ensures no symlinks are used
 bundle_conda_prefix="$bundle_contents"
 
+# The mantid channel is required as the source for installing mslice
+mantid_channel=mantid
+# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
+# the nightly version of mslice
+if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
+  mantid_channel=mantid/label/nightly
+fi
+
 echo "Creating Conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
-  --channel "$conda_channel" --channel conda-forge --channel mantid --yes \
+  --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \
   jq  # used for processing the version string
 echo

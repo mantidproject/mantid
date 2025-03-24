@@ -27,8 +27,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexusCpp/NeXusException.hpp"
-#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <Poco/Path.h>
 
@@ -38,7 +39,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -70,7 +71,7 @@ const std::string LoadILLSANS::summary() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLSANS::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the ILL for SANS machines
   if (descriptor.isEntry("/entry0/mode") &&
       ((descriptor.isEntry("/entry0/reactor_power") && descriptor.isEntry("/entry0/instrument_name")) ||
@@ -276,16 +277,16 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
  * @param numberOfTubes
  * @param numberOfPixelsPerTube
  */
-void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
-                                    int &numberOfPixelsPerTube) {
+void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, size_t &numberOfChannels, size_t &numberOfTubes,
+                                    size_t &numberOfPixelsPerTube) {
   if (m_isD16Omega) {
-    numberOfChannels = data.dim0();
-    numberOfTubes = data.dim1();
-    numberOfPixelsPerTube = data.dim2();
+    numberOfChannels = static_cast<size_t>(data.dim0());
+    numberOfTubes = static_cast<size_t>(data.dim1());
+    numberOfPixelsPerTube = static_cast<size_t>(data.dim2());
   } else {
-    numberOfPixelsPerTube = data.dim1();
-    numberOfChannels = data.dim2();
-    numberOfTubes = data.dim0();
+    numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+    numberOfChannels = static_cast<size_t>(data.dim2());
+    numberOfTubes = static_cast<size_t>(data.dim0());
   }
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
@@ -360,7 +361,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
     }
   }
 
-  int numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
+  size_t numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTubes);
 
   // For these monochromatic instruments, one bin is "TOF" mode, and more than that is a scan
@@ -408,7 +409,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
                           dataLeft.dim0() * dataLeft.dim1()) +
       m_numberOfMonitors;
 
-  int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
+  size_t numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(dataCenter, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
 
   MultichannelType type = (numberOfChannels != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
@@ -418,8 +419,8 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   // we need to adjust the default binning after loadmetadata
   if (numberOfChannels != 1) {
     std::vector<double> frames(numberOfChannels, 0);
-    for (int i = 0; i < numberOfChannels; ++i) {
-      frames[i] = i;
+    for (size_t i = 0; i < numberOfChannels; ++i) {
+      frames[i] = static_cast<double>(i);
     }
     m_defaultBinning.resize(numberOfChannels);
     std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
@@ -464,7 +465,7 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
       static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) +
       m_numberOfMonitors;
 
-  int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
+  size_t numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(data1_data, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
 
   MultichannelType type = (numberOfChannels != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
@@ -475,8 +476,8 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
   // we need to adjust the default binning after loadmetadata
   if (numberOfChannels != 1) {
     std::vector<double> frames(numberOfChannels, 0);
-    for (int i = 0; i < numberOfChannels; ++i) {
-      frames[i] = i;
+    for (size_t i = 0; i < numberOfChannels; ++i) {
+      frames[i] = static_cast<double>(i);
     }
     m_defaultBinning.resize(numberOfChannels);
     std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
@@ -723,7 +724,7 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
 size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt const &data, const std::vector<double> &timeBinning,
                                       size_t firstIndex, const MultichannelType type) {
 
-  int numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
+  size_t numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTube);
 
   bool pointData = true;
@@ -1067,10 +1068,10 @@ std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std
   auto scannedValues = LoadHelper::getDoubleDataset(entry, path);
   scannedValues.load();
 
-  const int nBins = scannedValues.dim1();
+  const int64_t nBins = scannedValues.dim1();
   std::vector<double> binning(nBins, 0);
 
-  for (int i = 0; i < nBins; ++i) {
+  for (int64_t i = 0; i < nBins; ++i) {
     // for D16, we are only interested in the first line, which contains the omega values
     binning[i] = scannedValues(0, i);
   }
@@ -1087,12 +1088,12 @@ std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std
  */
 std::vector<double> LoadILLSANS::getVariableTimeBinning(const NXEntry &entry, const std::string &path, const NXInt &sum,
                                                         const NXFloat &times) const {
-  const int nBins = sum.dim0();
+  const int64_t nBins = sum.dim0();
   std::vector<double> binCenters;
   binCenters.reserve(nBins);
   NXFloat distance = entry.openNXFloat(path);
   distance.load();
-  for (int bin = 0; bin < nBins; ++bin) {
+  for (int64_t bin = 0; bin < nBins; ++bin) {
     // sum is in nanoseconds, times is in microseconds
     const double tof = sum[bin] * 1E-9 - times[bin] * 1E-6 / 2.;
     // velocity in m/s

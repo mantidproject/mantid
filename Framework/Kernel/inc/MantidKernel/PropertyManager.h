@@ -103,7 +103,7 @@ public:
   /// removes the property from the properties map and returns a pointer to it
   std::unique_ptr<Property> takeProperty(const size_t index) override;
   /// Clears the whole property map
-  void clear() override;
+  void clear() override final;
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const override;

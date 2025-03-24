@@ -69,7 +69,7 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 ///    Copyright (C) 2010, Chris Frey <cdfrey@foursquare.net>, To God be the
 ///    glory
 ///    Released to the public domain.
-time_t DateAndTime::utc_mktime(struct tm *utctime) {
+time_t DateAndTime::utc_mktime(const struct tm *utctime) {
   time_t result;
   struct tm tmp, check;
 
@@ -348,7 +348,7 @@ void DateAndTime::setFromISO8601(const std::string &str) {
     const size_t nCharZ = time.find('Z', nCharT);
     if (nCharZ != std::string::npos) {
       // Found a Z. Remove it, and no timezone fix
-      time = time.substr(0, nCharZ);
+      time.resize(nCharZ);
     } else {
       // Look for a + or - indicating time zone offset
       size_t n_plus, n_minus;
@@ -369,7 +369,7 @@ void DateAndTime::setFromISO8601(const std::string &str) {
         std::string offset_str = time.substr(nPlusMinus + 1, time.size() - nPlusMinus - 1);
 
         // Take out the offset from time string
-        time = time.substr(0, nPlusMinus);
+        time.resize(nPlusMinus);
 
         // Separate into minutes and hours
         std::string hours_str("0"), minutes_str("0");

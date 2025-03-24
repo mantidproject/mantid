@@ -40,7 +40,7 @@ public:
   AlgorithmProgressPresenter(QWidget *parent, IAlgorithmProgressWidget *);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double, const QString, const double, const int) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double, const QString &, const double, const int) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
   AlgorithmProgressModel &model() { return m_model; }

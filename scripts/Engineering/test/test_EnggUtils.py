@@ -18,7 +18,7 @@ enggutils_path = "Engineering.EnggUtils"
 
 class EnggUtilsTest(unittest.TestCase):
     def setUp(self):
-        self.calibration = create_autospec(CalibrationInfo())
+        self.calibration = create_autospec(CalibrationInfo(), instance=True)
         self.calibration.is_valid.return_value = True
         self.calibration.get_instrument.return_value = "ENGINX"
         self.calibration.get_group_suffix.return_value = "all_banks"

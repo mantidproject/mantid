@@ -34,7 +34,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         ws = mock.MagicMock()
         # add mock subplot
         subplot = mock.MagicMock()
-        self.subplot = mock.create_autospec(subplotContext)
+        self.subplot = mock.create_autospec(subplotContext, instance=True)
         with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
             self.context.addLine("one", ws, spec_num, "C0")
@@ -47,7 +47,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         ws = gen_ws(mock_ws)
         # add mock subplot
         subplot = mock.MagicMock()
-        self.subplot = mock.create_autospec(subplotContext)
+        self.subplot = mock.create_autospec(subplotContext, instance=True)
         with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
             self.context.addLine("one", ws, spec_num, "C0")
@@ -57,7 +57,7 @@ class MultiPlottingContextTest(unittest.TestCase):
     def test_update_layout(self):
         # add mocks
         figure = mock.Mock()
-        self.subplot = mock.create_autospec(subplotContext)
+        self.subplot = mock.create_autospec(subplotContext, instance=True)
         names = ["one", "two", "three"]
         for name in names:
             self.context.addSubplot(name, mock.Mock())
