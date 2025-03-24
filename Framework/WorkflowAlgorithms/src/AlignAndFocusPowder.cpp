@@ -493,7 +493,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = std::make_unique<Progress>(this, 0., 1., 22);
+  m_progress = std::make_unique<Progress>(this, 0., 1., 21);
 
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
