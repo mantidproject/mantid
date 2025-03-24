@@ -440,6 +440,14 @@ template <> MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, s
   value = this->getStrAttr(info);
 }
 
+template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
+  AttrInfo info;
+  info.type = getType<NumT>();
+  info.length = 1;
+  info.name = name;
+  value = this->getAttr<NumT>(info);
+}
+
 string File::getStrAttr(const AttrInfo &info) {
   string res;
   if (info.type != NXnumtype::CHAR) {

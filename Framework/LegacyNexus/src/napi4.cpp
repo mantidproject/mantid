@@ -100,7 +100,6 @@ static int findNapiClass(pLgcyNexusFile pFile, int groupRef, NXname nxclass) {
     /* normal group */
     strcpy(nxclass, classText);
     Vdetach(groupID);
-    return groupRef;
   } else {
     /* code for linked renamed groups */
     attID = Vfindattr(groupID, "NAPIlink");
@@ -115,6 +114,7 @@ static int findNapiClass(pLgcyNexusFile pFile, int groupRef, NXname nxclass) {
       return tags[1];
     }
   }
+  return groupRef;
 }
 /* --------------------------------------------------------------------- */
 
