@@ -36,13 +36,11 @@ typedef struct __fileLgcyStack *pFileLgcyStack;
 
 pFileLgcyStack makeFileStack();
 void killFileStack(pFileLgcyStack self);
-int getFileStackSize();
 
 void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *filename);
 void popFileStack(pFileLgcyStack self);
 
 pLgcyFunction peekFileOnStack(pFileLgcyStack self);
-char *peekFilenameOnStack(pFileLgcyStack self);
 void peekIDOnStack(pFileLgcyStack self, NXlink *id);
 void setCloseID(pFileLgcyStack self, const NXlink &id);
 

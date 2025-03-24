@@ -1022,6 +1022,7 @@ void NX4assignFunctions(pLgcyFunction fHandle) {
   fHandle->nxinitgroupdir = NX4initgroupdir;
   fHandle->nxinitattrdir = NX4initattrdir;
   fHandle->nxgetnextattra = NX4getnextattra;
+  fHandle->nxgetattrainfo = NULL;
 }
 
 #endif /*HDF4*/

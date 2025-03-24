@@ -65,8 +65,6 @@ void killFileStack(pFileLgcyStack self) {
     free(self);
   }
 }
-/*---------------------------------------------------------------------*/
-int getFileStackSize() { return sizeof(fileLgcyStack); }
 /*----------------------------------------------------------------------*/
 void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *file) {
   size_t length;
@@ -89,8 +87,6 @@ void popFileStack(pFileLgcyStack self) {
 }
 /*----------------------------------------------------------------------*/
 pLgcyFunction peekFileOnStack(pFileLgcyStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
-/*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileLgcyStack self) { return self->fileStack[self->fileStackPointer].filename; }
 /*----------------------------------------------------------------------*/
 void peekIDOnStack(pFileLgcyStack self, NXlink *id) {
   memcpy(id, &self->fileStack[self->fileStackPointer].closeID, sizeof(NXlink));
