@@ -432,6 +432,12 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   }
 }
 
+template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
+  NumT value;
+  this->getAttr(info, &value);
+  return value;
+}
+
 template <> MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
   AttrInfo info;
   info.type = getType<char>();
