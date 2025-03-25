@@ -330,7 +330,7 @@ class PEARLTransfit(PythonAlgorithm):
     def calc_effective_temp_and_error(self, fwhm, fwhm_err, energy, energy_err, correlation, mass):
         const = ((1e-3) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
         temp = const * (fwhm**2) / energy
-        # propagate errors assuming not corellated
+        # propagate errors
         dtemp_by_dfwhm = 2 * fwhm / energy
         dtemp_by_denergy = -((fwhm / energy) ** 2)
         # calc. term due to covariance
