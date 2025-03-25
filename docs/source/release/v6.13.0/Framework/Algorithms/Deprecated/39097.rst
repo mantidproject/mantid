@@ -1,0 +1,6 @@
+- :ref:`UnwrapSNS <algm-UnwrapSNS>` has been deprecated. There is no replacement.
+- Property ``Unwrap Ref`` has been deprecated for algorithms that previously
+  called deprecated algorithm :ref:`UnwrapSNS <algm-UnwrapSNS>`:
+  :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`,
+  :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`
+  and :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
