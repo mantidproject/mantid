@@ -12,8 +12,6 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 def get_mock_data_info():
-    # TODO I really really dislike having to do this in a test, but
-    # TODO de-coupling StateData is required to avoid it
     file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
     data_builder = get_data_builder(SANSFacility.ISIS, file_information)
     data_builder.set_sample_scatter("SANS2D00022024")
