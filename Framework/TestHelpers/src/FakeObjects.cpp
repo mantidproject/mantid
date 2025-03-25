@@ -8,8 +8,8 @@
 
 // Property implementations
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.tcc"
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidAPI/WorkspaceProperty.hxx"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 DECLARE_WORKSPACE(WorkspaceTester)
 

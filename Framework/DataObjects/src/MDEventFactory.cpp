@@ -21,12 +21,12 @@
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
-#include "MantidDataObjects/MDBin.tcc"
-#include "MantidDataObjects/MDBox.tcc"
-#include "MantidDataObjects/MDBoxBase.tcc"
-#include "MantidDataObjects/MDBoxIterator.tcc"
-#include "MantidDataObjects/MDEventWorkspace.tcc"
-#include "MantidDataObjects/MDGridBox.tcc"
+#include "MantidDataObjects/MDBin.hxx"
+#include "MantidDataObjects/MDBox.hxx"
+#include "MantidDataObjects/MDBoxBase.hxx"
+#include "MantidDataObjects/MDBoxIterator.hxx"
+#include "MantidDataObjects/MDEventWorkspace.hxx"
+#include "MantidDataObjects/MDGridBox.hxx"
 
 namespace Mantid::DataObjects {
 // ### BEGIN AUTO-GENERATED CODE

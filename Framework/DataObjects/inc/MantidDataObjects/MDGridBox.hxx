@@ -1087,6 +1087,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) 
  * @param signal [out] :: set to the integrated signal
  * @param errorSquared [out] :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
+ * @param useOnePercentBackgroundCorrection :: use extra correction
  */
 TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, const coord_t radiusSquared,
                                       signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
@@ -1566,6 +1567,7 @@ public:
  * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)
  coordinates for each event
  * @param expInfoIndex   :: vector of experiment info indexes for N events.
+ * @param goniometerIndex :: vector of goniometer info indices for N events
  * @param detectorId :: vector of detector's ID for N events.
 
  *@return number of events rejected (0 as nothing is rejected here)
@@ -1586,6 +1588,7 @@ TMDE(size_t MDGridBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
  * @param errorSq :: events Error squared
  * @param point   :: reference to the vector of  MDEvent coordinates
  * @param expInfoIndex ::    run  index
+ * @param goniometerIndex :: goniometer index
  * @param detectorId ::  detector's ID
  * */
 TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal, const signal_t errorSq, const std::vector<coord_t> &point,
@@ -1601,8 +1604,8 @@ TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal, const signal_t err
  * @param Signal  :: events signal
  * @param errorSq :: events Error squared
  * @param point :: reference to the  MDEvent coordinates
- * @param point   :: reference to the vector of  MDEvent coordinates
  * @param expInfoIndex ::    run  index
+ * @param goniometerIndex :: goniometer index
  * @param detectorId ::  detector's ID
 
  * */

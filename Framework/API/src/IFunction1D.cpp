@@ -13,7 +13,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
-#include "MantidAPI/IFunction1D.tcc"
+#include "MantidAPI/IFunction1D.hxx"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
