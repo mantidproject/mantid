@@ -20,7 +20,7 @@
 # Physics Research A 547 (2005) 601-615
 # -----------------------------------------------------------------------
 from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion, LogicOperator
-from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, mtd
+from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, AnalysisDataService as ADS
 from scipy import constants
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper
@@ -193,7 +193,7 @@ class PEARLTransfit(PythonAlgorithm):
         estimate_background = self.getProperty("EstimateBackground").value
 
         if not is_calib:
-            if "S_fit_Parameters" not in mtd:
+            if not ADS.doesExist("S_fit_Parameters"):
                 self.log().warning(
                     "No calibration files found. Please run this algorithm will 'Calibration' ticked to generate the calibration workspace."
                 )
@@ -242,7 +242,7 @@ class PEARLTransfit(PythonAlgorithm):
         else:
             out_ws_name = "T_fit"
             # retrieve parameters from previous calibration
-            calib_param_table = mtd["S_fit_Parameters"]
+            calib_param_table = ADS.retrieve("S_fit_Parameters")
             for ipar in range(func.nParams()):
                 row = calib_param_table.row(ipar)
                 func[row["Name"]] = row["Value"]
@@ -281,7 +281,7 @@ class PEARLTransfit(PythonAlgorithm):
             fwhm_err = final_func.fun.getError("GaussianFWHM")
             energy = final_func["Position"]
             energy_err = final_func.fun.getError("Position")
-            # get element from corellation matrix (called scaled covar in mantid)
+            # get element from correlation matrix (called normalised covar in mantid)
             irow = final_func.fun.getParameterIndex("Position")
             corr = fit_res["OutputNormalisedCovarianceMatrix"].row(irow)["GaussianFWHM"]
             temp_eff, temp_eff_err = self.calc_effective_temp_and_error(fwhm, fwhm_err, energy, energy_err, corr, mass)
@@ -324,7 +324,7 @@ class PEARLTransfit(PythonAlgorithm):
         return {
             "Function": FunctionWrapper(alg.getProperty("Function").value),
             "OutputStatus": alg.getProperty("OutputStatus").value,
-            "OutputNormalisedCovarianceMatrix": mtd[alg.getPropertyValue("OutputNormalisedCovarianceMatrix")],
+            "OutputNormalisedCovarianceMatrix": ADS.retrieve(alg.getPropertyValue("OutputNormalisedCovarianceMatrix")),
         }
 
     def calc_effective_temp_and_error(self, fwhm, fwhm_err, energy, energy_err, correlation, mass):
@@ -333,7 +333,7 @@ class PEARLTransfit(PythonAlgorithm):
         # propagate errors assuming not corellated
         dtemp_by_dfwhm = 2 * fwhm / energy
         dtemp_by_denergy = -((fwhm / energy) ** 2)
-        # calc. term due to covaraiance
+        # calc. term due to covariance
         # corr = 100*cij/sqrt(cii*cjj); cii = error_i^2
         covar = (correlation * fwhm_err * energy_err) / 100
         covar_term = 2 * dtemp_by_dfwhm * dtemp_by_denergy * covar
