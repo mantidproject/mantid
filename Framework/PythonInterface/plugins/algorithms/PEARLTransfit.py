@@ -40,7 +40,6 @@ class PEARLTransfit(PythonAlgorithm):
         "Hf01_TwogG": 0.00192,
         "Hf01_Gg": 0.0662,
         "Hf01_startE": 0.6,
-        "Hf01_Ediv": 0.01,
         "Hf01_endE": 1.7,
         # Hf02
         "Hf02_Mass": 177.0,
@@ -49,7 +48,6 @@ class PEARLTransfit(PythonAlgorithm):
         "Hf02_TwogG": 0.009,
         "Hf02_Gg": 0.0608,
         "Hf02_startE": 2.0,
-        "Hf02_Ediv": 0.01,
         "Hf02_endE": 2.7,
         # Ta10
         "Ta10_Mass": 181.0,
@@ -58,7 +56,6 @@ class PEARLTransfit(PythonAlgorithm):
         "Ta10_TwogG": 0.00335,
         "Ta10_Gg": 0.0069,
         "Ta10_startE": 9.6,
-        "Ta10_Ediv": 0.01,
         "Ta10_endE": 11.4,
         # Irp6
         "Irp6_Mass": 191.0,
@@ -67,7 +64,6 @@ class PEARLTransfit(PythonAlgorithm):
         "Irp6_TwogG": 0.000547,
         "Irp6_Gg": 0.072,
         "Irp6_startE": 0.1,
-        "Irp6_Ediv": 0.01,
         "Irp6_endE": 0.9,
         # Iro5
         "Iro5_Mass": 191.0,
@@ -76,7 +72,6 @@ class PEARLTransfit(PythonAlgorithm):
         "Iro5_TwogG": 0.006,
         "Iro5_Gg": 0.082,
         "Iro5_startE": 4.9,
-        "Iro5_Ediv": 0.01,
         "Iro5_endE": 6.3,
         # Iro9
         "Iro9_Mass": 191.0,
@@ -85,19 +80,14 @@ class PEARLTransfit(PythonAlgorithm):
         "Iro9_TwogG": 0.0031,
         "Iro9_Gg": 0.082,
         "Iro9_startE": 8.7,
-        "Iro9_Ediv": 0.01,
         "Iro9_endE": 9.85,
     }
-
-    # Physical constants
-    k = constants.k
-    e = constants.e
 
     def version(self):
         return 1
 
     def name(self):
-        return "PEARLTransfit2"
+        return "PEARLTransfit"
 
     def category(self):
         return "Diffraction\\Fitting"
@@ -216,7 +206,7 @@ class PEARLTransfit(PythonAlgorithm):
             # this means that Rebin is effectively performing a mean rather than sum
             ws.setDistribution(True)
             self.exec_child_alg("ConvertFromDistribution", Workspace=ws)
-            bin_width = 1000 * float(self.getProperty("Ediv").value)
+            bin_width = 1000 * float(self.getProperty("Ediv").value)  # meV
             ws = self.exec_child_alg("Rebin", InputWorkspace=ws, Params=f"{bin_width}", FullBinsOnly=True)
 
         # Define the gaussian width at the reference temperature
