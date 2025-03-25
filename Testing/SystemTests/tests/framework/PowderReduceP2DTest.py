@@ -66,6 +66,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         )
 
     def doValidation(self):
+        """Overrides validation to handle .p2d file with tolerances"""
         measured = f"{self.outputFile}.p2d"
         expected = self.reference
 
