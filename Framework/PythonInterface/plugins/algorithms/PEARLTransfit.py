@@ -24,6 +24,7 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, 
 from scipy import constants
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper
+from typing import Sequence
 
 
 class PEARLTransfit(PythonAlgorithm):
@@ -32,7 +33,7 @@ class PEARLTransfit(PythonAlgorithm):
     # S.F. Mughabghab and D.I. Garber
     # June 1973, BNL report 325
     # Mass in atomic units, En in eV, temperatures in K, gamma factors in eV
-    ResParamsDict = {
+    res_params_dict = {
         # Hf01
         "Hf01_Mass": 177.0,
         "Hf01_En": 1.098,
@@ -112,7 +113,7 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="Type of foil included with the sample",
         )
-        self.declareProperty(name="Ediv", defaultValue="0.0025", direction=Direction.Input, doc="Energy step in eV")
+        self.declareProperty(name="Ediv", defaultValue=0.0025, direction=Direction.Input, doc="Energy bin-width in eV")
         self.declareProperty(name="ReferenceTemp", defaultValue="290", direction=Direction.Input, doc="Enter reference temperature in K")
         self.declareProperty(
             name="Calibration",
@@ -170,26 +171,15 @@ class PEARLTransfit(PythonAlgorithm):
         enable_Ediv = EnabledWhenProperty("RebinInEnergy", PropertyCriterion.IsDefault)
         self.setPropertySettings("Ediv", enable_Ediv)
 
-    def validateFileInputs(self, filesList):
-        # MultipleFileProperty returns a list of list(s) of files, or a list containing a single (string) file
-        # Condense into one list of file(s) in either case
-        returnList = []
-        for files in filesList:
-            if isinstance(files, str):
-                returnList.append(files)
-            else:
-                returnList.extend(files)
-        return returnList
-
     def PyExec(self):
         # ----------------------------------------------------------
         # Imports resonance parameters from ResParam dictionary depending on the selected foil type.
         # ----------------------------------------------------------
-        files = self.validateFileInputs(self.getProperty("Files").value)
+        files = self.get_file_list(self.getProperty("Files").value)
         foil_type = self.getProperty("FoilType").value
         is_calib = self.getProperty("Calibration").value
-        refTemp = float(self.getProperty("ReferenceTemp").value)
-        isDebug = self.getProperty("Debug").value
+        ref_temp = float(self.getProperty("ReferenceTemp").value)
+        is_debug = self.getProperty("Debug").value
         estimate_background = self.getProperty("EstimateBackground").value
 
         if not is_calib:
@@ -211,9 +201,9 @@ class PEARLTransfit(PythonAlgorithm):
 
         # Define the gaussian width at the reference temperature
         # Factor of 1e3 converting to meV for Mantid
-        energy = self.ResParamsDict[foil_type + "_En"]
-        mass = self.ResParamsDict[foil_type + "_Mass"]
-        gauss_fwhm_ref_temp = 1000.0 * np.sqrt(4 * energy * constants.k * refTemp * mass / (constants.e * (1 + mass) ** 2))
+        energy = self.res_params_dict[foil_type + "_En"]
+        mass = self.res_params_dict[foil_type + "_Mass"]
+        gauss_fwhm_ref_temp = 1000.0 * np.sqrt(4 * energy * constants.k * ref_temp * mass / (constants.e * (1 + mass) ** 2))
 
         # make initial function with constraints
         func = FunctionWrapper("PEARLTransVoigt")
@@ -225,9 +215,9 @@ class PEARLTransfit(PythonAlgorithm):
             # use tabulated values (note energies are in eV)
             out_ws_name = "S_fit"
             func["Amplitude"] = 1.6
-            TwogG = self.ResParamsDict[foil_type + "_TwogG"]
-            Gg = self.ResParamsDict[foil_type + "_Gg"]
-            func["LorentzianFWHM"] = 1000.0 * (0.5 * TwogG + Gg)
+            two_gGamma = self.res_params_dict[foil_type + "_TwogG"]
+            gamma_g = self.res_params_dict[foil_type + "_Gg"]
+            func["LorentzianFWHM"] = 1000.0 * (0.5 * two_gGamma + gamma_g)
             func["GaussianFWHM"] = gauss_fwhm_ref_temp
             func["Position"] = energy * 1000  # take peak position starting guess from tabulated value
             bg_pars = np.zeros(3)
@@ -286,14 +276,14 @@ class PEARLTransfit(PythonAlgorithm):
             corr = fit_res["OutputNormalisedCovarianceMatrix"].row(irow)["GaussianFWHM"]
             temp_eff, temp_eff_err = self.calc_effective_temp_and_error(fwhm, fwhm_err, energy, energy_err, corr, mass)
             # calculate sample temp using ideal gas formulation
-            TD = self.ResParamsDict[foil_type + "_TD"]  # Debye temp.
-            temp_sample, temp_sample_err = self.calc_sample_temp_and_error_from_effective(temp_eff, temp_eff_err, TD)
+            temp_debye = self.res_params_dict[foil_type + "_TD"]  # Debye temp.
+            temp_sample, temp_sample_err = self.calc_sample_temp_and_error_from_effective(temp_eff, temp_eff_err, temp_debye)
 
             # print info
             self.log().information(f"Sample temperature is: {temp_sample:.2f} +/- {temp_sample_err:.2f} K")
-            if isDebug:
+            if is_debug:
                 self.log().information("-----------------------------")
-                self.log().information(f"The Debye temperature is {TD:.2f} K")
+                self.log().information(f"The Debye temperature is {temp_debye:.2f} K")
                 self.log().information(f"The effective temperature is: {temp_eff:.2f} +/- {temp_eff_err:.2f} K")
                 self.log().information(f"Fitted in range {ws.readX(0)[0]:.2f} < Energy (meV) < {ws.readX(0)[-1]:.2f}")
                 self.log().information(f"Gaussian width at this reference temperature is: {gauss_fwhm_ref_temp:.2f} meV")
@@ -305,6 +295,18 @@ class PEARLTransfit(PythonAlgorithm):
 
         # clean up ADS
         self.exec_child_alg("DeleteWorkspace", Workspace=fit_res["OutputNormalisedCovarianceMatrix"])
+
+    @staticmethod
+    def get_file_list(input_files):
+        # MultipleFileProperty returns a list of list(s) of files, or a list containing a single (string) file
+        # Condense into one list of file(s) in either case
+        file_list = []
+        for files in input_files:
+            if isinstance(files, str):
+                file_list.append(files)
+            else:
+                file_list.extend(files)
+        return file_list
 
     def exec_child_alg(self, alg_name: str, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
@@ -327,7 +329,9 @@ class PEARLTransfit(PythonAlgorithm):
             "OutputNormalisedCovarianceMatrix": ADS.retrieve(alg.getPropertyValue("OutputNormalisedCovarianceMatrix")),
         }
 
-    def calc_effective_temp_and_error(self, fwhm, fwhm_err, energy, energy_err, correlation, mass):
+    def calc_effective_temp_and_error(
+        self, fwhm: float, fwhm_err: float, energy: float, energy_err: float, correlation: float, mass: float
+    ) -> (float, float):
         const = ((1e-3) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
         temp = const * (fwhm**2) / energy
         # propagate errors
@@ -340,21 +344,21 @@ class PEARLTransfit(PythonAlgorithm):
         temp_err = const * np.sqrt((dtemp_by_dfwhm * fwhm_err) ** 2 + (dtemp_by_denergy * energy_err) ** 2 + covar_term)
         return temp, temp_err
 
-    def calc_sample_temp_and_error_from_effective(self, temp_eff, temp_eff_err, TD):
-        if 8 * temp_eff < 3 * TD:
+    def calc_sample_temp_and_error_from_effective(self, temp_eff: float, temp_eff_err: float, temp_debye: float) -> (float, float):
+        if 8 * temp_eff < 3 * temp_debye:
             self.log().warning("The effective temperature is currently too far below the Debye temperature to give an accurate measure.")
             return temp_eff, temp_eff_err
         # use free gas formulation
-        log_term = np.log((8 * temp_eff + 3 * TD) / (8 * temp_eff - 3 * TD))
-        temp_sample = 3 * TD / (4 * log_term)
+        log_term = np.log((8 * temp_eff + 3 * temp_debye) / (8 * temp_eff - 3 * temp_debye))
+        temp_sample = 3 * temp_debye / (4 * log_term)
         # calculate error using derivative
-        temp_sample_err = abs((36 * TD**2) / ((9 * TD**2 - 64 * temp_eff**2) * log_term**2)) * temp_eff_err
+        temp_sample_err = abs((36 * temp_debye**2) / ((9 * temp_debye**2 - 64 * temp_eff**2) * log_term**2)) * temp_eff_err
         return temp_sample, temp_sample_err
 
     # ----------------------------------------------------------
     # Define function for importing raw monitor data, summing, normalising, converting units, and cropping
     # ----------------------------------------------------------
-    def _load_monitor_from_single_file(self, filepath):
+    def _load_monitor_from_single_file(self, filepath: str):
         ws, *_ = self.exec_child_alg("Load", Filename=filepath)
         ws = self.exec_child_alg("ExtractSingleSpectrum", InputWorkspace=ws, WorkspaceIndex=3)
         ws = self.exec_child_alg("CropWorkspace", InputWorkspace=ws, XMin=100, XMax=19990)
@@ -362,20 +366,20 @@ class PEARLTransfit(PythonAlgorithm):
         ws = self.exec_child_alg("ConvertUnits", InputWorkspace=ws, Target="Energy")
         return ws
 
-    def load_and_average_moinitor_from_files(self, filepaths, foil_type):
+    def load_and_average_moinitor_from_files(self, filepaths: Sequence[str], foil_type: str):
         ws = self._load_monitor_from_single_file(filepaths[0])
         for filepath in filepaths[1:]:
             ws = ws + self._load_monitor_from_single_file(filepath)
         if len(filepaths) > 1:
             ws = ws / len(filepaths)
         # crop
-        xstart = 1000 * self.ResParamsDict[foil_type + "_startE"]
-        xend = 1000 * self.ResParamsDict[foil_type + "_endE"]
+        xstart = 1000 * self.res_params_dict[foil_type + "_startE"]
+        xend = 1000 * self.res_params_dict[foil_type + "_endE"]
         ws = self.exec_child_alg("CropWorkspaceRagged", InputWorkspace=ws, XMin=xstart, XMax=xend)
         return ws
 
     @staticmethod
-    def estimate_linear_background(x, y, nbg=3):
+    def estimate_linear_background(x: np.ndarray, y: np.ndarray, nbg: int = 3) -> (float, float):
         if len(y) < 2 * nbg:
             # not expected as trying to fit a function with 7 parameters
             return 2 * [0.0]
