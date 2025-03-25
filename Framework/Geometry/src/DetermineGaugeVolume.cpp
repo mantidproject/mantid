@@ -35,10 +35,10 @@ BeamProfile::BeamProfile(IComponent_const_sptr source, const V3D beamDirection) 
     }
   } else {
     BoundingBox *sourceBB = new BoundingBox();
+    source->getBoundingBox(*sourceBB);
     if (sourceBB->isNull()) {
       throw std::runtime_error("BeamProfile: No bounding box found for source");
     }
-    source->getBoundingBox(*sourceBB);
     shape = SLIT;
     width = sourceBB->xMax() - sourceBB->xMin();
     height = sourceBB->yMax() - sourceBB->yMin();
