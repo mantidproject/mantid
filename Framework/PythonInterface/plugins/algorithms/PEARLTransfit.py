@@ -171,6 +171,13 @@ class PEARLTransfit(PythonAlgorithm):
         enable_Ediv = EnabledWhenProperty("RebinInEnergy", PropertyCriterion.IsDefault)
         self.setPropertySettings("Ediv", enable_Ediv)
 
+    def validateInputs(self):
+        issues = dict()
+        is_calib = self.getProperty("Calibration").value
+        if not is_calib and not ADS.doesExist("S_fit_Parameters"):
+            issues["Calibration"] = "No S_fit_Parameters workspace exists, please fit a calibration run."
+        return issues
+
     def PyExec(self):
         # ----------------------------------------------------------
         # Imports resonance parameters from ResParam dictionary depending on the selected foil type.
@@ -181,13 +188,6 @@ class PEARLTransfit(PythonAlgorithm):
         ref_temp = float(self.getProperty("ReferenceTemp").value)
         is_debug = self.getProperty("Debug").value
         estimate_background = self.getProperty("EstimateBackground").value
-
-        if not is_calib:
-            if not ADS.doesExist("S_fit_Parameters"):
-                self.log().warning(
-                    "No calibration files found. Please run this algorithm will 'Calibration' ticked to generate the calibration workspace."
-                )
-                return
 
         ws = self.load_and_average_moinitor_from_files(files, foil_type)
         if self.getProperty("RebinInEnergy").value:

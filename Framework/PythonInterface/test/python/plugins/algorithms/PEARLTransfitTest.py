@@ -55,7 +55,8 @@ class PEARLTransfitTest(unittest.TestCase):
 
     def test_algorithm_cancels_if_no_calib(self):
         # Test that the algorithm is aborted if run in measurement mode without a calibration file
-        PEARLTransfit(Files="PEARL00073987", Calibration=False)
+        with self.assertRaisesRegex(RuntimeError, "No S_fit_Parameters workspace exists, please fit a calibration run."):
+            PEARLTransfit(Files="PEARL00073987", Calibration=False)
         self.assertFalse(ADS.doesExist("T_fit_Parameters"))
         self.assertFalse(ADS.doesExist("T_fit_Workspace"))
         self.assertFalse(ADS.doesExist("S_fit_Parameters"))
