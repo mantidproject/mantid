@@ -691,19 +691,19 @@ double Component::getFittingParameter(const std::string &pname, double xvalue) c
   if (m_map) {
     Parameter_sptr parameter = m_map->getRecursive(this, pname, "fitting");
     if (!parameter) {
-      throw std::runtime_error(
-          std::format("Fitting parameter={} could not be extracted from component={}", pname, this->getName()));
+      throw std::runtime_error("Fitting parameter=" + pname +
+                               " could not be extracted from component=" + this->getName());
     }
 
     try {
       const auto &fitParam = parameter->value<FitParameter>();
       return fitParam.getValue(xvalue);
     } catch (...) {
-      throw std::runtime_error(
-          std::format("Unable to get lookup table for parameter={} from component={}", pname, this->getName()));
+      throw std::runtime_error("Unable to get lookup table for parameter=" + pname +
+                               " from component=" + this->getName());
     }
   } else {
-    throw std::runtime_error(std::format("Parameter map is not available in component={}", this->getName()));
+    throw std::runtime_error("Parameter map is not available in component=" + this->getName());
   }
 }
 

@@ -35,8 +35,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos, Component::getR
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription, Component::getParamShortDescription, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription, Component::getParamDescription, 1, 2)
 
-// }
-
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 } // namespace

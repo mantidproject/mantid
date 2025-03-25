@@ -8,7 +8,7 @@ import unittest
 from mantid.geometry import Component
 
 
-class ComponenetTest(unittest.TestCase):
+class ComponentTest(unittest.TestCase):
     _testws = None
 
     def setUp(self):

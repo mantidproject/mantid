@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
