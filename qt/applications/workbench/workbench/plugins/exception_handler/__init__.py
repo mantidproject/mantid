@@ -28,7 +28,7 @@ def exception_logger(main_window, exc_type, exc_value, exc_traceback):
 
     if UsageService.isEnabled():
         page = CrashReportPage(show_continue_terminate=True)
-        presenter = ErrorReporterPresenter(page, "", "workbench", traceback.format_exception(exc_type, exc_value, exc_traceback))
+        presenter = ErrorReporterPresenter(page, "", "workbench", None, traceback.format_exception(exc_type, exc_value, exc_traceback))
         presenter.show_view_blocking()
         if not page.continue_working:
             main_window.close()
