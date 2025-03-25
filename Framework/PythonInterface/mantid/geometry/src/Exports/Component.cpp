@@ -93,6 +93,5 @@ void export_Component() {
       // Component_getPositionParameter())
       //.def("getParameter", &Component::getRotationParameter,
       // Component_getRotationParameter())
-
       ;
 }
