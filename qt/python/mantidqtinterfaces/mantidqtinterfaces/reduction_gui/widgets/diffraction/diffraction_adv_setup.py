@@ -62,9 +62,6 @@ class AdvancedSetupWidget(BaseWidget):
         iv4.setBottom(0)
         self._content.maxchunksize_edit.setValidator(iv4)
 
-        dv0 = QDoubleValidator(self._content.unwrap_edit)
-        self._content.unwrap_edit.setValidator(dv0)
-
         dv2 = QDoubleValidator(self._content.lowres_edit)
         self._content.lowres_edit.setValidator(dv2)
 
@@ -157,7 +154,6 @@ class AdvancedSetupWidget(BaseWidget):
             self._content.offsetdata_edit.setText(str(state.offsetdata).strip())
         else:
             self._content.offsetdata_edit.setText("0")
-        self._content.unwrap_edit.setText(str(state.unwrapref))
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
         self._content.maxchunksize_edit.setText(str(state.maxchunksize))
@@ -208,7 +204,6 @@ class AdvancedSetupWidget(BaseWidget):
         #
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.offsetdata = self._content.offsetdata_edit.text().strip()
-        s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
         s.cropwavelengthmin = str(self._content.cropwavelengthmin_edit.text())
         s.cropwavelengthmax = str(self._content.lineEdit_croppedWavelengthMax.text())
