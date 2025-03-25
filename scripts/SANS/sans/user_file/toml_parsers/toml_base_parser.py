@@ -16,7 +16,7 @@ class TomlParserBase(IStateParser, metaclass=ABCMeta):
         self._validator = schema_validator
         self._validator.validate()
 
-        data_info = self.get_state_data(file_information)
+        data_info = super().get_state_data(file_information)
         self._implementation = self._get_impl(dict_to_parse, data_info)
         self._implementation.parse_all()
 
