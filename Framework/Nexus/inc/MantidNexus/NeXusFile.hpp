@@ -39,11 +39,11 @@ public:
   /**
    * \return A pair of the next entry available in a listing.
    */
-  Entry getNextEntry();
+  // Entry getNextEntry();
   /**
    * \return Information about the next attribute.
    */
-  AttrInfo getNextAttr();
+  // AttrInfo getNextAttr();
 
 private:
 
@@ -377,7 +377,7 @@ public:
    * \param info Description of the attribute to add.
    * \param data The attribute value.
    */
-  // void putAttr(const AttrInfo &info, const void *data);
+  template <typename NumT> void putAttr(const AttrInfo &info, const NumT *data);
 
   /**
    * Put the supplied data as an attribute into the currently open data.
@@ -386,7 +386,7 @@ public:
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  // template <typename NumT> void putAttr(const std::string &name, const NumT value);
+  template <typename NumT> void putAttr(const std::string &name, const NumT value);
 
   /**
    * Put a string as an attribute in the file.
@@ -394,7 +394,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  // void putAttr(const char *name, const char *value);
+  void putAttr(const char *name, const char *value);
 
   /**
    * Put a string as an attribute in the file.
@@ -402,7 +402,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  // void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
+  void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
 
   /**
    * \copydoc NeXus::File::putSlab(void* data, DimSizeVector& start,
@@ -537,7 +537,7 @@ public:
   /**
    * \return String data from the file.
    */
-  // std::string getStrData();
+  std::string getStrData();
 
   /**
    * \return The Info structure that describes the currently open data.
@@ -592,7 +592,7 @@ public:
    * \param length The length of the attribute. If this is "-1" then the
    * information in the supplied AttrInfo object will be used.
    */
-  // void getAttr(const AttrInfo &info, void *data, int length = -1);
+  void getAttr(const AttrInfo &info, void *data, int length = -1);
 
   /**
    * Get the value of an attribute that is a scalar number.
@@ -602,7 +602,7 @@ public:
    *
    * \return The attribute value.
    */
-  // template <typename NumT> NumT getAttr(const AttrInfo &info);
+  template <typename NumT> NumT getAttr(const AttrInfo &info);
 
   /**
    * Get the value of an attribute that is a scalar number.
@@ -611,7 +611,7 @@ public:
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  // template <typename NumT> void getAttr(const std::string &name, NumT &value);
+  template <typename NumT> void getAttr(const std::string &name, NumT &value);
 
   /**
    * Get the value of a string attribute.
@@ -620,7 +620,7 @@ public:
    *
    * \return The value of the attribute.
    */
-  // std::string getStrAttr(const AttrInfo &info);
+  std::string getStrAttr(const AttrInfo &info);
 
   /**
    * \return The id of the group used for linking.

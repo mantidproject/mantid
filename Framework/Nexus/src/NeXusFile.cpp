@@ -8,6 +8,7 @@
 #include <numeric>
 #include <sstream>
 #include <typeinfo>
+#include <unordered_map>
 
 using namespace NeXus;
 using std::string;
@@ -69,56 +70,26 @@ static H5::FileAccPropList defaultFileAcc() {
   return access_plist;
 }
 
-static H5::DataType nxToHDF5Type(NXnumtype datatype) {
+static std::unordered_map<int, void const *> const nxToHDF5Map {
+    std::pair<int, void const*>(NXnumtype::CHAR, &H5::PredType::NATIVE_CHAR),
+    std::pair<int, void const*>(NXnumtype::INT8, &H5::PredType::NATIVE_SCHAR),
+    std::pair<int, void const*>(NXnumtype::UINT8, &H5::PredType::NATIVE_UCHAR),
+    std::pair<int, void const*>(NXnumtype::INT16, &H5::PredType::NATIVE_INT16),
+    std::pair<int, void const*>(NXnumtype::UINT16, &H5::PredType::NATIVE_UINT16),
+    std::pair<int, void const*>(NXnumtype::INT32, &H5::PredType::NATIVE_INT32),
+    std::pair<int, void const*>(NXnumtype::UINT32, &H5::PredType::NATIVE_UINT32),
+    std::pair<int, void const*>(NXnumtype::INT64, &H5::PredType::NATIVE_INT64),
+    std::pair<int, void const*>(NXnumtype::UINT64, &H5::PredType::NATIVE_UINT64),
+    std::pair<int, void const*>(NXnumtype::FLOAT32, &H5::PredType::NATIVE_FLOAT),
+    std::pair<int, void const*>(NXnumtype::FLOAT64, &H5::PredType::NATIVE_DOUBLE)
+  };
+
+static H5::DataType nxToHDF5Type(NXnumtype const &datatype) {
   H5::DataType type;
-  switch (datatype) {
-  case NXnumtype::CHAR: {
-    type = H5::PredType::NATIVE_CHAR;
-    break;
-  }
-  case NXnumtype::INT8: {
-    type = H5::PredType::NATIVE_SCHAR;
-    break;
-  }
-  case NXnumtype::UINT8: {
-    type = H5::PredType::NATIVE_UCHAR;
-    break;
-  }
-  case NXnumtype::INT16: {
-    type = H5::PredType::NATIVE_INT16;
-    break;
-  }
-  case NXnumtype::UINT16: {
-    type = H5::PredType::NATIVE_UINT16;
-    break;
-  }
-  case NXnumtype::INT32: {
-    type = H5::PredType::NATIVE_INT32;
-    break;
-  }
-  case NXnumtype::UINT32: {
-    type = H5::PredType::NATIVE_UINT32;
-    break;
-  }
-  case NXnumtype::INT64: {
-    type = H5::PredType::NATIVE_INT64;
-    break;
-  }
-  case NXnumtype::UINT64: {
-    type = H5::PredType::NATIVE_UINT64;
-    break;
-  }
-  case NXnumtype::FLOAT32: {
-    type = H5::PredType::NATIVE_FLOAT;
-    break;
-  }
-  case NXnumtype::FLOAT64: {
-    type = H5::PredType::NATIVE_DOUBLE;
-    break;
-  }
-  default: {
+  if (nxToHDF5Map.contains(datatype)) {
+    type = *static_cast<H5::PredType const *>(nxToHDF5Map.at(datatype));
+  } else {
     type = H5::PredType::NATIVE_HERR;
-  }
   }
   return type;
 }
@@ -135,57 +106,70 @@ static H5::DataType nxToHDF5Type(NXnumtype datatype) {
  *
  *-------------------------------------------------------------------------
  */
-static NXnumtype hdf5ToNXType(H5::DataType dt) {
+static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
   NXnumtype iPtype = NXnumtype::BAD;
-  size_t size;
-  H5T_sign_t sign;
 
-  auto tclass = dt.getClass();
-
+  // if the type is one of the predefined datatypes used by us, just get it
+  auto findit = nxToHDF5Map.begin();
+  for(; *static_cast<H5::PredType const *>(findit->second) != dt && findit != nxToHDF5Map.end(); findit++){}
   if (dt == H5::PredType::NATIVE_CHAR) {
     iPtype = NXnumtype::CHAR;
-  } else if (tclass == H5T_STRING) {
-    iPtype = NXnumtype::CHAR;
-  } else if (tclass == H5T_INTEGER) {
-    size = dt.getSize();
-    sign = reinterpret_cast<H5::IntType *>(&dt)->getSign();
-    if (size == 1) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT8;
-      } else {
-        iPtype = NXnumtype::UINT8;
-      }
-    } else if (size == 2) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT16;
-      } else {
-        iPtype = NXnumtype::UINT16;
-      }
-    } else if (size == 4) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT32;
-      } else {
-        iPtype = NXnumtype::UINT32;
-      }
-    } else if (size == 8) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT64;
-      } else {
-        iPtype = NXnumtype::UINT64;
-      }
-    }
-  } else if (tclass == H5T_FLOAT) {
-    size = dt.getSize(); // H5Tget_size(atype);
-    if (size == 4) {
-      iPtype = NXnumtype::FLOAT32;
-    } else if (size == 8) {
-      iPtype = NXnumtype::FLOAT64;
-    }
-  }
-  if (iPtype == NXnumtype::BAD) {
-    throw Exception("ERROR: hdf5ToNXtype: invalid type");
-  }
+  } else if (*static_cast<H5::PredType const *>(findit->second) == dt && findit != nxToHDF5Map.end()) {
+    iPtype = findit->first;
+  } else {
+    // if it's not a usual type, try to deduce the type from the datatype object
+    auto tclass = dt.getClass();
 
+    if (tclass == H5T_STRING) {
+      iPtype = NXnumtype::CHAR;
+    } else if (tclass == H5T_INTEGER) {
+      size_t size = dt.getSize();
+      H5T_sign_t sign = H5T_SGN_2;
+      // NOTE H5cpp only defines the getSign method for IntType objects
+      // but this method is not defined on any other DataType class, and 
+      // can cause segfault if used on any other object.  Therefore we 
+      // have to default to assuming signed int and only go to unsigned 
+      // if we are able to deduce otherwise
+      H5::IntType const *it = dynamic_cast<H5::IntType const *>(&dt);
+      if (it != nullptr) {
+        sign = it->getSign();
+      }
+      // signed integers
+      if (sign == H5T_SGN_2) {
+        if (size == 1) {
+          iPtype = NXnumtype::INT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::INT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::INT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::INT64;
+        }
+      } 
+      // unsigned integers
+      else {
+        if (size == 1) {
+          iPtype = NXnumtype::UINT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::UINT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::UINT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::UINT64;
+        }
+      }
+    } else if (tclass == H5T_FLOAT) {
+      size_t size = dt.getSize();
+      if (size == 4) {
+        iPtype = NXnumtype::FLOAT32;
+      } else if (size == 8) {
+        iPtype = NXnumtype::FLOAT64;
+      }
+    }
+    if (iPtype == NXnumtype::BAD) {
+      throw Exception("ERROR: hdf5ToNXtype: invalid type");
+    }
+  }
   return iPtype;
 }
 
@@ -360,7 +344,7 @@ string File::getPath() {
       // skip the root entry
     } else {
       try {
-        output = reinterpret_cast<H5::Group *>(loc.get())->getObjName();
+        output = dynamic_cast<H5::Group *>(loc.get())->getObjName();
       } catch (...) {
         throw Exception("nope!", m_filename);
       }
@@ -588,11 +572,8 @@ template <typename NumT> void File::putData(const NumT *data) {
     throw Exception("Data specified as null in putData", m_filename);
   }
 
-  auto current = this->getCurrentLocation();
-  H5::DataSet *dataset;
-  try {
-    dataset = reinterpret_cast<H5::DataSet *>(current);
-  } catch (...) {
+  H5::DataSet *dataset = dynamic_cast<H5::DataSet *>(this->getCurrentLocation());
+  if (dataset == nullptr) {
     throw Exception("Failed to write data, current location is not a DataSet", m_filename);
   }
   DimArray dims, maxdims, start, size;
@@ -630,47 +611,62 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData<NumT>(data.data());
 }
 
-// void File::putAttr(const AttrInfo &info, const void *data) {
-//   if (info.name == NULL_STR) {
-//     throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
-//   }
-//   if (info.name.empty()) {
-//     throw Exception("Supplied empty name to putAttr");
-//   }
-//   CALL_NAPI(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
-//             "NXputattr(" + info.name + ", data, " + info.length + ", " + info.type + ") failed");
-// }
+template <> MANTID_NEXUS_DLL void File::putData<std::string>(const string *data) {
+  char const * chardata = data->c_str();
+  this->putData(chardata);
+}
 
-// template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
-//   AttrInfo info;
-//   info.name = name;
-//   info.length = 1;
-//   info.type = getType<NumT>();
-//   this->putAttr(info, &value);
-// }
+template <typename NumT>
+void File::putAttr(const AttrInfo &info, const NumT *data) {
+  if (info.name == NULL_STR) {
+    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"");
+  }
+  if (info.name.empty()) {
+    throw Exception("Supplied empty name to putAttr");
+  }
 
-// void File::putAttr(const char *name, const char *value) {
-//   if (name == NULL) {
-//     throw Exception("Specified name as null to putAttr");
-//   }
-//   if (value == NULL) {
-//     throw Exception("Specified value as null to putAttr");
-//   }
-//   string s_name(name);
-//   string s_value(value);
-//   this->putAttr(s_name, s_value);
-// }
+  H5::H5Object *obj = dynamic_cast<H5::H5Object *>(this->getCurrentLocation());
+  if (obj == nullptr) {
+    throw Exception("Cannot add an attribute at current location", m_filename);
+  }
 
-// void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
-//   string my_value(value);
-//   if (my_value.empty() && empty_add_space)
-//     my_value = " "; // Make a default "space" to avoid errors.
-//   AttrInfo info;
-//   info.name = name;
-//   info.length = static_cast<unsigned int>(my_value.size());
-//   info.type = NXnumtype::CHAR;
-//   this->putAttr(info, &(my_value[0]));
-// }
+  H5::DataSpace aid2((int)info.dims.size(), toDimArray(info.dims).data());
+  H5::DataType aid1 = Mantid::NeXus::H5Util::getType<NumT>();
+  H5::Attribute attr = obj->createAttribute(info.name, aid1, aid2);
+  attr.write(aid1, data);
+  attr.close();
+}
+
+template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
+  AttrInfo info;
+  info.name = name;
+  info.length = 1;
+  info.type = getType<NumT>();
+  this->putAttr<NumT>(info, &value);
+}
+
+void File::putAttr(const char *name, const char *value) {
+  if (name == NULL) {
+    throw Exception("Specified name as null to putAttr");
+  }
+  if (value == NULL) {
+    throw Exception("Specified value as null to putAttr");
+  }
+  string s_name(name);
+  string s_value(value);
+  this->putAttr(s_name, s_value);
+}
+
+void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
+  string my_value(value);
+  if (my_value.empty() && empty_add_space)
+    my_value = " "; // Make a default "space" to avoid errors.
+  AttrInfo info;
+  info.name = name;
+  info.length = static_cast<unsigned int>(my_value.size());
+  info.type = NXnumtype::CHAR;
+  this->putAttr(info, &(my_value[0]));
+}
 
 // void File::putSlab(const void *data, const vector<int> &start, const vector<int> &size) {
 //   this->putSlab(data, toDimSize(start), toDimSize(size));
@@ -745,11 +741,8 @@ template <typename NumT> void File::getData(NumT *data) {
   }
 
   // make sure this is a data set
-  auto current = this->getCurrentLocation();
-  H5::DataSet *dataset;
-  try {
-    dataset = reinterpret_cast<H5::DataSet *>(current);
-  } catch (...) {
+  H5::DataSet *dataset = dynamic_cast<H5::DataSet *>(this->getCurrentLocation());
+  if (dataset == nullptr) {
     throw Exception("Failed to get data, current location is not a DataSet", m_filename);
   }
 
@@ -780,14 +773,14 @@ template <> MANTID_NEXUS_DLL void File::getData<string>(string *data) {
     msg << "File::getData<string>() only understand rank=1 data. Found rank=" << info.dims.size();
     throw Exception(msg.str());
   }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
+  char *value = new char[static_cast<size_t>(info.dims[0]) + 1];
   try {
     this->getData<char>(value);
   } catch (const Exception &) {
     delete[] value;
     throw; // rethrow the original exception
   }
-  *data = string(value); //, static_cast<size_t>(info.dims[0]));
+  *data = string(value, static_cast<size_t>(info.dims[0]));
   delete[] value;
 }
 
@@ -914,41 +907,18 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
 //   }
 // }
 
-// string File::getStrData() {
-//   string res;
-//   Info info = this->getInfo();
-//   if (info.type != NXnumtype::CHAR) {
-//     stringstream msg;
-//     msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-//     throw Exception(msg.str());
-//   }
-//   if (info.dims.size() != 1) {
-//     stringstream msg;
-//     msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-//     throw Exception(msg.str());
-//   }
-//   char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
-//   try {
-//     this->getData(value);
-//   } catch (const Exception &) {
-//     delete[] value;
-//     throw; // rethrow the original exception
-//   }
-//   res = string(value, static_cast<size_t>(info.dims[0]));
-//   delete[] value;
-//   return res;
-// }
+string File::getStrData() {
+  string res;
+  this->getData<string>(&res);
+  return res;
+}
 
 Info File::getInfo() {
-  auto current = this->getCurrentLocation();
-  // ensure this is a dataset
-  H5::DataSet *dataset;
-  try {
-    dataset = reinterpret_cast<H5::DataSet *>(current);
-  } catch (...) {
+  // ensure current location is a dataset
+  H5::DataSet *dataset = dynamic_cast<H5::DataSet *>(this->getCurrentLocation());
+  if (dataset == nullptr) {
     throw Exception("Trying to read info of non-DataSet location\n");
   }
-
   // get the datatype
   auto dt = dataset->getDataType();
   auto ds = dataset->getSpace();
@@ -1028,8 +998,11 @@ Info File::getInfo() {
 
 //   int rank;
 //   int dim[NX_MAXRANK];
-//   NXstatus status = NAPI_STATUS(NXgetnextattra(*(this->m_pfile_id), name, &rank, dim, &type), "NXgetnextattra
-//   failed"); if (status == NXstatus::NX_OK) {
+//   NXstatus status = NAPI_STATUS(
+//     NXgetnextattra(*(this->m_pfile_id), name, &rank, dim, &type),
+//     "NXgetnextattra failed"
+//   );
+//   if (status == NXstatus::NX_OK) {
 //     AttrInfo info;
 //     info.type = type;
 //     info.name = string(name);
@@ -1069,72 +1042,72 @@ Info File::getInfo() {
 //   }
 // }
 
-// void File::getAttr(const AttrInfo &info, void *data, int length) {
-//   char name[NX_MAXNAMELEN];
-//   strcpy(name, info.name.c_str());
-//   NXnumtype type = info.type;
-//   if (length < 0) {
-//     length = static_cast<int>(info.length);
-//   }
-//   CALL_NAPI(NXgetattr(*(this->m_pfile_id), name, data, &length, &type), "NXgetattr(" + info.name + ") failed");
-//   if (type != info.type) {
-//     stringstream msg;
-//     msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
-//     throw Exception(msg.str());
-//   }
-//   // char attributes are always NULL terminated and so may change length
-//   if (static_cast<unsigned>(length) != info.length && type != NXnumtype::CHAR) {
-//     stringstream msg;
-//     msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
-//     throw Exception(msg.str());
-//   }
-// }
+void File::getAttr(const AttrInfo &info, void *data, int length) {
+  // char name[NX_MAXNAMELEN];
+  // strcpy(name, info.name.c_str());
+  // NXnumtype type = info.type;
+  // if (length < 0) {
+  //   length = static_cast<int>(info.length);
+  // }
+  // CALL_NAPI(NXgetattr(*(this->m_pfile_id), name, data, &length, &type), "NXgetattr(" + info.name + ") failed");
+  // if (type != info.type) {
+  //   stringstream msg;
+  //   msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
+  //   throw Exception(msg.str());
+  // }
+  // // char attributes are always NULL terminated and so may change length
+  // if (static_cast<unsigned>(length) != info.length && type != NXnumtype::CHAR) {
+  //   stringstream msg;
+  //   msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
+  //   throw Exception(msg.str());
+  // }
+}
 
-// template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
-//   NumT value;
-//   this->getAttr(info, &value);
-//   return value;
-// }
+template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
+  NumT value;
+  this->getAttr(info, &value);
+  return value;
+}
 
-// template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
-//   AttrInfo info;
-//   info.type = getType<char>();
-//   info.length = 2000; ///< @todo need to find correct length of attribute
-//   info.name = name;
-//   value = this->getStrAttr(info);
-// }
+template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
+  AttrInfo info;
+  info.type = getType<char>();
+  info.length = 2000; ///< @todo need to find correct length of attribute
+  info.name = name;
+  value = this->getStrAttr(info);
+}
 
-// template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-//   AttrInfo info;
-//   info.type = getType<NumT>();
-//   info.length = 1;
-//   info.name = name;
-//   value = this->getAttr<NumT>(info);
-// }
+template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
+  AttrInfo info;
+  info.type = getType<NumT>();
+  info.length = 1;
+  info.name = name;
+  value = this->getAttr<NumT>(info);
+}
 
-// string File::getStrAttr(const AttrInfo &info) {
-//   string res;
-//   if (info.type != NXnumtype::CHAR) {
-//     stringstream msg;
-//     msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
-//     throw Exception(msg.str());
-//   }
-//   char *value = new char[info.length + 1];
-//   try {
-//     this->getAttr(info, value, static_cast<int>(info.length) + 1);
-//   } catch (const Exception &) {
-//     // Avoid memory leak
-//     delete[] value;
-//     throw; // rethrow original exception
-//   }
+string File::getStrAttr(const AttrInfo &info) {
+  string res;
+  if (info.type != NXnumtype::CHAR) {
+    stringstream msg;
+    msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
+    throw Exception(msg.str());
+  }
+  char *value = new char[info.length + 1];
+  try {
+    this->getAttr(info, value, static_cast<int>(info.length) + 1);
+  } catch (const Exception &) {
+    // Avoid memory leak
+    delete[] value;
+    throw; // rethrow original exception
+  }
 
-//   // res = string(value, info.length);
-//   // allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
-//   res = string(value);
-//   delete[] value;
+  // res = string(value, info.length);
+  // allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
+  res = string(value);
+  delete[] value;
 
-//   return res;
-// }
+  return res;
+}
 
 // vector<AttrInfo> File::getAttrInfos() {
 //   vector<AttrInfo> infos;
@@ -1236,29 +1209,29 @@ NXnumtype::operator std::string() const {
 // /* Concrete instantiations of template definitions.                 */
 // /* ---------------------------------------------------------------- */
 // /*
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const float value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const double value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int8_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint8_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int16_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint16_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int32_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint32_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int64_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint64_t value);
-// template MANTID_NEXUS_DLL void File::putAttr(const string &name, const char value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const float value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const double value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int8_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint8_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int16_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint16_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int32_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint32_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const int64_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const uint64_t value);
+template MANTID_NEXUS_DLL void File::putAttr(const string &name, const char value);
 
-// template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
-// template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
 
 template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int length,
                                               bool open_data);
@@ -1547,5 +1520,9 @@ template MANTID_NEXUS_DLL void File::getData(vector<char> &data);
 // template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
 //                                              const DimSizeVector &size);
 
-// template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, double &value);
-// template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, int &value);
+template MANTID_NEXUS_DLL void File::getAttr(const AttrInfo &info, int*, int length);
+template MANTID_NEXUS_DLL void File::getAttr(const AttrInfo &info, double*, int length);
+template MANTID_NEXUS_DLL void File::getAttr(const AttrInfo &info, char*, int length);
+
+template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, double &value);
+template MANTID_NEXUS_DLL void File::getAttr(const std::string &name, int &value);

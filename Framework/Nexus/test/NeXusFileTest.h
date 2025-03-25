@@ -394,7 +394,7 @@ public:
   }
 
   void test_make_data_layers_bad() {
-    cout << "\ntest makeData layers\n";
+    cout << "\ntest makeData layers -- bad\n";
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_data_layers.h5");
     NXnumtype type(NXnumtype::CHAR);
     string data1("layer1"), data2("layer2");
@@ -494,7 +494,26 @@ public:
     removeFile(filename);
   }
 
+  void test_putData_bad() {
+    cout << "\ntest putData -- bad\n";
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    int data = 1;
+    file.makeGroup("a_group", "NXshirt", true);
+    TS_ASSERT_THROWS(file.putData<int>(&data), NeXus::Exception&);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+    cout << "good!";
+  }
+
   void test_getInfo() {
+    cout << "\ntest getInfo -- good\n";
+    fflush(stdout);
     // open a file
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
     removeFile(filename);
@@ -527,12 +546,13 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!";
   }
 
   void test_getInfo_bad() {
-    cout << ""
-        // open a file
-        string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    cout << "\ntest getInfo -- bad\n";
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
     removeFile(filename);
     NeXus::File file(filename, H5ACC_CREATE5);
 
@@ -549,11 +569,10 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+    cout << "good!\n";
   }
 
-  /* NOTE
-   * This is not working properly.... */
-  void xtest_data_putget_string() {
+  void test_data_putget_string() {
     cout << "\ntest dataset read/write -- string\n";
 
     // open a file
@@ -562,7 +581,7 @@ public:
     NeXus::File file(filename, H5ACC_CREATE5);
 
     // put/get a string
-    cout << "\tread/write string...";
+    cout << "\nread/write string...\n";
     string in("this is a string"), out;
     file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
@@ -579,10 +598,17 @@ public:
     file.closeData();
     TS_ASSERT_EQUALS(in, out);
 
+    // yet another way
+    in = "even more data";
+    file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    out = file.getStrData();
+    TS_ASSERT_EQUALS(in, out);
+
     // cleanup
     file.close();
     removeFile(filename);
-    cout << "good!";
+    cout << "good!\n";
   }
 
   void test_data_putget_array() {
@@ -693,5 +719,67 @@ public:
     // cleanup
     file.close();
     removeFile(filename);
+  }
+
+  template <typename T>
+  void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
+    string name1=name+"1", name2=name+"2", name3=name+"3";
+
+    T out, zero(0);
+
+    // test put/get by pointer to data
+    DimVector dims {1};
+    AttrInfo info {NeXus::getType<int>(), (unsigned int)dims.front(), name1, dims};
+    file.putAttr<T>(info, &data);
+    file.getAttr<T>(info, &out);
+    TS_ASSERT_EQUALS(data, out);
+    out = zero;
+
+    // test put/get by value
+    file.putAttr<T>(name2, data);
+    file.getAttr<T>(name2, out);
+    TS_ASSERT_EQUALS(data, out);
+    out = zero;
+    
+    // test put/get by return
+    info.name = name3;
+    file.putAttr<T>(info, &data);
+    out = file.getAttr<T>(info);
+    TS_ASSERT_EQUALS(data, out);
+    out = zero;
+  }
+
+  void test_putget_attr_basic() {
+    cout << "\ntest attribute read/write\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_attr.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put/get an int attribute
+    int data1 = 12;
+    do_test_putget_attr(file, "int_attr_", data1);
+
+    // put/get a double attribute
+    double data2 = 120.2e6;
+    do_test_putget_attr(file, "int_attr_", data2);
+
+    // // put/get a single char attribute
+    // char data3 = 'x';
+    // do_test_putget_attr(file, "int_attr_", data3);
+
+    // // put/get a char string attribute
+    // char data4[] = "a string of text";
+    // do_test_putget_attr(file, "int_attr_", data4);
+
+    // // put/get a string attribute
+    // string data5 = "a different string of text";
+    // do_test_putget_attr(file, "int_attr_", data5);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+    cout << "good!\n";
   }
 };
