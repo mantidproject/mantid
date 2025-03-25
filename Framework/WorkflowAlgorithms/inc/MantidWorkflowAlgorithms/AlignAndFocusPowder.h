@@ -97,7 +97,6 @@ private:
   bool binInDspace{false};
   double xmin{0.0};
   double xmax{0.0};
-  double LRef{0.0};
   double DIFCref{0.0};
   double minwl{0.0};
   double maxwl{0.0};
