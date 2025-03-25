@@ -210,12 +210,6 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
     return (2);
-  const size_t nSpect = indices.size();
-  size_t nSpectBins = localworkspace->y(0).size();
-  if (raggedSpectra)
-    for (size_t i = 0; i < nSpect; i++)
-      nSpectBins = std::max(nSpectBins, localworkspace->y(indices[i]).size());
-  std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
   // Set the axis labels and values
   Mantid::API::Axis *xAxis = localworkspace->getAxis(0);
@@ -239,6 +233,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   }
   // Get the values on the vertical axis
   std::vector<double> axis2;
+  const size_t nSpect = indices.size();
   if (nSpect < nHist)
     for (size_t i = 0; i < nSpect; i++)
       axis2.emplace_back((*sAxis)(indices[i]));
@@ -246,19 +241,26 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++)
       axis2.emplace_back((*sAxis)(i));
 
-  std::vector<int> start = {0, 0};
-  std::vector<int> asize = {1, dims_array[1]};
-
   // -------------- Actually write the 2D data ----------------------------
   if (write2Ddata) {
+    size_t nSpectBins = localworkspace->y(0).size();
+    if (raggedSpectra)
+      for (size_t i = 0; i < nSpect; i++)
+        nSpectBins = std::max(nSpectBins, localworkspace->y(indices[i]).size());
+    const std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
+    const std::vector<int> asize = {1, dims_array[1]};
+
     std::string name = "values";
     m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
+
+    std::vector<int> start = {0, 0};
     for (size_t i = 0; i < nSpect; i++) {
       auto &vy = localworkspace->y(indices[i]);
       std::vector<int> _dims = {1, static_cast<int>(vy.size())};
       m_filehandle->putSlab(vy.rawData().data(), start, _dims);
       start[0]++;
     }
+
     if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     m_filehandle->putAttr("signal", 1);
@@ -271,6 +273,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     // error
     name = "errors";
     m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
+
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
       auto &ve = localworkspace->e(indices[i]);
@@ -302,16 +305,22 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
         m_progress->reportIncrement(1, "Writing data");
     }
 
-    // Potentially x error
+    // x error
     if (localworkspace->hasDx(0)) {
-      dims_array[0] = static_cast<int>(nSpect);
-      dims_array[1] = static_cast<int>(localworkspace->dx(0).size());
+      size_t nDx = localworkspace->dx(0).size();
+      if (raggedSpectra)
+        for (size_t i = 0; i < nSpect; i++)
+          nDx = std::max(nDx, localworkspace->dx(indices[i]).size());
+      const std::vector<int> _dims_array = {static_cast<int>(nSpect), static_cast<int>(nDx)};
+      const std::vector<int> _asize = {1, _dims_array[1]};
+
       std::string dxErrorName = "xerrors";
-      m_filehandle->makeCompData(dxErrorName, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
+      m_filehandle->makeCompData(dxErrorName, NXnumtype::FLOAT64, _dims_array, m_nexuscompression, _asize, true);
       start[0] = 0;
-      asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
-        m_filehandle->putSlab(localworkspace->dx(indices[i]).rawData().data(), start, asize);
+        auto &vdx = localworkspace->dx(indices[i]);
+        std::vector<int> _dims = {1, static_cast<int>(vdx.size())};
+        m_filehandle->putSlab(vdx.rawData().data(), start, _dims);
         start[0]++;
       }
     }
@@ -324,23 +333,27 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     size_t max_x_size{0};
     for (size_t i = 0; i < nSpect; i++)
       max_x_size = std::max(max_x_size, localworkspace->x(indices[i]).size());
-    dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(max_x_size);
+    const std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(max_x_size)};
+    const std::vector<int> asize = {1, dims_array[1]};
     m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
-    start[0] = 0;
 
     // create vector of NaNs to fill invalid space at end of ragged array
     std::vector<double> nans(max_x_size, std::numeric_limits<double>::quiet_NaN());
 
+    std::vector<int> start = {0, 0};
     for (size_t i = 0; i < nSpect; i++) {
-      size_t nBins = localworkspace->x(indices[i]).size();
-      asize[1] = static_cast<int>(nBins);
-      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
-      if (nBins < max_x_size) {
-        start[1] = asize[1];
-        asize[1] = static_cast<int>(max_x_size - nBins);
-        m_filehandle->putSlab(nans.data(), start, asize);
-        start[1] = 0;
+      auto &vx = localworkspace->x(indices[i]);
+
+      // write data
+      std::vector<int> _dims = {1, static_cast<int>(vx.size())};
+      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, _dims);
+
+      // pad with NaN
+      const int nBins = _dims[1];
+      if (nBins < asize[1]) {
+        std::vector<int> _start = {start[0], nBins};
+        _dims[1] = asize[1] - nBins;
+        m_filehandle->putSlab(nans.data(), _start, _dims);
       }
       start[0]++;
     }
@@ -350,11 +363,11 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
-    dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(localworkspace->x(0).size());
+    const std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(localworkspace->x(0).size())};
+    const std::vector<int> asize = {1, dims_array[1]};
     m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
-    start[0] = 0;
-    asize[1] = dims_array[1];
+
+    std::vector<int> start = {0, 0};
     for (size_t i = 0; i < nSpect; i++) {
       m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
       start[0]++;
