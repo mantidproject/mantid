@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import argparse
-import resource
 import subprocess
 import sys
 
-from mantid.kernel.environment import is_linux
+from mantid.kernel.environment import is_linux, is_windows
 from mantid.kernel import Logger
+
+if is_linux():
+    import resource
 
 from mantidqt.utils.qt import plugins
 
@@ -72,7 +74,12 @@ def start(options: argparse.ArgumentParser):
         if options.quit:
             launch_command += " --quit"
 
-        workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+        if not is_windows():
+            # preexec_fn is not supported on Windows
+            workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+        else:
+            workbench_process = subprocess.Popen(launch_command, shell=True)
+
         workbench_pid = str(workbench_process.pid)
         workbench_process.wait()
 
