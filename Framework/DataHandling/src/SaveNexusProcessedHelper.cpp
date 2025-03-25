@@ -254,7 +254,9 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     std::string name = "values";
     m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
     for (size_t i = 0; i < nSpect; i++) {
-      m_filehandle->putSlab(localworkspace->y(indices[i]).rawData().data(), start, asize);
+      auto &vy = localworkspace->y(indices[i]);
+      std::vector<int> _dims = {1, static_cast<int>(vy.size())};
+      m_filehandle->putSlab(vy.rawData().data(), start, _dims);
       start[0]++;
     }
     if (m_progress != nullptr)
@@ -271,7 +273,9 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
-      m_filehandle->putSlab(localworkspace->e(indices[i]).rawData().data(), start, asize);
+      auto &ve = localworkspace->e(indices[i]);
+      std::vector<int> _dims = {1, static_cast<int>(ve.size())};
+      m_filehandle->putSlab(ve.rawData().data(), start, _dims);
       start[0]++;
     }
 
