@@ -300,7 +300,7 @@ public:
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
   /// Maximum absolute integer value
-  int maxCoeff();
+  int maxCoeff() const;
   /// Absolute value
   V3D absoluteValue() const;
   /// Calculates the error in hkl
@@ -330,6 +330,11 @@ public:
 
   void saveNexus(::NeXus::File *file, const std::string &name) const;
   void loadNexus(::NeXus::File *file, const std::string &name);
+
+  /// @brief  Determine if a V3D can be considered nan
+  /// @param vec
+  /// @return True if any of x, y, or z is nan; False otherwise
+  static bool isnan(V3D const &vec) { return (std::isnan(vec.X()) || std::isnan(vec.Y()) || std::isnan(vec.Z())); }
 
 private:
   std::array<double, 3> m_pt;
