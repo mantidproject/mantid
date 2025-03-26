@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 
 #include <memory>
 #include <utility>
@@ -239,7 +238,7 @@ float NXClass::getFloat(const std::string &name) const {
   return *number();
 }
 
-int NXClass::getInt(const std::string &name) const {
+int32_t NXClass::getInt(const std::string &name) const {
   NXInt number = openNXInt(name);
   number.load();
   return *number();
@@ -410,34 +409,6 @@ nxdimsize_t NXDataSet::dim3() const {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
   return static_cast<int>(m_info.dims[3]);
-}
-
-/**  Wrapper to the NXgetdata.
- *   @param data :: The pointer to the buffer accepting the data from the file.
- *   @throw runtime_error if the operation fails.
- */
-template <typename NumT> void NXDataSet::getData(NumT *data) {
-  m_fileID->openData(name());
-  m_fileID->getData(data);
-  m_fileID->closeData();
-}
-
-/**  Wrapper to the NXgetslab.
- *   @param data :: The pointer to the buffer accepting the data from the file.
- *   @param start :: The array of starting indeces to read in from the file. The
- * size of the array must be equal to
- *          the rank of the data.
- *   @param size :: The array of numbers of data elements to read along each
- * dimenstion.
- *          The number of dimensions (the size of the array) must be equal to
- * the rank of the data.
- *   @throw runtime_error if the operation fails.
- */
-template <typename NumT>
-void NXDataSet::getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
-  m_fileID->openData(name());
-  m_fileID->getSlab(data, start, size);
-  m_fileID->closeData();
 }
 
 //---------------------------------------------------------

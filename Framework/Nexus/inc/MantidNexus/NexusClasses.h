@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <array>
@@ -155,17 +155,19 @@ public:
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
-  /**  Load the data from the file. Calling this method with all default
-   * arguments
-   *   makes it to read in all the data.
-   *   @param blocksize :: The size of the block of data that should be read.
-   * Note that this is only used for rank 2 and 3 datasets currently
-   *   @param i :: Calling load with non-negative i reads in a chunk of
-   * dimension rank()-1 and i is the index of the chunk. The rank of the data
-   * must be >= 1
-   *   @param j :: Non-negative value makes it read a chunk of dimension
-   * rank()-2. i and j are its indices.
-   *            The rank of the data must be >= 2
+
+  /// Load all of the currently opened file
+  virtual void load() {}
+
+  /**
+   * Load the data from the file. Calling this method with all default arguments makes it to read in all the data.
+   *
+   * @param blocksize :: The size of the block of data that should be read. Note that this is only used for rank 2 and 3
+   * datasets currently
+   * @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index of the
+   * chunk. The rank of the data must be >= 1
+   * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. The rank of
+   * the data must be >= 2
    */
   virtual void load(nxdimsize_t const blocksize, nxdimsize_t const i, nxdimsize_t const j) {
     // we need the var names for docs build, need below void casts to stop compiler warnings
@@ -175,9 +177,33 @@ public:
   };
 
 protected:
-  template <typename NumT> void getData(NumT *data);
+  /**  Wrapper to the NXgetdata.
+   *   @param data :: The pointer to the buffer accepting the data from the file.
+   *   @throw runtime_error if the operation fails.
+   */
+  template <typename NumT> void getData(NumT *data) {
+    m_fileID->openData(name());
+    m_fileID->getData(data);
+    m_fileID->closeData();
+  }
+
+  /**  Wrapper to the NXgetslab.
+   *   @param data :: The pointer to the buffer accepting the data from the file.
+   *   @param start :: The array of starting indeces to read in from the file. The
+   * size of the array must be equal to
+   *          the rank of the data.
+   *   @param size :: The array of numbers of data elements to read along each
+   * dimenstion.
+   *          The number of dimensions (the size of the array) must be equal to
+   * the rank of the data.
+   *   @throw runtime_error if the operation fails.
+   */
   template <typename NumT>
-  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
+  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
+    m_fileID->openData(name());
+    m_fileID->getSlab(data, start, size);
+    m_fileID->closeData();
+  }
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -260,6 +286,15 @@ public:
   container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
   std::size_t size() const { return m_size; }
+
+  /// Read all of the datablock in
+  void load() override {
+    if (rank() > 4) {
+      throw std::runtime_error("Cannot load dataset of rank greater than 4");
+    }
+    getData(m_data.data());
+  }
+
   /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
    * data are stored as a 1d array.
    *   If the data are loaded in chunks the newly read in data replace the old
@@ -275,7 +310,7 @@ public:
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
    */
-  void load(nxdimsize_t const blocksize = 1, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
+  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
@@ -360,6 +395,7 @@ public:
       }
     }
     alloc(n);
+    // m_fileID->getSlab(m_data.data(), datastart, datasize);
     getSlab(m_data.data(), datastart, datasize);
   }
 
@@ -390,11 +426,13 @@ private:
 };
 
 /// The integer dataset type
-using NXInt = NXDataSetTyped<int>;
-/// The integer dataset type
-using NXInt32 = NXDataSetTyped<int32_t>;
+using NXInt = NXDataSetTyped<int32_t>;
 /// The integer dataset type
 using NXInt64 = NXDataSetTyped<int64_t>;
+/// The integer dataset type
+using NXUInt32 = NXDataSetTyped<int32_t>;
+/// The integer dataset type
+using NXUInt64 = NXDataSetTyped<int64_t>;
 /// The float dataset type
 using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
@@ -403,12 +441,6 @@ using NXDouble = NXDataSetTyped<double>;
 using NXChar = NXDataSetTyped<char>;
 /// The size_t dataset type
 using NXSize = NXDataSetTyped<std::size_t>;
-/// The size_t dataset type
-using NXUInt = NXDataSetTyped<unsigned int>;
-/// The size_t dataset type
-using NXUInt32 = NXDataSetTyped<uint32_t>;
-/// The size_t dataset type
-using NXUInt64 = NXDataSetTyped<uint64_t>;
 
 //-------------------- classes --------------------------//
 
@@ -474,7 +506,7 @@ public:
    *   @param name :: The name of the dataset
    *   @return The int
    */
-  NXInt openNXInt(const std::string &name) const { return openNXDataSet<int>(name); }
+  NXInt openNXInt(const std::string &name) const { return openNXDataSet<int32_t>(name); }
   /**  Creates and opens a float dataset
    *   @param name :: The name of the dataset
    *   @return The float
@@ -514,7 +546,7 @@ public:
    *   @param name :: The name of the NXInt dataset
    *   @return The int
    */
-  int getInt(const std::string &name) const;
+  int32_t getInt(const std::string &name) const;
 
   /// Returns a list of all classes (or groups) in this NXClass
   std::vector<NXClassInfo> &groups() const { return *m_groups; }
@@ -590,11 +622,9 @@ public:
   /// Opens data of float type
   NXFloat openFloatData() { return openData<float>(); }
   /// Opens data of int type
-  NXInt openIntData() { return openData<int>(); }
+  NXInt openIntData() { return openData<int32_t>(); }
   /// Opens data of size type
   NXSize openSizeData() { return openData<std::size_t>(); }
-  /// Opens data of unsigned int type
-  NXUInt openUIntData() { return openData<unsigned int>(); }
 };
 
 /**  Implements NXdetector Nexus class.

@@ -1180,6 +1180,7 @@ template MANTID_NEXUS_DLL void File::putData(const uint32_t *data);
 template MANTID_NEXUS_DLL void File::putData(const int64_t *data);
 template MANTID_NEXUS_DLL void File::putData(const uint64_t *data);
 template MANTID_NEXUS_DLL void File::putData(const char *data);
+template MANTID_NEXUS_DLL void File::putData(const bool *data);
 
 template MANTID_NEXUS_DLL void File::putData(const vector<float> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<double> &data);
@@ -1204,6 +1205,7 @@ template MANTID_NEXUS_DLL void File::getData(uint32_t *data);
 template MANTID_NEXUS_DLL void File::getData(int64_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint64_t *data);
 template MANTID_NEXUS_DLL void File::getData(char *data);
+template MANTID_NEXUS_DLL void File::getData(bool *data);
 
 template MANTID_NEXUS_DLL void File::getData(vector<float> &data);
 template MANTID_NEXUS_DLL void File::getData(vector<double> &data);
@@ -1263,6 +1265,7 @@ template MANTID_NEXUS_DLL void File::getSlab(uint32_t *data, const DimSizeVector
 template MANTID_NEXUS_DLL void File::getSlab(int64_t *data, const DimSizeVector &start, const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::getSlab(uint64_t *data, const DimSizeVector &start, const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::getSlab(char *data, const DimSizeVector &start, const DimSizeVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(bool *data, const DimSizeVector &start, const DimSizeVector &size);
 
 template MANTID_NEXUS_DLL void File::putSlab(const float *data, const vector<int> &start, const vector<int> &size);
 template MANTID_NEXUS_DLL void File::putSlab(const double *data, const vector<int> &start, const vector<int> &size);
@@ -1274,6 +1277,7 @@ template MANTID_NEXUS_DLL void File::putSlab(const int32_t *data, const vector<i
 template MANTID_NEXUS_DLL void File::putSlab(const uint32_t *data, const vector<int> &start, const vector<int> &size);
 template MANTID_NEXUS_DLL void File::putSlab(const int64_t *data, const vector<int> &start, const vector<int> &size);
 template MANTID_NEXUS_DLL void File::putSlab(const uint64_t *data, const vector<int> &start, const vector<int> &size);
+template MANTID_NEXUS_DLL void File::putSlab(const char *data, const vector<int> &start, const vector<int> &size);
 
 template MANTID_NEXUS_DLL void File::putSlab(const float *data, const DimSizeVector &start, const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::putSlab(const double *data, const DimSizeVector &start, const DimSizeVector &size);
@@ -1292,6 +1296,7 @@ template MANTID_NEXUS_DLL void File::putSlab(const int64_t *data, const DimSizeV
                                              const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::putSlab(const uint64_t *data, const DimSizeVector &start,
                                              const DimSizeVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const char *data, const DimSizeVector &start, const DimSizeVector &size);
 
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, int start, int size);
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<double> &data, int start, int size);
