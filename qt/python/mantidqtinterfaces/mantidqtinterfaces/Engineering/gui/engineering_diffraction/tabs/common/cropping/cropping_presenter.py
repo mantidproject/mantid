@@ -43,7 +43,7 @@ class CroppingPresenter(object):
         self.group = group_mapping.get(index, GROUP.TEXTURE30)
         self.custom_groupingfile_enabled = index == 0
         self.custom_spectra_enabled = index == 3
-        self.set_custom_widgets_visibility(index == 0, index == 3)
+        self.set_custom_widgets_visibility(self.custom_groupingfile_enabled, self.custom_spectra_enabled)
 
     def on_groupingfile_changed(self) -> None:
         self.groupingfile_valid = self.view.finder_custom.isValid()

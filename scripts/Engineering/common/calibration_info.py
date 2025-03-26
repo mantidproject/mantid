@@ -278,7 +278,9 @@ class CalibrationInfo:
             raise ValueError("Grouping file path is not set.")
         ext = path.splitext(self.grouping_filepath)[-1].lower()
         if ext == ".cal":
-            self.create_grouping_workspace_from_calfile()
+            self.group_ws = CreateGroupingWorkspace(
+                InstrumentName=self.instrument, OldCalFilename=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name()
+            )
         elif ext == ".xml":
             self.group_ws = LoadDetectorsGroupingFile(InputFile=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name())
         else:
@@ -304,15 +306,6 @@ class CalibrationInfo:
             raise ValueError(
                 "Could not find or create grouping requested - make sure the directory of the grouping.xml files is on the path"
             )
-
-    def create_grouping_workspace_from_calfile(self) -> None:
-        """
-        Create grouping workspace for ROI defined in .cal file
-        """
-        grp_ws, _, _ = CreateGroupingWorkspace(
-            InstrumentName=self.instrument, OldCalFilename=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name()
-        )
-        self.group_ws = grp_ws
 
     def create_grouping_workspace_from_spectra_list(self) -> None:
         """
