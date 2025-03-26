@@ -33,7 +33,7 @@ void export_Label() {
       .def("setLabel", &setLabelFromStdString, (arg("self"), arg("caption"), arg("label")),
            "Set the caption (e.g.Temperature) & label (K) on the unit")
 
-      .def("setLabel", (void(Label::*)(const std::string &, const UnitLabel &)) & Label::setLabel,
+      .def("setLabel", (void (Label::*)(const std::string &, const UnitLabel &))&Label::setLabel,
            (arg("self"), arg("caption"), arg("label")),
            "Set the caption (e.g.Temperature) "
            "& label (K) on the unit, See the "
