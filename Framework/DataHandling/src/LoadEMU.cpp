@@ -109,7 +109,7 @@ template <>
 double GetNeXusValue<double>(const NeXus::NXEntry &entry, const std::string &path, const double &defval,
                              int32_t index) {
   try {
-    NeXus::NXDataSetTyped<float> dataSet = entry.openNXDataSet<float>(path);
+    NeXus::NXFloat dataSet = entry.openNXFloat(path);
     dataSet.load();
 
     return dataSet()[index];

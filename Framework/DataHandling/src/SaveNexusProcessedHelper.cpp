@@ -662,7 +662,8 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
 
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
-void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
+template <typename NumT>
+void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, NumT const *data,
                             bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array
