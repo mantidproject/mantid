@@ -1,0 +1,1 @@
+- `#38668 <https://github.com/mantidproject/mantid/issues/38668>`_ : Disable ``Rietveld`` from :ref:`GSAS-II UI <ui engineering gsas>` Refinement Method combobox options. Add on-hover tooltip to inform users that Rietveld is not currently supported.
