@@ -136,7 +136,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _instrument = None
     _filterBadPulses = None
     _removePromptPulseWidth = None
-    _LRef = None
     _DIFCref = None
     _wavelengthMin = None
     _wavelengthMax = None
@@ -392,6 +391,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self.getProperty("InterpolateTargetTemp").value > 0.0 and not len(self.getProperty("BackgroundNumber").value) == 2:
             issues["InterpolateTargetTemp"] = "If InterpolateTargetTemp specified, you must provide two background run numbers"
+
+        # Deprecated properties
+        if not self.getProperty("UnwrapRef").isDefault:
+            issues["UnwrapRef"] = "SNSPowderReduction property UnwrapRef is deprecated since 2025-03-24."
         return issues
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -413,7 +416,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
         self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth").value
         self._lorentz = self.getProperty("LorentzCorrection").value
-        self._LRef = self.getProperty("UnwrapRef").value
         self._DIFCref = self.getProperty("LowResRef").value
         self._wavelengthMin = self.getProperty("CropWavelengthMin").value
         self._wavelengthMax = self.getProperty("CropWavelengthMax").value
@@ -944,7 +946,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             CompressTolerance=self.COMPRESS_TOL_TOF,
             CompressBinningMode=self._compressBinningMode,
             LorentzCorrection=self._lorentz,
-            UnwrapRef=self._LRef,
             LowResRef=self._DIFCref,
             LowResSpectrumOffset=self._lowResTOFoffset,
             CropWavelengthMin=self._wavelengthMin,
@@ -1060,7 +1061,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     CompressTolerance=self.COMPRESS_TOL_TOF,
                     CompressBinningMode=self._compressBinningMode,
                     LorentzCorrection=self._lorentz,
-                    UnwrapRef=self._LRef,
                     LowResRef=self._DIFCref,
                     LowResSpectrumOffset=self._lowResTOFoffset,
                     CropWavelengthMin=self._wavelengthMin,
