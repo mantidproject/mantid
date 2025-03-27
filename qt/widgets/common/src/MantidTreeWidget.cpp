@@ -245,7 +245,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
                                                  .surface = false,
                                                  .contour = false,
                                                  .isAdvanced = false,
-                                                 .advanced = NULL};
+                                                 .advanced = {}};
     return selections;
   }
 
