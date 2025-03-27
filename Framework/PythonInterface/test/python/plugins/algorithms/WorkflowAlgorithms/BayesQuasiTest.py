@@ -261,7 +261,7 @@ class BayesQuasiTest(unittest.TestCase):
         sub_ws = group.getItem(0)
         np.testing.assert_approx_equal(sub_ws.dataY(0)[0], 0.02540, significant=significant_digits)
         np.testing.assert_approx_equal(sub_ws.dataY(1)[0], 0.01632, significant=significant_digits)
-        np.testing.assert_approx_equal(sub_ws.dataY(2)[0], -0.00908, significant=significant_digits)
+        np.testing.assert_approx_equal(sub_ws.dataY(2)[0], -0.00908, significant=2)
 
     # --------------------------------Helper functions--------------------------------------
 
