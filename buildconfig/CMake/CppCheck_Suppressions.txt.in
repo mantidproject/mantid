@@ -517,15 +517,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Replicate
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.cpp:83
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/ApplyMuonDetectorGroupPairing.h:28
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/ApplyMuonDetectorGrouping.h:28
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/AsymmetryCalc.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/CalMuonDetectorPhases.h:26
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h:28
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/MuonGroupingAsymmetry.h:22
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/MuonGroupingCounts.h:20
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/MuonPairingAsymmetry.h:22
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/MuonPreProcess.h:23
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Muon/src/EstimateMuonAsymmetryFromCounts.cpp:157
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:151
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:156
