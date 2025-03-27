@@ -33,10 +33,10 @@
 
 #include <stdexcept>
 
+#include "MantidLegacyNexus/NeXusFileInfo.h"
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
 #include "MantidLegacyNexus/napiconfig.h"
-#include "MantidLegacyNexus/nxstack.h"
 
 using namespace Mantid::LegacyNexus;
 

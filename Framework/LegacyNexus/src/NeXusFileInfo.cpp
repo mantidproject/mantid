@@ -23,7 +23,7 @@
   Added code to support the path stack for NXgetpath,
         Mark Koennecke, October 2009
 */
-#include "MantidLegacyNexus/nxstack.h"
+#include "MantidLegacyNexus/NeXusFileInfo.h"
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
 #include <stdlib.h>
