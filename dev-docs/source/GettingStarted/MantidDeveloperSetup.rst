@@ -12,3 +12,10 @@ Create a Conda environment and install the ``mantid-developer`` Conda metapackag
   .. code-block:: sh
 
     mamba install -c mantid/label/nightly mantid-developer
+
+* It is important that you regularly update your ``mantid-developer`` environment so that the dependencies are consistent with those used in production.
+  With your ``mantid-developer`` environment activated, run the following command:
+
+  .. code-block:: sh
+
+    mamba update -c mantid/label/nightly mantid-developer
