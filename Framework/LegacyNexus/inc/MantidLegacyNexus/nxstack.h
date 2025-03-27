@@ -30,6 +30,30 @@
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi_internal.h"
 
+#include <string>
+#include <vector>
+
+class NexusFileID {
+public:
+  NexusFileID(const std::string &userFilePath) : m_userFilePath(userFilePath) {}
+
+  std::string getFullNexusPath() const;
+  const std::string &getFilePath() const { return m_filePath; }
+  pLgcyFunction getNexusFunctions() const { return m_nexusFunctions; }
+  void setNexusFunctions(pLgcyFunction nexusFunctions) { m_nexusFunctions = nexusFunctions; }
+  void pushNexusPath(const std::string &path);
+  void popNexusPath();
+  const std::string &getUserFilePath() { return m_userFilePath; }
+  void setFilePath(const std::string &filePath) { m_filePath = filePath; }
+
+private:
+  std::string m_filePath;
+  std::vector<std::string> m_nexusPath;
+  size_t m_pathChars;
+  pLgcyFunction m_nexusFunctions;
+  std::string m_userFilePath;
+};
+
 typedef struct __fileLgcyStack *pFileLgcyStack;
 
 #define MAXEXTERNALDEPTH 16
@@ -41,8 +65,6 @@ void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *filenam
 void popFileStack(pFileLgcyStack self);
 
 pLgcyFunction peekFileOnStack(pFileLgcyStack self);
-void peekIDOnStack(pFileLgcyStack self, NXlink *id);
-void setCloseID(pFileLgcyStack self, const NXlink &id);
 
 int fileStackDepth(pFileLgcyStack self);
 

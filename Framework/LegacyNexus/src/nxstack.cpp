@@ -29,13 +29,35 @@
 #include <stdlib.h>
 #include <string.h>
 
+std::string NexusFileID::getFullNexusPath() const {
+  if (m_nexusPath.empty()) {
+    return {};
+  }
+  std::string fullNexusPath;
+  fullNexusPath.reserve(m_pathChars + m_nexusPath.size());
+  for (const auto &path : m_nexusPath) {
+    fullNexusPath.push_back('/');
+    fullNexusPath.append(path);
+  }
+  return fullNexusPath;
+}
+void NexusFileID::pushNexusPath(const std::string &path) {
+  m_nexusPath.push_back(path);
+  m_pathChars += path.size();
+}
+void NexusFileID::popNexusPath() {
+  if (!m_nexusPath.size()) {
+    m_pathChars -= m_nexusPath.back().size();
+    m_nexusPath.pop_back();
+  }
+}
+
 /*-----------------------------------------------------------------------
  Data definitions
 ---------------------------------------------------------------------*/
 
 typedef struct {
   pLgcyFunction pDriver;
-  NXlink closeID;
   char filename[1024];
 } fileLgcyStackEntry;
 
@@ -71,7 +93,6 @@ void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *file) {
 
   self->fileStackPointer++;
   self->fileStack[self->fileStackPointer].pDriver = pDriv;
-  memset(&self->fileStack[self->fileStackPointer].closeID, 0, sizeof(NXlink));
   length = strlen(file);
   if (length >= 1024) {
     length = 1023;
@@ -88,13 +109,7 @@ void popFileStack(pFileLgcyStack self) {
 /*----------------------------------------------------------------------*/
 pLgcyFunction peekFileOnStack(pFileLgcyStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
 /*----------------------------------------------------------------------*/
-void peekIDOnStack(pFileLgcyStack self, NXlink *id) {
-  memcpy(id, &self->fileStack[self->fileStackPointer].closeID, sizeof(NXlink));
-}
-/*---------------------------------------------------------------------*/
-void setCloseID(pFileLgcyStack self, const NXlink &id) {
-  memcpy(&self->fileStack[self->fileStackPointer].closeID, &id, sizeof(NXlink));
-}
+
 /*----------------------------------------------------------------------*/
 int fileStackDepth(pFileLgcyStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
