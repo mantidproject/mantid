@@ -8,6 +8,10 @@
 import os
 import sys
 import json
+from pathlib import Path
+import fnmatch
+from types import ModuleType
+from typing import Generator
 
 
 def print_histogram_R_factors(project):
@@ -164,6 +168,42 @@ def export_lattice_parameters(temp_save_directory, name_of_project, project):
             file.write(parameters_json)
 
 
+def limited_rglob(directory: Path, pattern: str, max_depth: int) -> Generator[Path, None, None]:
+    """
+    Recursively search for files matching the pattern in the directory up to a specified depth.
+    """
+    if not directory.is_dir():
+        raise FileNotFoundError(f"The provided directory path '{directory}' is not a valid directory.")
+    for root, dirs, files in os.walk(directory):
+        current_depth = len(Path(root).parts) - len(directory.parts)
+        if current_depth > max_depth:
+            dirs[:] = []
+        if current_depth <= max_depth:
+            for file in files:
+                if fnmatch.fnmatch(file, pattern):
+                    yield Path(root) / file
+
+
+def find_gsasii(directory_path: Path, file_name: str) -> ModuleType:
+    """
+    Recursively search for the file_name in the directory_path - the search checks all subdirectories
+    :Raises ImportError: If the file_name is not found in the directory_path
+    """
+    for file_path in limited_rglob(directory_path, file_name, max_depth=3):
+        if file_path.is_file():
+            if str(file_path.parent) not in sys.path:
+                sys.path.append(str(file_path.parent))
+            try:
+                import GSASIIscriptable as G2sc
+
+                return G2sc
+            except ImportError as exc:
+                raise ImportError(
+                    f"GSASIIscriptable ({file_name}) module found in {str(file_path.parent)} but could not be imported"
+                ) from exc
+    raise ImportError(f"GSASIIscriptable module '{file_name}' could not be found using the provided path: {directory_path}")
+
+
 def main():
     # Parse Inputs from Mantid
     inputs_dict = json.loads(sys.argv[1])
@@ -188,13 +228,7 @@ def main():
     number_of_regions = inputs_dict["number_of_regions"]
 
     # Call GSASIIscriptable
-    import_path = None
-    try:
-        import_path = os.path.join(path_to_gsas2, "GSASII")
-        sys.path.insert(0, import_path)
-        import GSASIIscriptable as G2sc
-    except ModuleNotFoundError:
-        raise ImportError(f"GSAS-II was not found at {import_path}")
+    G2sc = find_gsasii(Path(path_to_gsas2), "GSASIIscriptable.py")
 
     project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
     gsas_project = G2sc.G2Project(filename=project_path)
