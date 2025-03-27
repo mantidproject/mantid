@@ -219,12 +219,10 @@ struct Info {
 
 /** Information about an attribute. */
 struct AttrInfo {
-  /** The primative type for the attribute. */
-  NXnumtype type;
-  /** The length of the attribute. */
-  unsigned length;
   /** The name of the attribute. */
   std::string name;
+  /** The primative type for the attribute. */
+  NXnumtype type;
   /** The dimensions of the attribute. */
   DimVector dims;
 };

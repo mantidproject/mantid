@@ -503,7 +503,7 @@ public:
 
     int data = 1;
     file.makeGroup("a_group", "NXshirt", true);
-    TS_ASSERT_THROWS(file.putData<int>(&data), NeXus::Exception&);
+    TS_ASSERT_THROWS(file.putData<int>(&data), NeXus::Exception &);
 
     // cleanup
     file.close();
@@ -721,32 +721,12 @@ public:
     removeFile(filename);
   }
 
-  template <typename T>
-  void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
-    string name1=name+"1", name2=name+"2", name3=name+"3";
-
-    T out, zero(0);
-
+  template <typename T> void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
     // test put/get by pointer to data
-    DimVector dims {1};
-    AttrInfo info {NeXus::getType<int>(), (unsigned int)dims.front(), name1, dims};
-    file.putAttr<T>(info, &data);
-    file.getAttr<T>(info, &out);
+    T out;
+    file.putAttr<T>(name, data);
+    file.getAttr<T>(name, out);
     TS_ASSERT_EQUALS(data, out);
-    out = zero;
-
-    // test put/get by value
-    file.putAttr<T>(name2, data);
-    file.getAttr<T>(name2, out);
-    TS_ASSERT_EQUALS(data, out);
-    out = zero;
-    
-    // test put/get by return
-    info.name = name3;
-    file.putAttr<T>(info, &data);
-    out = file.getAttr<T>(info);
-    TS_ASSERT_EQUALS(data, out);
-    out = zero;
   }
 
   void test_putget_attr_basic() {
@@ -758,24 +738,17 @@ public:
     NeXus::File file(filename, H5ACC_CREATE5);
 
     // put/get an int attribute
-    int data1 = 12;
-    do_test_putget_attr(file, "int_attr_", data1);
+    do_test_putget_attr(file, "int_attr_", 12);
 
     // put/get a double attribute
-    double data2 = 120.2e6;
-    do_test_putget_attr(file, "int_attr_", data2);
+    do_test_putget_attr(file, "dbl_attr_", 120.2e6);
 
-    // // put/get a single char attribute
-    // char data3 = 'x';
-    // do_test_putget_attr(file, "int_attr_", data3);
+    // put/get a single char attribute
+    do_test_putget_attr(file, "char_attr_", 'x');
 
-    // // put/get a char string attribute
-    // char data4[] = "a string of text";
-    // do_test_putget_attr(file, "int_attr_", data4);
-
-    // // put/get a string attribute
-    // string data5 = "a different string of text";
-    // do_test_putget_attr(file, "int_attr_", data5);
+    // put/get a string attribute
+    string data5 = "different string of text";
+    do_test_putget_attr(file, "str_attr_", data5);
 
     // cleanup
     file.close();

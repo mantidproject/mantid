@@ -39,14 +39,9 @@ public:
   /**
    * \return A pair of the next entry available in a listing.
    */
-  // Entry getNextEntry();
-  /**
-   * \return Information about the next attribute.
-   */
-  // AttrInfo getNextAttr();
+  Entry getNextEntry();
 
 private:
-
   /**
    * Initialize the pending group search to start again.
    */
@@ -62,7 +57,7 @@ private:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  // void initOpenFile(const std::string &filename, const H5access access = H5ACC_CREATE5);
+  // void initOpenFile(std::string const &filename, H5access access = const H5ACC_CREATE5);
 
 public:
   /**
@@ -71,7 +66,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const std::string &filename, const H5access access);
+  File(std::string const &filename, H5access const access);
 
   /**
    * Create a new File.
@@ -79,7 +74,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const char *filename, const H5access access);
+  File(char const *filename, H5access const access);
 
   /**
    * Copy constructor
@@ -121,7 +116,14 @@ public:
 
   void flush(H5F_scope_t scope = H5F_SCOPE_LOCAL) const;
 
+  /// @brief  Get the current location in the stack
+  /// @return A pointer to the location, as an H5Location object
   H5::H5Location *getCurrentLocation();
+
+  /// @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
+  /// @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
+  /// @return A pointer to the current location, treated as a T*
+  template <typename T> T *getCurrentLocationAs();
 
   void verifyGroupClass(H5::Group const &, std::string const &) const;
 
@@ -133,7 +135,7 @@ public:
    * \param open_group Whether or not to automatically open the group after
    * creating it.
    */
-  void makeGroup(const std::string &name, const std::string &class_name, bool open_group = false);
+  void makeGroup(std::string const &name, std::string const &class_name, bool open_group = false);
 
   /**
    * Open an existing group.
@@ -141,7 +143,7 @@ public:
    * \param name The name of the group to create (i.e. "entry").
    * \param class_name The type of group to create (i.e. "NXentry").
    */
-  void openGroup(const std::string &name, const std::string &class_name);
+  void openGroup(std::string const &name, std::string const &class_name);
 
   /**
    * Open the NeXus object with the path specified.
@@ -150,7 +152,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  // void openPath(const std::string &path);
+  // void openPath(std::string const &path);
 
   /**
    * Open the group in which the NeXus object with the specified path exists.
@@ -159,7 +161,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  // void openGroupPath(const std::string &path);
+  // void openGroupPath(std::string const &path);
 
   /**
    * Get the path into the current file
@@ -177,7 +179,7 @@ public:
    * \copydoc NeXus::File::makeData(const std::string&, NXnumtype,
    *                              const DimVector&, bool);
    */
-  void makeData(const std::string &name, NXnumtype type, const std::vector<int> &dims, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype type, std::vector<int> const &dims, bool open_data = false);
 
   /**
    * Create a data field with the specified information.
@@ -187,7 +189,7 @@ public:
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(const std::string &name, NXnumtype type, const DimVector &dims, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype type, DimVector const &dims, bool open_data = false);
 
   /**
    * Create a 1D data field with the specified information.
@@ -198,7 +200,7 @@ public:
    * \param open_data Whether or not to open the data after creating it.
    */
   template <typename NumT>
-  void makeData(const std::string &name, const NXnumtype type, const NumT length, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype const type, NumT const length, bool open_data = false);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -206,7 +208,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  // void writeData(const std::string &name, const std::string &value);
+  // void writeData(std::string const &name, std::string const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -214,7 +216,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  // void writeData(const std::string &name, const char *value);
+  // void writeData(std::string const &name, char const *value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -223,7 +225,7 @@ public:
    * \param name The name of the field to create.
    * \param value The vector to put into the file.
    */
-  // template <typename NumT> void writeData(const std::string &name, const std::vector<NumT> &value);
+  // template <typename NumT> void writeData(std::string const &name, std::vector<NumT> const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -232,7 +234,7 @@ public:
    * \param name The name of the field to create.
    * \param value The value to put into the file.
    */
-  // template <typename NumT> void writeData(const std::string &name, const NumT &value);
+  // template <typename NumT> void writeData(std::string const &name, NumT const &value);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -243,7 +245,7 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   // template <typename NumT>
-  // void writeData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims);
+  // void writeData(std::string const &name, std::vector<NumT> const &value, std::vector<int> const &dims);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -254,7 +256,7 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   // template <typename NumT>
-  // void writeData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims);
+  // void writeData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -262,7 +264,7 @@ public:
    * \param name :: The name of the field to create.
    * \param value :: The vector to put into the file.
    */
-  // template <typename NumT> void writeExtendibleData(const std::string &name, std::vector<NumT> &value);
+  // template <typename NumT> void writeExtendibleData(std::string const &name, std::vector<NumT> &value);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -272,7 +274,7 @@ public:
    * \param chunkSize :: chunk size to use when writing
    */
   // template <typename NumT>
-  // void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const dimsize_t chunk);
+  // void writeExtendibleData(std::string const &name, std::vector<NumT> &value, dimsize_t const chunk);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -283,7 +285,7 @@ public:
    * \param chunk :: chunk size to use when writing
    */
   // template <typename NumT>
-  // void writeExtendibleData(const std::string &name, std::vector<NumT> &value, DimVector &dims, DimSizeVector &chunk);
+  // void writeExtendibleData(std::string const &name, std::vector<NumT> &value, DimVector &dims, DimSizeVector &chunk);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -292,7 +294,7 @@ public:
    * \param name :: The name of the field to create.
    * \param value :: The vector to put into the file.
    */
-  // template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value);
+  // template <typename NumT> void writeUpdatedData(std::string const &name, std::vector<NumT> &value);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -302,15 +304,15 @@ public:
    * \param value :: The vector to put into the file.
    * \param dims :: The dimensions of the data.
    */
-  // template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value, DimVector &dims);
+  // template <typename NumT> void writeUpdatedData(std::string const &name, std::vector<NumT> &value, DimVector &dims);
 
   /**
    * \copydoc makeCompData(const std::string&, const NXnumtype,
    *                       const DimVector&, const NXcompression,
    *                       const DimSizeVector&, bool)
    */
-  // void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int> &dims,
-  //                   const NXcompression comp, const std::vector<int> &bufsize, bool open_data = false);
+  // void makeCompData(std::string const &name, NXnumtype const type, std::vector<int> const &dims,
+  //                   NXcompression const comp, std::vector<int> const &bufsize, bool open_data = false);
 
   /**
    * Create a field with compression.
@@ -322,18 +324,18 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  // void makeCompData(const std::string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-  //                   const DimSizeVector &bufsize, bool open_data = false);
+  // void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression const comp,
+  //                   DimSizeVector const &bufsize, bool open_data = false);
 
   /**
-   * \copydoc writeCompData(const std::string & name,
-   *                        const std::vector<NumT> & value,
-   *                        const DimVector & dims, const NXcompression comp,
-   *                        const DimSizeVector & bufsize)
+   * \copydoc writeCompData(std::string & const name,
+   *                        std::vector<NumT> & const value,
+   *                        DimVector & const dims, NXcompression const comp,
+   *                        DimSizeVector & const bufsize)
    */
   // template <typename NumT>
-  // void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims,
-  //                    const NXcompression comp, const std::vector<int> &bufsize);
+  // void writeCompData(std::string const &name, std::vector<NumT> const &value, std::vector<int> const &dims,
+  //                    NXcompression const comp, std::vector<int> const &bufsize);
 
   /**
    * Create a compressed data, insert the data, and close it.
@@ -346,13 +348,13 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   // template <typename NumT>
-  // void writeCompData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims,
-  //                    const NXcompression comp, const DimSizeVector &bufsize);
+  // void writeCompData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
+  //                    NXcompression const comp, DimSizeVector const &bufsize);
 
   /**
    * \param name The name of the data to open.
    */
-  void openData(const std::string &name);
+  void openData(std::string const &name);
 
   /**
    * Close the currently open data.
@@ -362,22 +364,13 @@ public:
   /**
    * \param data The data to put in the file.
    */
-  template <typename NumT>
-  void putData(const NumT *data);
+  template <typename NumT> void putData(NumT const *data);
 
   /**
    * \param data The data to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putData(const std::vector<NumT> &data);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(const AttrInfo &info, const NumT *data);
+  template <typename NumT> void putData(std::vector<NumT> const &data);
 
   /**
    * Put the supplied data as an attribute into the currently open data.
@@ -386,7 +379,7 @@ public:
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void putAttr(const std::string &name, const NumT value);
+  template <typename NumT> void putAttr(std::string const &name, NumT const &value);
 
   /**
    * Put a string as an attribute in the file.
@@ -394,21 +387,13 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(const char *name, const char *value);
-
-  /**
-   * Put a string as an attribute in the file.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   */
-  void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
+  void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
   /**
    * \copydoc NeXus::File::putSlab(void* data, DimSizeVector& start,
    *                                DimSizeVector& size)
    */
-  // void putSlab(const void *data, const std::vector<int> &start, const std::vector<int> &size);
+  // void putSlab(void const *data, std::vector<int> const &start, std::vector<int> const &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -417,14 +402,14 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  // void putSlab(const void *data, const DimSizeVector &start, const DimSizeVector &size);
+  // void putSlab(void const *data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, DimSizeVector&,
    *                               DimSizeVector&)
    */
   // template <typename NumT>
-  // void putSlab(const std::vector<NumT> &data, const std::vector<int> &start, const std::vector<int> &size);
+  // void putSlab(std::vector<NumT> const &data, std::vector<int> const &start, std::vector<int> const &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -435,12 +420,12 @@ public:
    * \tparam NumT numeric data type of \a data
    */
   // template <typename NumT>
-  // void putSlab(const std::vector<NumT> &data, const DimSizeVector &start, const DimSizeVector &size);
+  // void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * \copydoc NeXus::File::putSlab(std::vector<NumT>&, int64_t, int64_t)
    */
-  // template <typename NumT> void putSlab(const std::vector<NumT> &data, int start, int size);
+  // template <typename NumT> void putSlab(std::vector<NumT> const &data, int start, int size);
 
   /**
    * Insert a number as part of a data in the final file.
@@ -450,7 +435,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void putSlab(const std::vector<NumT> &data, dimsize_t start, dimsize_t size);
+  // template <typename NumT> void putSlab(std::vector<NumT> const &data, dimsize_t start, dimsize_t size);
 
   /**
    * \return The id of the data used for linking.
@@ -511,7 +496,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void readData(const std::string &dataName, std::vector<NumT> &data);
+  // template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -521,7 +506,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void readData(const std::string &dataName, NumT &data);
+  // template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -532,7 +517,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  // void readData(const std::string &dataName, std::string &data);
+  // void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.
@@ -547,20 +532,20 @@ public:
   /**
    * Return the entries available in the current place in the file.
    */
-  // Entries getEntries();
+  Entries getEntries();
 
   /** Return the entries available in the current place in the file,
    * but avoids the map copy of getEntries().
    *
    * \param result The map that will be filled with the entries
    */
-  // void getEntries(Entries &result);
+  void getEntries(Entries &result);
 
   /**
    * \copydoc NeXus::File::getSlab(void*, const DimSizeVector&,
    *                               const DimSizeVector&)
    */
-  // void getSlab(void *data, const std::vector<int> &start, const std::vector<int> &size);
+  // void getSlab(void *data, std::vector<int> const &start, std::vector<int> const &size);
 
   /**
    * Get a section of data from the file.
@@ -570,7 +555,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  // void getSlab(void *data, const DimSizeVector &start, const DimSizeVector &size);
+  // void getSlab(void *data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * \return Information about all attributes on the data that is
@@ -582,27 +567,7 @@ public:
    *  \return true if the current point in the file has the named attribute
    *  \param name the name of the attribute to look for.
    */
-  // bool hasAttr(const std::string &name);
-
-  /**
-   * Get the value of the attribute specified by the AttrInfo supplied.
-   *
-   * \param info Designation of which attribute to read.
-   * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
-   */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
-
-  /**
-   * Get the value of an attribute that is a scalar number.
-   *
-   * \param info Designation of which attribute to read.
-   * \tparam NumT numeric data type of result
-   *
-   * \return The attribute value.
-   */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
+  // bool hasAttr(std::string const &name);
 
   /**
    * Get the value of an attribute that is a scalar number.
@@ -611,7 +576,7 @@ public:
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void getAttr(const std::string &name, NumT &value);
+  template <typename NumT> void getAttr(std::string const &name, NumT &value);
 
   /**
    * Get the value of a string attribute.
@@ -620,7 +585,7 @@ public:
    *
    * \return The value of the attribute.
    */
-  std::string getStrAttr(const AttrInfo &info);
+  std::string getStrAttr(AttrInfo const &info);
 
   /**
    * \return The id of the group used for linking.
