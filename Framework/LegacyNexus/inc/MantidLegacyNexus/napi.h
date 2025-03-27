@@ -50,6 +50,7 @@
 #include "MantidLegacyNexus/DllConfig.h"
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include <stdint.h>
+#include <string>
 
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
@@ -205,13 +206,12 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(Mantid::Leg
 /**
  * Retrieve the current path in the NeXus file
  * \param handle a NeXus file handle
- * \param path A buffer to copy the path too
+ * \param path A string to copy the path to.
  * \param  pathlen The maximum number of characters to copy into path
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNexus::NXhandle handle, char *path,
-                                                               int pathlen);
+MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNexus::NXhandle handle, std::string &path);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
