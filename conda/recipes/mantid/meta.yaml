@@ -44,7 +44,6 @@ requirements:
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
-    - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
     - numpy {{ numpy }}
     - occt {{ occt }}
