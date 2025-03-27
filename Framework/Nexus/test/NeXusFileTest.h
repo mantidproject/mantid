@@ -272,8 +272,8 @@ public:
     cout << "good!\n";
   }
 
-  void test_getPath() {
-    cout << "\ntest get_path\n";
+  void test_getPath_groups() {
+    cout << "\ntest get_path -- groups only\n";
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grp.h5");
     removeFile(filename);
 
@@ -511,9 +511,34 @@ public:
     cout << "good!";
   }
 
+  void test_getPath_data() {
+    cout << "\ntest get_path -- groups and data!\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grpdata.h5");
+    removeFile(filename);
+
+    // at root, path should be "/"
+    NeXus::File file(filename, H5ACC_CREATE5);
+    TS_ASSERT_EQUALS("/", file.getPath());
+
+    // make and open a group -- now at "/abc"
+    file.makeGroup("abc", "NXclass", true);
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.makeData("def", NeXus::getType<int>(), 1, true);
+    int in=17;
+    file.putData(&in);
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    file.closeData();
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
   void test_getInfo() {
     cout << "\ntest getInfo -- good\n";
-    fflush(stdout);
+
     // open a file
     string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
     removeFile(filename);
@@ -754,5 +779,119 @@ public:
     file.close();
     removeFile(filename);
     cout << "good!\n";
+  }
+
+  void test_getEntries() {
+    cout << "\ntest getEntries\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_entries.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // setup a recursive group tree
+    Entries expected {
+      Entry {"/entry1", "NXentry"},
+      Entry {"/entry1/layer2a", "NXentry"},
+      Entry {"/entry1/layer2a/layer3a", "NXentry"},
+      Entry {"/entry1/layer2a/layer3b", "NXentry"},
+      Entry {"/entry1/layer2a/data1", "SDS"},
+      Entry {"/entry1/layer2b", "NXentry"},
+      Entry {"/entry1/layer2b/layer3a", "NXentry"},
+      Entry {"/entry1/layer2b/layer3b", "NXentry"},
+      Entry {"/entry2", "NXentry"},
+      Entry {"/entry2/layer2c", "NXentry"},
+      Entry {"/entry2/layer2c/layer3c", "NXentry"}
+    };
+
+    string current;
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      current = file.getPath();
+      string path = it->first;
+      while (path.find(current) == path.npos) {
+        file.closeGroup();
+        current = file.getPath();
+      }
+      string name = path.substr(path.find_last_of("/")+1, path.npos);
+      if (it->second == "NXentry") {
+        file.makeGroup(name, it->second, true);
+      } else if (it->second == "SDS") {
+        string data = "Data";
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
+        file.putData(data.data());
+        file.closeData();
+      }
+    } 
+
+    Entries actual = file.getEntries();
+    for(auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // also test root level name
+    TS_ASSERT_EQUALS("entry1", file.getTopLevelEntryName());
+  }
+
+  void test_links() {
+    cout << "tests of linkature\n";
+
+    string const filename("NexusFIle_linktest.nxs");
+    removeFile(filename);
+
+    NeXus::File file(filename, H5ACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // Create some data with a link
+    cout << "create entry at /entry/some_data\n";
+    string const somedata("this is some data");
+    file.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
+    file.openData("some_data");
+    file.putData(somedata.data());
+    NXlink datalink = file.getDataID();
+    file.closeData();
+    file.flush();
+    // Create a group, and link it to that data
+    cout << "create group at /entry/data to link to the data\n";
+    file.makeGroup("data", "NXdata");
+    file.openGroup("data", "NXdata");
+    file.makeLink(datalink);
+    file.closeGroup();
+    file.flush();
+
+    // // check data link
+    // file.openPath("/entry/data/some_data");
+    // // TODO why can't we get the data through the link?
+    // // string output1;
+    // // fileid.getData(&output1);
+    // // TS_ASSERT_EQUALS(somedata, output1);
+    // NXlink res1 = file.getDataID();
+    // TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
+    // TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
+    // printf("data link works\n");
+    // fileid.closeGroup();
+
+    // // Create two groups, group1 and group2
+    // // Make a link inside group2 to group1
+    // // make group1
+    // cout << "create group /entry/group1\n";
+    // std::string const strdata("NeXus sample data");
+    // fileid.makeGroup("group1", "NXentry");
+    // fileid.openGroup("group1", "NXentry");
+    // NXlink grouplink = fileid.getGroupID();
+    // fileid.closeGroup();
+    // // make group 2
+    // cout << "create group /entry/group2/group1\n";
+    // fileid.makeGroup("group2", "NXentry");
+    // fileid.openGroup("group2", "NXentry");
+    // fileid.makeLink(grouplink);
+    // fileid.closeGroup();
+
+    // // check group link
+    // fileid.openPath("/entry/group2/group1");
+    // NXlink res2 = file.getGroupID();
+    // TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
+    // TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
+    // printf("group link works\n");
   }
 };

@@ -337,25 +337,14 @@ void LoadEventNexus::setTopEntryName() {
     return;
   }
 
-  try {
-    while (true) {
-      const auto entry = m_file->getNextEntry();
-      if (entry.second == "NXentry") {
-        if ((entry.first == "entry") || (entry.first == "raw_data_1")) {
-          m_top_entry_name = entry.first;
-          break;
-        }
-      } else if (entry == ::NeXus::EOD_ENTRY) {
-        g_log.error() << "Unable to determine name of top level NXentry - assuming "
-                         "\"entry\".\n";
-        m_top_entry_name = "entry";
-        break;
-      }
-    }
-  } catch (const std::exception &) {
-    g_log.error() << "Unable to determine name of top level NXentry - assuming "
-                     "\"entry\".\n";
+  std::set<std::string> goodEntries {"entry", "raw_data_1"};
+  string possibleTop;
+  possibleTop = m_file->getTopLevelEntryName();
+  if (goodEntries.count(possibleTop) == 0) {
+    g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\".\n";
     m_top_entry_name = "entry";
+  } else {
+    m_top_entry_name = possibleTop;
   }
 }
 

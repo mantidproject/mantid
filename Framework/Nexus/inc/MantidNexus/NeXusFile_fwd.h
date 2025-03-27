@@ -73,11 +73,11 @@ typedef struct {
   int type;
 } info_type, *pinfo;
 
+enum class NXlinktype {group = 0, sds = 1};
+
 typedef struct {
-  long iTag;             /* HDF4 variable */
-  long iRef;             /* HDF4 variable */
-  char targetPath[1024]; /* path to item to link */
-  int linkType;          /* HDF5: 0 for group link, 1 for SDS link */
+  std::string targetPath; /* path to item to link */
+  NXlinktype linkType;    /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
 /* Map NeXus compression methods to HDF compression methods */

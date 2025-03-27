@@ -129,12 +129,9 @@ void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runD
   // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
   // follows
   std::string entryNameActual(entryName);
+  
   if (entryName.empty()) {
-    try {
-      const auto entryNameAndClass = filehandle.getNextEntry();
-      entryNameActual = entryNameAndClass.first;
-    } catch (const ::NeXus::Exception &) { /* ignore */
-    }
+    entryNameActual = filehandle.getTopLevelEntryName();
   }
 
   // open the group and parse down

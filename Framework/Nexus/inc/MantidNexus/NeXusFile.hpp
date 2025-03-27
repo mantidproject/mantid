@@ -35,22 +35,15 @@ private:
   std::string m_filename;
   std::vector<std::shared_ptr<H5::H5Location>> m_stack;
 
-public:
-  /**
-   * \return A pair of the next entry available in a listing.
-   */
-  Entry getNextEntry();
-
-private:
   /**
    * Initialize the pending group search to start again.
    */
-  void initGroupDir();
+  // void initGroupDir();
 
   /**
    * Initialize the pending attribute search to start again.
    */
-  void initAttrDir();
+  // void initAttrDir();
 
   /**
    * Function to consolidate the file opening code for the various constructors
@@ -58,6 +51,11 @@ private:
    * \param access How to access the file.
    */
   // void initOpenFile(std::string const &filename, H5access access = const H5ACC_CREATE5);
+
+  /**
+   * Return the root of the file as a group
+   */
+  H5::Group *getRoot();
 
 public:
   /**
@@ -125,7 +123,7 @@ public:
   /// @return A pointer to the current location, treated as a T*
   template <typename T> T *getCurrentLocationAs();
 
-  void verifyGroupClass(H5::Group const &, std::string const &) const;
+  bool verifyGroupClass(H5::Group const &, std::string const &) const;
 
   /**
    * Create a new group.
@@ -440,14 +438,14 @@ public:
   /**
    * \return The id of the data used for linking.
    */
-  // NXlink getDataID();
+  NXlink getDataID();
 
   /**
    * Create a link in the current location to the supplied id.
    *
    * \param link The object (group or data) in the file to link to.
    */
-  // void makeLink(NXlink &link);
+  void makeLink(NXlink &link);
 
   /**
    * Put the currently open data in the supplied pointer.
@@ -541,6 +539,12 @@ public:
    */
   void getEntries(Entries &result);
 
+  /** Return the string name of the top-level entry
+   * 
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
+
   /**
    * \copydoc NeXus::File::getSlab(void*, const DimSizeVector&,
    *                               const DimSizeVector&)
@@ -590,13 +594,13 @@ public:
   /**
    * \return The id of the group used for linking.
    */
-  // NXlink getGroupID();
+  NXlink getGroupID();
 
   /**
    * This function checksi if we are in an open dataset
    * \returns true if we are currently in an open dataset else false
    */
-  // bool isDataSetOpen();
+  bool isDataSetOpen();
 };
 
 /**
