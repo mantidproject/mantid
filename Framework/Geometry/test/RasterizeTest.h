@@ -276,4 +276,34 @@ public:
     // boxes
     simpleRasterChecks(raster, sphere, 912, SPHERE_VOLUME, .01);
   }
+
+  void test_SmallerIntegrationVolumeWithinBiggerSample() {
+    V3D sampleCenter(0., 0., 0.);
+    const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(2, 2, 2, sampleCenter, "sample");
+    const std::shared_ptr<CSGObject> integVolume =
+        ComponentCreationHelper::createCuboid(1, 1, 1, sampleCenter, "sample");
+    const auto raster_result = Rasterize::calculate(V3D(0., 0., 1.), *integVolume, *sample, 1.0);
+
+    TS_ASSERT_EQUALS(raster_result.l1.size(), 8);
+    TS_ASSERT_DELTA(raster_result.totalvolume, 8.0, 0.001);
+    for (int i = 0; i < raster_result.l1.size(); i++) {
+      // all l1s should be greater or equal to 1
+      TS_ASSERT_LESS_THAN_EQUALS(1.0, raster_result.l1[i])
+    };
+  }
+
+  void test_LargerIntegrationVolumeThanSample() {
+    V3D sampleCenter(0., 0., 0.);
+    const std::shared_ptr<CSGObject> integVolume =
+        ComponentCreationHelper::createCuboid(2, 2, 2, sampleCenter, "sample");
+    const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(1, 1, 1, sampleCenter, "sample");
+    const auto raster_result = Rasterize::calculate(V3D(0., 0., 1.), *integVolume, *sample, 1.0);
+
+    TS_ASSERT_EQUALS(raster_result.l1.size(), 8);
+    TS_ASSERT_DELTA(raster_result.totalvolume, 8.0, 0.001);
+    for (int i = 0; i < raster_result.l1.size(); i++) {
+      // all l1s should be less than or equal to 2
+      TS_ASSERT_LESS_THAN_EQUALS(raster_result.l1[i], 2.0)
+    };
+  }
 };
