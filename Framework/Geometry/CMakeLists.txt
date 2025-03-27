@@ -42,6 +42,7 @@ set(SRC_FILES
     src/Crystal/SymmetryOperationSymbolParser.cpp
     src/Crystal/UnitCell.cpp
     src/Crystal/V3R.cpp
+    src/DetermineGaugeVolume.cpp
     src/IObjComponent.cpp
     src/Instrument.cpp
     src/Instrument/CompAssembly.cpp
@@ -181,6 +182,7 @@ set(INC_FILES
     inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
     inc/MantidGeometry/Crystal/UnitCell.h
     inc/MantidGeometry/Crystal/V3R.h
+    inc/MantidGeometry/DetermineGaugeVolume.h
     inc/MantidGeometry/ICompAssembly.h
     inc/MantidGeometry/IComponent.h
     inc/MantidGeometry/IDetector.h
@@ -320,6 +322,7 @@ set(TEST_FILES
     DetectorGroupTest.h
     DetectorInfoIteratorTest.h
     DetectorTest.h
+    DetermineGaugeVolumeTest.h
     FitParameterTest.h
     GeneralFrameTest.h
     GeneralTest.h
