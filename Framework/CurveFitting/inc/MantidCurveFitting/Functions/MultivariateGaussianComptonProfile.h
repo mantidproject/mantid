@@ -50,8 +50,8 @@ private:
   /// Helper to allow the amplitude to be specified separately
   void massProfile(double *result, const size_t nData, const double amplitude) const;
 
-  double calculateJ(std::vector<double> s2Cache, double y) const;
-  double calculateFSE(std::vector<double> s2Cache, double y) const;
+  double calculateJ(const std::vector<double> &s2Cache, double y) const;
+  double calculateFSE(const std::vector<double> &s2Cache, double y) const;
 
   /**
    * @brief Calculates the integrand of the mass profile.

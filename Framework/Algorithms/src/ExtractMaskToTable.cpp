@@ -360,7 +360,8 @@ void ExtractMaskToTable::addToTableWorkspace(const TableWorkspace_sptr &outws, s
  * @param minuend :: vector with items to be removed from
  * @param subtrahend :: vector containing the items to be removed from minuend
  */
-std::vector<detid_t> ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend) {
+std::vector<detid_t> ExtractMaskToTable::subtractVector(const std::vector<detid_t> &minuend,
+                                                        std::vector<detid_t> &subtrahend) {
   // Define some variables
   std::vector<detid_t>::iterator firstsubiter, fiter;
   firstsubiter = subtrahend.begin();
