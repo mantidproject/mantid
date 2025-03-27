@@ -43,8 +43,7 @@ StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent) : 
   button->setMaximumSize(20, 1000000);
   connect(button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(button);
-  layout->setContentsMargins(0, 0, 0, 0);
-  layout->setSpacing(0);
+  layout->setContentsMargins(0, 0, 20, 0);
   layout->setStretchFactor(button, 0);
   this->setLayout(layout);
 }
