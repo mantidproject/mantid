@@ -970,12 +970,10 @@ QtProperty *FunctionTreeView::getFunctionProperty(std::string const &index) cons
   // Might not be the most efficient way to do it. m_functionManager might be
   // searched instead,
   // but it is not being kept up-to-date at the moment (is not cleared).
-  const auto it = std::find_if(m_properties.keys().cbegin(), m_properties.keys().cend(), [&](const auto &property) {
-    return (isFunction(property) && getIndex(property) == index);
-  });
-
-  if (it != m_properties.keys().cend()) {
-    return *it;
+  for (const auto &property : m_properties.keys()) {
+    if (isFunction(property) && getIndex(property) == index) {
+      return property;
+    }
   }
 
   // No function with such index

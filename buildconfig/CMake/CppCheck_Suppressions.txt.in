@@ -679,6 +679,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowse
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:169
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:189
 duplicateAssignExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrowser/FunctionBrowserUtils.cpp:20
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:974
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoModelMD.cpp:17
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoModelMD.cpp:24
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoPresenter.cpp:33
