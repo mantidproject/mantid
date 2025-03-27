@@ -336,36 +336,31 @@ static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl
 
 /*---------------------------------------------------------------------*/
 static pLgcyFunction handleToNexusFunc(NXhandle fid) {
-  if (pFileLgcyStack fileStack = static_cast<pFileLgcyStack>(fid)) {
-    return peekFileOnStack(fileStack);
+  if (auto nexusFileID = static_cast<NexusFileID *>(fid)) {
+    return nexusFileID->getNexusFunctions();
   } else {
     return NULL;
   }
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack);
+static NXstatus NXinternalopen(NXaccess am, NexusFileID *fileRecord);
 /*----------------------------------------------------------------------*/
 NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
   NXstatus status;
-  pFileLgcyStack fileStack = NULL;
 
   *gHandle = NULL;
-  fileStack = makeFileStack();
-  if (fileStack == NULL) {
-    NXReportError("ERROR: no memory to create filestack");
-    return NXstatus::NX_ERROR;
-  }
-  status = NXinternalopen(userfilename, am, fileStack);
+  auto fileRecord = new NexusFileID(userfilename);
+  status = NXinternalopen(am, fileRecord);
   if (status == NXstatus::NX_OK) {
-    *gHandle = fileStack;
+    *gHandle = fileRecord;
   }
 
   return status;
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack) {
+static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
   int backend_type, iRet;
   pLgcyFunction fHandle = NULL;
   char error[1024];
@@ -401,23 +396,12 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if (my_am == NXACC_CREATE4) {
-    /* HDF4 will be used ! */
-    backend_type = NXACC_CREATE4;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5)) {
-    /* HDF5 will be used ! */
-    backend_type = NXACC_CREATE5;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else if (my_am == NXACC_CREATEXML) {
-    snprintf(error, 1023, "xml backend not supported for %s", userfilename);
-    NXReportError(error);
+  if ((my_am == NXACC_CREATE4) || (my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5) || (my_am == NXACC_CREATEXML)) {
+    NXReportError("Write operations have been deprecated from LegacyNexus");
     free(fHandle);
     return NXstatus::NX_ERROR;
   } else {
-    filename = locateNexusFileInPath(const_cast<char *>(static_cast<const char *>(userfilename)));
+    filename = locateNexusFileInPath(fileRecord->getUserFilePath().c_str());
     if (filename == NULL) {
       NXReportError("Out of memory in NeXus-API");
       free(fHandle);
@@ -461,7 +445,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
     fHandle->pNexusData = hdf4_handle;
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX4assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
+    fileRecord->setFilePath(filename);
+    fileRecord->setNexusFunctions(fHandle);
 #else
     NXReportError("ERROR: Attempt to create HDF4 file when not linked with HDF4");
     retstat = NXstatus::NX_ERROR;
@@ -481,7 +466,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
     fHandle->pNexusData = hdf5_handle;
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
+    fileRecord->setFilePath(filename);
+    fileRecord->setNexusFunctions(fHandle);
 #else
     NXReportError("ERROR: Attempt to create HDF5 file when not linked with HDF5");
     retstat = NXstatus::NX_ERROR;
@@ -507,8 +493,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileLg
   return retstat;
 }
 
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileLgcyStack fileStack) {
-  return LOCKED_CALL(NXinternalopenImpl(userfilename, am, fileStack));
+static NXstatus NXinternalopen(NXaccess am, NexusFileID *fileRecord) {
+  return LOCKED_CALL(NXinternalopenImpl(am, fileRecord));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -516,26 +502,17 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileLgcySt
 NXstatus NXclose(NXhandle *fid) {
   NXhandle hfil;
   NXstatus status;
-  pFileLgcyStack fileStack = NULL;
-  pLgcyFunction pFunc = NULL;
   if (*fid == NULL) {
     return NXstatus::NX_OK;
   }
-  fileStack = (pFileLgcyStack)*fid;
-  pFunc = peekFileOnStack(fileStack);
+  NexusFileID *fileID = static_cast<NexusFileID *>(*fid);
+  pLgcyFunction pFunc = fileID->getNexusFunctions();
   hfil = pFunc->pNexusData;
   status = LOCKED_CALL(pFunc->nxclose(&hfil));
   pFunc->pNexusData = hfil;
+  *fid = NULL;
   free(pFunc);
-  popFileStack(fileStack);
-  if (fileStackDepth(fileStack) < 0) {
-    killFileStack(fileStack);
-    *fid = NULL;
-  }
-  /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
-  /*
-     Fortify_CheckAllMemory();
-   */
+  delete fileID;
 
   return status;
 }
@@ -546,15 +523,13 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  pFileLgcyStack fileStack;
-  pLgcyFunction pFunc = NULL;
 
-  fileStack = static_cast<pFileLgcyStack>(fid);
-  pFunc = handleToNexusFunc(fid);
+  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
 
   status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
   if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
+    fileID->pushNexusPath(name);
   }
   NXMDisableErrorReporting();
   char nxurl[1024];
@@ -570,42 +545,27 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
 NXstatus NXclosegroup(NXhandle fid) {
   NXstatus status;
-  pFileLgcyStack fileStack = NULL;
 
+  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
   pLgcyFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileLgcyStack>(fid);
-  if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-    if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
-    }
-    return status;
-  } else {
-    throw std::runtime_error("Support for Externally Linking files has been removed from LegacyNexus");
+  status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
+  if (status == NXstatus::NX_OK) {
+    fileID->popNexusPath();
   }
+  return status;
 }
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
   NXstatus status, attStatus;
-  pFileLgcyStack fileStack;
-  pLgcyFunction pFunc = NULL;
 
-  fileStack = static_cast<pFileLgcyStack>(fid);
-  pFunc = handleToNexusFunc(fid);
+  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
+  pLgcyFunction pFunc = handleToNexusFunc(fid);
   status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
 
   if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
-  }
-
-  NXMDisableErrorReporting();
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  NXMEnableErrorReporting();
-  if (attStatus == NXstatus::NX_OK) {
-    throw std::runtime_error("Support for Externally Linking files has been removed from LegacyNexus");
+    fileID->pushNexusPath(name);
   }
   return status;
 }
@@ -614,20 +574,14 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
 
 NXstatus NXclosedata(NXhandle fid) {
   NXstatus status;
-  pFileLgcyStack fileStack = NULL;
 
+  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
   pLgcyFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileLgcyStack>(fid);
-
-  if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-    if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
-    }
-    return status;
-  } else {
-    throw std::runtime_error("Support for Externally Linking files has been removed from LegacyNexus");
+  status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
+  if (status == NXstatus::NX_OK) {
+    fileID->popNexusPath();
   }
+  return status;
 }
 
 /* ------------------------------------------------------------------- */
