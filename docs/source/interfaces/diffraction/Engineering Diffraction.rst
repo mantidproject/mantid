@@ -97,14 +97,11 @@ Cropping
 ^^^^^^^^
 
 The interface also provides the ability to restrict a new calibration to a particular region of interest:
-one of the two banks on ENGIN-X, a custom grouping file, a list of spectra (referred to as cropped), Texture20 grouping
+one of the two banks on ENGIN-X, a custom grouping file (``.cal`` or ``.xml`` files), a list of spectra (referred to as cropped), Texture20 grouping
 (consists of 10 groupings per detector bank - 20 in total) and Texture30 (15 groupings per detector bank - 30 in total).
 
 Parameters
 ^^^^^^^^^^
-
-Vanadium Number
-    The run number or file path used to correct the calibration and experiment runs.
 
 Calibration Sample Number
     The run number for the calibration sample run (such as ceria) used to calibrate
@@ -113,8 +110,11 @@ Calibration Sample Number
 Path
     The path to the GSAS parameter file (.prm) to be loaded.
 
-Bank/Spectra
+Region Of Interest
     Select a bank to crop to or specify a custom spectra will be entered.
+
+Custom Grouping File
+    The path to a custom ``.cal`` or ``.xml`` file with the desired detector groupings.
 
 Custom Spectra
     A comma separated list of spectra to restrict the calibration to. Can be provided as single spectrum numbers
@@ -141,7 +141,7 @@ vanadium run must also be supplied for normalisation.
 The data will be focused over the region of interest selected in the calibration tab.
 Files can be selected by providing run numbers or selecting the files manually using the browse button.
 
-Ticking the "Plot Focused Workspace" checkbox will create a plot of nthe focused spectra for each of the focused runs
+Ticking the "Plot Focused Workspace" checkbox will create a plot of the focused spectra for each of the focused runs
 when the algorithm is complete.
 
 Clicking the focus button will begin the focusing algorithm for the selected run files. The button and plotting checkbox
@@ -164,8 +164,11 @@ Parameters
 Sample Run Number
     The run numbers of or file paths to the data files to be focused.
 
-Bank/Spectra
-    Select which bank to restrict the focusing to or allow for the entry of custom spectra.
+Vanadium Number
+    The run number or file path used to correct the focused data files.
+
+Chosen Region Of Interest
+    Select which bank to restrict the focusing to or allow for the entry of custom spectra (this is carried over from the Calibration Tab).
 
 .. image:: ../../images/EngDiff_Focus.png
     :width: 600px
