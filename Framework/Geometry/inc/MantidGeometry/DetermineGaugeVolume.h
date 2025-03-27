@@ -18,14 +18,26 @@ namespace Geometry {
 class IObject;
 struct MANTID_GEOMETRY_DLL BeamProfile {
 public:
-  BeamProfile(const IComponent_const_sptr source, const Kernel::V3D beamDirection);
+  static std::optional<BeamProfile> create(const IComponent_const_sptr source, const Kernel::V3D beamDirection) {
+    try {
+      return BeamProfile(source, beamDirection);
+    } catch (const std::exception &e) {
+      return std::nullopt;
+    }
+  }
+
   BeamProfile() = default;
+  BeamProfile(const BeamProfile &) = default;
+
   std::string shape;
   double radius;
   double height;
   double width;
   Kernel::V3D direction;
   Kernel::V3D center;
+
+private:
+  BeamProfile(const IComponent_const_sptr source, const Kernel::V3D beamDirection);
 };
 
 namespace GaugeVolume {

@@ -195,13 +195,13 @@ public:
     pmap->addString(source, "beam-shape", "Slit");
     V3D direction(0., 0., 1.);
 
-    BeamProfile beam(newInstrument.getSource(), direction);
+    auto beam = BeamProfile::create(newInstrument.getSource(), direction);
 
-    TS_ASSERT_EQUALS(beam.shape, "Slit");
-    TS_ASSERT_EQUALS(beam.height, 5.);
-    TS_ASSERT_EQUALS(beam.width, 10.);
-    TS_ASSERT_EQUALS(beam.direction, direction);
-    TS_ASSERT_EQUALS(beam.center, V3D(0., 0., -10.));
+    TS_ASSERT_EQUALS(beam->shape, "Slit");
+    TS_ASSERT_EQUALS(beam->height, 5.);
+    TS_ASSERT_EQUALS(beam->width, 10.);
+    TS_ASSERT_EQUALS(beam->direction, direction);
+    TS_ASSERT_EQUALS(beam->center, V3D(0., 0., -10.));
   }
 
   void test_beamProfileCylinder() {
@@ -215,12 +215,12 @@ public:
 
     V3D direction(0., 0., 1.);
 
-    BeamProfile beam(newInstrument.getSource(), direction);
+    auto beam = BeamProfile::create(newInstrument.getSource(), direction);
 
-    TS_ASSERT_EQUALS(beam.shape, "Circle");
-    TS_ASSERT_EQUALS(beam.radius, 10.);
-    TS_ASSERT_EQUALS(beam.direction, direction);
-    TS_ASSERT_EQUALS(beam.center, V3D(0., 0., -10.));
+    TS_ASSERT_EQUALS(beam->shape, "Circle");
+    TS_ASSERT_EQUALS(beam->radius, 10.);
+    TS_ASSERT_EQUALS(beam->direction, direction);
+    TS_ASSERT_EQUALS(beam->center, V3D(0., 0., -10.));
   }
 
   void test_beamProfileNoBoundingBox() {
@@ -232,11 +232,8 @@ public:
     pmap->addDouble(source, "beam-radius", 10.);
     pmap->addString(source, "beam-shape", "VOID");
 
-    TS_ASSERT_THROWS(
-        [&]() {
-          V3D direction(0., 0., 1.);
-          BeamProfile beam(newInstrument.getSource(), direction);
-        }(),
-        const std::runtime_error &);
+    auto beam = BeamProfile::create(newInstrument.getSource(), V3D(0., 0., 1.));
+
+    TS_ASSERT_EQUALS(beam, std::nullopt);
   }
 };
