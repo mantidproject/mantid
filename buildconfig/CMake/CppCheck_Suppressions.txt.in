@@ -644,13 +644,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspaceSelector.h:67
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspaceSelector.h:77
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspaceSelector.h:81
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:163
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:225
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:352
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:581
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:616
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:902
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:904
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:441
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ConvolutionFunctionModel.cpp:230
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:103
