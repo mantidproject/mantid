@@ -18,6 +18,7 @@ from mantid.kernel import (
 from mantid.simpleapi import SaveGSSCW, SaveFocusedXYE, AnalysisDataService, RenameWorkspace, mtd
 from mantid import logger
 import numpy as np
+import numpy.lib.recfunctions as rfn
 import datetime
 import os
 import os.path
@@ -246,7 +247,20 @@ class HB2AReduce(PythonAlgorithm):
                 raise RuntimeError("Could not read {}, file likely malformed".format(filename))
 
             # Accumulate data
-            data = d if data is None else np.append(data, d)
+            if data is None:
+                data = d
+            else:
+                # Ensure both data and d have the same columns
+                all_cols = sorted(list(set(data.dtype.names) | set(d.dtype.names)))
+                for col in all_cols:
+                    if col not in data.dtype.names:
+                        data = rfn.append_fields(data, col, np.zeros(len(data), dtype=float), usemask=False)
+                    if col not in d.dtype.names:
+                        d = rfn.append_fields(d, col, np.zeros(len(d), dtype=float), usemask=False)
+
+                data = data[all_cols]
+                d = d[all_cols]
+                data = np.append(data, d)
 
         # Get any masked detectors
         detector_mask = self.get_detector_mask(exp, indir)
