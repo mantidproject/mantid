@@ -500,14 +500,11 @@ shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscr
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:49
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:58
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h:166
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h:27
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/InvalidParameter.h:35
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h:27
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CalculateCoverageDGS.cpp:165
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompactMD.cpp:30
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompactMD.cpp:31
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspaceBase.cpp:91
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspaceBase.cpp:165
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:163
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:293
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWorkspace.cpp:178
