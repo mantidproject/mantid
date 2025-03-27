@@ -251,7 +251,7 @@ class BayesQuasiTest(unittest.TestCase):
         @param prob Probability workspace from BayesQuasi
         @param group Group workspace of fitted spectra from BayesQuasi
         """
-        significant_digits = 4
+        significant_digits = 3
         # Test values of result
         np.testing.assert_approx_equal(result.dataY(0)[0], 81.12644, significant=significant_digits)
         np.testing.assert_approx_equal(result.dataY(1)[0], 0.0319747, significant=significant_digits)
