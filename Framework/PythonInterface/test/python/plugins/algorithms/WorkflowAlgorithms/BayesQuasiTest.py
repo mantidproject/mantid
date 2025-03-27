@@ -253,9 +253,9 @@ class BayesQuasiTest(unittest.TestCase):
         """
         significant_digits = 3
         # Test values of result
-        np.testing.assert_approx_equal(result.dataY(0)[0], 81.12644, significant=significant_digits)
-        np.testing.assert_approx_equal(result.dataY(1)[0], 0.0319747, significant=significant_digits)
-        np.testing.assert_approx_equal(result.dataY(2)[0], 0.77168, significant=significant_digits)
+        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=0.1)
+        self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-4)
 
         # Test values of group
         sub_ws = group.getItem(0)
