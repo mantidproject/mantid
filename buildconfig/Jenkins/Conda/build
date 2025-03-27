@@ -33,7 +33,7 @@ if [[ -n "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
-BUILD_OPTIONS="-j$BUILD_THREADS"
+BUILD_OPTIONS=""
 if [[ $OSTYPE == "msys"* ]]; then
     BUILD_OPTIONS="$BUILD_OPTIONS --config Release"
 fi
@@ -43,6 +43,14 @@ cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $
 
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
+
+if [ -f build.ninja ]; then
+    # if using ninja let ninja control compiling threads
+    echo "ninja will control number of threads"
+else
+    # prepend number of threads to build with
+    BUILD_OPTIONS="-j$BUILD_THREADS $BUILD_OPTIONS"
+fi
 
 if [[ $ENABLE_COVERITY == true ]]; then
     conda install -y jq curl
@@ -64,16 +72,18 @@ if [[ $ENABLE_BUILD_CODE == true ]]; then
     cmake --build . $BUILD_OPTIONS
 fi
 
-if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    cmake --build . --target AllTests $BUILD_OPTIONS
-fi
-
+# create a collection of targets to run all at once during main build
 if [[ $ENABLE_UNIT_TESTS == true || $ENABLE_SYSTEM_TESTS == true || $ENABLE_DOC_TESTS == true ]]; then
-    cmake --build . --target StandardTestData $BUILD_OPTIONS
-fi
+    TARGET_BUILD_AND_DOWNLOAD="$TARGET_BUILD_AND_DOWNLOAD StandardTestData"
+    if [[ $ENABLE_UNIT_TESTS == true ]]; then
+	TARGET_BUILD_AND_DOWNLOAD="$TARGET_BUILD_AND_DOWNLOAD AllTests"
+    fi
+    if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+	TARGET_BUILD_AND_DOWNLOAD="$TARGET_BUILD_AND_DOWNLOAD SystemTestData"
+    fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    cmake --build . --target SystemTestData $BUILD_OPTIONS
+    # compile and download data
+    cmake --build . --target $TARGET_BUILD_AND_DOWNLOAD $BUILD_OPTIONS
 fi
 
 # Build docs
