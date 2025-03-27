@@ -7,7 +7,7 @@ set(SRC_FILES
     src/NexusClasses.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
-    src/nxstack.cpp
+    src/NeXusFileInfo.cpp
     src/stptok.cpp
 )
 
@@ -21,8 +21,8 @@ set(INC_FILES
     inc/MantidLegacyNexus/NexusClasses.h
     inc/MantidLegacyNexus/NeXusException.hpp
     inc/MantidLegacyNexus/NeXusFile.hpp
+    inc/MantidLegacyNexus/NeXusFileInfo.h
     inc/MantidLegacyNexus/nx_stptok.h
-    inc/MantidLegacyNexus/nxstack.h
 )
 
 # Add the target for this directory
