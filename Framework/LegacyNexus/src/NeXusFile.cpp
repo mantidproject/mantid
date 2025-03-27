@@ -125,16 +125,15 @@ void File::openPath(const string &path) {
 }
 
 std::string File::getPath() {
-  char cPath[2048];
-
-  memset(cPath, 0, sizeof(cPath));
-  NXstatus status = NXgetpath(this->m_file_id, cPath, sizeof(cPath) - 1);
+  std::string path;
+  path.reserve(2048);
+  NXstatus status = NXgetpath(this->m_file_id, path);
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXgetpath() failed";
     throw Exception(msg.str(), status);
   }
-  return std::string(cPath);
+  return path;
 }
 
 void File::closeGroup() {

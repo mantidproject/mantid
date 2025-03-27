@@ -26,6 +26,8 @@
 */
 #pragma once
 
+const int EXPECTED_PATH_STACK_HEIGHT = 5;
+
 // get nxlink
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi_internal.h"
@@ -35,7 +37,9 @@
 
 class NexusFileID {
 public:
-  NexusFileID(const std::string &userFilePath) : m_userFilePath(userFilePath) {}
+  NexusFileID(const std::string &userFilePath) : m_userFilePath(userFilePath), m_pathChars(0), m_nexusFunctions(NULL) {
+    m_nexusPath.reserve(EXPECTED_PATH_STACK_HEIGHT);
+  }
 
   std::string getFullNexusPath() const;
   const std::string &getFilePath() const { return m_filePath; }
@@ -53,21 +57,3 @@ private:
   pLgcyFunction m_nexusFunctions;
   std::string m_userFilePath;
 };
-
-typedef struct __fileLgcyStack *pFileLgcyStack;
-
-#define MAXEXTERNALDEPTH 16
-
-pFileLgcyStack makeFileStack();
-void killFileStack(pFileLgcyStack self);
-
-void pushFileStack(pFileLgcyStack self, pLgcyFunction pDriv, const char *filename);
-void popFileStack(pFileLgcyStack self);
-
-pLgcyFunction peekFileOnStack(pFileLgcyStack self);
-
-int fileStackDepth(pFileLgcyStack self);
-
-void pushPath(pFileLgcyStack self, const char *name);
-void popPath(pFileLgcyStack self);
-int buildPath(pFileLgcyStack self, char *path, int pathlen);

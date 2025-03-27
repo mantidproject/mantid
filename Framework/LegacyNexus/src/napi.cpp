@@ -558,7 +558,7 @@ NXstatus NXclosegroup(NXhandle fid) {
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXnumtype type = NXnumtype::CHAR;
   int length = 1023;
-  NXstatus status, attStatus;
+  NXstatus status;
 
   NexusFileID *fileID = static_cast<NexusFileID *>(fid);
   pLgcyFunction pFunc = handleToNexusFunc(fid);
@@ -967,13 +967,10 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
 }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
-  int status;
-  pFileLgcyStack fileStack = NULL;
-
-  fileStack = static_cast<pFileLgcyStack>(fid);
-  status = buildPath(fileStack, path, pathlen);
-  if (status != 1) {
+NXstatus NXgetpath(NXhandle fid, std::string &path) {
+  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
+  path = fileID->getFullNexusPath();
+  if (path.empty()) {
     return NXstatus::NX_ERROR;
   }
   return NXstatus::NX_OK;
