@@ -55,10 +55,6 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
-# Not a primary dependency, but pinning to avoid a couple of unit test failures
-mkl:
-  - 2024.1.0
-
 muparser:
   - '>=2.3.2'
 
