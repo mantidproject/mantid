@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
-from mantid.kernel import Property, FloatPropertyWithValue, StringPropertyWithValue
+from mantid.kernel import Property, FloatPropertyWithValue, StringPropertyWithValue, PointerPropertyWithValue
 from testhelpers import create_algorithm, run_algorithm
 import numpy as np
 
@@ -220,6 +220,46 @@ class PropertyWithValueTest(unittest.TestCase):
 
             def PyExec(self):
                 self.setProperty("MyProperty", BIGINT)
+
+        AlgorithmFactory.subscribe(MyAlgorithm)
+        algo = MyAlgorithm()
+        algo.initialize()
+        myAlgorithmName = "MyAlgorithm"
+        _create_algorithm_function(myAlgorithmName, 1, algo)
+        from mantid.simpleapi import MyAlgorithm as MyAlgorithmInMantid
+
+        # call the algorithm, ensure the output is the large integer expected
+        ret = MyAlgorithmInMantid(1)
+        assert ret == BIGINT
+        # clean up the the algorithm manager and verify
+        AlgorithmFactory.unsubscribe(myAlgorithmName, 1)
+        with self.assertRaises(RuntimeError) as cm:
+            MyAlgorithmInMantid(2)
+        assert f"not registered {myAlgorithmName}" in str(cm.exception)
+
+    def test_pointer_property(self):
+        """
+        Test that PointerPropertys can be declared and work as intended
+        """
+        from mantid.api import AlgorithmFactory, PythonAlgorithm
+        from mantid.kernel import Direction, IntPropertyWithValue
+        from mantid.simpleapi import _create_algorithm_function
+
+        # an object that cannot normally be handled through standard properties
+        myObj = {(1, 2): [3, 4], (5, 6): [7, 8]}
+
+        # a large number than cannot fit in a C++ int, requiring u_int64
+        BIGINT: int = 125824461545280
+
+        # create an algorithm that returns a ULongLongPropertyWithValue as the output
+        # then register it so that it can be called as a function
+        class MyAlgorithm(PythonAlgorithm):
+            def PyInit(self):
+                self.declareProperty(IntPropertyWithValue("InputInt", 0))
+                self.declareProperty(PointerPropertyWithValue("MyProperty", 0, direction=Direction.Output))
+
+            def PyExec(self):
+                self.setProperty("MyProperty", id(myObj))
 
         AlgorithmFactory.subscribe(MyAlgorithm)
         algo = MyAlgorithm()
