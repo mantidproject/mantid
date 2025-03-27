@@ -278,7 +278,7 @@ class CalibrationInfo:
             raise ValueError("Grouping file path is not set.")
         ext = path.splitext(self.grouping_filepath)[-1].lower()
         if ext == ".cal":
-            self.group_ws = CreateGroupingWorkspace(
+            self.group_ws, _, _ = CreateGroupingWorkspace(
                 InstrumentName=self.instrument, OldCalFilename=self.grouping_filepath, OutputWorkspace=self.get_group_ws_name()
             )
         elif ext == ".xml":

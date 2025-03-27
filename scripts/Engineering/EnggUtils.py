@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from numpy import array, degrees, isfinite, reshape
+from numpy import array, degrees, isfinite, reshape, round
 from os import path, makedirs
 from shutil import copy2
 
@@ -480,6 +480,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
         if ws_sample:
             # None returned if no proton charge
             ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
+            _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc)
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
@@ -498,6 +499,26 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             _plot_focused_workspaces(output_workspaces)
 
     return focused_files_list, focused_files_gsas2_list
+
+
+def _get_difc(ws, ind):
+    return ws.spectrumInfo().diffractometerConstants(ind)[UnitParams.difc]
+
+
+def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
+    try:
+        num_foc, num_van = ws_foc.getNumberHistograms(), ws_van_foc.getNumberHistograms()
+        assert num_foc == num_van
+        if num_foc == num_van:
+            ind = 0
+            while ind < num_foc:
+                # check each grouping difcs is same within 3 dp, stop if any fail
+                assert round(_get_difc(ws_foc, ind), 3) == round(_get_difc(ws_van_foc, ind), 3)
+                ind += 1
+    except AssertionError:
+        error_msg = f"The calibration of {ws_van_foc} does not match {ws_foc}. Ensure the vanadium calibration file loaded is correct."
+        logger.error(error_msg)
+        raise AssertionError(error_msg)
 
 
 def process_vanadium(vanadium_path, calibration, full_calib):

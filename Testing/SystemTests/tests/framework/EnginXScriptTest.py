@@ -113,6 +113,76 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
         _try_delete_cal_and_focus_dirs(CWDIR)
 
 
+class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidSystemTest):
+    def runTest(self):
+        grouping_path_1 = str(os.path.join(CWDIR, r"TestingCalFiles\example1\my_grouping.cal"))
+        grouping_path_2 = str(os.path.join(CWDIR, r"TestingCalFiles\example2\my_grouping.cal"))
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_1,
+        )
+        enginx.main()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_2,
+        )
+        self.assertRaises(AssertionError, enginx.main)
+
+    def validate(self):
+        pass
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
+class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtesting.MantidSystemTest):
+    def runTest(self):
+        grouping_path_1 = os.path.join(CWDIR, r"TestingCalFiles\example2\my_grouping.cal")
+        grouping_path_2 = os.path.join(CWDIR, r"TestingCalFiles\example3\my_grouping.cal")
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_1,
+        )
+        enginx.main()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_2,
+        )
+        self.assertRaises(AssertionError, enginx.main)
+
+    def validate(self):
+        pass
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
 class FocusTexture(systemtesting.MantidSystemTest):
     def runTest(self):
         enginx = EnginX(
