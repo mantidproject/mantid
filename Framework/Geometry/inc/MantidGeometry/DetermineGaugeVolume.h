@@ -21,7 +21,7 @@ public:
   static std::optional<BeamProfile> create(const IComponent_const_sptr source, const Kernel::V3D beamDirection) {
     try {
       return BeamProfile(source, beamDirection);
-    } catch (const std::exception &e) {
+    } catch (const std::exception &) {
       return std::nullopt;
     }
   }
