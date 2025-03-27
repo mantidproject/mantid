@@ -16,10 +16,10 @@ Clone the mantid source code
       This sets you up with accessing the remote repository via SSH so make sure to setup git properly using this `startup guide <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_ and ensure your ssh key is setup using this `guide to Github with SSH <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_.
     * Or by using `GitKraken <https://www.gitkraken.com/>`_.
 
-Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
+Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
-* Choose the latest version of ``Mambaforge-MacOSX-x86_64.sh`` for intel based Macs or for the new arm versions use ``Mambaforge-MacOSX-arm64.sh``
-* Run your downloaded script from the terminal using ``bash Mambaforge-MacOSX-x86_64.sh`` or ``bash Mambaforge-MacOSX-arm64.sh`` depending on your downloaded variant.
+* Choose the latest version of ``Miniforge3-MacOSX-x86_64.sh`` for intel based Macs or for the new arm versions use ``Miniforge3-MacOSX-arm64.sh``
+* Run your downloaded script from the terminal using ``bash Miniforge3-MacOSX-x86_64.sh`` or ``bash Miniforge3-MacOSX-arm64.sh`` depending on your downloaded variant.
 * If it asks whether or not you want to initialise conda with conda init, choose to do so.
 * Restart your terminal.
 
