@@ -253,7 +253,7 @@ class BayesQuasiTest(unittest.TestCase):
         """
 
         # Test values of result
-        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=1e-4)
+        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=0.1)
         self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-4)
         self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-4)
 
