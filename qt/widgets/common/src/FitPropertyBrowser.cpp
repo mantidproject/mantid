@@ -1044,7 +1044,7 @@ void FitPropertyBrowser::deleteFunction() {
 //
 
 // Get the default function name
-std::string FitPropertyBrowser::defaultFunctionType() const { return m_defaultFunction; }
+const std::string &FitPropertyBrowser::defaultFunctionType() const { return m_defaultFunction; }
 
 // Set the default function name
 void FitPropertyBrowser::setDefaultFunctionType(const std::string &fnType) { m_defaultFunction = fnType; }
@@ -1064,7 +1064,7 @@ void FitPropertyBrowser::setDefaultPeakType(const std::string &fnType) {
   setDefaultFunctionType(fnType);
 }
 /// Get the default background type
-std::string FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
+const std::string &FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
 /// Set the default background type
 void FitPropertyBrowser::setDefaultBackgroundType(const std::string &fnType) {
   m_defaultBackground = fnType;
@@ -2827,7 +2827,7 @@ void FitPropertyBrowser::workspaceChange(const QString &wsName) {
 /**
  * Returns the list of workspace names the fit property browser is working on
  */
-QStringList FitPropertyBrowser::getWorkspaceNames() { return m_workspaceNames; }
+const QStringList &FitPropertyBrowser::getWorkspaceNames() { return m_workspaceNames; }
 
 /**
  * Call MultifitSetupDialog to populate MultiBG function.
@@ -3194,12 +3194,12 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 /**=================================================================================================
  * Get Fit Algorithm parameters
  */
-std::string FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
+const std::string &FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
 
 /**=================================================================================================
  * Get Fit Algorithm output statuss
  */
-std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
+const std::string &FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
 
 /**=================================================================================================
  * Show online function help

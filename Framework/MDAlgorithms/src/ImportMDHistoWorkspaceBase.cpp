@@ -87,11 +87,11 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
     int ndims_int = getProperty("Dimensionality");
     ndims = ndims_int;
   }
-  std::vector<double> extents = getProperty("Extents");
-  std::vector<int> nbins = getProperty("NumberOfBins");
-  std::string dimensions_string = getPropertyValue("Names");
-  std::vector<std::string> names = parseNames(dimensions_string);
-  std::vector<std::string> units = getProperty("Units");
+  const std::vector<double> extents = getProperty("Extents");
+  const std::vector<int> nbins = getProperty("NumberOfBins");
+  const std::string dimensions_string = getPropertyValue("Names");
+  const std::vector<std::string> names = parseNames(dimensions_string);
+  const std::vector<std::string> units = getProperty("Units");
   std::vector<std::string> frames = getProperty("Frames");
 
   // Perform all validation on inputs
@@ -162,7 +162,7 @@ std::map<std::string, std::string> ImportMDHistoWorkspaceBase::validateInputs() 
   targetFrames.emplace_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
-  for (auto &frame : frames) {
+  for (const auto &frame : frames) {
     auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;

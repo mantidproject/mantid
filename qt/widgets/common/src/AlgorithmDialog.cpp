@@ -160,7 +160,7 @@ void AlgorithmDialog::saveInput() {
   AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
   QStringList::const_iterator pend = m_algProperties.end();
   for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr) {
-    Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
+    const Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
     if (p->remember()) {
       QString pName = *pitr;
       QString value = m_propertyValueMap.value(pName);
@@ -222,7 +222,7 @@ bool AlgorithmDialog::requiresUserInput(const QString &propName) const { return 
 QString AlgorithmDialog::getInputValue(const QString &propName) const {
   QString value = m_propertyValueMap.value(propName);
   if (value.isEmpty()) {
-    Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
+    const Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
     if (prop)
       return QString::fromStdString(prop->getDefault());
     else
@@ -349,7 +349,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
     const QString pName = *pitr;
     if (skipList.contains(pName)) {
       // For the load dialog, skips setting some properties
-      Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
+      const Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
       std::string error = p->isValid();
       m_errors[pName] = QString::fromStdString(error).trimmed();
       if (!error.empty())
@@ -578,7 +578,7 @@ QString AlgorithmDialog::openFileDialog(const QString &propName) {
 void AlgorithmDialog::fillAndSetComboBox(const QString &propName, QComboBox *optionsBox) const {
   if (!optionsBox)
     return;
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if (!property)
     return;
 
@@ -613,7 +613,7 @@ void AlgorithmDialog::fillLineEdit(const QString &propName, QLineEdit *textField
   if (!isForScript()) {
     textField->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
   } else {
-    Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+    const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
     if (property && property->isValid().empty() && (m_python_arguments.contains(propName) || !property->isDefault())) {
       textField->setText(QString::fromStdString(property->value()));
     }
@@ -899,9 +899,9 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
     // String in ISO8601 format /* add toUTC() to go from local time */
     QString value = dateEdit->dateTime().toString(Qt::ISODate);
     return value;
-  } else if (MantidWidget *mtd_widget = qobject_cast<MantidWidget *>(widget)) {
+  } else if (const MantidWidget *mtd_widget = qobject_cast<MantidWidget *>(widget)) {
     return mtd_widget->getUserInput().toString().trimmed();
-  } else if (PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget)) {
+  } else if (const PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget)) {
     return propWidget->getValue().trimmed();
   } else {
     QMessageBox::warning(this, windowTitle(),

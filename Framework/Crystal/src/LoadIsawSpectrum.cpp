@@ -187,8 +187,8 @@ void LoadIsawSpectrum::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
-                                      std::vector<std::vector<double>> spectra, size_t id) {
+double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec, const std::vector<std::vector<double>> &time,
+                                      const std::vector<std::vector<double>> &spectra, size_t id) {
   double spect = 0;
   if (iSpec == 1) {
     //"Calculate the spectrum using spectral coefficients for the GSAS Type 2
