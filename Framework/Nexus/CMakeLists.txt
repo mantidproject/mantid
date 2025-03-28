@@ -29,9 +29,9 @@ set(TEST_FILES
     # H5UtilTest.h
     # NexusIOHelperTest.h
     NeXusFileTest.h
-    # NeXusFileLeakTest.h
+    NeXusFileLeakTest.h
     # NeXusFileNapiTest.h
-    # NeXusFileReadWriteTest.h
+    NeXusFileReadWriteTest.h
 )
 # cmake-format: on
 

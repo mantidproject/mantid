@@ -159,7 +159,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  // void openGroupPath(std::string const &path);
+  void openGroupPath(std::string const &path);
 
   /**
    * Get the path into the current file
@@ -538,6 +538,11 @@ public:
    * \param result The map that will be filled with the entries
    */
   void getEntries(Entries &result);
+
+  /**
+   * Return all entries in the file, with absolute paths.
+   */
+  void getEntryDirectory(Entries &result);
 
   /** Return the string name of the top-level entry
    * 

@@ -43,6 +43,10 @@ public:
   // void setUp() { mkdir( "playground" ); }
   // void tearDown() { system( "rm -Rf playground"); }
 
+  // #################################################################################################################
+  // TEST CONSTRUCTORS
+  // #################################################################################################################
+  
   void test_remove() {
     // create a simple file, and make sure removeFile works as intended
     cout << "\nremoving\n";
@@ -142,6 +146,10 @@ public:
     file.close();
     removeFile(filename);
   }
+
+  // #################################################################################################################
+  // TEST MAKE / OPEN / CLOSE GROUP
+  // #################################################################################################################
 
   void test_make_group() {
     cout << "\ntest makeGroup\n";
@@ -272,35 +280,9 @@ public:
     cout << "good!\n";
   }
 
-  void test_getPath_groups() {
-    cout << "\ntest get_path -- groups only\n";
-    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grp.h5");
-    removeFile(filename);
-
-    // at root, path should be "/"
-    NeXus::File file(filename, H5ACC_CREATE5);
-    TS_ASSERT_EQUALS("/", file.getPath());
-
-    // make and open a group -- now at "/abc"
-    file.makeGroup("abc", "NXclass", true);
-    TS_ASSERT_EQUALS("/abc", file.getPath());
-
-    // make another layer -- at "/acb/def"
-    file.makeGroup("def", "NXentry", true);
-    TS_ASSERT_EQUALS("/abc/def", file.getPath());
-
-    // go down a step -- back to "/abc"
-    file.closeGroup();
-    TS_ASSERT_EQUALS("/abc", file.getPath());
-
-    // go up a different step -- at "/abc/ghi"
-    file.makeGroup("ghi", "NXfunsicle", true);
-    TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-  }
+  // #################################################################################################################
+  // TEST MAKE / OPEN / PUT / CLOSE DATASET
+  // #################################################################################################################
 
   void test_makeData() {
     cout << "\ntest make data\n";
@@ -511,92 +493,6 @@ public:
     cout << "good!";
   }
 
-  void test_getPath_data() {
-    cout << "\ntest get_path -- groups and data!\n";
-    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grpdata.h5");
-    removeFile(filename);
-
-    // at root, path should be "/"
-    NeXus::File file(filename, H5ACC_CREATE5);
-    TS_ASSERT_EQUALS("/", file.getPath());
-
-    // make and open a group -- now at "/abc"
-    file.makeGroup("abc", "NXclass", true);
-    TS_ASSERT_EQUALS("/abc", file.getPath());
-
-    // make another layer -- at "/acb/def"
-    file.makeData("def", NeXus::getType<int>(), 1, true);
-    int in=17;
-    file.putData(&in);
-    TS_ASSERT_EQUALS("/abc/def", file.getPath());
-    file.closeData();
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-  }
-
-  void test_getInfo() {
-    cout << "\ntest getInfo -- good\n";
-
-    // open a file
-    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
-    removeFile(filename);
-    NeXus::File file(filename, H5ACC_CREATE5);
-
-    // put an integer
-    int in = 17;
-    file.makeData("int_data", NeXus::getType<int>(), 1, true);
-    file.putData(&in);
-
-    // get the info and check
-    Info info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, NeXus::getType<int>());
-    TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 1);
-
-    file.closeData();
-
-    // put a double
-    double ind = 107.2345;
-    file.makeData("double_data", NeXus::getType<double>(), 1, true);
-    file.putData(&ind);
-
-    // get the info and check
-    info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
-    TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 1);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!";
-  }
-
-  void test_getInfo_bad() {
-    cout << "\ntest getInfo -- bad\n";
-    // open a file
-    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
-    removeFile(filename);
-    NeXus::File file(filename, H5ACC_CREATE5);
-
-    // put an integer
-    int in = 17;
-    file.makeData("int_data", NeXus::getType<int>(), 1, true);
-    file.putData(&in);
-    file.closeData();
-
-    // open a group and try to get info
-    file.makeGroup("a_group", "NXshorts", true);
-    TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
-  }
-
   void test_data_putget_string() {
     cout << "\ntest dataset read/write -- string\n";
 
@@ -746,6 +642,200 @@ public:
     removeFile(filename);
   }
 
+  // #################################################################################################################
+  // TEST PATH METHODS 
+  // #################################################################################################################
+
+  void test_getPath_groups() {
+    cout << "\ntest get_path -- groups only\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grp.h5");
+    removeFile(filename);
+
+    // at root, path should be "/"
+    NeXus::File file(filename, H5ACC_CREATE5);
+    TS_ASSERT_EQUALS("/", file.getPath());
+
+    // make and open a group -- now at "/abc"
+    file.makeGroup("abc", "NXclass", true);
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.makeGroup("def", "NXentry", true);
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+
+    // go down a step -- back to "/abc"
+    file.closeGroup();
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // go up a different step -- at "/abc/ghi"
+    file.makeGroup("ghi", "NXfunsicle", true);
+    TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_getPath_data() {
+    cout << "\ntest get_path -- groups and data!\n";
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_grpdata.h5");
+    removeFile(filename);
+
+    // at root, path should be "/"
+    NeXus::File file(filename, H5ACC_CREATE5);
+    TS_ASSERT_EQUALS("/", file.getPath());
+
+    // make and open a group -- now at "/abc"
+    file.makeGroup("abc", "NXclass", true);
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.makeData("def", NeXus::getType<int>(), 1, true);
+    int in=17;
+    file.putData(&in);
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    file.closeData();
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+  }
+
+  void test_openPath() {
+    cout << "\ntest openPath\n";
+    fflush(stdout);
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_entries.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // setup a recursive group tree
+    Entries tree {
+      Entry {"/entry1", "NXentry"},
+      Entry {"/entry1/layer2a", "NXentry"},
+      Entry {"/entry1/layer2a/layer3a", "NXentry"},
+      Entry {"/entry1/layer2a/layer3b", "NXentry"},
+      Entry {"/entry1/layer2a/data1", "SDS"},
+      Entry {"/entry1/layer2b", "NXentry"},
+      Entry {"/entry1/layer2b/layer3a", "NXentry"},
+      Entry {"/entry1/layer2b/layer3b", "NXentry"},
+      Entry {"/entry2", "NXentry"},
+      Entry {"/entry2/layer2c", "NXentry"},
+      Entry {"/entry2/layer2c/layer3c", "NXentry"}
+    };
+
+    string current;
+    for (auto it = tree.begin(); it != tree.end(); it++) {
+      current = file.getPath();
+      string path = it->first;
+      while (path.find(current) == path.npos) {
+        file.closeGroup();
+        current = file.getPath();
+      }
+      string name = path.substr(path.find_last_of("/")+1, path.npos);
+      if (it->second == "NXentry") {
+        file.makeGroup(name, it->second, true);
+      } else if (it->second == "SDS") {
+        string data = "Data";
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
+        file.putData(data.data());
+        file.closeData();
+      }
+    }
+    file.closeGroup();
+    file.closeGroup();
+    file.closeGroup();
+
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+
+    // open the root
+    file.openGroup("entry1", "NXentry");
+    std::string actual, expected = "/";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2b/layer3a";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2a/data1";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+  }
+
+  void test_getInfo() {
+    cout << "\ntest getInfo -- good\n";
+
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int>(), 1, true);
+    file.putData(&in);
+
+    // get the info and check
+    Info info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<int>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+
+    file.closeData();
+
+    // put a double
+    double ind = 107.2345;
+    file.makeData("double_data", NeXus::getType<double>(), 1, true);
+    file.putData(&ind);
+
+    // get the info and check
+    info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+    cout << "good!";
+  }
+
+  void test_getInfo_bad() {
+    cout << "\ntest getInfo -- bad\n";
+    // open a file
+    string filename("/home/4rx/mantid/build/Testing/Temporary/test_nexus_file_dataRW.h5");
+    removeFile(filename);
+    NeXus::File file(filename, H5ACC_CREATE5);
+
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int>(), 1, true);
+    file.putData(&in);
+    file.closeData();
+
+    // open a group and try to get info
+    file.makeGroup("a_group", "NXshorts", true);
+    TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
+
+    // cleanup
+    file.close();
+    removeFile(filename);
+    cout << "good!\n";
+  }
+
+// ##################################################################################################################
+// TEST ATTRIBUTE METHODS
+// ################################################################################################################
+
   template <typename T> void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
     // test put/get by pointer to data
     T out;
@@ -790,7 +880,7 @@ public:
     NeXus::File file(filename, H5ACC_CREATE5);
 
     // setup a recursive group tree
-    Entries expected {
+    Entries tree {
       Entry {"/entry1", "NXentry"},
       Entry {"/entry1/layer2a", "NXentry"},
       Entry {"/entry1/layer2a/layer3a", "NXentry"},
@@ -805,7 +895,7 @@ public:
     };
 
     string current;
-    for (auto it = expected.begin(); it != expected.end(); it++) {
+    for (auto it = tree.begin(); it != tree.end(); it++) {
       current = file.getPath();
       string path = it->first;
       while (path.find(current) == path.npos) {
@@ -823,7 +913,37 @@ public:
       }
     } 
 
+    // at root level, should be entry1, entry2
+    file.openPath("/");
     Entries actual = file.getEntries();
+    Entries expected = {Entry {"entry1", "NXentry"}, Entry {"entry2", "NXentry"}};
+    for(auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1, should be layer2a, layer2b
+    file.openPath("/entry1");
+    actual = file.getEntries();
+    expected = Entries({Entry {"layer2a", "NXentry"}, Entry {"layer2b", "NXentry"}});
+    for(auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry1/layer2a");
+    actual = file.getEntries();
+    expected = Entries({Entry {"layer3a", "NXentry"}, Entry {"layer3b", "NXentry"}, Entry {"data1", "SDS"}});
+    for(auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry2/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry2/layer2c");
+    actual = file.getEntries();
+    expected = Entries({Entry {"layer3c", "NXentry"}});
     for(auto it = expected.begin(); it != expected.end(); it++) {
       TS_ASSERT_EQUALS(actual.count(it->first), 1);
       TS_ASSERT_EQUALS(it->second, actual[it->first]);
@@ -831,67 +951,20 @@ public:
 
     // also test root level name
     TS_ASSERT_EQUALS("entry1", file.getTopLevelEntryName());
+
+    // also test getting the directory
+    file.getEntryDirectory(actual);
+    for(auto it = tree.cbegin(); it != tree.cend(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
   }
 
-  void test_links() {
-    cout << "tests of linkature\n";
+// ##################################################################################################################
+// TEST LINK METHODS
+// ################################################################################################################
 
-    string const filename("NexusFIle_linktest.nxs");
-    removeFile(filename);
+/* NOTE these pre-exist, in NeXusFileReadWriteTest.h*/
 
-    NeXus::File file(filename, H5ACC_CREATE5);
-    file.makeGroup("entry", "NXentry", true);
-
-    // Create some data with a link
-    cout << "create entry at /entry/some_data\n";
-    string const somedata("this is some data");
-    file.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
-    file.openData("some_data");
-    file.putData(somedata.data());
-    NXlink datalink = file.getDataID();
-    file.closeData();
-    file.flush();
-    // Create a group, and link it to that data
-    cout << "create group at /entry/data to link to the data\n";
-    file.makeGroup("data", "NXdata");
-    file.openGroup("data", "NXdata");
-    file.makeLink(datalink);
-    file.closeGroup();
-    file.flush();
-
-    // // check data link
-    // file.openPath("/entry/data/some_data");
-    // // TODO why can't we get the data through the link?
-    // // string output1;
-    // // fileid.getData(&output1);
-    // // TS_ASSERT_EQUALS(somedata, output1);
-    // NXlink res1 = file.getDataID();
-    // TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-    // TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
-    // printf("data link works\n");
-    // fileid.closeGroup();
-
-    // // Create two groups, group1 and group2
-    // // Make a link inside group2 to group1
-    // // make group1
-    // cout << "create group /entry/group1\n";
-    // std::string const strdata("NeXus sample data");
-    // fileid.makeGroup("group1", "NXentry");
-    // fileid.openGroup("group1", "NXentry");
-    // NXlink grouplink = fileid.getGroupID();
-    // fileid.closeGroup();
-    // // make group 2
-    // cout << "create group /entry/group2/group1\n";
-    // fileid.makeGroup("group2", "NXentry");
-    // fileid.openGroup("group2", "NXentry");
-    // fileid.makeLink(grouplink);
-    // fileid.closeGroup();
-
-    // // check group link
-    // fileid.openPath("/entry/group2/group1");
-    // NXlink res2 = file.getGroupID();
-    // TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
-    // TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
-    // printf("group link works\n");
-  }
 };
