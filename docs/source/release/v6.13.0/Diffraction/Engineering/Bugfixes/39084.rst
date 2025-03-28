@@ -1,0 +1,1 @@
+- Within  :ref:`algm-AbsorptionCorrection` algorithm, when ``Rasterize`` is called, it now takes both the Integration Volume Shape and the Sample Shape to calculate L1 paths. Before, it would only take the integration volume and would assume that the paths within this shape are equal to the paths within the sample.
