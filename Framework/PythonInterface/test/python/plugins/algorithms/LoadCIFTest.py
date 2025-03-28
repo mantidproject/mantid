@@ -50,6 +50,13 @@ class SpaceGroupBuilderTest(unittest.TestCase):
     def test_getSpaceGroupFromString_valid_correct_add_inversion(self):
         self.assertEqual(self.builder._getSpaceGroupFromString({"_space_group_name_h-m_alt": "F m 3 m"}), "F m -3 m")
 
+    def test_getSpaceGroupFromString_valid_correct_value_short_form(self):
+        valid_new = {"_space_group_name_h-m_alt": "C 2/m"}
+        valid_old = {"_symmetry_space_group_name_h-m": "C 2/m"}
+
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_new), "C 1 2/m 1")
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_old), "C 1 2/m 1")
+
     def test_getSpaceGroupFromString_invalid(self):
         valid_old = {"_symmetry_space_group_name_h-m": "P m -3 m"}
         invalid_new = {"_space_group_name_h-m_alt": "invalid"}
