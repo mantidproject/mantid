@@ -150,7 +150,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  // void openPath(std::string const &path);
+  void openPath(std::string const &path);
 
   /**
    * Open the group in which the NeXus object with the specified path exists.
@@ -206,7 +206,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  // void writeData(std::string const &name, std::string const &value);
+  void writeData(std::string const &name, std::string const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -214,7 +214,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  // void writeData(std::string const &name, char const *value);
+  void writeData(std::string const &name, char const *value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -223,7 +223,7 @@ public:
    * \param name The name of the field to create.
    * \param value The vector to put into the file.
    */
-  // template <typename NumT> void writeData(std::string const &name, std::vector<NumT> const &value);
+  template <typename NumT> void writeData(std::string const &name, std::vector<NumT> const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -232,7 +232,7 @@ public:
    * \param name The name of the field to create.
    * \param value The value to put into the file.
    */
-  // template <typename NumT> void writeData(std::string const &name, NumT const &value);
+  template <typename NumT> void writeData(std::string const &name, NumT const &value);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -242,8 +242,8 @@ public:
    * \param dims The dimensions of the data.
    * \tparam NumT numeric data type of \a value
    */
-  // template <typename NumT>
-  // void writeData(std::string const &name, std::vector<NumT> const &value, std::vector<int> const &dims);
+  template <typename NumT>
+  void writeData(std::string const &name, std::vector<NumT> const &value, std::vector<int> const &dims);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -253,8 +253,8 @@ public:
    * \param dims The dimensions of the data.
    * \tparam NumT numeric data type of \a value
    */
-  // template <typename NumT>
-  // void writeData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
+  template <typename NumT>
+  void writeData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -482,7 +482,7 @@ public:
   /** Return true if the data opened is of one of the
    * int data types, 32 bits or less.
    */
-  // bool isDataInt();
+  bool isDataInt();
 
   /** Put data into the supplied vector. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -494,7 +494,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
+  template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -504,7 +504,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  // template <typename NumT> void readData(std::string const &dataName, NumT &data);
+  template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -515,7 +515,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  // void readData(std::string const &dataName, std::string &data);
+  void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.

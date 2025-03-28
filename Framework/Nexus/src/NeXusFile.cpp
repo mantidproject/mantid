@@ -428,7 +428,6 @@ void File::makeData(std::string const &name, NXnumtype const type, NumT const le
   this->makeData(name, type, dims, open_data);
 }
 
-/*
 template <typename NumT> void File::writeData(std::string const &name, NumT const &value) {
   std::vector<NumT> v(1, value);
   this->writeData(name, v);
@@ -467,7 +466,6 @@ template <typename NumT> void File::writeData(std::string const &name, vector<Nu
   this->putData(value);
   this->closeData();
 }
-*/
 
 // template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> &value) {
 //   // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
@@ -844,109 +842,109 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   this->getData<NumT>(data.data());
 }
 
-// void File::getDataCoerce(vector<int> &data) {
-//   Info info = this->getInfo();
-//   if (info.type == NXnumtype::INT8) {
-//     vector<int8_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT8) {
-//     vector<uint8_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::INT16) {
-//     vector<int16_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT16) {
-//     vector<uint16_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::INT32) {
-//     vector<int32_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT32) {
-//     vector<uint32_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else {
-//     throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.");
-//   }
-// }
+void File::getDataCoerce(vector<int> &data) {
+  Info info = this->getInfo();
+  if (info.type == NXnumtype::INT8) {
+    vector<int8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT8) {
+    vector<uint8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::INT16) {
+    vector<int16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT16) {
+    vector<uint16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::INT32) {
+    vector<int32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT32) {
+    vector<uint32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else {
+    throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.");
+  }
+}
 
-// void File::getDataCoerce(vector<double> &data) {
-//   Info info = this->getInfo();
-//   if (info.type == NXnumtype::INT8) {
-//     vector<int8_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT8) {
-//     vector<uint8_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::INT16) {
-//     vector<int16_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT16) {
-//     vector<uint16_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::INT32) {
-//     vector<int32_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::UINT32) {
-//     vector<uint32_t> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::FLOAT32) {
-//     vector<float> result;
-//     this->getData(result);
-//     data.assign(result.begin(), result.end());
-//   } else if (info.type == NXnumtype::FLOAT64) {
-//     this->getData(data);
-//   } else {
-//     throw Exception("NexusFile::getDataCoerce(): Could not coerce to double.");
-//   }
-// }
+void File::getDataCoerce(vector<double> &data) {
+  Info info = this->getInfo();
+  if (info.type == NXnumtype::INT8) {
+    vector<int8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT8) {
+    vector<uint8_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::INT16) {
+    vector<int16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT16) {
+    vector<uint16_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::INT32) {
+    vector<int32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::UINT32) {
+    vector<uint32_t> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::FLOAT32) {
+    vector<float> result;
+    this->getData(result);
+    data.assign(result.begin(), result.end());
+  } else if (info.type == NXnumtype::FLOAT64) {
+    this->getData(data);
+  } else {
+    throw Exception("NexusFile::getDataCoerce(): Could not coerce to double.");
+  }
+}
 
-// template <typename NumT> void File::readData(std::string const &dataName, std::vector<NumT> &data) {
-//   this->openData(dataName);
-//   this->getData(data);
-//   this->closeData();
-// }
+template <typename NumT> void File::readData(std::string const &dataName, std::vector<NumT> &data) {
+  this->openData(dataName);
+  this->getData(data);
+  this->closeData();
+}
 
-// template <typename NumT> void File::readData(std::string const &dataName, NumT &data) {
-//   std::vector<NumT> dataVector;
-//   this->openData(dataName);
-//   this->getData(dataVector);
-//   if (dataVector.size() > 0)
-//     data = dataVector[0];
-//   this->closeData();
-// }
+template <typename NumT> void File::readData(std::string const &dataName, NumT &data) {
+  std::vector<NumT> dataVector;
+  this->openData(dataName);
+  this->getData(dataVector);
+  if (dataVector.size() > 0)
+    data = dataVector[0];
+  this->closeData();
+}
 
-// void File::readData(std::string const &dataName, std::string &data) {
-//   this->openData(dataName);
-//   data = this->getStrData();
-//   this->closeData();
-// }
+void File::readData(std::string const &dataName, std::string &data) {
+  this->openData(dataName);
+  data = this->getStrData();
+  this->closeData();
+}
 
-// bool File::isDataInt() {
-//   Info info = this->getInfo();
-//   switch (info.type) {
-//   case NXnumtype::INT8:
-//   case NXnumtype::UINT8:
-//   case NXnumtype::INT16:
-//   case NXnumtype::UINT16:
-//   case NXnumtype::INT32:
-//   case NXnumtype::UINT32:
-//     return true;
-//   default:
-//     return false;
-//   }
-// }
+bool File::isDataInt() {
+  Info info = this->getInfo();
+  switch (info.type) {
+  case NXnumtype::INT8:
+  case NXnumtype::UINT8:
+  case NXnumtype::INT16:
+  case NXnumtype::UINT16:
+  case NXnumtype::INT32:
+  case NXnumtype::UINT32:
+    return true;
+  default:
+    return false;
+  }
+}
 
 string File::getStrData() {
   std::string res;
@@ -981,7 +979,6 @@ Entries File::getEntries() {
 
 void File::getEntries(Entries &result) {
   result.clear();
-  // this->initGroupDir();
   recursivePopulateEntries(this->getRoot(), result);
 }
 
@@ -1107,8 +1104,8 @@ string File::getStrAttr(AttrInfo const &info) {
 // }
 
 NXlink File::getGroupID() {
-  // make sure current location is a dataset
-  this->getCurrentLocationAs<H5::Group>();
+  // make sure current location is a group
+  auto *current = this->getCurrentLocationAs<H5::Group>();
 
   /*
     this means: if the item is already linked: use the target attribute; 
@@ -1119,13 +1116,11 @@ NXlink File::getGroupID() {
   try {
     link.targetPath = this->getStrAttr(targetInfo);
   } catch (Exception &) {
-    link.targetPath == this->getPath();
+    link.targetPath == current->getObjName();
   }
   link.linkType = NXlinktype::group;
   return link;
 }
-
-// void File::initGroupDir() { CALL_NAPI(NXinitgroupdir(*(this->m_pfile_id)), "NXinitgroupdir failed"); }
 
 // void File::initAttrDir() { CALL_NAPI(NXinitattrdir(*(this->m_pfile_id)), "NXinitattrdir failed"); }
 
@@ -1237,195 +1232,195 @@ template MANTID_NEXUS_DLL void File::putData(vector<float> const &data);
 template MANTID_NEXUS_DLL void File::putData(vector<double> const &data);
 template MANTID_NEXUS_DLL void File::putData(vector<std::string> const &data);
 
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, float const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, double const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int8_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint8_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int16_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint16_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int32_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint32_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int64_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint64_t const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, char const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, float const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, double const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int8_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint8_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int16_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint16_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int32_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint32_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, int64_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, uint64_t const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, char const &value);
 
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value);
 
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value,
-//                                                std::vector<int> const &dims);
-// template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value,
-//                                                std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value,
+                                               std::vector<int> const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value,
+                                               std::vector<int> const &dims);
 
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value);
 
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value,
-//                                                          dimsize_t const chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value,
-//                                                          dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value,
+                                                         dimsize_t const chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value,
+                                                         dimsize_t const chunk);
 
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value, DimVector
-// &dims,
-//                                                          DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value,
-//                                                          DimVector &dims, DimSizeVector &chunk);
-// template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value, DimVector
-// &dims,
-//                                                          DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> &value, DimVector
+&dims,
+                                                         DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> &value,
+                                                         DimVector &dims, DimSizeVector &chunk);
+template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> &value, DimVector
+&dims,
+                                                         DimSizeVector &chunk);
 
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<float> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<double> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int8_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint8_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int16_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint16_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int32_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint32_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int64_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint64_t> &value);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<char> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<float> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<double> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int8_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint8_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int16_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint16_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int32_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint32_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int64_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint64_t> &value);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<char> &value);
 
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<float> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<double> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int8_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint8_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int16_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint16_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int32_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint32_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int64_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint64_t> &value, DimVector &dims);
-// template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<char> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<float> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<double> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int8_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint8_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int16_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint16_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int32_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint32_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<int64_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<uint64_t> &value, DimVector &dims);
+template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<char> &value, DimVector &dims);
 
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<float> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<float> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<double> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<double> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int8_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int8_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint8_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint8_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int16_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int16_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint16_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint16_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int32_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int32_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint32_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint32_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int64_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int64_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint64_t> const &value,
-//                                                    vector<int> const &dims, NXcompression const comp,
-//                                                    vector<int> const &bufsize);
-// template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint64_t> const &value,
-//                                                    DimVector const &dims, NXcompression const comp,
-//                                                    DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<float> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<float> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<double> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<double> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int8_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int8_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint8_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint8_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int16_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int16_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint16_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint16_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int32_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int32_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint32_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint32_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int64_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int64_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint64_t> const &value,
+                                                   vector<int> const &dims, NXcompression const comp,
+                                                   vector<int> const &bufsize);
+template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint64_t> const &value,
+                                                   DimVector const &dims, NXcompression const comp,
+                                                   DimSizeVector const &bufsize);
 
 template MANTID_NEXUS_DLL void File::getData(int *data);
 template MANTID_NEXUS_DLL void File::getData(int64_t *data);
@@ -1447,28 +1442,28 @@ template MANTID_NEXUS_DLL void File::getData(vector<int64_t> &data);
 template MANTID_NEXUS_DLL void File::getData(vector<uint64_t> &data);
 template MANTID_NEXUS_DLL void File::getData(vector<char> &data);
 
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<float> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<double> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int8_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint8_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int16_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint16_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int32_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint32_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int64_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint64_t> &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<char> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<float> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<double> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int8_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint8_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int16_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint16_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int32_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint32_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<int64_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<uint64_t> &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, vector<char> &data);
 
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, float &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, double &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int8_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint8_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int16_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint16_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int32_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint32_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int64_t &data);
-// template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint64_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, float &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, double &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int8_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint8_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int16_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint16_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int32_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint32_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, int64_t &data);
+template MANTID_NEXUS_DLL void File::readData(std::string const &dataName, uint64_t &data);
 
 // template MANTID_NEXUS_DLL void File::putSlab(std::vector<float> const &data, int start, int size);
 // template MANTID_NEXUS_DLL void File::putSlab(std::vector<double> const &data, int start, int size);
