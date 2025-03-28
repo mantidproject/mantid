@@ -80,12 +80,8 @@ public:
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission can
-    NXcanSASTestTransmissionParameters transmissionParameters;
-    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
-    transmissionParameters.usesTransmission = true;
-
-    auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, nullptr);
@@ -113,12 +109,8 @@ public:
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission can
-    NXcanSASTestTransmissionParameters transmissionCanParameters;
-    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
-    transmissionCanParameters.usesTransmission = true;
-
-    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin, transmissionCanParameters.xmax);
+    parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameCanAttrValue);
+    auto transmissionCan = getTransmissionWorkspace(parameters.transmissionCanParameters);
 
     // Act
     save_file_no_issues(ws, parameters, nullptr, transmissionCan);
@@ -147,19 +139,10 @@ public:
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission
-    NXcanSASTestTransmissionParameters transmissionParameters;
-    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
-    transmissionParameters.usesTransmission = true;
-
-    NXcanSASTestTransmissionParameters transmissionCanParameters;
-    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
-    transmissionCanParameters.usesTransmission = true;
-
-    auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
-
-    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin, transmissionCanParameters.xmax);
+    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameCanAttrValue);
+    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
+    auto transmissionCan = getTransmissionWorkspace(parameters.transmissionCanParameters);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
@@ -210,12 +193,8 @@ public:
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission can
-    NXcanSASTestTransmissionParameters transmissionParameters;
-    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
-    transmissionParameters.usesTransmission = true;
-
-    auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, nullptr);
@@ -299,24 +278,19 @@ public:
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission
-    NXcanSASTestTransmissionParameters transmissionParameters;
-    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
-    transmissionParameters.usesTransmission = true;
-    transmissionParameters.isHistogram = isHistogram;
+    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    parameters.transmissionParameters.isHistogram = isHistogram;
+    parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    parameters.transmissionCanParameters.isHistogram = isHistogram;
 
-    NXcanSASTestTransmissionParameters transmissionCanParameters;
-    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
-    transmissionCanParameters.usesTransmission = true;
-    transmissionCanParameters.isHistogram = isHistogram;
-
-    auto transmission = getTransmissionWorkspace(transmissionParameters);
-    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
+    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
+    auto transmissionCan = getTransmissionWorkspace(parameters.transmissionCanParameters);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
 
     // Assert
-    do_assert(parameters, transmissionParameters, transmissionCanParameters);
+    do_assert(parameters);
 
     // Clean up
     removeFile(parameters.filename);
@@ -400,7 +374,7 @@ public:
   }
 
 private:
-  void save_file_no_issues(const Mantid::API::Workspace_sptr &workspace, NXcanSASTestParameters &parameters,
+  void save_file_no_issues(const Mantid::API::Workspace_sptr &workspace, const NXcanSASTestParameters &parameters,
                            const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
                            const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
