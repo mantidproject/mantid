@@ -11,6 +11,7 @@
 #include <H5Cpp.h>
 #include <MantidAPI/WorkspaceGroup_fwd.h>
 #include <filesystem>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

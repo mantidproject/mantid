@@ -728,7 +728,7 @@ void addTransmission(H5::Group &group, const MatrixWorkspace_const_sptr &workspa
 
 /**
  * Adds signal and Q data to the data group from 1D reduced SANS data
- * @param group: The data group
+ * @param data: The data group
  * @param workspace: The reduced SANS workspace
  */
 void addData1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
