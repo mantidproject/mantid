@@ -43,6 +43,14 @@ Mantid::API::MatrixWorkspace_sptr toPointData(const Mantid::API::MatrixWorkspace
   return toPointAlg->getProperty("OutputWorkspace");
 }
 
+void groupWorkspaces(const std::string &groupName, const std::vector<std::string> &wsNames) {
+  auto const groupAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setProperty("InputWorkspaces", wsNames);
+  groupAlg->setProperty("OutputWorkspace", groupName);
+  groupAlg->execute();
+}
+
 } // namespace
 
 namespace NXcanSASTestHelper {
@@ -76,12 +84,15 @@ void setXValuesOn1DWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
 }
 
 void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &logName,
-                    const std::string &logValue) {
+                    const std::string &logValue, const std::string &logUnit) {
   auto logAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   logAlg->initialize();
   logAlg->setChild(true);
   logAlg->setProperty("Workspace", workspace);
   logAlg->setProperty("LogName", logName);
+  if (!logUnit.empty()) {
+    logAlg->setProperty("LogUnit", logUnit);
+  }
   logAlg->setProperty("LogText", logValue);
   logAlg->execute();
 }
@@ -97,17 +108,22 @@ void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::str
   }
 }
 
-void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &instrumentName) {
+void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &instrumentName,
+                    const std::string &instrumentFilename) {
   auto instAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
   instAlg->initialize();
   instAlg->setChild(true);
   instAlg->setProperty("Workspace", workspace);
   instAlg->setProperty("InstrumentName", instrumentName);
+  // Filename takes precedence over instrument name
+  if (!instrumentFilename.empty()) {
+    instAlg->setProperty("Filename", instrumentFilename);
+  }
   instAlg->setProperty("RewriteSpectraMap", "False");
   instAlg->execute();
 }
 
-Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &parameters) {
+Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(const NXcanSASTestParameters &parameters) {
   Mantid::API::MatrixWorkspace_sptr ws;
   if (parameters.hasDx) {
     ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(parameters.size, parameters.value,
@@ -124,7 +140,7 @@ Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &par
   set_logs(ws, parameters.runNumber, parameters.userFile);
 
   // Set instrument
-  set_instrument(ws, parameters.instrumentName);
+  set_instrument(ws, parameters.instrumentName, parameters.instrumentFilename);
   ws->getSpectrum(0).setDetectorID(1);
 
   // Set Sample info
@@ -150,7 +166,7 @@ Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &par
   return ws;
 }
 
-Mantid::API::MatrixWorkspace_sptr getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters) {
+Mantid::API::MatrixWorkspace_sptr getTransmissionWorkspace(const TransmissionTestParameters &parameters) {
   Mantid::API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create1DWorkspaceConstant(parameters.size, parameters.value, parameters.error, false);
   ws->setTitle(parameters.name);
@@ -163,21 +179,16 @@ Mantid::API::MatrixWorkspace_sptr getTransmissionWorkspace(NXcanSASTestTransmiss
 
 Mantid::API::WorkspaceGroup_sptr provideGroupWorkspace(Mantid::API::AnalysisDataServiceImpl &ads,
                                                        NXcanSASTestParameters &parameters) {
-  auto const &ws1 = provide1DWorkspace(parameters);
-  auto const &ws2 = provide1DWorkspace(parameters);
+  const auto &ws1 = provide1DWorkspace(parameters);
+  const auto &ws2 = provide1DWorkspace(parameters);
   ads.add("ws1", ws1);
   ads.add("ws2", ws2);
   parameters.idf = getIDFfromWorkspace(ws1);
-
-  auto const groupAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
-  groupAlg->initialize();
-  groupAlg->setProperty("InputWorkspaces", "ws1,ws2");
-  groupAlg->setProperty("OutputWorkspace", "ws_group");
-  groupAlg->execute();
+  groupWorkspaces("ws_group", {"ws1", "ws2"});
   return ads.retrieveWS<Mantid::API::WorkspaceGroup>("ws_group");
 }
 
-Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(NXcanSASTestParameters &parameters) {
+Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(const NXcanSASTestParameters &parameters) {
   auto ws = provide1DWorkspace(parameters);
 
   std::string axisBinning = std::to_string(parameters.xmin) + ",1," + std::to_string(parameters.xmax);
@@ -227,17 +238,53 @@ Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(NXcanSASTestParameters &par
   return ws;
 }
 
-void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws) {
+void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws, double value) {
   const auto numberOfHistograms = ws->getNumberHistograms();
 
   for (size_t index = 0; index < numberOfHistograms; ++index) {
-    auto &data = ws->dataY(index);
-    data = Mantid::MantidVec(data.size(), static_cast<double>(index));
+    auto &data = ws->mutableY(index);
+    auto &error = ws->mutableE(index);
+
+    auto val = value != 0 ? value : static_cast<double>(index);
+    data = Mantid::MantidVec(data.size(), val);
+    error = Mantid::MantidVec(error.size(), std::sqrt(val));
   }
 }
 
+Mantid::API::WorkspaceGroup_sptr providePolarizedGroup(Mantid::API::AnalysisDataServiceImpl &ads,
+                                                       NXcanSASTestParameters &parameters) {
+  std::vector<std::string> wsNames;
+  for (int i = 0; i < parameters.polWorkspaceNumber; i++) {
+    Mantid::API::MatrixWorkspace_sptr ws;
+    if (parameters.is2dData) {
+      ws = provide2DWorkspace(parameters);
+      set2DValues(ws, !parameters.referenceValues.empty() ? parameters.referenceValues.at(i) : 0);
+    } else {
+      ws = provide1DWorkspace(parameters);
+    }
+
+    const auto name = "group_" + std::to_string(i);
+    ads.add(name, ws);
+    wsNames.push_back(name);
+  }
+  groupWorkspaces("GroupPol", wsNames);
+  auto groupWS = ads.retrieveWS<Mantid::API::WorkspaceGroup>("GroupPol");
+  parameters.idf = parameters.instrumentName;
+  if (parameters.instrumentName != "POLSANSTEST") {
+    parameters.idf = getIDFfromWorkspace(std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWS->getItem(0)));
+  }
+  return groupWS;
+}
+
+void setPolarizedParameters(NXcanSASTestParameters &parameters) {
+  parameters.instrumentName = "POLSANSTEST";
+  parameters.instrumentFilename = "unit_testing/POLSANSTEST_Definition.xml";
+  parameters.isPolarized = true;
+}
+
 void removeFile(const std::string &filename) {
-  if (auto const &path = std::filesystem::path(filename); !path.empty()) {
+  const auto &path = std::filesystem::path(filename);
+  if (!path.empty() && exists(path)) {
     std::filesystem::remove(path);
   }
 }
