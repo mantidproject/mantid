@@ -13,7 +13,10 @@ namespace DataHandling {
 
 namespace NXcanSAS {
 // General
-enum class WorkspaceDimensionality { oneD, twoD, other };
+enum class WorkspaceDimensionality { other, oneD, twoD };
+
+// NXcanSAS file extension
+const std::string NX_CANSAS_EXTENSION = ".h5";
 
 // NXcanSAS Tag Definitions
 const std::string sasUnitAttr = "units";
@@ -69,14 +72,6 @@ const std::string sasDataI = "I";
 const std::string sasDataIdev = "Idev";
 const std::string sasDataMask = "Mask";
 
-// SASdata polarization
-// WIP: Initial proposal: https://wiki.cansas.org/index.php?title=NXcanSAS_v1.1
-const std::string sasDataPout = "Pout";
-const std::string sasDataPin = "Pin";
-const std::string sasDataPoutIndicesAttr = "Pout_indices";
-const std::string sasDataPinIndicesAttr = "Pin_indices";
-const std::string sasDataPolarizationUnitAttr = "none";
-
 // SASinstrument
 const std::string sasInstrumentClassAttr = "SASinstrument";
 const std::string nxInstrumentClassAttr = "NXinstrument";
@@ -120,6 +115,16 @@ const std::string sasInstrumentSampleThickness = "thickness";
 const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
 
 const std::string sasInstrumentIDF = "idf";
+
+// SASpolarization
+// WIP: Initial proposal: https://wiki.cansas.org/index.php?title=NXcanSAS_v1.1
+const std::string sasDataPout = "Pout";
+const std::string sasDataPin = "Pin";
+const std::string sasDataPoutIndicesAttr = "Pout_indices";
+const std::string sasDataPinIndicesAttr = "Pin_indices";
+constexpr int sasDataPoutIndicesValue = 1;
+constexpr int sasDataPinIndicesValue = 0;
+const std::string sasDataPolarizationUnitAttr = "none";
 
 struct InstrumentPolarizer {
   explicit InstrumentPolarizer(const std::string &type, const std::string &name) : m_type(type), m_name(name) {};
