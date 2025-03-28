@@ -43,6 +43,6 @@ void SavePolarizedNXcanSAS::exec() {
   auto const baseFilename = getPropertyValue("Filename");
   Workspace_sptr const workspace = getProperty("InputWorkspace");
   auto const wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-  savePolarizedGroup(wsGroup, NXcanSAS::prepareFilename(baseFilename, 0, false));
+  savePolarizedGroup(wsGroup, NXcanSAS::prepareFilename(baseFilename));
 }
 } // namespace Mantid::DataHandling
