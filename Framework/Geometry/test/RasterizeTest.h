@@ -284,9 +284,11 @@ public:
         ComponentCreationHelper::createCuboid(1, 1, 1, sampleCenter, "sample");
     const auto raster_result = Rasterize::calculate(V3D(0., 0., 1.), *integVolume, *sample, 1.0);
 
-    TS_ASSERT_EQUALS(raster_result.l1.size(), 8);
+    const int size = static_cast<int>(raster_result.l1.size());
+
+    TS_ASSERT_EQUALS(size, 8);
     TS_ASSERT_DELTA(raster_result.totalvolume, 8.0, 0.001);
-    for (int i = 0; i < raster_result.l1.size(); i++) {
+    for (int i = 0; i < size; i++) {
       // all l1s should be greater or equal to 1
       TS_ASSERT_LESS_THAN_EQUALS(1.0, raster_result.l1[i])
     };
@@ -299,9 +301,11 @@ public:
     const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(1, 1, 1, sampleCenter, "sample");
     const auto raster_result = Rasterize::calculate(V3D(0., 0., 1.), *integVolume, *sample, 1.0);
 
-    TS_ASSERT_EQUALS(raster_result.l1.size(), 8);
+    const int size = static_cast<int>(raster_result.l1.size());
+
+    TS_ASSERT_EQUALS(size, 8);
     TS_ASSERT_DELTA(raster_result.totalvolume, 8.0, 0.001);
-    for (int i = 0; i < raster_result.l1.size(); i++) {
+    for (int i = 0; i < size; i++) {
       // all l1s should be less than or equal to 2
       TS_ASSERT_LESS_THAN_EQUALS(raster_result.l1[i], 2.0)
     };
