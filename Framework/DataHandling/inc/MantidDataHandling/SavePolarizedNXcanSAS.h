@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SavePolarizedNXcanSAS : Saves a reduced polarized group workspace in the NXcanSAS format.
+/** SavePolarizedNXcanSAS : Extends SaveNXcanSAS adding metadata for polarized SANS measurements.
  */
 class MANTID_DATAHANDLING_DLL SavePolarizedNXcanSAS final : public SaveNXcanSASBase {
 public:
@@ -21,11 +21,13 @@ public:
   /// Virtual dtor
   ~SavePolarizedNXcanSAS() override = default;
   const std::string name() const override { return "SavePolarizedNXcanSAS"; }
-  bool checkGroups() override { return false; }
-  /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Save a MatrixWorkspace to a file in the NXcanSAS format (for both 1D and 2D data).";
+    return "Save a Group Workspace with reduced SANS polarized data in NXcanSAS Format.";
   }
+
+  /// InputWorkspace property only accepts workspace groups so we don't want the base algorithm class to process
+  /// them as it will done in exec.
+  bool checkGroups() override { return false; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -40,8 +42,6 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-
-  std::vector<API::MatrixWorkspace_sptr> m_workspaces;
 };
 
 } // namespace DataHandling

@@ -26,18 +26,23 @@ void SavePolarizedNXcanSAS::init() {
 }
 
 std::map<std::string, std::string> SavePolarizedNXcanSAS::validateInputs() {
-  auto result = validateStandardInputs();
-  return validatePolarizedInputs(result);
-  ;
+  std::map<std::string, std::string> results;
+
+  auto const standardResults = validateStandardInputs();
+  results.insert(standardResults.begin(), standardResults.end());
+
+  auto const polarizedResults = validatePolarizedInputs();
+  results.insert(polarizedResults.begin(), polarizedResults.end());
+
+  return results;
 }
 
 void SavePolarizedNXcanSAS::exec() {
-  m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3);
+  m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 4);
 
-  auto baseFilename = getPropertyValue("Filename");
-  Workspace_sptr workspace = getProperty("InputWorkspace");
-  auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-  savePolarizedGroup(wsGroup, NXcanSAS::prepareFilename(baseFilename, 0, m_workspaces.size() > 1));
+  auto const baseFilename = getPropertyValue("Filename");
+  Workspace_sptr const workspace = getProperty("InputWorkspace");
+  auto const wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  savePolarizedGroup(wsGroup, NXcanSAS::prepareFilename(baseFilename, 0, false));
 }
-
 } // namespace Mantid::DataHandling
