@@ -54,8 +54,8 @@ class SpaceGroupBuilderTest(unittest.TestCase):
         valid_new = {"_space_group_name_h-m_alt": "C 2/m"}
         valid_old = {"_symmetry_space_group_name_h-m": "C 2/m"}
 
-        self.assertEqual(self.builder._getSpaceGroupFromString(valid_new), "C 2/m")
-        self.assertEqual(self.builder._getSpaceGroupFromString(valid_old), "C 2/m")
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_new), "C 1 2/m 1")
+        self.assertEqual(self.builder._getSpaceGroupFromString(valid_old), "C 1 2/m 1")
 
     def test_getSpaceGroupFromString_invalid(self):
         valid_old = {"_symmetry_space_group_name_h-m": "P m -3 m"}
