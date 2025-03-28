@@ -556,8 +556,6 @@ NXstatus NXclosegroup(NXhandle fid) {
 }
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
   NXstatus status;
 
   NexusFileID *fileID = static_cast<NexusFileID *>(fid);
