@@ -97,7 +97,7 @@ void PolarizationEfficiencyCor::init() {
       "Ap, Rho and Alpha for Fredrikze.");
 
   const auto wildesFlipperValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true, '0', '1', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true, "0", "1", true);
   declareProperty(Prop::FLIPPERS, "", wildesFlipperValidator,
                   "Flipper configurations of the input workspaces  (Wildes method only)");
 
