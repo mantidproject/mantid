@@ -591,6 +591,8 @@ void addEMFieldDirection(H5::Group &group, const std::string &emFieldDir) {
  * Adds the direction and strength of either magnetic or electric field on the sample.
  * @param group: The sas group to add the data to.
  * @param workspace: The workspace from which to extract the information
+ * @param emFieldStrengthLog: The log name in the workspace that contains information about the electric or magnetic
+ * field.
  * @param emFieldDir: Comma separated string representing spherical vector with directions polar,azimuthal androtation.
  */
 void addSampleEMFields(H5::Group &group, const MatrixWorkspace_sptr &workspace, const std::string &emFieldStrengthLog,
@@ -728,7 +730,7 @@ void addTransmission(H5::Group &group, const MatrixWorkspace_const_sptr &workspa
 
 /**
  * Adds signal and Q data to the data group from 1D reduced SANS data
- * @param group: The data group
+ * @param data: The data group
  * @param workspace: The reduced SANS workspace
  */
 void addData1D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
