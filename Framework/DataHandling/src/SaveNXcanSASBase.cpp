@@ -352,7 +352,6 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
 
   // Get scaled background subtraction information
   const auto &scaledBgSubWorkspace = getPropertyValue(StandardProperties::BKG_SUB_WORKSPACE);
-  double scaledBgSubScaleFactor = getProperty(StandardProperties::BKG_SUB_SCALE);
 
   addProcess(sasEntry, workspace, transmissionCan);
 
@@ -369,6 +368,7 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
   }
 
   if (!scaledBgSubWorkspace.empty()) {
+    double scaledBgSubScaleFactor = getProperty(StandardProperties::BKG_SUB_SCALE);
     H5Util::write(process, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
     H5Util::writeScalarDataSetWithStrAttributes(process, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor,
                                                 {});

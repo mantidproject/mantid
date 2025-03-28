@@ -136,8 +136,8 @@ struct InstrumentPolarizer {
   static std::string sasPolarizerIDFDeviceType() { return "device-type"; }
   static std::string sasPolarizerDistance() { return "distance"; }
   static std::string sasPolarizerDistanceUnitAttr() { return "m"; }
-  std::string getComponentName() const { return m_name; }
-  std::string getComponentType() const { return m_type; }
+  const std::string &getComponentName() const { return m_name; }
+  const std::string &getComponentType() const { return m_type; }
 
 private:
   std::string m_type;

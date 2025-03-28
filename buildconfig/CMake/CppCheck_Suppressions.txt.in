@@ -220,7 +220,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineC
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:260
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:363
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:452
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrections/SpinStateValidator.cpp:42
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MayersSampleCorrectionStrategy.cpp:119
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:313

@@ -223,16 +223,16 @@ void addPropertyFromRunIfExists(const Run &run, const std::string &propertyName,
 
 struct SpinStateHelper {
   explicit SpinStateHelper(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
-    auto const spinVec = std::vector<int>({-1, 1});
+    auto const stateVector = std::vector<int>({-1, 1});
     if (spinStateStr.size() == 4) {
-      Pin = spinVec;
-      Pout = spinVec;
+      Pin = stateVector;
+      Pout = stateVector;
     } else if (spinStateStr.size() == 2) {
       if (spinStateStr.begin()->starts_with("0")) {
         Pin = std::vector<int>(1, 0);
-        Pout = spinVec;
+        Pout = stateVector;
       } else {
-        Pin = spinVec;
+        Pin = stateVector;
         Pout = std::vector<int>(1, 0);
       }
     }
