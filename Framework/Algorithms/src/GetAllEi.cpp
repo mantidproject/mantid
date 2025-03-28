@@ -903,7 +903,7 @@ Kernel::Property *GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &
  *                        experiment start/end times.
  */
 double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
-                                 Kernel::TimeROI &timeroi) {
+                                 const Kernel::TimeROI &timeroi) {
 
   auto pIProperty = getPLogForProperty(inputWS, propertyName);
 

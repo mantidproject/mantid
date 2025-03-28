@@ -200,7 +200,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEvents
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1804
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:518
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetAllEi.cpp:905
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskInstrument.cpp:67
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MedianDetectorTest.cpp:280
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeLogs.cpp:82

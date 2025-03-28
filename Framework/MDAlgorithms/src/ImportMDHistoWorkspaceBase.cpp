@@ -162,7 +162,7 @@ std::map<std::string, std::string> ImportMDHistoWorkspaceBase::validateInputs() 
   targetFrames.emplace_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
-  for (auto &frame : frames) {
+  for (const auto &frame : frames) {
     auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;
