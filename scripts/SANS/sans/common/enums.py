@@ -200,6 +200,7 @@ class SaveType(Enum):
     NIST_QXY = "NistQxy"
     NO_TYPE = "NoType"
     NX_CAN_SAS = "NXcanSAS"
+    POL_NX_CAN_SAS = "PolarizedNXcanSAS"
     RKH = "RKH"
 
 
