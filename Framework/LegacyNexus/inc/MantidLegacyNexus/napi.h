@@ -206,12 +206,10 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(Mantid::Leg
 /**
  * Retrieve the current path in the NeXus file
  * \param handle a NeXus file handle
- * \param path A string to copy the path to.
- * \param  pathlen The maximum number of characters to copy into path
- * \return NX_OK or NX_ERROR
+ * \return the nexus path
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNexus::NXhandle handle, std::string &path);
+MANTID_LEGACYNEXUS_DLL std::string NXgetpath(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file

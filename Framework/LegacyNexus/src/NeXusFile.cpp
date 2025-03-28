@@ -125,14 +125,7 @@ void File::openPath(const string &path) {
 }
 
 std::string File::getPath() {
-  std::string path;
-  path.reserve(2048);
-  NXstatus status = NXgetpath(this->m_file_id, path);
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXgetpath() failed";
-    throw Exception(msg.str(), status);
-  }
+  std::string path = NXgetpath(this->m_file_id);
   return path;
 }
 
