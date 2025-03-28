@@ -34,7 +34,7 @@ extern NXstatus NX4getdataID(NXhandle handle, NXlink *pLink);
 
 extern NXstatus NX4getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
-void NX4assignFunctions(pLgcyFunction fHandle);
+void NX4assignFunctions(LgcyFunction &fHandle);
 
 /*
  *  HDF changed from MAX_VAR_DIMS to H4_MAX_VAR_DIMS aronud 9/5/2007
