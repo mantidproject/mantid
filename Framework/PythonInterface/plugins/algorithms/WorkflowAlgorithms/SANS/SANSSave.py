@@ -16,6 +16,10 @@ from sans.common.general_functions import get_detector_names_from_instrument
 from sans.common.constant_containers import SANSInstrument_string_as_key_NoInstrument
 from sans.common.enums import SaveType
 
+FILE_FORMAT_DOC_SUFFIX = (
+    "Note that if file formats of the same type, e.g. .xml are chosen, then the file format is appended to the file name."
+)
+
 
 class SANSSave(DataProcessorAlgorithm):
     def category(self):
@@ -50,54 +54,49 @@ class SANSSave(DataProcessorAlgorithm):
             "Nexus",
             False,
             direction=Direction.Input,
-            doc="Save as nexus format. "
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as nexus format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "CanSAS",
             False,
             direction=Direction.Input,
-            doc="Save as CanSAS xml format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as CanSAS xml format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "NXcanSAS",
             False,
             direction=Direction.Input,
-            doc="Save as NXcanSAS format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as NXcanSAS format. " + FILE_FORMAT_DOC_SUFFIX,
+        )
+        self.declareProperty(
+            "PolarizedNXcanSAS",
+            False,
+            direction=Direction.Input,
+            doc="Save in PolarizedNXcanSAS format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "NistQxy",
             False,
             direction=Direction.Input,
-            doc="Save as Nist Qxy format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as Nist Qxy format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "RKH",
             False,
             direction=Direction.Input,
-            doc="Save as RKH format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as RKH format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "CSV",
             False,
             direction=Direction.Input,
-            doc="Save as CSV format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as CSV format. " + FILE_FORMAT_DOC_SUFFIX,
         )
 
         self.setPropertyGroup("Nexus", "FileFormats")
         self.setPropertyGroup("CanSAS", "FileFormats")
         self.setPropertyGroup("NXCanSAS", "FileFormats")
+        self.setPropertyGroup("PolarizedNXcanSAS", "FileFormats")
         self.setPropertyGroup("NistQxy", "FileFormats")
         self.setPropertyGroup("RKH", "FileFormats")
         self.setPropertyGroup("CSV", "FileFormats")
@@ -239,6 +238,7 @@ class SANSSave(DataProcessorAlgorithm):
             errors.update({"Nexus": "At least one data format needs to be specified."})
             errors.update({"CanSAS": "At least one data format needs to be specified."})
             errors.update({"NXcanSAS": "At least one data format needs to be specified."})
+            errors.update({"PolarizedNXcanSAS": "At least one data format needs to be specified"})
             errors.update({"NistQxy": "At least one data format needs to be specified."})
             errors.update({"RKH": "At least one data format needs to be specified."})
             errors.update({"CSV": "At least one data format needs to be specified."})
@@ -252,8 +252,8 @@ class SANSSave(DataProcessorAlgorithm):
                     " only. This requires all axes to be numeric."
                 }
             )
-        polarization_props = self.getProperty("PolarizationProps").value
-        if len(polarization_props) > 0:
+        if self.getProperty("PolarizedNXcanSAS"):
+            polarization_props = self.getProperty("PolarizationProps").value
             # TODO: Get these directly from the algorithm.
             mandatory_props = [
                 "InputSpinStates",
@@ -275,6 +275,7 @@ class SANSSave(DataProcessorAlgorithm):
         self._check_file_types(file_types, "Nexus", SaveType.NEXUS)
         self._check_file_types(file_types, "CanSAS", SaveType.CAN_SAS)
         self._check_file_types(file_types, "NXcanSAS", SaveType.NX_CAN_SAS)
+        self._check_file_types(file_types, "PolarizedNXcanSAS", SaveType.POL_NX_CAN_SAS)
         self._check_file_types(file_types, "NistQxy", SaveType.NIST_QXY)
         self._check_file_types(file_types, "RKH", SaveType.RKH)
         self._check_file_types(file_types, "CSV", SaveType.CSV)
@@ -288,6 +289,9 @@ class SANSSave(DataProcessorAlgorithm):
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NX_CAN_SAS, file_types, [])
+
+        # SavePolarizedNXcanSAS clashes with SaveNXcanSAS
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.POL_NX_CAN_SAS, file_types, [SaveType.NX_CAN_SAS])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NIST_QXY, file_types, [SaveType.RKH])

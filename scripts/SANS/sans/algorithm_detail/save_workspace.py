@@ -61,6 +61,11 @@ def get_save_strategy(file_format_bundle, file_name, save_options, additional_pr
         save_name = "SaveNXcanSAS"
         save_options.update(additional_properties)
         save_options.update(additional_run_numbers)
+    elif file_format is SaveType.POL_NX_CAN_SAS:
+        file_name = get_file_name(file_format_bundle, file_name, "_polnxcansas", ".h5")
+        save_name = "SavePolarizedNXcanSAS"
+        save_options.update(additional_properties)
+        save_options.update(additional_run_numbers)
     elif file_format is SaveType.NIST_QXY:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
         save_name = "SaveNISTDAT"
