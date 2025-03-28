@@ -115,8 +115,8 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
 
 class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidSystemTest):
     def runTest(self):
-        grouping_path_1 = str(os.path.join(CWDIR, r"TestingCalFiles\example1\my_grouping.cal"))
-        grouping_path_2 = str(os.path.join(CWDIR, r"TestingCalFiles\example2\my_grouping.cal"))
+        grouping_path_1 = str(os.path.join(CWDIR, "TestingCalFiles/example1/my_grouping.cal"))
+        grouping_path_2 = str(os.path.join(CWDIR, "TestingCalFiles/example2/my_grouping.cal"))
         enginx = EnginX(
             vanadium_run="ENGINX307521",
             focus_runs=["ENGINX305761"],
@@ -150,8 +150,8 @@ class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidS
 
 class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtesting.MantidSystemTest):
     def runTest(self):
-        grouping_path_1 = os.path.join(CWDIR, r"TestingCalFiles\example2\my_grouping.cal")
-        grouping_path_2 = os.path.join(CWDIR, r"TestingCalFiles\example3\my_grouping.cal")
+        grouping_path_1 = os.path.join(CWDIR, "TestingCalFiles/example2/my_grouping.cal")
+        grouping_path_2 = os.path.join(CWDIR, "TestingCalFiles/example3/my_grouping.cal")
         enginx = EnginX(
             vanadium_run="ENGINX307521",
             focus_runs=["ENGINX305761"],
