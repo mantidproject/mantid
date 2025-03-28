@@ -92,16 +92,12 @@ const char *AlternateCSPythonLexer::keywords(int set) const {
   if (set == 1) {
     // Retrieve default Python keywords from qscintilla
     const char *defaultKeywords = QsciLexerPython::keywords(1);
-    QStringList keywordList = QString::fromUtf8(defaultKeywords).split(" ");
+    static std::string combinedKeywords;
+    std::ostringstream stream;
+    stream << defaultKeywords << " " << customKeywords;
 
-    for (const QString &keyword : m_customKeywords) {
-      if (!keywordList.contains(keyword)) {
-        keywordList.append(keyword);
-      }
-    }
-
-    QByteArray m_keywordsBuffer = keywordList.join(" ").toUtf8();
-    return m_keywordsBuffer.constData();
+    combinedKeywords = stream.str();
+    return combinedKeywords.c_str();
   }
 
   return QsciLexerPython::keywords(set);

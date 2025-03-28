@@ -22,5 +22,5 @@ public:
 
 private:
   QFont m_font;
-  const QStringList m_customKeywords = {"True", "False"};
+  static constexpr const char *customKeywords = "True False";
 };
