@@ -597,6 +597,7 @@ set(TEST_FILES
     SavePDFGuiTest.h
     SavePHXTest.h
     SaveParameterFileTest.h
+    SavePolarizedNXcanSASTest.h
     SaveRKHTest.h
     SaveRMCProfileTest.h
     SaveReflectometryAsciiTest.h
