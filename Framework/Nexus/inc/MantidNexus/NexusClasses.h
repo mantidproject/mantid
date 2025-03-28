@@ -156,26 +156,6 @@ public:
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
 
-  /// Load all of the currently opened file
-  virtual void load() {}
-
-  /**
-   * Load the data from the file. Calling this method with all default arguments makes it to read in all the data.
-   *
-   * @param blocksize :: The size of the block of data that should be read. Note that this is only used for rank 2 and 3
-   * datasets currently
-   * @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index of the
-   * chunk. The rank of the data must be >= 1
-   * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. The rank of
-   * the data must be >= 2
-   */
-  virtual void load(nxdimsize_t const blocksize, nxdimsize_t const i, nxdimsize_t const j) {
-    // we need the var names for docs build, need below void casts to stop compiler warnings
-    UNUSED_ARG(blocksize);
-    UNUSED_ARG(i);
-    UNUSED_ARG(j);
-  };
-
 protected:
   /**  Wrapper to the NXgetdata.
    *   @param data :: The pointer to the buffer accepting the data from the file.
@@ -288,10 +268,25 @@ public:
   std::size_t size() const { return m_size; }
 
   /// Read all of the datablock in
-  void load() override {
-    if (rank() > 4) {
+  void load() {
+    const auto rank_local = this->rank();
+    if (rank_local > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
+    // determine total size in memory and allocate it
+    auto num_ele = this->dim0();
+    if (rank_local > 1) {
+      num_ele *= this->dim1();
+      if (rank_local > 2) {
+        num_ele *= this->dim2();
+        if (rank_local > 3) {
+          num_ele *= this->dim3();
+        }
+      }
+    }
+    this->alloc(static_cast<std::size_t>(num_ele));
+
+    // do the actual load
     getData(m_data.data());
   }
 
@@ -310,7 +305,7 @@ public:
    * rank()-2. i and j are its indeces.
    *            The rank of the data must be >= 2
    */
-  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
+  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
