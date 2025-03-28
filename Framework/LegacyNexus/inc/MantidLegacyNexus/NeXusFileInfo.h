@@ -55,5 +55,5 @@ private:
   std::vector<std::string> m_nexusPath;
   size_t m_pathChars;
   LgcyFunctionPtr m_nexusFunctions;
-  std::string m_userFilePath;
+  const std::string m_userFilePath;
 };
