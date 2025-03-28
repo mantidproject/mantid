@@ -242,21 +242,20 @@ public:
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    int n = 0;
     if (rank() == 4) {
-      n = dim0() * dim1() * dim2() * dim3();
+      int n = dim0() * dim1() * dim2() * dim3();
       alloc(n);
       getData(m_data.data());
     } else if (rank() == 3) {
-      n = dim0() * dim1() * dim2();
+      int n = dim0() * dim1() * dim2();
       alloc(n);
       getData(m_data.data());
     } else if (rank() == 2) {
-      n = dim0() * dim1();
+      int n = dim0() * dim1();
       alloc(n);
       getData(m_data.data());
     } else if (rank() == 1) {
-      n = dim0();
+      int n = dim0();
       alloc(n);
       getData(m_data.data());
     }

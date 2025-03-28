@@ -375,7 +375,6 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   pLgcyNexusFile pNew = NULL;
   char pBuffer[512];
   char *time_puffer = NULL;
-  char HDF_VERSION[64];
   uint32 lmajor, lminor, lrelease;
   int32 am1 = 0;
 
@@ -422,6 +421,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
       return NXstatus::NX_ERROR;
     }
 
+    char HDF_VERSION[64];
     /* set the HDF4 version attribute */
     Hgetlibversion(&lmajor, &lminor, &lrelease, HDF_VERSION);
     if (SDsetattr(pNew->iSID, "HDF_version", DFNT_CHAR8, static_cast<int32>(strlen(HDF_VERSION)), HDF_VERSION) < 0) {

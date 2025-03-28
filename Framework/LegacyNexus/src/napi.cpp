@@ -335,8 +335,8 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
 static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
 
 /*---------------------------------------------------------------------*/
-static LgcyFunction &handleToNexusFunc(NXhandle fid) {
-  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
+static const LgcyFunction &handleToNexusFunc(NXhandle fid) {
+  const NexusFileID *fileID = static_cast<NexusFileID *>(fid);
   return fileID->getNexusFunctions();
 }
 
@@ -560,14 +560,14 @@ NXstatus NXclosedata(NXhandle fid) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
-  auto &nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxgetdataID(nexusFuncs.pNexusData, sRes));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  auto &nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxgetnextentry(nexusFuncs.pNexusData, name, nxclass, datatype));
 }
 
@@ -607,7 +607,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   int rank;
   int64_t iDim[NX_MAXRANK];
 
-  auto &nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   LOCKED_CALL(nexusFuncs.nxgetinfo64(nexusFuncs.pNexusData, &rank, iDim, &type)); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (nexusFuncs.stripFlag == 1) && (rank == 1)) {
@@ -648,7 +648,7 @@ NXstatus NXgetinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
   char *pPtr = NULL;
-  auto &nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   *rank = 0;
   status = LOCKED_CALL(nexusFuncs.nxgetinfo64(nexusFuncs.pNexusData, rank, dimension, iType));
   /*
@@ -670,28 +670,28 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  auto &nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxgetattr(nexusFuncs.pNexusData, name, data, datalen, iType));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupID(NXhandle fid, NXlink *sRes) {
-  auto nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxgetgroupID(nexusFuncs.pNexusData, sRes));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitattrdir(NXhandle fid) {
-  auto nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxinitattrdir(nexusFuncs.pNexusData));
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitgroupdir(NXhandle fid) {
-  auto nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxinitgroupdir(nexusFuncs.pNexusData));
 }
 
@@ -941,12 +941,12 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
 
 /*----------------------------------------------------------------------*/
 std::string NXgetpath(NXhandle fid) {
-  NexusFileID *fileID = static_cast<NexusFileID *>(fid);
+  const NexusFileID *fileID = static_cast<NexusFileID *>(fid);
   return fileID->getFullNexusPath();
 }
 
 NXstatus NXgetnextattra(NXhandle fid, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  auto nexusFuncs = handleToNexusFunc(fid);
+  const auto &nexusFuncs = handleToNexusFunc(fid);
   return LOCKED_CALL(nexusFuncs.nxgetnextattra(nexusFuncs.pNexusData, pName, rank, dim, iType));
 }
 
