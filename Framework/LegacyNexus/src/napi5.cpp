@@ -1448,23 +1448,23 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
 }
 
 /*------------------------------------------------------------------------*/
-void NX5assignFunctions(pLgcyFunction fHandle) {
-  fHandle->nxclose = NX5close;
-  fHandle->nxopengroup = NX5opengroup;
-  fHandle->nxclosegroup = NX5closegroup;
-  fHandle->nxopendata = NX5opendata;
-  fHandle->nxclosedata = NX5closedata;
-  fHandle->nxgetdataID = NX5getdataID;
-  fHandle->nxgetdata = NX5getdata;
-  fHandle->nxgetinfo64 = NX5getinfo64;
-  fHandle->nxgetnextentry = NX5getnextentry;
-  fHandle->nxgetnextattr = NULL;
-  fHandle->nxgetattr = NX5getattr;
-  fHandle->nxgetgroupID = NX5getgroupID;
-  fHandle->nxinitgroupdir = NX5initgroupdir;
-  fHandle->nxinitattrdir = NX5initattrdir;
-  fHandle->nxgetnextattra = NX5getnextattra;
-  fHandle->nxgetattrainfo = NX5getattrainfo;
+void NX5assignFunctions(LgcyFunction &fHandle) {
+  fHandle.nxclose = NX5close;
+  fHandle.nxopengroup = NX5opengroup;
+  fHandle.nxclosegroup = NX5closegroup;
+  fHandle.nxopendata = NX5opendata;
+  fHandle.nxclosedata = NX5closedata;
+  fHandle.nxgetdataID = NX5getdataID;
+  fHandle.nxgetdata = NX5getdata;
+  fHandle.nxgetinfo64 = NX5getinfo64;
+  fHandle.nxgetnextentry = NX5getnextentry;
+  fHandle.nxgetnextattr = NULL;
+  fHandle.nxgetattr = NX5getattr;
+  fHandle.nxgetgroupID = NX5getgroupID;
+  fHandle.nxinitgroupdir = NX5initgroupdir;
+  fHandle.nxinitattrdir = NX5initattrdir;
+  fHandle.nxgetnextattra = NX5getnextattra;
+  fHandle.nxgetattrainfo = NX5getattrainfo;
 }
 
 #endif /* HDF5 */

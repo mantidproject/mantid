@@ -26,6 +26,7 @@
 #include "MantidLegacyNexus/NeXusFileInfo.h"
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
+#include <stdexcept>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,4 +51,11 @@ void NexusFileID::popNexusPath() {
     m_pathChars -= m_nexusPath.back().size();
     m_nexusPath.pop_back();
   }
+}
+
+LgcyFunction &NexusFileID::getNexusFunctions() const {
+  if (!m_nexusFunctions) {
+    throw std::runtime_error("NeXuS functions are not set for file" + m_userFilePath);
+  }
+  return *m_nexusFunctions;
 }

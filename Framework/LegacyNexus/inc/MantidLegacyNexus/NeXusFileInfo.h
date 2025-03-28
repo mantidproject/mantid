@@ -37,14 +37,14 @@ const int EXPECTED_PATH_STACK_HEIGHT = 5;
 
 class NexusFileID {
 public:
-  NexusFileID(const std::string &userFilePath) : m_pathChars(0), m_nexusFunctions(NULL), m_userFilePath(userFilePath) {
+  NexusFileID(const std::string &userFilePath) : m_pathChars(0), m_userFilePath(userFilePath) {
     m_nexusPath.reserve(EXPECTED_PATH_STACK_HEIGHT);
   }
 
   std::string getFullNexusPath() const;
   const std::string &getFilePath() const { return m_filePath; }
-  pLgcyFunction getNexusFunctions() const { return m_nexusFunctions; }
-  void setNexusFunctions(pLgcyFunction nexusFunctions) { m_nexusFunctions = nexusFunctions; }
+  LgcyFunction &getNexusFunctions() const;
+  void setNexusFunctions(LgcyFunctionPtr nexusFunctions) { m_nexusFunctions = std::move(nexusFunctions); }
   void pushNexusPath(const std::string &path);
   void popNexusPath();
   const std::string &getUserFilePath() { return m_userFilePath; }
@@ -54,6 +54,6 @@ private:
   std::string m_filePath;
   std::vector<std::string> m_nexusPath;
   size_t m_pathChars;
-  pLgcyFunction m_nexusFunctions;
+  LgcyFunctionPtr m_nexusFunctions;
   std::string m_userFilePath;
 };
