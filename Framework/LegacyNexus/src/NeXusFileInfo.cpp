@@ -46,7 +46,7 @@ void NexusFileID::pushNexusPath(const std::string &path) {
   m_pathChars += path.size();
 }
 void NexusFileID::popNexusPath() {
-  if (!m_nexusPath.size()) {
+  if (m_nexusPath.size()) {
     m_pathChars -= m_nexusPath.back().size();
     m_nexusPath.pop_back();
   }

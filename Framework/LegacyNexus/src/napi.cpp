@@ -965,13 +965,9 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
 }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXgetpath(NXhandle fid, std::string &path) {
+std::string NXgetpath(NXhandle fid) {
   NexusFileID *fileID = static_cast<NexusFileID *>(fid);
-  path = fileID->getFullNexusPath();
-  if (path.empty()) {
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
+  return fileID->getFullNexusPath();
 }
 
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
