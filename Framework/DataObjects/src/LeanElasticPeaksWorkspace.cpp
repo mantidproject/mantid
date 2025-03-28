@@ -613,7 +613,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
       toNexus[ii * maxShapeJSONLength + ic] = ' ';
   }
 
-  file->putData(static_cast<void *>(toNexus));
+  file->putData(toNexus);
 
   delete[] toNexus;
   file->putAttr("units", "Not known"); // Units may need changing when known
