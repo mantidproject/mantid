@@ -1,0 +1,1 @@
+- Add new :ref:`algm-SavePolarizedNXcanSAS` algorithm to saved reduce polarized SANS data in NXcanSAS format.
