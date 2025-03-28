@@ -37,7 +37,7 @@ const int EXPECTED_PATH_STACK_HEIGHT = 5;
 
 class NexusFileID {
 public:
-  NexusFileID(const std::string &userFilePath) : m_userFilePath(userFilePath), m_pathChars(0), m_nexusFunctions(NULL) {
+  NexusFileID(const std::string &userFilePath) : m_pathChars(0), m_nexusFunctions(NULL), m_userFilePath(userFilePath) {
     m_nexusPath.reserve(EXPECTED_PATH_STACK_HEIGHT);
   }
 
