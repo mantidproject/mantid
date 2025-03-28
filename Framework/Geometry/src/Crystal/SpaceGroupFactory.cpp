@@ -493,7 +493,6 @@ DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 1 21/n", "P 1 1 21/a | -y,x-y,z")
 DECLARE_TRANSFORMED_SPACE_GROUP(14, "P 1 1 21/b", "P 1 1 21/a | -x+y,-x,z")
 
 DECLARE_GENERATED_SPACE_GROUP(15, "C 1 2/c 1", "-x,y,-z+1/2; -x,-y,-z")
-DECLARE_GENERATED_SPACE_GROUP(15, "C 2/c", "-x,y,-z+1/2; -x,-y,-z")
 DECLARE_TRANSFORMED_SPACE_GROUP(15, "A 1 2/n 1", "C 1 2/c 1 | -x+z,y,-x")
 DECLARE_TRANSFORMED_SPACE_GROUP(15, "I 1 2/a 1", "C 1 2/c 1 | -z,y,x-z")
 DECLARE_TRANSFORMED_SPACE_GROUP(15, "A 1 1 2/a", "C 1 2/c 1 | y,z,x")
