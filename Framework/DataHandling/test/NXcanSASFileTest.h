@@ -12,7 +12,7 @@
 #include "../inc/MantidDataHandling/NXcanSASDefinitions.h"
 #include "../inc/MantidDataHandling/NXcanSASHelper.h"
 
-#include "../..//Kernel/inc/MantidKernel/VectorHelper.h"
+#include "MantidKernel/VectorHelper.h"
 #include "NXcanSASTestHelper.h"
 
 #include <string>
