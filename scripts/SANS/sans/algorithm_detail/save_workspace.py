@@ -48,36 +48,37 @@ def get_save_strategy(file_format_bundle, file_name, save_options, additional_pr
     :return: a handle to a save algorithm
     """
     file_format = file_format_bundle.file_format
-    if file_format is SaveType.NEXUS:
-        file_name = get_file_name(file_format_bundle, file_name, "", ".nxs")
-        save_name = "SaveNexusProcessed"
-    elif file_format is SaveType.CAN_SAS:
-        file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
-        save_name = "SaveCanSAS1D"
-        save_options.update(additional_properties)
-        save_options.update(additional_run_numbers)
-    elif file_format is SaveType.NX_CAN_SAS:
-        file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
-        save_name = "SaveNXcanSAS"
-        save_options.update(additional_properties)
-        save_options.update(additional_run_numbers)
-    elif file_format is SaveType.POL_NX_CAN_SAS:
-        file_name = get_file_name(file_format_bundle, file_name, "_polnxcansas", ".h5")
-        save_name = "SavePolarizedNXcanSAS"
-        save_options.update(additional_properties)
-        save_options.update(additional_run_numbers)
-    elif file_format is SaveType.NIST_QXY:
-        file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
-        save_name = "SaveNISTDAT"
-    elif file_format is SaveType.RKH:
-        file_name = get_file_name(file_format_bundle, file_name, "", ".txt")
-        save_name = "SaveRKH"
-        save_options.update({"Append": False})
-    elif file_format is SaveType.CSV:
-        file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
-        save_name = "SaveCSV"
-    else:
-        raise RuntimeError("SaveWorkspace: The requested data {0} format is currently not supported.".format(file_format))
+    match file_format:
+        case SaveType.NEXUS:
+            file_name = get_file_name(file_format_bundle, file_name, "", ".nxs")
+            save_name = "SaveNexusProcessed"
+        case SaveType.CAN_SAS:
+            file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
+            save_name = "SaveCanSAS1D"
+            save_options.update(additional_properties)
+            save_options.update(additional_run_numbers)
+        case SaveType.NX_CAN_SAS:
+            file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
+            save_name = "SaveNXcanSAS"
+            save_options.update(additional_properties)
+            save_options.update(additional_run_numbers)
+        case SaveType.POL_NX_CAN_SAS:
+            file_name = get_file_name(file_format_bundle, file_name, "_polnxcansas", ".h5")
+            save_name = "SavePolarizedNXcanSAS"
+            save_options.update(additional_properties)
+            save_options.update(additional_run_numbers)
+        case SaveType.NIST_QXY:
+            file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
+            save_name = "SaveNISTDAT"
+        case SaveType.RKH:
+            file_name = get_file_name(file_format_bundle, file_name, "", ".txt")
+            save_name = "SaveRKH"
+            save_options.update({"Append": False})
+        case SaveType.CSV:
+            file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
+            save_name = "SaveCSV"
+        case _:
+            raise RuntimeError("SaveWorkspace: The requested data {0} format is currently not supported.".format(file_format))
     save_options.update({"Filename": file_name})
     return create_unmanaged_algorithm(save_name, **save_options)
 
