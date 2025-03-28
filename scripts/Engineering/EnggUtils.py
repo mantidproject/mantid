@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from numpy import array, degrees, isfinite, reshape
+from numpy import array, degrees, isfinite, reshape, round
 from os import path, makedirs
 from shutil import copy2
 
@@ -273,13 +273,13 @@ def load_existing_calibration_files(calibration):
         msg = f"Could not open GSAS calibration file: {prm_filepath}"
         logger.warning(msg)
         return None
+    calibration.load_relevant_calibration_files()
     try:
         # read diff constants from prm
         write_diff_consts_to_table_from_prm(prm_filepath)
     except RuntimeError:
         logger.error(f"Invalid file selected: {prm_filepath}")
         return None
-    calibration.load_relevant_calibration_files()
     return prm_filepath
 
 
@@ -315,10 +315,8 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
-    :param bank: The bank to crop to, both if none.
-    :param calfile: The custom calibration file to crop to, not used if none.
-    :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
-    :return: dict containing calibrated diffractometer constants, and copy of the raw ceria workspace
+    :param calibration: CalibrationInfo object with details of calibration and grouping
+    :param full_instrument_cal_ws: The workspace with the full instrument calibration
     """
 
     # initial process of ceria ws
@@ -482,6 +480,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
         if ws_sample:
             # None returned if no proton charge
             ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
+            _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc)
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
@@ -502,10 +501,38 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     return focused_files_list, focused_files_gsas2_list
 
 
+def _get_difc(ws, ind):
+    return ws.spectrumInfo().diffractometerConstants(ind)[UnitParams.difc]
+
+
+def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
+    try:
+        num_foc, num_van = ws_foc.getNumberHistograms(), ws_van_foc.getNumberHistograms()
+        assert num_foc == num_van
+        if num_foc == num_van:
+            ind = 0
+            while ind < num_foc:
+                # check each grouping difcs is same within 3 dp, stop if any fail
+                assert round(_get_difc(ws_foc, ind), 3) == round(_get_difc(ws_van_foc, ind), 3)
+                ind += 1
+    except AssertionError:
+        error_msg = f"The calibration of {ws_van_foc} does not match {ws_foc}. Ensure the vanadium calibration file loaded is correct."
+        logger.error(error_msg)
+        raise AssertionError(error_msg)
+
+
 def process_vanadium(vanadium_path, calibration, full_calib):
     van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
     if ADS.doesExist(van_foc_name):
+        if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
+            logger.warning(
+                f"Focussed Vanadium Data: '{van_foc_name}' has been loaded from the ADS from a previous focussing run. "
+                f"If the custom calibration has not changed, this is not a problem. "
+                f"If the calibration has changed, check that the different groupings are not giving the same calibration file name. "
+                f"If they are, it is recommended that you rename them or clear the previous "
+                f"Focussed Vanadium Data from the ADS before you rerun Focus. "
+            )
         ws_van_foc = ADS.retrieve(van_foc_name)
     else:
         if ADS.doesExist(van_run):
