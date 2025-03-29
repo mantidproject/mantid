@@ -42,17 +42,17 @@ Usage
 **Example**
 
 .. testcode:: SavePolarizedNXcanSAS
-    workspaces = []
-    #Create sample workspace group with simple test data and adding ZOOM instrument.
-    for n in range(4):
-        ws = CreateSampleWorkspace(OutputWorkspace=f'out_{n}', Function='User Defined', UserDefinedFunction=f'name=Lorentzian,
-                                   Amplitude=1000, PeakCentre={n+1}, FWHM=1', XUnit='MomentumTransfer', NumBanks=1,
-                                   BankPixelWidth=1, XMin=0, XMax=16.5, BinWidth=0.1)
-        LoadInstrument(f'out_{n}',InstrumentName='ZOOM', RewriteSpectraMap=False)
-        workspaces.append(ws)
 
-    group = GroupWorkspaces(workspaces)
-    SavePolarizedNXcanSAS(group, 'test_file', InputSpinStates='+1-1,-1-1,+1+1,-1+1')
+    #Create sample workspace group with simple test data and adding ZOOM instrument.
+    names = []
+    for n in range(4):
+        name = f"out_{n}"
+        CreateSampleWorkspace(OutputWorkspace=name, Function="User Defined", UserDefinedFunction=f"name=Lorentzian, Amplitude=1000, PeakCentre={n+1}, FWHM=1", XUnit="MomentumTransfer", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=16.5, BinWidth=0.1)
+        LoadInstrument(name,InstrumentName="ZOOM", RewriteSpectraMap=False)
+        names.append(name)
+
+    group = GroupWorkspaces(names)
+    SavePolarizedNXcanSAS(group, "test_file", InputSpinStates="+1-1,-1-1,+1+1,-1+1")
 
 .. categories::
 
