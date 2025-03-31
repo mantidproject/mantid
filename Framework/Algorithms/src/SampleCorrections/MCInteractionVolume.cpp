@@ -31,7 +31,7 @@ namespace Algorithms {
  */
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
-                                         const IObject_sptr gaugeVolume)
+                                         IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(getFullBoundingBox()),
       m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
   try {

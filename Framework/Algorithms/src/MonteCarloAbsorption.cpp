@@ -319,8 +319,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   // Configure strategy
   Geometry::IObject_sptr gaugeVolume = nullptr;
-  if (inputWS.run().hasProperty("GaugeVolume")) {
+  try {
     Geometry::IObject_sptr gaugeVolume = ShapeFactory().createShape(inputWS.run().getProperty("GaugeVolume")->value());
+  } catch (...) {
   }
   auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
   auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,

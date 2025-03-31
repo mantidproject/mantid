@@ -39,7 +39,8 @@ enum class Environment {
   CubeSamplePlusContainer,
   CylinderSampleOnly,
   CylinderSamplePlusContainer,
-  MeshSamplePlusContainer
+  MeshSamplePlusContainer,
+  CubeSamplePlusCubeGV,
 };
 
 struct TestWorkspaceDescriptor {
@@ -115,7 +116,8 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
                                        Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
                                    1 /*number density*/)));
       ws->mutableSample().setShape(shape);
-    } else if (environment == Environment::CubeSampleOnly || environment == Environment::CubeSamplePlusContainer) {
+    } else if (environment == Environment::CubeSampleOnly || environment == Environment::CubeSamplePlusContainer ||
+               environment == Environment::CubeSamplePlusCubeGV) {
       // create 1cm x 1cm cube
       auto cubeShape = ComponentCreationHelper::createCuboid(0.005, 0.005, 0.005, {0., 0., -0.005});
 
@@ -141,6 +143,11 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
                                      1 /*number density*/)));
         auto can = std::make_shared<Container>(shape);
         ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
+      }
+      if (environment == Environment::CubeSamplePlusCubeGV) {
+        // create 1mm x 1mm x 1mm cube for the gauge volume
+        auto gaugeVolumeXML = ComponentCreationHelper::cuboidXML(0.0005, 0.0005, 0.0005, {0., 0., -0.0005}, "gv");
+        ws->mutableRun().addProperty<std::string>("GaugeVolume", gaugeVolumeXML);
       }
     }
   }
@@ -347,6 +354,26 @@ public:
     constexpr double delta(1e-03);
     const double calculatedAttFactor = exp(-2);
     TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
+  }
+
+  void test_Workspace_With_Sample_And_Gauge_Volume() {
+    using namespace Mantid::Geometry;
+
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSamplePlusCubeGV, DeltaEMode::Elastic, -1};
+    auto testWS = setUpWS(wsProps);
+
+    auto mcAbsorb = createAlgorithm();
+    constexpr int NEVENTS = 1000;
+    mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
+
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+
+    verifyDimensions(wsProps, outputWS);
+
+    // for now, just checking it runs
   }
 
   void test_Workspace_Slit_Beam_Size_Set() {
