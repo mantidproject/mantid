@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -18,6 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -203,7 +205,8 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  */
 std::shared_ptr<IMCInteractionVolume>
 MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
-                                              const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+                                              const MCInteractionVolume::ScatteringPointVicinity pointsIn,
+                                              const Geometry::IObject_sptr gaugeVolume) {
   auto interactionVol = std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn);
   return interactionVol;
 }
@@ -315,7 +318,11 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
+  Geometry::IObject_sptr gaugeVolume = nullptr;
+  if (inputWS.run().hasProperty("GaugeVolume")) {
+    Geometry::IObject_sptr gaugeVolume = ShapeFactory().createShape(inputWS.run().getProperty("GaugeVolume")->value());
+  }
+  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
   auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
                                  resimulateTracksForDiffWavelengths);
 

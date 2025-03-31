@@ -13,6 +13,7 @@
 #include <iomanip>
 
 namespace Mantid {
+using Geometry::IObject_sptr;
 using Geometry::Track;
 using Kernel::V3D;
 
@@ -29,9 +30,10 @@ namespace Algorithms {
  * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
-                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn)
+                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn,
+                                         const IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(getFullBoundingBox()),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn) {
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
@@ -58,12 +60,15 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
 }
 
 /**
- * Returns the axis-aligned bounding box for the volume including env if
- * m_pointsIn != SampleOnly
- * @return The bounding box
+ * Returns the defined gauge volume if one is present, otherwise returns axis-aligned bounding box
+ * for the volume including env if m_pointsIn != SampleOnly
+ * @return The bounding box of the interaction volume
  */
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
+  if (m_gaugeVolume != nullptr) {
+    auto sampleBox = m_gaugeVolume->clone();
+  }
   if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
     sampleBox.grow(envBox);
