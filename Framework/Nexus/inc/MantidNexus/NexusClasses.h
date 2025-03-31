@@ -427,7 +427,7 @@ using NXInt64 = NXDataSetTyped<int64_t>;
 /// The integer dataset type
 using NXUInt32 = NXDataSetTyped<int32_t>;
 /// The integer dataset type
-using NXUInt64 = NXDataSetTyped<int64_t>;
+using NXUInt64 = NXDataSetTyped<uint64_t>;
 /// The float dataset type
 using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
