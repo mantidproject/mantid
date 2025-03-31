@@ -434,8 +434,6 @@ using NXFloat = NXDataSetTyped<float>;
 using NXDouble = NXDataSetTyped<double>;
 /// The char dataset type
 using NXChar = NXDataSetTyped<char>;
-/// The size_t dataset type
-using NXSize = NXDataSetTyped<std::size_t>;
 
 //-------------------- classes --------------------------//
 
@@ -521,7 +519,7 @@ public:
    *   @param name :: The name of the dataset
    *   @return The size_t
    */
-  NXSize openNXSize(const std::string &name) const { return openNXDataSet<std::size_t>(name); }
+  NXUInt64 openNXSize(const std::string &name) const { return openNXDataSet<uint64_t>(name); }
   /**  Returns a string
    *   @param name :: The name of the NXChar dataset
    *   @return The string
@@ -618,8 +616,6 @@ public:
   NXFloat openFloatData() { return openData<float>(); }
   /// Opens data of int type
   NXInt openIntData() { return openData<int32_t>(); }
-  /// Opens data of size type
-  NXSize openSizeData() { return openData<std::size_t>(); }
 };
 
 /**  Implements NXdetector Nexus class.
