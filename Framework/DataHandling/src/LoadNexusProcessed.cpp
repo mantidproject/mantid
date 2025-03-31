@@ -2154,7 +2154,7 @@ void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::Matri
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
   spec.load();
-  NXSize bins = wksp_cls.openNXSize("masked_bins");
+  NXUInt64 bins = wksp_cls.openNXSize("masked_bins");
   bins.load();
   NXDouble weights = wksp_cls.openNXDouble("mask_weights");
   weights.load();
