@@ -207,7 +207,7 @@ std::shared_ptr<IMCInteractionVolume>
 MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
                                               const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                               const Geometry::IObject_sptr gaugeVolume) {
-  auto interactionVol = std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn);
+  auto interactionVol = std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn, gaugeVolume);
   return interactionVol;
 }
 
@@ -317,15 +317,28 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
-  // Configure strategy
-  Geometry::IObject_sptr gaugeVolume = nullptr;
-  try {
-    Geometry::IObject_sptr gaugeVolume = ShapeFactory().createShape(inputWS.run().getProperty("GaugeVolume")->value());
-  } catch (...) {
-  }
-  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+  // Configure interaction volume
+
+  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
   auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
                                  resimulateTracksForDiffWavelengths);
+
+  bool hasGaugeVol = false;
+  try {
+    // needs to have a run and a gauge volume defined, otherwise keep the null pointer
+    inputWS.run().getProperty("GaugeVolume");
+    hasGaugeVol = true;
+  } catch (const std::exception &e) {
+  }
+
+  if (hasGaugeVol) {
+    std::string xmlString = inputWS.run().getProperty("GaugeVolume")->value();
+    std::shared_ptr<IObject> gaugeVolume = ShapeFactory().createShape(xmlString);
+    auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+    // Configure strategy
+    auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
+                                   resimulateTracksForDiffWavelengths);
+  }
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 

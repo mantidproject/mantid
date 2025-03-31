@@ -32,8 +32,10 @@ namespace Algorithms {
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                          IObject_sptr gaugeVolume)
-    : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(getFullBoundingBox()),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
+    : m_sample(sample.getShape().clone()), m_env(nullptr), m_maxScatterAttempts(maxScatterAttempts),
+      m_pointsIn(pointsIn), m_gaugeVolume(nullptr) {
+  m_gaugeVolume = gaugeVolume;
+  m_activeRegion = getFullBoundingBox();
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
@@ -67,7 +69,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
   if (m_gaugeVolume != nullptr) {
-    auto sampleBox = m_gaugeVolume->clone();
+    auto sampleBox = m_gaugeVolume->getBoundingBox();
   }
   if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
@@ -114,7 +116,11 @@ std::optional<Kernel::V3D>
 MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
   std::optional<Kernel::V3D> pointGenerated{std::nullopt};
   if (componentIndex == -1) {
-    pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+    if (m_gaugeVolume != nullptr) {
+      pointGenerated = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 1);
+    } else {
+      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+    }
   } else {
     pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 1);
   }
