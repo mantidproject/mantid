@@ -82,3 +82,23 @@ QFont AlternateCSPythonLexer::defaultFont(int style) const {
   Q_UNUSED(style);
   return m_font;
 }
+
+///**
+// * Returns the keywords used by the lexer for a given set.
+// * @param set The keyword set to retrieve (1 is for keywords)
+// * @return A string containing the keywords
+// */
+const char *AlternateCSPythonLexer::keywords(int set) const {
+  if (set == 1) {
+    // Retrieve default Python keywords from qscintilla
+    const char *defaultKeywords = QsciLexerPython::keywords(1);
+    static std::string combinedKeywords;
+    std::ostringstream stream;
+    stream << defaultKeywords << " " << customKeywords;
+
+    combinedKeywords = stream.str();
+    return combinedKeywords.c_str();
+  }
+
+  return QsciLexerPython::keywords(set);
+}
