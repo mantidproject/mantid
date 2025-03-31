@@ -50,9 +50,17 @@ public:
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
     string const szFile("nexus_leak_test1.nxs");
 
-    removeFile(szFile); // in case it was left over from previous run
-
     File file_obj(szFile, NXACC_CREATE5);
+    std::string oss(strmakef("entry_%d", 0));
+    file_obj.makeGroup(oss, "NXentry");
+    file_obj.openGroup(oss, "NXentry");
+    std::string oss2(strmakef("data_%d", 0));
+    file_obj.makeGroup(oss2, "NXdata");
+    file_obj.openGroup(oss2, "NXdata");
+    std::string oss3(strmakef("data_%d", 0));
+    file_obj.makeGroup(oss3, "NXdata");
+    file_obj.openGroup(oss3, "NXdata");
+
     file_obj.close();
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
@@ -64,7 +72,6 @@ public:
       file_obj.close();
     }
 
-    removeFile(szFile); // cleanup
     cout << "Leak Test 1 Success!\n";
   }
 

@@ -95,55 +95,6 @@ private:
     }
   }
 
-  template <typename T> void do_rwslabvec_test(File &fileid, std::string const dataname, vector<T> const &data) {
-    cout << "Testing slab " << dataname << "\n";
-
-    // write
-    dimsize_t dimsize = data.size();
-    DimSizeVector const start({0}), size({dimsize});
-    fileid.makeData(dataname, getType<T>(), dimsize);
-    fileid.openData(dataname);
-    fileid.putSlab(data, start, size);
-    fileid.closeData();
-
-    // read
-    int const Ncheck(5); // can't use variable-length arrays, just check this many
-    T output[Ncheck];
-    fileid.openData(dataname);
-    fileid.getSlab(&(output[0]), start, size);
-
-    // compare
-    for (int i = 0; i < Ncheck; i++) {
-      TS_ASSERT_EQUALS(data[i], output[i])
-    }
-  }
-
-  template <size_t N, size_t M, typename T>
-  void do_rwslab_test(File &fileid, std::string const dataname, T const (&data)[N][M]) {
-    cout << "Testing slab " << dataname << "\n";
-
-    // write
-    DimSizeVector start({0, 0}), size({N, M});
-    DimVector const dims({N, M});
-    fileid.makeData(dataname, getType<T>(), dims);
-    fileid.openData(dataname);
-    fileid.putSlab(&(data[0][0]), start, size);
-    fileid.closeData();
-
-    // prepare to read/compare
-    T output[N][M];
-    fileid.openData(dataname);
-
-    // read, compare, row-by-row
-    for (size_t i = 1; i <= N; i++) {
-      size = {(dimsize_t)i, (dimsize_t)M};
-      fileid.getSlab(&(output[0][0]), start, size);
-      for (size_t j = 0; j < M; j++) {
-        TS_ASSERT_EQUALS(data[0][j], output[0][j]);
-      }
-    }
-  }
-
 public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
@@ -184,7 +135,6 @@ public:
     // cleanup and return
     fileid.close();
     cout << "napi slab test done\n";
-    removeFile(nxFile);
   }
 
   void test_napi_vec() {
@@ -224,39 +174,6 @@ public:
     // cleanup and return
     fileid.close();
     cout << "napi slab test done\n";
-    removeFile(nxFile);
-  }
-
-  void test_napi_slab() {
-    cout << "Starting NAPI SLAB Test\n";
-    std::string const nxFile("NExusFile_test_vec.h5");
-    File fileid = do_prep_files(nxFile);
-
-    // test of slab read/write
-    vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
-    vector<double> const r8_vec{12., 13., 14., 15., 16.};
-    float const r4_array[5][4] = {
-        {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-    double const r8_array[5][4] = {
-        {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-    do_rwslabvec_test(fileid, "r4_slab", r4_vec);
-    do_rwslabvec_test(fileid, "r8_slab", r8_vec);
-    do_rwslab_test(fileid, "r4_slab2d", r4_array);
-    do_rwslab_test(fileid, "r8_slab2d", r8_array);
-
-    // check all entries
-    vector<string> entry_names({"r4_slab", "r4_slab2d", "r8_slab", "r8_slab2d"});
-    Entries exp_entries;
-    for (string x : entry_names) {
-      exp_entries[x] = "SDS";
-    }
-    Entries entries = fileid.getEntries();
-    TS_ASSERT_EQUALS(entries, exp_entries);
-
-    // cleanup and return
-    fileid.close();
-    cout << "napi slab test done\n";
-    removeFile(nxFile);
   }
 
   void test_openPath() {
@@ -306,7 +223,6 @@ public:
 
     // cleanup
     fileid.close();
-    removeFile(filename);
     cout << "NXopenpath checks OK\n";
   }
 

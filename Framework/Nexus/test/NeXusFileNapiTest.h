@@ -287,21 +287,14 @@ public:
     string const fileext = ".h5";
     string const filename("nexus_file_napi_test_cpp" + fileext);
 
-    removeFile(filename); // in case last round failed
-
     // try writing a file
     do_test_write(filename, nx_creation_code);
 
     // try reading a file
     do_test_read(filename);
 
-    removeFile(filename); // cleanup
-
     // try using the load path
     do_test_loadPath(DMC01 + fileext);
     do_test_loadPath(DMC02 + fileext);
-
-    removeFile(DMC01 + fileext);
-    removeFile(DMC02 + fileext);
   }
 };
