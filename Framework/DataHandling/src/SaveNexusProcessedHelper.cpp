@@ -699,8 +699,8 @@ int NexusFileIO::findMantidWSEntries() const {
  * @return true for OK, false for error
  */
 bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws) const {
-  std::vector<int> spectra;
-  std::vector<std::size_t> bins;
+  std::vector<int32_t> spectra;
+  std::vector<int64_t> bins;
   std::vector<double> weights;
   int spectra_count = 0;
   int offset = 0;
