@@ -1,0 +1,15 @@
+# The refspecs listed in this file are ignored by `git blame` when git is configured correctly.
+# The refspecs must be listed in commit order from oldest to newest.
+#
+# MOST OF THE COMMITS LISTED ARE BY BOTS
+#
+# github does this automatically https://docs.github.com/en/repositories/working-with-files/using-files/viewing-and-understanding-files#ignore-commits-in-the-blame-view
+#
+# To configure it locally, run
+# git config blame.ignoreRevsFile .git-blame-ignore-revs
+# Or add it as an option
+# git blame --ignore-revs-file .git-blame-ignore-revs
+
+dccacdbddbc28f43a4ab9d1b63caf2fda71b1688
+9485437150f800515afbf15ab6ef05108714a0eb
+a90b115e443e27eb187aba3cd794eee591079401
