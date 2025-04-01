@@ -50,8 +50,6 @@ public:
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
     string const szFile("nexus_leak_test1.nxs");
 
-    removeFile(szFile); // in case it was left over from previous run
-
     File file_obj(szFile, NXACC_CREATE5); // swap this for a read instead of create?
     file_obj.close();
 
