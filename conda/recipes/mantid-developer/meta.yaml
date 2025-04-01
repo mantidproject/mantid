@@ -23,6 +23,7 @@ requirements:
     - lib3mf # [win]
     - libboost-devel {{ libboost_devel }}
     - libboost-python-devel {{ libboost_python_devel }}
+    - libexpat {{ libexpat }} #[linux]
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
     - matplotlib {{ matplotlib }}

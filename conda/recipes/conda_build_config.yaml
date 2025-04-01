@@ -55,6 +55,10 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
+#try to fix failing figuremanager test
+libexpat:
+  - '<2.7.0'
+
 # Not a primary dependency, but pinning to avoid a couple of unit test failures
 mkl:
   - 2024.1.0
