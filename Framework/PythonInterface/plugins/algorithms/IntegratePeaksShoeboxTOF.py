@@ -446,29 +446,22 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
-                # integrate at previously found ipos
-                if weak_pk.ispec in ispecs:
-                    ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
-                else:
-                    kernal_nrows_weak_pk = kernel.shape[0]
-                    kernal_ncols_weak_pk = kernel.shape[1]
-                    if weak_pk.kernel_shape[0] > kernal_nrows_weak_pk:
-                        kernal_nrows_weak_pk = weak_pk.kernel_shape[0]
-                    if weak_pk.kernel_shape[1] > kernal_ncols_weak_pk:
-                        kernal_ncols_weak_pk = weak_pk.kernel_shape[1]
 
+                # integrate at previously found ipos
+                if weak_pk.ispec not in ispecs:
+                    nrows = max(kernel.shape[0], weak_pk.kernel_shape[0])
+                    ncols = max(kernel.shape[0], weak_pk.kernel_shape[0])
                     peak_data = array_converter.get_peak_data(
                         peak,
                         peak.getDetectorID(),
                         bank_name,
-                        nshoebox * kernal_nrows_weak_pk,
-                        nshoebox * kernal_ncols_weak_pk,
+                        nshoebox * nrows,
+                        nshoebox * ncols,
                         nrows_edge,
                         ncols_edge,
                     )
                     x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
-                    ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
-
+                ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 peaks_det_ids[ipk] = peak_data.detids
 
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
