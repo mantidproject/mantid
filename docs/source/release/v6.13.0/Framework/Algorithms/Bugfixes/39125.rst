@@ -1,1 +1,1 @@
-- Fixes a bug in  :ref:`algm-Divide` which do not clear unit when the YUnit of lhs == rhs due to rhsBlockszie being 0.
+- Fixes a bug in  :ref:`algm-Divide` where units were not properly cleared when dividing two :ref:`ragged_workspace <Ragged_Workspace>` with identical Y-axis Units. This issue could cause errors in downstream data reduction workflows where the resulting workspace should be unitless. The fix ensures proper unit handling for :ref:`ragged_workspace <Ragged_Workspace>` division operations.
