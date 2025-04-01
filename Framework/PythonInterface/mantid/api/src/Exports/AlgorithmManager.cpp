@@ -127,6 +127,7 @@ GNU_DIAG_OFF("conversion")
 // cppcheck-suppress unknownMacro
 BOOST_PYTHON_FUNCTION_OVERLOADS(create_overloads, create, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(createUnmanaged_overloads, createUnmanaged, 2, 3)
+
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond

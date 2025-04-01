@@ -221,7 +221,7 @@ std::string createDocString(const IAlgorithm &self) {
   buffer << "Property descriptions: " << EOL << EOL;
   // write the actual property descriptions
   for (size_t i = 0; i < numProps; ++i) {
-    Mantid::Kernel::Property *prop = properties[i];
+    const Mantid::Kernel::Property *prop = properties[i];
     buffer << prop->name() << "(" << Mantid::Kernel::Direction::asText(prop->direction());
     if (!prop->isValid().empty())
       buffer << ":req";
@@ -251,7 +251,7 @@ std::string createDocString(const IAlgorithm &self) {
 struct AllowCThreads {
   explicit AllowCThreads(const object &algm)
       : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr), m_tracking(false) {
-    PyThreadState *curThreadState = PyThreadState_GET();
+    const PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
@@ -315,8 +315,7 @@ PyObject *getAlgorithmID(const IAlgorithm &self) {
   AlgorithmID id = self.getAlgorithmID();
   if (id)
     return to_python_value<AlgorithmIDProxy>()(AlgorithmIDProxy(id));
-  else
-    Py_RETURN_NONE;
+  return Py_NewRef(Py_None);
 }
 
 //--------------------------------------------------------------------------------------

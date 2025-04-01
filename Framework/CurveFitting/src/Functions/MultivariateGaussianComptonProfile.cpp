@@ -132,7 +132,7 @@ void MultivariateGaussianComptonProfile::massProfile(double *result, const size_
  * @param y Y value
  * @return Mass profile
  */
-double MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache, double y) const {
+double MultivariateGaussianComptonProfile::calculateJ(const std::vector<double> &s2Cache, double y) const {
   double sum(0.0);
 
   for (int i = 0; i < m_integrationSteps; i++) {
@@ -153,7 +153,7 @@ double MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cach
  * @param y Y value
  * @return Additive FSE correction
  */
-double MultivariateGaussianComptonProfile::calculateFSE(std::vector<double> s2Cache, double y) const {
+double MultivariateGaussianComptonProfile::calculateFSE(const std::vector<double> &s2Cache, double y) const {
   double sum(0.0);
 
   for (int i = 0; i < m_integrationSteps; i++) {

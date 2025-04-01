@@ -21,8 +21,7 @@ namespace Geometry {
  @author Owen Arnold, Tessella plc
  @date 16/12/2010*/
 
-class MANTID_GEOMETRY_DLL
-MDGeometryXMLDefinitions{// clang-format off
+class MANTID_GEOMETRY_DLL MDGeometryXMLDefinitions { // clang-format off
 public :
 // XML schema tag definitions for generating xml.
 static const std::string workspaceNameXMLTagStart(){ return "<MDWorkspaceName>"; }

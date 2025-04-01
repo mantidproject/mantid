@@ -1411,21 +1411,24 @@ void WorkspaceTreeWidget::plotSpectrum(const std::string &type) {
     m_mantidDisplayModel->plotSubplots(userInput.plots, MantidQt::DistributionDefault, showErrorBars);
   } else if (userInput.simple || userInput.waterfall) {
     if (userInput.isAdvanced) {
+      const auto advancedUserInput = userInput.advanced.value();
       m_mantidDisplayModel->plot1D(userInput.plots, true, MantidQt::DistributionDefault, showErrorBars, nullptr, false,
-                                   userInput.waterfall, userInput.advanced.logName, userInput.advanced.customLogValues);
+                                   userInput.waterfall, advancedUserInput.logName, advancedUserInput.customLogValues);
     } else {
       m_mantidDisplayModel->plot1D(userInput.plots, true, MantidQt::DistributionDefault, showErrorBars, nullptr, false,
                                    userInput.waterfall);
     }
 
   } else if (userInput.surface) {
-    m_mantidDisplayModel->plotSurface(userInput.advanced.accepted, userInput.advanced.plotIndex,
-                                      userInput.advanced.axisName, userInput.advanced.logName,
-                                      userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
+    const auto advancedUserInput = userInput.advanced.value();
+    m_mantidDisplayModel->plotSurface(advancedUserInput.accepted, advancedUserInput.plotIndex,
+                                      advancedUserInput.axisName, advancedUserInput.logName,
+                                      advancedUserInput.customLogValues, advancedUserInput.workspaceNames);
   } else if (userInput.contour) {
-    m_mantidDisplayModel->plotContour(userInput.advanced.accepted, userInput.advanced.plotIndex,
-                                      userInput.advanced.axisName, userInput.advanced.logName,
-                                      userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
+    const auto advancedUserInput = userInput.advanced.value();
+    m_mantidDisplayModel->plotContour(advancedUserInput.accepted, advancedUserInput.plotIndex,
+                                      advancedUserInput.axisName, advancedUserInput.logName,
+                                      advancedUserInput.customLogValues, advancedUserInput.workspaceNames);
   }
 }
 
