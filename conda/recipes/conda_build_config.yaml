@@ -55,10 +55,6 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
-#Causing test_figureerrorsmanager failures with trying to pick events
-libexpat:
-  - '<=2.6.4'
-
 # Not a primary dependency, but pinning to avoid a couple of unit test failures
 mkl:
   - 2024.1.0
@@ -93,6 +89,10 @@ poco:
 
 psutil:
   - '>=5.8.0'
+
+#Causing test_figureerrorsmanager failures with trying to pick events
+pydantic:
+ - '<2.11'
 
 sphinx:
   - '>=4.5.*'
