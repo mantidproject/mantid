@@ -118,13 +118,13 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &integShape, con
   // go through the bounding box generating cubes and seeing if they are
   // inside the shape
   for (size_t i = 0; i < numZSlices; ++i) {
-    const double z = (static_cast<double>(i) + 0.5) * ZSliceThickness + integBbox.xMin();
+    const double z = (static_cast<double>(i) + 0.5) * ZSliceThickness + integBbox.zMin();
 
     for (size_t j = 0; j < numYSlices; ++j) {
       const double y = (static_cast<double>(j) + 0.5) * YSliceThickness + integBbox.yMin();
 
       for (size_t k = 0; k < numXSlices; ++k) {
-        const double x = (static_cast<double>(k) + 0.5) * XSliceThickness + integBbox.zMin();
+        const double x = (static_cast<double>(k) + 0.5) * XSliceThickness + integBbox.xMin();
         // Set the current position in the sample in Cartesian coordinates.
         const Kernel::V3D currentPosition = V3D(x, y, z);
         // Check if the current point is within the object. If not, skip.
