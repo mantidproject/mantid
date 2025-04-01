@@ -1,0 +1,1 @@
+- Fixes a bug in  :ref:`algm-Divide` which do not clear unit when the YUnit of lhs == rhs due to rhsBlockszie being 0.
