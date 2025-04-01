@@ -37,6 +37,8 @@ public:
                                               const Kernel::V3D &endPos, MCInteractionStatistics &stats) const override;
   ComponentScatterPoint generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
   void setActiveRegion(const Geometry::BoundingBox &region) override;
+  Geometry::IObject_sptr getGaugeVolume() const override;
+  void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) override;
 
 private:
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng) const;

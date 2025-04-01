@@ -33,8 +33,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                          IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(nullptr), m_maxScatterAttempts(maxScatterAttempts),
-      m_pointsIn(pointsIn), m_gaugeVolume(nullptr) {
-  m_gaugeVolume = gaugeVolume;
+      m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
   m_activeRegion = getFullBoundingBox();
   try {
     m_env = &sample.getEnvironment();
@@ -60,6 +59,16 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
                                 "environment parts must have a valid shape.");
   }
 }
+/**
+ * Returns the defined gauge volume if one is present, otherwise returns nullptr
+ * @return Shared pointer to gauge volume object
+ */
+Geometry::IObject_sptr MCInteractionVolume::getGaugeVolume() const { return m_gaugeVolume; }
+
+/**
+ * Sets the gauge volume on the InteractionVolume
+ */
+void MCInteractionVolume::setGaugeVolume(Geometry::IObject_sptr gaugeVolume) { m_gaugeVolume = gaugeVolume; }
 
 /**
  * Returns the defined gauge volume if one is present, otherwise returns axis-aligned bounding box
@@ -69,7 +78,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
   if (m_gaugeVolume != nullptr) {
-    auto sampleBox = m_gaugeVolume->getBoundingBox();
+    sampleBox = m_gaugeVolume->getBoundingBox();
   }
   if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
@@ -117,12 +126,12 @@ MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::Ps
   std::optional<Kernel::V3D> pointGenerated{std::nullopt};
   if (componentIndex == -1) {
     if (m_gaugeVolume != nullptr) {
-      pointGenerated = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 1);
+      pointGenerated = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 2);
     } else {
-      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 2);
     }
   } else {
-    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 1);
+    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 2);
   }
   return pointGenerated;
 }

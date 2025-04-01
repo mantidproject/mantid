@@ -28,12 +28,16 @@ namespace Algorithms {
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
  */
-MCAbsorptionStrategy::MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
-                                           DeltaEMode::Type EMode, const size_t nevents,
-                                           const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda)
-    : m_beamProfile(beamProfile), m_scatterVol(setActiveRegion(interactionVolume, beamProfile)), m_nevents(nevents),
+MCAbsorptionStrategy::MCAbsorptionStrategy(std::shared_ptr<IMCInteractionVolume> interactionVolume,
+                                           const IBeamProfile &beamProfile, DeltaEMode::Type EMode,
+                                           const size_t nevents, const size_t maxScatterPtAttempts,
+                                           const bool regenerateTracksForEachLambda)
+    : m_beamProfile(beamProfile), m_scatterVol(std::move(interactionVolume)), m_nevents(nevents),
       m_maxScatterAttempts(maxScatterPtAttempts), m_EMode(EMode),
-      m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {}
+      m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {
+
+  setActiveRegion(m_scatterVol, beamProfile);
+}
 
 /**
  * Set the active region on the interaction volume as smaller of the sample
@@ -43,10 +47,9 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(IMCInteractionVolume &interactionVolu
  * @param beamProfile The beam profile
  * @return The interaction volume object with active region set
  */
-IMCInteractionVolume &MCAbsorptionStrategy::setActiveRegion(IMCInteractionVolume &interactionVolume,
-                                                            const IBeamProfile &beamProfile) {
-  interactionVolume.setActiveRegion(beamProfile.defineActiveRegion(interactionVolume.getFullBoundingBox()));
-  return interactionVolume;
+void MCAbsorptionStrategy::setActiveRegion(std::shared_ptr<IMCInteractionVolume> interactionVolume,
+                                           const IBeamProfile &beamProfile) {
+  interactionVolume->setActiveRegion(beamProfile.defineActiveRegion(interactionVolume->getFullBoundingBox()));
 }
 
 /**
@@ -70,8 +73,9 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng, c
                                      const std::vector<double> &lambdas, const double lambdaFixed,
                                      std::vector<double> &attenuationFactors, std::vector<double> &attFactorErrors,
                                      MCInteractionStatistics &stats) {
-  const auto scatterBounds = m_scatterVol.getFullBoundingBox();
+  const auto scatterBounds = m_scatterVol->getFullBoundingBox();
   const auto nbins = static_cast<int>(lambdas.size());
+  Geometry::IObject_sptr gv = m_scatterVol->getGaugeVolume();
 
   std::vector<double> wgtMean(attenuationFactors.size()), wgtM2(attenuationFactors.size());
 
@@ -85,7 +89,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng, c
         if (m_regenerateTracksForEachLambda || j == 0) {
           const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
           std::tie(success, beforeScatter, afterScatter) =
-              m_scatterVol.calculateBeforeAfterTrack(rng, neutron.startPos, finalPos, stats);
+              m_scatterVol->calculateBeforeAfterTrack(rng, neutron.startPos, finalPos, stats);
         } else {
           success = true;
         }

@@ -207,8 +207,7 @@ std::shared_ptr<IMCInteractionVolume>
 MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
                                               const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                               const Geometry::IObject_sptr gaugeVolume) {
-  auto interactionVol = std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn, gaugeVolume);
-  return interactionVol;
+  return std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn, gaugeVolume);
 }
 
 /**
@@ -226,12 +225,12 @@ MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const s
  * @return a pointer to an MCAbsorptionStrategy object
  */
 std::shared_ptr<IMCAbsorptionStrategy>
-MonteCarloAbsorption::createStrategy(IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
-                                     Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                                     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda) {
-  auto MCAbs = std::make_shared<MCAbsorptionStrategy>(interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
-                                                      regenerateTracksForEachLambda);
-  return MCAbs;
+MonteCarloAbsorption::createStrategy(std::shared_ptr<IMCInteractionVolume> interactionVol,
+                                     const IBeamProfile &beamProfile, Kernel::DeltaEMode::Type EMode,
+                                     const size_t nevents, const size_t maxScatterPtAttempts,
+                                     const bool regenerateTracksForEachLambda) {
+  return std::make_shared<MCAbsorptionStrategy>(interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
+                                                regenerateTracksForEachLambda);
 }
 
 /**
@@ -319,26 +318,28 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   // Configure interaction volume
 
-  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
-  auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
-                                 resimulateTracksForDiffWavelengths);
-
   bool hasGaugeVol = false;
+  Geometry::IObject_sptr gaugeVolume = nullptr;
+
   try {
-    // needs to have a run and a gauge volume defined, otherwise keep the null pointer
     inputWS.run().getProperty("GaugeVolume");
     hasGaugeVol = true;
-  } catch (const std::exception &e) {
+  } catch (const std::exception &) {
   }
 
   if (hasGaugeVol) {
     std::string xmlString = inputWS.run().getProperty("GaugeVolume")->value();
-    std::shared_ptr<IObject> gaugeVolume = ShapeFactory().createShape(xmlString);
-    auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
-    // Configure strategy
-    auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
-                                   resimulateTracksForDiffWavelengths);
+    gaugeVolume = ShapeFactory().createShape(xmlString);
   }
+
+  std::shared_ptr<IMCInteractionVolume> interactionVolume =
+      createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+
+  Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
+
+  std::shared_ptr<IMCAbsorptionStrategy> strategy =
+      createStrategy(interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
+                     resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 
