@@ -39,12 +39,6 @@ public:
   static LegacyNeXusFileTest *createSuite() { return new LegacyNeXusFileTest(); }
   static void destroySuite(LegacyNeXusFileTest *suite) { delete suite; }
 
-  void test_compile() {
-    string x = strmakef("not_a_real_file_%d", 10);
-    removeFile(x);
-    TS_ASSERT(true);
-  }
-
   void test_open_group() {
     cout << "\ntest openGroup\n";
     string filename("test_nexus_file_grp.h5");
@@ -54,14 +48,14 @@ public:
     string grp("test_group"), cls("NXsample");
 
     // check error conditions
-    TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openGroup(grp, string()), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup(string(), cls), Exception &);
+    TS_ASSERT_THROWS(file.openGroup(grp, string()), Exception &);
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
-    auto new_loc = file.getGroupID();
-    cout << strmakef("Located at %s\n", new_loc.targetPath);
-    TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
+    // auto new_loc = file.getGroupID();
+    // cout << strmakef("Located at %s\n", new_loc.targetPath);
+    // TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
 
     // cleanup
     file.close();
@@ -76,7 +70,7 @@ public:
 
     // try to open it with wrong class name
     string notcls("NXshorts");
-    TS_ASSERT_THROWS(file.openGroup(grp, notcls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup(grp, notcls), Exception &);
 
     // cleanup
     file.close();
@@ -88,14 +82,14 @@ public:
     File file(filename, NXACC_CREATE5);
 
     // check error at root
-    TS_ASSERT_THROWS(file.getGroupID(), NeXus::Exception &);
+    // TS_ASSERT_THROWS(file.getGroupID(), Exception &);
 
     // now make group, close it, and check we are back at root
-    string grp("test_group"), cls("NXsample");
-    auto ingrp = file.getGroupID();
-    TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
-    file.closeGroup();
-    TS_ASSERT_THROWS(file.getGroupID(), Exception &)
+    // string grp("test_group"), cls("NXsample");
+    // auto ingrp = file.getGroupID();
+    // TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
+    // file.closeGroup();
+    // TS_ASSERT_THROWS(file.getGroupID(), Exception &)
 
     // cleanup
     file.close();

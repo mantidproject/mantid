@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
@@ -48,22 +49,23 @@ public:
   void test_leak1() {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    string const szFile("nexus_leak_test1.nxs");
-
-    File file_obj(szFile, NXACC_CREATE5); // swap this for a read instead of create?
-    file_obj.close();
+    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath("nexus_leak_test1.nxs");
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
         cout << "loop count " << iReOpen << "\n";
       }
 
-      file_obj = File(szFile, NXACC_RDWR);
+      File file_obj(szFile, NXACC_READ);
+      file_obj.openGroup("entry_0", "NXentry");
+      // file_obj.openData("data_0");
+      // file_obj.closeData(); ### Accidently created the data as a group, redo this file. Loop to create lots of
+      // groups/data like test 2.
+      file_obj.closeGroup();
       file_obj.close();
+
       // fileid.openGroup(oss, "NXentry"); Lets open and close a few groups?
     }
-
-    removeFile(szFile); // cleanup
     cout << "Leak Test 1 Success!\n";
   }
 };

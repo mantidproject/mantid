@@ -115,6 +115,7 @@ static NXstatus nxiunlock(int ret) {
  *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
  *  Freddie Akeroyd, 16/06/2011
  */
+#include <iostream>
 #include <windows.h>
 
 static CRITICAL_SECTION nx_critical;
@@ -166,6 +167,10 @@ static char *locateNexusFileInPath(char const *const startName) {
   char const *loadPath = NULL, *pPtr = NULL;
   char *testPath = NULL;
   char pathPrefix[256];
+
+  char cwd[MAX_PATH];
+  GetCurrentDirectoryA(MAX_PATH, cwd); // Get current working directory
+  std::cout << cwd;
 
   if (canOpen(startName)) {
     return strdup(startName);
