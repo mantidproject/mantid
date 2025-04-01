@@ -132,8 +132,5 @@ public:
     // try using the load path
     do_test_loadPath(DMC01 + fileext);
     do_test_loadPath(DMC02 + fileext);
-
-    removeFile(DMC01 + fileext);
-    removeFile(DMC02 + fileext);
   }
 };
