@@ -19,7 +19,6 @@ namespace Muon {
 class MANTID_MUON_DLL MuonPairingAsymmetry final : public API::Algorithm {
 public:
   MuonPairingAsymmetry() : API::Algorithm() {}
-  virtual ~MuonPairingAsymmetry() = default;
 
   const std::string name() const override { return "MuonPairingAsymmetry"; }
   int version() const override { return (1); }

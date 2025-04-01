@@ -39,7 +39,7 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     return "The number of spin states specified is not an allowed value";
 
   // First check that the spin states are valid entries
-  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [&](std::string s) {
+  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [&](const std::string &s) {
         const bool isPair = setContains(allowedPairs, s);
         const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, s);
         return !isPair && !isSingle;

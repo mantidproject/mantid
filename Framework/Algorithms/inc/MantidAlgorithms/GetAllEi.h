@@ -65,7 +65,7 @@ protected: // for testing, private otherwise.
 
   /**Return average time series log value for the appropriately filtered log*/
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
-                         Kernel::TimeROI &timeroi);
+                         const Kernel::TimeROI &timeroi);
   /**process logs and retrieve chopper speed and chopper delay*/
   void findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, double &chop_speed, double &chop_delay);
   void findGuessOpeningTimes(const std::pair<double, double> &TOF_range, double ChopDelay, double Period,
