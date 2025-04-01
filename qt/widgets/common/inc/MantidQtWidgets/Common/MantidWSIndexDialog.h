@@ -23,6 +23,7 @@
 #include <QVBoxLayout>
 #include <QValidator>
 
+#include <optional>
 #include <set>
 
 namespace MantidQt {
@@ -246,7 +247,7 @@ public:
     bool surface;
     bool contour;
     bool isAdvanced;
-    UserInputAdvanced advanced;
+    std::optional<UserInputAdvanced> advanced;
   };
 
   /// The string "Workspace index"
