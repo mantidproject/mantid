@@ -35,7 +35,7 @@ requirements:
     - poco {{ poco }}
     - psutil {{ psutil }}
     - pycifrw
-    - pydantic
+    - pydantic {{ pydantic }}
     - pyqt {{ pyqt }}
     - pyqtwebengine
     - python-dateutil {{ python_dateutil }}
