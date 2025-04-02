@@ -230,11 +230,8 @@ void File::makeData(const string &name, NXnumtype type, const DimVector &dims, b
   }
 }
 
-template <typename NumT>
-void File::makeData(const string &name, const NXnumtype type, const NumT length, bool open_data) {
-  DimVector dims;
-  dims.push_back(static_cast<dimsize_t>(length));
-  this->makeData(name, type, dims, open_data);
+void File::makeData(const string &name, const NXnumtype type, const dimsize_t length, bool open_data) {
+  this->makeData(name, type, DimVector({length}), open_data);
 }
 
 template <typename NumT> void File::writeData(const string &name, const NumT &value) {
@@ -975,23 +972,6 @@ template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
 template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
 template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
 template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
-
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int8_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const uint8_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int16_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const uint16_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int32_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const uint32_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const int64_t length,
-                                              bool open_data);
-template MANTID_NEXUS_DLL void File::makeData(const string &name, const NXnumtype type, const uint64_t length,
-                                              bool open_data);
 
 template MANTID_NEXUS_DLL void File::putData(const vector<int8_t> &data);
 template MANTID_NEXUS_DLL void File::putData(const vector<uint8_t> &data);

@@ -51,7 +51,8 @@ public:
   void test_remove() {
     // create a simple file, and make sure removeFile works as intended
     cout << "\nremoving\n";
-    std::string filename = FileResource("not_a_real_file.txt").fullPath();
+    FileResource resource("not_a_real_file.txt");
+    std::string filename = resource.fullPath();
 
     // ensure file doesn't already exist
     if (std::filesystem::exists(filename)) {
@@ -75,28 +76,23 @@ public:
   void test_can_create() {
     cout << "\ntest creation\n";
 
-    string filename = FileResource("test_nexus_file_init.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_init.h5");
+    std::string filename = resource.fullPath();
 
     // create the file and ensure it exists
     NeXus::File file(filename, NXACC_CREATE5);
     file.close();
     TS_ASSERT(std::filesystem::exists(filename));
-
-    // cleanup
-    removeFile(filename);
   }
 
   void test_flush() {
     cout << "\ntest flush\n";
     // make sure flush works
-    string filename = FileResource("test_nexus_file_flush.h5").fullPath();
+    // TODO actually test the buffers
+    FileResource resource("test_nexus_file_flush.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.flush();
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   // #################################################################################################################
@@ -105,8 +101,8 @@ public:
 
   void test_make_group() {
     cout << "\ntest makeGroup\n";
-    string filename = FileResource("test_nexus_file_grp.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     string grp("test_group"), cls("NXsample");
@@ -116,17 +112,12 @@ public:
     TS_ASSERT_THROWS(file.makeGroup("", cls), NeXus::Exception &);
     // check works when correct
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_open_group() {
     cout << "\ntest openGroup\n";
-    string filename = FileResource("test_nexus_file_grp.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // create a group, to be opened
@@ -140,17 +131,12 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_open_group_bad() {
     cout << "\ntest openGroup bad\n";
-    string filename = FileResource("test_nexus_file_grp.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // create a group, to be opened
@@ -160,18 +146,13 @@ public:
     // try to open it with wrong class name
     string notcls("NXshorts");
     TS_ASSERT_THROWS(file.openGroup(grp, notcls), NeXus::Exception &);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_open_group_layers() {
     cout << "\ntest openGroup layers\n";
-    string filename = FileResource("test_nexus_file_grp_layers.h5").fullPath();
+    FileResource resource("test_nexus_file_grp_layers.h5");
+    std::string filename = resource.fullPath();
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
-    removeFile(filename);
 
     // create a file with group -- open it
     NeXus::File file(filename, NXACC_CREATE5);
@@ -181,16 +162,12 @@ public:
     // create a group inside the group -- open it
     file.makeGroup(grp2, cls2, false);
     file.openGroup(grp2, cls2);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
-    string filename = FileResource("test_nexus_file_grp.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // check error at root
@@ -202,11 +179,6 @@ public:
     file.closeGroup();
 
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   // #################################################################################################################
@@ -215,8 +187,8 @@ public:
 
   void test_makeData() {
     cout << "\ntest make data\n";
-    string filename = FileResource("test_nexus_file_data.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
 
     string name("some_data");
     DimVector dims({1});
@@ -236,17 +208,12 @@ public:
 
     // check it works when it works
     TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_makeData_length() {
     cout << "\ntest make data -- using length\n";
-    string filename = FileResource("test_nexus_file_data.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
 
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
@@ -255,25 +222,14 @@ public:
 
     // check it works when it works -- int
     string name("some_data_int");
-    TS_ASSERT_THROWS_NOTHING(file.makeData<int32_t>(name, type, 3));
-
-    // check it works when it works -- int64_t
-    name = "some_data_int64";
-    TS_ASSERT_THROWS_NOTHING(file.makeData<int64_t>(name, type, 3));
-
-    // check it works when it works -- size_t
-    name = "some_data_size";
-    TS_ASSERT_THROWS_NOTHING(file.makeData<uint64_t>(name, type, 3));
-
-    // cleanup
-    file.close();
-    removeFile(filename);
+    dimsize_t len(3);
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, len));
   }
 
   void test_open_dataset() {
     cout << "\ntest openData\n";
-    string filename = FileResource("test_nexus_file_data.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -288,18 +244,12 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_closeData() {
     cout << "\ntest closeData\n";
-    string filename = FileResource("test_nexus_file_dataclose.h5").fullPath();
-    removeFile(filename);
-    NXnumtype type(NXnumtype::CHAR);
+    FileResource resource("test_nexus_file_dataclose.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -307,15 +257,10 @@ public:
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
 
     // now make data, close it, and check we are back at root
-    file.makeData("test_data:", type, 1, true);
+    file.makeData("test_data:", NXnumtype::CHAR, 1, true);
     TS_ASSERT_THROWS_NOTHING(file.closeData());
 
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   template <typename T> void do_test_data_putget(NeXus::File &file, string name, T in) {
@@ -331,8 +276,8 @@ public:
     cout << "\ntest dataset read/write\n";
 
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -365,36 +310,28 @@ public:
     cout << "\tread/write char...";
     do_test_data_putget<char>(file, "data_char", 'x');
     cout << "done\n";
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   void test_putData_bad() {
     cout << "\ntest putData -- bad\n";
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
 
     // try to put data into a group -- should fail
     int data = 1;
     file.makeGroup("a_group", "NXshirt", true);
     TS_ASSERT_THROWS(file.putData(&data), NeXus::Exception &);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!";
   }
 
   void xtest_data_putget_string() {
     cout << "\ntest dataset read/write -- string\n";
 
     // open a file
-    string filename = FileResource("test_nexus_file_stringrw=.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_stringrw=.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -422,19 +359,14 @@ public:
     file.putData(&in);
     out = file.getStrData();
     TS_ASSERT_EQUALS(in, out);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_data_putget_array() {
     cout << "\ntest dataset read/write -- arrays\n";
 
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -484,24 +416,20 @@ public:
         TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
       }
     }
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   void test_data_putget_vector() {
     cout << "\ntest dataset read/write -- vector\n";
 
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW_vec.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW_vec.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int vector
     vector<int32_t> in{11, 8, 9, 12}, out;
-    file.makeData<uint64_t>("data_int", NeXus::getType<int32_t>(), in.size(), true);
+    file.makeData("data_int", NeXus::getType<int32_t>(), in.size(), true);
     file.putData(in);
     file.getData(out);
     Info info = file.getInfo();
@@ -513,7 +441,7 @@ public:
 
     // put/get a double vector
     vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
-    file.makeData<uint64_t>("data_dbl", NeXus::getType<double>(), ind.size(), true);
+    file.makeData("data_dbl", NeXus::getType<double>(), ind.size(), true);
     file.putData(ind);
     file.getData(outd);
     info = file.getInfo();
@@ -522,10 +450,6 @@ public:
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), ind.size());
     TS_ASSERT_EQUALS(ind, outd);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   // #################################################################################################################
@@ -534,11 +458,11 @@ public:
 
   void test_getPath_groups() {
     cout << "\ntest get_path -- groups only\n";
-    string filename = FileResource("test_nexus_file_grp.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
 
     // at root, path should be "/"
-    NeXus::File file(filename, NXACC_CREATE5);
     TS_ASSERT_EQUALS("/", file.getPath());
 
     // make and open a group -- now at "/abc"
@@ -556,19 +480,15 @@ public:
     // go up a different step -- at "/abc/ghi"
     file.makeGroup("ghi", "NXfunsicle", true);
     TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   void test_getPath_data() {
     cout << "\ntest get_path -- groups and data!\n";
-    string filename = FileResource("test_nexus_file_grpdata.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_grpdata.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
 
     // at root, path should be "/"
-    NeXus::File file(filename, NXACC_CREATE5);
     TS_ASSERT_EQUALS("/", file.getPath());
 
     // make and open a group -- now at "/abc"
@@ -581,10 +501,6 @@ public:
     file.putData(&in);
     TS_ASSERT_EQUALS("/abc/def", file.getPath());
     file.closeData();
-
-    // cleanup
-    file.close();
-    removeFile(filename);
   }
 
   void test_openPath() {
@@ -592,8 +508,8 @@ public:
     fflush(stdout);
 
     // open a file
-    string filename = FileResource("test_nexus_entries.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_entries.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // setup a recursive group tree
@@ -622,7 +538,7 @@ public:
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
         string data = "Data";
-        file.makeData<uint64_t>(name, NXnumtype::CHAR, data.size(), true);
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
         file.putData(data.data());
         file.closeData();
       }
@@ -662,8 +578,8 @@ public:
     cout << "\ntest getInfo -- good\n";
 
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -690,18 +606,13 @@ public:
     TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 1);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!";
   }
 
   void test_getInfo_bad() {
     cout << "\ntest getInfo -- bad\n";
     // open a file
-    string filename = FileResource("test_nexus_file_dataRW.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
@@ -714,11 +625,6 @@ public:
     // open a group and try to get info
     file.makeGroup("a_group", "NXshorts", true);
     TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   // ##################################################################################################################
@@ -737,8 +643,8 @@ public:
     cout << "\ntest attribute read/write\n";
 
     // open a file
-    string filename = FileResource("test_nexus_attr.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_attr.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // put/get an int attribute
@@ -746,19 +652,14 @@ public:
 
     // put/get a double attribute
     do_test_putget_attr(file, "dbl_attr_", 120.2e6);
-
-    // cleanup
-    file.close();
-    removeFile(filename);
-    cout << "good!\n";
   }
 
   void test_getEntries() {
     cout << "\ntest getEntries\n";
 
     // open a file
-    string filename = FileResource("test_nexus_entries.h5").fullPath();
-    removeFile(filename);
+    FileResource resource("test_nexus_entries.h5");
+    std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // setup a recursive group tree
@@ -787,7 +688,7 @@ public:
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
         string data = "Data";
-        file.makeData<uint64_t>(name, NXnumtype::CHAR, data.size(), true);
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
         file.putData(data.data());
         file.closeData();
       }
