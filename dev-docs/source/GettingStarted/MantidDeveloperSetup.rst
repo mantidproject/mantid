@@ -18,4 +18,4 @@ Create a Conda environment and install the ``mantid-developer`` Conda metapackag
 
   .. code-block:: sh
 
-    mamba update -c mantid/label/nightly mantid-developer
+    mamba update -c mantid/label/nightly --all
