@@ -13,17 +13,17 @@ from mantidqt.widgets.helpwindow.helpwindowpresenter import HelpWindowPresenter
 _presenter = None
 
 
-def show_help_page(relative_url, local_docs=None, online_base_url="https://docs.mantidproject.org/"):
+def show_help_page(relativeUrl, localDocs=None, onlineBaseUrl="https://docs.mantidproject.org/"):
     """
     Show the help window at the given relative URL path.
     """
     global _presenter
     if _presenter is None:
         # Create a Presenter once. Re-use it on subsequent calls.
-        _presenter = HelpWindowPresenter(local_docs=local_docs, online_base_url=online_base_url)
+        _presenter = HelpWindowPresenter(localDocs=localDocs, onlineBaseUrl=onlineBaseUrl)
 
     # Ask the Presenter to load the requested page
-    _presenter.showHelpPage(relative_url)
+    _presenter.show_help_page(relativeUrl)
 
 
 def main(cmdargs=sys.argv):
@@ -34,7 +34,7 @@ def main(cmdargs=sys.argv):
 
     parser = argparse.ArgumentParser(description="Standalone test of the Python-based Mantid Help Window.")
     parser.add_argument(
-        "relative_url", nargs="?", default="", help="Relative doc path (e.g. 'algorithms/Load-v1.html'), defaults to 'index.html' if empty."
+        "relativeUrl", nargs="?", default="", help="Relative doc path (e.g. 'algorithms/Load-v1.html'), defaults to 'index.html' if empty."
     )
     parser.add_argument("--local-docs", default=None, help="Path to local Mantid HTML docs. Overrides environment if set.")
     parser.add_argument(
@@ -51,7 +51,7 @@ def main(cmdargs=sys.argv):
     app = QApplication(sys.argv)
 
     # Show the requested help page
-    show_help_page(relative_url=args.relative_url, local_docs=args.local_docs, online_base_url=args.online_base_url)
+    show_help_page(relativeUrl=args.relativeUrl, localDocs=args.local_docs, onlineBaseUrl=args.online_base_url)
 
     sys.exit(app.exec_())
 
