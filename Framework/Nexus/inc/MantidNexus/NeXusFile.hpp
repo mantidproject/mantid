@@ -190,8 +190,7 @@ public:
    * \param length The number of elements in the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  template <typename NumT>
-  void makeData(const std::string &name, const NXnumtype type, const NumT length, bool open_data = false);
+  void makeData(const std::string &name, const NXnumtype type, const dimsize_t length, bool open_data = false);
 
   /**
    * Create a 1D data field, insert the data, and close the data.

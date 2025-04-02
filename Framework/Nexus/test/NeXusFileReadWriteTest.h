@@ -202,7 +202,7 @@ public:
 
     // tests of float read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
-    vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
+    vector<double> const r8_vec{12., 13., 14., 15., 16.};
     float const r4_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
@@ -234,7 +234,7 @@ public:
 
     // test of slab read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
-    vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
+    vector<double> const r8_vec{12., 13., 14., 15., 16.};
     float const r4_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
@@ -326,6 +326,7 @@ public:
     NXlink datalink = fileid.getDataID();
     fileid.closeData();
     fileid.flush();
+
     // Create a group, and link it to that data
     cout << "create group at /entry/data to link to the data\n";
     fileid.makeGroup("data", "NXdata");
@@ -343,8 +344,9 @@ public:
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
-    printf("data link works\n");
-    fileid.closeGroup();
+    cout << "data link works\n";
+
+    fileid.openPath("/entry");
 
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
@@ -355,6 +357,7 @@ public:
     fileid.openGroup("group1", "NXentry");
     NXlink grouplink = fileid.getGroupID();
     fileid.closeGroup();
+
     // make group 2
     cout << "create group /entry/group2/group1\n";
     fileid.makeGroup("group2", "NXentry");
@@ -367,6 +370,6 @@ public:
     NXlink res2 = fileid.getGroupID();
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
-    printf("group link works\n");
+    cout << "group link works\n";
   }
 };
