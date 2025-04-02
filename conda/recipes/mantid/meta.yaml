@@ -67,6 +67,7 @@ requirements:
     - {{ pin_compatible("numpy", upper_bound="2.2") }}
     - occt {{ occt }}
     - pycifrw
+    - pydantic {{ pydantic }}
     - python
     - python-dateutil {{ python_dateutil }}
     - pyyaml {{ pyyaml }}
@@ -78,7 +79,6 @@ requirements:
     - orsopy {{ orsopy }}
     - quasielasticbayes
     - zlib
-    - pydantic
 
   run_constrained:
     - matplotlib {{ matplotlib }}
