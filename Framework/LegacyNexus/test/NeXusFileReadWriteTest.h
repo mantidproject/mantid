@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
@@ -46,24 +47,29 @@ public:
    */
 
 private:
-  template <typename T> void do_rw_test(File &fileid, std::string const &dataname, T const &data) {
+  template <typename T> void do_r_test(File &fileid, std::string const &dataname, T const &data) {
+    fileid.openGroup("entry", "NXentry");
+
     cout << "Testing data " << dataname << "\n";
     // read
     T output;
     fileid.readData(dataname, output);
-
+    fileid.closeGroup();
     // compare
     TS_ASSERT_EQUALS(data, output);
   }
 
   template <size_t N, size_t M, typename T>
-  void do_rw2darray_test(File &fileid, std::string const &dataname, T const (&data)[N][M]) {
+  void do_r2darray_test(File &fileid, std::string const &dataname, T const (&data)[N][M]) {
+    fileid.openGroup("entry", "NXentry");
+
     cout << "Testing attribute " << dataname << "\n";
     // read
     T output[N][M];
     fileid.openData(dataname);
     fileid.getData(&(output[0][0]));
     fileid.closeData();
+    fileid.closeGroup();
 
     // compare
     for (size_t i = 0; i < N; i++) {
@@ -77,7 +83,8 @@ public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
     std::string const nxFile("NexusFile_test_char.h5");
-    File fileid(nxFile);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
+    File fileid(filepath);
 
     // tests of string/char read/write
     string const ch_test_data = "NeXus ><}&{'\\&\" Data";
@@ -86,11 +93,11 @@ public:
     char const c2_array[3][2] = {{'z', 'y'}, {'x', 'w'}, {'v', 'u'}};
     char const c3_array[6][1] = {{'z'}, {'y'}, {'x'}, {'w'}, {'v'}, {'u'}};
     char const c4_array[1][7] = {{'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
-    do_rw_test(fileid, "ch_data", ch_test_data);
-    do_rw2darray_test(fileid, "c1_data", c1_array);
-    do_rw2darray_test(fileid, "c2_data", c2_array);
-    do_rw2darray_test(fileid, "c3_data", c3_array);
-    do_rw2darray_test(fileid, "c4_data", c4_array);
+    do_r_test(fileid, "ch_data", ch_test_data);
+    do_r2darray_test(fileid, "c1_data", c1_array);
+    do_r2darray_test(fileid, "c2_data", c2_array);
+    do_r2darray_test(fileid, "c3_data", c3_array);
+    do_r2darray_test(fileid, "c4_data", c4_array);
 
     // check all attributes
     // auto attrs = fileid.getAttrInfos();
@@ -118,15 +125,16 @@ public:
   void test_napi_vec() {
     cout << "Starting NAPI VEC Test\n";
     std::string const nxFile("NexusFile_test_vec.h5");
-    File fileid(nxFile);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
+    File fileid(filepath);
 
     // tests of integer read/write
     vector<unsigned char> const i1_array{1, 2, 3, 4};
     vector<short int> const i2_array{1000, 2000, 3000, 4000};
     vector<int> const i4_array{1000000, 2000000, 3000000, 4000000};
-    do_rw_test(fileid, "i1_data", i1_array);
-    do_rw_test(fileid, "i2_data", i2_array);
-    do_rw_test(fileid, "i4_data", i4_array);
+    do_r_test(fileid, "i1_data", i1_array);
+    do_r_test(fileid, "i2_data", i2_array);
+    do_r_test(fileid, "i4_data", i4_array);
 
     // tests of float read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
@@ -135,10 +143,10 @@ public:
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-    do_rw_test(fileid, "r4_vec_data", r4_vec);
-    do_rw_test(fileid, "r8_vec_data", r8_vec);
-    do_rw2darray_test(fileid, "r4_data", r4_array);
-    do_rw2darray_test(fileid, "r8_data", r8_array);
+    do_r_test(fileid, "r4_vec_data", r4_vec);
+    do_r_test(fileid, "r8_vec_data", r8_vec);
+    do_r2darray_test(fileid, "r4_data", r4_array);
+    do_r2darray_test(fileid, "r8_data", r8_array);
 
     // check all entries
     // vector<string> entry_names({"i1_data", "i2_data", "i4_data", "r4_data", "r4_vec_data", "r8_data",
@@ -156,9 +164,9 @@ public:
   void test_openPath() {
     cout << "tests for openPath\n";
 
-    // make file with path /entry
     string const filename("NexusFile_openpathtest.nxs");
-    File fileid(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    File fileid(filepath);
 
     // compare
     char output;
@@ -189,30 +197,32 @@ public:
   void test_links() {
     cout << "tests of linkature\n";
 
-    // string const filename("NexusFIle_linktest.nxs");
-    // File fileid = do_prep_files(filename);
+    string const filename("NexusFIle_linktest.nxs");
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    File fileid(filepath);
 
-    //// check data link
-    // fileid.openPath("/entry/data/some_data");
-    //// TODO why can't we get the data through the link?
-    //// string output1;
-    //// fileid.getData(&output1);
-    //// TS_ASSERT_EQUALS(somedata, output1);
+    // check data link
+    fileid.openPath("/entry/data/some_data");
+    // TODO why can't we get the data through the link?
+    // string output1;
+    // fileid.getData(&output1);
+    // TS_ASSERT_EQUALS(somedata, output1);
     // NXlink res1 = fileid.getDataID();
     // TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     // TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
-    // printf("data link works\n");
-    // fileid.closeGroup();
+    printf("data link works\n");
+    fileid.closeGroup();
 
-    //// check group link
-    // fileid.openPath("/entry/group2/group1");
+    // check group link
+    fileid.openPath("/entry/group2/group1");
     // NXlink res2 = fileid.getGroupID();
     // TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     // TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
-    //
-    ////cleanup
-    // fileid.close();;
-    //
-    // printf("group link works\n");
+
+    // cleanup
+    fileid.close();
+    ;
+
+    printf("group link works\n");
   }
 };

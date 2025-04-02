@@ -32,12 +32,28 @@ template <typename NumT> NXnumtype getType(NumT const number) {
   throw Exception(msg.str());
 }
 
+// template specialisations for types we kno
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(char const) { return NXnumtype::CHAR; }
 
-// template specialisations for types we know
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(float const) { return NXnumtype::FLOAT32; }
 
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(double const) { return NXnumtype::FLOAT64; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int8_t const) { return NXnumtype::INT8; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint8_t const) { return NXnumtype::UINT8; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int16_t const) { return NXnumtype::INT16; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint16_t const) { return NXnumtype::UINT16; }
+
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int32_t const) { return NXnumtype::INT32; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint32_t const) { return NXnumtype::UINT32; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(int64_t const) { return NXnumtype::INT64; }
+
+template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(uint64_t const) { return NXnumtype::UINT64; }
 
 } // namespace Mantid::LegacyNexus
 

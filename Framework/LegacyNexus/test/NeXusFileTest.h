@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
 #include "MantidlegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
@@ -41,11 +42,11 @@ public:
 
   void test_open_group() {
     cout << "\ntest openGroup\n";
-    string filename("test_nexus_file_grp.h5");
-    File file(filename, NXACC_CREATE5);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    File file(filename, NXACC_READ);
 
     // create a group, to be opened
-    string grp("test_group"), cls("NXsample");
+    string grp("abc"), cls("NXclass");
 
     // check error conditions
     TS_ASSERT_THROWS(file.openGroup(string(), cls), Exception &);
@@ -63,14 +64,13 @@ public:
 
   void test_open_group_bad() {
     cout << "\ntest openGroup bad\n";
-    string filename("test_nexus_file_grp.h5");
-    File file(filename, NXACC_CREATE5);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    File file(filename, NXACC_READ);
 
-    string grp("test_group"), cls("NXpants");
+    string grp("abc"), notgrp("clothes"), cls("NXclass"), notcls("NXpants");
 
-    // try to open it with wrong class name
-    string notcls("NXshorts");
     TS_ASSERT_THROWS(file.openGroup(grp, notcls), Exception &);
+    TS_ASSERT_THROWS(file.openGroup(notgrp, cls), Exception &);
 
     // cleanup
     file.close();
@@ -78,8 +78,8 @@ public:
 
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
-    string filename("test_nexus_file_grp.h5");
-    File file(filename, NXACC_CREATE5);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    File file(filename, NXACC_READ);
 
     // check error at root
     // TS_ASSERT_THROWS(file.getGroupID(), Exception &);
@@ -97,16 +97,18 @@ public:
 
   void test_getPath() {
     cout << "\ntest get_path\n";
-    string filename("test_nexus_file_grp.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
 
     // at root, path should be "/"
-    File file(filename, NXACC_CREATE5);
+    File file(filename, NXACC_READ);
     TS_ASSERT_EQUALS("", file.getPath());
 
-    // make and open a group -- now at "/abc"
+    // open a group -- now at "/abc"
+    file.openGroup("abc", "NXclass");
     TS_ASSERT_EQUALS("/abc", file.getPath());
 
-    // make another layer -- at "/acb/def"
+    // open another layer -- at "/acb/def"
+    file.openGroup("def", "NXentry");
     TS_ASSERT_EQUALS("/abc/def", file.getPath());
 
     // go down a step -- back to "/abc"
@@ -114,6 +116,7 @@ public:
     TS_ASSERT_EQUALS("/abc", file.getPath());
 
     // go up a different step -- at "/abc/ghi"
+    file.openGroup("ghi", "NXfunsicle");
     TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
 
     // cleanup
