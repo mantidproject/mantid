@@ -662,7 +662,8 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
 
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
-void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
+template <typename NumT>
+void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, NumT const *data,
                             bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array
@@ -698,8 +699,8 @@ int NexusFileIO::findMantidWSEntries() const {
  * @return true for OK, false for error
  */
 bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws) const {
-  std::vector<int> spectra;
-  std::vector<std::size_t> bins;
+  std::vector<int32_t> spectra;
+  std::vector<int64_t> bins;
   std::vector<double> weights;
   int spectra_count = 0;
   int offset = 0;
