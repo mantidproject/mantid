@@ -8,9 +8,11 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
+using Kernel::V3D;
 namespace API {
 class Sample;
 }
@@ -30,10 +32,17 @@ public:
     Kernel::V3D unitDir;
   };
 
+  IBeamProfile(const V3D center);
+  IBeamProfile() = default;
   virtual ~IBeamProfile() = default;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng, const Geometry::BoundingBox &) const = 0;
   virtual Geometry::BoundingBox defineActiveRegion(const Geometry::BoundingBox &) const = 0;
+  Geometry::IObject_sptr getIntersectionWithSample(const Geometry::IObject &sample,
+                                                   const V3D beamDirection = V3D(0, 0, 1)) const;
+
+protected:
+  V3D m_beamCenter;
 };
 
 } // namespace Algorithms
