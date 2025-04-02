@@ -5,8 +5,27 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+
+from mantid import logger
 from qtpy.QtCore import QUrl
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
+
+
+def getMantidVersionString():
+    """
+    Placeholder function to get Mantid version
+    """
+    try:
+        import mantid
+
+        if hasattr(mantid, "__version__"):
+            versionParts = str(mantid.__version__).split(".")
+            if len(versionParts) >= 2:
+                return f"v{versionParts[0]}.{versionParts[1]}.0"
+    except ImportError:
+        pass
+    logger.warning("Warning: Could not determine Mantid version for documentation URL.")
+    return None
 
 
 class NoOpRequestInterceptor(QWebEngineUrlRequestInterceptor):
@@ -31,30 +50,92 @@ class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
 
 
 class HelpWindowModel:
-    def __init__(self, local_docs_base=None, online_base="https://docs.mantidproject.org/"):
-        if local_docs_base and not os.path.isdir(local_docs_base):
-            raise ValueError(f"Local docs directory '{local_docs_base}' does not exist or is invalid.")
-        self.local_docs_base = local_docs_base
-        self.online_base = online_base.rstrip("/")
+    MODE_LOCAL = "Local Docs"
+    MODE_ONLINE = "Online Docs"
 
-    def is_local_docs_enabled(self):
-        """
-        :return: True if local_docs_base is set and is a valid directory
-        """
-        return bool(self.local_docs_base and os.path.isdir(self.local_docs_base))
+    def __init__(self, localDocsBase=None, onlineBase="https://docs.mantidproject.org/"):
+        self._rawLocalDocsBase = localDocsBase
+        self._rawOnlineBase = onlineBase.rstrip("/")
 
-    def build_help_url(self, relative_url):
-        """
-        Returns a QUrl pointing to either local or online docs for the given relative URL.
-        """
-        if not relative_url or not relative_url.endswith(".html"):
-            relative_url = "index.html"
+        self._isLocal = False
+        self._modeString = self.MODE_ONLINE
+        self._baseUrl = self._rawOnlineBase
+        self._versionString = None
 
-        if self.is_local_docs_enabled():
-            full_path = os.path.join(self.local_docs_base, relative_url)
-            return QUrl.fromLocalFile(full_path)
+        self._determine_mode_and_base_url()
+
+    def _determine_mode_and_base_url(self):
+        """
+        Sets the internal state (_isLocal, _modeString, _baseWrl, _versionString)
+        based on the validity of localDocsBase and attempts to find a versioned URL.
+        """
+        if self._rawLocalDocsBase and os.path.isdir(self._rawLocalDocsBase):
+            self._isLocal = True
+            self._modeString = self.MODE_LOCAL
+            absLocalPath = os.path.abspath(self._rawLocalDocsBase)
+            self._baseUrl = QUrl.fromLocalFile(absLocalPath).toString()
+            self._versionString = None
+            logger.debug(f"Using {self._modeString} from {self._baseUrl}")
         else:
-            return QUrl(self.online_base + "/" + relative_url)
+            if self._rawLocalDocsBase:
+                logger.warning(f"Local docs path '{self._rawLocalDocsBase}' is invalid or not found. Falling back to online docs.")
+
+            self._isLocal = False
+            self._modeString = self.MODE_ONLINE
+
+            isLikelyRelease = self._rawLocalDocsBase is None
+            if isLikelyRelease:
+                self._versionString = getMantidVersionString()
+
+            if self._versionString:
+                baseOnline = self._rawOnlineBase
+                if baseOnline.endswith("/stable"):
+                    baseOnline = baseOnline[: -len("/stable")]
+
+                if self._versionString not in baseOnline:
+                    self._baseUrl = f"{baseOnline.rstrip('/')}/{self._versionString}"
+                    logger.debug(f"Using {self._modeString} (Version: {self._versionString}) from {self._baseUrl}")
+                else:
+                    self._baseUrl = self._rawOnlineBase
+                    logger.debug(f"Using {self._modeString} (Using provided base URL, possibly stable/latest): {self._baseUrl}")
+
+            else:
+                self._baseUrl = self._rawOnlineBase
+                logger.debug(f"Using {self._modeString} (Version: Unknown/Stable) from {self._baseUrl}")
+
+    def is_local_docs_mode(self):
+        """
+        :return: True if using local docs, False otherwise. Based on initial check.
+        """
+        return self._isLocal
+
+    def get_mode_string(self):
+        """
+        :return: User-friendly string indicating the mode ("Local Docs" or "Online Docs").
+        """
+        return self._modeString
+
+    def get_base_url(self):
+        """
+        :return: The determined base URL (either file:///path or https://docs...[/version])
+        """
+        return self._baseUrl.rstrip("/") + "/"
+
+    def build_help_url(self, relativeUrl):
+        """
+        Returns a QUrl pointing to the determined doc source for the given relative URL.
+        """
+        if not relativeUrl or not relativeUrl.lower().endswith((".html", ".htm")):
+            relativeUrl = "index.html"
+
+        relativeUrl = relativeUrl.lstrip("/")
+        base = self.get_base_url()
+        fullUrlStr = f"{base}{relativeUrl}"
+
+        url = QUrl(fullUrlStr)
+        if not url.isValid():
+            logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{base}' and relative '{relativeUrl}'")
+        return url
 
     def get_home_url(self):
         """
@@ -62,11 +143,7 @@ class HelpWindowModel:
           - local 'index.html' if local docs are enabled
           - online docs homepage otherwise
         """
-        if self.is_local_docs_enabled():
-            full_path = os.path.join(self.local_docs_base, "index.html")
-            return QUrl.fromLocalFile(full_path)
-        else:
-            return QUrl(self.online_base + "/index.html")
+        return self.build_help_url("index.html")
 
     def create_request_interceptor(self):
         """
@@ -74,7 +151,9 @@ class HelpWindowModel:
           - LocalRequestInterceptor if local docs are used (for mathjax CORS)
           - NoOpRequestInterceptor otherwise
         """
-        if self.is_local_docs_enabled():
+        if self._isLocal:
+            logger.debug("Using LocalRequestInterceptor.")
             return LocalRequestInterceptor()
         else:
+            logger.debug("Using NoOpRequestInterceptor.")
             return NoOpRequestInterceptor()
