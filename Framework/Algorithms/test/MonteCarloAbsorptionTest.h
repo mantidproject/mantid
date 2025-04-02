@@ -725,7 +725,7 @@ private:
 
   protected:
     std::shared_ptr<Mantid::Algorithms::IMCAbsorptionStrategy>
-    createStrategy(Mantid::Algorithms::IMCInteractionVolume &interactionVol,
+    createStrategy(std::shared_ptr<Mantid::Algorithms::IMCInteractionVolume> interactionVol,
                    const Mantid::Algorithms::IBeamProfile &beamProfile, Mantid::Kernel::DeltaEMode::Type EMode,
                    const size_t nevents, const size_t maxScatterPtAttempts,
                    const bool regenerateTracksForEachLambda) override {
