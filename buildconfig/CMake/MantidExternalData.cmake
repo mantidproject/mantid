@@ -37,9 +37,12 @@ set(ExternalData_URL_TEMPLATES
 file:///var/bigharddrive/%(algo)/%(hash)"
 )
 mark_as_advanced(ExternalData_URL_TEMPLATES)
+# places on local disk
 list(APPEND ExternalData_URL_TEMPLATES "file:///home/builder/MantidExternalData-readonly/%(algo)/%(hash)")
 list(APPEND ExternalData_URL_TEMPLATES "file:///Users/builder/MantidExternalData-readonly/%(algo)/%(hash)")
-list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)")
+# facility based mirrors
+list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") # RAL
+list(APPEND ExternalData_URL_TEMPLATES "https://mantid-ilm.sns.gov/testdata/%(algo)/%(hash)") # ORNL
 # This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)")
 
