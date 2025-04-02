@@ -44,7 +44,6 @@ requirements:
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
-    - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
     - numpy {{ numpy }}
     - occt {{ occt }}
@@ -63,7 +62,6 @@ requirements:
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - jemalloc {{ jemalloc }}  # [osx or linux]
     - lib3mf  # [win]
-    - mkl {{ mkl }} # [win]
     - {{ pin_compatible("numpy", upper_bound="2.2") }}
     - occt {{ occt }}
     - pycifrw
