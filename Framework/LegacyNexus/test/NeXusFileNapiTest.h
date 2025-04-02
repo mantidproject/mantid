@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
@@ -29,11 +30,6 @@ using std::map;
 using std::multimap;
 using std::string;
 using std::vector;
-
-namespace {
-const std::string DMC01("dmc01cpp");
-const std::string DMC02("dmc02cpp");
-} // namespace
 
 class LegacyNeXusFileNapiTest : public CxxTest::TestSuite {
 
@@ -109,28 +105,33 @@ private:
     cout << "readTest(" << filename << ") successful\n";
   }
 
-  // DO WE STILL NEED THIS, DEPRECATE NXACC_RDRW?
   void do_test_loadPath(const string &filename) {
-    if (getenv("NX_LOAD_PATH") != NULL) {
-      TS_ASSERT_THROWS_NOTHING(File file(filename, NXACC_RDWR));
-      cout << "Success loading NeXus file from path" << endl;
-    } else {
-      cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
-    }
+    TS_ASSERT_THROWS_NOTHING(File file(filename, NXACC_READ));
+    cout << "Success loading NeXus file from path" << endl;
   }
 
 public:
-  void test_readwrite_hdf5() {
+  void test_read_hdf5() {
     cout << " Nexus File Tests\n";
-    NXaccess const nx_creation_code = NXACC_CREATE5;
     string const fileext = ".h5";
     string const filename("nexus_file_napi_test_cpp" + fileext);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
 
     // try reading a file
-    do_test_read(filename);
+    do_test_read(filepath);
 
+    int envSet = 1; // indicates path env var not set
     // try using the load path
-    do_test_loadPath(DMC01 + fileext);
-    do_test_loadPath(DMC02 + fileext);
+    if (getenv("NX_LOAD_PATH") == NULL) {
+      std::string envStr = "NX_LOAD_PATH=" + filepath;
+      envStr.erase(envStr.find(filename), filename.size());
+      envSet = putenv(envStr.c_str());
+    }
+    do_test_loadPath(filename);
+
+    // clean load path
+    if (envSet == 0) {
+      (void)putenv("NX_LOAD_PATH=");
+    }
   }
 };
