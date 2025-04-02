@@ -45,7 +45,7 @@ void MultipleScatteringCorrectionDistGraber::cacheLS1(const V3D &beamDirection) 
   auto integrationVolume = std::shared_ptr<const IObject>(m_sampleShape->clone());
 
   // create the raster
-  auto raster = Geometry::Rasterize::calculate(beamDirection, *integrationVolume, m_elementSize);
+  auto raster = Geometry::Rasterize::calculate(beamDirection, *integrationVolume, *integrationVolume, m_elementSize);
 
   // check if the raster is empty
   if (raster.l1.size() == 0) {
