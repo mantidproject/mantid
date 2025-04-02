@@ -98,7 +98,7 @@ class SpaceGroupBuilder(object):
             tmpSpaceGroupSymbol = rawSpaceGroupSymbol.split(" ")
             if len(tmpSpaceGroupSymbol) == 1:
                 rawSpaceGroupSymbol = tmpSpaceGroupSymbol[0][0] + " 1 " + tmpSpaceGroupSymbol[0][1:] + " 1"
-            if len(tmpSpaceGroupSymbol) == 2:
+            elif len(tmpSpaceGroupSymbol) == 2:
                 rawSpaceGroupSymbol = tmpSpaceGroupSymbol[0] + " 1 " + tmpSpaceGroupSymbol[1] + " 1"
 
         return rawSpaceGroupSymbol.strip()
