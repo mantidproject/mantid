@@ -293,7 +293,7 @@ public:
     file.makeGroup(monitorName, "NXmonitor", openGroup);
     file.writeData("monitor_number", i);
     file.writeData("spectrum_index", i);
-    std::vector<int> dims(3, 1);
+    ::NeXus::DimVector dims(3, 1);
     dims[2] = nbins;
     std::vector<int> data(nbins, i);
     file.writeData("data", data, dims);

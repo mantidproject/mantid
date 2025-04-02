@@ -74,7 +74,7 @@ public:
                                            bool compress) const;
 
   template <typename NumT>
-  void writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, NumT const *data,
+  void writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
                  bool compress = false) const;
 
   /// write bin masking information
