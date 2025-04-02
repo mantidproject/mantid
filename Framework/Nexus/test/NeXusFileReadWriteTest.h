@@ -78,7 +78,7 @@ private:
     // write
     fileid.makeData(dataname, getType<T>(), DimVector({N, M}));
     fileid.openData(dataname);
-    fileid.putData(data);
+    fileid.putData(&(data[0][0]));
     fileid.closeData();
 
     // read
@@ -110,7 +110,7 @@ private:
     int const Ncheck(5); // can't use variable-length arrays, just check this many
     T output[Ncheck];
     fileid.openData(dataname);
-    fileid.getSlab(&output, start, size);
+    fileid.getSlab(&(output[0]), start, size);
 
     // compare
     for (int i = 0; i < Ncheck; i++) {
@@ -137,7 +137,7 @@ private:
     // read, compare, row-by-row
     for (size_t i = 1; i <= N; i++) {
       size = {(dimsize_t)i, (dimsize_t)M};
-      fileid.getSlab(&output, start, size);
+      fileid.getSlab(&(output[0][0]), start, size);
       for (size_t j = 0; j < M; j++) {
         TS_ASSERT_EQUALS(data[0][j], output[0][j]);
       }
@@ -193,9 +193,9 @@ public:
     File fileid = do_prep_files(nxFile);
 
     // tests of integer read/write
-    vector<unsigned char> const i1_array{1, 2, 3, 4};
-    vector<short int> const i2_array{1000, 2000, 3000, 4000};
-    vector<int> const i4_array{1000000, 2000000, 3000000, 4000000};
+    vector<uint8_t> const i1_array{1, 2, 3, 4};
+    vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
+    vector<int32_t> const i4_array{1000000, 2000000, 3000000, 4000000};
     do_rw_test(fileid, "i1_data", i1_array);
     do_rw_test(fileid, "i2_data", i2_array);
     do_rw_test(fileid, "i4_data", i4_array);
@@ -322,7 +322,7 @@ public:
     string const somedata("this is some data");
     fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
     fileid.openData("some_data");
-    fileid.putData(&somedata);
+    fileid.putData(somedata.c_str());
     NXlink datalink = fileid.getDataID();
     fileid.closeData();
     fileid.flush();
