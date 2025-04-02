@@ -13,6 +13,7 @@ import systemtesting
 
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, SANSSave
 
 
 # -----------------------------------------------
@@ -210,6 +211,53 @@ class SANSSaveTest(unittest.TestCase):
 
         # Clean up
         self._remove_file(file_name)
+
+    def test_polarization_props_must_be_set_when_polarized_nx_can_sas_set(self):
+        # Arrange
+        workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        save_name = "SANSSave"
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "PolarizedNXCanSAS": True,
+        }
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.setRethrows(True)
+        # Act
+        self.assertRaisesRegex(RuntimeError, "PolarizationProps must be set to use SavePolarizedNXCanSAS.", save_alg.execute)
+
+    def test_polarization_props_throws_when_any_mandatory_properties_unset(self):
+        # Arrange
+        workspace_0 = CreateSampleWorkspace()
+        workspace_1 = CreateSampleWorkspace()
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        pol_props = {
+            "InputSpinStates": "0,1",
+            "PolarizerComponentName": "a",
+            "AnalyzerComponentName": "b",
+            "FlipperComponentNames": ["c", "d", "e"],
+            "MagneticFieldStrengthLogName": "f",
+            "MagneticFieldDirection": "g,h,i",
+        }
+        for i in range(0, len(pol_props)):
+            one_removed = pol_props.copy()
+            one_removed.pop(list(one_removed.keys())[i])
+            with self.assertRaisesRegex(
+                RuntimeError,
+                f".*PolarizationProps: Missing property for SavePolarizedNXCanSAS. "
+                f"These properties are missing: {{'{list(pol_props.keys())[i]}'}}",
+            ):
+                # Act
+                SANSSave(
+                    InputWorkspace=workspace,
+                    Filename=file_name,
+                    PolarizedNXCanSAS=True,
+                    PolarizationProps=one_removed,
+                )
 
 
 class SANSSaveRunnerTest(systemtesting.MantidSystemTest):

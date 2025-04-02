@@ -8,7 +8,17 @@
 
 """SANSSave algorithm performs saving of SANS reduction data."""
 
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
+from mantid.api import (
+    DataProcessorAlgorithm,
+    WorkspaceProperty,
+    MatrixWorkspaceProperty,
+    AlgorithmFactory,
+    PropertyMode,
+    FileProperty,
+    FileAction,
+    Progress,
+    WorkspaceGroup,
+)
 from mantid.kernel import Direction, logger, PropertyManagerProperty
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
 from sans.common.file_information import convert_to_shape
@@ -28,9 +38,12 @@ class SANSSave(DataProcessorAlgorithm):
     def summary(self):
         return "Performs saving of reduced SANS data."
 
+    def checkGroups(self):
+        return False
+
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            WorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
             doc="The workspace which is to be saved."
             " This workspace needs to be the result of a SANS reduction,"
             " i.e. it can only be 1D or 2D if the second axis is numeric.",
@@ -226,8 +239,21 @@ class SANSSave(DataProcessorAlgorithm):
         errors = dict()
         # The workspace must be 1D or 2D if the second axis is numeric
         workspace = self.getProperty("InputWorkspace").value
-        number_of_histograms = workspace.getNumberHistograms()
-        axis1 = workspace.getAxis(1)
+        if isinstance(workspace, WorkspaceGroup):
+            return self._validate_group(errors, workspace)
+        return self._validate_workspace(errors, workspace)
+
+    def _validate_group(self, errors, input_workspace):
+        if not self.getProperty("PolarizedNXcanSAS").value:
+            errors.update({"InputWorkspace": "Only PolarizedNXcanSAS is compatible with group workspaces."})
+            return
+        for i in range(0, input_workspace.getNumberOfEntries()):
+            self._validate_workspace(errors, input_workspace.getItem(i))
+        return errors
+
+    def _validate_workspace(self, errors, input_workspace):
+        number_of_histograms = input_workspace.getNumberHistograms()
+        axis1 = input_workspace.getAxis(1)
         is_first_axis_numeric = axis1.isNumeric()
         if not is_first_axis_numeric and number_of_histograms > 1:
             errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all axes need to be numeric."})
@@ -252,23 +278,29 @@ class SANSSave(DataProcessorAlgorithm):
                     " only. This requires all axes to be numeric."
                 }
             )
-        if self.getProperty("PolarizedNXcanSAS"):
-            polarization_props = self.getProperty("PolarizationProps").value
-            # TODO: Get these directly from the algorithm.
-            mandatory_props = [
-                "InputSpinStates",
-                "PolarizerComponentName",
-                "AnalyzerComponentName",
-                "FlipperComponentNames",
-                "MagneticFieldStrengthLogName",
-                "MagneticFieldDirection",
-            ]
-            if not all(prop in polarization_props for prop in mandatory_props):
-                missing_props = set(mandatory_props) - set(polarization_props.keys())
-                errors.update(
-                    {"PolarizationProps": f"Missing property for SavePolarizedNXCanSAS. These properties are missing: {missing_props}"}
-                )
+        if self.getProperty("PolarizedNXcanSAS").value:
+            self._validate_pol_props(errors)
         return errors
+
+    def _validate_pol_props(self, errors):
+        polarization_props = self.getProperty("PolarizationProps").value
+        if not polarization_props:
+            errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXCanSAS."})
+            return errors
+        # TODO: Get these directly from the algorithm.
+        mandatory_props = [
+            "InputSpinStates",
+            "PolarizerComponentName",
+            "AnalyzerComponentName",
+            "FlipperComponentNames",
+            "MagneticFieldStrengthLogName",
+            "MagneticFieldDirection",
+        ]
+        if not all(prop in polarization_props.keys() for prop in mandatory_props):
+            missing_props = set(mandatory_props) - set(polarization_props.keys())
+            errors.update(
+                {"PolarizationProps": f"Missing property for SavePolarizedNXCanSAS. These properties are missing: {missing_props}"}
+            )
 
     def _get_file_formats(self):
         file_types = []
