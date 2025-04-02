@@ -276,7 +276,7 @@ public:
 
   void valueChanged(QtProperty *property, const QVariant &val);
 
-  int internalPropertyToType(QtProperty *property) const;
+  int internalPropertyToType(const QtProperty *property) const;
   QtVariantProperty *createSubProperty(QtVariantProperty *parent, QtVariantProperty *after, QtProperty *internal);
   void removeSubProperty(QtVariantProperty *property);
 

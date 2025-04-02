@@ -173,12 +173,11 @@ static QList<QLocale::Country> sortCountries(const QList<QLocale::Country> &coun
 
 void QtMetaEnumProvider::initLocale() {
   QMultiMap<QString, QLocale::Language> nameToLanguage;
-  QLocale::Language language = QLocale::C;
-  while (language <= QLocale::LastLanguage) {
+  for (int language_number = QLocale::C; language_number <= QLocale::LastLanguage; language_number++) {
+    const auto language = static_cast<QLocale::Language>(language_number);
     QLocale locale(language);
     if (locale.language() == language)
       nameToLanguage.insert(QLocale::languageToString(language), language);
-    language = (QLocale::Language)((uint)language + 1); // ++language
   }
 
   const QLocale system = QLocale::system();
@@ -187,8 +186,7 @@ void QtMetaEnumProvider::initLocale() {
 
   QList<QLocale::Language> languages = nameToLanguage.values();
   QListIterator<QLocale::Language> itLang(languages);
-  while (itLang.hasNext()) {
-    QLocale::Language language = itLang.next();
+  for (const auto language : languages) {
     QList<QLocale::Country> countries;
 #if QT_VERSION < 0x040300
     countries = countriesForLanguage(language);
@@ -2469,7 +2467,7 @@ void QtSizePropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prope
   }
 }
 
-void QtSizePropertyManagerPrivate::setValue(QtProperty *property, const QSize &val) {
+void QtSizePropertyManagerPrivate::setValue(QtProperty *const property, const QSize &val) {
   m_intPropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_intPropertyManager->setValue(m_propertyToH.value(property), val.height());
 }

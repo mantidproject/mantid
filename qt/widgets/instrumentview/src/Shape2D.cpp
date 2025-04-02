@@ -251,7 +251,7 @@ Shape2D *Shape2D::loadShape2DFromType(const std::string &type, const std::string
  */
 std::string Shape2D::saveToProject() const {
   API::TSVSerialiser tsv;
-  bool props[]{m_scalable, m_editing, m_selected, m_visible};
+  const std::vector<bool> props = {m_scalable, m_editing, m_selected, m_visible};
 
   tsv.writeLine("Properties");
   for (auto prop : props) {

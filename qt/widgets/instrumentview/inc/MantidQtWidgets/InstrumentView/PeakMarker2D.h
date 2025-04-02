@@ -59,7 +59,7 @@ public:
   const QRectF &getLabelRect() const { return m_labelRect; }
   /// Allows PeakOverlay to move the label to avoid overlapping
   void moveLabelRectTo(const QPointF &p) const { m_labelRect.moveTo(p); }
-  QString getLabel() const { return m_label; }
+  const QString &getLabel() const { return m_label; }
 
 protected:
   /* --- Implemented Shape2D protected virtual methods --- */

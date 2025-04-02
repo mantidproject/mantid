@@ -22,7 +22,7 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL PeakMarker : public Common::Python::InstanceHolder {
 public:
-  explicit PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
+  explicit PeakMarker(const FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
                       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();

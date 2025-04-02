@@ -758,7 +758,7 @@ void Shape2DCollection::saveToTableWorkspace() {
   table->addColumn("str", "Parameters");
 
   size_t count = 0;
-  for (auto shape : m_shapes) {
+  for (const auto shape : m_shapes) {
     auto shapeStr = shape->saveToProject();
     TableRow row = table->appendRow();
     row << std::to_string(count) << shapeStr;
@@ -802,7 +802,7 @@ void Shape2DCollection::loadFromTableWorkspace(const Mantid::API::ITableWorkspac
  * @param fillColor :: The fill colour.
  */
 void Shape2DCollection::addFreeShape(const QPolygonF &poly, const QColor &borderColor, const QColor &fillColor) {
-  auto freeShape = dynamic_cast<Shape2DFree *>(m_currentShape);
+  const auto freeShape = dynamic_cast<Shape2DFree *>(m_currentShape);
   if (!freeShape) {
     if (poly.isEmpty())
       throw std::logic_error("Cannot create a shape from empty polygon.");

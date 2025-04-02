@@ -187,7 +187,7 @@ void Viewport::applyProjection() const {
  * @param b :: The y screen coordinate in pixels
  * @param point :: The projection point on the sphere in model coordinates
  */
-void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
+Mantid::Kernel::V3D Viewport::projectOnSphere(int a, int b) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
   auto x = static_cast<double>((2.0 * a - m_dimensions.width()) / m_dimensions.width());
@@ -202,7 +202,7 @@ void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
          // circle
     z = sqrt(1.0 - norm);
   // Set-up point
-  point(x, y, z);
+  return Mantid::Kernel::V3D(x, y, z);
 }
 
 /**
@@ -373,8 +373,7 @@ void Viewport::wheelZoom(int a, int b, int d) {
   // OpenGL works with floats. Set a limit to the zoom factor
   // based on the epsilon for floats
   const double zoomLimit = std::numeric_limits<float>::epsilon() * 1000;
-  Mantid::Kernel::V3D point;
-  generateTranslationPoint(a, b, point);
+  Mantid::Kernel::V3D point = generateTranslationPoint(a, b);
   double diff = 1.0 + static_cast<double>(d) / 600;
   double newZoomFactor = m_zoomFactor * diff;
   if (newZoomFactor < zoomLimit || 1.0 / newZoomFactor < zoomLimit)
@@ -403,7 +402,7 @@ void Viewport::setZoom(double zoom) {
  * @param a :: The x mouse coordinate
  * @param b :: The y mouse coordinate
  */
-void Viewport::initRotationFrom(int a, int b) { projectOnSphere(a, b, m_lastpoint); }
+void Viewport::initRotationFrom(int a, int b) { m_lastpoint = projectOnSphere(a, b); }
 
 /**
  * Generate the rotation matrix to rotate to this point.
@@ -411,8 +410,7 @@ void Viewport::initRotationFrom(int a, int b) { projectOnSphere(a, b, m_lastpoin
  * @param b :: The y mouse coordinate
  */
 void Viewport::generateRotationTo(int a, int b) {
-  Mantid::Kernel::V3D newpoint;
-  projectOnSphere(a, b, newpoint);
+  Mantid::Kernel::V3D newpoint = projectOnSphere(a, b);
   // Angle is given in degrees as the dot product of the two vectors
   double angle = m_rotationspeed * newpoint.angle(m_lastpoint);
   const auto diff = m_lastpoint.cross_prod(newpoint);
@@ -431,7 +429,7 @@ void Viewport::generateRotationTo(int a, int b) {
  * @param a :: The x mouse coordinate
  * @param b :: The y mouse coordinate
  */
-void Viewport::initTranslateFrom(int a, int b) { generateTranslationPoint(a, b, m_lastpoint); }
+void Viewport::initTranslateFrom(int a, int b) { m_lastpoint = generateTranslationPoint(a, b); }
 
 /**
  * Generate scene translation such that a point of the last initTranslateFrom
@@ -440,8 +438,7 @@ void Viewport::initTranslateFrom(int a, int b) { generateTranslationPoint(a, b, 
  * @param b :: The y mouse coordinate
  */
 void Viewport::generateTranslationTo(int a, int b) {
-  Mantid::Kernel::V3D newpoint;
-  generateTranslationPoint(a, b, newpoint);
+  Mantid::Kernel::V3D newpoint = generateTranslationPoint(a, b);
   // This is now the difference
   newpoint -= m_lastpoint;
   m_xTrans += newpoint[0];
@@ -454,13 +451,13 @@ void Viewport::generateTranslationTo(int a, int b) {
  * @param b :: The y mouse coordinate
  * @param point :: Return the result through this reference.
  */
-void Viewport::generateTranslationPoint(int a, int b, Mantid::Kernel::V3D &point) const {
+Mantid::Kernel::V3D Viewport::generateTranslationPoint(int a, int b) const {
   double x, y, z = 0.0;
   double xmin, xmax, ymin, ymax, zmin, zmax;
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
   x = static_cast<double>((xmin + ((xmax - xmin) * ((double)a / (double)m_dimensions.width()))));
   y = static_cast<double>((ymin + ((ymax - ymin) * (m_dimensions.height() - b) / m_dimensions.height())));
-  point(x, y, z);
+  return Mantid::Kernel::V3D(x, y, z);
 }
 
 /**
