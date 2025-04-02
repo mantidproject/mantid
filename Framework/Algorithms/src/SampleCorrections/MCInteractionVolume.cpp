@@ -124,9 +124,15 @@ int MCInteractionVolume::getComponentIndex(Kernel::PseudoRandomNumberGenerator &
 std::optional<Kernel::V3D>
 MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
   std::optional<Kernel::V3D> pointGenerated{std::nullopt};
+  std::optional<Kernel::V3D> tmpPoint{std::nullopt};
   if (componentIndex == -1) {
     if (m_gaugeVolume != nullptr) {
-      pointGenerated = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 2);
+      tmpPoint = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 2);
+      if (tmpPoint) {
+        if (m_sample->isValid(tmpPoint.value())) {
+          pointGenerated = tmpPoint;
+        }
+      }
     } else {
       pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 2);
     }

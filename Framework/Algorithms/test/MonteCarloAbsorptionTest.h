@@ -39,8 +39,9 @@ enum class Environment {
   CubeSamplePlusContainer,
   CylinderSampleOnly,
   CylinderSamplePlusContainer,
+  CylinderSamplePlusGV,
+  RotatedCylinderSamplePlusGV,
   MeshSamplePlusContainer,
-  CubeSamplePlusCubeGV,
 };
 
 struct TestWorkspaceDescriptor {
@@ -50,6 +51,7 @@ struct TestWorkspaceDescriptor {
   Environment sampleEnviron;
   unsigned int emode;
   double efixed;
+  bool straightThrough = true;
 };
 
 void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment environment) {
@@ -116,8 +118,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
                                        Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
                                    1 /*number density*/)));
       ws->mutableSample().setShape(shape);
-    } else if (environment == Environment::CubeSampleOnly || environment == Environment::CubeSamplePlusContainer ||
-               environment == Environment::CubeSamplePlusCubeGV) {
+    } else if (environment == Environment::CubeSampleOnly || environment == Environment::CubeSamplePlusContainer) {
       // create 1cm x 1cm cube
       auto cubeShape = ComponentCreationHelper::createCuboid(0.005, 0.005, 0.005, {0., 0., -0.005});
 
@@ -129,26 +130,66 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
                                        Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
                                    1 /*number density*/)));
       ws->mutableSample().setShape(shape);
-      if (environment == Environment::CubeSamplePlusContainer) {
-        auto xmlShapeStreamFront = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., -0.0125}, "front");
-        auto xmlShapeStreamBack = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., 0.0025}, "back");
-        std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack + "<algebra val=\"back:front\"/>";
-        ShapeFactory shapeMaker;
-        auto holderShape = shapeMaker.createShape(combinedXML);
-        auto shape = std::shared_ptr<IObject>(holderShape->cloneWithMaterial(
-            Mantid::Kernel::Material("Test",
-                                     Mantid::PhysicalConstants::NeutronAtom(
-                                         0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
-                                         Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
-                                     1 /*number density*/)));
-        auto can = std::make_shared<Container>(shape);
-        ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
-      }
-      if (environment == Environment::CubeSamplePlusCubeGV) {
-        // create 1mm x 1mm x 1mm cube for the gauge volume
-        auto gaugeVolumeXML = ComponentCreationHelper::cuboidXML(0.0005, 0.0005, 0.0005, {0., 0., -0.0005}, "gv");
-        ws->mutableRun().addProperty<std::string>("GaugeVolume", gaugeVolumeXML);
-      }
+    } else if (environment == Environment::CylinderSamplePlusGV) {
+      // Define a cylindrical sample shape orientated with axis perpedicular to beam
+      constexpr double sampleRadius{0.01};
+      constexpr double sampleHeight{0.1};
+      const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
+      const V3D yAxis{0., 1., 0.};
+      auto cylinderShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
+                                                                         yAxis, "sample-cylinder");
+      // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
+      auto shape = std::shared_ptr<IObject>(cylinderShape->cloneWithMaterial(Mantid::Kernel::Material(
+          "Test",
+          Mantid::PhysicalConstants::NeutronAtom(0, 0, 0, 0, 0, 1.0 /*total scattering xs*/, 0.0 /*absorption xs*/),
+          1 /*number density*/)));
+      ws->mutableSample().setShape(shape);
+      // create 1mm radius cylinder gauge volume
+      constexpr double gvRadius{0.001};
+      constexpr double gvHeight{2 * sampleRadius};
+      const V3D gvBaseCentre{0., 0., -sampleRadius};
+      const V3D gvYAxis{0., 0., 1.};
+      auto gaugeVolumeXML =
+          ComponentCreationHelper::cappedCylinderXML(gvRadius, gvHeight, gvBaseCentre, gvYAxis, "gauge-volume");
+      ws->mutableRun().addProperty<std::string>("GaugeVolume", gaugeVolumeXML);
+    } else if (environment == Environment::RotatedCylinderSamplePlusGV) {
+      // Define a cylindrical sample shape with axis at (1,1,1)
+      constexpr double sampleRadius{0.01};
+      constexpr double sampleHeight{0.1};
+      const V3D sampleBaseCentre{-sampleHeight / (2.0 * std::sqrt(3)), -sampleHeight / (2.0 * std::sqrt(3)),
+                                 -sampleHeight / (2.0 * std::sqrt(3))};
+      const V3D yAxis{1., 1., 1.};
+      auto cylinderShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
+                                                                         yAxis, "sample-cylinder");
+      // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
+      auto shape = std::shared_ptr<IObject>(cylinderShape->cloneWithMaterial(Mantid::Kernel::Material(
+          "Test",
+          Mantid::PhysicalConstants::NeutronAtom(0, 0, 0, 0, 0, 1.0 /*total scattering xs*/, 0.0 /*absorption xs*/),
+          1 /*number density*/)));
+      ws->mutableSample().setShape(shape);
+      // create 1mm radius cylinder gauge volume
+      constexpr double gvRadius{0.0001};       //
+      constexpr double gvHeight{2 * 0.011547}; // beam path length within ellipse of r = 0.01 at 45 degrees
+      const V3D gvBaseCentre{0., 0., -gvHeight / 2.};
+      const V3D gvYAxis{0., 0., 1.};
+      auto gaugeVolumeXML =
+          ComponentCreationHelper::cappedCylinderXML(gvRadius, gvHeight, gvBaseCentre, gvYAxis, "gauge-volume");
+      ws->mutableRun().addProperty<std::string>("GaugeVolume", gaugeVolumeXML);
+    }
+    if (environment == Environment::CubeSamplePlusContainer) {
+      auto xmlShapeStreamFront = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., -0.0125}, "front");
+      auto xmlShapeStreamBack = ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., 0.0025}, "back");
+      std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack + "<algebra val=\"back:front\"/>";
+      ShapeFactory shapeMaker;
+      auto holderShape = shapeMaker.createShape(combinedXML);
+      auto shape = std::shared_ptr<IObject>(holderShape->cloneWithMaterial(
+          Mantid::Kernel::Material("Test",
+                                   Mantid::PhysicalConstants::NeutronAtom(
+                                       0, 0, 0, 0, 0, 0.5 /*total scattering xs*/,
+                                       Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda /*absorption xs*/),
+                                   1 /*number density*/)));
+      auto can = std::make_shared<Container>(shape);
+      ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
     }
   }
 }
@@ -172,12 +213,18 @@ Mantid::API::MatrixWorkspace_sptr setUpWS(const TestWorkspaceDescriptor &wsProps
     auto pixelShape = ComponentCreationHelper::createCappedCylinder(
         cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
-    // source and detector are at +/-100m so tracks approx parallel to beam
+    // source and detector are at +/-100m so tracks approx parallel to beam for straight case
     constexpr double distance = 100.0;
     Detector *det = new Detector("det", 1, pixelShape, nullptr);
-    det->setPos(0, 0, distance);
-    testInst->add(det);
-    testInst->markAsDetector(det);
+    if (wsProps.straightThrough) {
+      det->setPos(0, 0, distance);
+      testInst->add(det);
+      testInst->markAsDetector(det);
+    } else {
+      det->setPos(distance, 0, 0);
+      testInst->add(det);
+      testInst->markAsDetector(det);
+    }
 
     ComponentCreationHelper::addSourceToInstrument(testInst, V3D(0.0, 0.0, -distance));
     ComponentCreationHelper::addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
@@ -356,11 +403,11 @@ public:
     TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
   }
 
-  void test_Workspace_With_Sample_And_Gauge_Volume() {
+  void test_Workspace_With_Cylindrical_Sample_And_Gauge_Volume() {
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSamplePlusCubeGV, DeltaEMode::Elastic, -1};
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CylinderSamplePlusGV, DeltaEMode::Elastic, 1};
     auto testWS = setUpWS(wsProps);
 
     auto mcAbsorb = createAlgorithm();
@@ -372,8 +419,38 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
+    auto yData = outputWS->getSpectrum(0).dataY();
 
-    // for now, just checking it runs
+    constexpr double delta(1e-03);
+    // pass straight through, all path lengths are 2cm
+    const double calculatedAttFactor = exp(-2);
+    TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
+  }
+
+  void test_Workspace_With_Rotated_Cylindrical_Sample_And_Gauge_Volume() {
+    using namespace Mantid::Geometry;
+
+    using Mantid::Kernel::DeltaEMode;
+    // set detector at 90 degrees to beam
+    TestWorkspaceDescriptor wsProps = {1,  2,    false, Environment::RotatedCylinderSamplePlusGV, DeltaEMode::Elastic,
+                                       -1, false};
+    auto testWS = setUpWS(wsProps);
+
+    auto mcAbsorb = createAlgorithm();
+    constexpr int NEVENTS = 1000;
+    mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
+
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+    auto outputWS = getOutputWorkspace(mcAbsorb);
+
+    verifyDimensions(wsProps, outputWS);
+    auto yData = outputWS->getSpectrum(0).dataY();
+
+    constexpr double delta(5e-03);
+    // pass staright through, all path lengths for this orientation given by 2 * (root2*R)
+    const double calculatedAttFactor = 0.1478786377506909;
+    TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta); // set a generous 'within 5%' tolerance
   }
 
   void test_Workspace_Slit_Beam_Size_Set() {
