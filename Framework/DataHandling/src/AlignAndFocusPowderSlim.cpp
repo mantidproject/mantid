@@ -20,6 +20,9 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
@@ -41,6 +44,7 @@ using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::EnumeratedStringProperty;
 using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
@@ -50,7 +54,10 @@ const std::string CAL_FILE("CalFileName");
 const std::string LOAD_IDF_FROM_NXS("LoadNexusInstrumentXML");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
-const std::string PARAMS("Params");
+const std::string X_MIN("XMin");
+const std::string X_MAX("XMax");
+const std::string X_DELTA("XDelta");
+const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 } // namespace PropertyNames
 
@@ -62,6 +69,10 @@ const std::string INDEX_ID("event_index");
 
 // this is used for unit conversion to correct units
 const std::string MICROSEC("microseconds");
+
+const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
+enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
 
 } // namespace
 
@@ -423,9 +434,19 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "Optional: The .cal file containing the position correction factors. "
                   "Either this or OffsetsWorkspace needs to be specified.");
-  auto mustBeLengthThree = std::make_shared<ArrayLengthValidator<double>>(3);
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PARAMS, "0.25,0.0016,2.25", mustBeLengthThree),
-                  "A comma separated list of first bin boundary, width, last bin boundary. ");
+  auto positiveValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  positiveValidator->setLower(0);
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 0.25, positiveValidator,
+                                                                      Direction::Input),
+                  "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016, positiveValidator,
+                                                                      Direction::Input),
+                  "Bin size for output data");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 2.25, positiveValidator,
+                                                                      Direction::Input),
+                  "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
+                  "Specify binning behavior ('Logorithmic')");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -436,19 +457,17 @@ void AlignAndFocusPowderSlim::init() {
  */
 void AlignAndFocusPowderSlim::exec() {
   // create a histogram workspace
-  constexpr size_t numHist{6};
-  const std::vector<double> params = getProperty(PropertyNames::PARAMS);
+  constexpr size_t numHist{6}; // TODO make this determined from grouping
 
-  // These give the limits in each file as to which events we actually load
-  // (when filtering by time).
+  // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
   loadSize.resize(1, 0);
 
-  HistogramData::BinEdges XValues_new(0);
-  const double binWidth = params[1];
-  const bool linearBins = bool(binWidth > 0.);
-  UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), true, false));
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
+  // set up the output workspace binning
+  const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
+  const bool linearBins = bool(binmode == BinningMode::LINEAR); // this is needed later
+  const double x_delta = getProperty(PropertyNames::X_DELTA);   // this is needed later
+  MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   const Kernel::NexusDescriptor descriptor(filename);
@@ -549,7 +568,7 @@ void AlignAndFocusPowderSlim::exec() {
 
     // threaded processing of the banks
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, binWidth, linearBins);
+                         m_calibration, m_masked, x_delta, linearBins);
     constexpr size_t GRAINSIZE_BANK{1};
     tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), GRAINSIZE_BANK), task);
   }
@@ -573,6 +592,28 @@ void AlignAndFocusPowderSlim::exec() {
   wksp->setYUnit("Counts");
   wksp->getAxis(0)->setUnit("DSpacing");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
+}
+
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const size_t numHist, const bool linearBins,
+                                                                    const double x_delta) {
+  const double x_min = getProperty(PropertyNames::X_MIN);
+  const double x_max = getProperty(PropertyNames::X_MAX);
+
+  constexpr bool resize_xnew{true};
+  constexpr bool full_bins_only{false};
+
+  HistogramData::BinEdges XValues_new(0);
+  if (linearBins) {
+    const std::vector<double> params{x_min, x_delta, x_max};
+    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                               full_bins_only));
+  } else {
+    const std::vector<double> params{x_min, -1. * x_delta, x_max};
+    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                               full_bins_only));
+  }
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
+  return wksp;
 }
 
 void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp) {
