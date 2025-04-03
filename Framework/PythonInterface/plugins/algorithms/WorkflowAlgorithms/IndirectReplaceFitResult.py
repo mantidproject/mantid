@@ -127,10 +127,10 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         input_workspace = self.getProperty("InputWorkspace").value
         single_fit_workspace = self.getProperty("SingleFitWorkspace").value
 
-        if not string_ends_with(input_name, self._allowed_ws_extension):
+        if not string_ends_with(input_name, [self._allowed_ws_extension]):
             issues["InputWorkspace"] = "The input workspace must have a name ending in {0}".format(self._allowed_ws_extension)
 
-        if not string_ends_with(single_fit_name, self._allowed_ws_extension):
+        if not string_ends_with(single_fit_name, [self._allowed_ws_extension]):
             issues["SingleFitWorkspace"] = "This workspace must have a name ending in {0}".format(self._allowed_ws_extension)
 
         if not output_name:

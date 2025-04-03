@@ -134,7 +134,7 @@ template <typename Predicate> void removeVectorElements(std::vector<std::string>
 }
 
 bool doesStringEndWith(std::string const &str, std::vector<std::string> const &delimiters) {
-  return std::any_of(delimiters.begin(), delimiters.end(),
+  return std::any_of(delimiters.cbegin(), delimiters.cend(),
                      [&str](std::string const &delimiter) { return str.ends_with(delimiter); });
 }
 
