@@ -289,7 +289,7 @@ void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSideSample);
+  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_sampleObject, m_cubeSideSample);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
@@ -305,7 +305,7 @@ void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSideContainer);
+  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_containerObject, m_cubeSideContainer);
   m_containerVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");

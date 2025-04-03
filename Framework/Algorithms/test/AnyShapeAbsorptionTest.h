@@ -204,8 +204,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("ScatteringXSection", "5.1"));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleNumberDensity", "0.07192"));
     atten.setRethrows(true); // needed for the next check to work
-    TS_ASSERT_THROWS(atten.execute(), const std::runtime_error &);
-    TS_ASSERT(!atten.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(atten.execute());
+    TS_ASSERT(atten.isExecuted());
 
     AnalysisDataService::Instance().remove(flatWS);
   }
