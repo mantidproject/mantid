@@ -12,7 +12,6 @@
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
-using Kernel::V3D;
 namespace API {
 class Sample;
 }
