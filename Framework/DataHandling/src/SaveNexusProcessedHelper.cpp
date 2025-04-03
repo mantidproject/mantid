@@ -215,7 +215,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   if (raggedSpectra)
     for (size_t i = 0; i < nSpect; i++)
       nSpectBins = std::max(nSpectBins, localworkspace->y(indices[i]).size());
-  std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
+  ::NeXus::DimVector dims_array = {static_cast<::NeXus::dimsize_t>(nSpect),
+                                   static_cast<::NeXus::dimsize_t>(nSpectBins)};
 
   // Set the axis labels and values
   Mantid::API::Axis *xAxis = localworkspace->getAxis(0);
@@ -246,8 +247,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++)
       axis2.emplace_back((*sAxis)(i));
 
-  std::vector<int> start = {0, 0};
-  std::vector<int> asize = {1, dims_array[1]};
+  ::NeXus::DimVector start = {0, 0};
+  ::NeXus::DimSizeVector asize = {1, dims_array[1]};
 
   // -------------- Actually write the 2D data ----------------------------
   if (write2Ddata) {
@@ -341,8 +342,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
       start[0]++;
     }
   } else if (uniformSpectra) {
-    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, std::vector<int>{static_cast<int>(localworkspace->x(0).size())},
-                           true);
+    m_filehandle->makeData("axis1", NXnumtype::FLOAT64,
+                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(localworkspace->x(0).size())}, true);
     m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
@@ -372,7 +373,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   if (!sAxis->isText()) {
     // write axis2, maybe just spectra number
-    m_filehandle->makeData("axis2", NXnumtype::FLOAT64, std::vector<int>{static_cast<int>(axis2.size())}, true);
+    m_filehandle->makeData("axis2", NXnumtype::FLOAT64,
+                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(axis2.size())}, true);
     m_filehandle->putData(axis2.data());
     m_filehandle->putAttr("units", sLabel, false);
 
@@ -389,7 +391,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++) {
       textAxis += sAxis->label(i) + "\n";
     }
-    m_filehandle->makeData("axis2", NXnumtype::CHAR, std::vector<int>{static_cast<int>(textAxis.size())}, true);
+    m_filehandle->makeData("axis2", NXnumtype::CHAR,
+                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(textAxis.size())}, true);
     m_filehandle->putData(textAxis.c_str());
     m_filehandle->putAttr("units", "TextAxis");
 
@@ -422,7 +425,7 @@ template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(NXnumtype type, const std::string &interpret_as, const API::Column &col,
                                    const std::string &columnName) const {
   const auto nRows = static_cast<int>(col.size());
-  std::vector<int> dims_array = {nRows};
+  const ::NeXus::DimVector dims_array = {nRows};
 
   auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
@@ -471,7 +474,7 @@ void NexusFileIO::writeNexusVectorColumn(const Column_const_sptr &col, const std
   }
 
   // Set-up dimensions
-  std::vector<int> dims{static_cast<int>(rowCount), static_cast<int>(maxSize)};
+  const ::NeXus::DimVector dims{static_cast<::NeXus::dimsize_t>(rowCount), static_cast<::NeXus::dimsize_t>(maxSize)};
 
   // Create data array
   boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
@@ -566,8 +569,8 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       if (maxStr == 0) {
         maxStr = 1;
       }
-      std::vector<int> dims_array = {nRows, static_cast<int>(maxStr)};
-      std::vector<int> asize = {1, dims_array[1]};
+      const ::NeXus::DimVector dims_array = {nRows, static_cast<::NeXus::dimsize_t>(maxStr)};
+      const ::NeXus::DimSizeVector asize = {1, dims_array[1]};
 
       m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, ::NeXus::LZW, asize);
 
@@ -631,7 +634,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
   m_filehandle->openGroup("event_workspace", "NXdata");
 
   // The array of indices for each event list #
-  std::vector<int> dims_array = {static_cast<int>(indices.size())};
+  ::NeXus::DimVector dims_array = {static_cast<::NeXus::dimsize_t>(indices.size())};
   if (!indices.empty()) {
     if (compress)
       m_filehandle->makeCompData("indices", NXnumtype::INT64, dims_array, m_nexuscompression, dims_array);
@@ -663,7 +666,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
 template <typename NumT>
-void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, NumT const *data,
+void NexusFileIO::writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
                             bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array

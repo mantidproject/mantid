@@ -2044,7 +2044,7 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *fi
     index += maxlen;
   }
 
-  std::vector<int> dims{static_cast<int>(values.size()), static_cast<int>(maxlen)};
+  const NeXus::DimVector dims{static_cast<NeXus::dimsize_t>(values.size()), static_cast<NeXus::dimsize_t>(maxlen)};
   file->makeData("value", NXnumtype::CHAR, dims, true);
   file->putData(strs.data());
   file->closeData();
