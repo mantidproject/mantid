@@ -1,10 +1,5 @@
 name: 'Check for merge conflicts'
 on:
-  push:
-    branches:
-      - 'main'
-      - 'release-next'
-      - 'ornl-next'
   pull_request:
     types: [opened, synchronize, reopened]
 
