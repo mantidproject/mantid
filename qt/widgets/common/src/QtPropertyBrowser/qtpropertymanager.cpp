@@ -471,7 +471,7 @@ QString QtIntPropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtIntPropertyManager::setValue(QtProperty *property, int val) {
-  void (QtIntPropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, int) = nullptr;
+  void (QtIntPropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, int) = nullptr;
   setValueInRange<int, QtIntPropertyManagerPrivate, QtIntPropertyManager, int>(
       this, d_ptr, &QtIntPropertyManager::propertyChanged, &QtIntPropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -751,7 +751,7 @@ QString QtDoublePropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtDoublePropertyManager::setValue(QtProperty *property, double val) {
-  void (QtDoublePropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, double) = nullptr;
+  void (QtDoublePropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, double) = nullptr;
   setValueInRange<double, QtDoublePropertyManagerPrivate, QtDoublePropertyManager, double>(
       this, d_ptr, &QtDoublePropertyManager::propertyChanged, &QtDoublePropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -1334,7 +1334,7 @@ QString QtDatePropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtDatePropertyManager::setValue(QtProperty *property, const QDate &val) {
-  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, const QDate &) = nullptr;
+  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, const QDate &) = nullptr;
   setValueInRange<const QDate &, QtDatePropertyManagerPrivate, QtDatePropertyManager, const QDate>(
       this, d_ptr, &QtDatePropertyManager::propertyChanged, &QtDatePropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -2467,7 +2467,7 @@ void QtSizePropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prope
   }
 }
 
-void QtSizePropertyManagerPrivate::setValue(QtProperty *const property, const QSize &val) {
+void QtSizePropertyManagerPrivate::setValue(const QtProperty *property, const QSize &val) {
   m_intPropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_intPropertyManager->setValue(m_propertyToH.value(property), val.height());
 }
@@ -2749,7 +2749,7 @@ void QtSizeFPropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prop
   }
 }
 // cppcheck-suppress constParameterCallback
-void QtSizeFPropertyManagerPrivate::setValue(QtProperty *property, const QSizeF &val) {
+void QtSizeFPropertyManagerPrivate::setValue(const QtProperty *property, const QSizeF &val) {
   m_doublePropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_doublePropertyManager->setValue(m_propertyToH.value(property), val.height());
 }

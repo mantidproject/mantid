@@ -802,7 +802,7 @@ void Shape2DCollection::loadFromTableWorkspace(const Mantid::API::ITableWorkspac
  * @param fillColor :: The fill colour.
  */
 void Shape2DCollection::addFreeShape(const QPolygonF &poly, const QColor &borderColor, const QColor &fillColor) {
-  const auto freeShape = dynamic_cast<Shape2DFree *>(m_currentShape);
+  auto freeShape = dynamic_cast<const Shape2DFree *>(m_currentShape);
   if (!freeShape) {
     if (poly.isEmpty())
       throw std::logic_error("Cannot create a shape from empty polygon.");
