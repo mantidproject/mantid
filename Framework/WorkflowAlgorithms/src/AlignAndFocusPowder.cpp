@@ -215,9 +215,7 @@ void AlignAndFocusPowder::init() {
                   "Multiply each spectrum by "
                   "sin(theta) where theta is "
                   "half of the Bragg angle");
-  declareProperty(PropertyNames::UNWRAP_REF, 0.,
-                  "Reference total flight path for frame "
-                  "unwrapping. Zero skips the correction");
+  declareProperty(PropertyNames::UNWRAP_REF, 0., "This property is deprecated (since v6.13).");
   declareProperty(PropertyNames::LOWRES_REF, 0., "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
   mapPropertyName(PropertyNames::WL_MIN, "wavelength_min");
@@ -292,6 +290,11 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
         "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
     result[PropertyNames::RESONANCE_UPPER_LIMITS] =
         "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
+  }
+
+  // Deprecated properties
+  if (!isDefault(PropertyNames::UNWRAP_REF)) {
+    g_log.error("AlignAndFocusPowder property UnwrapRef is deprecated since 2025-03-24.");
   }
 
   return result;
@@ -378,7 +381,6 @@ void AlignAndFocusPowder::exec() {
   auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
   this->getVecPropertyFromPmOrSelf(PropertyNames::RAGGED_DELTA, m_delta_ragged);
-  LRef = getProperty(PropertyNames::UNWRAP_REF);
   DIFCref = getProperty(PropertyNames::LOWRES_REF);
   const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
   minwl = getProperty(PropertyNames::WL_MIN);
@@ -491,7 +493,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = std::make_unique<Progress>(this, 0., 1., 22);
+  m_progress = std::make_unique<Progress>(this, 0., 1., 21);
 
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
@@ -651,26 +653,6 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // Beyond this point, low resolution TOF workspace is considered.
-  if (LRef > 0.) {
-    // this algorithm was originally created for POWGEN before issues in the DAS were fixed
-    // it is not used in any current reduction and remains for legacy data processing
-    m_outputW = convertUnits(m_outputW, "TOF");
-
-    g_log.information() << "running UnwrapSNS(LRef=" << LRef << ",Tmin=" << tmin << ",Tmax=" << tmax << ") started at "
-                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("UnwrapSNS");
-    removeAlg->setProperty("InputWorkspace", m_outputW);
-    removeAlg->setProperty("OutputWorkspace", m_outputW);
-    removeAlg->setProperty("LRef", LRef);
-    if (tmin > 0.)
-      removeAlg->setProperty("Tmin", tmin);
-    if (tmax > tmin)
-      removeAlg->setProperty("Tmax", tmax);
-    removeAlg->executeAsChildAlg();
-    m_outputW = removeAlg->getProperty("OutputWorkspace");
-  }
-  m_progress->report();
-
   if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the workspace
     // turn off the low res stuff
     m_processLowResTOF = false;
@@ -735,7 +717,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // Convert units
-  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
+  if (minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "dSpacing");
     if (m_processLowResTOF)
       m_lowResW = convertUnits(m_lowResW, "dSpacing");

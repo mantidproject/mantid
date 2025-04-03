@@ -224,23 +224,7 @@
             <item row="1" column="4">
              <widget class="QLineEdit" name="lineEdit_croppedWavelengthMax"/>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="unwrap_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reference total flight path for frame unwrapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Unwrap Ref</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
+            <item row="2" column="1">
              <widget class="QLineEdit" name="maxchunksize_edit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -383,31 +367,6 @@
               </property>
               <property name="text">
                <string>Push Data Positive</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="unwrap_edit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for reference total flight path for frame unwrapping. Zero skips the correction. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -554,7 +513,7 @@
               </item>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="label">
               <property name="minimumSize">
                <size>
@@ -602,21 +561,21 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="label_3">
               <property name="text">
                <string>Scale Data</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="3" column="1">
              <widget class="QLineEdit" name="scaledata_edit">
               <property name="toolTip">
                <string>Constant to multiply the data by before writing out</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="label_bkgdsmooth">
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Parameters to smooth background (can run) by FFT smooth algorithm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -626,7 +585,7 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="4" column="1">
              <widget class="QLineEdit" name="bkgdsmoothpar_edit">
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Parameters to smooth background (can run) by FFT smooth algorithm.&lt;/p&gt;&lt;p&gt;Enter 2 integers.  The suggested values are &amp;quot;20, 2&amp;quot;. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1263,7 +1222,6 @@
  <tabstops>
   <tabstop>outputfileprefix_edit</tabstop>
   <tabstop>lowres_edit</tabstop>
-  <tabstop>unwrap_edit</tabstop>
   <tabstop>maxchunksize_edit</tabstop>
   <tabstop>scaledata_edit</tabstop>
   <tabstop>bkgdsmoothpar_edit</tabstop>

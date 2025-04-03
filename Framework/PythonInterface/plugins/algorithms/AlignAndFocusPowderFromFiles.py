@@ -195,6 +195,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         if (not self.getProperty("LogAllowList").isDefault) and (not self.getProperty("LogBlockList").isDefault):
             errors["LogAllowList"] = "Cannot specify with LogBlockList"
             errors["LogBlockList"] = "Cannot specify with LogAllowList"
+        if not self.getProperty("UnwrapRef").isDefault:
+            errors["UnwrapRef"] = "AlignAndFocusPowderFromFiles property UnwrapRef is deprecated since 2025-03-24."
 
         return errors
 
