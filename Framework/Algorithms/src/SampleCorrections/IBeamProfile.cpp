@@ -15,21 +15,22 @@
 namespace Mantid {
 using Kernel::V3D;
 
+namespace {
 /**
  * @brief Create XML string to define a cuboid for the beam and sample intersection
  *
- * @param width width of intersection area
- * @param height hight of intersection area
- * @param depth depth of intersection area
+ * @param xExtent xExtent of intersection area
+ * @param yExtent yExtent of intersection area
+ * @param zExtent zExtent of intersection area
  * @param centerPos centre of the intersection area
  * @return std::string
  */
-std::string cuboidXML(double width, double height, double depth, const V3D &centerPos) {
+std::string cuboidXML(double xExtent, double yExtent, double zExtent, const V3D &centerPos) {
 
   // Convert full dimensions to half-lengths
-  const double szX = width / 2.0;
-  const double szY = height / 2.0;
-  const double szZ = depth / 2.0;
+  const double szX = xExtent / 2.0;
+  const double szY = yExtent / 2.0;
+  const double szZ = zExtent / 2.0;
 
   // Define corners of the cuboid
   V3D leftFrontBottom{szX, -szY, -szZ};
@@ -57,6 +58,7 @@ std::string cuboidXML(double width, double height, double depth, const V3D &cent
 
   return xmlShapeStream.str();
 }
+} // namespace
 
 namespace Algorithms {
 /**
@@ -100,11 +102,11 @@ Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::I
     return nullptr;
   }
 
-  double height = intersectionBox.yMax() - intersectionBox.yMin();
-  double width = intersectionBox.xMax() - intersectionBox.xMin();
-  double depth = intersectionBox.zMax() - intersectionBox.zMin();
+  double yExtent = intersectionBox.yMax() - intersectionBox.yMin();
+  double xExtent = intersectionBox.xMax() - intersectionBox.xMin();
+  double zExtent = intersectionBox.zMax() - intersectionBox.zMin();
 
-  std::string shapeXML = cuboidXML(width, height, depth, intersectionBox.centrePoint());
+  std::string shapeXML = cuboidXML(xExtent, yExtent, zExtent, intersectionBox.centrePoint());
   return Geometry::ShapeFactory().createShape(shapeXML);
 }
 

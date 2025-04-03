@@ -28,17 +28,17 @@ using Mantid::Kernel::V3D;
 
 class IBeamProfileTest : public CxxTest::TestSuite {
 private:
-  void checkIntersectionVolume(const std::shared_ptr<IObject> &intersectionVolume, double expectedHeight,
-                               double expectedWidth, double expectedDepth) {
+  void checkIntersectionVolume(const std::shared_ptr<IObject> &intersectionVolume, double expectedX, double expectedY,
+                               double expectedZ) {
     TS_ASSERT(intersectionVolume);
-    double width, height, depth;
-    height = intersectionVolume->getBoundingBox().xMax() - intersectionVolume->getBoundingBox().xMin();
-    width = intersectionVolume->getBoundingBox().yMax() - intersectionVolume->getBoundingBox().yMin();
-    depth = intersectionVolume->getBoundingBox().zMax() - intersectionVolume->getBoundingBox().zMin();
+    double yExtent, xExtent, zExtent;
+    xExtent = intersectionVolume->getBoundingBox().xMax() - intersectionVolume->getBoundingBox().xMin();
+    yExtent = intersectionVolume->getBoundingBox().yMax() - intersectionVolume->getBoundingBox().yMin();
+    zExtent = intersectionVolume->getBoundingBox().zMax() - intersectionVolume->getBoundingBox().zMin();
 
-    TS_ASSERT_EQUALS(width, expectedWidth);
-    TS_ASSERT_EQUALS(height, expectedHeight);
-    TS_ASSERT_EQUALS(depth, expectedDepth);
+    TS_ASSERT_EQUALS(yExtent, expectedY);
+    TS_ASSERT_EQUALS(xExtent, expectedX);
+    TS_ASSERT_EQUALS(zExtent, expectedZ);
   }
 
   ExperimentInfo_sptr createInstrument(const V3D &sourcePos) {
