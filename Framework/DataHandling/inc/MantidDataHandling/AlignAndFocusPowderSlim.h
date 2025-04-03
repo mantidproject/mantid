@@ -44,9 +44,10 @@ private:
   void init() override;
   void exec() override;
 
+  API::MatrixWorkspace_sptr createOutputWorkspace(const size_t numHist, const bool linearBins, const double x_delta);
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
 
-  void loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename);
+  void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
   std::set<detid_t> m_masked;
