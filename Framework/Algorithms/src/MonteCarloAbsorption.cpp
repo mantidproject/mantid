@@ -278,7 +278,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
                                                         const InterpolationOption &interpolateOpt,
                                                         const bool useSparseInstrument,
                                                         const size_t maxScatterPtAttempts,
-                                                        const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+                                                        MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
 
@@ -330,6 +330,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   if (hasGaugeVol) {
     std::string xmlString = inputWS.run().getProperty("GaugeVolume")->value();
     gaugeVolume = ShapeFactory().createShape(xmlString);
+    pointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY; // if gauge volume present, only generate
+                                                                         // points from the sample
+    g_log.information("Gauge Volume found. Scattering Points limited to Sample Only.");
   }
 
   std::shared_ptr<IMCInteractionVolume> interactionVolume =

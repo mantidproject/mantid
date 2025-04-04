@@ -77,7 +77,7 @@ private:
                                          const bool simulateTracksForEachWavelength, const int seed,
                                          const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
                                          const size_t maxScatterPtAttempts,
-                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+                                         MCInteractionVolume::ScatteringPointVicinity pointsIn);
   API::MatrixWorkspace_uptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
