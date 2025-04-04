@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import sys
+import argparse
 
 from qtpy.QtWidgets import QApplication
 from mantidqt.widgets.helpwindow.helpwindowpresenter import HelpWindowPresenter
@@ -30,8 +31,6 @@ def main(cmdargs=sys.argv):
     """
     Run this script standalone to test the Python-based Help Window.
     """
-    import argparse
-
     parser = argparse.ArgumentParser(description="Standalone test of the Python-based Mantid Help Window.")
     parser.add_argument(
         "relativeUrl", nargs="?", default="", help="Relative doc path (e.g. 'algorithms/Load-v1.html'), defaults to 'index.html' if empty."
