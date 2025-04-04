@@ -5,12 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from typing import List, Dict
 from unittest import mock
 
 from sans.common.enums import (
     SANSInstrument,
-    SANSFacility,
     DetectorType,
     ReductionMode,
     RangeStepType,
@@ -19,42 +17,17 @@ from sans.common.enums import (
     FitType,
     RebinType,
 )
-from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
-from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
+from sans.test_helper.toml_parser_test_helpers import setup_parser_dict
 
 
 class TomlV1ParserTest(unittest.TestCase):
-    @staticmethod
-    def _get_mock_data_info():
-        # TODO I really really dislike having to do this in a test, but
-        # TODO de-coupling StateData is required to avoid it
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00022024")
-        data_builder.set_sample_scatter_period(3)
-        return data_builder.build()
-
-    def _setup_parser(self, dict_vals) -> TomlV1Parser:
-        def _add_missing_mandatory_key(dict_to_check: Dict, key_path: List[str], replacement_val):
-            _dict = dict_to_check
-            for key in key_path[0:-1]:
-                if key not in _dict:
-                    _dict[key] = {}
-                _dict = _dict[key]
-
-            if key_path[-1] not in _dict:
-                _dict[key_path[-1]] = replacement_val  # Add in child value
-            return dict_to_check
-
-        self._mocked_data_info = self._get_mock_data_info()
-        # instrument key needs to generally be present
-        dict_vals = _add_missing_mandatory_key(dict_vals, ["instrument", "name"], "LOQ")
-        dict_vals = _add_missing_mandatory_key(dict_vals, ["detector", "configuration", "selected_detector"], "rear")
-
-        return TomlV1Parser(dict_vals, file_information=None)
+    def _setup_parser(self, dict_vals):
+        setup_dict, mocked_data_info = setup_parser_dict(dict_vals)
+        self._mocked_data_info = mocked_data_info
+        return TomlV1Parser(setup_dict, file_information=None)
 
     def test_instrument(self):
         parser = self._setup_parser(dict_vals={"instrument": {"name": SANSInstrument.SANS2D.value}})
