@@ -261,14 +261,16 @@ class SANSSave(DataProcessorAlgorithm):
         workspace = self.getProperty("InputWorkspace").value
         if isinstance(workspace, WorkspaceGroup):
             return self._validate_group(errors, workspace)
+        if self.getProperty("PolarizedNXcanSAS").value:
+            errors.update({"InputWorkspace": "Must be a workspace group to save using PolarizedNXcanSAS"})
+            return errors
         return self._validate_workspace(errors, workspace)
 
     def _validate_group(self, errors, input_workspace):
-        if not self.getProperty("PolarizedNXcanSAS").value:
-            errors.update({"InputWorkspace": "Only PolarizedNXcanSAS is compatible with group workspaces."})
-            return
         for i in range(0, input_workspace.getNumberOfEntries()):
             self._validate_workspace(errors, input_workspace.getItem(i))
+        if self.getProperty("PolarizedNXcanSAS").value:
+            self._validate_pol_props(errors)
         return errors
 
     def _validate_workspace(self, errors, input_workspace):
@@ -298,8 +300,6 @@ class SANSSave(DataProcessorAlgorithm):
                     " only. This requires all axes to be numeric."
                 }
             )
-        if self.getProperty("PolarizedNXcanSAS").value:
-            self._validate_pol_props(errors)
         return errors
 
     def _validate_pol_props(self, errors):
