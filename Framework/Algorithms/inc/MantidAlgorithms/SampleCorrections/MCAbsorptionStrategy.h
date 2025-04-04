@@ -40,7 +40,7 @@ class MonteCarloAbsorption;
 */
 class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy : public IMCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile,
+  MCAbsorptionStrategy(std::shared_ptr<IMCInteractionVolume> interactionVolume, const IBeamProfile &beamProfile,
                        Kernel::DeltaEMode::Type EMode, const size_t nevents, const size_t maxScatterPtAttempts,
                        const bool regenerateTracksForEachLambda);
   virtual void calculate(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &finalPos,
@@ -49,13 +49,13 @@ public:
                          MCInteractionStatistics &stats) override;
 
 private:
+  std::shared_ptr<IMCInteractionVolume> m_scatterVol;
   const IBeamProfile &m_beamProfile;
-  const IMCInteractionVolume &m_scatterVol;
   const size_t m_nevents;
   const size_t m_maxScatterAttempts;
   const Kernel::DeltaEMode::Type m_EMode;
   const bool m_regenerateTracksForEachLambda;
-  IMCInteractionVolume &setActiveRegion(IMCInteractionVolume &interactionVolume, const IBeamProfile &beamProfile);
+  void setActiveRegion(std::shared_ptr<IMCInteractionVolume> interactionVolume, const IBeamProfile &beamProfile);
 };
 
 } // namespace Algorithms

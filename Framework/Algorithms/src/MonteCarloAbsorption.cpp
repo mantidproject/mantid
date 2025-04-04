@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -18,6 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -203,9 +205,9 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  */
 std::shared_ptr<IMCInteractionVolume>
 MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
-                                              const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
-  auto interactionVol = std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn);
-  return interactionVol;
+                                              const MCInteractionVolume::ScatteringPointVicinity pointsIn,
+                                              const Geometry::IObject_sptr gaugeVolume) {
+  return std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn, gaugeVolume);
 }
 
 /**
@@ -223,12 +225,12 @@ MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const s
  * @return a pointer to an MCAbsorptionStrategy object
  */
 std::shared_ptr<IMCAbsorptionStrategy>
-MonteCarloAbsorption::createStrategy(IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile,
-                                     Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                                     const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda) {
-  auto MCAbs = std::make_shared<MCAbsorptionStrategy>(interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
-                                                      regenerateTracksForEachLambda);
-  return MCAbs;
+MonteCarloAbsorption::createStrategy(std::shared_ptr<IMCInteractionVolume> interactionVol,
+                                     const IBeamProfile &beamProfile, Kernel::DeltaEMode::Type EMode,
+                                     const size_t nevents, const size_t maxScatterPtAttempts,
+                                     const bool regenerateTracksForEachLambda) {
+  return std::make_shared<MCAbsorptionStrategy>(interactionVol, beamProfile, EMode, nevents, maxScatterPtAttempts,
+                                                regenerateTracksForEachLambda);
 }
 
 /**
@@ -276,7 +278,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
                                                         const InterpolationOption &interpolateOpt,
                                                         const bool useSparseInstrument,
                                                         const size_t maxScatterPtAttempts,
-                                                        const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
+                                                        MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
 
@@ -314,10 +316,35 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
-  // Configure strategy
-  auto interactionVolume = createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn);
-  auto strategy = createStrategy(*interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
-                                 resimulateTracksForDiffWavelengths);
+  // Configure interaction volume
+
+  bool hasGaugeVol = false;
+  Geometry::IObject_sptr gaugeVolume = nullptr;
+
+  try {
+    inputWS.run().getProperty("GaugeVolume");
+    hasGaugeVol = true;
+  } catch (const std::exception &) {
+  }
+
+  if (hasGaugeVol) {
+    std::string xmlString = inputWS.run().getProperty("GaugeVolume")->value();
+    gaugeVolume = ShapeFactory().createShape(xmlString);
+    if (pointsIn != MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY) {
+      g_log.warning("Gauge Volume found. Scattering Points limited to Sample Only.");
+    }
+    pointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY; // if gauge volume present, only generate
+                                                                         // points from the sample
+  }
+
+  std::shared_ptr<IMCInteractionVolume> interactionVolume =
+      createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+
+  Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
+
+  std::shared_ptr<IMCAbsorptionStrategy> strategy =
+      createStrategy(interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
+                     resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 

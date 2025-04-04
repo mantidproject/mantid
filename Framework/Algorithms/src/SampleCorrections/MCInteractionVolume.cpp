@@ -13,6 +13,7 @@
 #include <iomanip>
 
 namespace Mantid {
+using Geometry::IObject_sptr;
 using Geometry::Track;
 using Kernel::V3D;
 
@@ -29,9 +30,11 @@ namespace Algorithms {
  * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
-                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn)
-    : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(getFullBoundingBox()),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn) {
+                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn,
+                                         IObject_sptr gaugeVolume)
+    : m_sample(sample.getShape().clone()), m_env(nullptr), m_maxScatterAttempts(maxScatterAttempts),
+      m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
+  m_activeRegion = this->MCInteractionVolume::getFullBoundingBox();
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
@@ -56,15 +59,27 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
                                 "environment parts must have a valid shape.");
   }
 }
+/**
+ * Returns the defined gauge volume if one is present, otherwise returns nullptr
+ * @return Shared pointer to gauge volume object
+ */
+Geometry::IObject_sptr MCInteractionVolume::getGaugeVolume() const { return m_gaugeVolume; }
 
 /**
- * Returns the axis-aligned bounding box for the volume including env if
- * m_pointsIn != SampleOnly
- * @return The bounding box
+ * Sets the gauge volume on the InteractionVolume
+ */
+void MCInteractionVolume::setGaugeVolume(Geometry::IObject_sptr gaugeVolume) { m_gaugeVolume = gaugeVolume; }
+
+/**
+ * Returns the defined gauge volume if one is present, otherwise returns axis-aligned bounding box
+ * for the volume including env if m_pointsIn != SampleOnly
+ * @return The bounding box of the interaction volume
  */
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
-  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+  if (m_gaugeVolume != nullptr) {
+    sampleBox = m_gaugeVolume->getBoundingBox();
+  } else if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
     sampleBox.grow(envBox);
   }
@@ -108,10 +123,20 @@ int MCInteractionVolume::getComponentIndex(Kernel::PseudoRandomNumberGenerator &
 std::optional<Kernel::V3D>
 MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
   std::optional<Kernel::V3D> pointGenerated{std::nullopt};
+  std::optional<Kernel::V3D> tmpPoint{std::nullopt};
   if (componentIndex == -1) {
-    pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+    if (m_gaugeVolume != nullptr) {
+      tmpPoint = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 2);
+      if (tmpPoint) {
+        if (m_sample->isValid(tmpPoint.value())) {
+          pointGenerated = tmpPoint;
+        }
+      }
+    } else {
+      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 2);
+    }
   } else {
-    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 1);
+    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 2);
   }
   return pointGenerated;
 }

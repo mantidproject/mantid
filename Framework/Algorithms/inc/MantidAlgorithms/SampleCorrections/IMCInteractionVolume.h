@@ -40,6 +40,8 @@ public:
                                               const Kernel::V3D &endPos, MCInteractionStatistics &stats) const = 0;
   virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;
+  virtual Geometry::IObject_sptr getGaugeVolume() const = 0;
+  virtual void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) = 0;
 };
 
 } // namespace Algorithms

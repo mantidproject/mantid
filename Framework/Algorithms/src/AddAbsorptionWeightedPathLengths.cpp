@@ -118,7 +118,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
 
   auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
   // Configure strategy
-  MCInteractionVolume interactionVol(inputWS->sample(), maxScatterPtAttempts);
+  std::shared_ptr<IMCInteractionVolume> interactionVol =
+      std::make_shared<MCInteractionVolume>(inputWS->sample(), maxScatterPtAttempts);
   MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts, true);
 
   bool useSinglePath = getProperty("UseSinglePath");

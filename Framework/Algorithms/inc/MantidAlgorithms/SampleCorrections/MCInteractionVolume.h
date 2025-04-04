@@ -29,13 +29,16 @@ class MANTID_ALGORITHMS_DLL MCInteractionVolume : public IMCInteractionVolume {
 public:
   enum class ScatteringPointVicinity { SAMPLEANDENVIRONMENT, SAMPLEONLY, ENVIRONMENTONLY };
   MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
-                      const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
+                      const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,
+                      Geometry::IObject_sptr gaugeVolume = nullptr);
 
   const Geometry::BoundingBox getFullBoundingBox() const override;
   virtual TrackPair calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
                                               const Kernel::V3D &endPos, MCInteractionStatistics &stats) const override;
   ComponentScatterPoint generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
   void setActiveRegion(const Geometry::BoundingBox &region) override;
+  Geometry::IObject_sptr getGaugeVolume() const override;
+  void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) override;
 
 private:
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng) const;
@@ -46,6 +49,7 @@ private:
   Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;
   const ScatteringPointVicinity m_pointsIn;
+  Geometry::IObject_sptr m_gaugeVolume;
 };
 
 } // namespace Algorithms
