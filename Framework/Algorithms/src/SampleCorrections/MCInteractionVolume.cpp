@@ -34,7 +34,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
                                          IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(nullptr), m_maxScatterAttempts(maxScatterAttempts),
       m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
-  m_activeRegion = getFullBoundingBox();
+  m_activeRegion = this->MCInteractionVolume::getFullBoundingBox();
   try {
     m_env = &sample.getEnvironment();
     assert(m_env);
