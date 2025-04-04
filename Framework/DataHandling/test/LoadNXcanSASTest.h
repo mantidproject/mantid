@@ -107,36 +107,26 @@ public:
     const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
 
     // Create transmission
-    NXcanSASTestTransmissionParameters transmissionParameters;
-    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
-    transmissionParameters.usesTransmission = true;
+    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameCanAttrValue);
 
-    NXcanSASTestTransmissionParameters transmissionCanParameters;
-    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
-    transmissionCanParameters.usesTransmission = true;
-
-    auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin, transmissionParameters.xmax);
-
-    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin, transmissionCanParameters.xmax);
-
+    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
+    auto transmissionCan = getTransmissionWorkspace(parameters.transmissionCanParameters);
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
 
     // Act
     auto wsOut = load_file_no_issues(parameters, true /*load transmission*/, outWsName);
 
     // Assert
-    do_assert_load(ws, wsOut, parameters, transmission, transmissionCan, transmissionParameters,
-                   transmissionCanParameters);
+    do_assert_load(ws, wsOut, parameters, transmission, transmissionCan);
 
     // Clean up
     auto transName = ws->getTitle();
-    const std::string transExtension = "_trans_" + transmissionParameters.name;
+    const std::string transExtension = "_trans_" + parameters.transmissionParameters.name;
     transName += transExtension;
 
     auto transNameCan = ws->getTitle();
-    const std::string transExtensionCan = "_trans_" + transmissionCanParameters.name;
+    const std::string transExtensionCan = "_trans_" + parameters.transmissionCanParameters.name;
     transNameCan += transExtensionCan;
 
     removeFile(parameters.filename);
@@ -338,7 +328,7 @@ private:
     return ws;
   }
 
-  void save_file_no_issues(const MatrixWorkspace_sptr &workspace, NXcanSASTestParameters &parameters,
+  void save_file_no_issues(const MatrixWorkspace_sptr &workspace, const NXcanSASTestParameters &parameters,
                            const MatrixWorkspace_sptr &transmission = nullptr,
                            const MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
@@ -464,7 +454,7 @@ private:
   }
 
   void do_assert_transmission(const MatrixWorkspace_sptr &mainWorkspace, const MatrixWorkspace_sptr &transIn,
-                              const NXcanSASTestTransmissionParameters &parameters) {
+                              const TransmissionTestParameters &parameters) {
     if (!parameters.usesTransmission || !transIn) {
       return;
     }
@@ -490,9 +480,7 @@ private:
 
   void do_assert_load(const MatrixWorkspace_sptr &wsIn, const MatrixWorkspace_sptr &wsOut,
                       NXcanSASTestParameters &parameters, const MatrixWorkspace_sptr &transmission = nullptr,
-                      const MatrixWorkspace_sptr &transmissionCan = nullptr,
-                      const NXcanSASTestTransmissionParameters &sampleParameters = NXcanSASTestTransmissionParameters(),
-                      const NXcanSASTestTransmissionParameters &canParameters = NXcanSASTestTransmissionParameters()) {
+                      const MatrixWorkspace_sptr &transmissionCan = nullptr) {
     // Ensure that both have the same units
     do_assert_units(wsIn, wsOut);
 
@@ -530,8 +518,12 @@ private:
     do_assert_instrument(wsIn, wsOut);
 
     // Test transmission workspaces
-    do_assert_transmission(wsOut, std::move(transmission), std::move(sampleParameters));
-    do_assert_transmission(wsOut, std::move(transmissionCan), std::move(canParameters));
+    if (parameters.transmissionParameters.usesTransmission) {
+      do_assert_transmission(wsOut, std::move(transmission), parameters.transmissionParameters);
+    }
+    if (parameters.transmissionCanParameters.usesTransmission) {
+      do_assert_transmission(wsOut, std::move(transmissionCan), parameters.transmissionCanParameters);
+    }
   }
 };
 

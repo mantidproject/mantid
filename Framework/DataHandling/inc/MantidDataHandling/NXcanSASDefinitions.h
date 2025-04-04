@@ -13,7 +13,10 @@ namespace DataHandling {
 
 namespace NXcanSAS {
 // General
-enum class WorkspaceDimensionality { oneD, twoD, other };
+enum class WorkspaceDimensionality { other, oneD, twoD };
+
+// NXcanSAS file extension
+const std::string NX_CANSAS_EXTENSION = ".h5";
 
 // NXcanSAS Tag Definitions
 const std::string sasUnitAttr = "units";
@@ -46,6 +49,7 @@ const std::string sasEntryDefinitionFormat = "NXcanSAS";
 const std::string sasEntryTitle = "title";
 const std::string sasEntryRun = "run";
 const std::string sasEntryRunInLogs = "run_number";
+const std::string sasEntryDefaultSuffix = "01";
 
 // SASdata
 const std::string sasDataClassAttr = "SASdata";
@@ -111,6 +115,42 @@ const std::string sasInstrumentSampleThickness = "thickness";
 const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
 
 const std::string sasInstrumentIDF = "idf";
+
+// SASpolarization
+// WIP: Initial proposal: https://wiki.cansas.org/index.php?title=NXcanSAS_v1.1
+const std::string sasDataPout = "Pout";
+const std::string sasDataPin = "Pin";
+const std::string sasDataPoutIndicesAttr = "Pout_indices";
+const std::string sasDataPinIndicesAttr = "Pin_indices";
+constexpr int sasDataPoutIndicesValue = 1;
+constexpr int sasDataPinIndicesValue = 0;
+const std::string sasDataPolarizationUnitAttr = "none";
+
+struct InstrumentPolarizer {
+  explicit InstrumentPolarizer(const std::string &type, const std::string &name) : m_type(type), m_name(name) {};
+  std::string sasPolarizerClassAttr() const { return "SAS" + m_type; }
+  std::string sasPolarizerGroupAttr() const { return "sas" + m_type; }
+  std::string nxPolarizerClassAttr() const { return (m_type == "flipper") ? "NX" + m_type : "NXpolarizer"; }
+  static std::string sasPolarizerName() { return "name"; }
+  static std::string sasPolarizerDeviceType() { return "type"; }
+  static std::string sasPolarizerIDFDeviceType() { return "device-type"; }
+  static std::string sasPolarizerDistance() { return "distance"; }
+  static std::string sasPolarizerDistanceUnitAttr() { return "m"; }
+  const std::string &getComponentName() const { return m_name; }
+  const std::string &getComponentType() const { return m_type; }
+
+private:
+  std::string m_type;
+  std::string m_name;
+};
+
+const std::string sasSampleMagneticField = "magnetic_field";
+const std::string sasSampleEMFieldDirectionAttr = "direction";
+const std::string sasSampleEMFieldDirectionSphericalAttr = "direction_spherical";
+const std::string sasSampleEMFieldDirectionPolar = "polar_angle";
+const std::string sasSampleEMFieldDirectionAzimuthal = "azimuthal_angle";
+const std::string sasSampleEMFieldDirectionRotation = "rotation_angle";
+const std::string sasSampleEMFieldDirectionUnitsAttr = "degrees";
 
 // SASprocess
 const std::string sasProcessClassAttr = "SASprocess";
