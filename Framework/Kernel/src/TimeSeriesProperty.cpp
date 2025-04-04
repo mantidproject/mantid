@@ -1458,17 +1458,9 @@ void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time
     m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
   // set the values
   constexpr double SEC_TO_NANO{1000000000.0};
-  // This used to cast negative times to uint64_t, which is undefined behaviour. Fixing
-  // that for all times results in times changing (only a few nanoseconds but this has
-  // a noticeable effect on the tests). Hence to minimise disruption this only
-  // does the new calculation for negative times, and leaves all positive times with
-  // the old calculation.
-  const auto start_time_ns_d = static_cast<double>(start_time.totalNanoseconds());
-  const auto start_time_ns_u = static_cast<uint64_t>(start_time.totalNanoseconds());
+  const int64_t start_time_ns = start_time.totalNanoseconds();
   for (std::size_t i = 0; i < num; i++) {
-    const uint64_t time = time_sec[i] < 0 ? static_cast<uint64_t>(start_time_ns_d + time_sec[i] * SEC_TO_NANO)
-                                          : start_time_ns_u + static_cast<uint64_t>(time_sec[i] * SEC_TO_NANO);
-    m_values.emplace_back(time, new_values[i]);
+    m_values.emplace_back(start_time_ns + static_cast<int64_t>(time_sec[i] * SEC_TO_NANO), new_values[i]);
   }
 
   // reset the size
