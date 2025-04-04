@@ -30,7 +30,7 @@ namespace Mantid {
 namespace NeXus {
 /** @class NexusFileIO SaveNexusProcessedHelper.h NeXus/SaveNexusProcessedHelper.h
 
-Utility method for saving NeXus format of Mantid Workspace
+Utility methods for saving Mantid Workspaces in NeXus format.
 This class interfaces to the C Nexus API. This is written for use by
 Save and Load NexusProcessed classes, though it could be extended to
 other Nexus formats. It might be replaced in future by methods using

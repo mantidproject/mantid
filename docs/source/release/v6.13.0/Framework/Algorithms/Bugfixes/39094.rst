@@ -1,0 +1,1 @@
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`: fix SEGFAULT due to slab size to data size mismatch, on write of ragged workspaces.
