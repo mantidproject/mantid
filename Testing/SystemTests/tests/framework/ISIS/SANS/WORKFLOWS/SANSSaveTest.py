@@ -214,7 +214,10 @@ class SANSSaveTest(unittest.TestCase):
 
     def test_polarization_props_must_be_set_when_polarized_nx_can_sas_set(self):
         # Arrange
-        workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
+        workspace_0 = CreateSampleWorkspace()
+        workspace_1 = CreateSampleWorkspace()
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
         file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
         save_name = "SANSSave"
         save_options = {
@@ -226,6 +229,21 @@ class SANSSaveTest(unittest.TestCase):
         save_alg.setRethrows(True)
         # Act
         self.assertRaisesRegex(RuntimeError, "PolarizationProps must be set to use SavePolarizedNXCanSAS.", save_alg.execute)
+
+    def test_workspace_must_be_group_to_use_polarized_nx_can_sas(self):
+        # Arrange
+        workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        save_name = "SANSSave"
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "PolarizedNXCanSAS": True,
+        }
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.setRethrows(True)
+        # Act
+        self.assertRaisesRegex(RuntimeError, "Must be a workspace group to save using PolarizedNXcanSAS", save_alg.execute)
 
     def test_polarization_props_throws_when_any_mandatory_properties_unset(self):
         # Arrange
@@ -279,6 +297,19 @@ class SANSSaveTest(unittest.TestCase):
 
         # Act
         SANSSave(workspace, file_name, PolarizedNXcanSAS=True, PolarizationProps=pol_props)
+
+    def test_group_workspaces_handled_by_non_pol_alg(self):
+        # Arrange
+        workspace_0 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_1 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
+        workspace = ConvertSpectrumAxis(InputWorkspace=workspace, Target="ElasticQ", EFixed=1)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+
+        # Act
+        SANSSave(workspace, file_name, NXcanSAS=True)
 
 
 class SANSSaveRunnerTest(systemtesting.MantidSystemTest):
