@@ -119,5 +119,7 @@ void export_ExperimentInfo() {
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
       .def("setSample", setSample, args("self", "sample"))
-      .def("setRun", setRun, args("self", "run"));
+      .def("setRun", setRun, args("self", "run"))
+      .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),
+           "Update parameters in the instrument-parameter map. Logs must be loaded before calling this method");
 }
