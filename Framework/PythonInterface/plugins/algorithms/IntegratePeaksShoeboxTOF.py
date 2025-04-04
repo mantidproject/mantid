@@ -465,7 +465,24 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 peaks_det_ids[ipk] = peak_data.detids
 
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
+                    ws,
+                    peaks,
+                    ipk,
+                    kernel,
+                    nrows,
+                    ncols,
+                    nbins,
+                    x,
+                    y,
+                    esq,
+                    ispecs,
+                    ipos,
+                    det_edges,
+                    weak_peak_threshold,
+                    False,
+                )
+
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * weak_pk.tof_bin_width
                 sigma = sigma * weak_pk.tof_bin_width
