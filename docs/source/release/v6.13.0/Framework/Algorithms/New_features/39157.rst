@@ -1,0 +1,1 @@
+In :ref:`algm-MonteCarloAbsorption`, when a gauge volume has been defined with :ref:`algm-DefineGaugeVolume`, the algorithm now uses this gauge volume to generate the scattering points for calculating attenuation within the sample.
