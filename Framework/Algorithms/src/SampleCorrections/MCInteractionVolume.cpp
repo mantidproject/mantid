@@ -79,8 +79,7 @@ const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
   if (m_gaugeVolume != nullptr) {
     sampleBox = m_gaugeVolume->getBoundingBox();
-  }
-  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+  } else if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
     sampleBox.grow(envBox);
   }
