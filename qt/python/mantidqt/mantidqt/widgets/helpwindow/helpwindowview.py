@@ -42,7 +42,7 @@ class HelpWindowView(QMainWindow):
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.ScrollAnimatorEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, False)
-        # settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True) # Ensure JS is on (default)
+        # settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True) # JS is enabled by default!
 
         # If the interceptor is not None, apply it to the current profile
         if interceptor is not None:
@@ -122,7 +122,7 @@ class HelpWindowView(QMainWindow):
 
         icon = QIcon.fromTheme(iconThemeName, fallbackIcon)  # noqa: F841
         self.statusLabel.setStyleSheet(f"QLabel {{ padding-left: 5px; padding-right: 5px; margin-left: 5px; {colorStyle} }}")
-        self.statusLabel.setText(f"<b>{modeText}</b>")
+        self.statusLabel.setText(f"{modeText}")
         self.statusLabel.setToolTip(tooltip)
         logger.debug(f"HelpWindow View: Status set to '{modeText}' (Local: {isLocal})")
 
