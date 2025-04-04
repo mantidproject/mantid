@@ -283,6 +283,38 @@ std::vector<double> Goniometer::getEulerAngles(const std::string &convention) {
   return Quat(getR()).getEulerAngles(convention);
 }
 
+/** return the goniometer convention used determine from the motor axes
+ *
+ * @returns string with the convention
+ */
+std::string Goniometer::getConventionFromMotorAxes() const {
+  if (motors.size() != 3) {
+    g_log.warning() << "Goniometerdoes not have 3 axes. Cannot determine "
+                       "convention.\n";
+    return "";
+  }
+
+  std::string convention;
+  for (const auto &motor : motors) {
+    switch (std::abs(motor.rotationaxis.masterDir())) {
+    case 1:
+      convention += "X";
+      break;
+    case 2:
+      convention += "Y";
+      break;
+    case 3:
+      convention += "Z";
+      break;
+    default:
+      g_log.warning() << "Goniometer has an axis with a non-standard "
+                         "rotation axis.\n";
+      return "";
+    }
+  }
+  return convention;
+}
+
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR() {
   if (initFromR) {
