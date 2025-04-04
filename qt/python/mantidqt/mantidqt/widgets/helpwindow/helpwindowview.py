@@ -113,7 +113,7 @@ class HelpWindowView(QMainWindow):
             iconThemeName = "network-offline"
             fallbackIcon = QIcon(":/qt-project.org/styles/commonstyle/images/disconnected-32.png")
             tooltip = f"Showing {modeText} from local disk."
-            colorStyle = "color: red;"
+            colorStyle = "color: green;"
         else:
             iconThemeName = "network-wired"
             fallbackIcon = QIcon(":/qt-project.org/styles/commonstyle/images/connected-32.png")
