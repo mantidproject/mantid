@@ -2171,6 +2171,21 @@ public:
     TS_ASSERT_EQUALS(range.stop(), stop);
   }
 
+  void test_negativeTimes() {
+    using namespace Mantid::Types::Core;
+    TimeSeriesProperty<double> series("doubleProperty");
+    const DateAndTime startTime(100000, 0);
+    const std::vector<double> times{-5000, -1, 0, 1, 5};
+    const std::vector<double> values{1, 1, 1, 1, 1};
+    series.create(startTime, times, values);
+    TS_ASSERT_EQUALS(times.size(), series.size());
+    TS_ASSERT_EQUALS(values.size(), series.valuesAsVector().size());
+    const std::vector<DateAndTime> timesAsVector = series.timesAsVector();
+    for (size_t i = 0; i < times.size(); i++) {
+      TS_ASSERT_EQUALS(startTime + times[i], timesAsVector[i]);
+    }
+  }
+
 private:
   /// Generate a test log
   std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {

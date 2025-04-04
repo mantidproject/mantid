@@ -1458,9 +1458,9 @@ void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time
     m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
   // set the values
   constexpr double SEC_TO_NANO{1000000000.0};
-  const uint64_t start_time_ns = static_cast<uint64_t>(start_time.totalNanoseconds());
+  const int64_t start_time_ns = start_time.totalNanoseconds();
   for (std::size_t i = 0; i < num; i++) {
-    m_values.emplace_back(start_time_ns + static_cast<uint64_t>(time_sec[i] * SEC_TO_NANO), new_values[i]);
+    m_values.emplace_back(start_time_ns + static_cast<int64_t>(time_sec[i] * SEC_TO_NANO), new_values[i]);
   }
 
   // reset the size

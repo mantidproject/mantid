@@ -1,0 +1,1 @@
+- Fixed undefined behaviour when loading time series data with negative times. This could result in very small changes (nanoseconds) to recorded times due to floating-point arithmetic.
