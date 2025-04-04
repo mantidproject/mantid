@@ -11,7 +11,10 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 EditResultsDialog::EditResultsDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.wsInputWorkspace->setLowerBinLimit(2);
+  m_uiForm.wsInputWorkspace->showWorkspaceGroups(false);
+
   m_uiForm.wsSingleFitWorkspace->setUpperBinLimit(1);
+  m_uiForm.wsSingleFitWorkspace->showWorkspaceGroups(false);
 
   connect(m_uiForm.pbPasteInputName, &QPushButton::clicked, this, &EditResultsDialog::setOutputWorkspaceName);
   connect(m_uiForm.pbReplaceFitResult, &QPushButton::clicked, this, &EditResultsDialog::replaceSingleFitResult);

@@ -235,7 +235,7 @@ void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace, F const &ge
 template <typename F>
 void renameWorkspacesInQENSFit(Algorithm *qensFit, const Algorithm_sptr &renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
-                               std::string const &groupSuffix, const F &getNameSuffix) {
+                               const F &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
@@ -246,10 +246,6 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit, const Algorithm_sptr &renameA
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
-
-  auto const groupName = outputBaseName + groupSuffix;
-  if (outputGroup->getName() != groupName)
-    renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
 
 std::vector<std::size_t> createDatasetGrouping(const std::vector<MatrixWorkspace_sptr> &workspaces,
@@ -690,16 +686,14 @@ void QENSFitSequential::renameWorkspaces(WorkspaceGroup_sptr outputGroup, std::v
     std::string workspaceName = inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup), outputBaseName, endOfSuffix + "s",
-                                   getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup), outputBaseName, getNameSuffix);
 }
 
 void QENSFitSequential::renameWorkspaces(WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
                                          std::string const &outputBaseName, std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
-  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup), outputBaseName, endOfSuffix + "s",
-                                   getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup), outputBaseName, getNameSuffix);
 }
 
 void QENSFitSequential::renameGroupWorkspace(std::string const &currentName, std::vector<std::string> const &spectra,
