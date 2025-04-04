@@ -171,7 +171,7 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
     for (auto &prop : props) {
       if (prop->direction() == Mantid::Kernel::Direction::Input) {
         // try to cast property to WorkspaceProperty
-        Mantid::API::WorkspaceProperty<> *wsProp = dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
+        const Mantid::API::WorkspaceProperty<> *wsProp = dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
         if (wsProp != nullptr) {
           m_algPropName = QString::fromStdString(prop->name());
           break;

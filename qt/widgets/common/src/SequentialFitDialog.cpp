@@ -109,7 +109,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
       int spec = -1;
       if (ws) {
-        Mantid::API::Axis *y = ws->getAxis(1);
+        const auto y = ws->getAxis(1);
         if (y->isSpectra()) {
           spec = y->spectraNo(wi);
         }
@@ -189,7 +189,8 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
     // add the option that displays workspace names
     logNames << "SourceName";
     for (auto log : logs) {
-      Mantid::Kernel::TimeSeriesProperty<double> *p = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
+      const Mantid::Kernel::TimeSeriesProperty<double> *p =
+          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
       if (!p)
         continue;
       logNames << QString::fromStdString(log->name());

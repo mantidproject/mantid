@@ -36,7 +36,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   m_widgets.push_back(m_textbox);
 
   // Check if this is a masked property
-  Mantid::Kernel::MaskedProperty<std::string> *maskedProp =
+  const Mantid::Kernel::MaskedProperty<std::string> *maskedProp =
       dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
   // Make it echo those little stars
   if (maskedProp)
