@@ -138,7 +138,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
       const V3D yAxis{0., 1., 0.};
       auto cylinderShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
                                                                          yAxis, "sample-cylinder");
-      // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
+      // create test material with mu=1
       auto shape = std::shared_ptr<IObject>(cylinderShape->cloneWithMaterial(Mantid::Kernel::Material(
           "Test",
           Mantid::PhysicalConstants::NeutronAtom(0, 0, 0, 0, 0, 1.0 /*total scattering xs*/, 0.0 /*absorption xs*/),
@@ -153,21 +153,20 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
           ComponentCreationHelper::cappedCylinderXML(gvRadius, gvHeight, gvBaseCentre, gvYAxis, "gauge-volume");
       ws->mutableRun().addProperty<std::string>("GaugeVolume", gaugeVolumeXML);
     } else if (environment == Environment::RotatedCylinderSamplePlusGV) {
-      // Define a cylindrical sample shape with axis at (1,1,1)
+      // Define a cylindrical sample shape which has been rotated 45 degrees about (1,0,1)
       constexpr double sampleRadius{0.01};
       constexpr double sampleHeight{0.1};
-      const V3D sampleBaseCentre{-sampleHeight / (2.0 * std::sqrt(3)), -sampleHeight / (2.0 * std::sqrt(3)),
-                                 -sampleHeight / (2.0 * std::sqrt(3))};
-      const V3D yAxis{1., 1., 1.};
+      const V3D sampleBaseCentre{-sampleHeight / (4.0), -sampleHeight / (2.0 * std::sqrt(2)), -sampleHeight / (4.0)};
+      const V3D yAxis = -sampleBaseCentre;
       auto cylinderShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
                                                                          yAxis, "sample-cylinder");
-      // create test material with mu=1 for lambda=0.5, mu=2 for lambda=1.5
+      // create test material with mu=1
       auto shape = std::shared_ptr<IObject>(cylinderShape->cloneWithMaterial(Mantid::Kernel::Material(
           "Test",
           Mantid::PhysicalConstants::NeutronAtom(0, 0, 0, 0, 0, 1.0 /*total scattering xs*/, 0.0 /*absorption xs*/),
           1 /*number density*/)));
       ws->mutableSample().setShape(shape);
-      // create 1mm radius cylinder gauge volume
+      // create 0.1mm radius cylinder gauge volume
       constexpr double gvRadius{0.0001};       //
       constexpr double gvHeight{2 * 0.011547}; // beam path length within ellipse of r = 0.01 at 45 degrees
       const V3D gvBaseCentre{0., 0., -gvHeight / 2.};
@@ -221,7 +220,7 @@ Mantid::API::MatrixWorkspace_sptr setUpWS(const TestWorkspaceDescriptor &wsProps
       testInst->add(det);
       testInst->markAsDetector(det);
     } else {
-      det->setPos(distance, 0, 0);
+      det->setPos(-distance, 0, 0);
       testInst->add(det);
       testInst->markAsDetector(det);
     }
@@ -422,7 +421,7 @@ public:
     auto yData = outputWS->getSpectrum(0).dataY();
 
     constexpr double delta(1e-03);
-    // pass straight through, all path lengths are 2cm
+    // pass straight through - all path lengths are exactly 2cm
     const double calculatedAttFactor = exp(-2);
     TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
   }
@@ -437,7 +436,7 @@ public:
     auto testWS = setUpWS(wsProps);
 
     auto mcAbsorb = createAlgorithm();
-    constexpr int NEVENTS = 1000;
+    constexpr int NEVENTS = 5000;
     mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
@@ -447,10 +446,10 @@ public:
     verifyDimensions(wsProps, outputWS);
     auto yData = outputWS->getSpectrum(0).dataY();
 
-    constexpr double delta(5e-03);
-    // pass staright through, all path lengths for this orientation given by 2 * (root2*R)
-    const double calculatedAttFactor = 0.1478786377506909;
-    TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta); // set a generous 'within 5%' tolerance
+    constexpr double delta(1e-02);
+    // calculated theoretical absoprtion for this cylinder, using https://doi.org/10.1107/S0567739471000652
+    const double calculatedAttFactor = 0.14047;
+    TS_ASSERT_DELTA(calculatedAttFactor / yData[0], 1.0, delta); // 'within 1%' tolerance
   }
 
   void test_Workspace_Slit_Beam_Size_Set() {
