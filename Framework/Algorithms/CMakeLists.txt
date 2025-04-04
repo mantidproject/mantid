@@ -284,6 +284,7 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
+    src/SampleCorrections/IBeamProfile.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
@@ -875,6 +876,7 @@ set(TEST_FILES
     HRPDSlabCanAbsorptionTest.h
     He3TubeEfficiencyTest.h
     HyspecScharpfCorrectionTest.h
+    IBeamProfileTest.h
     IQTransformTest.h
     IdentifyNoisyDetectorsTest.h
     IndirectFitDataCreationHelperTest.h
