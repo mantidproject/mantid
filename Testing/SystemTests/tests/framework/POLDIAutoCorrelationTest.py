@@ -30,7 +30,7 @@ class POLDIAutoCorrelationTest(systemtesting.MantidSystemTest):
             LoadSINQFile(Instrument="POLDI", Filename=dataFile + ".hdf", OutputWorkspace=dataFile)
             LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", RewriteSpectraMap=True)
             PoldiTruncateData(InputWorkspace=dataFile, OutputWorkspace=dataFile)
-            PoldiAutoCorrelation(InputWorkspace=dataFile, wlenmin=1.1, wlenmax=5.0, OutputWorkspace=dataFile + "Corr")
+            PoldiAutoCorrelation(InputWorkspace=dataFile, wlenmin=1.1, wlenmax=5.0, OutputWorkspace=dataFile + "Corr", Version=5)
 
     def analyseResults(self, filenames):
         for dataFile in filenames:

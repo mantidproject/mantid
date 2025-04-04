@@ -146,8 +146,16 @@ Taking Cuts
 #. In the row labelled ``along``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
 #. In the row labelled ``over``, set the ``from`` value to ``30`` and the ``to`` value to ``60``
 #. Click ``Plot``
+#. Depending on the cutting algorithm, the plot will look similar to the plot below when using the integration method
 
 .. figure:: ../../../../docs/source/images/cut_plot.png
+   :alt: cut_plot.png
+   :align: center
+   :width: 80%
+
+and similar to the plot below when using the rebin method.
+
+.. figure:: ../../../../docs/source/images/cut_plot_2.png
    :alt: cut_plot.png
    :align: center
    :width: 80%
@@ -163,7 +171,7 @@ Taking Cuts
 #. Check that the ``File`` menu only has one menu item, ``Close``
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
 #. Click on ``Save Cut to Workspace`` and check the ``MD Histo`` tab of the Workspace Manager to verify that the new workspace was added
-#. Click on Flip Integration Axis. The y axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
+#. Click on Flip Integration Axis. The x axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
 
 
 .. figure:: ../../../../docs/source/images/flip_integration_axis.png

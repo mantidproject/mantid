@@ -372,8 +372,6 @@ std::map<std::string, Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() c
   return topLevel;
 }
 
-void AnalysisDataServiceImpl::shutdown() { clear(); }
-
 //-------------------------------------------------------------------------
 // Private methods
 //-------------------------------------------------------------------------

@@ -95,7 +95,7 @@ Convolution tab
 #. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
 #. Try the various ``Plot`` options in the interface
 
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots per input spectra
    (b)  ``Plot Current Preview`` - should result in a plot with three datasets
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 

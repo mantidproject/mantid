@@ -29,7 +29,7 @@ The following example shows how to calculate the residuals following a fit perfo
     data_Si = PoldiTruncateData(data_Si_raw)
 
     # Perform correlation method, find and refine peaks in correlation spectrum
-    correlation_Si = PoldiAutoCorrelation(data_Si)
+    correlation_Si = PoldiAutoCorrelation(data_Si, Version=5)
     peaks_Si_raw = PoldiPeakSearch(correlation_Si)
 
     # Only use the 11 strongest peaks

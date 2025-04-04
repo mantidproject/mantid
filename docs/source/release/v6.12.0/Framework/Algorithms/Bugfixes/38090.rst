@@ -1,1 +1,0 @@
-- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now performs a check and throws an error if input workspace's bins are mismatched. The mismatch check can be disabled setting the ``CheckMatchingBins`` property to ``False``.

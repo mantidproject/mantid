@@ -40,7 +40,7 @@ Usage
     fig.show()
 
 
-.. image:: ../../../images/CreateMonteCarloWorkspace_spectrum.png
+.. image:: ../images/CreateMonteCarloWorkspace_spectrum.png
    :alt: Overplot of simulated data over input data
    :width: 500px
    :height: 400px

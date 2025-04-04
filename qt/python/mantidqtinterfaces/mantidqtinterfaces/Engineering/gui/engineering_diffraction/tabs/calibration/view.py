@@ -53,7 +53,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.sig_update_sample_field.connect(slot)
 
     def set_on_check_cropping_state_changed(self, slot):
-        self.check_cropCalib.stateChanged.connect(slot)
+        self.check_roiCalib.stateChanged.connect(slot)
 
     # =================
     # Component Setters
@@ -90,10 +90,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.widget_cropping.setVisible(visible)
 
     def set_check_cropping_enabled(self, enabled):
-        self.check_cropCalib.setEnabled(enabled)
+        self.check_roiCalib.setEnabled(enabled)
 
     def set_check_cropping_checked(self, checked):
-        self.check_cropCalib.setChecked(checked)
+        self.check_roiCalib.setChecked(checked)
 
     # =================
     # Component Getters
@@ -121,7 +121,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         return self.radio_loadCalib.isChecked()
 
     def get_crop_checked(self):
-        return self.check_cropCalib.isChecked()
+        return self.check_roiCalib.isChecked()
 
     def get_cropping_widget(self):
         return self.widget_cropping
@@ -151,7 +151,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.setTabOrder(self.radio_newCalib, self.finder_sample.focusProxy())
         self.setTabOrder(self.finder_sample.focusProxy(), self.radio_loadCalib)
         self.setTabOrder(self.radio_loadCalib, self.finder_path.focusProxy())
-        self.setTabOrder(self.finder_path.focusProxy(), self.check_cropCalib)
-        self.setTabOrder(self.check_cropCalib, self.widget_cropping)
+        self.setTabOrder(self.finder_path.focusProxy(), self.check_roiCalib)
+        self.setTabOrder(self.check_roiCalib, self.widget_cropping)
         self.setTabOrder(self.widget_cropping, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_calibrate)

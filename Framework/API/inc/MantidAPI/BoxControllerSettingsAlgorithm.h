@@ -39,9 +39,6 @@ protected:
   /// Take the defaults for the box splitting from the instrument parameters.
   void takeDefaultsFromInstrument(const Mantid::Geometry::Instrument_const_sptr &instrument, const size_t ndims);
 
-protected:
-  ~BoxControllerSettingsAlgorithm() = default;
-
 private:
 };
 

@@ -26,16 +26,16 @@ To deprecate an existing C++ algorithm, its associated class must:
 Here are the relevant lines for deprecating algorithm ``MyOldAlg`` on Christmas day in 2020 and informing that
 ``MyNewAlg`` should be used
 
-  .. code-block:: c++
+.. code-block:: c++
 
-    #include "MantidAPI/DeprecatedAlgorithm.h"
+  #include "MantidAPI/DeprecatedAlgorithm.h"
 
-    class MANTID_ALGORITHMS_DLL MyOldAlg : public API::Algorithm, public API::DeprecatedAlgorithm {
-    public:
-    MyOldAlg::MyOldAlg() : m_someMember(0) {
-      useAlgorithm("MyNewAlg");
-      deprecatedDate("2020-12-25");
-     }
+  class MANTID_ALGORITHMS_DLL MyOldAlg : public API::Algorithm, public API::DeprecatedAlgorithm {
+  public:
+  MyOldAlg::MyOldAlg() : m_someMember(0) {
+    useAlgorithm("MyNewAlg");
+    deprecatedDate("2020-12-25");
+  }
 
 
 Deprecating a Python Algorithm
@@ -45,13 +45,13 @@ To deprecate a Python algorithm, we decorate its associated class with
 ``mantid.utils.deprecator.deprecated_algorithm``. In the example below we deprecated ``MyOldAlg`` on
 Christmas day in 2020, and inform that ``MyNewAlg`` should be used in place of ``MyOldAlg``.
 
-  .. code-block:: python
+.. code-block:: python
 
-    from mantid.utils.deprecator import deprecated_algorithm
+  from mantid.utils.deprecator import deprecated_algorithm
 
-    @deprecated_algorithm('MyNewAlg', '2020-12-25')
-    class MyOldAlg(PythonAlgorithm):
-        pass # continued with class definition
+  @deprecated_algorithm('MyNewAlg', '2020-12-25')
+  class MyOldAlg(PythonAlgorithm):
+      pass # continued with class definition
 
 If there is no other algorithm to be used in place of ``MyOlAlg``, then an empty string or ``None`` must be
 passed, e.g ``@deprecated_algorithm(None, '2020-12-25')``
@@ -64,32 +64,32 @@ Upon using a deprecated algorithm, a message will be printed in the logs at the 
 level. For instance, when using algorithm `MyOldAlg` (deprecated on Christmas day in 2020) in place of
 the new algorithm `MyNewAlg`, the following error message is printed:
 
-  .. code-block:: bash
+.. code-block:: bash
 
-    Algorithm "MyOldAlg" is deprecated since 2020-12-25. Use "MyNewAlg" instead
+  Algorithm "MyOldAlg" is deprecated since 2020-12-25. Use "MyNewAlg" instead
 
 If so desired, the user can raise a ``RuntimeError`` by setting property ``algorithms.deprecated`` to
 ``Raise`` in the user properties file `$HOME/.mantid/Mantid.user.properties`, or in a script using `ConfigService`:
 
-  .. code-block:: python
+.. code-block:: python
 
-    from mantid.kernel import ConfigService
-    config = ConfigService.Instance()
-    config['algorithms.deprecated'] = 'Raise'
+  from mantid.kernel import ConfigService
+  config = ConfigService.Instance()
+  config['algorithms.deprecated'] = 'Raise'
 
 Coming to our previous example, an error message is printed
 
-  .. code-block:: bash
+.. code-block:: bash
 
-    Error in execution of algorithm MyOldAlg
-    Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm
+  Error in execution of algorithm MyOldAlg
+  Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm
 
 
 To prevent the previous error and instead print a log error message, `algorithms.deprecated` can be
 left unset or set to "``Log``".
 
-  .. note::
+.. note::
 
-    Debug builds set ``algorithms.deprecated`` to ``Raise``, the purpose is twofold. First, prevent developers
-    from introducing new source invoking deprecated algorithms. Second, encourage developers to refactor existing
-    source that invokes deprecated algorithms.
+  Debug builds set ``algorithms.deprecated`` to ``Raise``, the purpose is twofold. First, prevent developers
+  from introducing new source invoking deprecated algorithms. Second, encourage developers to refactor existing
+  source that invokes deprecated algorithms.
