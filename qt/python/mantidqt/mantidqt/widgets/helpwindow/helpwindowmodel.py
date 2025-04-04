@@ -11,21 +11,24 @@ from qtpy.QtCore import QUrl
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
 
 
-def getMantidVersionString():
+def _get_version_string_for_url():
     """
     Placeholder function to get Mantid version
     """
     try:
         import mantid
 
-        if hasattr(mantid, "__version__"):
-            versionParts = str(mantid.__version__).split(".")
-            if len(versionParts) >= 2:
-                return f"v{versionParts[0]}.{versionParts[1]}.0"
+        # Use the mantid version object (proper way)
+        versionObj = mantid.version()
+        # Retrieve the patch
+        patch = versionObj.patch.split(".")[0]
+        versionStr = f"v{versionObj.major}.{versionObj.minor}.{patch}"
     except ImportError:
-        pass
-    logger.warning("Warning: Could not determine Mantid version for documentation URL.")
-    return None
+        logger.warning("Could not determine Mantid version for documentation URL.")
+    except Exception as e:
+        logger.warning(f"Error determining Mantid version for documentation URL: {e}")
+
+    return versionStr
 
 
 class NoOpRequestInterceptor(QWebEngineUrlRequestInterceptor):
@@ -85,7 +88,7 @@ class HelpWindowModel:
 
             isLikelyRelease = self._rawLocalDocsBase is None
             if isLikelyRelease:
-                self._versionString = getMantidVersionString()
+                self._versionString = _get_version_string_for_url()
 
             if self._versionString:
                 baseOnline = self._rawOnlineBase
@@ -98,7 +101,6 @@ class HelpWindowModel:
                 else:
                     self._baseUrl = self._rawOnlineBase
                     logger.debug(f"Using {self._modeString} (Using provided base URL, possibly stable/latest): {self._baseUrl}")
-
             else:
                 self._baseUrl = self._rawOnlineBase
                 logger.debug(f"Using {self._modeString} (Version: Unknown/Stable) from {self._baseUrl}")
@@ -129,12 +131,11 @@ class HelpWindowModel:
             relativeUrl = "index.html"
 
         relativeUrl = relativeUrl.lstrip("/")
-        base = self.get_base_url()
-        fullUrlStr = f"{base}{relativeUrl}"
+        fullUrlStr = f"{self.get_base_url()}{relativeUrl}"
 
         url = QUrl(fullUrlStr)
         if not url.isValid():
-            logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{base}' and relative '{relativeUrl}'")
+            logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{self.get_base_url()}' and relative '{relativeUrl}'")
         return url
 
     def get_home_url(self):

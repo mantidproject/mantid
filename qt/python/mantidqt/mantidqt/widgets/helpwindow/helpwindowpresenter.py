@@ -85,16 +85,17 @@ class HelpWindowPresenter:
         Cleanup resources, close the View if open. Called on app quit.
         """
         logger.debug("Cleanup requested (likely app quitting).")
-        if self._view is not None and self._windowOpen:
-            logger.information("Closing Help Window view during cleanup.")
-            self._view.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-            self._view.close()
-            self._windowOpen = False
-            self._view = None
-        elif self._view is not None:
-            logger.debug("View exists but wasn't marked open during cleanup, ensuring deletion.")
-            self._view.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-            self._view.close()
+        if self._view:
+            if self._windowOpen:
+                logger.information("Closing Help Window view during cleanup.")
+                self._view.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+                self._view.close()
+                self._windowOpen = False
+            else:
+                logger.debug("View exists but wasn't marked open during cleanup, ensuring deletion.")
+                self._view.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+                self._view.close()
+
             self._view = None
         else:
             logger.debug("No view instance to clean up.")
