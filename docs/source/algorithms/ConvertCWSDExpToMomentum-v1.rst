@@ -107,7 +107,7 @@ Inconsistency between using virtual instrument and copying instrument
 #####################################################################
 
 It is found that the results, i.e., the peak's position in sample-momentum
-space, by FindPeaksMD, are different betweent the MDEventWorkspaces
+space, by FindPeaksMD, are different between the MDEventWorkspaces
 output by this algorithm with copying instrument or creating virtual instrument.
 
 It is caused by the difference of the instruments in the MDEventWorkspace.

@@ -55,7 +55,7 @@ Usage
 
     calitable.addRow(["bank42/sixteenpack", 0., 0, 0., 0,1,0,180])  # move to (0,0,0) and rotate to (0,1,0)@180degree
 
-    # laod emptry instrument
+    # load empty instrument
     ws_original = LoadEmptyInstrument("CORELLI_Definition.xml")
     ws_calibrated = ConvertToEventWorkspace(ws_original)
 

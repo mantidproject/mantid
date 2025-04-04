@@ -54,7 +54,7 @@ center of the bin with the maximum momentum.
 **Rescaling to first spectrum**: Since the Y-scale has arbitrary units, a
 rescaling convention is taken whereby the maximum of the
 first spectrum (lowest Q-value) is rescaled to 1.0. This rescaling may not
-be employed when the intent is to compare to other runs, like can substraction
+be employed when the intent is to compare to other runs, e.g. subtraction
 of comparison between deuterated and hydrogenated samples.
 
 Reflection Selector

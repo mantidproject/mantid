@@ -15,7 +15,7 @@ In order to reduce API usage and optimise performance the request is sent with a
 with the date of the current release.
 
 This algorithm is run on asynchronously on start-up in release builds and official releases of Mantid.
-It only outputs messages to the logs and outpus properties, it does not change anything else.
+It only outputs messages to the logs and output properties, it does not change anything else.
 
 If you want to disable the check on start-up add this to your mantid.user.properties file::
 
