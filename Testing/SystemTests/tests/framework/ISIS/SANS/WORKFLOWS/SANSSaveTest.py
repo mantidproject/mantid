@@ -13,7 +13,7 @@ import systemtesting
 
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, SANSSave
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, SANSSave, ConvertSpectrumAxis, CreateSimulationWorkspace
 
 
 # -----------------------------------------------
@@ -258,6 +258,27 @@ class SANSSaveTest(unittest.TestCase):
                     PolarizedNXCanSAS=True,
                     PolarizationProps=one_removed,
                 )
+
+    def test_polarizer_algorithm_executed(self):
+        # Arrange
+        workspace_0 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_1 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
+        workspace = ConvertSpectrumAxis(InputWorkspace=workspace, Target="ElasticQ", EFixed=1)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        pol_props = {
+            "InputSpinStates": "+10,-10",
+            "PolarizerComponentName": "a",
+            "AnalyzerComponentName": "b",
+            "FlipperComponentNames": "c,d,e",
+            "MagneticFieldStrengthLogName": "f",
+            "MagneticFieldDirection": "1,2,3",
+        }
+
+        # Act
+        SANSSave(workspace, file_name, PolarizedNXcanSAS=True, PolarizationProps=pol_props)
 
 
 class SANSSaveRunnerTest(systemtesting.MantidSystemTest):
