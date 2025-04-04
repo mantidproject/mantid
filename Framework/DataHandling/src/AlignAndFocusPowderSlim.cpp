@@ -576,6 +576,14 @@ void AlignAndFocusPowderSlim::exec() {
   // close the file so child algorithms can do their thing
   h5file.close();
 
+  // set the instrument - TODO parameters should be input information
+  const double l1{43.755};
+  const std::vector<double> polars{90, 90, 120, 150, 157, 65.5}; // two-theta
+  const std::vector<double> azimuthals{180, 0, 0, 0, 0, 0};      // angle from positive x-axis
+  const std::vector<double> l2s{2.296, 2.296, 2.070, 2.070, 2.070, 2.530};
+  const std::vector<specnum_t> specids;
+  wksp = editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
   // load run metadata
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
@@ -646,6 +654,28 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
   const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
   m_masked = maskWS->getMaskedDetectors();
   g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
+}
+
+API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
+    API::MatrixWorkspace_sptr &wksp, const double l1, const std::vector<double> &polars,
+    const std::vector<specnum_t> &specids, const std::vector<double> &l2s, const std::vector<double> &azimuthals) {
+  API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
+  editAlg->setProperty("Workspace", wksp);
+  if (l1 > 0.)
+    editAlg->setProperty("PrimaryFlightPath", l1);
+  if (!polars.empty())
+    editAlg->setProperty("Polar", polars);
+  if (!specids.empty())
+    editAlg->setProperty("SpectrumIDs", specids);
+  if (!l2s.empty())
+    editAlg->setProperty("L2", l2s);
+  if (!azimuthals.empty())
+    editAlg->setProperty("Azimuthal", azimuthals);
+  editAlg->executeAsChildAlg();
+
+  wksp = editAlg->getProperty("Workspace");
+
+  return wksp;
 }
 
 // ------------------------ BankCalibration object
