@@ -81,7 +81,7 @@ Usage
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
     print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
-Ouptut:
+Output:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithAlpha
 
@@ -118,7 +118,7 @@ Ouptut:
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
     print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
-Ouptut:
+Output:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithDensity
 
@@ -157,7 +157,7 @@ Ouptut:
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
     print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
-Ouptut:
+Output:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
 
@@ -200,7 +200,7 @@ Ouptut:
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
     print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
-Ouptut:
+Output:
 
 .. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
 
@@ -211,7 +211,7 @@ Ouptut:
     Output workspace using WavelengthRange: [34628.83535201 33034.12828025 31579.90975329 30248.39814428
      29024.69117275]
 
-The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lambda)}` where :math:`\sigma_t (\lambda) = \sigma_s + \sigma_a (\lambda)` is the total cross-section. This can be calculatd directly by the :ref:`algm-CalculateSampleTransmission-v1` algorithm. Yet, we can also back out the transmission with the ``CalculateEfficiencyCorrection`` algorithm. The example below shows how:
+The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lambda)}` where :math:`\sigma_t (\lambda) = \sigma_s + \sigma_a (\lambda)` is the total cross-section. This can be calculated directly by the :ref:`algm-CalculateSampleTransmission-v1` algorithm. Yet, we can also back out the transmission with the ``CalculateEfficiencyCorrection`` algorithm. The example below shows how:
 
 **Example - Transmission using the CalculateEfficiencyCorrection and CalculateSampleTransmission comparison.**
 
@@ -289,7 +289,7 @@ To first back out the measured spectrum of Milder et al. [1]_, the incident spec
     incident_wksp = ConvertToPointData(InputWorkspace=incident_wksp)
 
     # Spectrum function given in Milder et al. Eq (5)
-    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2, lamdaT):
+    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT):
         deltaTerm =  1. / (1. + np.exp((wavelengths - lambda1) / lambda2))
         term1 = phiMax * (lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
         term2 = phiEpi * deltaTerm / (wavelengths**(1 + 2 * alpha))

@@ -29,7 +29,7 @@ Usage
 
 .. code-block:: python
 
-    # pws is a regular PeaksWorkspace available in memroy
+    # pws is a regular PeaksWorkspace available in memory
     ConvertPeaksWorkspace(PeakWorkspace='pws', OutputWorkspace='lpws')
 
 2) LeanElasticPeaksWorkspace to PeaksWorkspace

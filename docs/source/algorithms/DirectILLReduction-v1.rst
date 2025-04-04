@@ -47,10 +47,10 @@ After conversion from time-of-flight to energy transfer, the binning may differ 
 - For negative energy transfers, copy binning from the spectrum which covers the largest negative energy transfer range.
 - For positive energy transfers, use the median bin width over all spectra at zero energy transfer.
 
-The automatic rebinning can be overriden by the *EnergyRebinningParams* or *EnergyRebinning* properties. *EnergyRebinningParams* is directly passed to :ref:`Rebin <algm-Rebin>` as the *Params* property. On the other hand, *EnergyRebinning* allows for mixture of automatic and user specified rebinning. Its syntax is a comma separated list of letters `a` for automatic binning and numbers for ranges and user-specified bin widths. Here are some examples:
+The automatic rebinning can be overridden by the *EnergyRebinningParams* or *EnergyRebinning* properties. *EnergyRebinningParams* is directly passed to :ref:`Rebin <algm-Rebin>` as the *Params* property. On the other hand, *EnergyRebinning* allows for mixture of automatic and user specified rebinning. Its syntax is a comma separated list of letters `a` for automatic binning and numbers for ranges and user-specified bin widths. Here are some examples:
 
 `'a'`
-    Rebin the entire energy transfer axis automatically. Same as the defalt behavior.
+    Rebin the entire energy transfer axis automatically. Same as the default behavior.
 
 `'-4, a, 8'`
     Rebin the energy transfer axis from -4 to 8 meV automatically.
@@ -64,7 +64,7 @@ The automatic rebinning can be overriden by the *EnergyRebinningParams* or *Ener
 `'-10, a, -1, 0.01, 1, a, 4'`
     Start the energy transfer axis at -10 meV, use automatic binning up to -1 meV. Between -1 and 1 meV use bin width of 0.01 meV. Use automatic binning again from 1 to 4 meV.
 
-*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the wavelength and the :math:`2\theta` separation of the grouped detectors. By default, the detectors are grouped to 0.01 degree wide bins in :math:`2\theta` or to the value of the ``natural-angle-step`` instrument parameter. The default behavior can be overriden by the *GroupingAngleStep* property.
+*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the wavelength and the :math:`2\theta` separation of the grouped detectors. By default, the detectors are grouped to 0.01 degree wide bins in :math:`2\theta` or to the value of the ``natural-angle-step`` instrument parameter. The default behavior can be overridden by the *GroupingAngleStep* property.
 
 Transposing output
 ##################

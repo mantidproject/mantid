@@ -158,7 +158,7 @@ Example 3: Rotating a single detector
   # Original position of detector 33
   print(ws.getInstrument().getDetector(33).getPos())
 
-  # Caclulate the solid angles for all detectors in the instrument
+  # Calculate the solid angles for all detectors in the instrument
   # The result is a single-bin workspace with solid angles for all spectra in ws
   saws = SolidAngle( ws )
   # Collect the solid angles from the first bin in saws and save them in numpy array.

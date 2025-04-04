@@ -38,7 +38,7 @@ detid @5.1483 @7.2070
 ===== ======= =======
 
 The first pixel contains the 5.1483A peak at :math:`TOF = 10000.0 \mu s` and the 7.2070A peak is not
-observed. Similary for the second pixel. The third pixels observes the second peak but not the first,
+observed. Similarly for the second pixel. The third pixels observes the second peak but not the first,
 and the fourth pixel observes both peaks.
 
 It is required that the reference peak centers in d-spacing have at least a precision of 5 digits.

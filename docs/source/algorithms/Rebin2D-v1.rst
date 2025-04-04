@@ -27,7 +27,7 @@ old bin.
 If the input to :ref:`algm-Rebin2D` is a **RebinnedOutput** workspace,
 the algorithm will make use of the fractional weights stored in each bin of
 the input **RebinnedOutput** workspace. A more detailed explanation of this
-appproach is described in :ref:`FractionalRebinning <FractionalRebinning>`.
+approach is described in :ref:`FractionalRebinning <FractionalRebinning>`.
 
 If the `UseFractionalArea` option is set to `True` and the input workspace
 is not of type **RebinnedOutput**, the algorithm will be correct if the input

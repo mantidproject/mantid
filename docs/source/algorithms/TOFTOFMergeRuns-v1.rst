@@ -82,7 +82,7 @@ Usage
     # Run start
     print("Start of experiment for 1st workspace: {}".format(ws1.getRun().getLogData('run_start').value))
     print("Start of experiment for 2nd workspace: {}".format(ws2.getRun().getLogData('run_start').value))
-    print("Start of experiment for merged workspaces = miminum of all workspaces: {}".format(ws3.getRun().getLogData('run_start').value))
+    print("Start of experiment for merged workspaces = minimum of all workspaces: {}".format(ws3.getRun().getLogData('run_start').value))
 
     # Run end
     print("End of experiment for 1st workspace: {}".format(ws1.getRun().getLogData('run_end').value))
@@ -112,7 +112,7 @@ Output:
     Duration of experiment for merged workspaces = sum of all durations (in s): 7202
     Start of experiment for 1st workspace: 2013-07-28T10:32:19+0053
     Start of experiment for 2nd workspace: 2013-07-28T11:32:19+0053
-    Start of experiment for merged workspaces = miminum of all workspaces: 2013-07-28T10:32:19+0053
+    Start of experiment for merged workspaces = minimum of all workspaces: 2013-07-28T10:32:19+0053
     End of experiment for 1st workspace: 2013-07-28T11:32:20+0053
     End of experiment for 2nd workspace: 2013-07-28T12:32:19+0053
     End of experiment for merged workspaces = maximum of all workspaces: 2013-07-28T12:32:19+0053

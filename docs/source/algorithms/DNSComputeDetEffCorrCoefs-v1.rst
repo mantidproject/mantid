@@ -42,7 +42,7 @@ Detector efficiency correction is performed using the measurements of vanadium s
 
 .. note::
 
-        To apply detector efficiency corrrection to the data, one should divide neutron counts by the coefficients:
+        To apply detector efficiency correction to the data, one should divide neutron counts by the coefficients:
 
                 :math:`(I_i)_{corr} = \frac{I_i}{k_i}`
 

@@ -33,11 +33,11 @@ Comments for creating useful cross-correlation output
 * Supply input data with relatively high signal to noise ratio.
   When this is not met, the resulting cross-correlation generally have issues having offsets determined from them by :ref:`algm-GetDetectorOffsets`.
 * Take note of input binning structure before using :ref:`algm-GetDetectorOffsets` and :ref:`algm-ConvertDiffCal`.
-  The different binning modes (linear or logorithmic) correspond to different behavior in the follow-on algorithms.
+  The different binning modes (linear or logarithmic) correspond to different behavior in the follow-on algorithms.
 * Cross-correlating linear binning generally uses ``OffsetMode="Relative"`` or ``OffsetMode="Absolute"`` and requires a narrow range of integration around a single Bragg peak with known reference d-spacing.
 * Use a large range for ``XMin`` to ``XMax``.
   This will promote calibrations that take a larger range of the data into account rather than a single diffraction peak.
-  However, it only works for logorithmic binning which will use ``OffsetMode="Signed"`` in :ref:`algm-GetDetectorOffsets`.
+  However, it only works for logarithmic binning which will use ``OffsetMode="Signed"`` in :ref:`algm-GetDetectorOffsets`.
 * With wide range of integration, use the ``MaxDSpaceShift`` to limit the value of :math:`r`.
   Not only will this speed up the calculation, but the output spectra will only include where the spectra are similar to the reference and not have spurious peaks or background.
   **NOTE:** `MaxDSpaceShift` must be greater than  approximately double the maximum Bragg peak full-width of the input data to ensure that the cross correlation contains a complete peak.

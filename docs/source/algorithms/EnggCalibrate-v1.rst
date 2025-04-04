@@ -59,7 +59,7 @@ Usage
     ws_name = 'test_engg_data'
     Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
 
-    # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+    # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
     van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
     van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 

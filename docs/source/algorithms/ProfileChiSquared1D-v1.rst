@@ -148,17 +148,17 @@ Parameter                 Parameter name
 Value                     Parameter value passed with the Function property
 Value at Min              The minimum point of the 1d slice of the :math:`\chi^{2}`. If the Function is at the minimum then
                           Value at Min should be equal to Value.
-Left Error (1-sigma)      The negative deviation from the minimum point equivalent to :math:`1\sigma`. Estimated from analisys
+Left Error (1-sigma)      The negative deviation from the minimum point equivalent to :math:`1\sigma`. Estimated from analysis
                           of the surface.
-Right Error (1-sigma)     The positive deviation from the minimum point equivalent to :math:`1\sigma`. Estimated from analisys
+Right Error (1-sigma)     The positive deviation from the minimum point equivalent to :math:`1\sigma`. Estimated from analysis
                           of the surface.
-Left Error (2-sigma)      The negative deviation from the minimum point equivalent to :math:`2\sigma`. Estimated from analisys
+Left Error (2-sigma)      The negative deviation from the minimum point equivalent to :math:`2\sigma`. Estimated from analysis
                           of the surface.
-Right Error (2-sigma)     The positive deviation from the minimum point equivalent to :math:`2\sigma`. Estimated from analisys
+Right Error (2-sigma)     The positive deviation from the minimum point equivalent to :math:`2\sigma`. Estimated from analysis
                           of the surface.
-Left Error (3-sigma)      The negative deviation from the minimum point equivalent to :math:`3\sigma`. Estimated from analisys
+Left Error (3-sigma)      The negative deviation from the minimum point equivalent to :math:`3\sigma`. Estimated from analysis
                           of the surface.
-Right Error (3-sigma)     The positive deviation from the minimum point equivalent to :math:`3\sigma`. Estimated from analisys
+Right Error (3-sigma)     The positive deviation from the minimum point equivalent to :math:`3\sigma`. Estimated from analysis
                           of the surface.
 Quadratic Error           :math:`1\sigma` standard deviation in the quadratic approximation of the surface.
 ======================    ==============

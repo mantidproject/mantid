@@ -148,7 +148,7 @@ This property of the algorithm allows to decide the treatment and shape of the o
 The `Individual` setting will preserve the number of workspaces of the input, allowing to check workspace by workspace how the relevant process reduced the data.
 This is the recommended setting for the sample data processing for the use as input to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm.
 
-`IndividualXY` allows to display all measured point on a single plot as a function of a twotheta. This option is indended as a convenient diagnostics, and the output
+`IndividualXY` allows to display all measured point on a single plot as a function of a twotheta. This option is intended as a convenient diagnostics, and the output
 obtained with this selection is not a suitable input for further processing in :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`.
 
 `AveragePol` will average the workspaces according to their polarization orientation and the flipper state. The output will contain as many workspaces as there are

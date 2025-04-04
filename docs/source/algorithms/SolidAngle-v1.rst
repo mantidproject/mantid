@@ -29,7 +29,7 @@ components.
 -------------------
 
 The method property changes how the solid angle calculation is
-perfomed.
+performed.
 ``GenericShape`` uses the ray-tracing methods of :ref:`Instrument`.
 
 All of the others have special analytical forms taken from small angle scattering literature.

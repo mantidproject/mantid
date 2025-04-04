@@ -44,7 +44,7 @@ Flux spectrum plot:
 
 .. figure:: /images/MDNormSCDPreprocessIncoherent_Flux.png
 
-**TOPAZ example with backgound subtraction, grouping, masking and Spherical Absorption Correction**
+**TOPAZ example with background subtraction, grouping, masking and Spherical Absorption Correction**
 
 .. code-block:: python
 

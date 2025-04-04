@@ -37,7 +37,7 @@ Projection Binning
 ##################
 
 The 'PnBin' property, where n is between 1 and 5, is used to specify the binning for the nth dimension of the output workspace.
-The dimension will be truncated to have extents 'minimum' and 'maximum', with 'stepsize' specifying the size of the bins inbetween.
+The dimension will be truncated to have extents 'minimum' and 'maximum', with 'stepsize' specifying the size of the bins in between.
 '(maximum - minimum)/stepsize' is rounded down to produce an integer number, greater than or equal to 1, of equally-sized bins between 'minimum' and 'maximum'.
 
 Note that if the output workspace is an MDEventWorkspace (NoPix=False), these properties define the top-level box structure of the workspace.

@@ -28,7 +28,7 @@ Footprint
 The footprint of the experiment is not necessarily instrument specific and can be thought of as the area of the sample
 that is reach by the beam during the experiment. When providing the value of the footprint to the algorithm it should be
 based on the footprint that you would wish to use for the experiment as this information cannot be taken directly from
-the instrument definition and is experiment-dependant.
+the instrument definition and is experiment-dependent.
 
 Usage
 -----

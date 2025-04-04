@@ -9,7 +9,7 @@
 Description
 -----------
 
-The format used differs based on the type of workspace being saved.  For a table workspace the data will contain an optional row of column headers, followed by the row values, with each individual column value seperated by the defined seperator.
+The format used differs based on the type of workspace being saved.  For a table workspace the data will contain an optional row of column headers, followed by the row values, with each individual column value separated by the defined separator.
 
 For a  matrix workspace the data are stored in the file in columns: the first column contains
 the X-values, followed by pairs of Y and E values. Columns are separated by
@@ -17,7 +17,7 @@ commas. The resulting file can normally be loaded into a workspace by the
 :ref:`algm-LoadAscii` algorithm.
 
 There is limited support for MDHistoWorkspaces, and the algorithm only allows for the saving of 1D MDHisto Workspaces.
-This functionality is specifically used to save cuts made using sliceviewr.
+This functionality is specifically used to save cuts made using sliceviewer.
 The saved format consists of a header comment that contains all of the workspace properties,
 followed by three separate columns corresponding to X, Y, and E, respectively.
 

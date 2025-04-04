@@ -29,7 +29,7 @@ Usage
 
 .. testcode:: ExCopyInstrumentParametersSimple
 
-   # We load two workspaces with same instument
+   # We load two workspaces with same instrument
    # the first of which has had come detectors moved by calibration.
    # The run CopyInstrumentParameters and show that the same detectors have been moved.
    #

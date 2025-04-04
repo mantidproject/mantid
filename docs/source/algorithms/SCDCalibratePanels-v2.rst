@@ -18,8 +18,8 @@ The calibration targets includes:
 
 3) `T0`, also known as initial TOF offset (in micro seconds).
 
-4) sample position, also known as the inital sample position offest, which are
-   three offests (in meters) of the sample stage along x, y, z in lab reference frame.
+4) sample position, also known as the initial sample position offset, which are
+   three offsets (in meters) of the sample stage along x, y, z in lab reference frame.
 
 The underlining mechanism of this calibration is to match the measured Q vectors
 (`Q_{sample}`) with the those generated from tweaked instrument position and orientation,
@@ -49,19 +49,19 @@ However, here are some key points to keep in mind while using this calibration a
 instrument:
 
 1) Always double-check the attached UB matrix or make sure correct lattice constant is provided to the calibration
-   algoirthm with `RecalculateUB` enabled.
+   algorithm with `RecalculateUB` enabled.
    This calibration algorithm is not smart enough to recognize incorrect UB matrix or lattice constant on-the-fly.
 
 2) Try to calibrate `L1`, `T0` and `sample position` within the same calibration process by checking all of them
    as the optimizer will have a better chance to find the global minimum.
-   Otherwise, a manual or semi-manual iterative call of this calibration algorithm is needed to locate the acutal
+   Otherwise, a manual or semi-manual iterative call of this calibration algorithm is needed to locate the actual
    minimum, which can be time consuming and error prone.
 
 3) Please provide reasonable search radius for the calibration target as a too-narrow search radius will force the
-   optmizer to settle at the boundary while a too-wide search radius might yield some physically unrealistic
+   optimizer to settle at the boundary while a too-wide search radius might yield some physically unrealistic
    results (e.g. it is highly unlikely that a detector is off by a few meters from its engineering position).
 
-4) This calibration algoritm does **NOT** modify the instruemnt attached to the input workspace.
+4) This calibration algorithm does **NOT** modify the instrument attached to the input workspace.
    But the UB matrix attached to the input workspace will be modified if the `RecalculateUB` is elected as part of
    the calibration process.
 
@@ -74,7 +74,7 @@ instrument:
 6) The advanced option section provides several profiling options, which are mostly intended for experienced beamline scientists
    and Mantid developers.
    Regular users are recommended to stay away from this section as running parameter space profiling is very time consuming, and
-   the results are often irrelavent to the data reduction.
+   the results are often irrelevant to the data reduction.
 
 Usage
 -----
@@ -181,8 +181,8 @@ Usage
 
     # run the calibration on pws
     # similar to actual calibration, where
-    #   1. the peaks in side pws knows the correct L1, but info is embeded in Qsamples
-    #   2. the recored L1 in instrument Info is the default engineering value
+    #   1. the peaks in side pws knows the correct L1, but info is embedded in Qsamples
+    #   2. the recorded L1 in instrument Info is the default engineering value
     SCDCalibratePanels(
         PeakWorkspace="pws",
         a=silicon.a,
@@ -200,7 +200,7 @@ Usage
     )
 
 This calibration should be able to correct the `L1` recorded in the instrument info using
-the information embeded in all peaks.
+the information embedded in all peaks.
 
 
 

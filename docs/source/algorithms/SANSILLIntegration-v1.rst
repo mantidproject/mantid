@@ -42,7 +42,7 @@ The **-** can be given to request logarithmic binning.
 Two entries
 ###########
 
-If two entries are given, they will be regarded as user specifed :math:`Q_min` and :math:`Q_max`, and the default bin width will be suggested.
+If two entries are given, they will be regarded as user specified :math:`Q_min` and :math:`Q_max`, and the default bin width will be suggested.
 
 .. code-block:: python
 

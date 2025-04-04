@@ -76,7 +76,7 @@ Temporary Workspaces
 ####################
 
 If the KeepTemporaryWorkspaces option is True the data and the
-normalization in addition to the nomalized data will be
+normalization in addition to the normalized data will be
 outputted. This allows you to run separate instances of
 SingleCrystalDiffuseReduction and combine the results. They will have
 names "ws_data" and "ws_normalization"
@@ -174,7 +174,7 @@ Usage
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym.png
 
-**Multiple files with symmetry and background substraction**
+**Multiple files with symmetry and background subtraction**
 
 .. code-block:: python
 

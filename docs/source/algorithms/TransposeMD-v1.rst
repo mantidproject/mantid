@@ -10,7 +10,7 @@
 Description
 -----------
 
-Performs an axis-aligned traspose of a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Default *Axes* setting gives not transpose. It is possible to remove dimensions from the input workspace by omitting those dimension indexes from the *Axes* property. *Axes* are zero-based indexes.
+Performs an axis-aligned transpose of a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Default *Axes* setting gives not transpose. It is possible to remove dimensions from the input workspace by omitting those dimension indexes from the *Axes* property. *Axes* are zero-based indexes.
 
 Usage
 -----
