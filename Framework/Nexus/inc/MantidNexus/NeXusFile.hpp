@@ -167,12 +167,6 @@ public:
   void closeGroup();
 
   /**
-   * \copydoc NeXus::File::makeData(const std::string&, NXnumtype,
-   *                              const DimVector&, bool);
-   */
-  void makeData(const std::string &name, NXnumtype type, const std::vector<int> &dims, bool open_data = false);
-
-  /**
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
@@ -190,8 +184,7 @@ public:
    * \param length The number of elements in the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  template <typename NumT>
-  void makeData(const std::string &name, const NXnumtype type, const NumT length, bool open_data = false);
+  void makeData(const std::string &name, const NXnumtype type, const dimsize_t length, bool open_data = false);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -226,17 +219,6 @@ public:
    * \param value The value to put into the file.
    */
   template <typename NumT> void writeData(const std::string &name, const NumT &value);
-
-  /**
-   * Create a n-dimension data field, insert the data, and close the data.
-   *
-   * \param name The name of the field to create.
-   * \param value The data to put into the file.
-   * \param dims The dimensions of the data.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT>
-  void writeData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -298,14 +280,6 @@ public:
   template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value, DimVector &dims);
 
   /**
-   * \copydoc makeCompData(const std::string&, const NXnumtype,
-   *                       const DimVector&, const NXcompression,
-   *                       const DimSizeVector&, bool)
-   */
-  void makeCompData(const std::string &name, const NXnumtype type, const std::vector<int> &dims,
-                    const NXcompression comp, const std::vector<int> &bufsize, bool open_data = false);
-
-  /**
    * Create a field with compression.
    *
    * \param name The name of the data to create.
@@ -317,16 +291,6 @@ public:
    */
   void makeCompData(const std::string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
                     const DimSizeVector &bufsize, bool open_data = false);
-
-  /**
-   * \copydoc writeCompData(const std::string & name,
-   *                        const std::vector<NumT> & value,
-   *                        const DimVector & dims, const NXcompression comp,
-   *                        const DimSizeVector & bufsize)
-   */
-  template <typename NumT>
-  void writeCompData(const std::string &name, const std::vector<NumT> &value, const std::vector<int> &dims,
-                     const NXcompression comp, const std::vector<int> &bufsize);
 
   /**
    * Create a compressed data, insert the data, and close it.
@@ -355,7 +319,7 @@ public:
   /**
    * \param data The data to put in the file.
    */
-  void putData(const void *data);
+  template <typename NumT> void putData(const NumT *data);
 
   /**
    * \param data The data to put in the file.
@@ -397,26 +361,13 @@ public:
   void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
 
   /**
-   * \copydoc NeXus::File::putSlab(void* data, DimSizeVector& start,
-   *                                DimSizeVector& size)
-   */
-  void putSlab(const void *data, const std::vector<int> &start, const std::vector<int> &size);
-
-  /**
    * Insert an array as part of a data in the final file.
    *
    * \param data The array to put in the file.
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  void putSlab(const void *data, const DimSizeVector &start, const DimSizeVector &size);
-
-  /**
-   * \copydoc NeXus::File::putSlab(std::vector<NumT>& data, DimSizeVector&,
-   *                               DimSizeVector&)
-   */
-  template <typename NumT>
-  void putSlab(const std::vector<NumT> &data, const std::vector<int> &start, const std::vector<int> &size);
+  template <typename NumT> void putSlab(const NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -430,11 +381,6 @@ public:
   void putSlab(const std::vector<NumT> &data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
-   * \copydoc NeXus::File::putSlab(std::vector<NumT>&, int64_t, int64_t)
-   */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, int start, int size);
-
-  /**
    * Insert a number as part of a data in the final file.
    *
    * \param data The array to put in the file.
@@ -442,7 +388,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, dimsize_t start, dimsize_t size);
+  template <typename NumT> void putSlab(const std::vector<NumT> &data, const dimsize_t start, const dimsize_t size);
 
   /**
    * \return The id of the data used for linking.
@@ -461,7 +407,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  void getData(void *data);
+  template <typename NumT> void getData(NumT *data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -549,12 +495,6 @@ public:
   void getEntries(Entries &result);
 
   /**
-   * \copydoc NeXus::File::getSlab(void*, const DimSizeVector&,
-   *                               const DimSizeVector&)
-   */
-  void getSlab(void *data, const std::vector<int> &start, const std::vector<int> &size);
-
-  /**
    * Get a section of data from the file.
    *
    * \param data The pointer to insert that data into.
@@ -562,7 +502,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  void getSlab(void *data, const DimSizeVector &start, const DimSizeVector &size);
+  template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
    * \return Information about all attributes on the data that is

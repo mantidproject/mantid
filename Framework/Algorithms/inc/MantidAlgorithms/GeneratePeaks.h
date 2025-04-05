@@ -68,7 +68,7 @@ private:
   /// Create output workspace
   API::MatrixWorkspace_sptr createOutputWorkspace();
 
-  API::MatrixWorkspace_sptr createDataWorkspace(std::vector<double> binparameters);
+  API::MatrixWorkspace_sptr createDataWorkspace(const std::vector<double> &binparameters) const;
 
   void createFunction(std::string &peaktype, std::string &bkgdtype);
 

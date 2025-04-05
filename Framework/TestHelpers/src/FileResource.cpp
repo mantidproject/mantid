@@ -24,6 +24,11 @@ FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debu
   } else {
     throw std::invalid_argument("failed to load temp directory: " + temp_dir.generic_string());
   }
+
+  // if the file already exists and was not cleaned up, remove it
+  if (std::filesystem::is_regular_file(m_full_path)) {
+    std::filesystem::remove(m_full_path);
+  }
 }
 
 void FileResource::setDebugMode(bool mode) { m_debugMode = mode; }

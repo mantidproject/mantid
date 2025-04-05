@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
 #include <array>
@@ -31,8 +31,8 @@ namespace NeXus {
 typedef int64_t nxdimsize_t;
 typedef std::array<nxdimsize_t, 4> NXDimArray;
 
-/** Structure for keeping information about a Nexus data set,
- *  such as the dimensions and the type
+/**
+ * Structure for keeping information about a Nexus data set, such as the dimensions and the type
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
@@ -45,8 +45,7 @@ struct NXInfo {
   operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
 };
 
-/**  Information about a Nexus class
- */
+/// Information about a Nexus class
 struct NXClassInfo {
   NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
@@ -58,15 +57,15 @@ struct NXClassInfo {
   operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
 };
 
-/**
- * LoadNexusProcessed and SaveNexusProcessed need to share some attributes, put
- * them at
- * namespace level here
+/*
+ * LoadNexusProcessed and SaveNexusProcessed need to share some attributes, put them at namespace level here
  */
+
 /// Default block size for reading and writing processed files
 const int g_processed_blocksize = 8;
 
-/**  Nexus attributes. The type of each attribute is NX_CHAR
+/**
+ * Nexus attributes. The type of each attribute is NX_CHAR
  */
 class MANTID_NEXUS_DLL NXAttributes {
 public:
@@ -80,11 +79,12 @@ private:
   std::map<std::string, std::string> m_values; ///< the list of attributes
 };
 
-/// Forward declaration
+// Forward declaration
 class NXClass;
 
-/**  The base abstract class for NeXus classes and data sets.
- *    NX classes and data sets are defined at www.nexusformat.org
+/**
+ * The base abstract class for NeXus classes and data sets.
+ * NX classes and data sets are defined at www.nexusformat.org
  */
 class MANTID_NEXUS_DLL NXObject {
   friend class NXDataSet; ///< a friend class declaration
@@ -155,28 +155,36 @@ public:
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
-  /**  Load the data from the file. Calling this method with all default
-   * arguments
-   *   makes it to read in all the data.
-   *   @param blocksize :: The size of the block of data that should be read.
-   * Note that this is only used for rank 2 and 3 datasets currently
-   *   @param i :: Calling load with non-negative i reads in a chunk of
-   * dimension rank()-1 and i is the index of the chunk. The rank of the data
-   * must be >= 1
-   *   @param j :: Non-negative value makes it read a chunk of dimension
-   * rank()-2. i and j are its indices.
-   *            The rank of the data must be >= 2
-   */
-  virtual void load(nxdimsize_t const blocksize, nxdimsize_t const i, nxdimsize_t const j) {
-    // we need the var names for docs build, need below void casts to stop compiler warnings
-    UNUSED_ARG(blocksize);
-    UNUSED_ARG(i);
-    UNUSED_ARG(j);
-  };
 
 protected:
-  void getData(void *data);
-  void getSlab(void *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size);
+  /**
+   * Wrapper to the NXgetdata.
+   *
+   * @param data :: The pointer to the buffer accepting the data from the file.
+   * @throw runtime_error if the operation fails.
+   */
+  template <typename NumT> void getData(NumT *data) {
+    m_fileID->openData(name());
+    m_fileID->getData(data);
+    m_fileID->closeData();
+  }
+
+  /**
+   * Wrapper to the NXgetslab.
+   *
+   * @param data :: The pointer to the buffer accepting the data from the file.
+   * @param start :: The array of starting indeces to read in from the file. The size of the array must be equal to the
+   * rank of the data.
+   * @param size :: The array of numbers of data elements to read along each dimenstion. The number of dimensions (the
+   * size of the array) must be equal to the rank of the data.
+   * @throw runtime_error if the operation fails.
+   */
+  template <typename NumT>
+  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
+    m_fileID->openData(name());
+    m_fileID->getSlab(data, start, size);
+    m_fileID->closeData();
+  }
 
 private:
   NXInfo m_info; ///< Holds the data info
@@ -185,22 +193,24 @@ private:
 template <typename T>
 using container_T = std::conditional_t<std::is_same<T, bool>{}, boost::container::vector<bool>, std::vector<T>>;
 
-/**  Templated class implementation of NXDataSet. After loading the data it can
- * be accessed via operators () and [].
+/**
+ * Templated class implementation of NXDataSet. After loading the data it can be accessed via operators () and [].
  */
 template <class T> class NXDataSetTyped : public NXDataSet {
 
 public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the dataset.
-   *   @param name :: The name of the dataset relative to its parent
+  /**
+   * Constructor.
+   *
+   * @param parent :: The parent Nexus class. In terms of HDF it is the group containing the dataset.
+   * @param name :: The name of the dataset relative to its parent
    */
   NXDataSetTyped(NXClass const &parent, std::string const &name) : NXDataSet(parent, name), m_size(0UL) {}
-  /** Returns a pointer to the internal data buffer.
-   *  @throw runtime_error exception if the data have not been loaded /
-   * initialized.
-   *  @return a pointer to the array of items
+  /**
+   * Returns a pointer to the internal data buffer.
+   *
+   * @throw runtime_error exception if the data have not been loaded / initialized.
+   * @return a pointer to the array of items
    */
   const T *operator()() const {
     if (m_data.empty())
@@ -214,11 +224,13 @@ public:
     return m_data.data();
   }
 
-  /** Returns the i-th value in the internal buffer
-   *  @param i :: The linear index of the data element
-   *  @throw runtime_error if the data have not been loaded / initialized.
-   *  @throw range_error if the index is greater than the buffer size.
-   *  @return A reference to the value
+  /**
+   * Returns the i-th value in the internal buffer
+   *
+   * @param i :: The linear index of the data element
+   * @throw runtime_error if the data have not been loaded / initialized.
+   * @throw range_error if the index is greater than the buffer size.
+   * @return A reference to the value
    */
   const T &operator[](std::size_t i) const {
     if (m_data.empty())
@@ -229,24 +241,27 @@ public:
   }
 
   T &operator[](std::size_t i) { return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)[i]); }
-  /** Returns a value assuming the data is a two-dimensional array
-   *  @param i :: The index along dim0()
-   *  @param j :: The index along dim1()
-   *  @throw runtime_error if the data have not been loaded / initialized.
-   *  @throw range_error if the indeces point outside the buffer.
-   *  @return A reference to the value
+  /**
+   * Returns a value assuming the data is a two-dimensional array
+   *
+   * @param i :: The index along dim0()
+   * @param j :: The index along dim1()
+   * @throw runtime_error if the data have not been loaded / initialized.
+   * @throw range_error if the indeces point outside the buffer.
+   * @return A reference to the value
    */
   const T &operator()(std::size_t i, std::size_t j) const { return this->operator[](i * dim1() + j); }
   T &operator()(std::size_t i, std::size_t j) {
     return const_cast<T &>(static_cast<const NXDataSetTyped &>(*this)(i, j));
   }
-  /** Returns a value assuming the data is a tree-dimensional array
-   *  @param i :: The index along dim0()
-   *  @param j :: The index along dim1()
-   *  @param k :: The index along dim2()
-   *  @throw runtime_error if the data have not been loaded / initialized.
-   *  @throw range_error if the indeces point outside the buffer.
-   *  @return A reference to the value
+  /**
+   * Returns a value assuming the data is a tree-dimensional array
+   * @param i :: The index along dim0()
+   * @param j :: The index along dim1()
+   * @param k :: The index along dim2()
+   * @throw runtime_error if the data have not been loaded / initialized.
+   * @throw range_error if the indeces point outside the buffer.
+   * @return A reference to the value
    */
   const T &operator()(std::size_t i, std::size_t j, std::size_t k) const {
     return this->operator[]((i * dim1() + j) * dim2() + k);
@@ -259,22 +274,43 @@ public:
   container_T<T> &vecBuffer() { return m_data; }
   /// Returns the size of the data buffer
   std::size_t size() const { return m_size; }
-  /**  Implementation of the virtual NXDataSet::load(...) method. Internally the
-   * data are stored as a 1d array.
-   *   If the data are loaded in chunks the newly read in data replace the old
-   * ones. The actual rank of the loaded
-   *   data is equal or less than the rank of the dataset (returned by rank()
-   * method).
-   *   @param blocksize :: The size of the block of data that should be read.
-   * Note that this is only used for rank 2 and 3 datasets currently
-   *   @param i :: Calling load with non-negative i reads in a chunk of
-   * dimension rank()-1 and i is the index of the chunk. The rank of the data
-   * must be >= 1
-   *   @param j :: Non-negative value makes it read a chunk of dimension
-   * rank()-2. i and j are its indeces.
-   *            The rank of the data must be >= 2
+
+  /// Read all of the datablock in
+  void load() {
+    const auto rank_local = this->rank();
+    if (rank_local > 4) {
+      throw std::runtime_error("Cannot load dataset of rank greater than 4");
+    }
+    // determine total size in memory and allocate it
+    auto num_ele = this->dim0();
+    if (rank_local > 1) {
+      num_ele *= this->dim1();
+      if (rank_local > 2) {
+        num_ele *= this->dim2();
+        if (rank_local > 3) {
+          num_ele *= this->dim3();
+        }
+      }
+    }
+    this->alloc(static_cast<std::size_t>(num_ele));
+
+    // do the actual load
+    getData(m_data.data());
+  }
+
+  /**
+   * Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. If the
+   * data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded data is equal
+   * or less than the rank of the dataset (returned by rank() method).
+   *
+   * @param blocksize :: The size of the block of data that should be read. Note that this is only used for rank 2 and 3
+   * datasets currently
+   * @param i :: Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index of the
+   * chunk. The rank of the data must be >= 1
+   * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. The rank of
+   * the data must be >= 2
    */
-  void load(nxdimsize_t const blocksize = 1, nxdimsize_t const i = -1, nxdimsize_t const j = -1) override {
+  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
@@ -363,8 +399,10 @@ public:
   }
 
 private:
-  /** Allocates memory for the data buffer
-   *  @param new_size :: The number of elements to allocate.
+  /**
+   * Allocates memory for the data buffer
+   *
+   * @param new_size :: The number of elements to allocate.
    */
   void alloc(nxdimsize_t new_size) {
     if (new_size <= 0) {
@@ -389,57 +427,56 @@ private:
 };
 
 /// The integer dataset type
-using NXInt = NXDataSetTyped<int>;
+using NXInt = NXDataSetTyped<int32_t>;
+/// The integer dataset type
+using NXInt64 = NXDataSetTyped<int64_t>;
+/// The integer dataset type
+using NXUInt32 = NXDataSetTyped<int32_t>;
+/// The integer dataset type
+using NXUInt64 = NXDataSetTyped<uint64_t>;
 /// The float dataset type
 using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
 using NXDouble = NXDataSetTyped<double>;
 /// The char dataset type
 using NXChar = NXDataSetTyped<char>;
-/// The size_t dataset type
-using NXSize = NXDataSetTyped<std::size_t>;
-/// The size_t dataset type
-using NXUInt = NXDataSetTyped<unsigned int>;
 
 //-------------------- classes --------------------------//
 
-/**  The base class for a Nexus class (group). A Nexus class can contain
- * datasets and other Nexus classes.
- *   The NeXus file format (www.nexusformat.org) specifies the content of the
- * Nexus classes.
- *   Derived classes have specialized methods for creating classes and datasets
- * specific for the particular Nexus class.
- *   NXClass is a conctrete C++ class so arbitrary, non-standard Nexus classes
- * (groups) can be created and loaded from
- *   NeXus files.
+/**
+ * The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes. The NeXus file
+ * format (www.nexusformat.org) specifies the content of the Nexus classes.
+ *
+ * Derived classes have specialized methods for creating classes and datasets specific for the particular Nexus class.
+ * NXClass is a conctrete C++ class so arbitrary, non-standard Nexus classes (groups) can be created and loaded from
+ * NeXus files.
  */
 class MANTID_NEXUS_DLL NXClass : public NXObject {
   friend class NXRoot;
 
 public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
+  /**
+   * Constructor.
+   *
+   * @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+   * @param name :: The name of the NXClass relative to its parent
    */
   NXClass(NXClass const &parent, std::string const &name);
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
-  /// Creates a new object in the NeXus file at path path.
-  // virtual void make(const std::string& path) = 0;
-  /// Resets the current position for getNextEntry() to the beginning
-  void reset();
+
   /**
    * Check if a path exists relative to the current class path
    * @param path :: A string representing the path to test
    * @return True if it is valid
    */
   bool isValid(const std::string &path) const;
-  /**  Templated method for creating derived NX classes. It also opens the
-   * created class.
-   *   @param name :: The name of the class
-   *   @tparam NX Concrete Nexus class
-   *   @return The new object
+  /**
+   * Templated method for creating derived NX classes. It also opens the created class.
+   *
+   * @param name :: The name of the class
+   * @tparam NX Concrete Nexus class
+   * @return The new object
    */
   template <class NX> NX openNXClass(const std::string &name) const {
     NX nxc(*this, name);
@@ -447,16 +484,20 @@ public:
     return nxc;
   }
 
-  /**  Creates and opens an arbitrary (non-standard) class (group).
-   *   @param name :: The name of the class.
-   *   @return The opened NXClass
+  /**
+   * Creates and opens an arbitrary (non-standard) class (group).
+   *
+   * @param name :: The name of the class.
+   * @return The opened NXClass
    */
   NXClass openNXGroup(const std::string &name) const { return openNXClass<NXClass>(name); }
 
-  /**  Templated method for creating datasets. It also opens the created set.
-   *   @param name :: The name of the dataset
-   *   @tparam T The type of the data (int, double, ...).
-   *   @return The new object
+  /**
+   * Templated method for creating datasets. It also opens the created set.
+   *
+   * @param name :: The name of the dataset
+   * @tparam T The type of the data (int, double, ...).
+   * @return The new object
    */
   template <class T> NXDataSetTyped<T> openNXDataSet(const std::string &name) const {
     NXDataSetTyped<T> data(*this, name);
@@ -464,51 +505,61 @@ public:
     return data;
   }
 
-  /**  Creates and opens an integer dataset
-   *   @param name :: The name of the dataset
-   *   @return The int
+  /**
+   * Creates and opens an integer dataset
+   * @param name :: The name of the dataset
+   * @return The int
    */
-  NXInt openNXInt(const std::string &name) const { return openNXDataSet<int>(name); }
-  /**  Creates and opens a float dataset
-   *   @param name :: The name of the dataset
-   *   @return The float
+  NXInt openNXInt(const std::string &name) const { return openNXDataSet<int32_t>(name); }
+  /**
+   * Creates and opens a float dataset
+   * @param name :: The name of the dataset
+   * @return The float
    */
   NXFloat openNXFloat(const std::string &name) const { return openNXDataSet<float>(name); }
-  /**  Creates and opens a double dataset
-   *   @param name :: The name of the dataset
-   *   @return The double
+  /**
+   * Creates and opens a double dataset
+   * @param name :: The name of the dataset
+   * @return The double
    */
   NXDouble openNXDouble(const std::string &name) const { return openNXDataSet<double>(name); }
-  /**  Creates and opens a char dataset
-   *   @param name :: The name of the dataset
-   *   @return The char
+  /**
+   * Creates and opens a char dataset
+   * @param name :: The name of the dataset
+   * @return The char
    */
   NXChar openNXChar(const std::string &name) const { return openNXDataSet<char>(name); }
-  /**  Creates and opens a size_t dataset
-   *   @param name :: The name of the dataset
-   *   @return The size_t
+  /**
+   * Creates and opens a size_t dataset
+   * @param name :: The name of the dataset
+   * @return The size_t
    */
-  NXSize openNXSize(const std::string &name) const { return openNXDataSet<std::size_t>(name); }
-  /**  Returns a string
-   *   @param name :: The name of the NXChar dataset
-   *   @return The string
+  NXUInt64 openNXSize(const std::string &name) const { return openNXDataSet<uint64_t>(name); }
+  /**
+   * Returns a string
+   *
+   * @param name :: The name of the NXChar dataset
+   * @return The string
    */
   std::string getString(const std::string &name) const;
-  /**  Returns a double
-   *   @param name :: The name of the NXDouble dataset
-   *   @return The double
+  /**
+   * Returns a double
+   * @param name :: The name of the NXDouble dataset
+   * @return The double
    */
   double getDouble(const std::string &name) const;
-  /**  Returns a float
-   *   @param name :: The name of the NXFloat dataset
-   *   @return The float
+  /**
+   * Returns a float
+   * @param name :: The name of the NXFloat dataset
+   * @return The float
    */
   float getFloat(const std::string &name) const;
-  /**  Returns a int
-   *   @param name :: The name of the NXInt dataset
-   *   @return The int
+  /**
+   * Returns a int
+   * @param name :: The name of the NXInt dataset
+   * @return The int
    */
-  int getInt(const std::string &name) const;
+  int32_t getInt(const std::string &name) const;
 
   /// Returns a list of all classes (or groups) in this NXClass
   std::vector<NXClassInfo> &groups() const { return *m_groups; }
@@ -516,9 +567,10 @@ public:
   bool containsGroup(const std::string &query) const;
   /// Returns a list of all datasets in this NXClass
   std::vector<NXInfo> &datasets() const { return *m_datasets; }
-  /** Returns NXInfo for a dataset
-   *  @param name :: The name of the dataset
-   *  @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
+  /**
+   * Returns NXInfo for a dataset
+   * @param name :: The name of the dataset
+   * @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
    */
   NXInfo getDataSetInfo(const std::string &name) const;
   /// Returns whether an individual dataset is present
@@ -553,16 +605,15 @@ private:
  */
 class MANTID_NEXUS_DLL NXData : public NXClass {
 public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
+  /**
+   * Constructor.
+   * @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+   * @param name :: The name of the NXClass relative to its parent
    */
   NXData(const NXClass &parent, const std::string &name);
   /// Nexus class id
   std::string NX_class() const override { return "NXdata"; }
-  /**  Opens the dataset within this NXData with signal=1 attribute.
-   */
+  /// Opens the dataset within this NXData with signal=1 attribute.
   template <typename T> NXDataSetTyped<T> openData() {
     for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
@@ -584,21 +635,16 @@ public:
   /// Opens data of float type
   NXFloat openFloatData() { return openData<float>(); }
   /// Opens data of int type
-  NXInt openIntData() { return openData<int>(); }
-  /// Opens data of size type
-  NXSize openSizeData() { return openData<std::size_t>(); }
-  /// Opens data of unsigned int type
-  NXUInt openUIntData() { return openData<unsigned int>(); }
+  NXInt openIntData() { return openData<int32_t>(); }
 };
 
-/**  Implements NXdetector Nexus class.
- */
+/// Implements NXdetector Nexus class.
 class MANTID_NEXUS_DLL NXDetector : public NXClass {
 public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
+  /**
+   * Constructor.
+   * @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+   * @param name :: The name of the NXClass relative to its parent
    */
   NXDetector(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
@@ -611,8 +657,7 @@ public:
   NXFloat openPolarAngle() { return openNXFloat("polar_angle"); }
 };
 
-/**  Implements NXinstrument Nexus class.
- */
+/// Implements NXinstrument Nexus class.
 class MANTID_NEXUS_DLL NXInstrument : public NXClass {
 public:
   /**  Constructor.
@@ -630,32 +675,33 @@ public:
   NXDetector openNXDetector(const std::string &name) { return openNXClass<NXDetector>(name); }
 };
 
-/**  Implements NXentry Nexus class.
- */
+/// Implements NXentry Nexus class.
 class MANTID_NEXUS_DLL NXEntry : public NXClass {
 public:
-  /**  Constructor.
-   *   @param parent :: The parent Nexus class. In terms of HDF it is the group
-   * containing the NXClass.
-   *   @param name :: The name of the NXClass relative to its parent
+  /**
+   * Constructor.
+   *
+   * @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+   * @param name :: The name of the NXClass relative to its parent
    */
   NXEntry(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
   /// Nexus class id
   std::string NX_class() const override { return "NXentry"; }
-  /**  Opens a NXData
-   *   @param name :: The name of the class
-   *   @return the nxdata entry
+  /**
+   * Opens a NXData
+   * @param name :: The name of the class
+   * @return the nxdata entry
    */
   NXData openNXData(const std::string &name) const { return openNXClass<NXData>(name); }
-  /**  Opens a NXInstrument
-   *   @param name :: The name of the class
-   *   @return the instrument
+  /**
+   * Opens a NXInstrument
+   * @param name :: The name of the class
+   * @return the instrument
    */
   NXInstrument openNXInstrument(const std::string &name) const { return openNXClass<NXInstrument>(name); }
 };
 
-/**  Implements NXroot Nexus class.
- */
+/// Implements NXroot Nexus class.
 class MANTID_NEXUS_DLL NXRoot : public NXClass {
 public:
   // Constructor
@@ -669,9 +715,10 @@ public:
   /// True if complies with our understanding of the www.nexusformat.org
   /// definition.
   bool isStandard() const;
-  /**  Opens an entry -- a topmost Nexus class
-   *   @param name :: The name of the entry
-   *   @return the entry
+  /**
+   * Opens an entry -- a topmost Nexus class
+   * @param name :: The name of the entry
+   * @return the entry
    */
   NXEntry openEntry(const std::string &name) { return openNXClass<NXEntry>(name); }
   NXEntry openFirstEntry();

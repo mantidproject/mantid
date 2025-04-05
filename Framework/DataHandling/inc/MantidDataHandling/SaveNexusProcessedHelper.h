@@ -73,7 +73,8 @@ public:
                                            float const *weights, float const *errorSquareds, int64_t const *pulsetimes,
                                            bool compress) const;
 
-  void writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
+  template <typename NumT>
+  void writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
                  bool compress = false) const;
 
   /// write bin masking information

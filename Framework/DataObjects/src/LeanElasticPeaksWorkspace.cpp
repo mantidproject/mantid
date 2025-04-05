@@ -586,9 +586,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Goniometer Matrix Column
-  std::vector<int> array_dims;
-  array_dims.emplace_back(static_cast<int>(m_peaks.size()));
-  array_dims.emplace_back(9);
+  const NeXus::DimVector array_dims{static_cast<::NeXus::dimsize_t>(m_peaks.size()), 9};
   file->writeData("column_13", goniometerMatrix, array_dims);
   file->openData("column_13");
   file->putAttr("name", "Goniometer Matrix");
@@ -613,7 +611,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
       toNexus[ii * maxShapeJSONLength + ic] = ' ';
   }
 
-  file->putData(static_cast<void *>(toNexus));
+  file->putData(toNexus);
 
   delete[] toNexus;
   file->putAttr("units", "Not known"); // Units may need changing when known
@@ -622,9 +620,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Qlab
-  std::vector<int> qlab_dims;
-  qlab_dims.emplace_back(static_cast<int>(m_peaks.size()));
-  qlab_dims.emplace_back(3);
+  const NeXus::DimVector qlab_dims{static_cast<::NeXus::dimsize_t>(m_peaks.size()), 3};
   file->writeData("column_15", qlabs, qlab_dims);
   file->openData("column_15");
   file->putAttr("name", "Q LabFrame");

@@ -26,7 +26,6 @@ requirements:
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
     - matplotlib {{ matplotlib }}
-    - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
     - ninja {{ ninja }}
     - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
@@ -35,7 +34,7 @@ requirements:
     - poco {{ poco }}
     - psutil {{ psutil }}
     - pycifrw
-    - pydantic
+    - pydantic {{ pydantic }}
     - pyqt {{ pyqt }}
     - pyqtwebengine
     - python-dateutil {{ python_dateutil }}

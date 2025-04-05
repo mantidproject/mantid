@@ -78,7 +78,7 @@ private:
     // write
     fileid.makeData(dataname, getType<T>(), DimVector({N, M}));
     fileid.openData(dataname);
-    fileid.putData(data);
+    fileid.putData(&(data[0][0]));
     fileid.closeData();
 
     // read
@@ -110,7 +110,7 @@ private:
     int const Ncheck(5); // can't use variable-length arrays, just check this many
     T output[Ncheck];
     fileid.openData(dataname);
-    fileid.getSlab(&output, start, size);
+    fileid.getSlab(&(output[0]), start, size);
 
     // compare
     for (int i = 0; i < Ncheck; i++) {
@@ -137,7 +137,7 @@ private:
     // read, compare, row-by-row
     for (size_t i = 1; i <= N; i++) {
       size = {(dimsize_t)i, (dimsize_t)M};
-      fileid.getSlab(&output, start, size);
+      fileid.getSlab(&(output[0][0]), start, size);
       for (size_t j = 0; j < M; j++) {
         TS_ASSERT_EQUALS(data[0][j], output[0][j]);
       }
@@ -193,16 +193,16 @@ public:
     File fileid = do_prep_files(nxFile);
 
     // tests of integer read/write
-    vector<unsigned char> const i1_array{1, 2, 3, 4};
-    vector<short int> const i2_array{1000, 2000, 3000, 4000};
-    vector<int> const i4_array{1000000, 2000000, 3000000, 4000000};
+    vector<uint8_t> const i1_array{1, 2, 3, 4};
+    vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
+    vector<int32_t> const i4_array{1000000, 2000000, 3000000, 4000000};
     do_rw_test(fileid, "i1_data", i1_array);
     do_rw_test(fileid, "i2_data", i2_array);
     do_rw_test(fileid, "i4_data", i4_array);
 
     // tests of float read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
-    vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
+    vector<double> const r8_vec{12., 13., 14., 15., 16.};
     float const r4_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
@@ -234,7 +234,7 @@ public:
 
     // test of slab read/write
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
-    vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
+    vector<double> const r8_vec{12., 13., 14., 15., 16.};
     float const r4_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
@@ -322,10 +322,11 @@ public:
     string const somedata("this is some data");
     fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
     fileid.openData("some_data");
-    fileid.putData(&somedata);
+    fileid.putData(somedata.c_str());
     NXlink datalink = fileid.getDataID();
     fileid.closeData();
     fileid.flush();
+
     // Create a group, and link it to that data
     cout << "create group at /entry/data to link to the data\n";
     fileid.makeGroup("data", "NXdata");
@@ -343,8 +344,9 @@ public:
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
-    printf("data link works\n");
-    fileid.closeGroup();
+    cout << "data link works\n";
+
+    fileid.openPath("/entry");
 
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
@@ -355,6 +357,7 @@ public:
     fileid.openGroup("group1", "NXentry");
     NXlink grouplink = fileid.getGroupID();
     fileid.closeGroup();
+
     // make group 2
     cout << "create group /entry/group2/group1\n";
     fileid.makeGroup("group2", "NXentry");
@@ -367,6 +370,6 @@ public:
     NXlink res2 = fileid.getGroupID();
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
-    printf("group link works\n");
+    cout << "group link works\n";
   }
 };

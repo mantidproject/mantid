@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -676,8 +677,34 @@ void Component::setDescription(const std::string &descr) {
 }
 
 size_t Component::registerContents(class ComponentVisitor &componentVisitor) const {
-
   return componentVisitor.registerGenericComponent(*this);
+}
+
+/**
+ * Get fitting parameter from a look up table or a formula
+ * @param pname :: The name of the parameter
+ * @param xvalue :: xvalue to interpolate lookup table of parameter map
+ * components
+ * @returns A list of values
+ */
+double Component::getFittingParameter(const std::string &pname, double xvalue) const {
+  if (m_map) {
+    Parameter_sptr parameter = m_map->getRecursive(this, pname, "fitting");
+    if (!parameter) {
+      throw std::runtime_error("Fitting parameter=" + pname +
+                               " could not be extracted from component=" + this->getName());
+    }
+
+    try {
+      const auto &fitParam = parameter->value<FitParameter>();
+      return fitParam.getValue(xvalue);
+    } catch (...) {
+      throw std::runtime_error("Unable to get lookup table for parameter=" + pname +
+                               " from component=" + this->getName());
+    }
+  } else {
+    throw std::runtime_error("Parameter map is not available in component=" + this->getName());
+  }
 }
 
 } // namespace Mantid::Geometry

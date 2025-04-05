@@ -171,9 +171,9 @@ QGroupBox:title {
            </widget>
           </item>
           <item row="7" column="0" colspan="3">
-           <widget class="QCheckBox" name="check_cropCalib">
+           <widget class="QCheckBox" name="check_roiCalib">
             <property name="text">
-             <string>Crop Calibration</string>
+             <string>Set Calibration Region of Interest</string>
             </property>
            </widget>
           </item>
@@ -255,7 +255,7 @@ QGroupBox:title {
   <tabstop>finder_sample</tabstop>
   <tabstop>radio_loadCalib</tabstop>
   <tabstop>finder_path</tabstop>
-  <tabstop>check_cropCalib</tabstop>
+  <tabstop>check_roiCalib</tabstop>
   <tabstop>widget_cropping.combo_bank</tabstop>
   <tabstop>widget_cropping.edit_crop</tabstop>
   <tabstop>widget_cropping.finder_custom</tabstop>

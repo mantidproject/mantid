@@ -57,7 +57,8 @@ private:
 
   void loadExperimentInfos(std::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
-  void loadSlab(const std::string &name, void *data, const DataObjects::MDHistoWorkspace_sptr &ws, NXnumtype dataType);
+  template <typename NumT>
+  void loadSlab(const std::string &name, NumT *data, const DataObjects::MDHistoWorkspace_sptr &ws, NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();

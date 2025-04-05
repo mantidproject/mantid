@@ -13,7 +13,7 @@ class NXData;
 class NXEntry;
 class NXRoot;
 template <typename T> class NXDataSetTyped;
-using NXInt = NXDataSetTyped<int>;
+using NXInt = NXDataSetTyped<int32_t>;
 using NXFloat = NXDataSetTyped<float>;
 using NXDouble = NXDataSetTyped<double>;
 } // namespace Mantid::NeXus

@@ -11,6 +11,7 @@ from Engineering.EnggUtils import (
     _save_output_files,
     _load_run_and_convert_to_dSpacing,
     process_vanadium,
+    GROUP,
 )
 
 enggutils_path = "Engineering.EnggUtils"
@@ -23,6 +24,20 @@ class EnggUtilsTest(unittest.TestCase):
         self.calibration.get_instrument.return_value = "ENGINX"
         self.calibration.get_group_suffix.return_value = "all_banks"
         self.calibration.get_foc_ws_suffix.return_value = "bank"
+
+        self.custom_calibration = create_autospec(CalibrationInfo(), instance=True)
+        self.custom_calibration.is_valid.return_value = True
+        self.custom_calibration.get_instrument.return_value = "ENGINX"
+        self.custom_calibration.get_group_suffix.return_value = "Custom_test"
+        self.custom_calibration.get_foc_ws_suffix.return_value = "Custom_test"
+        self.custom_calibration.group = GROUP.CUSTOM
+
+        self.cropped_calibration = create_autospec(CalibrationInfo(), instance=True)
+        self.cropped_calibration.is_valid.return_value = True
+        self.cropped_calibration.get_instrument.return_value = "ENGINX"
+        self.cropped_calibration.get_group_suffix.return_value = "Cropped_test"
+        self.cropped_calibration.get_foc_ws_suffix.return_value = "Cropped_test"
+        self.cropped_calibration.group = GROUP.CROPPED
 
     # tests for code used in calibration tab of UI
 
@@ -101,6 +116,72 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         ws_van_foc, van_run = process_vanadium("van_path", self.calibration, "full_calib")
 
         self.assertEqual(ws_van_foc, "van_ws_foc")
+        self.assertEqual(van_run, "123456")
+
+    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
+    @patch(enggutils_path + ".ADS")
+    def test_process_vanadium_foc_not_rerun_if_custom_present(self, mock_ads, mock_path):
+        mock_path.return_value = "123456"
+        mock_ads.doesExist.return_value = True
+        mock_ads.retrieve.return_value = "van_ws_foc"  # if we just retrieves the ws in the ADS, we would get this
+
+        ws_van_foc, van_run = process_vanadium("van_path", self.custom_calibration, "full_calib")
+
+        mock_ads.retrieve.assert_called_once_with("engggui_curves_Custom_test")
+        self.assertEqual(ws_van_foc, "van_ws_foc")  # we want this to be recalculated
+        self.assertEqual(van_run, "123456")
+
+    @patch(enggutils_path + "._smooth_vanadium")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
+    @patch(enggutils_path + ".ADS")
+    def test_process_vanadium_foc_rerun_if_custom_new(self, mock_ads, mock_path, mock_load_run, mock_foc_run, mock_smooth_van):
+        mock_path.return_value = "123456"
+        mock_ads.doesExist.side_effect = [False, True]
+        mock_ads.retrieve.return_value = "van_ws_foc_old"  # if we just retrieves the ws in the ADS, we would get this
+        mock_smooth_van.return_value = "van_ws_foc_new"  # if we actually run a calibration we should get this
+
+        ws_van_foc, van_run = process_vanadium("van_path", self.custom_calibration, "full_calib")
+
+        mock_ads.retrieve.assert_called_once_with("123456")
+        mock_load_run.assert_not_called()
+        mock_foc_run.assert_called_once()
+        mock_smooth_van.assert_called_once()
+        self.assertEqual(ws_van_foc, "van_ws_foc_new")  # we want this to be recalculated
+        self.assertEqual(van_run, "123456")
+
+    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
+    @patch(enggutils_path + ".ADS")
+    def test_process_vanadium_foc_not_rerun_if_cropped_present(self, mock_ads, mock_path):
+        mock_path.return_value = "123456"
+        mock_ads.doesExist.return_value = True
+        mock_ads.retrieve.return_value = "van_ws_foc"  # if we just retrieves the ws in the ADS, we would get this
+
+        ws_van_foc, van_run = process_vanadium("van_path", self.cropped_calibration, "full_calib")
+
+        mock_ads.retrieve.assert_called_once_with("engggui_curves_Cropped_test")
+        self.assertEqual(ws_van_foc, "van_ws_foc")  # we want this to be recalculated
+        self.assertEqual(van_run, "123456")
+
+    @patch(enggutils_path + "._smooth_vanadium")
+    @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
+    @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
+    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
+    @patch(enggutils_path + ".ADS")
+    def test_process_vanadium_foc_rerun_if_cropped_new(self, mock_ads, mock_path, mock_load_run, mock_foc_run, mock_smooth_van):
+        mock_path.return_value = "123456"
+        mock_ads.doesExist.side_effect = [False, True]
+        mock_ads.retrieve.return_value = "van_ws_foc_old"  # if we just retrieves the ws in the ADS, we would get this
+        mock_smooth_van.return_value = "van_ws_foc_new"  # if we actually run a calibration we should get this
+
+        ws_van_foc, van_run = process_vanadium("van_path", self.cropped_calibration, "full_calib")
+
+        mock_ads.retrieve.assert_called_once_with("123456")
+        mock_load_run.assert_not_called()
+        mock_foc_run.assert_called_once()
+        mock_smooth_van.assert_called_once()
+        self.assertEqual(ws_van_foc, "van_ws_foc_new")  # we want this to be recalculated
         self.assertEqual(van_run, "123456")
 
     @patch(enggutils_path + "._smooth_vanadium")

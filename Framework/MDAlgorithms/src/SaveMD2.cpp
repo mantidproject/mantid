@@ -149,14 +149,14 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   // Number of data points
   // Size in each dimension (in the "C" style order, so z,y,x
   // That is, data[z][y][x] = etc.
-  std::vector<int> size(numDims);
+  ::NeXus::DimVector size(numDims);
   for (size_t d = 0; d < numDims; d++) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     // Size in each dimension (reverse order for RANK)
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  std::vector<int> chunks = size;
+  ::NeXus::DimSizeVector chunks = size;
   chunks[0] = 1; // Drop the largest stride for chunking, I don't know
                  // if this is the best but appears to work
 

@@ -173,8 +173,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
       for (const auto &childWsName : childWsNames) {
-        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) == selectedWsNameSet.end()) {
-          selectedWsNameSet.insert(QString::fromStdString(childWsName));
+        if (selectedWsNameSet.insert(QString::fromStdString(childWsName)).second) {
           selectedWsNameList.emplace_back(QString::fromStdString(childWsName));
         }
       }
@@ -188,7 +187,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
   // Get the names of, and pointers to, the MatrixWorkspaces only.
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
-  foreach (const auto selectedWsName, selectedWsNameList) {
+  foreach (const auto &selectedWsName, selectedWsNameList) {
     const auto matrixWs =
         std::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
     if (matrixWs) {
@@ -238,13 +237,15 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
       spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()), SINGLE_SPECTRUM);
     }
     // and get simple 1D plot done
-    MantidWSIndexWidget::UserInput selections;
-    selections.plots = spectrumToPlot;
-    selections.simple = true;
-    selections.waterfall = false;
-    selections.tiled = false;
-    selections.surface = false;
-    selections.contour = false;
+    MantidWSIndexWidget::UserInput selections = {.plots = spectrumToPlot,
+                                                 .simple = true,
+                                                 .waterfall = false,
+                                                 .tiled = false,
+                                                 .errors = false,
+                                                 .surface = false,
+                                                 .contour = false,
+                                                 .isAdvanced = false,
+                                                 .advanced = {}};
     return selections;
   }
 
