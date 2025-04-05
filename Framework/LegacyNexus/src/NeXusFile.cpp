@@ -169,6 +169,15 @@ void File::closeData() {
   }
 }
 
+NXlink File::getDataID() {
+  NXlink link;
+  NXstatus status = NXgetdataID(this->m_file_id, &link);
+  if (status != NXstatus::NX_OK) {
+    throw Exception("NXgetdataID failed", status);
+  }
+  return link;
+}
+
 void File::getData(void *data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData");
@@ -486,6 +495,20 @@ string File::getStrAttr(const AttrInfo &info) {
   return res;
 }
 
+vector<AttrInfo> File::getAttrInfos() {
+  vector<AttrInfo> infos;
+  this->initAttrDir();
+  AttrInfo temp;
+  while (true) {
+    temp = this->getNextAttr();
+    if (temp.name == NULL_STR) {
+      break;
+    }
+    infos.push_back(temp);
+  }
+  return infos;
+}
+
 bool File::hasAttr(const std::string &name) {
   this->initAttrDir();
   AttrInfo temp;
@@ -498,6 +521,15 @@ bool File::hasAttr(const std::string &name) {
       return true;
   }
   return false;
+}
+
+NXlink File::getGroupID() {
+  NXlink link;
+  NXstatus status = NXgetgroupID(this->m_file_id, &link);
+  if (status != NXstatus::NX_OK) {
+    throw Exception("NXgetgroupID failed", status);
+  }
+  return link;
 }
 
 void File::initGroupDir() {

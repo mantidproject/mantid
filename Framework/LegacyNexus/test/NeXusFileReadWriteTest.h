@@ -86,7 +86,7 @@ public:
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
-    // tests of string/char read/write
+    // tests of string/char read
     string const ch_test_data = "NeXus ><}&{'\\&\" Data";
     char const c1_array[5][4] = {
         {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
@@ -100,22 +100,23 @@ public:
     do_r2darray_test(fileid, "c4_data", c4_array);
 
     // check all attributes
-    // auto attrs = fileid.getAttrInfos();
-    // vector<string> exp_attr_names({"hugo", "cucumber"});
-    // vector<string> attr_names;
-    // for (auto x : attrs) {
-    //  attr_names.push_back(x.name);
-    //}
-    // TS_ASSERT_EQUALS(attr_names, exp_attr_names);
+    fileid.openGroup("entry", "NXentry");
+    auto attrs = fileid.getAttrInfos();
+    vector<string> exp_attr_names({"hugo", "cucumber"});
+    vector<string> attr_names;
+    for (auto x : attrs) {
+      attr_names.push_back(x.name);
+    }
+    TS_ASSERT_EQUALS(attr_names, exp_attr_names);
 
     // check all entries
-    // vector<string> entry_names({"c1_data", "c2_data", "c3_data", "c4_data", "ch_data"});
-    // Entries exp_entries;
-    // for (string x : entry_names) {
-    //  exp_entries[x] = "SDS";
-    //}
-    // Entries entries = fileid.getEntries();
-    // TS_ASSERT_EQUALS(entries, exp_entries);
+    vector<string> entry_names({"c1_data", "c2_data", "c3_data", "c4_data", "ch_data"});
+    std::map<std::string, std::string> exp_entries;
+    for (string x : entry_names) {
+      exp_entries[x] = "SDS";
+    }
+    std::map<std::string, std::string> entries = fileid.getEntries();
+    TS_ASSERT_EQUALS(entries, exp_entries);
 
     // cleanup and return
     fileid.close();
@@ -128,7 +129,7 @@ public:
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
-    // tests of integer read/write
+    // tests of integer read
     vector<unsigned char> const i1_array{1, 2, 3, 4};
     vector<short int> const i2_array{1000, 2000, 3000, 4000};
     vector<int> const i4_array{1000000, 2000000, 3000000, 4000000};
@@ -136,7 +137,7 @@ public:
     do_r_test(fileid, "i2_data", i2_array);
     do_r_test(fileid, "i4_data", i4_array);
 
-    // tests of float read/write
+    // tests of float read
     vector<float> const r4_vec{12.f, 13.f, 14.f, 15.f, 16.f};
     vector<double> const r8_vec{12.l, 13.l, 14.l, 15.l, 16.l};
     float const r4_array[5][4] = {
@@ -149,12 +150,14 @@ public:
     do_r2darray_test(fileid, "r8_data", r8_array);
 
     // check all entries
-    // vector<string> entry_names({"i1_data", "i2_data", "i4_data", "r4_data", "r4_vec_data", "r8_data",
-    // "r8_vec_data"}); Entries exp_entries; for (string x : entry_names) {
-    //  exp_entries[x] = "SDS";
-    //}
-    // Entries entries = fileid.getEntries();
-    // TS_ASSERT_EQUALS(entries, exp_entries);
+    vector<string> entry_names({"i1_data", "i2_data", "i4_data", "r4_data", "r4_vec_data", "r8_data", "r8_vec_data"});
+    std::map<std::string, std::string> exp_entries;
+    for (string x : entry_names) {
+      exp_entries[x] = "SDS";
+    }
+    fileid.openGroup("entry", "NXentry");
+    std::map<std::string, std::string> entries = fileid.getEntries();
+    TS_ASSERT_EQUALS(entries, exp_entries);
 
     // cleanup and return
     fileid.close();
@@ -207,17 +210,18 @@ public:
     // string output1;
     // fileid.getData(&output1);
     // TS_ASSERT_EQUALS(somedata, output1);
-    // NXlink res1 = fileid.getDataID();
-    // TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-    // TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
+
+    NXlink res1 = fileid.getDataID();
+    TS_ASSERT_EQUALS(1, res1.linkType);
+    TS_ASSERT_EQUALS("/entry/some_data", string(res1.targetPath));
     printf("data link works\n");
     fileid.closeGroup();
 
     // check group link
     fileid.openPath("/entry/group2/group1");
-    // NXlink res2 = fileid.getGroupID();
-    // TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
-    // TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
+    NXlink res2 = fileid.getGroupID();
+    TS_ASSERT_EQUALS(0, res2.linkType);
+    TS_ASSERT_EQUALS("/entry/group1", string(res2.targetPath));
 
     // cleanup
     fileid.close();
