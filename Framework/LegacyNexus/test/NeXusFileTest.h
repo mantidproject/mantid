@@ -54,9 +54,9 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
-    // auto new_loc = file.getGroupID();
-    // cout << strmakef("Located at %s\n", new_loc.targetPath);
-    // TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
+    auto new_loc = file.getGroupID();
+    cout << strmakef("Located at %s\n", new_loc.targetPath);
+    TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
 
     // cleanup
     file.close();
@@ -82,14 +82,14 @@ public:
     File file(filename, NXACC_READ);
 
     // check error at root
-    // TS_ASSERT_THROWS(file.getGroupID(), Exception &);
+    TS_ASSERT_THROWS(file.getGroupID(), Exception &);
 
-    // now make group, close it, and check we are back at root
-    // string grp("test_group"), cls("NXsample");
-    // auto ingrp = file.getGroupID();
-    // TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
-    // file.closeGroup();
-    // TS_ASSERT_THROWS(file.getGroupID(), Exception &)
+    // open group, close it, and check we are back at root
+    file.openGroup("abc", "NXclass");
+    auto ingrp = file.getGroupID();
+    TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
+    file.closeGroup();
+    TS_ASSERT_THROWS(file.getGroupID(), Exception &)
 
     // cleanup
     file.close();

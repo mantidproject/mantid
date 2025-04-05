@@ -150,6 +150,11 @@ public:
   void closeData();
 
   /**
+   * \return The id of the data used for linking.
+   */
+  NXlink getDataID();
+
+  /**
    * Put the currently open data in the supplied pointer.
    *
    * \param data The pointer to copy the data to.
@@ -220,6 +225,11 @@ public:
   std::string getStrData();
 
   /**
+   * \return The id of the group used for linking.
+   */
+  NXlink getGroupID();
+
+  /**
    * \return The Info structure that describes the currently open data.
    */
   Info getInfo();
@@ -235,6 +245,12 @@ public:
    * \param result The map that will be filled with the entries
    */
   void getEntries(std::map<std::string, std::string> &result);
+
+  /**
+   * \return Information about all attributes on the data that is
+   * currently open.
+   */
+  std::vector<AttrInfo> getAttrInfos();
 
   /**
    *  \return true if the current point in the file has the named attribute
