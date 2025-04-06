@@ -11,11 +11,11 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <Eigen/Dense>
@@ -329,13 +329,14 @@ void PolarizationCorrectionWildes::init() {
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
 
-  const auto flipperConfigValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
+  const auto flipperConfigValidator =
+      std::make_shared<Kernel::SpinStateValidator>(std::unordered_set<int>{1, 2, 3, 4}, true);
   declareProperty(Prop::FLIPPERS,
                   std::string(FlipperConfigurations::OFF_OFF) + ", " + FlipperConfigurations::OFF_ON + ", " +
                       FlipperConfigurations::ON_OFF + ", " + FlipperConfigurations::ON_ON,
                   flipperConfigValidator, "Flipper configurations of the input workspaces.");
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, false, '+', '-', true);
+      std::make_shared<Kernel::SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, false, '+', '-', true);
   declareProperty(Prop::SPIN_STATES, "", spinStateValidator, "The order of the spin states in the output workspace.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
