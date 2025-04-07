@@ -26,7 +26,7 @@ def exists_in_ads(workspace_name: str) -> bool:
     return AnalysisDataService.doesExist(workspace_name)
 
 
-def get_ads_workspace(workspace_name: str) -> bool:
+def get_ads_workspace(workspace_name: str) -> Union[None, MatrixWorkspace, WorkspaceGroup]:
     return AnalysisDataService.retrieve(workspace_name) if exists_in_ads(workspace_name) else None
 
 
