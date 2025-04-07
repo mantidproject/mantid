@@ -497,7 +497,6 @@ void FitPowderDiffPeaks::observePeakRange(const BackToBackExponential_sptr &this
   const auto &vecX = m_dataWS->x(m_wsIndex);
 
   size_t icentre = findMaxValue(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
-  double peakcentre = vecX[icentre];
 
   // 3. Narrow now the peak range
   peakleftbound = vecX[icentre] - 4.0 * rightfwhm;
@@ -506,6 +505,7 @@ void FitPowderDiffPeaks::observePeakRange(const BackToBackExponential_sptr &this
   double rightpeakleftbound = rightpeak->centre() - 3 * rightfwhm;
   if (peakrightbound > rightpeakleftbound) {
     peakrightbound = rightpeakleftbound;
+    double peakcentre = vecX[icentre];
     if (peakrightbound < 2.0 * rightfwhm + peakcentre)
       g_log.warning() << "Peak @ " << peakcentre << "'s right boundary is too close to its right peak!\n";
   }
@@ -1085,7 +1085,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
         thispeak->setHeight(0.0);
 
       // Debug output
-      vector<int> &hkl = m_vecPeakFunctions[ifit].second.first;
+      const vector<int> &hkl = m_vecPeakFunctions[ifit].second.first;
       stringstream dbss;
       dbss << "Peak [" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << "] expected @ TOF = " << thispeak->centre()
            << ": \t";
@@ -1193,7 +1193,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(const BackToBackExponential_sptr
 
   // a) Fit peak height
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
-    string &parname = peakparams[iparam];
+    const string &parname = peakparams[iparam];
     if (parname == "I")
       peak->unfix(iparam);
     else
@@ -2303,11 +2303,11 @@ pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParame
   */
 
   for (size_t i = 0; i < numpeaks; ++i) {
-    double &chi2 = m_peakFitChi2[i];
+    const double &chi2 = m_peakFitChi2[i];
     if (chi2 > 0) {
       // Bad fit peak has chi^2 < 0;
       double dh = m_vecPeakFunctions[i].first;
-      vector<int> &hkl = m_vecPeakFunctions[i].second.first;
+      const vector<int> &hkl = m_vecPeakFunctions[i].second.first;
       BackToBackExponential_sptr peak = m_vecPeakFunctions[i].second.second;
 
       TableRow newrow = tablews->appendRow();
@@ -2376,7 +2376,7 @@ pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParame
     if (chi2 > 0) {
       // A good fit has chi^2 larger than 0
       double dh = m_vecPeakFunctions[i].first;
-      vector<int> &hkl = m_vecPeakFunctions[i].second.first;
+      const vector<int> &hkl = m_vecPeakFunctions[i].second.first;
 
       TableRow newrow = ztablews->appendRow();
       newrow << hkl[0] << hkl[1] << hkl[2] << dh;
@@ -2452,7 +2452,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
   vector<pair<double, pair<vector<int>, BackToBackExponential_sptr>>>::iterator deliter;
   for (deliter = m_vecPeakFunctions.begin(); deliter != m_vecPeakFunctions.end(); ++deliter) {
     double d_h = deliter->first;
-    vector<int> &hkl = deliter->second.first;
+    const vector<int> &hkl = deliter->second.first;
     BackToBackExponential_sptr peak = deliter->second.second;
     double tofh = peak->getParameter("X0");
 
