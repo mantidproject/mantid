@@ -6,15 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from mantid import logger
+import logging
 from qtpy.QtCore import QUrl
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
+
+# Module-level logger for functions outside of classes
+_logger = logging.getLogger(__name__)
 
 
 def _get_version_string_for_url():
     """
-    Placeholder function to get Mantid version
+    Returns the Mantid version string formatted for use in documentation URLs.
+    For example, "v6.12.0" from version "6.12.0.1"
+
+    Returns:
+        str: Formatted version string in the form "vX.Y.Z" or None if version cannot be determined
     """
+    versionStr = None
     try:
         import mantid
 
@@ -24,9 +32,9 @@ def _get_version_string_for_url():
         patch = versionObj.patch.split(".")[0]
         versionStr = f"v{versionObj.major}.{versionObj.minor}.{patch}"
     except ImportError:
-        logger.warning("Could not determine Mantid version for documentation URL.")
+        _logger.warning("Could not determine Mantid version for documentation URL.")
     except Exception as e:
-        logger.warning(f"Error determining Mantid version for documentation URL: {e}")
+        _logger.warning(f"Error determining Mantid version for documentation URL: {e}")
 
     return versionStr
 
@@ -53,6 +61,8 @@ class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
 
 
 class HelpWindowModel:
+    _logger = logging.getLogger(__name__)
+
     MODE_LOCAL = "Local Docs"
     MODE_ONLINE = "Online Docs"
 
@@ -78,10 +88,10 @@ class HelpWindowModel:
             absLocalPath = os.path.abspath(self._rawLocalDocsBase)
             self._baseUrl = QUrl.fromLocalFile(absLocalPath).toString()
             self._versionString = None
-            logger.debug(f"Using {self._modeString} from {self._baseUrl}")
+            self._logger.debug(f"Using {self._modeString} from {self._baseUrl}")
         else:
             if self._rawLocalDocsBase:
-                logger.warning(f"Local docs path '{self._rawLocalDocsBase}' is invalid or not found. Falling back to online docs.")
+                self._logger.warning(f"Local docs path '{self._rawLocalDocsBase}' is invalid or not found. Falling back to online docs.")
 
             self._isLocal = False
             self._modeString = self.MODE_ONLINE
@@ -97,13 +107,13 @@ class HelpWindowModel:
 
                 if self._versionString not in baseOnline:
                     self._baseUrl = f"{baseOnline.rstrip('/')}/{self._versionString}"
-                    logger.debug(f"Using {self._modeString} (Version: {self._versionString}) from {self._baseUrl}")
+                    self._logger.debug(f"Using {self._modeString} (Version: {self._versionString}) from {self._baseUrl}")
                 else:
                     self._baseUrl = self._rawOnlineBase
-                    logger.debug(f"Using {self._modeString} (Using provided base URL, possibly stable/latest): {self._baseUrl}")
+                    self._logger.debug(f"Using {self._modeString} (Using provided base URL, possibly stable/latest): {self._baseUrl}")
             else:
                 self._baseUrl = self._rawOnlineBase
-                logger.debug(f"Using {self._modeString} (Version: Unknown/Stable) from {self._baseUrl}")
+                self._logger.debug(f"Using {self._modeString} (Version: Unknown/Stable) from {self._baseUrl}")
 
     def is_local_docs_mode(self):
         """
@@ -118,7 +128,7 @@ class HelpWindowModel:
         return self._modeString
 
     def get_base_url(self):
-        """
+        """`
         :return: The determined base URL (either file:///path or https://docs...[/version])
         """
         return self._baseUrl.rstrip("/") + "/"
@@ -135,7 +145,7 @@ class HelpWindowModel:
 
         url = QUrl(fullUrlStr)
         if not url.isValid():
-            logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{self.get_base_url()}' and relative '{relativeUrl}'")
+            self._logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{self.get_base_url()}' and relative '{relativeUrl}'")
         return url
 
     def get_home_url(self):
@@ -153,8 +163,8 @@ class HelpWindowModel:
           - NoOpRequestInterceptor otherwise
         """
         if self._isLocal:
-            logger.debug("Using LocalRequestInterceptor.")
+            self._logger.debug("Using LocalRequestInterceptor.")
             return LocalRequestInterceptor()
         else:
-            logger.debug("Using NoOpRequestInterceptor.")
+            self._logger.debug("Using NoOpRequestInterceptor.")
             return NoOpRequestInterceptor()

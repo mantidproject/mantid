@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import logger
+import logging
 from qtpy.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
@@ -20,10 +20,12 @@ from qtpy.QtGui import QIcon
 
 
 class HelpWindowView(QMainWindow):
+    _logger = logging.getLogger(__name__)
+
     def __init__(self, presenter, interceptor=None):
         super().__init__()
         self.presenter = presenter
-        logger.debug("Initializing HelpWindowView.")
+        self._logger.debug("Initializing HelpWindowView.")
         self.setWindowTitle("Python Help Window")
         self.resize(1024, 768)
 
@@ -48,7 +50,7 @@ class HelpWindowView(QMainWindow):
         if interceptor is not None:
             profile = self.browser.page().profile()
             profile.setUrlRequestInterceptor(interceptor)
-            logger.debug(f"HelpWindow: Applied URL interceptor: {type(interceptor).__name__}")
+            self._logger.debug(f"HelpWindow: Applied URL interceptor: {type(interceptor).__name__}")
 
         # Toolbar with navigation buttons
         self.toolbar = QToolBar("Navigation")
@@ -118,7 +120,7 @@ class HelpWindowView(QMainWindow):
         self.statusLabel.setStyleSheet(f"QLabel {{ padding-left: 5px; padding-right: 5px; margin-left: 5px; {colorStyle} }}")
         self.statusLabel.setText(f"{modeText}")
         self.statusLabel.setToolTip(tooltip)
-        logger.debug(f"HelpWindow View: Status set to '{modeText}' (Local: {isLocal})")
+        self._logger.debug(f"HelpWindow View: Status set to '{modeText}' (Local: {isLocal})")
 
     def update_navigation_buttons(self, ok: bool = True):
         """
@@ -135,7 +137,7 @@ class HelpWindowView(QMainWindow):
         Notifies the Presenter that the user wants to go "Home."
         The Presenter decides whether it's local index.html or online docs.
         """
-        logger.debug("Home button clicked.")
+        self._logger.debug("Home button clicked.")
         self.presenter.show_home_page()
 
     def set_page_url(self, url: QUrl):
@@ -143,24 +145,24 @@ class HelpWindowView(QMainWindow):
         The Presenter calls this to load the desired doc page.
         """
         if url.isValid() and url != self.browser.url():
-            logger.debug(f"Loading URL: {url.toString()}")
+            self._logger.debug(f"Loading URL: {url.toString()}")
             self.browser.setUrl(url)
         elif not url.isValid():
-            logger.warning(f"Attempted to load invalid URL: {url.toString()}")
+            self._logger.warning(f"Attempted to load invalid URL: {url.toString()}")
         else:
-            logger.debug(f"URL already loaded: {url.toString()}")
+            self._logger.debug(f"URL already loaded: {url.toString()}")
 
     def display(self):
         """
         Show the window on screen.
         """
-        logger.debug("Displaying window.")
+        self._logger.debug("Displaying window.")
         self.show()
 
     def closeEvent(self, event):
         """
         Handle window close: notify the Presenter so it can do cleanup if needed.
         """
-        logger.debug("Close event triggered.")
+        self._logger.debug("Close event triggered.")
         self.presenter.on_close()
         super().closeEvent(event)
