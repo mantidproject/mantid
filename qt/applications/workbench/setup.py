@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 setup(
     name="MantidWorkbench",  # probably the wrong name if someone wants to include it
     version=os.environ["MANTID_VERSION_STR"],
-    install_requires=["mantidqtinterfaces"],
+    install_requires=["mantidqtinterfaces", "instrumentview"],
     packages=find_packages(exclude=["*.test"]),
     package_data={"": ["*.ui"]},
     entry_points={"gui_scripts": ["workbench = workbench.app.main:main"]},
