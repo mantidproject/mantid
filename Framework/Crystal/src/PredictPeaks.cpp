@@ -319,7 +319,7 @@ void PredictPeaks::exec() {
       // use default universal goniometer
       goniometerConvension = "YZY";
     }
-    for (auto &possibleHKL : possibleHKLs) {
+    for (const auto &possibleHKL : possibleHKLs) {
       Geometry::Goniometer goniometer(gonioVec.front());
       V3D q_sample = ub * possibleHKL * (2.0 * M_PI * m_qConventionFactor);
       goniometer.calcFromQSampleAndWavelength(q_sample, wavelength, flipX, innerGoniometer);
