@@ -53,7 +53,7 @@ class HelpWindowPresenter:
 
     def show_home_page(self):
         """
-        Presenter loggeric to load the 'Home' page, which might be local or online.
+        Presenter logic to load the 'Home' page, which might be local or online.
         The View calls this when the user hits the Home button.
         """
         self._ensure_view_created()

@@ -110,17 +110,11 @@ class HelpWindowView(QMainWindow):
         Updates the status label text and icon.
         """
         if isLocal:
-            iconThemeName = "network-offline"
-            fallbackIcon = QIcon(":/qt-project.org/styles/commonstyle/images/disconnected-32.png")
             tooltip = f"Showing {modeText} from local disk."
-            colorStyle = "color: green;"
         else:
-            iconThemeName = "network-wired"
-            fallbackIcon = QIcon(":/qt-project.org/styles/commonstyle/images/connected-32.png")
             tooltip = f"Showing {modeText} from the web."
-            colorStyle = "color: green;"
 
-        icon = QIcon.fromTheme(iconThemeName, fallbackIcon)  # noqa: F841
+        colorStyle = "color: green;"
         self.statusLabel.setStyleSheet(f"QLabel {{ padding-left: 5px; padding-right: 5px; margin-left: 5px; {colorStyle} }}")
         self.statusLabel.setText(f"{modeText}")
         self.statusLabel.setToolTip(tooltip)
