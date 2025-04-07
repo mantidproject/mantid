@@ -45,14 +45,14 @@ private:
   void exec() override;
 
   API::MatrixWorkspace_sptr createOutputWorkspace(const size_t numHist, const bool linearBins, const double x_delta);
-  void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
   API::MatrixWorkspace_sptr editInstrumentGeometry(API::MatrixWorkspace_sptr &wksp, const double l1,
                                                    const std::vector<double> &polars,
                                                    const std::vector<specnum_t> &specids,
                                                    const std::vector<double> &l2s,
                                                    const std::vector<double> &azimuthals);
-
-  void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename);
+  void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
+  void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
+                   const std::vector<double> &difc_focus);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
   std::set<detid_t> m_masked;
