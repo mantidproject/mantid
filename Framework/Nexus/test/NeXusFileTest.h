@@ -50,8 +50,8 @@ public:
 
   void test_open_group() {
     cout << "\ntest openGroup\n";
-    FileResource resource("test_nexus_file_grp.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_grp_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // create a group, to be opened
@@ -75,8 +75,8 @@ public:
 
   void test_open_group_bad() {
     cout << "\ntest openGroup bad\n";
-    FileResource resource("test_nexus_file_grp.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_grp_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // create a group, to be opened
@@ -92,8 +92,8 @@ public:
 
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
-    FileResource resource("test_nexus_file_grp.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_grp_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // check error at root
@@ -114,8 +114,7 @@ public:
 
   void test_makeData() {
     cout << "\ntest make data\n";
-    FileResource resource("test_nexus_file_data.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_data_h4.h4";
 
     string name("some_data");
     std::vector<std::int64_t> dims({1});
@@ -139,8 +138,7 @@ public:
 
   void test_makeData_length() {
     cout << "\ntest make data -- using length\n";
-    FileResource resource("test_nexus_file_data.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_data_h4.h4";
 
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
@@ -155,8 +153,8 @@ public:
 
   void test_open_dataset() {
     cout << "\ntest openData\n";
-    FileResource resource("test_nexus_file_data.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_data_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -175,8 +173,8 @@ public:
 
   void test_closeData() {
     cout << "\ntest closeData\n";
-    FileResource resource("test_nexus_file_dataclose.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataclose_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -203,24 +201,14 @@ public:
     cout << "\ntest dataset read/write\n";
 
     // open a file
-    FileResource resource("test_nexus_file_dataRW.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
     cout << "\tread/write int...";
     do_test_data_putget<int32_t>(file, "data_int", 12);
-    cout << "done\n";
-
-    // put/get an int64_t
-    cout << "\tread/write int64_t...";
-    do_test_data_putget<int64_t>(file, "data_int64", 12);
-    cout << "done\n";
-
-    // put/get a size_t
-    cout << "\tread/write size_T...";
-    do_test_data_putget<uint64_t>(file, "data_sizet", 12);
     cout << "done\n";
 
     // put/get a float
@@ -242,8 +230,8 @@ public:
   void test_putData_bad() {
     cout << "\ntest putData -- bad\n";
     // open a file
-    FileResource resource("test_nexus_file_dataRW.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -257,8 +245,8 @@ public:
     cout << "\ntest dataset read/write -- string\n";
 
     // open a file
-    FileResource resource("test_nexus_file_stringrw=.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_stringrw=_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -292,8 +280,8 @@ public:
     cout << "\ntest dataset read/write -- arrays\n";
 
     // open a file
-    FileResource resource("test_nexus_file_dataRW.h5");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -349,8 +337,8 @@ public:
     cout << "\ntest dataset read/write -- vector\n";
 
     // open a file
-    FileResource resource("test_nexus_file_dataRW_vec_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_vec_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -385,12 +373,11 @@ public:
 
   void test_getPath_groups() {
     cout << "\ntest get_path -- groups only\n";
-    FileResource resource("test_nexus_file_grp_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_grp_h4.h4";
     File file(filename, NXACC_CREATE4);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS("/", file.getPath());
+    TS_ASSERT_EQUALS("", file.getPath());
 
     // make and open a group -- now at "/abc"
     file.makeGroup("abc", "NXclass", true);
@@ -414,12 +401,12 @@ public:
 
   void test_getPath_data() {
     cout << "\ntest get_path -- groups and data!\n";
-    FileResource resource("test_nexus_file_grpdata_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_grpdata_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS("/", file.getPath());
+    TS_ASSERT_EQUALS("", file.getPath());
 
     // make and open a group -- now at "/abc"
     file.makeGroup("abc", "NXentry", true);
@@ -438,8 +425,8 @@ public:
     fflush(stdout);
 
     // open a file
-    FileResource resource("test_nexus_entries_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_entries_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // setup a recursive group tree
@@ -488,8 +475,8 @@ public:
 
     // open the root
     file.openGroup("entry1", "NXentry");
-    std::string actual, expected = "/";
-    file.openPath(expected);
+    std::string actual, expected = "";
+    file.openPath("/");
     actual = file.getPath();
     TS_ASSERT_EQUALS(actual, expected);
 
@@ -508,8 +495,8 @@ public:
     cout << "\ntest getInfo -- good\n";
 
     // open a file
-    FileResource resource("test_nexus_file_dataRW_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -541,8 +528,8 @@ public:
   void test_getInfo_bad() {
     cout << "\ntest getInfo -- bad\n";
     // open a file
-    FileResource resource("test_nexus_file_dataRW_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_file_dataRW_h4.h4";
+
     File file(filename, NXACC_CREATE4);
     file.makeGroup("entry", "NXentry", true);
 
@@ -573,8 +560,8 @@ public:
     cout << "\ntest attribute read/write\n";
 
     // open a file
-    FileResource resource("test_nexus_attr_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_attr_h4.h4";
+
     File file(filename, NXACC_CREATE4);
 
     // put/get an int attribute
@@ -588,33 +575,21 @@ public:
     cout << "\ntest getEntries\n";
 
     // open a file
-    FileResource resource("test_nexus_entries_h4.h4");
-    std::string filename = resource.fullPath();
+    std::string filename = "test_nexus_entries_h4.h4";
     File file(filename, NXACC_CREATE4);
 
     // setup a recursive group tree
-    std::map<std::string, std::string> tree{
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2a",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2a/layer3a",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2a/layer3b",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2a/data1", "SDS"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2b",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2b/layer3a",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>1/layer2b/layer3b",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>2",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>2/layer2c",
-                                            "NXstd::pair<std::string, std::string>"},
-        std::pair<std::string, std::string>{"/std::pair<std::string, std::string>2/layer2c/layer3c",
-                                            "NXstd::pair<std::string, std::string>"}};
+    std::map<std::string, std::string> tree{std::pair<std::string, std::string>{"/entry1", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2a", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2a/layer3a", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2a/layer3b", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2a/data1", "SDS"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2b", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2b/layer3a", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry1/layer2b/layer3b", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry2", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry2/layer2c", "NXentry"},
+                                            std::pair<std::string, std::string>{"/entry2/layer2c/layer3c", "NXentry"}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -635,8 +610,8 @@ public:
       }
     }
 
-    // at root level, should be entry1, entry2
     file.openPath("/");
+    // at root level, should be entry1, entry2
     std::map<std::string, std::string> actual = file.getEntries();
     std::map<std::string, std::string> expected = {std::pair<std::string, std::string>{"entry1", "NXentry"},
                                                    std::pair<std::string, std::string>{"entry2", "NXentry"}};

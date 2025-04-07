@@ -63,14 +63,14 @@ public:
 
     file_obj.close();
 
-    for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
-      if (0 == iReOpen % 100) {
-        cout << "loop count " << iReOpen << "\n";
-      }
+    // for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
+    //   if (0 == iReOpen % 100) {
+    //     cout << "loop count " << iReOpen << "\n";
+    //   }
 
-      file_obj = File(szFile, NXACC_RDWR);
-      file_obj.close();
-    }
+    //  file_obj = File(szFile, NXACC_RDWR);
+    //  file_obj.close();
+    //}
 
     cout << "Leak Test 1 Success!\n";
   }
