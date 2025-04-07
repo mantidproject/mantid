@@ -19,7 +19,10 @@ class TestEmptyInstruments(unittest.TestCase):
 
     def _create_empty_instrument_and_draw(self, instrument: str):
         ws = LoadEmptyInstrument(InstrumentName=instrument)
-        FullInstrumentViewWindow(ws, off_screen=True)
+        try:
+            FullInstrumentViewWindow(ws, off_screen=True)
+        except Exception as ex:
+            self.assertTrue(False, f"Failed for {instrument} with exception {ex}.")
 
     def test_gem(self):
         self._create_empty_instrument_and_draw("GEM")
