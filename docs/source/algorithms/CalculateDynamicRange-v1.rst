@@ -16,7 +16,7 @@ Elastic scattering is assumed.
 Masked detectors and monitors do not enter the calculation.
 The calculated values (in inverse Angstroms) will be set in sample logs as **qmin** and **qmax** respectively.
 Optionally, list of detector components can be given, in which case minimum and maximum momentum transfers will be calculated also for each component.
-They will be set in sample logs with the same names as the components preceeded by prefixes **qmin_** and **qmax_** respectively.
+They will be set in sample logs with the same names as the components preceded by prefixes **qmin_** and **qmax_** respectively.
 
 Usage
 -----
