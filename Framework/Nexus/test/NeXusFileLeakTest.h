@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
 #include <cstdio>
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
+using namespace Mantid::LegacyNexus;
 using namespace NexusTest;
 using std::cout;
 using std::endl;
@@ -48,9 +48,9 @@ public:
   void test_leak1() {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    string const szFile("nexus_leak_test1.nxs");
+    string const szFile("nexus_leak_test1_h4.nxs");
 
-    File file_obj(szFile, NXACC_CREATE5);
+    File file_obj(szFile, NXACC_CREATE4);
     std::string oss(strmakef("entry_%d", 0));
     file_obj.makeGroup(oss, "NXentry");
     file_obj.openGroup(oss, "NXentry");
@@ -83,11 +83,11 @@ public:
 
     cout << "Running Leak Test 2: " << nFiles << " iterations\n";
 
-    NXaccess access_mode = NXACC_CREATE5;
+    NXaccess access_mode = NXACC_CREATE4;
     std::string strFile;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
-      strFile = strmakef("nexus_leak_test2_%03d.nxs", iFile);
+      strFile = strmakef("nexus_leak_test2_%03d_h4.nxs", iFile);
       removeFile(strFile);
       cout << "file " << strFile << "\n";
 
@@ -103,7 +103,7 @@ public:
           fileid.openGroup(oss2, "NXdata");
           for (int iData = 0; iData < nData; iData++) {
             std::string oss3(strmakef("i2_data_%d", iData));
-            DimVector dims({(int64_t)i2_array.size()});
+            std::vector<int64_t> dims({(int64_t)i2_array.size()});
             fileid.makeData(oss3, NXnumtype::INT16, dims);
             fileid.openData(oss3);
             fileid.putData(i2_array.data());
@@ -114,69 +114,7 @@ public:
         fileid.closeGroup();
       }
       fileid.close();
-      removeFile(strFile);
     }
     cout << "Leak Test 2 Success!\n";
-  }
-
-  void test_leak3() {
-    cout << "Running Leak Test 3\n";
-    fflush(stdout);
-    const int nFiles = 10;
-    const int nEntry = 2;
-    const int nData = 2;
-#ifdef WIN32
-    // NOTE the Windows runners do not have enough stack space for the full test (max 1MB stack)
-    // Rather than skip the entire test, we can use a smaller array size
-    // It is no longer testing the same behavior on Windows with this choice.
-    std::size_t const TEST_SIZE(8);
-#else
-    std::size_t const TEST_SIZE(512);
-#endif // WIN32
-    DimVector array_dims({TEST_SIZE, TEST_SIZE});
-    std::string const szFile("nexus_leak_test3.nxs");
-    int const iBinarySize = TEST_SIZE * TEST_SIZE;
-    cout << "Creating array of " << iBinarySize << " integers\n";
-    fflush(stdout);
-    int16_t aiBinaryData[iBinarySize];
-
-    for (int i = 0; i < iBinarySize; i++) {
-      aiBinaryData[i] = static_cast<int16_t>(rand());
-    }
-    cout << "Created " << iBinarySize << " random integers\n";
-
-    for (int iFile = 0; iFile < nFiles; iFile++) {
-      cout << "file " << iFile << "\n";
-
-      File fileid(szFile, NXACC_CREATE5);
-
-      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
-        std::string oss(strmakef("entry_%d", iEntry));
-
-        fileid.makeGroup(oss, "NXentry");
-        fileid.openGroup(oss, "NXentry");
-        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
-          std::string oss2(strmakef("data_%d", iNXdata));
-          fileid.makeGroup(oss2, "NXdata");
-          fileid.openGroup(oss2, "NXdata");
-          fileid.getGroupID();
-          for (int iData = 0; iData < nData; iData++) {
-            std::string oss3(strmakef("i2_data_%d", iData));
-            fileid.makeCompData(oss3, NXnumtype::INT16, array_dims, NXcompression::LZW, array_dims);
-            fileid.openData(oss3);
-            fileid.putData(&(aiBinaryData[0]));
-            fileid.closeData();
-          }
-          fileid.closeGroup();
-        }
-        fileid.closeGroup();
-      }
-
-      fileid.close();
-
-      // Delete file
-      removeFile(szFile);
-    }
-    cout << "Leak Test 3 Success!\n";
   }
 };

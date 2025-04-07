@@ -1585,7 +1585,11 @@ NXstatus NX4getgroupID(NXhandle fileid, NXlink *sRes) {
   } else {
     sRes->iTag = DFTAG_VG;
     sRes->iRef = VQueryref(pFile->iCurrentVG);
-    NXIbuildPath(pFile, sRes->targetPath, 1024);
+    int datalen = 1024;
+    NXnumtype type = NXnumtype::CHAR;
+    if (NX4getattr(pFile, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
+      NXIbuildPath(pFile, sRes->targetPath, 1024);
+    }
     return NXstatus::NX_OK;
   }
   /* not reached */

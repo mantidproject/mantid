@@ -1036,6 +1036,8 @@ template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const v
                                                      const std::vector<int> &dims);
 template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<uint64_t> &value,
                                                      const std::vector<int> &dims);
+template MANTID_LEGACYNEXUS_DLL void File::writeData(const string &name, const vector<float> &value,
+                                                     const std::vector<std::int64_t> &dims);
 
 template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<float> &value);
 template MANTID_LEGACYNEXUS_DLL void File::writeExtendibleData(const string &name, std::vector<double> &value);
@@ -1260,3 +1262,6 @@ template MANTID_LEGACYNEXUS_DLL void File::putSlab(const std::vector<uint64_t> &
 
 template MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, double &value);
 template MANTID_LEGACYNEXUS_DLL void File::getAttr(const std::string &name, int &value);
+
+template MANTID_LEGACYNEXUS_DLL void File::putData(const std::vector<double> &data);
+template MANTID_LEGACYNEXUS_DLL void File::putData(const std::vector<int32_t> &data);

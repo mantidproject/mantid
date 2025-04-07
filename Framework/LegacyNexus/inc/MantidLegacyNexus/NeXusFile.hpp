@@ -3,6 +3,7 @@
 #include "MantidLegacyNexus/DllConfig.h"
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi.h"
+#include <cstdint>
 #include <map>
 #include <string>
 #include <utility>

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
 #include <cstdio>
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
+using namespace Mantid::LegacyNexus;
 using namespace NexusTest;
 using std::cout;
 using std::endl;
@@ -31,8 +31,8 @@ using std::string;
 using std::vector;
 
 namespace {
-const std::string DMC01("dmc01cpp");
-const std::string DMC02("dmc02cpp");
+const std::string DMC01("dmc01cpp_h4");
+const std::string DMC02("dmc02cpp_h4");
 } // namespace
 
 class NeXusFileNapiTest : public CxxTest::TestSuite {
@@ -46,7 +46,7 @@ public:
 private:
   void do_test_write(const string &filename, NXaccess create_code) {
     cout << "writeTest(" << filename << ") started\n";
-    NeXus::File file(filename, create_code);
+    Mantid::LegacyNexus::File file(filename, create_code);
     // create group
     file.makeGroup("entry", "NXentry", true);
     // group attributes
@@ -56,7 +56,7 @@ private:
     file.writeData("ch_data", "NeXus_data");
 
     // 2d array
-    ::NeXus::DimVector array_dims{5, 4};
+    std::vector<std::int64_t> array_dims{5, 4};
     char c1_array[5][4] = {
         {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
     file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
@@ -97,8 +97,8 @@ private:
       r8_array.push_back(static_cast<double>(i + 20));
     }
     file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
-    DimVector slab_start{4, 0};
-    DimSizeVector slab_size{1, 4};
+    std::vector<std::int64_t> slab_start{4, 0};
+    std::vector<std::int64_t> slab_size{1, 4};
     file.putSlab(&(r8_array[16]), slab_start, slab_size);
     slab_start[0] = 0;
     slab_start[1] = 0;
@@ -142,8 +142,8 @@ private:
         comp_array.push_back(i);
       }
     }
-    const DimVector cdims{20, 20};
-    file.writeCompData("comp_data", comp_array, array_dims, NeXus::LZW, cdims);
+    const std::vector<std::int64_t> cdims{20, 20};
+    file.writeCompData("comp_data", comp_array, array_dims, Mantid::LegacyNexus::LZW, cdims);
 
     // ---------- Test write Extendible Data --------------------------
     std::vector<int> data(10, 123);
@@ -180,7 +180,7 @@ private:
     file.flush();
 
     // real flush test
-    file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
+    file.makeData("flush_data", Mantid::LegacyNexus::getType<int>(), NX_UNLIMITED, true);
     vector<int> slab_array;
     slab_array.push_back(0);
     for (int i = 0; i < 7; i++) {
@@ -210,7 +210,7 @@ private:
     cout << "readTest(" << filename << ") started\n";
     const string SDS("SDS");
     // top level file information
-    NeXus::File file(filename);
+    Mantid::LegacyNexus::File file(filename);
     file.openGroup("entry", "NXentry");
 
     // Test getDataCoerce() -------------------
@@ -273,7 +273,7 @@ private:
 
   void do_test_loadPath(const string &filename) {
     if (getenv("NX_LOAD_PATH") != NULL) {
-      TS_ASSERT_THROWS_NOTHING(NeXus::File file(filename, NXACC_RDWR));
+      TS_ASSERT_THROWS_NOTHING(Mantid::LegacyNexus::File file(filename, NXACC_RDWR));
       cout << "Success loading NeXus file from path" << endl;
     } else {
       cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
@@ -283,9 +283,9 @@ private:
 public:
   void test_readwrite_hdf5() {
     cout << " Nexus File Tests\n";
-    NXaccess const nx_creation_code = NXACC_CREATE5;
-    string const fileext = ".h5";
-    string const filename("nexus_file_napi_test_cpp" + fileext);
+    NXaccess const nx_creation_code = NXACC_CREATE4;
+    string const fileext = ".h4";
+    string const filename("nexus_file_napi_test_cpp_h4" + fileext);
 
     // try writing a file
     do_test_write(filename, nx_creation_code);

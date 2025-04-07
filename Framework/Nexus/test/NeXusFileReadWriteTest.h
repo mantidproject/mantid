@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdarg>
 #include <cstdio>
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
+using namespace Mantid::LegacyNexus;
 using namespace NexusTest;
 using std::cout;
 using std::endl;
@@ -50,7 +50,7 @@ private:
 
     cout << "Creating \"" << nxFile << "\"" << endl;
     // create file
-    File fileid(nxFile, NXACC_CREATE5);
+    File fileid(nxFile, NXACC_CREATE4);
 
     fileid.makeGroup("entry", "NXentry");
     fileid.openGroup("entry", "NXentry");
@@ -76,7 +76,7 @@ private:
   void do_rw2darray_test(File &fileid, std::string const &dataname, T const (&data)[N][M]) {
     cout << "Testing attribute " << dataname << "\n";
     // write
-    fileid.makeData(dataname, getType<T>(), DimVector({N, M}));
+    fileid.makeData(dataname, getType<T>(), std::vector<std::int64_t>({N, M}));
     fileid.openData(dataname);
     fileid.putData(&(data[0][0]));
     fileid.closeData();
@@ -98,7 +98,7 @@ private:
 public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
-    std::string const nxFile("NexusFile_test_char.h5");
+    std::string const nxFile("NexusFile_test_char_h4.h4");
     File fileid = do_prep_files(nxFile);
 
     // tests of string/char read/write
@@ -125,11 +125,11 @@ public:
 
     // check all entries
     vector<string> entry_names({"c1_data", "c2_data", "c3_data", "c4_data", "ch_data"});
-    Entries exp_entries;
+    std::map<std::string, std::string> exp_entries;
     for (string x : entry_names) {
       exp_entries[x] = "SDS";
     }
-    Entries entries = fileid.getEntries();
+    std::map<std::string, std::string> entries = fileid.getEntries();
     TS_ASSERT_EQUALS(entries, exp_entries);
 
     // cleanup and return
@@ -139,7 +139,7 @@ public:
 
   void test_napi_vec() {
     cout << "Starting NAPI VEC Test\n";
-    std::string const nxFile("NexusFile_test_vec.h5");
+    std::string const nxFile("NexusFile_test_vec_h4.h4");
     File fileid = do_prep_files(nxFile);
 
     // tests of integer read/write
@@ -164,11 +164,11 @@ public:
 
     // check all entries
     vector<string> entry_names({"i1_data", "i2_data", "i4_data", "r4_data", "r4_vec_data", "r8_data", "r8_vec_data"});
-    Entries exp_entries;
+    std::map<std::string, std::string> exp_entries;
     for (string x : entry_names) {
       exp_entries[x] = "SDS";
     }
-    Entries entries = fileid.getEntries();
+    std::map<std::string, std::string> entries = fileid.getEntries();
     TS_ASSERT_EQUALS(entries, exp_entries);
 
     // cleanup and return
@@ -180,13 +180,13 @@ public:
     cout << "tests for openPath\n";
 
     // make file with path /entry
-    string const filename("NexusFile_openpathtest.nxs");
+    string const filename("NexusFile_openpathtest_h4.nxs");
     File fileid = do_prep_files(filename);
 
-    // make path /entry/data1
+    // make path /entry/datax
     fileid.writeData("data1", '1');
 
-    // make path /entry/data2
+    // make path /entry/datay
     fileid.writeData("data2", '2');
 
     // make path /entry/data1/more_data
@@ -209,6 +209,10 @@ public:
     fileid.getData(&output);
     TS_ASSERT_EQUALS('1', output);
 
+    fileid.openPath("/entry/data2");
+    fileid.getData(&output);
+    TS_ASSERT_EQUALS('2', output);
+
     fileid.openPath("/link/data4");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('4', output);
@@ -216,10 +220,6 @@ public:
     fileid.openPath("/entry/data/more_data");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('3', output);
-
-    fileid.openData("/entry/data2");
-    fileid.getData(&output);
-    TS_ASSERT_EQUALS('2', output);
 
     // cleanup
     fileid.close();
@@ -229,14 +229,14 @@ public:
   void test_links() {
     cout << "tests of linkature\n";
 
-    string const filename("NexusFIle_linktest.nxs");
+    string const filename("NexusFIle_linktest_h4.nxs");
     removeFile(filename);
     File fileid = do_prep_files(filename);
 
     // Create some data with a link
     cout << "create entry at /entry/some_data\n";
     string const somedata("this is some data");
-    fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
+    fileid.makeData("some_data", NXnumtype::CHAR, std::vector<std::int64_t>({(std::int64_t)somedata.size()}));
     fileid.openData("some_data");
     fileid.putData(somedata.c_str());
     NXlink datalink = fileid.getDataID();
