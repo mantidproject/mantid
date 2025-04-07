@@ -25,6 +25,7 @@
 #include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
@@ -74,6 +75,28 @@ const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
 
+// TODO refactor this to use the actual grouping
+double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus) {
+  // grouping taken from the IDF for VULCAN
+  if (detid < 0) {
+    throw std::runtime_error("detid < 0 is not supported");
+  } else if (detid < 100000) { // bank1 0-99095
+    return difc_focus[0];
+  } else if (detid < 200000) { // bank2 100000-199095
+    return difc_focus[1];
+  } else if (detid < 300000) { // bank3 200000-289095
+    return difc_focus[2];
+  } else if (detid < 400000) { // bank4 300000-389095
+    return difc_focus[3];
+  } else if (detid < 500000) { // bank5 400000-440095
+    return difc_focus[4];
+  } else if (detid < 600000) { // bank6 500000-554095
+    return difc_focus[5];
+  } else {
+    throw std::runtime_error("detid > 600000 is not supported");
+  }
+}
+
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -97,6 +120,21 @@ const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return
 
 //----------------------------------------------------------------------------------------------
 namespace { // anonymous
+std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
+                                           const std::vector<double> &polars) {
+  constexpr double deg2rad = M_PI / 180.;
+
+  std::vector<double> difc;
+  difc.reserve(l2s.size());
+
+  std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
+                 [l1, deg2rad](const auto &l2, const auto &polar) {
+                   return 1. / Kernel::Units::tofToDSpacingFactor(l1, l2, deg2rad * polar, 0.);
+                 });
+
+  return difc;
+}
+
 class NexusLoader {
 public:
   NexusLoader(const bool is_time_filtered, const size_t pulse_start_index, const size_t pulse_stop_index)
@@ -316,7 +354,7 @@ public:
     // number of events to histogram in a single thread
     constexpr size_t GRAINSIZE_EVENT{2000};
     // number of events to read from disk at one time
-    constexpr size_t EVENTS_PER_CHUNK{10000 * GRAINSIZE_EVENT};
+    constexpr size_t EVENTS_PER_CHUNK{50000 * GRAINSIZE_EVENT};
 
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
@@ -344,8 +382,8 @@ public:
       } else {
         // TODO REMOVE debug print
         std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                  << "   and should be read in " << (eventRangeFull.second / EVENTS_PER_CHUNK) << " chunks of "
-                  << EVENTS_PER_CHUNK << "\n";
+                  << "   and should be read in " << (1 + (eventRangeFull.second / EVENTS_PER_CHUNK)) << " chunks of "
+                  << EVENTS_PER_CHUNK << " (" << (EVENTS_PER_CHUNK / 1024 / 1024) << "MB)" << "\n";
 
         // create a histogrammer to process the events
         auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -436,13 +474,13 @@ void AlignAndFocusPowderSlim::init() {
                   "Either this or OffsetsWorkspace needs to be specified.");
   auto positiveValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   positiveValidator->setLower(0);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 0.25, positiveValidator,
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveValidator,
                                                                       Direction::Input),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016, positiveValidator,
                                                                       Direction::Input),
                   "Bin size for output data");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 2.25, positiveValidator,
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 16667, positiveValidator,
                                                                       Direction::Input),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
@@ -478,11 +516,20 @@ void AlignAndFocusPowderSlim::exec() {
   // prog->doReport("Loading instrument"); TODO add progress bar stuff
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
+  // TODO parameters should be input information
+  const double l1{43.755};
+  const std::vector<double> polars{90, 90, 120, 150, 157, 65.5}; // two-theta
+  const std::vector<double> azimuthals{180, 0, 0, 0, 0, 0};      // angle from positive x-axis
+  const std::vector<double> l2s{2.296, 2.296, 2.070, 2.070, 2.070, 2.530};
+  const std::vector<specnum_t> specids;
+  const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
+
+  // create values for focusing time-of-flight
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
   if (!cal_filename.empty()) {
-    loadCalFile(wksp, cal_filename);
+    this->loadCalFile(wksp, cal_filename, difc_focused);
   } else {
-    this->initCalibrationConstants(wksp);
+    this->initCalibrationConstants(wksp, difc_focused);
   }
 
   /*
@@ -576,13 +623,8 @@ void AlignAndFocusPowderSlim::exec() {
   // close the file so child algorithms can do their thing
   h5file.close();
 
-  // set the instrument - TODO parameters should be input information
-  const double l1{43.755};
-  const std::vector<double> polars{90, 90, 120, 150, 157, 65.5}; // two-theta
-  const std::vector<double> azimuthals{180, 0, 0, 0, 0, 0};      // angle from positive x-axis
-  const std::vector<double> l2s{2.296, 2.296, 2.070, 2.070, 2.070, 2.530};
-  const std::vector<specnum_t> specids;
-  wksp = editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+  // set the instrument
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
 
   // load run metadata
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
@@ -597,8 +639,9 @@ void AlignAndFocusPowderSlim::exec() {
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
 
+  // set output units to be the same as coming from AlignAndFocusPowderFromFiles
   wksp->setYUnit("Counts");
-  wksp->getAxis(0)->setUnit("DSpacing");
+  wksp->getAxis(0)->setUnit("TOF");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
@@ -624,17 +667,20 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const size_t
   return wksp;
 }
 
-void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp) {
+void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp,
+                                                       const std::vector<double> &difc_focus) {
   const auto detInfo = wksp->detectorInfo();
 
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
-      m_calibration.emplace(iter->detid(), 1. / detInfo.difcUncalibrated(iter->index()));
+      const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus);
+      m_calibration.emplace(iter->detid(), difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
 
-void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename) {
+void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename,
+                                          const std::vector<double> &difc_focus) {
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
@@ -648,7 +694,8 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
   for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
     const detid_t detid = calibrationWS->cell<int>(row, 0);
     const double detc = calibrationWS->cell<double>(row, 1);
-    m_calibration.emplace(detid, 1. / detc);
+    const auto difc_focussed = getFocussedPostion(detid, difc_focus);
+    m_calibration.emplace(detid, difc_focussed / detc);
   }
 
   const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
