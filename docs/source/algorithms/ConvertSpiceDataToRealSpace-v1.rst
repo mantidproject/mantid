@@ -19,7 +19,7 @@ Inputs
 Required workspaces
 +++++++++++++++++++
 
-There are two input Workspaces that are required for this algorithms.
+There are two input Workspaces that are required for this algorithm.
 Both of them stores the data from a SPICE file.
 
 One is a TableWorkspace that stores the data, including detectors' counts
@@ -89,7 +89,7 @@ Run
 ###
 
 In an HFIR powder diffractometer scan, one measurement is made at a certain rotational angle.
-Such one measurement contains 44 detectors' counts, instrument setup (such as rotation angle) and
+One such measurement contains 44 detectors' counts, instrument setup (such as rotation angle) and
 sample environment logs.
 As it is translated to MDWorkspace, such a measurement constitutes a {\it run}.
 
