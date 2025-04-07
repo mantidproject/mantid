@@ -2169,7 +2169,8 @@ void FitPowderDiffPeaks::parseBraggPeakTable(const TableWorkspace_sptr &peakws, 
 /** Create a Workspace2D for fitted peaks (pattern) and also the workspace for
  * Zscores!
  */
-Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern, int workspaceindex) {
+Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(const std::vector<double> &pattern,
+                                                                     int workspaceindex) {
   // 1. Init
   const auto &X = m_dataWS->x(workspaceindex);
 

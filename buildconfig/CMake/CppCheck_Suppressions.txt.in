@@ -185,7 +185,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEvents
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:518
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskInstrument.cpp:67
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MedianDetectorTest.cpp:280
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeLogs.cpp:82
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeLogs.cpp:83
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:292
@@ -238,7 +237,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePa
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1483
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:508
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:49
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:50
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SelectCellWithForm.cpp:134
@@ -252,7 +250,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.c
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:500
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:1088
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:1196
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2172
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2305
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2309
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2378
@@ -310,7 +307,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.c
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:989
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:909
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSS.cpp:449
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:254
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
@@ -328,7 +324,6 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:613
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceAscii.cpp:330
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:453
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:481
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:483
@@ -419,8 +414,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LiveListenerInfo.
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:242
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MantidVersion.cpp:100
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MaterialBuilder.cpp:219
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MaterialBuilder.cpp:231
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:113
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:158

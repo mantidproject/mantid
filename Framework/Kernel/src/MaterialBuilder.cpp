@@ -216,7 +216,7 @@ MaterialBuilder &MaterialBuilder::setAbsorptionXSection(double xsec) {
  * @param filename Name of the file containing the attenuation profile
  * @return A reference to the this object to allow chaining
  */
-MaterialBuilder &MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
+MaterialBuilder &MaterialBuilder::setAttenuationProfileFilename(const std::string &filename) {
   if (!filename.empty()) {
     m_attenuationProfileFileName = filename;
   }
@@ -228,7 +228,7 @@ MaterialBuilder &MaterialBuilder::setAttenuationProfileFilename(std::string file
  * @param filename Name of the file containing the attenuation profile
  * @return A reference to the this object to allow chaining
  */
-MaterialBuilder &MaterialBuilder::setXRayAttenuationProfileFilename(std::string filename) {
+MaterialBuilder &MaterialBuilder::setXRayAttenuationProfileFilename(const std::string &filename) {
   if (!filename.empty()) {
     m_xRayAttenuationProfileFileName = filename;
   }
