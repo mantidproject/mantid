@@ -19,7 +19,6 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering final : public API::Algorithm {
 public:
   CalculatePlaczekSelfScattering() : API::Algorithm() {}
-  virtual ~CalculatePlaczekSelfScattering() = default;
   virtual const std::string name() const override { return "CalculatePlaczekSelfScattering"; }
   virtual int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override { return {"FitIncidentSpectrum"}; }

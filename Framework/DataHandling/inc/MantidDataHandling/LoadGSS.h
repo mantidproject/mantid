@@ -56,7 +56,7 @@ private:
   API::MatrixWorkspace_sptr loadGSASFile(const std::string &filename, bool useBankAsSpectrum);
 
   /// Convert a string (value+unit) to double (value)
-  double convertToDouble(std::string inputstring);
+  double convertToDouble(const std::string &inputstring);
 
   /// Create an instrument geometry.
   void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace, const std::string &instrumentname,

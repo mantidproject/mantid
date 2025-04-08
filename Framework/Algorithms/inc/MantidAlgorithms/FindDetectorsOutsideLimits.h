@@ -51,13 +51,6 @@ class MANTID_ALGORITHMS_DLL FindDetectorsOutsideLimits : public DetectorDiagnost
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsOutsideLimits"; }
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Identifies histograms and their detectors that have total numbers "
-           "of counts over a user defined maximum or less than the user define "
-           "minimum.";
-  }
-
   const std::string category() const override;
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
