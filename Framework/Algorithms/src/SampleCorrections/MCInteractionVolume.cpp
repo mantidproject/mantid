@@ -68,6 +68,8 @@ MCInteractionVolume::create(const API::Sample &sample, const size_t maxScatterAt
                             const MCInteractionVolume::ScatteringPointVicinity pointsIn, IObject_sptr gaugeVolume) {
   auto interactionVol =
       std::shared_ptr<MCInteractionVolume>(new MCInteractionVolume(sample, maxScatterAttempts, pointsIn, gaugeVolume));
+  // init calls member functions that require instantiation of virtual functions so deferring this until after
+  // construction through a factory is preferable.
   interactionVol->init();
   return interactionVol;
 }

@@ -41,6 +41,8 @@ public:
   void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) override;
 
 private:
+  // init required to be called separately to constructor, so here we prevent public access to direct creation of
+  // instance
   explicit MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
                                const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,
                                Geometry::IObject_sptr gaugeVolume = nullptr);
