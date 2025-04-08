@@ -90,6 +90,21 @@ public:
     file.close();
   }
 
+  void test_open_group_layers() {
+    cout << "\ntest openGroup layers\n";
+    std::string filename = "test_nexus_file_grp_layers_h4.h4";
+    string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
+
+    // create a file with group -- open it
+    NeXus::File file(filename, NXACC_CREATE4);
+    file.makeGroup(grp1, cls1, false);
+    file.openGroup(grp1, cls1);
+
+    // create a group inside the group -- open it
+    file.makeGroup(grp2, cls2, false);
+    file.openGroup(grp2, cls2);
+  }
+
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
     std::string filename = "test_nexus_file_grp_h4.h4";
