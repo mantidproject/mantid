@@ -74,22 +74,25 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
 
 bool SpinStateValidator::anyOfIsInSet(const std::vector<std::string> &anyOf,
                                       const std::unordered_set<std::string> &set) {
-  return std::any_of(anyOf.cbegin(), anyOf.cend(), [&set](const std::string &s) { return setContains(set, s); });
+  return std::any_of(anyOf.cbegin(), anyOf.cend(),
+                     [&set](const std::string &stringPair) { return setContains(set, stringPair); });
 }
 
 const std::unordered_set<std::string> SpinStateValidator::getAllowedPairStates() const {
-  if (m_extra.empty()) {
-    return {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
+  std::unordered_set<std::string> allowedPairs = {m_para + m_para, m_para + m_anti, m_anti + m_para, m_anti + m_anti};
+  if (!m_extra.empty()) {
+    allowedPairs.insert(
+        {m_extra + m_para, m_extra + m_anti, m_para + m_extra, m_extra + m_extra, m_para + m_extra, m_anti + m_extra});
   }
-  return {m_extra + m_para,  m_extra + m_anti, m_para + m_extra, m_para + m_anti,  m_anti + m_para,
-          m_extra + m_extra, m_para + m_para,  m_anti + m_anti,  m_para + m_extra, m_anti + m_extra};
+  return allowedPairs;
 }
 
 const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const {
-  if (m_extra.empty()) {
-    return {m_para, m_anti};
+  std::unordered_set<std::string> allowedSinglePairs = {m_para, m_anti};
+  if (!m_extra.empty()) {
+    allowedSinglePairs.emplace(m_extra);
   }
-  return {m_para, m_anti, m_extra};
+  return allowedSinglePairs;
 }
 
 } // namespace Mantid::Kernel
