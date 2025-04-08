@@ -82,7 +82,7 @@ private:
 public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
-    std::string const nxFile("NexusFile_test_char.h5");
+    std::string const nxFile("LegacyNexus/hdf5/NexusFile_test_char.h5");
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
@@ -120,12 +120,12 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "napi slab test done\n";
+    cout << "napi char test done\n";
   }
 
   void test_napi_vec() {
     cout << "Starting NAPI VEC Test\n";
-    std::string const nxFile("NexusFile_test_vec.h5");
+    std::string const nxFile("LegacyNexus/hdf5/NexusFile_test_vec.h5");
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
@@ -161,13 +161,13 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "napi slab test done\n";
+    cout << "napi vec test done\n";
   }
 
   void test_openPath() {
     cout << "tests for openPath\n";
 
-    string const filename("NexusFile_openpathtest.nxs");
+    string const filename("LegacyNexus/hdf5/NexusFile_openpathtest.nxs");
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     File fileid(filepath);
 
@@ -200,7 +200,7 @@ public:
   void test_links() {
     cout << "tests of linkature\n";
 
-    string const filename("NexusFIle_linktest.nxs");
+    string const filename("LegacyNexus/hdf5/NexusFIle_linktest.nxs");
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     File fileid(filepath);
 
@@ -225,7 +225,6 @@ public:
 
     // cleanup
     fileid.close();
-    ;
 
     printf("group link works\n");
   }

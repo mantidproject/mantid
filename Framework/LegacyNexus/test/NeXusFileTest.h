@@ -42,7 +42,8 @@ public:
 
   void test_open_group() {
     cout << "\ntest openGroup\n";
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
     File file(filename, NXACC_READ);
 
     // create a group, to be opened
@@ -64,7 +65,8 @@ public:
 
   void test_open_group_bad() {
     cout << "\ntest openGroup bad\n";
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
     File file(filename, NXACC_READ);
 
     string grp("abc"), notgrp("clothes"), cls("NXclass"), notcls("NXpants");
@@ -76,9 +78,24 @@ public:
     file.close();
   }
 
+  void test_open_group_layers() {
+    cout << "\ntest openGroup layers\n";
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp_layers.h5");
+    string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
+
+    File file(filename, NXACC_READ);
+    // Open group
+    file.openGroup(grp1, cls1);
+
+    // Open group player
+    file.openGroup(grp2, cls2);
+  }
+
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
     File file(filename, NXACC_READ);
 
     // check error at root
@@ -95,12 +112,186 @@ public:
     file.close();
   }
 
-  void test_getPath() {
-    cout << "\ntest get_path\n";
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("test_nexus_file_grp.h5");
+  // #################################################################################################################
+  // TEST OPEN / CLOSE DATASET
+  // #################################################################################################################
+
+  void test_open_dataset() {
+    cout << "\ntest openData\n";
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_data.h5");
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+
+    string data("test_group");
+    NXnumtype type(NXnumtype::CHAR);
+
+    // check error conditions
+    TS_ASSERT_THROWS(file.openData(string()), Exception &);
+    TS_ASSERT_THROWS(file.openData("tacos1"), Exception &);
+
+    // open dataset
+    TS_ASSERT_THROWS_NOTHING(file.openData(data));
+  }
+
+  void test_closeData() {
+    cout << "\ntest closeData\n";
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataclose.h5");
+
+    File file(filename, NXACC_READ);
+
+    // check error at root
+    TS_ASSERT_THROWS(file.closeData(), Exception &);
+
+    // now open data, close it, and check we are back at root
+    file.openGroup("entry", "NXentry");
+    file.openData("test_data:");
+    TS_ASSERT_THROWS_NOTHING(file.closeData());
+
+    TS_ASSERT_THROWS(file.closeData(), Exception &);
+  }
+
+  template <typename T> void do_test_data_get(File &file, string name, T in) {
+    T out;
+    file.openData(name);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+  }
+
+  void xtest_data_get_basic() {
+    cout << "\ntest dataset read/write\n";
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_basic.h5");
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+
+    // get an int
+    cout << "\tread int...";
+    do_test_data_get<int32_t>(file, "data_int", 12);
+    cout << "done\n";
+
+    // get a float
+    cout << "\tread float...";
+    do_test_data_get<float>(file, "data_float", 1.2f);
+    cout << "done\n";
+
+    // get double
+    cout << "\tread double...";
+    do_test_data_get<double>(file, "data_double", 1.4);
+    cout << "done\n";
+
+    // get a single char
+    cout << "\tread char...";
+    do_test_data_get<char>(file, "data_char", 'x');
+    cout << "done\n";
+
+    file.closeGroup();
+  }
+
+  void xtest_data_get_array() {
+    cout << "\ntest dataset read/write -- arrays\n";
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+
+    File file(filename, NXACC_READ);
+
+    // get an int
+    file.openData("data_int");
+    int in[] = {12, 7, 2, 3}, out[4];
+    Info info = file.getInfo();
+    file.getData(&(out[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(in[i], out[i]);
+    }
+
+    // put/get double array
+    file.openData("data_double");
+    double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
+    info = file.getInfo();
+    file.getData(&(outd[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(ind[i], outd[i]);
+    }
+
+    // put/get double 2D array
+    std::vector<std::int64_t> dims{3, 2};
+    double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
+    double outdd[3][2];
+    file.openData("data_double_2d");
+    info = file.getInfo();
+    file.getData(&(outdd[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 2);
+    for (int i = 0; i < dims[0]; i++) {
+      for (int j = 0; j < dims[1]; j++) {
+        TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
+      }
+    }
+  }
+
+  void test_data_putget_vector() {
+    cout << "\ntest dataset read/write -- vector\n";
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW_vec.h5");
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+
+    // put/get an int vector
+    vector<int32_t> in{11, 8, 9, 12}, out;
+    file.openData("data_int");
+    file.getData(out);
+    Info info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), in.size());
+    TS_ASSERT_EQUALS(in, out);
+
+    // put/get a double vector
+    vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
+    file.openData("data_dbl");
+    file.getData(outd);
+    info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), ind.size());
+    TS_ASSERT_EQUALS(ind, outd);
+  }
+
+  // #################################################################################################################
+  // TEST PATH METHODS
+  // #################################################################################################################
+
+  void test_getPath_groups() {
+    cout << "\ntest get_path -- groups only\n";
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
+    File file(filename, NXACC_READ);
 
     // at root, path should be "/"
-    File file(filename, NXACC_READ);
     TS_ASSERT_EQUALS("", file.getPath());
 
     // open a group -- now at "/abc"
@@ -122,4 +313,184 @@ public:
     // cleanup
     file.close();
   }
+
+  void test_getPath_data() {
+    cout << "\ntest get_path -- groups and data!\n";
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grpdata.h5");
+    File file(filename, NXACC_READ);
+
+    // at root, path should be "/"
+    TS_ASSERT_EQUALS("", file.getPath());
+
+    // open a group -- now at "/abc"
+    file.openGroup("abc", "NXentry");
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.openData("def");
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    file.closeData();
+  }
+
+  void test_openPath() {
+    cout << "\ntest openPath\n";
+    fflush(stdout);
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_entries.h5");
+    File file(filename, NXACC_READ);
+
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openPath(""), Exception &);
+    // TS_ASSERT_THROWS(file.openPath("entry1"), Exception &);
+    TS_ASSERT_THROWS(file.openPath("/pants"), Exception &);
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), Exception &);
+
+    // make sure we are at root
+    file.openPath("/");
+
+    // open the root
+    file.openGroup("entry1", "NXentry");
+    std::string actual, expected = "";
+    file.openPath("/");
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2b/layer3a";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2a/data1";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+  }
+
+  void xtest_getInfo() {
+    cout << "\ntest getInfo -- good\n";
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+    file.openData("int_data");
+
+    // get the info and check
+    Info info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, getType<int32_t>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+
+    file.closeData();
+
+    file.openData("double_data");
+
+    // get the info and check
+    info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, getType<double>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+  }
+
+  void test_getInfo_bad() {
+    cout << "\ntest getInfo -- bad\n";
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+
+    File file(filename, NXACC_READ);
+    file.openGroup("entry", "NXentry");
+
+    file.openData("int_data");
+    ;
+    file.closeData();
+
+    // open a group and try to get info
+    file.openGroup("a_group", "NXshorts");
+    TS_ASSERT_THROWS(file.getInfo(), Exception &);
+  }
+
+  // ##################################################################################################################
+  // TEST ATTRIBUTE METHODS
+  // ################################################################################################################
+
+  template <typename T> void do_test_get_attr(File &file, string name, T const &data) {
+    // test put/get by pointer to data
+    T out;
+    file.getAttr<T>(name, out);
+    TS_ASSERT_EQUALS(data, out);
+  }
+
+  void test_get_attr_basic() {
+    cout << "\ntest attribute read/write\n";
+
+    // open a file
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_attr.h5");
+    File file(filename, NXACC_READ);
+
+    // put/get an int attribute
+    do_test_get_attr(file, "int_attr_", 12);
+
+    // put/get a double attribute
+    do_test_get_attr(file, "dbl_attr_", 120.2e6);
+  }
+
+  void test_getEntries() {
+    cout << "\ntest getEntries\n";
+
+    // open a file
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_entries.h5");
+    File file(filename, NXACC_READ);
+
+    file.openPath("/");
+    // at root level, should be entry1, entry2
+    std::map<std::string, std::string> actual = file.getEntries();
+    std::map<std::string, std::string> expected = {std::pair<std::string, std::string>{"entry1", "NXentry"},
+                                                   std::pair<std::string, std::string>{"entry2", "NXentry"}};
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1, should be layer2a, layer2b
+    file.openPath("/entry1");
+    actual = file.getEntries();
+    expected = std::map<std::string, std::string>({std::pair<std::string, std::string>{"layer2a", "NXentry"},
+                                                   std::pair<std::string, std::string>{"layer2b", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry1/layer2a");
+    actual = file.getEntries();
+    expected = std::map<std::string, std::string>({std::pair<std::string, std::string>{"layer3a", "NXentry"},
+                                                   std::pair<std::string, std::string>{"layer3b", "NXentry"},
+                                                   std::pair<std::string, std::string>{"data1", "SDS"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry2/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry2/layer2c");
+    actual = file.getEntries();
+    expected = std::map<std::string, std::string>({std::pair<std::string, std::string>{"layer3c", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+  }
+
+  // ##################################################################################################################
+  // TEST LINK METHODS
+  // ################################################################################################################
+
+  /* NOTE these pre-exist, in NeXusFileReadWriteTest.h*/
 };

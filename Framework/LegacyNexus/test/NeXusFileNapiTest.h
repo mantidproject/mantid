@@ -114,7 +114,7 @@ public:
   void test_read_hdf5() {
     cout << " Nexus File Tests\n";
     string const fileext = ".h5";
-    string const filename("nexus_file_napi_test_cpp" + fileext);
+    string const filename("LegacyNexus/hdf5/nexus_file_napi_test_cpp" + fileext);
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
 
     // try reading a file
