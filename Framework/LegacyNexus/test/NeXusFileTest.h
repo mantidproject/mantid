@@ -161,8 +161,8 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
-  void xtest_data_get_basic() {
-    cout << "\ntest dataset read/write\n";
+  void test_data_get_basic() {
+    cout << "\ntest dataset read\n";
 
     // open a file
     const std::string filename =
@@ -194,16 +194,17 @@ public:
     file.closeGroup();
   }
 
-  void xtest_data_get_array() {
-    cout << "\ntest dataset read/write -- arrays\n";
+  void test_data_get_array() {
+    cout << "\ntest dataset read -- arrays\n";
 
     // open a file
     const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_array.h5");
 
     File file(filename, NXACC_READ);
 
     // get an int
+    file.openGroup("entry", "NXentry");
     file.openData("data_int");
     int in[] = {12, 7, 2, 3}, out[4];
     Info info = file.getInfo();
@@ -216,7 +217,7 @@ public:
       TS_ASSERT_EQUALS(in[i], out[i]);
     }
 
-    // put/get double array
+    // get double array
     file.openData("data_double");
     double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
     info = file.getInfo();
@@ -229,7 +230,7 @@ public:
       TS_ASSERT_EQUALS(ind[i], outd[i]);
     }
 
-    // put/get double 2D array
+    // get double 2D array
     std::vector<std::int64_t> dims{3, 2};
     double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
     double outdd[3][2];
@@ -246,19 +247,20 @@ public:
         TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
       }
     }
+    file.closeGroup();
   }
 
-  void test_data_putget_vector() {
-    cout << "\ntest dataset read/write -- vector\n";
+  void test_data_get_vector() {
+    cout << "\ntest dataset read -- vector\n";
 
     // open a file
     const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW_vec.h5");
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_vec.h5");
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
 
-    // put/get an int vector
+    // get an int vector
     vector<int32_t> in{11, 8, 9, 12}, out;
     file.openData("data_int");
     file.getData(out);
@@ -269,7 +271,7 @@ public:
     TS_ASSERT_EQUALS(info.dims.front(), in.size());
     TS_ASSERT_EQUALS(in, out);
 
-    // put/get a double vector
+    // get a double vector
     vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
     file.openData("data_dbl");
     file.getData(outd);
@@ -374,7 +376,7 @@ public:
 
     // open a file
     const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR.h5");
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
     file.openData("int_data");
@@ -400,7 +402,7 @@ public:
     cout << "\ntest getInfo -- bad\n";
     // open a file
     const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataRW.h5");
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR.h5");
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -419,23 +421,23 @@ public:
   // ################################################################################################################
 
   template <typename T> void do_test_get_attr(File &file, string name, T const &data) {
-    // test put/get by pointer to data
+    // test get by pointer to data
     T out;
     file.getAttr<T>(name, out);
     TS_ASSERT_EQUALS(data, out);
   }
 
   void test_get_attr_basic() {
-    cout << "\ntest attribute read/write\n";
+    cout << "\ntest attribute read\n";
 
     // open a file
     const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_attr.h5");
     File file(filename, NXACC_READ);
 
-    // put/get an int attribute
+    // get an int attribute
     do_test_get_attr(file, "int_attr_", 12);
 
-    // put/get a double attribute
+    // get a double attribute
     do_test_get_attr(file, "dbl_attr_", 120.2e6);
   }
 
