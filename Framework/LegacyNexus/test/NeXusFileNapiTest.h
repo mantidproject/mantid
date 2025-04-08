@@ -111,11 +111,12 @@ private:
   }
 
 public:
-  void test_read_hdf5() {
+  void test_read() { impl_test_read(NexusFormat::HDF5); }
+
+  void impl_test_read(NexusFormat fmt) {
     cout << " Nexus File Tests\n";
-    string const fileext = ".h5";
-    string const filename("LegacyNexus/hdf5/nexus_file_napi_test_cpp" + fileext);
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "nexus_file_napi_test_cpp");
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     // try reading a file
     do_test_read(filepath);
@@ -124,10 +125,10 @@ public:
     // try using the load path
     if (getenv("NX_LOAD_PATH") == NULL) {
       std::string envStr = "NX_LOAD_PATH=" + filepath;
-      envStr.erase(envStr.find(filename), filename.size());
+      envStr.erase(envStr.find(vars.relFilePath));
       envSet = putenv(envStr.c_str());
     }
-    do_test_loadPath(filename);
+    do_test_loadPath(vars.relFilePath);
 
     // clean load path
     if (envSet == 0) {
