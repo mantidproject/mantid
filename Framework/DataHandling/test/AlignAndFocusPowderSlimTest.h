@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
 #include "MantidKernel/Timer.h"
@@ -28,10 +29,12 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void run_test(const std::string &filename) {
+  // run the algorithm do some common checks and return output workspace name
+  MatrixWorkspace_sptr run_algorithm(const std::string &filename) {
+    const std::string wksp_name("VULCAN");
+
     std::cout << "==================> " << filename << '\n';
     Mantid::Kernel::Timer timer;
-    const std::string wksp_name("VULCAN");
     AlignAndFocusPowderSlim alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -43,23 +46,55 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
 
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    return outputWS;
+  }
+
+  void test_defaults() {
+    const std::string filename("VULCAN_218062.nxs.h5");
+    MatrixWorkspace_sptr outputWS = run_algorithm(filename);
+
+    // observed value
+    constexpr size_t NUM_Y{4641};
+
+    // verify the output
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), NUM_Y);
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
+    // default values in algorithm
+    TS_ASSERT_EQUALS(outputWS->readX(0).front(), 10.);
+    TS_ASSERT_EQUALS(outputWS->readX(0).back(), 16667.);
+    // observed values from running
+    const auto y_values = outputWS->readY(0);
+    TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
+    TS_ASSERT_EQUALS(y_values[0], 0.);
+    TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 0.);
+    TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 20719);
+
+    // do not need to cleanup because workspace did not go into the ADS
+  }
+
+  // ==================================
+  // TODO things below this point are for benchmarking and will be removed later
+  // ==================================
+
+  void run_test(const std::string &filename) {
+    MatrixWorkspace_sptr outputWS = run_algorithm(filename);
+
     // LoadEventNexus 4 seconds
     // tof 6463->39950
 
     // verify the output
-    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 3349); // observed value
 
     // do not need to cleanup because workspace did not go into the ADS
   }
 
-  void test_exec1GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218075.nxs.h5"); }
+  void xtest_exec1GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218075.nxs.h5"); }
 
-  void test_exec10GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218092.nxs.h5"); }
+  void xtest_exec10GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_218092.nxs.h5"); }
 
-  void test_exec18GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_217967.nxs.h5"); }
-
-  //  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void xtest_exec18GB() { run_test("/home/pf9/build/mantid/vulcanperf/VULCAN_217967.nxs.h5"); }
 };
