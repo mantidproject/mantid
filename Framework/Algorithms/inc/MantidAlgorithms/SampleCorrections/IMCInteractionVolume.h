@@ -35,7 +35,6 @@ using TrackPair = std::tuple<bool, std::shared_ptr<Geometry::Track>, std::shared
 */
 class MANTID_ALGORITHMS_DLL IMCInteractionVolume {
 public:
-  virtual void init() = 0;
   virtual ~IMCInteractionVolume() = default;
   virtual TrackPair calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
                                               const Kernel::V3D &endPos, MCInteractionStatistics &stats) const = 0;
@@ -43,6 +42,9 @@ public:
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;
   virtual Geometry::IObject_sptr getGaugeVolume() const = 0;
   virtual void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) = 0;
+
+protected:
+  void init();
 };
 } // namespace Algorithms
 } // namespace Mantid
