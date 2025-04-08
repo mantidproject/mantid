@@ -27,6 +27,7 @@ class IBeamProfile;
 */
 class MANTID_ALGORITHMS_DLL MCInteractionVolume : public IMCInteractionVolume {
 public:
+  void init() override;
   enum class ScatteringPointVicinity { SAMPLEANDENVIRONMENT, SAMPLEONLY, ENVIRONMENTONLY };
   MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
                       const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,

@@ -45,7 +45,6 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(std::shared_ptr<IMCInteractionVolume>
  * outside the interaction volume class
  * @param interactionVolume The interaction volume object
  * @param beamProfile The beam profile
- * @return The interaction volume object with active region set
  */
 void MCAbsorptionStrategy::setActiveRegion(std::shared_ptr<IMCInteractionVolume> interactionVolume,
                                            const IBeamProfile &beamProfile) {

@@ -232,6 +232,7 @@ private:
     MOCK_METHOD1(setActiveRegion, void(const Mantid::Geometry::BoundingBox &));
     MOCK_METHOD1(setGaugeVolume, void(Mantid::Geometry::IObject_sptr gaugeVolume));
     MOCK_CONST_METHOD0(getGaugeVolume, Mantid::Geometry::IObject_sptr());
+    MOCK_METHOD0(init, void());
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
   class MockTrack final : public Mantid::Geometry::Track {
