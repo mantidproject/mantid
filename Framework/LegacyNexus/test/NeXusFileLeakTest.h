@@ -49,7 +49,7 @@ public:
   void test_leak1() {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath("nexus_leak_test1.nxs");
+    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/nexus_leak_test1.nxs");
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
@@ -67,5 +67,44 @@ public:
       // fileid.openGroup(oss, "NXentry"); Lets open and close a few groups?
     }
     cout << "Leak Test 1 Success!\n";
+  }
+
+  void xtest_leak2() {
+    int const nFiles = 1;
+    int const nEntry = 10;
+    int const nData = 10;
+    vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
+
+    cout << "Running Leak Test 2: " << nFiles << " iterations\n";
+
+    NXaccess access_mode = NXACC_READ;
+    std::string strFile;
+
+    for (int iFile = 0; iFile < nFiles; iFile++) {
+      strFile = strmakef("LegacyNexus/hdf5/nexus_leak_test2_%03d.nxs", iFile);
+      const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(strFile);
+      cout << "file " << strFile << "\n";
+
+      File fileid(strFile, access_mode);
+
+      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
+        std::string oss(strmakef("entry_%d", iEntry));
+        fileid.openGroup(oss, "NXentry");
+        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
+          std::string oss2(strmakef("data_%d", iNXdata));
+          fileid.openGroup(oss2, "NXdata");
+          for (int iData = 0; iData < nData; iData++) {
+            std::string oss3(strmakef("i2_data_%d", iData));
+            std::vector<int64_t> dims({(int64_t)i2_array.size()});
+            fileid.openData(oss3);
+            fileid.closeData();
+          }
+          fileid.closeGroup();
+        }
+        fileid.closeGroup();
+      }
+      fileid.close();
+    }
+    cout << "Leak Test 2 Success!\n";
   }
 };
