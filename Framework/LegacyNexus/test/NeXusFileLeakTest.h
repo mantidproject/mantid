@@ -43,7 +43,6 @@ public:
    * These correspond to former napi tests
    * - leak_test1
    * - leak_test2
-   * - leak_test3
    */
 
   void test_leak1() {
@@ -69,7 +68,7 @@ public:
     cout << "Leak Test 1 Success!\n";
   }
 
-  void xtest_leak2() {
+  void test_leak2() {
     int const nFiles = 1;
     int const nEntry = 10;
     int const nData = 10;
@@ -83,9 +82,9 @@ public:
     for (int iFile = 0; iFile < nFiles; iFile++) {
       strFile = strmakef("LegacyNexus/hdf5/nexus_leak_test2_%03d.nxs", iFile);
       const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(strFile);
-      cout << "file " << strFile << "\n";
+      cout << "file " << szFile << "\n";
 
-      File fileid(strFile, access_mode);
+      File fileid(szFile, access_mode);
 
       for (int iEntry = 0; iEntry < nEntry; iEntry++) {
         std::string oss(strmakef("entry_%d", iEntry));
