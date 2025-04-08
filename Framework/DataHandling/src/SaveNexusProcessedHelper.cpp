@@ -15,20 +15,29 @@
 // Maximum base file name size on modern windows systems is 260 characters
 #define NAME_MAX 260
 #endif /* _WIN32 */
+
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <memory>
 
 namespace Mantid::NeXus {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+using HistogramData::HistogramDx;
+using HistogramData::HistogramE;
+using HistogramData::HistogramX;
+using HistogramData::HistogramY;
+using Mantid::MantidVec; // for `<rebinned output>->readF(size_t index)`
 
 namespace {
 /// static logger
@@ -190,6 +199,79 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title, const std::
 }
 
 //-------------------------------------------------------------------------------------
+// Internal constants and template functions, used by `NexusFileIO::writeNexusProcessedData2D`:
+
+namespace {
+
+const double _DEFAULT_FILL_VALUE(0.0);
+
+// Typedef for vector-accessor member functions with signatures like:
+//   `const HistogramData::HistogramY & Mantid::API::MatrixWorkspace::y 	( 	const size_t  	index	)
+//   const`
+template <class V, class WS> using _VAccessor = const V &(WS::*)(size_t) const;
+
+// Return the data pointer for a vector:
+//   this allows us to work with both  `MantidVec` and `FixedLengthVector`.
+template <class V> const double *_dataPointer(const V &v) { return v.rawData().data(); }
+
+template <> const double *_dataPointer<MantidVec>(const MantidVec &v) { return v.data(); }
+
+// Internal-use method:
+//   * Create the dataset and write chunks of double-precision data;
+//   * Optionally fill the chunks with a specified fill value;
+//   * Optionally close the dataset.
+template <class V, class WS>
+void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open group, but NO open dataset
+                       const std::string &name,
+                       std::shared_ptr<const WS> src, // Do not pass std::shared_ptr<..> by reference!
+                       const std::vector<int> &indices, _VAccessor<V, WS> vData, bool raggedSpectra = false,
+                       ::NeXus::NXcompression compressionType = ::NeXus::NXcompression::NONE,
+                       double fillValue = _DEFAULT_FILL_VALUE, bool closeData = true) {
+
+  const size_t N_chunk = indices.size(); // number of spectra
+
+  size_t _chunk_size = ((*src).*vData)(0).size();
+  if (raggedSpectra) {
+    for (size_t n : indices)
+      _chunk_size = std::max(_chunk_size, ((*src).*vData)(n).size());
+  }
+  const size_t chunk_size = _chunk_size;
+
+  const ::NeXus::DimVector dims = {static_cast<::NeXus::dimsize_t>(N_chunk),
+                                   static_cast<::NeXus::dimsize_t>(chunk_size)};
+  const ::NeXus::DimSizeVector chunk_dims = {1, static_cast<::NeXus::dimsize_t>(chunk_size)};
+
+  // Create and open the dataset.
+  // (If compressionType == NXcompression::NONE, this just creates a non-compressed dataset.)
+  dest->makeCompData(name, NXnumtype::FLOAT64, dims, compressionType, chunk_dims, true);
+
+  // Prepare a padding vector. (Unfortunately, NeXus-api does not access `setFillValue`.)
+  const bool pad_data(fillValue != _DEFAULT_FILL_VALUE);
+  const std::vector<double> vFill(pad_data ? chunk_size : 0, fillValue);
+
+  // Write the data.
+  ::NeXus::DimVector start{0, 0};
+  for (size_t n : indices) {
+    const auto &v = ((*src).*vData)(n);
+    const ::NeXus::DimSizeVector data_dims = {1, static_cast<::NeXus::dimsize_t>(v.size())};
+    dest->putSlab(_dataPointer<V>(v), start, data_dims);
+    if (pad_data && data_dims[1] != static_cast<::NeXus::dimsize_t>(chunk_size)) {
+      // Fill the remainder of the slab.
+      const ::NeXus::DimSizeVector fill_dims = {1, static_cast<::NeXus::dimsize_t>(chunk_size) - data_dims[1]};
+      const ::NeXus::DimVector _start = {start[0], data_dims[1]};
+      dest->putSlab(vFill.data(), _start, fill_dims);
+    }
+
+    ++start[0];
+  }
+
+  if (closeData)
+    dest->closeData();
+}
+
+} // namespace
+
+//-------------------------------------------------------------------------------------
 /** Write out a MatrixWorkspace's data as a 2D matrix.
  * Use writeNexusProcessedDataEvent if writing an EventWorkspace.
  */
@@ -210,13 +292,6 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
     return (2);
-  const size_t nSpect = indices.size();
-  size_t nSpectBins = localworkspace->y(0).size();
-  if (raggedSpectra)
-    for (size_t i = 0; i < nSpect; i++)
-      nSpectBins = std::max(nSpectBins, localworkspace->y(indices[i]).size());
-  ::NeXus::DimVector dims_array = {static_cast<::NeXus::dimsize_t>(nSpect),
-                                   static_cast<::NeXus::dimsize_t>(nSpectBins)};
 
   // Set the axis labels and values
   Mantid::API::Axis *xAxis = localworkspace->getAxis(0);
@@ -240,6 +315,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   }
   // Get the values on the vertical axis
   std::vector<double> axis2;
+  const size_t nSpect = indices.size();
   if (nSpect < nHist)
     for (size_t i = 0; i < nSpect; i++)
       axis2.emplace_back((*sAxis)(indices[i]));
@@ -247,17 +323,13 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++)
       axis2.emplace_back((*sAxis)(i));
 
-  ::NeXus::DimVector start = {0, 0};
-  ::NeXus::DimSizeVector asize = {1, dims_array[1]};
-
   // -------------- Actually write the 2D data ----------------------------
   if (write2Ddata) {
-    std::string name = "values";
-    m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
-    for (size_t i = 0; i < nSpect; i++) {
-      m_filehandle->putSlab(localworkspace->y(indices[i]).rawData().data(), start, asize);
-      start[0]++;
-    }
+    _writeChunkedData<HistogramY, MatrixWorkspace>(m_filehandle, "values", localworkspace, indices, &MatrixWorkspace::y,
+                                                   raggedSpectra, m_nexuscompression, _DEFAULT_FILL_VALUE,
+                                                   false // don't close the dataset
+    );
+
     if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     m_filehandle->putAttr("signal", 1);
@@ -267,28 +339,21 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     m_filehandle->putAttr("unit_label", localworkspace->YUnitLabel(), false);
     m_filehandle->closeData();
 
-    // error
-    name = "errors";
-    m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
-    start[0] = 0;
-    for (size_t i = 0; i < nSpect; i++) {
-      m_filehandle->putSlab(localworkspace->e(indices[i]).rawData().data(), start, asize);
-      start[0]++;
-    }
-
+    // errors
+    _writeChunkedData<HistogramE, MatrixWorkspace>(m_filehandle, "errors", localworkspace, indices, &MatrixWorkspace::e,
+                                                   raggedSpectra, m_nexuscompression);
     if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
     // Fractional area for RebinnedOutput
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
-      name = "frac_area";
-      m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
-      start[0] = 0;
-      for (size_t i = 0; i < nSpect; i++) {
-        m_filehandle->putSlab(rebin_workspace->readF(indices[i]).data(), start, asize);
-        start[0]++;
-      }
+
+      _writeChunkedData<MantidVec, RebinnedOutput>(m_filehandle, "frac_area", rebin_workspace, indices,
+                                                   &RebinnedOutput::readF, raggedSpectra, m_nexuscompression,
+                                                   _DEFAULT_FILL_VALUE,
+                                                   false // don't close the dataset
+      );
 
       std::string finalized = (rebin_workspace->isFinalized()) ? "1" : "0";
       m_filehandle->putAttr("finalized", finalized);
@@ -297,65 +362,28 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
       if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
+      m_filehandle->closeData();
     }
 
-    // Potentially x error
+    // x errors
     if (localworkspace->hasDx(0)) {
-      dims_array[0] = static_cast<int>(nSpect);
-      dims_array[1] = static_cast<int>(localworkspace->dx(0).size());
-      std::string dxErrorName = "xerrors";
-      m_filehandle->makeCompData(dxErrorName, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
-      start[0] = 0;
-      asize[1] = dims_array[1];
-      for (size_t i = 0; i < nSpect; i++) {
-        m_filehandle->putSlab(localworkspace->dx(indices[i]).rawData().data(), start, asize);
-        start[0]++;
-      }
+      _writeChunkedData<HistogramDx, MatrixWorkspace>(m_filehandle, "xerrors", localworkspace, indices,
+                                                      &MatrixWorkspace::dx, raggedSpectra, m_nexuscompression);
     }
-
-    m_filehandle->closeData();
   }
 
   // write X data, as single array or all values if "ragged"
-  if (raggedSpectra) {
-    size_t max_x_size{0};
-    for (size_t i = 0; i < nSpect; i++)
-      max_x_size = std::max(max_x_size, localworkspace->x(indices[i]).size());
-    dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(max_x_size);
-    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
-    start[0] = 0;
-
-    // create vector of NaNs to fill invalid space at end of ragged array
-    std::vector<double> nans(max_x_size, std::numeric_limits<double>::quiet_NaN());
-
-    for (size_t i = 0; i < nSpect; i++) {
-      size_t nBins = localworkspace->x(indices[i]).size();
-      asize[1] = static_cast<int>(nBins);
-      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
-      if (nBins < max_x_size) {
-        start[1] = asize[1];
-        asize[1] = static_cast<int>(max_x_size - nBins);
-        m_filehandle->putSlab(nans.data(), start, asize);
-        start[1] = 0;
-      }
-      start[0]++;
-    }
-  } else if (uniformSpectra) {
+  if (uniformSpectra) {
     m_filehandle->makeData("axis1", NXnumtype::FLOAT64,
                            ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(localworkspace->x(0).size())}, true);
     m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
-    dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(localworkspace->x(0).size());
-    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
-    start[0] = 0;
-    asize[1] = dims_array[1];
-    for (size_t i = 0; i < nSpect; i++) {
-      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
-      start[0]++;
-    }
+    _writeChunkedData<HistogramX, MatrixWorkspace>(
+        m_filehandle, "axis1", localworkspace, indices, &MatrixWorkspace::x, raggedSpectra,
+        ::NeXus::NXcompression::NONE, raggedSpectra ? std::numeric_limits<double>::quiet_NaN() : _DEFAULT_FILL_VALUE,
+        false // don't close the dataset
+    );
   }
 
   std::string dist = (localworkspace->isDistribution()) ? "1" : "0";

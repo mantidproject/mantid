@@ -41,8 +41,10 @@
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.hxx"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -822,7 +824,7 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", "testSpace");
-    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    std::string file = "SaveNexusProcessedTest_test_ragged_bins_spectrum_indices.nxs";
     if (Poco::File(file).exists())
       Poco::File(file).remove();
     TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
@@ -844,6 +846,153 @@ public:
     if (clearfiles)
       Poco::File(file).remove();
     AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_ragged_x_bins_input_data_bounds() {
+    // Fix SEGFAULT when writing ragged data: respect input vector bounds at `putSlab`.
+
+    // Implementation note:
+    //   The preliminary implementation separated this test into a "negative" test (producing the SEGFAULT),
+    // and a "positive" test (not producing the SEGFAULT).
+    // The negative test was then wrapped, using `Poco::SignalHandler` and the `poco_throw_on_signal` macro.
+    // Unfortunately, the current `CTest` implementation bypasses these mechanisms (how?),
+    // and treats any abnormal termination as a failed test.  For the moment, the negative test requires
+    // a "by hand" treatment:
+    //   that is, test the previous version of `Mantid` using this version of `SaveNexusProcessedTest`,
+    // and verify that this test fails due to a SEGFAULT.
+
+    // Create a ragged workspace with rapidly decreasing spectrum lengths.
+    using Counts = Mantid::HistogramData::Counts;
+    using CountStandardDeviations = Mantid::HistogramData::CountStandardDeviations;
+    using Histogram = Mantid::HistogramData::Histogram;
+    using Histogram_sptr = std::shared_ptr<Histogram>;
+    std::function<Histogram_sptr(double, double, std::size_t)> spectrumFunc = [](double x_0, double x_1,
+                                                                                 std::size_t N_x) -> Histogram_sptr {
+      const double dx = (x_1 - x_0) / (double(N_x - 1));
+      Histogram_sptr rval = std::make_shared<Histogram>(Histogram::XMode::Points, Histogram::YMode::Counts);
+      rval->resize(N_x); // resizes x: Points
+      rval->setCounts(Counts(N_x));
+      rval->setCountStandardDeviations(CountStandardDeviations(N_x));
+
+      auto &vx = rval->mutableX();
+      auto &vy = rval->mutableY();
+      auto &ve = rval->mutableE();
+      double x = x_0;
+      for (std::size_t n = 0; n < N_x; ++n, x += dx) {
+        vx[n] = x;
+        vy[n] = 2.0;
+        ve[n] = M_SQRT2;
+      }
+      return rval;
+    };
+
+    const std::size_t PAGE_SIZE(4096);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunctionAndArgsList(
+        spectrumFunc, {{0.0, 25600.0, std::size_t(256 * PAGE_SIZE)},
+                       {0.0, 12800.0, std::size_t(128 * PAGE_SIZE)},
+                       {0.0, 6400.0, std::size_t(64 * PAGE_SIZE)},
+                       {0.0, 3200.0, std::size_t(32 * PAGE_SIZE)},
+                       {0.0, 1600.0, std::size_t(16 * PAGE_SIZE)},
+                       {0.0, 800.0, std::size_t(8 * PAGE_SIZE)},
+                       {0.0, 400.0, std::size_t(4 * PAGE_SIZE)},
+                       {0.0, 200.0, std::size_t(2 * PAGE_SIZE)}});
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws, false, false, "test instrument");
+    TS_ASSERT(ws->isRaggedWorkspace());
+    AnalysisDataService::Instance().add("testSpace", ws);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string fileName = "SaveNexusProcessedTest_test_ragged_bins_data_bounds.nxs";
+    if (Poco::File(fileName).exists())
+      Poco::File(fileName).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName));
+
+    // Verify that the current implementation doesn't produce a SEGFAULT.
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    // If the save successfully executed without producing a SEGFAULT, this test is complete.
+    if (clearfiles)
+      Poco::File(fileName).remove();
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_ragged_XY_readback() {
+    // Reading and writing ragged-workspace data: verify that spectra match on readback
+
+    // Create a ragged workspace with rapidly decreasing spectrum lengths.
+    using Counts = Mantid::HistogramData::Counts;
+    using CountStandardDeviations = Mantid::HistogramData::CountStandardDeviations;
+    using Histogram = Mantid::HistogramData::Histogram;
+    using Histogram_sptr = std::shared_ptr<Histogram>;
+    std::function<Histogram_sptr(double, double, std::size_t)> spectrumFunc = [](double x_0, double x_1,
+                                                                                 std::size_t N_x) -> Histogram_sptr {
+      const double dx = (x_1 - x_0) / (double(N_x - 1));
+      Histogram_sptr rval = std::make_shared<Histogram>(Histogram::XMode::Points, Histogram::YMode::Counts);
+      rval->resize(N_x); // resizes x: Points
+      rval->setCounts(Counts(N_x));
+      rval->setCountStandardDeviations(CountStandardDeviations(N_x));
+
+      auto &vx = rval->mutableX();
+      auto &vy = rval->mutableY();
+      auto &ve = rval->mutableE();
+      double x = x_0;
+      for (std::size_t n = 0; n < N_x; ++n, x += dx) {
+        vx[n] = x;
+        vy[n] = 2.0;
+        ve[n] = M_SQRT2;
+      }
+      return rval;
+    };
+
+    const std::size_t PAGE_SIZE(4096);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunctionAndArgsList(
+        spectrumFunc, {{0.0, 25600.0, std::size_t(256 * PAGE_SIZE)},
+                       {0.0, 12800.0, std::size_t(128 * PAGE_SIZE)},
+                       {0.0, 6400.0, std::size_t(64 * PAGE_SIZE)},
+                       {0.0, 3200.0, std::size_t(32 * PAGE_SIZE)},
+                       {0.0, 1600.0, std::size_t(16 * PAGE_SIZE)},
+                       {0.0, 800.0, std::size_t(8 * PAGE_SIZE)},
+                       {0.0, 400.0, std::size_t(4 * PAGE_SIZE)},
+                       {0.0, 200.0, std::size_t(2 * PAGE_SIZE)}});
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws, false, false, "test instrument");
+    TS_ASSERT(ws->isRaggedWorkspace());
+    AnalysisDataService::Instance().add("testSpace", ws);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string fileName = "SaveNexusProcessedTest_test_ragged_xy_readback.nxs";
+    if (Poco::File(fileName).exists())
+      Poco::File(fileName).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName));
+
+    // Verify that the current implementation doesn't produce a SEGFAULT.
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", fileName);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+
+    // check the X and Y values
+    for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(wsReloaded->readX(i), ws->readX(i));
+      TS_ASSERT_EQUALS(wsReloaded->readY(i), ws->readY(i));
+    }
+
+    if (clearfiles)
+      Poco::File(fileName).remove();
+    AnalysisDataService::Instance().remove("testSpace");
+    AnalysisDataService::Instance().remove("testSpaceReloaded");
   }
 
   void test_nexus_spectraDetectorMap() {
