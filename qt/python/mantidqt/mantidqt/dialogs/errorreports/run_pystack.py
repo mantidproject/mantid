@@ -33,7 +33,7 @@ def retrieve_thread_traces_from_coredump_file(workbench_pid: str) -> bytes:
         log.error(str(e))
         return b""
 
-    # Get most recent dump file, check it's python (can you check it's from workbench?)
+    # Get most recent dump file.
     core_file = _get_most_recent_core_dump_file(core_dumps_path, workbench_pid)
     if core_file is None:
         return b""
