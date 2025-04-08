@@ -32,29 +32,6 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-namespace {
-enum NexusFormat { HDF4, HDF5 };
-struct FormatUniqueVars {
-  std::string relFilePath;
-  std::string rootID;
-};
-FormatUniqueVars getFormatUniqueVars(const NexusFormat fmt, const std::string &filename) {
-  std::string relFilePath;
-  std::string rootID;
-  switch (fmt) {
-  case NexusFormat::HDF4:
-    relFilePath = "LegacyNexus/hdf4/" + filename + ".h4";
-    // In HDF4, returning the path of the root of the file gives ""
-    rootID = "";
-    break;
-  case NexusFormat::HDF5:
-    relFilePath = "LegacyNexus/hdf5/" + filename + ".h5";
-    rootID = "/";
-    break;
-  }
-  return FormatUniqueVars{relFilePath, rootID};
-}
-} // namespace
 class LegacyNeXusFileTest : public CxxTest::TestSuite {
 
 public:

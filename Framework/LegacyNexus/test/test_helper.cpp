@@ -30,3 +30,25 @@ std::string LegacyNexusTest::strmakef(const char *const fmt, ...) {
   va_end(args);
   return s;
 }
+
+LegacyNexusTest::FormatUniqueVars LegacyNexusTest::getFormatUniqueVars(const LegacyNexusTest::NexusFormat fmt,
+                                                                       const std::string &filename) {
+  std::string relFilePath;
+  std::string rootID;
+  std::string fileExt;
+  const std::string extSubStr = (filename.size() > 4) ? filename.substr(filename.size() - 4) : "";
+  switch (fmt) {
+  case LegacyNexusTest::NexusFormat::HDF4:
+    fileExt = (extSubStr == ".nxs") ? "" : ".h4";
+    relFilePath = "LegacyNexus/hdf4/" + filename + fileExt;
+    // In HDF4, returning the path of the root of the file gives ""
+    rootID = "";
+    break;
+  case LegacyNexusTest::NexusFormat::HDF5:
+    fileExt = (extSubStr == ".nxs") ? "" : ".h5";
+    relFilePath = "LegacyNexus/hdf5/" + filename + fileExt;
+    rootID = "/";
+    break;
+  }
+  return LegacyNexusTest::FormatUniqueVars{relFilePath, rootID};
+}

@@ -9,4 +9,12 @@ namespace LegacyNexusTest {
  */
 std::string strmakef(char const *const fmt, ...);
 
+enum NexusFormat { HDF4, HDF5 };
+
+struct FormatUniqueVars {
+  std::string relFilePath;
+  std::string rootID;
+};
+
+FormatUniqueVars getFormatUniqueVars(const NexusFormat fmt, const std::string &filename);
 } // namespace LegacyNexusTest
