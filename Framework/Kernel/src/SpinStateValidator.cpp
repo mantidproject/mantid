@@ -7,7 +7,7 @@
 
 #include "MantidKernel/SpinStateValidator.h"
 
-#include <MantidKernel/VectorHelper.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Mantid::Kernel {
@@ -33,7 +33,7 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   const auto &allowedPairs = getAllowedPairStates();
   const auto &allowedSingles = getAllowedSingleStates();
 
-  std::vector<std::string> spinStates = VectorHelper::splitStringIntoVector<std::string>(input);
+  auto spinStates = StringTokenizer{input, ",", StringTokenizer::TOK_TRIM}.asVector();
 
   int numberSpinStates = static_cast<int>(spinStates.size());
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())
