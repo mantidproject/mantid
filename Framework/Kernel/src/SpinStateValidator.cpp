@@ -28,9 +28,12 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     if (m_optional) {
       return "";
     }
-    return "Enter a spin state string, it should be a comma-separated list, e.g. " + m_para + m_anti + ", " + m_anti +
-           m_anti + ", " + m_anti + m_para + ", " + m_para + m_para + ".";
+    std::ostringstream msg;
+    msg << "Enter a spin state string, it should be a comma-separated list, e.g. ";
+    msg << m_para << m_anti << "," << m_para << m_para << "," << m_anti << m_para << ',' << m_anti << m_anti << ".";
+    return msg.str();
   }
+
   const auto &allowedPairs = getAllowedPairStates();
   const auto &allowedSingles = getAllowedSingleStates();
 
@@ -41,15 +44,17 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
     return "The number of spin states specified is not an allowed value";
 
   // First check that the spin states are valid entries
-  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [&](const std::string &s) {
-        const bool isPair = setContains(allowedPairs, s);
-        const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, s);
+  if (std::any_of(spinStates.cbegin(), spinStates.cend(), [&](const std::string &spinState) {
+        const bool isPair = setContains(allowedPairs, spinState);
+        const bool isSingle = m_acceptSingleStates && setContains(allowedSingles, spinState);
         return !isPair && !isSingle;
       })) {
-    return m_acceptSingleStates
-               ? "The spin states must either be one or two characters, with each being either a " + m_para + " or " +
-                     m_anti + "."
-               : "The spin states must consist of two characters, either a " + m_para + " or a " + m_anti + ".";
+    std::ostringstream msg;
+    msg << "The format for the spin states is invalid, every comma separated value should contain ";
+    msg << (m_acceptSingleStates ? "either one or two spin states " : "two spin states ") << "from the set " << m_para
+        << "," << m_anti << (!m_extra.empty() ? "," + m_extra : "") << ".";
+
+    return msg.str();
   }
 
   // Single digits can't mix with pairs
