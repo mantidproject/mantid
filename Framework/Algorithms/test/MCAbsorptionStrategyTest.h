@@ -46,7 +46,7 @@ public:
     MockBeamProfile testBeamProfile;
     EXPECT_CALL(testBeamProfile, defineActiveRegion(_)).WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
     const size_t nevents(10), maxTries(100);
-    std::shared_ptr<IMCInteractionVolume> interactionVol = std::make_shared<MCInteractionVolume>(testSampleSphere);
+    std::shared_ptr<IMCInteractionVolume> interactionVol = MCInteractionVolume::create(testSampleSphere);
     MCAbsorptionStrategy mcabsorb(interactionVol, testBeamProfile, Mantid::Kernel::DeltaEMode::Type::Direct, nevents,
                                   maxTries, false);
     // 3 random numbers per event expected
@@ -86,7 +86,7 @@ public:
     MockBeamProfile testBeamProfile;
     EXPECT_CALL(testBeamProfile, defineActiveRegion(_)).WillOnce(Return(testSampleSphere.getShape().getBoundingBox()));
     const size_t nevents(3), maxTries(100);
-    std::shared_ptr<IMCInteractionVolume> interactionVol = std::make_shared<MCInteractionVolume>(testSampleSphere);
+    std::shared_ptr<IMCInteractionVolume> interactionVol = MCInteractionVolume::create(testSampleSphere);
     MCAbsorptionStrategy mcabsorb(interactionVol, testBeamProfile, Mantid::Kernel::DeltaEMode::Type::Direct, nevents,
                                   maxTries, false);
     // 3 random numbers per event expected to generate x,y,z of each scatter pt
@@ -138,7 +138,7 @@ public:
     using namespace MonteCarloTesting;
     using namespace ::testing;
     MockBeamProfile testBeamProfile;
-    std::shared_ptr<MockMCInteractionVolume> testInteractionVolume = std::make_shared<MockMCInteractionVolume>();
+    std::shared_ptr<MockMCInteractionVolume> testInteractionVolume = MockMCInteractionVolume::createMock();
     MCAbsorptionStrategy testStrategy(testInteractionVolume, testBeamProfile, Mantid::Kernel::DeltaEMode::Elastic, 5, 2,
                                       true);
     MockRNG rng;
@@ -192,7 +192,7 @@ public:
     auto testThinAnnulus = MonteCarloTesting::createTestSample(MonteCarloTesting::TestSampleType::ThinAnnulus);
     RectangularBeamProfile testBeamProfile(ReferenceFrame(Y, Z, Right, "source"), V3D(), 1, 1);
     const size_t nevents(10), maxTries(1);
-    std::shared_ptr<IMCInteractionVolume> interactionVol = std::make_shared<MCInteractionVolume>(testThinAnnulus);
+    std::shared_ptr<IMCInteractionVolume> interactionVol = MCInteractionVolume::create(testThinAnnulus);
     MCAbsorptionStrategy mcabs(interactionVol, testBeamProfile, Mantid::Kernel::DeltaEMode::Type::Direct, nevents,
                                maxTries, false);
     MockRNG rng;
@@ -220,15 +220,31 @@ private:
     MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(const Mantid::Geometry::BoundingBox &));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
+
   class MockMCInteractionVolume final : public IMCInteractionVolume {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
+    // Mock Factory
+    static std::shared_ptr<MockMCInteractionVolume> createMock() {
+      auto mock = std::make_shared<MockMCInteractionVolume>();
+      mock->init();
+      return mock;
+    }
+
+    // Factory method mock (static, not part of IMCInteractionVolume)
+    static std::shared_ptr<IMCInteractionVolume> create(const Mantid::API::Sample &, size_t, ScatteringPointVicinity,
+                                                        Mantid::Geometry::IObject_sptr) {
+      return createMock();
+    }
+
     MOCK_CONST_METHOD4(calculateBeforeAfterTrack,
                        Mantid::Algorithms::TrackPair(Mantid::Kernel::PseudoRandomNumberGenerator &rng,
                                                      const Mantid::Kernel::V3D &startPos,
                                                      const Mantid::Kernel::V3D &endPos,
                                                      MCInteractionStatistics &stats));
     MOCK_CONST_METHOD0(getFullBoundingBox, const Mantid::Geometry::BoundingBox());
+    MOCK_CONST_METHOD1(generatePoint,
+                       Mantid::Algorithms::ComponentScatterPoint(Mantid::Kernel::PseudoRandomNumberGenerator &rng));
     MOCK_METHOD1(setActiveRegion, void(const Mantid::Geometry::BoundingBox &));
     MOCK_METHOD1(setGaugeVolume, void(Mantid::Geometry::IObject_sptr gaugeVolume));
     MOCK_CONST_METHOD0(getGaugeVolume, Mantid::Geometry::IObject_sptr());

@@ -57,10 +57,6 @@ protected:
                                                                 Kernel::DeltaEMode::Type EMode, const size_t nevents,
                                                                 const size_t maxScatterPtAttempts,
                                                                 const bool regenerateTracksForEachLambda);
-  virtual std::shared_ptr<IMCInteractionVolume>
-  createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
-                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
-                          Geometry::IObject_sptr gaugeVolume = nullptr);
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);

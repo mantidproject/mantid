@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 using Mantid::Algorithms::ComponentScatterPoint;
+using Mantid::Algorithms::IMCInteractionVolume;
 using Mantid::Algorithms::MCInteractionStatistics;
 using Mantid::Algorithms::MCInteractionVolume;
 using namespace ::testing;
@@ -38,10 +39,10 @@ public:
   void test_Bounding_Volume_Matches_Sample() {
     auto sample = createTestSample(TestSampleType::SolidSphere);
     auto sampleBox = sample.getShape().getBoundingBox();
-    MCInteractionVolume interactor(sample);
-    interactor.setActiveRegion(sampleBox);
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample);
+    interactor->setActiveRegion(sampleBox);
 
-    const auto interactionBox = interactor.getFullBoundingBox();
+    const auto interactionBox = interactor->getFullBoundingBox();
     TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
     TS_ASSERT_EQUALS(sampleBox.maxPoint(), interactionBox.maxPoint());
   }
@@ -55,10 +56,10 @@ public:
     EXPECT_CALL(rng, nextValue()).Times(Exactly(3)).WillRepeatedly(Return(0.25));
 
     auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample);
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample);
     MCInteractionStatistics trackStatistics(-1, sample);
     auto [success, beforeScatter, afterScatter] =
-        interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
+        interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
     TS_ASSERT(success);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getShape());
   }
@@ -74,17 +75,17 @@ public:
     // force scatter near front
     EXPECT_CALL(rng, nextValue()).Times(Exactly(3)).WillRepeatedly(Return(0.25));
 
-    MCInteractionVolume interactor(sample);
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample);
     MCInteractionStatistics trackStatistics(-1, sample);
     auto [success, beforeScatter, afterScatter] =
-        interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
+        interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getShape());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // force scatter near back (longer distance traversed with before lambda)
     EXPECT_CALL(rng, nextValue()).Times(Exactly(3)).WillRepeatedly(Return(0.75));
     std::tie(success, beforeScatter, afterScatter) =
-        interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
+        interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getShape());
   }
 
@@ -104,11 +105,11 @@ public:
         .WillOnce(Return(0.5))  // r2
         .WillOnce(Return(0.5)); // r3
 
-    MCInteractionVolume interactor(sample);
-    interactor.setActiveRegion(sample.getEnvironment().boundingBox());
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample);
+    interactor->setActiveRegion(sample.getEnvironment().boundingBox());
     MCInteractionStatistics trackStatistics(-1, sample);
     auto [success, beforeScatter, afterScatter] =
-        interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
+        interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getEnvironment().getContainer());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
@@ -116,7 +117,7 @@ public:
     EXPECT_CALL(rng, nextInt(-1, 0)).Times(Exactly(1)).WillOnce(Return(-1));      // MCInteractionVolume::generatePoint
     EXPECT_CALL(rng, nextValue()).Times(Exactly(3)).WillRepeatedly(Return(0.25)); // RandomPoint::bounded r1, r2, r3
     std::tie(success, beforeScatter, afterScatter) =
-        interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
+        interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter, sample.getShape());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
   }
@@ -126,7 +127,7 @@ public:
     auto kit = createTestKit();
     sample.setEnvironment(std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
 
-    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(sample));
+    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume::create(sample));
   }
 
   //----------------------------------------------------------------------------
@@ -135,10 +136,10 @@ public:
   void test_Construction_With_Invalid_Sample_Shape_Throws_Error() {
     Mantid::API::Sample sample;
     // nothing
-    TS_ASSERT_THROWS(MCInteractionVolume mcv(sample), const std::invalid_argument &);
+    TS_ASSERT_THROWS(MCInteractionVolume::create(sample), const std::invalid_argument &);
     // valid shape
     sample.setShape(ComponentCreationHelper::createSphere(1));
-    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(sample));
+    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume::create(sample));
   }
 
   void test_Throws_If_Point_Cannot_Be_Generated() {
@@ -150,9 +151,9 @@ public:
     MersenneTwister rng;
     rng.setSeed(1);
     const size_t maxTries(1);
-    MCInteractionVolume interactor(sample, maxTries);
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample, maxTries);
     MCInteractionStatistics trackStatistics(-1, sample);
-    TS_ASSERT_THROWS(interactor.calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics),
+    TS_ASSERT_THROWS(interactor->calculateBeforeAfterTrack(rng, startPos, endPos, trackStatistics),
                      const std::runtime_error &);
   }
 
@@ -165,8 +166,8 @@ public:
     sample.setShape(ComponentCreationHelper::createSphere(1));
     sample.setEnvironment(std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
 
-    MCInteractionVolume interactor(sample, maxAttempts);
-    interactor.setActiveRegion(kit->getComponent(0).getBoundingBox());
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample, maxAttempts);
+    interactor->setActiveRegion(kit->getComponent(0).getBoundingBox());
 
     // Generate "random" sequence
     MockRNG rng;
@@ -174,31 +175,31 @@ public:
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(0));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp1Point;
-    TS_ASSERT_THROWS_NOTHING(comp1Point = interactor.generatePoint(rng));
+    TS_ASSERT_THROWS_NOTHING(comp1Point = interactor->generatePoint(rng));
     TS_ASSERT(kit->isValid(comp1Point.scatterPoint));
     TS_ASSERT_EQUALS(comp1Point.componentIndex, 0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // Selects second component
-    MCInteractionVolume interactor2(sample, maxAttempts);
-    interactor2.setActiveRegion(kit->getComponent(1).getBoundingBox());
+    std::shared_ptr<IMCInteractionVolume> interactor2 = MCInteractionVolume::create(sample, maxAttempts);
+    interactor2->setActiveRegion(kit->getComponent(1).getBoundingBox());
 
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp2Point;
-    TS_ASSERT_THROWS_NOTHING(comp2Point = interactor2.generatePoint(rng));
+    TS_ASSERT_THROWS_NOTHING(comp2Point = interactor2->generatePoint(rng));
     TS_ASSERT(comp2Point.scatterPoint != comp1Point.scatterPoint);
     TS_ASSERT(kit->isValid(comp2Point.scatterPoint));
     TS_ASSERT_EQUALS(comp2Point.componentIndex, 1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
 
     // Selects third component
-    MCInteractionVolume interactor3(sample, maxAttempts);
-    interactor3.setActiveRegion(kit->getComponent(2).getBoundingBox());
+    std::shared_ptr<IMCInteractionVolume> interactor3 = MCInteractionVolume::create(sample, maxAttempts);
+    interactor3->setActiveRegion(kit->getComponent(2).getBoundingBox());
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
     EXPECT_CALL(rng, nextValue()).Times(3).WillOnce(Return(0.55)).WillOnce(Return(0.65)).WillOnce(Return(0.70));
     ComponentScatterPoint comp3Point;
-    TS_ASSERT_THROWS_NOTHING(comp3Point = interactor3.generatePoint(rng));
+    TS_ASSERT_THROWS_NOTHING(comp3Point = interactor3->generatePoint(rng));
     TS_ASSERT(comp3Point.scatterPoint != comp2Point.scatterPoint);
     TS_ASSERT(comp3Point.scatterPoint != comp1Point.scatterPoint);
     TS_ASSERT(kit->isValid(comp3Point.scatterPoint));
@@ -215,16 +216,16 @@ public:
     MockRNG rng;
     // Sequence will try to select one of the non-container pieces
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
-    EXPECT_CALL(rng, nextValue()).Times(3).WillRepeatedly(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).Times(6).WillRepeatedly(Return(0.5));
 
     using Mantid::API::Sample;
     Sample sample;
     sample.setShape(ComponentCreationHelper::createSphere(1));
     sample.setEnvironment(std::make_unique<Mantid::Geometry::SampleEnvironment>(*kit));
 
-    MCInteractionVolume interactor(sample, maxAttempts);
+    std::shared_ptr<IMCInteractionVolume> interactor = MCInteractionVolume::create(sample, maxAttempts);
     // Restrict region to can
-    TS_ASSERT_THROWS(interactor.generatePoint(rng), const std::runtime_error &);
+    TS_ASSERT_THROWS(interactor->generatePoint(rng), const std::runtime_error &);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
   }
 

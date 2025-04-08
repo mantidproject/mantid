@@ -195,22 +195,6 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
 }
 
 /**
- * Factory method to return an instance of the required interaction volume
- * class
- * @param sample A reference to the object defining details of the sample
- * @param maxScatterPtAttempts The maximum number of tries to generate a random
- * point within the object
- * @param pointsIn Where to generate the scattering point in
- * @return a pointer to an MCAbsorptionStrategy object
- */
-std::shared_ptr<IMCInteractionVolume>
-MonteCarloAbsorption::createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
-                                              const MCInteractionVolume::ScatteringPointVicinity pointsIn,
-                                              const Geometry::IObject_sptr gaugeVolume) {
-  return std::make_shared<MCInteractionVolume>(sample, maxScatterPtAttempts, pointsIn, gaugeVolume);
-}
-
-/**
  * Factory method to return an instance of the required absorption strategy
  * class
  * @param interactionVol The interaction volume object to inject into the
@@ -338,7 +322,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   }
 
   std::shared_ptr<IMCInteractionVolume> interactionVolume =
-      createInteractionVolume(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+      MCInteractionVolume::create(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
 
   Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
 

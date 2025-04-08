@@ -52,6 +52,27 @@ void MCInteractionVolume::init() {
 }
 
 /**
+ * Factory Method for constructing the volume encompassing the sample + any environment kit. The
+ * active region defines a bounding region for the sampling of the scattering
+ * position.
+ * @param sample A reference to a sample object that defines a valid shape
+ * & material
+ * @param maxScatterAttempts The maximum number of tries to generate a random
+ * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
+ * @param gaugeVolume Pointer to any gauge volume object defined for the interaction
+ * @return returns a shared pointer to interaction volume object
+ */
+std::shared_ptr<IMCInteractionVolume>
+MCInteractionVolume::create(const API::Sample &sample, const size_t maxScatterAttempts,
+                            const MCInteractionVolume::ScatteringPointVicinity pointsIn, IObject_sptr gaugeVolume) {
+  auto interactionVol =
+      std::shared_ptr<MCInteractionVolume>(new MCInteractionVolume(sample, maxScatterAttempts, pointsIn, gaugeVolume));
+  interactionVol->init();
+  return interactionVol;
+}
+
+/**
  * Construct the volume encompassing the sample + any environment kit. The
  * active region defines a bounding region for the sampling of the scattering
  * position.
@@ -60,14 +81,13 @@ void MCInteractionVolume::init() {
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
  * @param pointsIn Where to generate the scattering point in
+ * @param gaugeVolume Pointer to any gauge volume object defined for the interaction
  */
 MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                          IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(sample.hasEnvironment() ? &sample.getEnvironment() : nullptr),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {
-  init();
-}
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {}
 
 /**
  * Returns the defined gauge volume if one is present, otherwise returns nullptr
