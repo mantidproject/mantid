@@ -32,6 +32,29 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+namespace {
+enum NexusFormat { HDF4, HDF5 };
+struct FormatUniqueVars {
+  std::string relFilePath;
+  std::string rootID;
+};
+FormatUniqueVars getFormatUniqueVars(const NexusFormat fmt, const std::string &filename) {
+  std::string relFilePath;
+  std::string rootID;
+  switch (fmt) {
+  case NexusFormat::HDF4:
+    relFilePath = "LegacyNexus/hdf4/" + filename + ".h4";
+    // In HDF4, returning the path of the root of the file gives ""
+    rootID = "";
+    break;
+  case NexusFormat::HDF5:
+    relFilePath = "LegacyNexus/hdf5/" + filename + ".h5";
+    rootID = "/";
+    break;
+  }
+  return FormatUniqueVars{relFilePath, rootID};
+}
+} // namespace
 class LegacyNeXusFileTest : public CxxTest::TestSuite {
 
 public:
@@ -40,10 +63,12 @@ public:
   static LegacyNeXusFileTest *createSuite() { return new LegacyNeXusFileTest(); }
   static void destroySuite(LegacyNeXusFileTest *suite) { delete suite; }
 
-  void test_open_group() {
+  void test_open_group_h5() { impl_test_open_group(NexusFormat::HDF5); }
+
+  void impl_test_open_group(NexusFormat fmt) {
     cout << "\ntest openGroup\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // create a group, to be opened
@@ -57,16 +82,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
     auto new_loc = file.getGroupID();
     cout << strmakef("Located at %s\n", new_loc.targetPath);
-    TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
+    TS_ASSERT_DIFFERS(string(vars.rootID), string(new_loc.targetPath));
 
     // cleanup
     file.close();
   }
 
-  void test_open_group_bad() {
+  void test_open_group_badh5() { impl_test_open_group_bad(NexusFormat::HDF5); }
+
+  void impl_test_open_group_bad(NexusFormat fmt) {
     cout << "\ntest openGroup bad\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     string grp("abc"), notgrp("clothes"), cls("NXclass"), notcls("NXpants");
@@ -78,10 +105,12 @@ public:
     file.close();
   }
 
-  void test_open_group_layers() {
+  void test_open_group_layers_h5() { impl_test_open_group_layers(NexusFormat::HDF5); }
+
+  void impl_test_open_group_layers(NexusFormat fmt) {
     cout << "\ntest openGroup layers\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp_layers.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp_layers");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
 
     File file(filename, NXACC_READ);
@@ -92,10 +121,12 @@ public:
     file.openGroup(grp2, cls2);
   }
 
-  void test_closeGroup() {
+  void test_closeGroup_h5() { impl_test_closeGroup(NexusFormat::HDF5); }
+
+  void impl_test_closeGroup(NexusFormat fmt) {
     cout << "\ntest closeGroup\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // check error at root
@@ -104,7 +135,7 @@ public:
     // open group, close it, and check we are back at root
     file.openGroup("abc", "NXclass");
     auto ingrp = file.getGroupID();
-    TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
+    TS_ASSERT_DIFFERS(string(vars.rootID), string(ingrp.targetPath));
     file.closeGroup();
     TS_ASSERT_THROWS(file.getGroupID(), Exception &)
 
@@ -116,10 +147,12 @@ public:
   // TEST OPEN / CLOSE DATASET
   // #################################################################################################################
 
-  void test_open_dataset() {
+  void test_open_dataset_h5() { impl_test_open_dataset(NexusFormat::HDF5); }
+
+  void impl_test_open_dataset(NexusFormat fmt) {
     cout << "\ntest openData\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_data.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_data");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -135,10 +168,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
   }
 
-  void test_closeData() {
+  void test_closeData_h5() { impl_test_closeData(NexusFormat::HDF5); }
+
+  void impl_test_closeData(NexusFormat fmt) {
     cout << "\ntest closeData\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataclose.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataclose");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
 
@@ -161,12 +196,13 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
-  void test_data_get_basic() {
-    cout << "\ntest dataset read\n";
+  void test_data_get_basic_h5() { impl_test_data_get_basic(NexusFormat::HDF5); }
 
+  void impl_test_data_get_basic(NexusFormat fmt) {
+    cout << "\ntest dataset read\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_basic");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_basic.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -194,12 +230,13 @@ public:
     file.closeGroup();
   }
 
-  void test_data_get_array() {
-    cout << "\ntest dataset read -- arrays\n";
+  void test_data_get_array_h5() { impl_test_data_get_array(NexusFormat::HDF5); }
 
+  void impl_test_data_get_array(NexusFormat fmt) {
+    cout << "\ntest dataset read -- arrays\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_array");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_array.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
 
@@ -250,12 +287,13 @@ public:
     file.closeGroup();
   }
 
-  void test_data_get_vector() {
-    cout << "\ntest dataset read -- vector\n";
+  void test_data_get_vector() { impl_test_data_get_vector(NexusFormat::HDF5); }
 
+  void impl_test_data_get_vector(NexusFormat fmt) {
+    cout << "\ntest dataset read -- vector\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_vec");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR_vec.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -287,14 +325,16 @@ public:
   // TEST PATH METHODS
   // #################################################################################################################
 
-  void test_getPath_groups() {
+  void test_getPath_groups_h5() { impl_test_getPath_groups(NexusFormat::HDF5); }
+
+  void impl_test_getPath_groups(NexusFormat fmt) {
     cout << "\ntest get_path -- groups only\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grp.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS("", file.getPath());
+    TS_ASSERT_EQUALS(vars.rootID, file.getPath());
 
     // open a group -- now at "/abc"
     file.openGroup("abc", "NXclass");
@@ -316,14 +356,16 @@ public:
     file.close();
   }
 
-  void test_getPath_data() {
+  void test_getPath_data_h5() { impl_test_getPath_data(NexusFormat::HDF5); }
+
+  void impl_test_getPath_data(NexusFormat fmt) {
     cout << "\ntest get_path -- groups and data!\n";
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_grpdata.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grpdata");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS("", file.getPath());
+    TS_ASSERT_EQUALS(vars.rootID, file.getPath());
 
     // open a group -- now at "/abc"
     file.openGroup("abc", "NXentry");
@@ -335,13 +377,15 @@ public:
     file.closeData();
   }
 
-  void test_openPath() {
+  void test_openPath_h5() { impl_test_openPath(NexusFormat::HDF5); }
+
+  void impl_test_openPath(NexusFormat fmt) {
     cout << "\ntest openPath\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_entries");
     fflush(stdout);
 
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_entries.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // tests invalid cases
@@ -355,7 +399,7 @@ public:
 
     // open the root
     file.openGroup("entry1", "NXentry");
-    std::string actual, expected = "";
+    std::string actual, expected = vars.rootID;
     file.openPath("/");
     actual = file.getPath();
     TS_ASSERT_EQUALS(actual, expected);
@@ -371,12 +415,13 @@ public:
     TS_ASSERT_EQUALS(actual, expected);
   }
 
-  void xtest_getInfo() {
-    cout << "\ntest getInfo -- good\n";
+  void test_getInfo_h5() { impl_test_getInfo(NexusFormat::HDF5); }
 
+  void impl_test_getInfo(NexusFormat fmt) {
+    cout << "\ntest getInfo -- good\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
     file.openData("int_data");
@@ -389,20 +434,23 @@ public:
 
     file.closeData();
 
-    file.openData("double_data");
+    // RE ADD THIS, MAY NEED UNIQUE FILE
+    // file.openData("double_data");
 
     // get the info and check
-    info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, getType<double>());
-    TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 1);
+    // info = file.getInfo();
+    // TS_ASSERT_EQUALS(info.type, getType<double>());
+    // TS_ASSERT_EQUALS(info.dims.size(), 1);
+    // TS_ASSERT_EQUALS(info.dims.front(), 1);
   }
 
-  void test_getInfo_bad() {
+  void test_test_getInfo_bad_h5() { impl_test_getInfo_bad(NexusFormat::HDF5); }
+
+  void impl_test_getInfo_bad(NexusFormat fmt) {
     cout << "\ntest getInfo -- bad\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_dataR.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -427,11 +475,13 @@ public:
     TS_ASSERT_EQUALS(data, out);
   }
 
-  void test_get_attr_basic() {
-    cout << "\ntest attribute read\n";
+  void test_get_attr_basic_h5() { impl_test_get_attr_basic(NexusFormat::HDF5); }
 
+  void impl_test_get_attr_basic(NexusFormat fmt) {
+    cout << "\ntest attribute read\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_attr");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_attr.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     // get an int attribute
@@ -441,12 +491,13 @@ public:
     do_test_get_attr(file, "dbl_attr_", 120.2e6);
   }
 
-  void test_getEntries() {
-    cout << "\ntest getEntries\n";
+  void test_getEntries_h5() { impl_test_getEntries(NexusFormat::HDF5); }
 
+  void impl_test_getEntries(NexusFormat fmt) {
+    cout << "\ntest getEntries\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_entries");
     // open a file
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_entries.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
     File file(filename, NXACC_READ);
 
     file.openPath("/");

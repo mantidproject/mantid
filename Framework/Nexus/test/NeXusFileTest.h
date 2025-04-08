@@ -639,7 +639,7 @@ public:
     TS_ASSERT_EQUALS(data, out);
   }
 
-  void test_putget_attr_basic() {
+  void test_get_attr_basic() {
     cout << "\ntest attribute read/write\n";
 
     // open a file
