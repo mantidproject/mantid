@@ -26,7 +26,6 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL ConvertToDistribution : public API::Algorithm {
 public:
-  virtual ~ConvertToDistribution() = default;
   /// Algorithm's name
   const std::string name() const override { return "ConvertToDistribution"; }
   /// Summary of algorithms purpose

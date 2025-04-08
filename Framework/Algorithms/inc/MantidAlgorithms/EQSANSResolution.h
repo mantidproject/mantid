@@ -44,12 +44,7 @@ public:
   const std::string name() const override { return "EQSANSResolution"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Calculate the Q resolution for EQSANS data."; }
-
-  /// Algorithm's version
-  int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override { return {"ReactorSANSResolution"}; }
-  /// Algorithm's category for identification
-  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
