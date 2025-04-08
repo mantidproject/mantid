@@ -80,9 +80,12 @@ private:
   }
 
 public:
-  void test_napi_char() {
+  void test_napi_char_h5() { impl_test_napi_char(NexusFormat::HDF5); }
+
+  void impl_test_napi_char(NexusFormat fmt) {
     cout << "Starting NAPI CHAR Test\n";
-    std::string const nxFile("LegacyNexus/hdf5/NexusFile_test_char.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_test_char");
+    std::string const nxFile(vars.relFilePath);
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
@@ -123,9 +126,12 @@ public:
     cout << "napi char test done\n";
   }
 
-  void test_napi_vec() {
+  void test_napi_vec_h5() { impl_test_napi_vec(NexusFormat::HDF5); }
+
+  void impl_test_napi_vec(NexusFormat fmt) {
     cout << "Starting NAPI VEC Test\n";
-    std::string const nxFile("LegacyNexus/hdf5/NexusFile_test_vec.h5");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_test_vec");
+    std::string const nxFile(vars.relFilePath);
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
     File fileid(filepath);
 
@@ -164,10 +170,12 @@ public:
     cout << "napi vec test done\n";
   }
 
-  void test_openPath() {
-    cout << "tests for openPath\n";
+  void test_openPath_h5() { impl_test_openPath(NexusFormat::HDF5); }
 
-    string const filename("LegacyNexus/hdf5/NexusFile_openpathtest.nxs");
+  void impl_test_openPath(NexusFormat fmt) {
+    cout << "tests for openPath\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_openpathtest.nxs");
+    string const filename(vars.relFilePath);
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     File fileid(filepath);
 
@@ -197,10 +205,12 @@ public:
     cout << "NXopenpath checks OK\n";
   }
 
-  void test_links() {
-    cout << "tests of linkature\n";
+  void test_links_h5() { impl_test_links(NexusFormat::HDF5); }
 
-    string const filename("LegacyNexus/hdf5/NexusFIle_linktest.nxs");
+  void impl_test_links(NexusFormat fmt) {
+    cout << "tests of linkature\n";
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFIle_linktest.nxs");
+    string const filename(vars.relFilePath);
     const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     File fileid(filepath);
 
