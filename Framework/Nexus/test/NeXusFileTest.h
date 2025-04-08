@@ -96,7 +96,7 @@ public:
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
 
     // create a file with group -- open it
-    NeXus::File file(filename, NXACC_CREATE4);
+    File file(filename, NXACC_CREATE4);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
 

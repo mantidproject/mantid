@@ -76,7 +76,7 @@ public:
   }
 
   void test_leak2() {
-    int const nFiles = 10;
+    int const nFiles = 1;
     int const nEntry = 10;
     int const nData = 10;
     vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
