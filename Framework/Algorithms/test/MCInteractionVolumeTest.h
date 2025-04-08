@@ -216,7 +216,7 @@ public:
     MockRNG rng;
     // Sequence will try to select one of the non-container pieces
     EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
-    EXPECT_CALL(rng, nextValue()).Times(6).WillRepeatedly(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).Times(3).WillRepeatedly(Return(0.5));
 
     using Mantid::API::Sample;
     Sample sample;

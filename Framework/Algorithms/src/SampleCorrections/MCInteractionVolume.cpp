@@ -161,17 +161,17 @@ MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::Ps
   std::optional<Kernel::V3D> tmpPoint{std::nullopt};
   if (componentIndex == -1) {
     if (m_gaugeVolume != nullptr) {
-      tmpPoint = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 2);
+      tmpPoint = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 1);
       if (tmpPoint) {
         if (m_sample->isValid(tmpPoint.value())) {
           pointGenerated = tmpPoint;
         }
       }
     } else {
-      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 2);
+      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
     }
   } else {
-    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 2);
+    pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 1);
   }
   return pointGenerated;
 }
