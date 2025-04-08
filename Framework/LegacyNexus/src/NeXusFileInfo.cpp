@@ -32,7 +32,7 @@
 
 std::string NexusFileID::getFullNexusPath() const {
   if (m_nexusPath.empty()) {
-    return {};
+    return {'/'};
   }
   std::string fullNexusPath;
   fullNexusPath.reserve(m_pathChars + m_nexusPath.size());
