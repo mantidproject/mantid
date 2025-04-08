@@ -45,10 +45,13 @@ public:
    * - leak_test2
    */
 
-  void test_leak1() {
+  void test_leak1() { impl_test_leak1(NexusFormat::HDF5); }
+
+  void impl_test_leak1(NexusFormat fmt) {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/nexus_leak_test1.nxs");
+    FormatUniqueVars vars = getFormatUniqueVars(fmt, "nexus_leak_test1.nxs");
+    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
@@ -68,20 +71,22 @@ public:
     cout << "Leak Test 1 Success!\n";
   }
 
-  void test_leak2() {
+  void test_leak2() { impl_test_leak2(NexusFormat::HDF5); }
+
+  void impl_test_leak2(NexusFormat fmt) {
     int const nFiles = 1;
     int const nEntry = 10;
     int const nData = 10;
     vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
 
     cout << "Running Leak Test 2: " << nFiles << " iterations\n";
-
     NXaccess access_mode = NXACC_READ;
     std::string strFile;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
-      strFile = strmakef("LegacyNexus/hdf5/nexus_leak_test2_%03d.nxs", iFile);
-      const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(strFile);
+      strFile = strmakef("nexus_leak_test2_%03d.nxs", iFile);
+      FormatUniqueVars vars = getFormatUniqueVars(fmt, strFile);
+      const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
       cout << "file " << szFile << "\n";
 
       File fileid(szFile, access_mode);
