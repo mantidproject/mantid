@@ -2748,7 +2748,7 @@ void QtSizeFPropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prop
     m_hToProperty.remove(property);
   }
 }
-// cppcheck-suppress constParameterCallback
+
 void QtSizeFPropertyManagerPrivate::setValue(const QtProperty *property, const QSizeF &val) {
   m_doublePropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_doublePropertyManager->setValue(m_propertyToH.value(property), val.height());

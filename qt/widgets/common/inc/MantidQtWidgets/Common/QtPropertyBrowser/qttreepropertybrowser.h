@@ -249,9 +249,9 @@ public:
   QtTreePropertyBrowserPrivate();
   void init(QWidget *parent, const QStringList &options, bool darkTopLevel);
 
-  void propertyInserted(QtBrowserItem *index, QtBrowserItem *const &afterIndex);
-  void propertyRemoved(QtBrowserItem *const &index);
-  void propertyChanged(QtBrowserItem *const &index);
+  void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
+  void propertyRemoved(QtBrowserItem *index);
+  void propertyChanged(QtBrowserItem *index);
   QWidget *createEditor(QtProperty *property, QWidget *parent) const { return q_ptr->createEditor(property, parent); }
   QtProperty *indexToProperty(const QModelIndex &index) const;
   QTreeWidgetItem *indexToItem(const QModelIndex &index) const;
@@ -259,7 +259,7 @@ public:
   bool lastColumn(int column) const;
   void disableItem(QTreeWidgetItem *item) const;
   void enableItem(QTreeWidgetItem *item) const;
-  bool hasValue(QTreeWidgetItem *const &item) const;
+  bool hasValue(QTreeWidgetItem *item) const;
   void hideColumn(int col);
   void showColumn(int col);
 
@@ -272,13 +272,13 @@ public:
   bool markPropertiesWithoutValue() const { return m_markPropertiesWithoutValue; }
 
   QtBrowserItem *currentItem() const;
-  void setCurrentItem(QtBrowserItem *const &browserItem, bool block);
-  void editItem(QtBrowserItem *const &browserItem);
-  QTreeWidgetItem *getItemWidget(QtBrowserItem *const &browserItem);
-  void disableItem(QtBrowserItem *const &item);
+  void setCurrentItem(QtBrowserItem *browserItem, bool block);
+  void editItem(QtBrowserItem *browserItem);
+  QTreeWidgetItem *getItemWidget(QtBrowserItem *browserItem);
+  void disableItem(QtBrowserItem *item);
 
   void slotCurrentBrowserItemChanged(QtBrowserItem *item);
-  void slotCurrentTreeItemChanged(QTreeWidgetItem *const &newItem, QTreeWidgetItem * /*unused*/);
+  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/);
 
   QTreeWidgetItem *editedItem() const;
   void closeEditor();
