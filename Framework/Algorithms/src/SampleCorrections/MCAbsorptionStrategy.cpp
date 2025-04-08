@@ -32,7 +32,7 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(std::shared_ptr<IMCInteractionVolume>
                                            const IBeamProfile &beamProfile, DeltaEMode::Type EMode,
                                            const size_t nevents, const size_t maxScatterPtAttempts,
                                            const bool regenerateTracksForEachLambda)
-    : m_beamProfile(beamProfile), m_scatterVol(std::move(interactionVolume)), m_nevents(nevents),
+    : m_scatterVol(std::move(interactionVolume)), m_beamProfile(beamProfile), m_nevents(nevents),
       m_maxScatterAttempts(maxScatterPtAttempts), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {
 

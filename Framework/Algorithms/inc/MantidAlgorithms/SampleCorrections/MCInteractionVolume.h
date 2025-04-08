@@ -41,9 +41,9 @@ public:
   void setGaugeVolume(Geometry::IObject_sptr gaugeVolume) override;
 
 private:
-  MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
-                      const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,
-                      Geometry::IObject_sptr gaugeVolume = nullptr);
+  explicit MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
+                               const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,
+                               Geometry::IObject_sptr gaugeVolume = nullptr);
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng) const;
   std::optional<Kernel::V3D> generatePointInObjectByIndex(int componentIndex,
                                                           Kernel::PseudoRandomNumberGenerator &rng) const;
