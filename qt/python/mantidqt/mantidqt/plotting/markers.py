@@ -875,35 +875,34 @@ class SingleMarker(QObject):
             return
 
         marker_in_scope = True
-        x_lower, x_upper = self.marker.axis.get_xlim()
-        y_lower, y_upper = self.marker.axis.get_ylim()
+        ax = self.marker.axis
+        x_lower, x_upper = ax.get_xlim()
+        y_lower, y_upper = ax.get_ylim()
+
         if self.marker_type == "YSingle":
-            x_pos = self.label_x_offset
-            y_pos = self.relative(self.marker.y, y_lower, y_upper) + self.label_y_offset
+            # Horizontal marker
+            x_pos = x_upper - (x_upper - x_lower) * (1 - self.label_x_offset)
+            y_pos = self.marker.y
             rotation = 0
-            if not y_lower <= self.marker.y <= y_upper:
+            if not y_lower <= y_pos <= y_upper:
                 marker_in_scope = False
             horizontal = "right"
             vertical = "bottom"
         else:
-            x_pos = self.relative(self.marker.x, x_lower, x_upper) + self.label_x_offset
-            y_pos = self.label_y_offset
+            # Vertical marker
+            x_pos = self.marker.x
+            y_pos = y_upper - (y_upper - y_lower) * (1 - self.label_y_offset)
             rotation = -90
-            if not x_lower <= self.marker.x <= x_upper:
+            if not x_lower <= x_pos <= x_upper:
                 marker_in_scope = False
             horizontal = "left"
             vertical = "top"
-        if not 0.0 <= x_pos <= 1.0:
-            raise RuntimeError("The horizontal position of the label is relative.\nmust be 0 < pos < 1. Got {} instead".format(x_pos))
-        if not 0.0 <= y_pos <= 1.0:
-            raise RuntimeError("The vertical position of the label is relative.\nmust be 0 < pos < 1. Got {} instead".format(y_pos))
 
         if marker_in_scope:
-            self.annotations[text] = self.marker.axis.annotate(
-                text, xy=(x_pos, y_pos), xycoords="axes fraction", ha=horizontal, va=vertical, rotation=rotation
-            )
+            self.annotations[text] = ax.annotate(text, xy=(x_pos, y_pos), xycoords="data", ha=horizontal, va=vertical, rotation=rotation)
         else:
             self.annotations[text] = None
+
         self.canvas.draw()
 
     def remove_annotate(self, label):
