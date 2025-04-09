@@ -7,10 +7,13 @@
 
 import unittest
 
+import numpy as np
+
 # Import mantid.simpleapi first, otherwise we get circular import
 import mantid.simpleapi  # noqa: F401
 
 from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
+from abins.atomsdata import AtomsData
 
 
 class AtomInfoTest(unittest.TestCase):
@@ -39,8 +42,16 @@ class AtomInfoTest(unittest.TestCase):
             species.neutron_data
 
 
-class AtomsDataTest(unittest.TestCase):
+class AbinsAlgorithmMethodsTest(unittest.TestCase):
     """Test static methods on AbinsAlgorithm"""
+
+    _good_data = {
+        "atom_0": {"sort": 0, "symbol": "Si", "coord": np.asarray([0.0, 0.0, 0.0]), "mass": 28.085500},
+        "atom_1": {"sort": 1, "symbol": "C", "coord": np.asarray([0.25, 0.25, 0.25]), "mass": 12.0},
+    }
+
+    def setUp(self):
+        self._atoms_data = AtomsData(self._good_data)
 
     def test_cross_section(self):
         """Get cross section from nucleus information"""
@@ -56,3 +67,26 @@ class AtomsDataTest(unittest.TestCase):
             )
 
             self.assertAlmostEqual(xc, expected)
+
+    def test_get_atom_selection(self):
+        """Get selected symbols and idices from pre-split user input"""
+
+        for selection, expected in [
+            (["atom_1", "Si"], ([1], ["Si"])),
+            (["atom2", "1"], ([1, 2], [])),
+            (["C"], ([], ["C"])),
+        ]:
+            self.assertEqual(
+                AbinsAlgorithm.get_atom_selection(atoms_data=self._atoms_data, selection=selection),
+                expected,
+            )
+
+        for selection, error_match in [
+            (["atom1", "1"], "contains repeated atom"),
+            (["Na"], "not present in the system"),
+            (["Si", "1", "Si"], "contains repeated species"),
+            (["Si123"], r"Not all user atom selections \('atoms' option\) were understood."),
+            (["atom3.4"], r"Not all user atom selections \('atoms' option\) were understood."),
+        ]:
+            with self.assertRaisesRegex(ValueError, error_match):
+                AbinsAlgorithm.get_atom_selection(atoms_data=self._atoms_data, selection=selection)
