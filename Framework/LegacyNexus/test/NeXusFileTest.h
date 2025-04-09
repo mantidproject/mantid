@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
     auto new_loc = file.getGroupID();
     cout << strmakef("Located at %s\n", new_loc.targetPath);
-    TS_ASSERT_DIFFERS(string(vars.rootID), string(new_loc.targetPath));
+    TS_ASSERT_DIFFERS(string("/"), string(new_loc.targetPath));
 
     // cleanup
     file.close();
@@ -116,7 +116,7 @@ public:
     // open group, close it, and check we are back at root
     file.openGroup("abc", "NXclass");
     auto ingrp = file.getGroupID();
-    TS_ASSERT_DIFFERS(string(vars.rootID), string(ingrp.targetPath));
+    TS_ASSERT_DIFFERS(string("/"), string(ingrp.targetPath));
     file.closeGroup();
     TS_ASSERT_THROWS(file.getGroupID(), Exception &)
 
@@ -321,7 +321,7 @@ public:
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS(vars.rootID, file.getPath());
+    TS_ASSERT_EQUALS("/", file.getPath());
 
     // open a group -- now at "/abc"
     file.openGroup("abc", "NXclass");
@@ -353,7 +353,7 @@ public:
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
-    TS_ASSERT_EQUALS(vars.rootID, file.getPath());
+    TS_ASSERT_EQUALS("/", file.getPath());
 
     // open a group -- now at "/abc"
     file.openGroup("abc", "NXentry");
@@ -388,10 +388,10 @@ public:
 
     // open the root
     file.openGroup("entry1", "NXentry");
-    std::string actual, expected = vars.rootID;
+    std::string actual, expected = "/";
     file.openPath("/");
     actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(expected, actual);
 
     expected = "/entry1/layer2b/layer3a";
     file.openPath(expected);

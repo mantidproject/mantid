@@ -41,14 +41,11 @@ LegacyNexusTest::FormatUniqueVars LegacyNexusTest::getFormatUniqueVars(const Leg
   case LegacyNexusTest::NexusFormat::HDF4:
     fileExt = (extSubStr == ".nxs") ? "" : ".h4";
     relFilePath = "LegacyNexus/hdf4/" + filename + fileExt;
-    // In HDF4, returning the path of the root of the file gives ""
-    rootID = "";
     break;
   case LegacyNexusTest::NexusFormat::HDF5:
     fileExt = (extSubStr == ".nxs") ? "" : ".h5";
     relFilePath = "LegacyNexus/hdf5/" + filename + fileExt;
-    rootID = "/";
     break;
   }
-  return LegacyNexusTest::FormatUniqueVars{relFilePath, rootID};
+  return LegacyNexusTest::FormatUniqueVars{relFilePath};
 }
