@@ -47,10 +47,14 @@ class GoniometerTest(unittest.TestCase):
         ws = alg.getProperty("OutputWorkspace").value
         run = ws.run()
         g = run.getGoniometer()
+        self.assertEqual(g.getConventionFromMotorAxes(), "")
         # change the matrix:
         r = np.array([(1.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, -1.0, 0.0)])
         g.setR(r)
         self.assertTrue((g.getR() == r).all())
+
+        alg = run_algorithm("SetGoniometer", Workspace=ws, Axis0="0,0,1,0,1", Axis1="0,0,0,1,1", Axis2="0,0,1,0,1", child=True)
+        self.assertEqual(run.getGoniometer().getConventionFromMotorAxes(), "YZY")
 
 
 if __name__ == "__main__":
