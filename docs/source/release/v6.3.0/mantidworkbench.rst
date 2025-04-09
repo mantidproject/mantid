@@ -13,12 +13,6 @@ New features
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
-New Python Help Window
-----------------------
-- Embedded Browser: The old QtAssistant-based help viewer has been replaced with a browser-like help window using QtWebEngine. This supports richer HTML content, images, and more interactive elements.
-- Smaller Installation: The large local documentation archive is no longer bundled by default, reducing the overall download size. Local docs are still available for full offline use if needed.
-- Clear Documentation Source Indicator: A label in the help window toolbar shows if you are viewing “Local Docs” or “Online Docs,” removing confusion about which version of documentation you have loaded.
-- Simplified Maintenance: Supporting the migration away from QtAssistant in order to help the migration to PyQt 6 easier later on.
 
 Improvements
 ------------

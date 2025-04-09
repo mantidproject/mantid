@@ -1,0 +1,8 @@
+What's new:
+    - Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
+Improvements:
+    - Enhances the visual appearance and usability of in-app documentation.
+    - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
+    - Delivers a smoother and more consistent experience when navigating help and reference material.
+Key benefits:
+    - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future potential for interactive elements in documentation.
