@@ -111,7 +111,8 @@ private:
   }
 
 public:
-  void test_read() { impl_test_read(NexusFormat::HDF5); }
+  void test_read_h5() { impl_test_read(NexusFormat::HDF5); }
+  void test_read_h4() { impl_test_read(NexusFormat::HDF4); }
 
   void impl_test_read(NexusFormat fmt) {
     cout << " Nexus File Tests\n";
@@ -126,13 +127,13 @@ public:
     if (getenv("NX_LOAD_PATH") == NULL) {
       std::string envStr = "NX_LOAD_PATH=" + filepath;
       envStr.erase(envStr.find(vars.relFilePath));
-      envSet = putenv(envStr.c_str());
+      envSet = _putenv(envStr.c_str());
     }
     do_test_loadPath(vars.relFilePath);
 
     // clean load path
     if (envSet == 0) {
-      (void)putenv("NX_LOAD_PATH=");
+      (void)_putenv("NX_LOAD_PATH=");
     }
   }
 };
