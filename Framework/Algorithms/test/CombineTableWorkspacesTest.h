@@ -251,4 +251,60 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_different_tables_with_different_types_but_same_columns_combine() {
+    std::vector<std::string> dTypes = {"int", "str"};
+    std::vector<std::string> colTitles = {"ThingA", "ThingB"};
+    TableWorkspace_sptr table1 = createTableWorkspace(dTypes, 2, colTitles);
+    TableWorkspace_sptr table2 = createTableWorkspace(dTypes, 3, colTitles, 1, "1");
+
+    // Name of the output workspace.
+    std::string outWSName("CombineTableWorkspacesTest_OutputWS");
+
+    Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
+    TS_ASSERT(alg->execute())
+
+    // Retrieve the workspace from data service.
+    TableWorkspace_sptr ws = getOutput(outWSName);
+
+    // check properties of output table
+    TS_ASSERT_EQUALS(ws->rowCount(), 5)
+    TS_ASSERT_EQUALS(table1->getColumnNames(), table2->getColumnNames())
+    // check the rows added contain the expected values
+    TS_ASSERT_EQUALS(ws->cell<int>(2, 0), 1)
+    TS_ASSERT_EQUALS(ws->cell<std::string>(3, 1), "1")
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  // failures
+
+  void test_different_column_names_throw_error() {
+    std::vector<std::string> dTypes = {"int", "int"};
+    std::vector<std::string> colTitles1 = {"ThingA", "ThingB"};
+    std::vector<std::string> colTitles2 = {"ThingC", "ThingD"};
+    TableWorkspace_sptr table1 = createTableWorkspace(dTypes, 2, colTitles1);
+    TableWorkspace_sptr table2 = createTableWorkspace(dTypes, 2, colTitles2);
+
+    // Name of the output workspace.
+    std::string outWSName("CombineTableWorkspacesTest_OutputWS");
+
+    Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
+  }
+
+  void test_different_types_throw_error() {
+    std::vector<std::string> dTypes1 = {"int", "int"};
+    std::vector<std::string> dTypes2 = {"double", "double"};
+    std::vector<std::string> colTitles = {"ThingA", "ThingB"};
+    TableWorkspace_sptr table1 = createTableWorkspace(dTypes1, 2, colTitles);
+    TableWorkspace_sptr table2 = createTableWorkspace(dTypes2, 2, colTitles);
+
+    // Name of the output workspace.
+    std::string outWSName("CombineTableWorkspacesTest_OutputWS");
+
+    Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
+  }
 };
