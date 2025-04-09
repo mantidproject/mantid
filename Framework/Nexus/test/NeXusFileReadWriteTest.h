@@ -300,7 +300,7 @@ public:
     fileid.getData(&output);
     TS_ASSERT_EQUALS('3', output);
 
-    fileid.openData("/entry/data2");
+    fileid.openPath("/entry/data2");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('2', output);
 
