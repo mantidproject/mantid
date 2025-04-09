@@ -81,6 +81,7 @@ private:
 
 public:
   void test_napi_char_h5() { impl_test_napi_char(NexusFormat::HDF5); }
+  void test_napi_char_h4() { impl_test_napi_char(NexusFormat::HDF4); }
 
   void impl_test_napi_char(NexusFormat fmt) {
     cout << "Starting NAPI CHAR Test\n";
@@ -127,6 +128,7 @@ public:
   }
 
   void test_napi_vec_h5() { impl_test_napi_vec(NexusFormat::HDF5); }
+  void test_napi_vec_h4() { impl_test_napi_vec(NexusFormat::HDF4); }
 
   void impl_test_napi_vec(NexusFormat fmt) {
     cout << "Starting NAPI VEC Test\n";
@@ -171,6 +173,7 @@ public:
   }
 
   void test_openPath_h5() { impl_test_openPath(NexusFormat::HDF5); }
+  void test_openPath_h4() { impl_test_openPath(NexusFormat::HDF4); }
 
   void impl_test_openPath(NexusFormat fmt) {
     cout << "tests for openPath\n";
@@ -181,7 +184,6 @@ public:
 
     // compare
     char output;
-    fileid.closeGroup();
 
     fileid.openPath("/entry/data1");
     fileid.getData(&output);
@@ -191,13 +193,13 @@ public:
     fileid.getData(&output);
     TS_ASSERT_EQUALS('4', output);
 
+    fileid.openPath("/entry/data2");
+    fileid.getData(&output);
+    TS_ASSERT_EQUALS('2', output);
+
     fileid.openPath("/entry/data/more_data");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('3', output);
-
-    fileid.openData("/entry/data2");
-    fileid.getData(&output);
-    TS_ASSERT_EQUALS('2', output);
 
     // cleanup
     fileid.close();
@@ -206,6 +208,7 @@ public:
   }
 
   void test_links_h5() { impl_test_links(NexusFormat::HDF5); }
+  void test_links_h4() { impl_test_links(NexusFormat::HDF4); }
 
   void impl_test_links(NexusFormat fmt) {
     cout << "tests of linkature\n";
@@ -222,7 +225,10 @@ public:
     // TS_ASSERT_EQUALS(somedata, output1);
 
     NXlink res1 = fileid.getDataID();
-    TS_ASSERT_EQUALS(1, res1.linkType);
+    if (fmt == NexusFormat::HDF5) {
+      // for HDF4 the `linkType` member is uninitialized.
+      TS_ASSERT_EQUALS(1, res1.linkType);
+    }
     TS_ASSERT_EQUALS("/entry/some_data", string(res1.targetPath));
     printf("data link works\n");
     fileid.closeGroup();
@@ -230,7 +236,11 @@ public:
     // check group link
     fileid.openPath("/entry/group2/group1");
     NXlink res2 = fileid.getGroupID();
-    TS_ASSERT_EQUALS(0, res2.linkType);
+    if (fmt == NexusFormat::HDF5) {
+      // for HDF4 the `linkType` member is uninitialized.
+      TS_ASSERT_EQUALS(0, res2.linkType);
+    }
+
     TS_ASSERT_EQUALS("/entry/group1", string(res2.targetPath));
 
     // cleanup
