@@ -41,6 +41,7 @@ public:
   static void destroySuite(LegacyNeXusFileTest *suite) { delete suite; }
 
   void test_open_group_h5() { impl_test_open_group(NexusFormat::HDF5); }
+  void test_open_group_h4() { impl_test_open_group(NexusFormat::HDF4); }
 
   void impl_test_open_group(NexusFormat fmt) {
     cout << "\ntest openGroup\n";
@@ -66,6 +67,7 @@ public:
   }
 
   void test_open_group_badh5() { impl_test_open_group_bad(NexusFormat::HDF5); }
+  void test_open_group_badh4() { impl_test_open_group_bad(NexusFormat::HDF4); }
 
   void impl_test_open_group_bad(NexusFormat fmt) {
     cout << "\ntest openGroup bad\n";
@@ -83,6 +85,7 @@ public:
   }
 
   void test_open_group_layers_h5() { impl_test_open_group_layers(NexusFormat::HDF5); }
+  void test_open_group_layers_h4() { impl_test_open_group_layers(NexusFormat::HDF4); }
 
   void impl_test_open_group_layers(NexusFormat fmt) {
     cout << "\ntest openGroup layers\n";
@@ -99,6 +102,7 @@ public:
   }
 
   void test_closeGroup_h5() { impl_test_closeGroup(NexusFormat::HDF5); }
+  void test_closeGroup_h4() { impl_test_closeGroup(NexusFormat::HDF4); }
 
   void impl_test_closeGroup(NexusFormat fmt) {
     cout << "\ntest closeGroup\n";
@@ -125,6 +129,7 @@ public:
   // #################################################################################################################
 
   void test_open_dataset_h5() { impl_test_open_dataset(NexusFormat::HDF5); }
+  void test_open_dataset_h4() { impl_test_open_dataset(NexusFormat::HDF4); }
 
   void impl_test_open_dataset(NexusFormat fmt) {
     cout << "\ntest openData\n";
@@ -146,6 +151,7 @@ public:
   }
 
   void test_closeData_h5() { impl_test_closeData(NexusFormat::HDF5); }
+  void test_closeData_h4() { impl_test_closeData(NexusFormat::HDF4); }
 
   void impl_test_closeData(NexusFormat fmt) {
     cout << "\ntest closeData\n";
@@ -174,6 +180,7 @@ public:
   }
 
   void test_data_get_basic_h5() { impl_test_data_get_basic(NexusFormat::HDF5); }
+  void test_data_get_basic_h4() { impl_test_data_get_basic(NexusFormat::HDF4); }
 
   void impl_test_data_get_basic(NexusFormat fmt) {
     cout << "\ntest dataset read\n";
@@ -208,6 +215,7 @@ public:
   }
 
   void test_data_get_array_h5() { impl_test_data_get_array(NexusFormat::HDF5); }
+  void test_data_get_array_h4() { impl_test_data_get_array(NexusFormat::HDF4); }
 
   void impl_test_data_get_array(NexusFormat fmt) {
     cout << "\ntest dataset read -- arrays\n";
@@ -264,7 +272,8 @@ public:
     file.closeGroup();
   }
 
-  void test_data_get_vector() { impl_test_data_get_vector(NexusFormat::HDF5); }
+  void test_data_get_vector_h5() { impl_test_data_get_vector(NexusFormat::HDF5); }
+  void test_data_get_vector_h4() { impl_test_data_get_vector(NexusFormat::HDF4); }
 
   void impl_test_data_get_vector(NexusFormat fmt) {
     cout << "\ntest dataset read -- vector\n";
@@ -303,6 +312,7 @@ public:
   // #################################################################################################################
 
   void test_getPath_groups_h5() { impl_test_getPath_groups(NexusFormat::HDF5); }
+  void test_getPath_groups_h4() { impl_test_getPath_groups(NexusFormat::HDF4); }
 
   void impl_test_getPath_groups(NexusFormat fmt) {
     cout << "\ntest get_path -- groups only\n";
@@ -334,6 +344,7 @@ public:
   }
 
   void test_getPath_data_h5() { impl_test_getPath_data(NexusFormat::HDF5); }
+  void test_getPath_data_h4() { impl_test_getPath_data(NexusFormat::HDF4); }
 
   void impl_test_getPath_data(NexusFormat fmt) {
     cout << "\ntest get_path -- groups and data!\n";
@@ -355,6 +366,7 @@ public:
   }
 
   void test_openPath_h5() { impl_test_openPath(NexusFormat::HDF5); }
+  void test_openPath_h4() { impl_test_openPath(NexusFormat::HDF4); }
 
   void impl_test_openPath(NexusFormat fmt) {
     cout << "\ntest openPath\n";
@@ -393,6 +405,7 @@ public:
   }
 
   void test_getInfo_h5() { impl_test_getInfo(NexusFormat::HDF5); }
+  void test_getInfo_h4() { impl_test_getInfo(NexusFormat::HDF4); }
 
   void impl_test_getInfo(NexusFormat fmt) {
     cout << "\ntest getInfo -- good\n";
@@ -422,6 +435,7 @@ public:
   }
 
   void test_test_getInfo_bad_h5() { impl_test_getInfo_bad(NexusFormat::HDF5); }
+  void test_test_getInfo_bad_h4() { impl_test_getInfo_bad(NexusFormat::HDF4); }
 
   void impl_test_getInfo_bad(NexusFormat fmt) {
     cout << "\ntest getInfo -- bad\n";
@@ -453,6 +467,7 @@ public:
   }
 
   void test_get_attr_basic_h5() { impl_test_get_attr_basic(NexusFormat::HDF5); }
+  void test_get_attr_basic_h4() { impl_test_get_attr_basic(NexusFormat::HDF4); }
 
   void impl_test_get_attr_basic(NexusFormat fmt) {
     cout << "\ntest attribute read\n";
@@ -469,6 +484,7 @@ public:
   }
 
   void test_getEntries_h5() { impl_test_getEntries(NexusFormat::HDF5); }
+  void test_getEntries_h4() { impl_test_getEntries(NexusFormat::HDF4); }
 
   void impl_test_getEntries(NexusFormat fmt) {
     cout << "\ntest getEntries\n";
