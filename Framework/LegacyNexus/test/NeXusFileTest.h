@@ -307,6 +307,18 @@ public:
     TS_ASSERT_EQUALS(ind, outd);
   }
 
+  void test_write_access_denied() {
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf4/test_nexus_file_data.h4");
+    const std::string filename_h5 =
+        Mantid::API::FileFinder::Instance().getFullPath("LegacyNexus/hdf5/test_nexus_file_data.h5");
+    TS_ASSERT_THROWS(File file(filename, NXACC_RDWR), Exception &);
+    TS_ASSERT_THROWS(File file(filename, NXACC_CREATE4), Exception &);
+    TS_ASSERT_THROWS(File file(filename_h5, NXACC_CREATE5), Exception &);
+    TS_ASSERT_THROWS(File file(filename_h5, NXACC_CREATE), Exception &);
+    TS_ASSERT_THROWS_NOTHING(File file(filename, NXACC_READ));
+  }
+
   // #################################################################################################################
   // TEST PATH METHODS
   // #################################################################################################################

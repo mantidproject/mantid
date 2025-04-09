@@ -46,9 +46,9 @@ target_compile_definitions(LegacyNexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 target_link_libraries(LegacyNexus PUBLIC ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(LegacyNexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(LegacyNexus PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
