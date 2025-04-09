@@ -28,6 +28,17 @@ class TomlParserTest(unittest.TestCase):
             # Check correct params were forwarded on
             mocked_import.assert_called_once_with(test_dict, file_information=mocked_file_info)
 
+    def test_returns_v2_parser(self):
+        test_dict = {"toml_file_version": 2}
+
+        parser = TomlParser(toml_reader=self.get_mocked_reader(test_dict))
+        mocked_file_info = mock.NonCallableMock()
+        with mock.patch("sans.user_file.toml_parsers.toml_parser.TomlV2Parser") as mocked_import:
+            parser_version = parser.get_toml_parser(toml_file_path=mock.NonCallableMock, file_information=mocked_file_info)
+            self.assertEqual(mocked_import.return_value, parser_version)
+            # Check correct params were forwarded on
+            mocked_import.assert_called_once_with(test_dict, file_information=mocked_file_info)
+
     def test_throws_for_unknown_version(self):
         test_dict = {"toml_file_version": 100}
         parser = TomlParser(toml_reader=self.get_mocked_reader(test_dict))
