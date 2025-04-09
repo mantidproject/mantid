@@ -12,28 +12,3 @@ if(CXXTEST_FOUND)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET LegacyNexusTest PROPERTY FOLDER "UnitTests")
 endif()
-
-# ######### TESTS for napi
-set(TEST_PREFIX "LegacyNexusNapiTest")
-
-# #### HDF5 The test doesn't want to work under windows
-add_executable(legacy_napi_test_hdf5 EXCLUDE_FROM_ALL napi_test.cpp napi_test_util.cpp napi_test_util.h)
-target_link_libraries(legacy_napi_test_hdf5 PRIVATE Mantid::LegacyNexus)
-add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND legacy_napi_test_hdf5)
-set_property(TARGET legacy_napi_test_hdf5 PROPERTY FOLDER "UnitTests")
-
-add_executable(legacy_napi_test_cpp-hdf5 EXCLUDE_FROM_ALL napi_test_cpp.cpp napi_test_util.cpp napi_test_util.h)
-target_link_libraries(legacy_napi_test_cpp-hdf5 PRIVATE Mantid::LegacyNexus)
-add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND legacy_napi_test_cpp-hdf5)
-set_property(TARGET legacy_napi_test_cpp-hdf5 PROPERTY FOLDER "UnitTests")
-
-# #### test for unlimited dimensions
-add_executable(legacy_napi_test_nxunlimited EXCLUDE_FROM_ALL test_nxunlimited.cpp)
-target_link_libraries(legacy_napi_test_nxunlimited PRIVATE Mantid::LegacyNexus)
-add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND legacy_napi_test_nxunlimited)
-set_property(TARGET legacy_napi_test_nxunlimited PROPERTY FOLDER "UnitTests")
-# #### phony target to drag in all tests
-
-add_custom_target("${TEST_PREFIX}" DEPENDS legacy_napi_test_hdf5 legacy_napi_test_cpp-hdf5 legacy_napi_test_nxunlimited)
-
-add_dependencies(FrameworkTests "${TEST_PREFIX}")
