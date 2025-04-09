@@ -304,7 +304,19 @@ class AbinsAlgorithm:
     def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
         """Interpret the user 'Atoms' input as a set of elements and atom indices
 
-        (These atom indices match the user-facing convention and begin at 1.)"""
+        (These atom indices match the user-facing convention and begin at 1.)
+
+        Acceptable items in selection are:
+
+          - element symbol, e.g. "Si"
+          - atom index prefixed by "atom" or "atom_", e.g. "atom1", "atom_2"
+          - bare atom index e.g. "1"
+          - atom index range separated by hyphen, e.g. "1-2"
+
+        A range will be expanded to individual workspaces (currently) so the user
+        will still need to find some elegant way of summing/combining them.
+
+        """
 
         num_atoms = len(atoms_data)
         all_atms_smbls = list(set([atoms_data[atom_index]["symbol"] for atom_index in range(num_atoms)]))
@@ -319,15 +331,30 @@ class AbinsAlgorithm:
 
             # Acceptable formats for index: atom_1 atom1 1
             numbered_atom_test = re.compile(
-                f"""^                # No arbitrary prefixes
-                    ({ATOM_PREFIX})? # optional ATOM_PREFIX (i.e. "atom")
-                    _?               # optional underscore
-                    (?P<index>\\d+)  # capture digits as "index"
-                    $                # No arbitrary suffix
+                f"""^                  # No arbitrary prefixes
+                    ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
+                    _?                 # optional underscore
+                    (?P<index>[0-9]+)  # capture digits as "index"
+                    $                  # No suffix
                  """,
                 re.VERBOSE,
             )
             atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
+
+            # Acceptable formats for range: 1-2
+            atom_range_test = re.compile(
+                """^                  # No prefix
+                   (?P<start>\\d+)  # Capture starting index
+                   (-|\\.\\.)
+                # range indicated with "-" or ".."
+                   (?P<end>\\d+)    # Capture ending index
+                   $                  # No suffix
+                """,
+                re.VERBOSE,
+            )
+            atom_ranges = [
+                (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
+            ]
 
             # Acceptable formats for symbol: Ca
             element_symbol_test = re.compile(
@@ -361,10 +388,16 @@ class AbinsAlgorithm:
                 )
 
             # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len(atom_numbers) < len(selection):
-                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
-                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
-                raise ValueError("Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report)
+            if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
+                elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
+                numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
+                ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
+                raise ValueError(
+                    "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
+                )
+
+            for start, end in atom_ranges:
+                atom_numbers = atom_numbers + list(range(start, end + 1))
 
         return sorted(atom_numbers), atom_symbols
 

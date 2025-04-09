@@ -48,6 +48,7 @@ class AbinsAlgorithmMethodsTest(unittest.TestCase):
     _good_data = {
         "atom_0": {"sort": 0, "symbol": "Si", "coord": np.asarray([0.0, 0.0, 0.0]), "mass": 28.085500},
         "atom_1": {"sort": 1, "symbol": "C", "coord": np.asarray([0.25, 0.25, 0.25]), "mass": 12.0},
+        "atom_2": {"sort": 2, "symbol": "C", "coord": np.asarray([0.5, 0.5, 0.5]), "mass": 12.0},
     }
 
     def setUp(self):
@@ -75,6 +76,8 @@ class AbinsAlgorithmMethodsTest(unittest.TestCase):
             (["atom_1", "Si"], ([1], ["Si"])),
             (["atom2", "1"], ([1, 2], [])),
             (["C"], ([], ["C"])),
+            (["1-3"], ([1, 2, 3], [])),
+            (["1..2", "C"], ([1, 2], ["C"])),
         ]:
             self.assertEqual(
                 AbinsAlgorithm.get_atom_selection(atoms_data=self._atoms_data, selection=selection),
