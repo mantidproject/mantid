@@ -62,6 +62,33 @@ class PeaksViewerModelTest(unittest.TestCase):
         self.assertAlmostEqual(0.356, call_kwargs["alpha"], places=3)
         self.assertEqual(fg_color, call_kwargs["color"])
 
+    def test_draw_peaks_with_calc_hkl(self):
+        peak_center = (0.5, 0.2, 0.25)
+
+        # without calcHKL
+        _, mock_painter = draw_peaks((peak_center,), "r", slice_value=0.5, slice_width=30, frame=SpecialCoordinateSystem.HKL, calcHKL=False)
+
+        self.assertEqual(1, mock_painter.cross.call_count)
+        call_args, _ = mock_painter.cross.call_args
+        self.assertEqual(peak_center[0], call_args[0])
+        self.assertEqual(peak_center[1], call_args[1])
+
+        # with calcHKL, the HKL peak position should change
+        _, mock_painter = draw_peaks((peak_center,), "r", slice_value=0.5, slice_width=30, frame=SpecialCoordinateSystem.HKL, calcHKL=True)
+        self.assertEqual(1, mock_painter.cross.call_count)
+        call_args, _ = mock_painter.cross.call_args
+        self.assertAlmostEqual(0.159002, call_args[0], places=6)
+        self.assertAlmostEqual(0.127324, call_args[1], places=6)
+
+        # with calcHKL but with QSample frame, the peak position should not change
+        _, mock_painter = draw_peaks(
+            (peak_center,), "r", slice_value=0.5, slice_width=30, frame=SpecialCoordinateSystem.QSample, calcHKL=True
+        )
+        self.assertEqual(1, mock_painter.cross.call_count)
+        call_args, _ = mock_painter.cross.call_args
+        self.assertAlmostEqual(peak_center[0], call_args[0], places=6)
+        self.assertAlmostEqual(peak_center[1], call_args[1], places=6)
+
     def test_clear_peaks_removes_all_drawn(self):
         # create 2 peaks: 1 visible, 1 not (far outside Z range)
         visible_peak_center, invisible_center = (0.5, 0.2, 0.25), (0.4, 0.3, 25)
