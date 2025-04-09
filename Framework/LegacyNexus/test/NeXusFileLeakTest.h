@@ -45,7 +45,8 @@ public:
    * - leak_test2
    */
 
-  void test_leak1() { impl_test_leak1(NexusFormat::HDF5); }
+  void test_leak1_h5() { impl_test_leak1(NexusFormat::HDF5); }
+  void test_leak1_h4() { impl_test_leak1(NexusFormat::HDF4); }
 
   void impl_test_leak1(NexusFormat fmt) {
     int const nReOpen = 1000;
@@ -59,19 +60,13 @@ public:
       }
 
       File file_obj(szFile, NXACC_READ);
-      file_obj.openGroup("entry_0", "NXentry");
-      // file_obj.openData("data_0");
-      // file_obj.closeData(); ### Accidently created the data as a group, redo this file. Loop to create lots of
-      // groups/data like test 2.
-      file_obj.closeGroup();
       file_obj.close();
-
-      // fileid.openGroup(oss, "NXentry"); Lets open and close a few groups?
     }
     cout << "Leak Test 1 Success!\n";
   }
 
-  void test_leak2() { impl_test_leak2(NexusFormat::HDF5); }
+  void test_leak2_h5() { impl_test_leak2(NexusFormat::HDF5); }
+  void test_leak2_h4() { impl_test_leak2(NexusFormat::HDF4); }
 
   void impl_test_leak2(NexusFormat fmt) {
     int const nFiles = 1;
