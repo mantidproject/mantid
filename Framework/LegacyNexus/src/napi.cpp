@@ -388,7 +388,8 @@ static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if ((my_am == NXACC_CREATE4) || (my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5) || (my_am == NXACC_CREATEXML)) {
+  if ((my_am == NXACC_CREATE4) || (my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5) || (my_am == NXACC_CREATEXML) ||
+      (my_am == NXACC_RDWR)) {
     NXReportError("Write operations have been deprecated from LegacyNexus");
     return NXstatus::NX_ERROR;
   } else {
