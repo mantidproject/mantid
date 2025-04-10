@@ -18,15 +18,21 @@
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
 
+int setEnvVarFromString(std::string &envVarStr) {
 #ifdef _WIN32
-#define SETENV _putenv
+  return _putenv(envVarStr.c_str());
 #else
-#define SETENV putenv
+  auto pos = envVarStr.find('=');
+  std::string envVar = envVarStr.substr(0, pos);
+  std::string value = envVarStr.substr(pos + 1);
+  return setEnv(envVar, value, 1);
 #endif
+}
 
 using namespace Mantid::LegacyNexus;
 using namespace LegacyNexusTest;
@@ -128,18 +134,19 @@ public:
     // try reading a file
     do_test_read(filepath);
 
-    int envSet = 1; // indicates path env var not set
+    int envSet = 1; // non 0 value indicates path env var not set
     // try using the load path
+    std::string blankVarStr = "NX_LOAD_PATH=";
     if (getenv("NX_LOAD_PATH") == NULL) {
-      std::string envStr = "NX_LOAD_PATH=" + filepath;
+      std::string envStr = blankVarStr + filepath;
       envStr.erase(envStr.find(vars.relFilePath));
-      envSet = SETENV(envStr.c_str());
+      envSet = setEnvVarFromString(envStr);
     }
     do_test_loadPath(vars.relFilePath);
 
     // clean load path
     if (envSet == 0) {
-      (void)SETENV("NX_LOAD_PATH=");
+      (void)setEnvVarFromString(blankVarStr);
     }
   }
 };
