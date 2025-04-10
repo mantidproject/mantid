@@ -8,13 +8,13 @@
 #include "MantidAlgorithms/CombineTableWorkspaces.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include <any>
 
 namespace Mantid::Algorithms {
 using Mantid::API::Progress;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CombineTableWorkspaces)
@@ -50,6 +50,10 @@ void CombineTableWorkspaces::init() {
       "The combined peaks list.");
 }
 
+const std::map<std::string, int> CombineTableWorkspaces::allowedTypes() {
+  return {{"double", 0}, {"int", 1}, {"str", 2}, {"bool", 3}, {"size_t", 4}, {"float", 5}, {"V3D", 6}};
+}
+
 std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   std::map<std::string, std::string> results;
 
@@ -70,16 +74,25 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   auto lColNames = LHSWorkspace->getColumnNames();
   auto rColNames = RHSWorkspace->getColumnNames();
 
+  const std::map<std::string, int> allowedColumnTypes = allowedTypes();
+
   bool matchingColumnNames = true;
   bool matchingColumnTypes = true;
+  bool allColumnTypesAllowed = true;
 
   for (auto i = 0; i < expectedCols; i++) {
     if (lColNames[i] != rColNames[i]) {
       matchingColumnNames = false;
       break;
     }
-    if (LHSWorkspace->getColumn(i)->type() != RHSWorkspace->getColumn(i)->type()) {
+    auto LHType = LHSWorkspace->getColumn(i)->type();
+    if (LHType != RHSWorkspace->getColumn(i)->type()) {
       matchingColumnTypes = false;
+      break;
+    }
+    auto it = allowedColumnTypes.find(LHType);
+    if (it == allowedColumnTypes.end()) {
+      allColumnTypesAllowed = false;
       break;
     }
   }
@@ -96,6 +109,12 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
     return results;
   }
 
+  if (!allColumnTypesAllowed) {
+    results.emplace("LHSWorkspace", "Only supported data types are: double, int, string, bool, size_t, float, and V3D");
+    results.emplace("RHSWorkspace", "Only supported data types are: double, int, string, bool, size_t, float, and V3D");
+    return results;
+  }
+
   return results;
 }
 
@@ -106,10 +125,7 @@ void CombineTableWorkspaces::exec() {
   const DataObjects::TableWorkspace_sptr LHSWorkspace = getProperty("LHSWorkspace");
   const DataObjects::TableWorkspace_sptr RHSWorkspace = getProperty("RHSWorkspace");
 
-  const std::string doubleType = "double";
-  const std::string intType = "int";
-  const std::string stringType = "str";
-  const std::string boolType = "bool";
+  const std::map<std::string, int> allowedColumnTypes = allowedTypes();
 
   // Copy the first workspace to our output workspace
   DataObjects::TableWorkspace_sptr outputWS = LHSWorkspace->clone();
@@ -129,15 +145,24 @@ void CombineTableWorkspaces::exec() {
     TableRow currentRow = RHSWorkspace->getRow(r);
     for (std::size_t c = 0; c < nCols; c++) {
       auto dType = colTypes[c];
-      if (colTypes[c] == doubleType) {
+      if (allowedColumnTypes.at(dType) == 0) {
         newRow << currentRow.Double(c);
-      } else if (colTypes[c] == intType) {
+      } else if (allowedColumnTypes.at(dType) == 1) {
         newRow << currentRow.Int(c);
-      } else if (colTypes[c] == stringType) {
+      } else if (allowedColumnTypes.at(dType) == 2) {
         std::string val = currentRow.cell<std::string>(c);
         newRow << val;
-      } else if (colTypes[c] == boolType) {
+      } else if (allowedColumnTypes.at(dType) == 3) {
         bool val = currentRow.cell<Mantid::API::Boolean>(c);
+        newRow << val;
+      } else if (allowedColumnTypes.at(dType) == 4) {
+        std::size_t val = currentRow.cell<std::size_t>(c);
+        newRow << val;
+      } else if (allowedColumnTypes.at(dType) == 5) {
+        float val = currentRow.cell<float>(c);
+        newRow << val;
+      } else if (allowedColumnTypes.at(dType) == 6) {
+        V3D val = currentRow.cell<V3D>(c);
         newRow << val;
       }
     }
