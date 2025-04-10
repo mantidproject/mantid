@@ -14,7 +14,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
-from typing import List
+from pathlib import Path
+from dataclasses import dataclass, field
+from typing import List, Optional, Union
 
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from mantid.simpleapi import (
@@ -36,6 +38,149 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
     _generate_workspace_name,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
+
+
+@dataclass
+class SaveDirectories:
+    temporary_save_directory: str
+    project_name: str
+
+
+@dataclass
+class RefinementSettings:
+    method: str
+    background: bool
+    microstrain: bool
+    sigma_one: bool
+    gamma: bool
+    histogram_scale_factor: bool
+    unit_cell: bool
+
+
+@dataclass
+class FilePaths:
+    data_files: List[str]
+    phase_files: List[str]
+    instrument_files: List[str]
+
+
+@dataclass
+class GSAS2Config:
+    limits: Optional[List[List[float]]] = field(default_factory=list)
+    mantid_pawley_reflections: Optional[List[List[List[Union[float, int]]]]] = None
+    override_cell_lengths: Optional[List[List[float]]] = None
+    d_spacing_min: float = 1.0
+    number_of_regions: int = 1
+
+
+@dataclass
+class GSAS2ModelConfig:
+    path_to_gsas2: str = ""
+    project_name: Optional[str] = None
+    temporary_save_directory: str = ""
+    gsas2_save_dirs: Optional[List[str]] = None
+    timeout: int = 10
+
+
+@dataclass
+class GSAS2ModelState:
+    data_files: List[str] = field(default_factory=list)
+    instrument_files: List[str] = field(default_factory=list)
+    phase_filepaths: List[str] = field(default_factory=list)
+    x_min: Optional[List[float]] = None
+    x_max: Optional[List[float]] = None
+    data_x_min: Optional[List[float]] = None
+    data_x_max: Optional[List[float]] = None
+    number_of_regions: int = 0
+    number_histograms: int = 0
+    limits: Optional[List[List[float]]] = None
+    override_cell_length_string: Optional[str] = None
+    mantid_pawley_reflections: Optional[List[List[List[float]]]] = None
+    crystal_structures: Optional[List[CrystalStructure]] = None
+    chosen_cell_lengths: Optional[List[List[float]]] = None
+    out_call_gsas2: Optional[str] = None
+    err_call_gsas2: Optional[str] = None
+    phase_names_list: List[str] = field(default_factory=list)
+
+
+class GSAS2Handler(object):
+    """
+    A class that encapsulates logic for managing GSAS-II input parameters, paths, and configurations.
+
+    This class is responsible for:
+    - Validating and organizing input parameters required for GSAS-II refinements.
+    - Locating and configuring the GSAS-II Python executable and associated binaries.
+    - Serializing input parameters into a JSON format for use with GSAS-II scripts.
+    - Providing utility methods for searching files and directories within the GSAS-II installation.
+
+    Attributes:
+        - path_to_gsas2: Path to the GSAS-II installation directory.
+        - save_directories: Directories for temporary and project-specific saves.
+        - refinement_settings: Refinement options such as method and parameters.
+        - file_paths: Paths to data, phase, and instrument files.
+        - limits: X-axis limits for the refinement.
+        - mantid_pawley_reflections: Pawley reflections data.
+        - override_cell_lengths: User-specified lattice parameters.
+        - d_spacing_min: Minimum d-spacing value for reflections.
+        - number_of_regions: Number of regions in the refinement.
+        - os_platform: Operating system platform (e.g., "Windows", "Linux").
+        - python_binaries: Paths to additional binaries required for GSAS-II.
+
+    Methods:
+        - validate_inputs: Validates input parameters to ensure they meet expected criteria.
+        - gsasii_scriptable_path: Finds the path to the GSASIIscriptable.py file.
+        - to_json: Serializes input parameters into a JSON string.
+        - set_gsas2_python_path: Configures the path to the GSAS-II Python executable.
+        - set_binaries: Locates and sets additional binary paths required for GSAS-II.
+        - limited_rglob: Recursively searches for files or directories matching a pattern up to a specified depth.
+        - gsas2_python_path: Returns the path to the GSAS-II Python executable.
+
+    Raises:
+        - ValueError: If required parameters are missing or invalid.
+        - FileNotFoundError: If required files or directories are not found.
+    """
+
+    def __init__(
+        self,
+        path_to_gsas2: Union[str, Path],
+        save_directories: SaveDirectories,
+        refinement_settings: RefinementSettings,
+        file_paths: FilePaths,
+        config: GSAS2Config,
+    ):
+        # Ensure path_to_gsas2 is always a valid Path object
+        if not path_to_gsas2 or not str(path_to_gsas2).strip():
+            raise ValueError("path_to_gsas2 must be provided and cannot be None or empty.")
+        self.path_to_gsas2 = Path(path_to_gsas2).resolve()
+        if not self.path_to_gsas2.exists() or not self.path_to_gsas2.is_dir():
+            raise ValueError(f"Invalid path_to_gsas2: {self.path_to_gsas2} must be a valid directory.")
+
+        # Store grouped parameters
+        self.save_directories = save_directories
+        self.refinement_settings = refinement_settings
+        self.file_paths = file_paths
+        self.config = config
+
+        # GSAS-II configuration
+        self._gsas2_python_path: Optional[Path] = None
+        self.os_platform: Optional[str] = None
+        self.python_binaries: List[str] = []
+
+        # Validate inputs
+        self.validate_inputs()
+
+    def validate_inputs(self):
+        """
+        Validates the input parameters to ensure they meet the expected criteria.
+        Raises a ValueError if any parameter is invalid.
+        """
+        for attr, name in [
+            (self.file_paths.data_files, "data_files"),
+            (self.file_paths.phase_files, "phase_files"),
+            (self.file_paths.instrument_files, "instrument_files"),
+        ]:
+            if not attr:
+                raise ValueError(f"Invalid {name}: must be a non-empty list.")
 
 
 class GSAS2Model(object):
