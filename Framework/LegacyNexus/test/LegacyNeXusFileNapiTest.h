@@ -33,7 +33,7 @@ int setEnvVarFromString(std::string &envVarStr) {
   if (value != "") {
     return setenv(envVar.c_str(), value.c_str(), 1);
   } else {
-    return unsetenv(envVar);
+    return unsetenv(envVar.c_str());
   }
 
 #endif
