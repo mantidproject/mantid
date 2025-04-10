@@ -13,7 +13,6 @@ New features
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
-
 Improvements
 ------------
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
