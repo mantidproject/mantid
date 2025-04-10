@@ -165,9 +165,6 @@ static char *locateNexusFileInPath(char const *const startName) {
   char *testPath = NULL;
   char pathPrefix[256];
 
-  char cwd[MAX_PATH];
-  GetCurrentDirectoryA(MAX_PATH, cwd); // Get current working directory
-
   if (canOpen(startName)) {
     return strdup(startName);
   }
