@@ -5,7 +5,7 @@ set(SRC_FILES
     src/NexusClasses.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
-    src/NeXusFileInfo.cpp
+    src/NeXusFileID.cpp
     src/stptok.cpp
 )
 
@@ -20,10 +20,10 @@ set(INC_FILES
     inc/MantidLegacyNexus/NeXusException.hpp
     inc/MantidLegacyNexus/NeXusFile.hpp
     inc/MantidLegacyNexus/nx_stptok.h
-    inc/MantidLegacyNexus/NeXusFileInfo.h
+    inc/MantidLegacyNexus/NeXusFileID.h
 )
 
-set(TEST_FILES NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h NeXusFileReadWriteTest.h)
+set(TEST_FILES NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h NeXusFileReadTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
