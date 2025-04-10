@@ -210,7 +210,7 @@ if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
 fi
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy --platform osx-64 \
+CONDA_SUBDIR=osx-64 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \
   jq  # used for processing the version string
