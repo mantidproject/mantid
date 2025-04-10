@@ -126,7 +126,7 @@ void QtPropertyEditorView::drawRow(QPainter *painter, const QStyleOptionViewItem
 
   bool hasValue = true;
   if (m_editorPrivate) {
-    QtProperty *property = m_editorPrivate->indexToProperty(index);
+    const QtProperty *property = m_editorPrivate->indexToProperty(index);
     if (property)
       hasValue = property->hasValue();
   }
@@ -217,7 +217,7 @@ int QtPropertyEditorDelegate::indentation(const QModelIndex &index) const {
 }
 
 void QtPropertyEditorDelegate::slotEditorDestroyed(QObject *object) {
-  if (QWidget *w = qobject_cast<QWidget *>(object)) {
+  if (auto w = qobject_cast<const QWidget *>(object)) {
     const EditorToPropertyMap::iterator it = m_editorToProperty.find(w);
     if (it != m_editorToProperty.end()) {
       m_propertyToEditor.remove(it.value());
@@ -281,14 +281,14 @@ void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewIt
                                      const QModelIndex &index) const {
   bool hasValue = true;
   if (m_editorPrivate) {
-    QtProperty *property = m_editorPrivate->indexToProperty(index);
+    const QtProperty *property = m_editorPrivate->indexToProperty(index);
     if (property)
       hasValue = property->hasValue();
   }
 
   QStyleOptionViewItem opt = option;
   if ((m_editorPrivate && index.column() == 0) || !hasValue) {
-    QtProperty *property = m_editorPrivate->indexToProperty(index);
+    const QtProperty *property = m_editorPrivate->indexToProperty(index);
     if (property && property->isModified()) {
       opt.font.setBold(true);
       opt.fontMetrics = QFontMetrics(opt.font);
@@ -318,7 +318,7 @@ void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewIt
   }
   painter->restore();
   if (index.column() > 1) {
-    QtProperty *property = m_editorPrivate->indexToProperty(index);
+    const QtProperty *property = m_editorPrivate->indexToProperty(index);
     int optionIndex = index.column() - 2;
     if (optionIndex >= m_editorPrivate->options().size()) {
       return;
@@ -358,7 +358,6 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style) {
   QPixmap pix(14, 14);
   pix.fill(Qt::transparent);
   QStyleOption branchOption;
-  QRect r(QPoint(0, 0), pix.size());
   branchOption.rect = QRect(2, 2, 9, 9); // ### hardcoded in qcommonstyle.cpp
   branchOption.palette = palette;
   branchOption.state = QStyle::State_Children;
@@ -397,7 +396,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
   labels.append(translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
   labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", nullptr));
   // add optional columns
-  foreach (auto opt, m_options) {
+  foreach (const auto &opt, m_options) {
     labels.append(QApplication::translate("QtTreePropertyBrowser", opt.toStdString().c_str(), nullptr));
   }
   m_treeWidget->setHeaderLabels(labels);
@@ -438,7 +437,7 @@ void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem, bo
 
 QtProperty *QtTreePropertyBrowserPrivate::indexToProperty(const QModelIndex &index) const {
   QTreeWidgetItem *item = m_treeWidget->indexToItem(index);
-  QtBrowserItem *idx = m_itemToIndex.value(item);
+  const auto idx = m_itemToIndex.value(item);
   if (idx)
     return idx->property();
   return nullptr;
@@ -478,7 +477,7 @@ void QtTreePropertyBrowserPrivate::enableItem(QTreeWidgetItem *item) const {
   const int childCount = item->childCount();
   for (int i = 0; i < childCount; i++) {
     QTreeWidgetItem *child = item->child(i);
-    QtProperty *property = m_itemToIndex[child]->property();
+    const QtProperty *property = m_itemToIndex[child]->property();
     if (property->isEnabled()) {
       enableItem(child);
     }
@@ -486,7 +485,7 @@ void QtTreePropertyBrowserPrivate::enableItem(QTreeWidgetItem *item) const {
 }
 
 bool QtTreePropertyBrowserPrivate::hasValue(QTreeWidgetItem *item) const {
-  QtBrowserItem *browserItem = m_itemToIndex.value(item);
+  const auto browserItem = m_itemToIndex.value(item);
   if (browserItem)
     return browserItem->property()->hasValue();
   return false;
@@ -532,7 +531,7 @@ void QtTreePropertyBrowserPrivate::propertyChanged(QtBrowserItem *index) {
 }
 
 void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item) {
-  QtProperty *property = m_itemToIndex[item]->property();
+  const QtProperty *property = m_itemToIndex[item]->property();
   QString toolTip = property->toolTip();
   QIcon expandIcon;
   if (property->hasValue()) {
@@ -574,14 +573,13 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item) {
 }
 
 QColor QtTreePropertyBrowserPrivate::calculatedBackgroundColor(QtBrowserItem *item) const {
-  QtBrowserItem *i = item;
-  const QMap<QtBrowserItem *, QColor>::const_iterator itEnd = m_indexToBackgroundColor.constEnd();
-  while (i) {
-    QMap<QtBrowserItem *, QColor>::const_iterator it = m_indexToBackgroundColor.constFind(i);
-    if (it != itEnd)
-      return it.value();
-    i = i->parent();
+  const auto it = m_indexToBackgroundColor.constFind(item);
+  if (it != m_indexToBackgroundColor.cend()) {
+    return it.value();
+  } else if (item->parent()) {
+    return calculatedBackgroundColor(item->parent());
   }
+
   return QColor();
 }
 
@@ -615,7 +613,7 @@ QTreeWidgetItem *QtTreePropertyBrowserPrivate::editedItem() const { return m_del
 
 void QtTreePropertyBrowserPrivate::closeEditor() {
   auto treeItem = editedItem();
-  auto browserItem = m_itemToIndex[treeItem];
+  const QtBrowserItem *browserItem = m_itemToIndex[treeItem];
   m_delegate->closeEditor(browserItem->property());
 }
 
@@ -742,7 +740,7 @@ void QtTreePropertyBrowser::setRootIsDecorated(bool show) {
   d_ptr->m_treeWidget->setRootIsDecorated(show);
   QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
   while (it.hasNext()) {
-    QtProperty *property = it.next().value()->property();
+    const auto property = it.next().value()->property();
     if (!property->hasValue())
       d_ptr->updateItem(it.key());
   }
@@ -952,7 +950,7 @@ void QtTreePropertyBrowser::setPropertiesWithoutValueMarked(bool mark) {
   d_ptr->m_markPropertiesWithoutValue = mark;
   QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
   while (it.hasNext()) {
-    QtProperty *property = it.next().value()->property();
+    const auto property = it.next().value()->property();
     if (!property->hasValue())
       d_ptr->updateItem(it.key());
   }
