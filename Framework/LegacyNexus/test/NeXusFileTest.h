@@ -10,7 +10,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
-#include "MantidlegacyNexus/NeXusFile.hpp"
+#include "MantidLegacyNexus/NeXusFile.hpp"
 #include "test_helper.h"
 #include <cstdio>
 #include <cstdlib>
