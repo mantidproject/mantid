@@ -173,12 +173,11 @@ static QList<QLocale::Country> sortCountries(const QList<QLocale::Country> &coun
 
 void QtMetaEnumProvider::initLocale() {
   QMultiMap<QString, QLocale::Language> nameToLanguage;
-  QLocale::Language language = QLocale::C;
-  while (language <= QLocale::LastLanguage) {
+  for (int language_number = QLocale::C; language_number <= QLocale::LastLanguage; language_number++) {
+    const auto language = static_cast<QLocale::Language>(language_number);
     QLocale locale(language);
     if (locale.language() == language)
       nameToLanguage.insert(QLocale::languageToString(language), language);
-    language = (QLocale::Language)((uint)language + 1); // ++language
   }
 
   const QLocale system = QLocale::system();
@@ -187,8 +186,7 @@ void QtMetaEnumProvider::initLocale() {
 
   QList<QLocale::Language> languages = nameToLanguage.values();
   QListIterator<QLocale::Language> itLang(languages);
-  while (itLang.hasNext()) {
-    QLocale::Language language = itLang.next();
+  for (const auto language : languages) {
     QList<QLocale::Country> countries;
 #if QT_VERSION < 0x040300
     countries = countriesForLanguage(language);
@@ -473,7 +471,7 @@ QString QtIntPropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtIntPropertyManager::setValue(QtProperty *property, int val) {
-  void (QtIntPropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, int) = nullptr;
+  void (QtIntPropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, int) = nullptr;
   setValueInRange<int, QtIntPropertyManagerPrivate, QtIntPropertyManager, int>(
       this, d_ptr, &QtIntPropertyManager::propertyChanged, &QtIntPropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -753,7 +751,7 @@ QString QtDoublePropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtDoublePropertyManager::setValue(QtProperty *property, double val) {
-  void (QtDoublePropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, double) = nullptr;
+  void (QtDoublePropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, double) = nullptr;
   setValueInRange<double, QtDoublePropertyManagerPrivate, QtDoublePropertyManager, double>(
       this, d_ptr, &QtDoublePropertyManager::propertyChanged, &QtDoublePropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -1336,7 +1334,7 @@ QString QtDatePropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtDatePropertyManager::setValue(QtProperty *property, const QDate &val) {
-  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, const QDate &) = nullptr;
+  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *, const QDate &) = nullptr;
   setValueInRange<const QDate &, QtDatePropertyManagerPrivate, QtDatePropertyManager, const QDate>(
       this, d_ptr, &QtDatePropertyManager::propertyChanged, &QtDatePropertyManager::valueChanged, property, val,
       setSubPropertyValue);
@@ -2469,7 +2467,7 @@ void QtSizePropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prope
   }
 }
 
-void QtSizePropertyManagerPrivate::setValue(QtProperty *property, const QSize &val) {
+void QtSizePropertyManagerPrivate::setValue(const QtProperty *property, const QSize &val) {
   m_intPropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_intPropertyManager->setValue(m_propertyToH.value(property), val.height());
 }
@@ -2750,8 +2748,8 @@ void QtSizeFPropertyManagerPrivate::slotPropertyDestroyed(const QtProperty *prop
     m_hToProperty.remove(property);
   }
 }
-// cppcheck-suppress constParameterCallback
-void QtSizeFPropertyManagerPrivate::setValue(QtProperty *property, const QSizeF &val) {
+
+void QtSizeFPropertyManagerPrivate::setValue(const QtProperty *property, const QSizeF &val) {
   m_doublePropertyManager->setValue(m_propertyToW.value(property), val.width());
   m_doublePropertyManager->setValue(m_propertyToH.value(property), val.height());
 }

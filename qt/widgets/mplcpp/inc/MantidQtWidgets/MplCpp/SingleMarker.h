@@ -22,8 +22,8 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL SingleMarker : public Common::Python::InstanceHolder {
 public:
-  explicit SingleMarker(FigureCanvasQt *canvas, QString const &color, double position, double minimum, double maximum,
-                        QString const &markerType,
+  explicit SingleMarker(const FigureCanvasQt *canvas, QString const &color, double position, double minimum,
+                        double maximum, QString const &markerType,
                         QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
