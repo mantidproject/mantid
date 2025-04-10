@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -20,8 +21,12 @@ namespace DataHandling {
 
   @date 2012-01-30
 */
-class MANTID_DATAHANDLING_DLL LoadPreNexus : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadPreNexus : public API::IFileLoader<Kernel::FileDescriptor>,
+                                             public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  LoadPreNexus();
+
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Load a collection of PreNexus files."; }
