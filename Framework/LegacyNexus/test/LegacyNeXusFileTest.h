@@ -140,7 +140,6 @@ public:
     file.openGroup("entry", "NXentry");
 
     string data("test_group");
-    NXnumtype type(NXnumtype::CHAR);
 
     // check error conditions
     TS_ASSERT_THROWS(file.openData(string()), Exception &);
