@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
@@ -237,44 +238,47 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
   }
   std::vector<bool> emptySpectrum;
   emptySpectrum.reserve(nspec);
-  std::vector<double> aj, bj;
-  {
-    // Calculate coefficients aj, bj
+  std::vector<CurveFitting::EigenVector> n0Vectors(nspec);
 
-    double sxx = 0.;
-    double syy = 0.;
-    double sxy = 0.;
-    for (size_t h = 0; h < nspec; h++) {
-      emptySpectrum.emplace_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }) ||
-          phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
-      if (!emptySpectrum[h]) {
-        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
-        const double phi = phase->Double(h, phaseIndex);
-        const double X = n0[h] * asym * cos(phi);
-        const double Y = n0[h] * asym * sin(phi);
-        sxx += X * X;
-        syy += Y * Y;
-        sxy += X * Y;
-      }
+  // Calculate coefficients aj, bj
+
+  double sxx = 0.;
+  double syy = 0.;
+  double sxy = 0.;
+  for (size_t h = 0; h < nspec; h++) {
+    emptySpectrum.emplace_back(
+        std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }) ||
+        phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
+    if (!emptySpectrum[h]) {
+      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+      const double phi = phase->Double(h, phaseIndex);
+      const double X = n0[h] * asym * cos(phi);
+      const double Y = n0[h] * asym * sin(phi);
+      n0Vectors[h] = CurveFitting::EigenVector({X, Y});
+      sxx += X * X;
+      syy += Y * Y;
+      sxy += X * Y;
+    } else {
+      n0Vectors[h] = CurveFitting::EigenVector({0.0, 0.0});
     }
+  }
 
-    const double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
-    const double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
-    const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
-    const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
-    for (size_t h = 0; h < nspec; h++) {
-      if (emptySpectrum[h]) {
-        aj.emplace_back(0.0);
-        bj.emplace_back(0.0);
-      } else {
-        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
-        const double phi = phase->Double(h, phaseIndex);
-        const double X = n0[h] * asym * cos(phi);
-        const double Y = n0[h] * asym * sin(phi);
-        aj.emplace_back((lam1 * X + mu1 * Y) * 0.5);
-        bj.emplace_back((lam2 * X + mu2 * Y) * 0.5);
-      }
+  CurveFitting::EigenMatrix muLamMatrix(2, 2);
+  muLamMatrix.set(0, 0, sxx);
+  muLamMatrix.set(0, 1, sxy);
+  muLamMatrix.set(1, 0, sxy);
+  muLamMatrix.set(1, 1, syy);
+  muLamMatrix.invert();
+
+  std::vector<double> aj(nspec), bj(nspec);
+  for (size_t h = 0; h < nspec; h++) {
+    if (emptySpectrum[h]) {
+      aj[h] = 0;
+      bj[h] = 0;
+    } else {
+      const auto factors = muLamMatrix * n0Vectors[h];
+      aj[h] = factors[0];
+      bj[h] = factors[1];
     }
   }
 
