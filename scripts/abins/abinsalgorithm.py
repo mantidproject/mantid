@@ -397,6 +397,8 @@ class AbinsAlgorithm:
                 )
 
             for start, end in atom_ranges:
+                if start > end:
+                    start, end = end, start
                 atom_numbers = atom_numbers + list(range(start, end + 1))
 
         return sorted(atom_numbers), atom_symbols

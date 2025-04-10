@@ -77,6 +77,7 @@ class AbinsAlgorithmMethodsTest(unittest.TestCase):
             (["atom2", "1"], ([1, 2], [])),
             (["C"], ([], ["C"])),
             (["1-3"], ([1, 2, 3], [])),
+            (["3-1"], ([1, 2, 3], [])),
             (["1..2", "C"], ([1, 2], ["C"])),
         ]:
             self.assertEqual(
