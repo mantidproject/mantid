@@ -189,6 +189,7 @@ set(SRC_FILES
     src/SavePDFGui.cpp
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
+    src/SavePolarizedNXcanSAS.cpp
     src/SaveRKH.cpp
     src/SaveRMCProfile.cpp
     src/SaveReflectometryAscii.cpp
@@ -401,6 +402,7 @@ set(INC_FILES
     inc/MantidDataHandling/SavePDFGui.h
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
+    inc/MantidDataHandling/SavePolarizedNXcanSAS.h
     inc/MantidDataHandling/SaveRKH.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
@@ -598,6 +600,7 @@ set(TEST_FILES
     SavePDFGuiTest.h
     SavePHXTest.h
     SaveParameterFileTest.h
+    SavePolarizedNXcanSASTest.h
     SaveRKHTest.h
     SaveRMCProfileTest.h
     SaveReflectometryAsciiTest.h
@@ -662,6 +665,7 @@ set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   DataHandling
   PUBLIC Mantid::Nexus
+         Mantid::Algorithms
          Mantid::API
          Mantid::HistogramData
          Mantid::Catalog
