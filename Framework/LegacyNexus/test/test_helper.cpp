@@ -34,7 +34,6 @@ std::string LegacyNexusTest::strmakef(const char *const fmt, ...) {
 LegacyNexusTest::FormatUniqueVars LegacyNexusTest::getFormatUniqueVars(const LegacyNexusTest::NexusFormat fmt,
                                                                        const std::string &filename) {
   std::string relFilePath;
-  std::string rootID;
   std::string fileExt;
   const std::string extSubStr = (filename.size() > 4) ? filename.substr(filename.size() - 4) : "";
   switch (fmt) {
