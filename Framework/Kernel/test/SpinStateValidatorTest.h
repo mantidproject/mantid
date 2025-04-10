@@ -52,6 +52,12 @@ public:
     checkAllInputs(validator, incorrectInputs, false);
   }
 
+  void testDoubleIncorrectInputs() {
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2});
+    auto incorrectInputs = std::vector<std::string>{"0 1,11", " ,01", "11,0 0", "11", "1 1"};
+    checkAllInputs(validator, incorrectInputs, false);
+  }
+
   void testDuplicateEntry() {
     auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3});
     auto duplicates = std::vector<std::string>{"01, 01", "11,10,11", "00,00"};
