@@ -52,11 +52,10 @@ public:
   }
 
 protected:
-  virtual std::shared_ptr<IMCAbsorptionStrategy> createStrategy(std::shared_ptr<IMCInteractionVolume> interactionVol,
-                                                                const IBeamProfile &beamProfile,
-                                                                Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                                                                const size_t maxScatterPtAttempts,
-                                                                const bool regenerateTracksForEachLambda);
+  virtual [[nodiscard]] std::shared_ptr<IMCAbsorptionStrategy>
+  createStrategy(std::shared_ptr<IMCInteractionVolume> interactionVol, const IBeamProfile &beamProfile,
+                 Kernel::DeltaEMode::Type EMode, const size_t nevents, const size_t maxScatterPtAttempts,
+                 const bool regenerateTracksForEachLambda);
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);

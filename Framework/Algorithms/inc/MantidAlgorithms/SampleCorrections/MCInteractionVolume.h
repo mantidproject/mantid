@@ -28,7 +28,7 @@ class IBeamProfile;
 class MANTID_ALGORITHMS_DLL MCInteractionVolume : public IMCInteractionVolume {
 public:
   enum class ScatteringPointVicinity { SAMPLEANDENVIRONMENT, SAMPLEONLY, ENVIRONMENTONLY };
-  static std::shared_ptr<IMCInteractionVolume>
+  [[nodiscard]] static std::shared_ptr<IMCInteractionVolume>
   create(const API::Sample &sample, const size_t maxScatterAttempts = 5000,
          const ScatteringPointVicinity pointsIn = ScatteringPointVicinity::SAMPLEANDENVIRONMENT,
          Geometry::IObject_sptr gaugeVolume = nullptr);

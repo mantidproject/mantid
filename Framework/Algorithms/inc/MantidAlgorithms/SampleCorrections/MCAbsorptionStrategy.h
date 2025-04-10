@@ -55,7 +55,7 @@ private:
   const size_t m_maxScatterAttempts;
   const Kernel::DeltaEMode::Type m_EMode;
   const bool m_regenerateTracksForEachLambda;
-  void setActiveRegion(std::shared_ptr<IMCInteractionVolume> interactionVolume, const IBeamProfile &beamProfile);
+  void setActiveRegion();
 };
 
 } // namespace Algorithms

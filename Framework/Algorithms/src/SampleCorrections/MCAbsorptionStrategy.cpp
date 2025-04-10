@@ -36,19 +36,16 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(std::shared_ptr<IMCInteractionVolume>
       m_maxScatterAttempts(maxScatterPtAttempts), m_EMode(EMode),
       m_regenerateTracksForEachLambda(regenerateTracksForEachLambda) {
 
-  setActiveRegion(m_scatterVol, beamProfile);
+  setActiveRegion();
 }
 
 /**
  * Set the active region on the interaction volume as smaller of the sample
  * bounding box and the beam cross section. Trying to keep the beam details
  * outside the interaction volume class
- * @param interactionVolume The interaction volume object
- * @param beamProfile The beam profile
  */
-void MCAbsorptionStrategy::setActiveRegion(std::shared_ptr<IMCInteractionVolume> interactionVolume,
-                                           const IBeamProfile &beamProfile) {
-  interactionVolume->setActiveRegion(beamProfile.defineActiveRegion(interactionVolume->getFullBoundingBox()));
+void MCAbsorptionStrategy::setActiveRegion() {
+  m_scatterVol->setActiveRegion(m_beamProfile.defineActiveRegion(m_scatterVol->getFullBoundingBox()));
 }
 
 /**
