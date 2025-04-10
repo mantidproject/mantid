@@ -161,7 +161,7 @@ pipeline {
               expression { env.BUILD_DEVEL == 'win-64' }
             }
           }
-          agent { label 'win-64' }
+          agent { label 'win-64-j17' }
           options { timestamps () }
           steps {
             checkoutSource("${GIT_SHA}")
@@ -261,7 +261,7 @@ pipeline {
               expression { env.BUILD_PACKAGE == 'all' }
             }
           }
-          agent { label 'win-64' }
+          agent { label 'win-64-j17' }
           options {
               timestamps ()
               retry(3)
