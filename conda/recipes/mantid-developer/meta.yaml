@@ -46,7 +46,7 @@ requirements:
     - qtconsole {{ qtconsole }}
     - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
-    - quasielasticbayes
+    - quasielasticbayes {{ quasielasticbayes }}
     - requests>=2.25.1
     - scipy {{ scipy }}
     - setuptools

@@ -75,7 +75,7 @@ requirements:
     - libglu {{ libglu }}  # [linux]
     - joblib
     - orsopy {{ orsopy }}
-    - quasielasticbayes
+    - quasielasticbayes {{ quasielasticbayes }}
     - zlib
 
   run_constrained:
