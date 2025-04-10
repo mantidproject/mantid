@@ -23,6 +23,7 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
+  static const std::map<std::string, int> allowedTypes();
 
 private:
   void init() override;
