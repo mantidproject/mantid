@@ -23,7 +23,7 @@ set(INC_FILES
     inc/MantidLegacyNexus/NeXusFileID.h
 )
 
-set(TEST_FILES NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h NeXusFileReadTest.h)
+set(TEST_FILES LegacyNeXusFileTest.h LegacyNeXusFileLeakTest.h LegacyNeXusFileNapiTest.h LegacyNeXusFileReadTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
