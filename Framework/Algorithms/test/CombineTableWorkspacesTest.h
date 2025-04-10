@@ -315,6 +315,33 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  void test_big_tables_combine() {
+    std::string dType = "int";
+    std::vector<std::string> names = {"ThingA", "ThingB", "ThingC", "ThingD", "ThingE", "ThingF", "ThingG", "ThingH"};
+    TableWorkspace_sptr table1 = createSingleTypeTableWorkspace<int>(dType, 50, names, 0);
+    TableWorkspace_sptr table2 = createSingleTypeTableWorkspace<int>(dType, 50, names, 1);
+
+    // Name of the output workspace.
+    std::string outWSName("CombineTableWorkspacesTest_OutputWS");
+
+    Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
+    TS_ASSERT(alg->execute())
+
+    // Retrieve the workspace from data service.
+    TableWorkspace_sptr ws = getOutput(outWSName);
+
+    // check properties of output table
+    TS_ASSERT_EQUALS(ws->rowCount(), 100)
+    TS_ASSERT_EQUALS(ws->columnCount(), 8)
+    TS_ASSERT_EQUALS(table1->getColumnNames(), table2->getColumnNames())
+    // check the rows added contain the expected values
+    TS_ASSERT_EQUALS(ws->cell<int>(49, 0), 0)
+    TS_ASSERT_EQUALS(ws->cell<int>(50, 1), 1)
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
   void test_different_tables_with_different_types_but_same_columns_combine() {
     std::pair<std::string, std::string> dTypes = {"int", "double"};
     std::pair<std::string, std::string> colTitles = {"ThingA", "ThingB"};
