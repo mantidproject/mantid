@@ -30,7 +30,7 @@ int setEnvVarFromString(std::string &envVarStr) {
   auto pos = envVarStr.find('=');
   std::string envVar = envVarStr.substr(0, pos);
   std::string value = envVarStr.substr(pos + 1);
-  return setenv(envVar.c_str(), value, 1);
+  return setenv(envVar.c_str(), value.c_str(), 1);
 #endif
 }
 
