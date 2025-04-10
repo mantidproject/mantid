@@ -30,7 +30,12 @@ int setEnvVarFromString(std::string &envVarStr) {
   auto pos = envVarStr.find('=');
   std::string envVar = envVarStr.substr(0, pos);
   std::string value = envVarStr.substr(pos + 1);
-  return setenv(envVar.c_str(), value.c_str(), 1);
+  if (value != "") {
+    return setenv(envVar.c_str(), value.c_str(), 1);
+  } else {
+    return unsetenv(envVar);
+  }
+
 #endif
 }
 
@@ -123,11 +128,8 @@ private:
   }
 
 public:
-  void test_read() {
-    // Have to run these two tests in series as they effectively interact via the `NX_LOAD_PATH` env var.
-    impl_test_read(NexusFormat::HDF5);
-    impl_test_read(NexusFormat::HDF4);
-  }
+  void test_read_h5() { impl_test_read(NexusFormat::HDF5); }
+  void test_read_h4() { impl_test_read(NexusFormat::HDF4); }
 
   void impl_test_read(NexusFormat fmt) {
     cout << " Nexus File Tests\n";
