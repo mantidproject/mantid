@@ -22,6 +22,12 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#define SETENV _putenv
+#else
+#define SETENV putenv
+#endif
+
 using namespace Mantid::LegacyNexus;
 using namespace LegacyNexusTest;
 using std::cout;
@@ -127,13 +133,13 @@ public:
     if (getenv("NX_LOAD_PATH") == NULL) {
       std::string envStr = "NX_LOAD_PATH=" + filepath;
       envStr.erase(envStr.find(vars.relFilePath));
-      envSet = _putenv(envStr.c_str());
+      envSet = SETENV(envStr.c_str());
     }
     do_test_loadPath(vars.relFilePath);
 
     // clean load path
     if (envSet == 0) {
-      (void)_putenv("NX_LOAD_PATH=");
+      (void)SETENV("NX_LOAD_PATH=");
     }
   }
 };
