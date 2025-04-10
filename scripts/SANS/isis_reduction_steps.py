@@ -50,6 +50,7 @@ from mantid.simpleapi import (
     SANSWideAngleCorrection,
     SumSpectra,
     TOFSANSResolutionByPixel,
+    UnwrapMonitorsInTOF,
     Qxy,
     Q1D,
 )
@@ -2020,12 +2021,12 @@ class NormalizeToMonitor(ReductionStep):
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
 
-        # # Unwrap the monitors of the scatter workspace
-        # if reducer.unwrap_monitors:
-        #     wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
-        #     temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
-        #     DeleteWorkspace(mon)
-        #     mon = temp_mon
+        # Unwrap the monitors of the scatter workspace
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+            DeleteWorkspace(mon)
+            mon = temp_mon
 
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
@@ -2228,10 +2229,10 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
-        # # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
-        # if reducer.unwrap_monitors:
-        #     wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
-        #     UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+        # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
 
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
