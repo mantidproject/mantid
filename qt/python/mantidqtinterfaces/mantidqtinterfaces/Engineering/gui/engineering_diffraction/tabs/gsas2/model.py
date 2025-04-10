@@ -200,7 +200,7 @@ class GSAS2Model(object):
         return gsas_runtime
 
     def format_gsas2_call(self):
-        gsas2_inputs = parse_inputs.Gsas2Inputs(
+        gsas2_inputs = parse_inputs.Gsas2InputParameters(
             path_to_gsas2=self.path_to_gsas2,
             temporary_save_directory=self.temporary_save_directory,
             project_name=self.project_name,
@@ -226,7 +226,7 @@ class GSAS2Model(object):
         call = [
             gsas2_python_path,
             os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")),
-            parse_inputs.Gsas2Inputs_to_json(gsas2_inputs),
+            parse_inputs.Gsas2InputParameters_to_json(gsas2_inputs),
         ]
         return call
 
