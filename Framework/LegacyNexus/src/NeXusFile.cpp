@@ -32,7 +32,7 @@ template <typename NumT> NXnumtype getType(NumT const number) {
   throw Exception(msg.str());
 }
 
-// template specialisations for types we kno
+// template specialisations for types we know
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(char const) { return NXnumtype::CHAR; }
 
 template <> MANTID_LEGACYNEXUS_DLL NXnumtype getType(float const) { return NXnumtype::FLOAT32; }

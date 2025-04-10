@@ -148,8 +148,8 @@ public:
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
-  /**  Load the data from the file. Calling this method with all default
-   * arguments makes it to read in all the data.
+  /** Load the data from the file. Calling this method with all default
+   * arguments makes it read in all the data.
    */
   virtual void load() {};
 

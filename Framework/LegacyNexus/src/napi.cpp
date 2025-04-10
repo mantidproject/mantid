@@ -31,9 +31,7 @@
 #include <string.h>
 #include <time.h>
 
-#include <stdexcept>
-
-#include "MantidLegacyNexus/NeXusFileInfo.h"
+#include "MantidLegacyNexus/NeXusFileID.h"
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
 #include "MantidLegacyNexus/napiconfig.h"
@@ -115,7 +113,6 @@ static NXstatus nxiunlock(int ret) {
  *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
  *  Freddie Akeroyd, 16/06/2011
  */
-#include <iostream>
 #include <windows.h>
 
 static CRITICAL_SECTION nx_critical;
@@ -170,7 +167,6 @@ static char *locateNexusFileInPath(char const *const startName) {
 
   char cwd[MAX_PATH];
   GetCurrentDirectoryA(MAX_PATH, cwd); // Get current working directory
-  std::cout << cwd;
 
   if (canOpen(startName)) {
     return strdup(startName);
@@ -517,7 +513,9 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
   NXMEnableErrorReporting();
   if (attStatus == NXstatus::NX_OK) {
-    throw std::runtime_error("Support for Externally Linking files has been removed from LegacyNexus");
+    char pError[256];
+    snprintf(pError, 255, "ERROR: Support for Externally Linking files has been removed from LegacyNexus: %s", name);
+    NXReportError(pError);
   }
   return status;
 }
