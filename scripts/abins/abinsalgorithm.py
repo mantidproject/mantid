@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
+import textwrap
 from typing import Dict, Iterable, List, Literal, Tuple, Union
 
 import yaml
@@ -108,11 +109,16 @@ class AbinsAlgorithm:
 
         self.declareProperty(
             StringArrayProperty("Atoms", Direction.Input),
-            doc="List of atoms to use to calculate partial S."
-            "If left blank, workspaces with S for all types of atoms will be calculated. "
-            "Element symbols will be interpreted as a sum of all atoms of that element in the "
-            "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
-            "individual atoms, indexing from 1 following the order of the input data.",
+            doc=textwrap.dedent("""
+            List of atoms to use to calculate partial S.  If left blank, workspaces with S for all
+            types of atoms will be calculated.  Element symbols will be interpreted as a sum of all
+            atoms of that element in the cell. 'N', 'atomN' or 'atom_N' (where N is a positive
+            integer) will be interpreted as individual atoms, indexing from 1 following the order of
+            the input data.  A range of atoms can be indicated as e.g. '1-3' or '1..3'; this is
+            equivalent to individually selecting atoms 1, 2, 3. Selections are joined with commas
+            and selection styles can be used simultaneously, e.g. 'C,1-4,7' will select atoms
+            1,2,3,4,7 and all C atoms.
+            """).replace("\n", " "),
         )
 
         self.declareProperty(
