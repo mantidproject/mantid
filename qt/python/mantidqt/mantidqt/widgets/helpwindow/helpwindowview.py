@@ -4,85 +4,165 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QToolBar, QPushButton, QWidget
+import logging
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QVBoxLayout,
+    QToolBar,
+    QPushButton,
+    QWidget,
+    QLabel,
+    QSizePolicy,
+)
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
-from qtpy.QtCore import QUrl
+from qtpy.QtCore import QUrl, Qt
 from qtpy.QtGui import QIcon
 
 
 class HelpWindowView(QMainWindow):
+    _logger = logging.getLogger(__name__)
+
     def __init__(self, presenter, interceptor=None):
         super().__init__()
         self.presenter = presenter
+        self._logger.debug("Initializing HelpWindowView.")
         self.setWindowTitle("Python Help Window")
-        self.resize(800, 600)
+        self.resize(1024, 768)
+
+        # Central Widget and Layout
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setCentralWidget(container)
 
         # Create the QWebEngineView
         self.browser = QWebEngineView()
+        layout.addWidget(self.browser)
 
-        # Allow local file:// docs to load remote resources (fonts, scripts, etc.)
-        QWebEngineSettings.globalSettings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        # Configure Web Engine Settings
+        settings = self.browser.settings()
+        settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.ScrollAnimatorEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, False)
+        # settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True) # JS is enabled by default!
 
         # If the interceptor is not None, apply it to the current profile
         if interceptor is not None:
             profile = self.browser.page().profile()
             profile.setUrlRequestInterceptor(interceptor)
+            self._logger.debug(f"HelpWindow: Applied URL interceptor: {type(interceptor).__name__}")
 
         # Toolbar with navigation buttons
         self.toolbar = QToolBar("Navigation")
-        self.addToolBar(self.toolbar)
+        self.toolbar.setMovable(False)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
+
+        # --- Store references to buttons ---
+        self.backButton = QPushButton()
+        self.forwardButton = QPushButton()
+        self.reloadButton = QPushButton()
+        self.homeButton = QPushButton()
+        # ---------------------------------
 
         # Back
-        back_button = QPushButton()
-        back_button.setIcon(QIcon.fromTheme("go-previous"))
-        back_button.setToolTip("Go Back")
-        back_button.clicked.connect(self.browser.back)
-        self.toolbar.addWidget(back_button)
+        self.backButton.setIcon(QIcon.fromTheme("go-previous", QIcon(":/qt-project.org/styles/commonstyle/images/left-arrow-32.png")))
+        self.backButton.setToolTip("Go Back")
+        self.backButton.clicked.connect(self.browser.back)
+        self.toolbar.addWidget(self.backButton)
 
         # Forward
-        forward_button = QPushButton()
-        forward_button.setIcon(QIcon.fromTheme("go-next"))
-        forward_button.setToolTip("Go Forward")
-        forward_button.clicked.connect(self.browser.forward)
-        self.toolbar.addWidget(forward_button)
+        self.forwardButton.setIcon(QIcon.fromTheme("go-next", QIcon(":/qt-project.org/styles/commonstyle/images/right-arrow-32.png")))
+        self.forwardButton.setToolTip("Go Forward")
+        self.forwardButton.clicked.connect(self.browser.forward)
+        self.toolbar.addWidget(self.forwardButton)
 
         # Home
-        home_button = QPushButton()
-        home_button.setIcon(QIcon.fromTheme("go-home"))
-        home_button.setToolTip("Go Home")
-        home_button.clicked.connect(self.on_home_clicked)
-        self.toolbar.addWidget(home_button)
+        self.homeButton.setIcon(QIcon.fromTheme("go-home", QIcon(":/qt-project.org/styles/commonstyle/images/home-32.png")))
+        self.homeButton.setToolTip("Go to Home Page")
+        self.homeButton.clicked.connect(self.on_home_clicked)
+        self.toolbar.addWidget(self.homeButton)
 
         # Reload
-        reload_button = QPushButton()
-        reload_button.setIcon(QIcon.fromTheme("view-refresh"))
-        reload_button.setToolTip("Reload")
-        reload_button.clicked.connect(self.browser.reload)
-        self.toolbar.addWidget(reload_button)
+        self.reloadButton.setIcon(QIcon.fromTheme("view-refresh", QIcon(":/qt-project.org/styles/commonstyle/images/refresh-32.png")))
+        self.reloadButton.setToolTip("Reload Current Page")
+        self.reloadButton.clicked.connect(self.browser.reload)
+        self.toolbar.addWidget(self.reloadButton)
 
-        # Layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.browser)
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
+        # --- Add Status Indicator ---
+        # Spacer to push the status label to the right
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.toolbar.addWidget(spacer)
+
+        # Status Label (Icon + Text)
+        self.statusLabel = QLabel("Status: Initializing...")  # Initial text
+        self.statusLabel.setToolTip("Indicates whether documentation is loaded locally (Offline) or from the web (Online)")
+        # Add some padding/margin for aesthetics
+        self.statusLabel.setStyleSheet("QLabel { padding-left: 5px; padding-right: 5px; margin-left: 5px; }")
+        self.toolbar.addWidget(self.statusLabel)
+        # ---------------------------
+
+        # Connect signals for enabling/disabling buttons
+        self.browser.urlChanged.connect(self.update_navigation_buttons)
+        self.browser.loadFinished.connect(self.update_navigation_buttons)
+        self.update_navigation_buttons()
+
+    def set_status_indicator(self, modeText: str, isLocal: bool):
+        """
+        Updates the status label text and icon.
+        """
+        if isLocal:
+            tooltip = f"Showing {modeText} from local disk."
+        else:
+            tooltip = f"Showing {modeText} from the web."
+
+        colorStyle = "color: green;"
+        self.statusLabel.setStyleSheet(f"QLabel {{ padding-left: 5px; padding-right: 5px; margin-left: 5px; {colorStyle} }}")
+        self.statusLabel.setText(f"{modeText}")
+        self.statusLabel.setToolTip(tooltip)
+        self._logger.debug(f"HelpWindow View: Status set to '{modeText}' (Local: {isLocal})")
+
+    def update_navigation_buttons(self, ok: bool = True):
+        """
+        Enable/disable back/forward buttons based on browser history.
+        """
+        canGoBack = self.browser.history().canGoBack()
+        canGoForward = self.browser.history().canGoForward()
+        self.backButton.setEnabled(canGoBack)
+        self.forwardButton.setEnabled(canGoForward)
+        self.reloadButton.setEnabled(True)
 
     def on_home_clicked(self):
         """
         Notifies the Presenter that the user wants to go "Home."
         The Presenter decides whether it's local index.html or online docs.
         """
+        self._logger.debug("Home button clicked.")
         self.presenter.show_home_page()
 
     def set_page_url(self, url: QUrl):
-        """The Presenter calls this to load the desired doc page."""
-        self.browser.setUrl(url)
+        """
+        The Presenter calls this to load the desired doc page.
+        """
+        if url.isValid() and url != self.browser.url():
+            self._logger.debug(f"Loading URL: {url.toString()}")
+            self.browser.setUrl(url)
+        elif not url.isValid():
+            self._logger.warning(f"Attempted to load invalid URL: {url.toString()}")
+        else:
+            self._logger.debug(f"URL already loaded: {url.toString()}")
 
     def display(self):
-        """Show the window on screen."""
+        """
+        Show the window on screen.
+        """
+        self._logger.debug("Displaying window.")
         self.show()
 
     def closeEvent(self, event):
-        """Handle window close: notify the Presenter so it can do cleanup."""
+        """
+        Handle window close: notify the Presenter so it can do cleanup if needed.
+        """
+        self._logger.debug("Close event triggered.")
         self.presenter.on_close()
         super().closeEvent(event)
