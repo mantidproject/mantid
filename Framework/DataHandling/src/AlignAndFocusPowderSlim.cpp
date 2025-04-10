@@ -52,7 +52,6 @@ namespace { // anonymous namespace
 namespace PropertyNames {
 const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
-const std::string LOAD_IDF_FROM_NXS("LoadNexusInstrumentXML");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string X_MIN("XMin");
@@ -60,6 +59,7 @@ const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string READ_BANKS_IN_THREAD("ReadBanksInThread");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
@@ -455,10 +455,6 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::FILENAME, "", FileProperty::Load, exts),
                   "The name of the Event NeXus file to read, including its full or relative path. "
                   "The file name is typically of the form INST_####_event.nxs.");
-  // this property is needed so the correct load instrument is called
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>(PropertyNames::LOAD_IDF_FROM_NXS, true, Direction::Input),
-      "Reads the embedded Instrument XML from the NeXus file");
   declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(),
                                                                       Direction::Input),
                   "Optional: To only include events after the provided start "
@@ -472,15 +468,15 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "Optional: The .cal file containing the position correction factors. "
                   "Either this or OffsetsWorkspace needs to be specified.");
-  auto positiveValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
-  positiveValidator->setLower(0);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveValidator,
+  auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  positiveDblValidator->setLower(0);
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveDblValidator,
                                                                       Direction::Input),
                   "Minimum x-value for the output binning");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016, positiveValidator,
-                                                                      Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016,
+                                                                      positiveDblValidator, Direction::Input),
                   "Bin size for output data");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 16667, positiveValidator,
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 16667, positiveDblValidator,
                                                                       Direction::Input),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
@@ -488,6 +484,15 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
+
+  // parameters for chunking options - consider removing these later
+  const std::string CHUNKING_PARAM_GROUP("Chunking-temporary");
+  auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+  positiveIntValidator->setLower(1);
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_BANKS_IN_THREAD, 1, positiveIntValidator),
+      "Number of banks to read in a single thread. Lower means more parallelization.");
+  setPropertyGroup(PropertyNames::READ_BANKS_IN_THREAD, CHUNKING_PARAM_GROUP);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -502,6 +507,7 @@ void AlignAndFocusPowderSlim::exec() {
   loadSize.resize(1, 0);
 
   // set up the output workspace binning
+  this->progress(.0, "Create output workspace");
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR); // this is needed later
   const double x_delta = getProperty(PropertyNames::X_DELTA);   // this is needed later
@@ -510,10 +516,8 @@ void AlignAndFocusPowderSlim::exec() {
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   const Kernel::NexusDescriptor descriptor(filename);
 
+  // instrument is needed for lots of things
   const std::string ENTRY_TOP_LEVEL("entry");
-
-  // Load the instrument
-  // prog->doReport("Loading instrument"); TODO add progress bar stuff
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   // TODO parameters should be input information
@@ -525,6 +529,7 @@ void AlignAndFocusPowderSlim::exec() {
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 
   // create values for focusing time-of-flight
+  this->progress(.05, "Creating calibration constants");
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
   if (!cal_filename.empty()) {
     this->loadCalFile(wksp, cal_filename, difc_focused);
@@ -532,7 +537,7 @@ void AlignAndFocusPowderSlim::exec() {
     this->initCalibrationConstants(wksp, difc_focused);
   }
 
-  /*
+  /* TODO create grouping information
   // create IndexInfo
   // prog->doReport("Creating IndexInfo"); TODO add progress bar stuff
   const std::vector<int32_t> range;
@@ -547,8 +552,8 @@ void AlignAndFocusPowderSlim::exec() {
   // filter by time
   double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
   double filter_time_stop_sec = getProperty(PropertyNames::FILTER_TIMESTOP);
-
   if (filter_time_start_sec != EMPTY_DBL() || filter_time_stop_sec != EMPTY_DBL()) {
+    this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
     std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
@@ -591,6 +596,7 @@ void AlignAndFocusPowderSlim::exec() {
   // temporary "map" for detid -> calibration constant
 
   if (itClassEntries != allEntries.end()) {
+    this->progress(.17, "Reading events");
     const std::set<std::string> &classEntries = itClassEntries->second;
 
     // filter out the diagnostic entries
@@ -614,19 +620,21 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     // threaded processing of the banks
+    const int GRAINSIZE_BANK = getProperty(PropertyNames::READ_BANKS_IN_THREAD);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, x_delta, linearBins);
-    constexpr size_t GRAINSIZE_BANK{1};
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), GRAINSIZE_BANK), task);
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), static_cast<size_t>(GRAINSIZE_BANK)), task);
   }
 
   // close the file so child algorithms can do their thing
   h5file.close();
 
   // set the instrument
+  this->progress(.9, "Set instrument geometry");
   wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
 
   // load run metadata
+  this->progress(.91, "Loading metadata");
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
     LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
@@ -635,6 +643,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   // load logs
+  this->progress(.92, "Loading logs");
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
