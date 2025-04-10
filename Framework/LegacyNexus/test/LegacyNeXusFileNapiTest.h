@@ -123,8 +123,11 @@ private:
   }
 
 public:
-  void test_read_h5() { impl_test_read(NexusFormat::HDF5); }
-  void test_read_h4() { impl_test_read(NexusFormat::HDF4); }
+  void test_read() {
+    // Have to run these two tests in series as they effectively interact via the `NX_LOAD_PATH` env var.
+    impl_test_read(NexusFormat::HDF5);
+    impl_test_read(NexusFormat::HDF4);
+  }
 
   void impl_test_read(NexusFormat fmt) {
     cout << " Nexus File Tests\n";
