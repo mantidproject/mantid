@@ -59,7 +59,6 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
 
   const DataObjects::TableWorkspace_sptr LHSWorkspace = getProperty("LHSWorkspace");
   const DataObjects::TableWorkspace_sptr RHSWorkspace = getProperty("RHSWorkspace");
-  DataObjects::TableWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   auto expectedCols = LHSWorkspace->columnCount();
 
