@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Algorithms;
+using namespace Mantid::Kernel;
 
 class SpinStateValidatorTest : public CxxTest::TestSuite {
 public:
@@ -49,6 +49,12 @@ public:
   void testSinglePairAndDigitIncorrectInputs() {
     auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, true);
     auto incorrectInputs = std::vector<std::string>{"0 1", "2", "01,10", "!", "001", "", " ", "01,1", "0,00"};
+    checkAllInputs(validator, incorrectInputs, false);
+  }
+
+  void testDoubleIncorrectInputs() {
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2});
+    auto incorrectInputs = std::vector<std::string>{"0 1,11", " ,01", "11,0 0", "11", "1 1"};
     checkAllInputs(validator, incorrectInputs, false);
   }
 

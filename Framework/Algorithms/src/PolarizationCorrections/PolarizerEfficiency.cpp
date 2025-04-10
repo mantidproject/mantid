@@ -12,9 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <filesystem>
