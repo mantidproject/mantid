@@ -30,7 +30,7 @@ namespace Mantid {
 namespace NeXus {
 /** @class NexusFileIO SaveNexusProcessedHelper.h NeXus/SaveNexusProcessedHelper.h
 
-Utility method for saving NeXus format of Mantid Workspace
+Utility methods for saving Mantid Workspaces in NeXus format.
 This class interfaces to the C Nexus API. This is written for use by
 Save and Load NexusProcessed classes, though it could be extended to
 other Nexus formats. It might be replaced in future by methods using
@@ -74,7 +74,7 @@ public:
                                            bool compress) const;
 
   template <typename NumT>
-  void writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, NumT const *data,
+  void writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
                  bool compress = false) const;
 
   /// write bin masking information

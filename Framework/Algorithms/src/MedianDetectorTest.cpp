@@ -277,7 +277,7 @@ int MedianDetectorTest::maskOutliers(const std::vector<double> &medianvec, const
  * skipped.
  */
 int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr &countsWS, const std::vector<double> &medianvec,
-                                        std::vector<std::vector<size_t>> indexmap,
+                                        const std::vector<std::vector<size_t>> &indexmap,
                                         const API::MatrixWorkspace_sptr &maskWS) {
   g_log.debug("Applying the criteria to find failing detectors");
 

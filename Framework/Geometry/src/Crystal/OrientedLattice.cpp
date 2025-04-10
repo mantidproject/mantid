@@ -274,7 +274,7 @@ void OrientedLattice::saveNexus(::NeXus::File *file, const std::string &group) c
   file->writeData("unit_cell_gamma_error", this->errorgamma());
   // Save the UB matrix
   std::vector<double> ub = this->UB.getVector();
-  std::vector<int> dims(2, 3); // 3x3 matrix
+  const NeXus::DimVector dims(2, 3); // 3x3 matrix
   file->writeData("orientation_matrix", ub, dims);
 
   // Save the modulated UB matrix

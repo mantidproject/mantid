@@ -40,7 +40,7 @@ bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
 
 void renameWorkspacesInQENSFit(Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
                                const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
-                               std::string const &, std::function<std::string(std::size_t)> const &getNameSuffix) {
+                               std::function<std::string(std::size_t)> const &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 

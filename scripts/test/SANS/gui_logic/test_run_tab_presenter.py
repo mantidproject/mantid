@@ -23,7 +23,7 @@ from sans.test_helper.common import remove_file
 from sans.test_helper.mock_objects import create_mock_view
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
-from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
+from sans.user_file.toml_parsers.toml_base_schema import TomlValidationError
 
 BATCH_FILE_TEST_CONTENT_1 = [
     RowEntries(sample_scatter=1, sample_transmission=2, sample_direct=3, output_name="test_file", user_file="user_test_file"),

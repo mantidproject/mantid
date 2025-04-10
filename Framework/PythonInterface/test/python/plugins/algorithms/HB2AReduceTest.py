@@ -31,6 +31,22 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
         norm_time_wsk.delete()
 
+    def test_mergeRuns(self):
+        HB2AReduce_ws = HB2AReduce("HB2A_exp0954_scan0017.dat,HB2A_exp0954_scan0018.dat,HB2A_exp0954_scan0022.dat", SaveData=False)
+        self.assertTrue(HB2AReduce_ws)
+        self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 1)
+        self.assertEqual(HB2AReduce_ws.blocksize(), 2439)
+        self.assertEqual(np.argmax(HB2AReduce_ws.extractY()), 724)
+        self.assertAlmostEqual(np.max(HB2AReduce_ws.extractY()), 2.316557925)
+        norm_time_wsk = mtd[HB2AReduce_ws.name() + "_norm_time"]
+        self.assertTrue(norm_time_wsk)
+        self.assertEqual(norm_time_wsk.getNumberHistograms(), 1)
+        self.assertEqual(norm_time_wsk.blocksize(), 2439)
+        self.assertEqual(np.argmax(norm_time_wsk.extractY()), 724)
+        self.assertAlmostEqual(np.max(norm_time_wsk.extractY()), 29.890032119)
+        HB2AReduce_ws.delete()
+        norm_time_wsk.delete()
+
     def test_NotBinned(self):
         HB2AReduce_ws = HB2AReduce("HB2A_exp0666_scan0024.dat", BinData=False, SaveData=False)
         self.assertTrue(HB2AReduce_ws)

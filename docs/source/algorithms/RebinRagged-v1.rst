@@ -18,7 +18,7 @@ The minimum and maximum values that are specified are interpreted as follows:
 * ``numpy.nan``, ``math.nan``, and ``np.inf`` are interpreted to mean use the data's minimum or maximum x-value.
 
 The ``Delta`` parameter is required and can either be a single number which is common to all, or one number per spectra.
-Positive values are interpreted as constant step-size. Negative are logorithmic.
+Positive values are interpreted as constant step-size. Negative are logarithmic.
 
 Usage
 -----

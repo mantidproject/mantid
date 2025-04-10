@@ -301,7 +301,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   }
 
   m_nxFile->openData("rotation_angle");
-  m_nxFile->putSlab(rotValue, numFiles, 1);
+  m_nxFile->putSlab(rotValue, static_cast<::NeXus::dimsize_t>(numFiles), 1);
   m_nxFile->closeData();
 
   // Copy data out, remake data with dimension of old size plus new elements.
@@ -347,8 +347,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   }
 
   // Set the default key value for this WS
-  std::vector<double> keyValue;
-  keyValue.emplace_back(0);
+  std::vector<double> keyValue(1, 0);
 
   if (workspace->run().hasProperty("ImageKey")) {
     std::string tmpVal = workspace->run().getLogData("ImageKey")->value();
@@ -360,7 +359,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   }
 
   m_nxFile->openData("image_key");
-  m_nxFile->putSlab(keyValue, thisFileInd, 1);
+  m_nxFile->putSlab(keyValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 
   m_nxFile->closeGroup();
@@ -398,8 +397,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       // it won't be greater than this. Otherwise Shorten it
       if (strSize > 80)
         strSize = 80;
-      std::vector<int64_t> start = {thisFileInd, 0};
-      std::vector<int64_t> size = {1, static_cast<int64_t>(strSize)};
+      const ::NeXus::DimVector start = {thisFileInd, 0};
+      const ::NeXus::DimSizeVector size = {1, static_cast<::NeXus::dimsize_t>(strSize)};
       // single item
       m_nxFile->putSlab(valueAsStr.data(), start, size);
 
@@ -429,7 +428,7 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
   }
 
   m_nxFile->openData("data");
-  m_nxFile->putSlab(intensityValue, thisFileInd, 1);
+  m_nxFile->putSlab(intensityValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 }
 

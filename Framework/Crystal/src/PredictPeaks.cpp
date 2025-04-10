@@ -179,6 +179,7 @@ void PredictPeaks::exec() {
   MultipleExperimentInfos_sptr mdWS = std::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
 
   std::vector<DblMatrix> gonioVec;
+  std::string goniometerConvension;
   if (matrixWS) {
     // Retrieve the goniometer rotation matrix
     try {
@@ -191,6 +192,8 @@ void PredictPeaks::exec() {
                     << e.what() << '\n';
       g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
     }
+
+    goniometerConvension = matrixWS->run().getGoniometer().getConventionFromMotorAxes();
   } else if (peaksWS) {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
     // adjacent
@@ -210,6 +213,7 @@ void PredictPeaks::exec() {
       }
     }
 
+    goniometerConvension = peaksWS->run().getGoniometer().getConventionFromMotorAxes();
   } else if (mdWS) {
     if (mdWS->getNumExperimentInfo() <= 0)
       throw std::invalid_argument("Specified a MDEventWorkspace as InputWorkspace but it does not have "
@@ -233,6 +237,8 @@ void PredictPeaks::exec() {
         g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
       }
     }
+
+    goniometerConvension = inputExperimentInfo->run().getGoniometer().getConventionFromMotorAxes();
   }
 
   // If there's no goniometer matrix at this point, push back an identity
@@ -309,11 +315,15 @@ void PredictPeaks::exec() {
     double angleMax = getProperty("MaxAngle");
     bool innerGoniometer = getProperty("InnerGoniometer");
     bool flipX = getProperty("FlipX");
-    for (auto &possibleHKL : possibleHKLs) {
+    if (goniometerConvension.empty()) {
+      // use default universal goniometer
+      goniometerConvension = "YZY";
+    }
+    for (const auto &possibleHKL : possibleHKLs) {
       Geometry::Goniometer goniometer(gonioVec.front());
       V3D q_sample = ub * possibleHKL * (2.0 * M_PI * m_qConventionFactor);
       goniometer.calcFromQSampleAndWavelength(q_sample, wavelength, flipX, innerGoniometer);
-      std::vector<double> angles = goniometer.getEulerAngles("YZY");
+      std::vector<double> angles = goniometer.getEulerAngles(goniometerConvension);
       double angle = innerGoniometer ? angles[2] : angles[0];
       DblMatrix orientedUB = goniometer.getR() * ub;
 
@@ -331,8 +341,9 @@ void PredictPeaks::exec() {
         continue;
 
       if (Kernel::withinAbsoluteDifference(wavelength, lambda, 0.01)) {
-        g_log.information() << "Found goniometer rotation to be in YZY convention [" << angles[0] << ", " << angles[1]
-                            << ". " << angles[2] << "] degrees for Q sample = " << q_sample << "\n";
+        g_log.information() << "Found goniometer rotation to be in " << goniometerConvension << " convention ["
+                            << angles[0] << ", " << angles[1] << ". " << angles[2]
+                            << "] degrees for Q sample = " << q_sample << "\n";
         calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR());
         ++allowedPeakCount;
       }

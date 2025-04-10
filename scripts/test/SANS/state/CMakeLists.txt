@@ -9,6 +9,7 @@ set(TEST_PY_FILES
     data_test.py
     state_functions_test.py
     state_instrument_info_test.py
+    state_polarization_test.py
     scale_test.py
     mask_test.py
     move_test.py

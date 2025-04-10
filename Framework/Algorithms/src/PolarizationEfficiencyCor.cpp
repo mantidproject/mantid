@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
@@ -17,6 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <Eigen/Dense>

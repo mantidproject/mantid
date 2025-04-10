@@ -1,0 +1,2 @@
+- :ref:`QENSFitting <interface-inelastic-qens-fitting>` interface will generate a group workspace after fitting with suffix `_Result` when the output fit is a single fit, and suffix `_Results` when is a multiple fit.
+- Clicking plot button after a fit from :ref:`QENSFitting <interface-inelastic-qens-fitting>` no longer plot results twice.

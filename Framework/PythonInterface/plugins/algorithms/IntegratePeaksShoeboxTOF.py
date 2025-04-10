@@ -56,6 +56,7 @@ class WeakPeak:
     tof_fwhm: float
     tof_bin_width: float
     ipks_near: np.ndarray
+    kernel_shape: tuple
 
 
 class ShoeboxResult:
@@ -400,7 +401,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
                     fwhm = fwhm if get_nbins_from_b2bexp_params else None  # not calculated but not going to be used
-                    weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, bin_width, ipks_near))
+                    weak_peaks_list.append(
+                        WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, bin_width, ipks_near, (nrows, ncols, nbins))
+                    )
                 else:
                     if status == PEAK_STATUS.STRONG:
                         ipks_strong.append(ipk)
@@ -443,12 +446,43 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
+
                 # integrate at previously found ipos
+                if weak_pk.ispec not in ispecs:
+                    nrows = max(kernel.shape[0], weak_pk.kernel_shape[0])
+                    ncols = max(kernel.shape[0], weak_pk.kernel_shape[0])
+                    peak_data = array_converter.get_peak_data(
+                        peak,
+                        peak.getDetectorID(),
+                        bank_name,
+                        nshoebox * nrows,
+                        nshoebox * ncols,
+                        nrows_edge,
+                        ncols_edge,
+                    )
+                    x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 peaks_det_ids[ipk] = peak_data.detids
 
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
+                    ws,
+                    peaks,
+                    ipk,
+                    kernel,
+                    nrows,
+                    ncols,
+                    nbins,
+                    x,
+                    y,
+                    esq,
+                    ispecs,
+                    ipos,
+                    det_edges,
+                    weak_peak_threshold,
+                    False,
+                )
+
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * weak_pk.tof_bin_width
                 sigma = sigma * weak_pk.tof_bin_width
