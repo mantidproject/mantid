@@ -654,7 +654,7 @@ void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outpu
     std::string workspaceName = inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, getNameSuffix);
 }
 
 void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outputGroup,
@@ -662,7 +662,7 @@ void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outpu
                                            std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, getNameSuffix);
 }
 
 } // namespace Mantid::CurveFitting::Algorithms

@@ -50,8 +50,6 @@ void setSymmetryC1(API::IFunction &fun) {
   for (; i < fun.nParams(); ++i) {
     fun.unfix(i);
   }
-  fun.setParameter("IB21", 0.0);
-  fun.fixParameter("IB21");
 }
 
 // Set symmetry C2, Cs or C2h

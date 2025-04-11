@@ -67,6 +67,7 @@ enum class LorentzianType {
 enum class FitType {
   None,
   TeixeiraWater,
+  TeixeiraWaterIqtFT,
   FickDiffusion,
   ChudleyElliot,
   HallRoss,

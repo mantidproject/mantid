@@ -15,7 +15,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"

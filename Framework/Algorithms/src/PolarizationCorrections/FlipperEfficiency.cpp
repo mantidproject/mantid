@@ -11,8 +11,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/Unit.h"
 
 namespace {

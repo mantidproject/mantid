@@ -25,7 +25,7 @@ namespace Algorithms {
  */
 RectangularBeamProfile::RectangularBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center,
                                                double width, double height)
-    : IBeamProfile(), m_upIdx(frame.pointingUp()), m_beamIdx(frame.pointingAlongBeam()),
+    : IBeamProfile(center), m_upIdx(frame.pointingUp()), m_beamIdx(frame.pointingAlongBeam()),
       m_horIdx(frame.pointingHorizontal()), m_width(width), m_height(height), m_min(), m_beamDir() {
   m_min[m_upIdx] = center[m_upIdx] - 0.5 * height;
   m_min[m_horIdx] = center[m_horIdx] - 0.5 * width;

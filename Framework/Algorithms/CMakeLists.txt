@@ -242,7 +242,6 @@ set(SRC_FILES
     src/PolarizationCorrections/PolarizationCorrectionsHelpers.cpp
     src/PolarizationCorrections/PolarizationEfficienciesWildes.cpp
     src/PolarizationCorrections/PolarizerEfficiency.cpp
-    src/PolarizationCorrections/SpinStateValidator.cpp
     src/PolarizationEfficiencyCor.cpp
     src/PolynomialCorrection.cpp
     src/Power.cpp
@@ -284,6 +283,7 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
+    src/SampleCorrections/IBeamProfile.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
@@ -596,7 +596,6 @@ set(INC_FILES
     inc/MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h
     inc/MantidAlgorithms/PolarizationCorrections/PolarizationEfficienciesWildes.h
     inc/MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h
-    inc/MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h
     inc/MantidAlgorithms/PolarizationEfficiencyCor.h
     inc/MantidAlgorithms/PolynomialCorrection.h
     inc/MantidAlgorithms/Power.h
@@ -875,6 +874,7 @@ set(TEST_FILES
     HRPDSlabCanAbsorptionTest.h
     He3TubeEfficiencyTest.h
     HyspecScharpfCorrectionTest.h
+    IBeamProfileTest.h
     IQTransformTest.h
     IdentifyNoisyDetectorsTest.h
     IndirectFitDataCreationHelperTest.h
@@ -945,7 +945,6 @@ set(TEST_FILES
     PolarizationCorrections/PolarizationCorrectionsHelpersTest.h
     PolarizationCorrections/PolarizationEfficienciesWildesTest.h
     PolarizationCorrections/PolarizerEfficiencyTest.h
-    PolarizationCorrections/SpinStateValidatorTest.h
     PolarizationEfficiencyCorTest.h
     PolynomialCorrectionTest.h
     PowerLawCorrectionTest.h

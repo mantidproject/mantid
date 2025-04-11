@@ -7,6 +7,7 @@
 #include "MantidAPI/CatalogSession.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <memory>
 
@@ -17,5 +18,6 @@ void export_CatalogSession() {
   register_ptr_to_python<std::shared_ptr<CatalogSession>>();
 
   class_<CatalogSession, boost::noncopyable>("CatalogSession", no_init)
-      .def("getSessionId", &CatalogSession::getSessionId, args("self"), "Get the session id string.");
+      .def("getSessionId", &CatalogSession::getSessionId, args("self"), return_value_policy<copy_const_reference>(),
+           "Get the session id string.");
 }

@@ -46,6 +46,7 @@ set(PYTHON_TEST_FILES
     mantidqt/test/test_algorithm_observer.py
     mantidqt/test/test_import.py
     mantidqt/dialogs/errorreports/test/test_errorreport_presenter.py
+    mantidqt/dialogs/errorreports/test/test_run_pystack.py
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
     mantidqt/dialogs/test/test_spectraselectorutils.py

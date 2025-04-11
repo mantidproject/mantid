@@ -33,8 +33,10 @@ public:
   virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptionsView() const = 0;
   virtual bool getGroupOutputCheckbox() const = 0;
+  virtual IOutputNameView *getOutputName() const = 0;
 
   virtual std::string getFirstFilename() const = 0;
+  virtual std::string getInputText() const = 0;
 
   virtual bool isRunFilesValid() const = 0;
   virtual void validateCalibrationFileType(IUserInputValidator *uiv) const = 0;
@@ -97,8 +99,10 @@ public:
   IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptionsView() const override;
   bool getGroupOutputCheckbox() const override;
+  IOutputNameView *getOutputName() const override;
 
   std::string getFirstFilename() const override;
+  std::string getInputText() const override;
 
   bool isRunFilesValid() const override;
   void validateCalibrationFileType(IUserInputValidator *uiv) const override;

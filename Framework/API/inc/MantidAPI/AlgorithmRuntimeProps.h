@@ -18,7 +18,6 @@ public:
   AlgorithmRuntimeProps() = default;
   AlgorithmRuntimeProps(const AlgorithmRuntimeProps &) = default;
   AlgorithmRuntimeProps(AlgorithmRuntimeProps &&) = default;
-  ~AlgorithmRuntimeProps() = default;
 
   bool operator==(const Mantid::Kernel::IPropertyManager &other) override = delete;
   using Mantid::Kernel::PropertyManager::existsProperty;

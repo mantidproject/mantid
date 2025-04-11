@@ -14,7 +14,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/** @class LoadIDFFromNexus LoadInstrumentFromNexus.h
+/** @class LoadIDFFromNexus LoadIDFFromNexus.h
 DataHandling/LoadIDFFromNexus.h
 
 Load an IDF from a Nexus file, if found there.

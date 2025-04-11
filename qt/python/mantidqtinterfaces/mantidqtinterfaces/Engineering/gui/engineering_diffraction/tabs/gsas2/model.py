@@ -286,7 +286,8 @@ class GSAS2Model(object):
         except Exception as exc:
             logger.error(
                 f"GSAS-II call failed with error: {str(exc)}. "
-                "Please check the Path to GSASII in the Engineering Diffraction Settings is valid"
+                "Please check the Path to GSASII in the Engineering Diffraction Settings is valid. "
+                "Path must be outer most directory of GSAS-II installation."
             )
             return None
 

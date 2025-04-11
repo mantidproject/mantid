@@ -43,7 +43,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"Transpose3D", "TransposeMD", "ConvertUnits", "ConvertSpectrumAxis", "ConvertAxesToRealSpace"};
+    return {"TransposeMD", "ConvertUnits", "ConvertSpectrumAxis", "ConvertAxesToRealSpace"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Axes"; }

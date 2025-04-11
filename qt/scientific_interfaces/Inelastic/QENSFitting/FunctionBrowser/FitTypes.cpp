@@ -46,6 +46,7 @@ namespace ConvTypes {
 
 std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
                                                                    {FitType::TeixeiraWater, true},
+                                                                   {FitType::TeixeiraWaterIqtFT, true},
                                                                    {FitType::FickDiffusion, true},
                                                                    {FitType::ChudleyElliot, true},
                                                                    {FitType::HallRoss, true},
@@ -62,6 +63,7 @@ std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::Non
 
 std::unordered_map<std::string, FitType>
     FitTypeStringToEnum({{"TeixeiraWaterSQE", FitType::TeixeiraWater},
+                         {"TeixeiraWaterIqtFT", FitType::TeixeiraWaterIqtFT},
                          {"FickDiffusionSQE", FitType::FickDiffusion},
                          {"ChudleyElliotSQE", FitType::ChudleyElliot},
                          {"HallRossSQE", FitType::HallRoss},
@@ -83,6 +85,8 @@ std::map<ConvTypes::FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<Conv
     {ConvTypes::FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
     {ConvTypes::FitType::TeixeiraWater,
      {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {ConvTypes::FitType::TeixeiraWaterIqtFT,
+     {"TeixeiraWaterIqtFT", "TeixeiraWaterIqtFT", {ParamID::TWIF_AMP, ParamID::TWIF_TAU1, ParamID::TWIF_GAMMA}}},
     {ConvTypes::FitType::FickDiffusion,
      {"Fick Diffusion SQE", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
     {ConvTypes::FitType::ChudleyElliot,

@@ -27,8 +27,15 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.ndimage import distance_transform_edt, maximum_position, label
 from scipy.signal import convolve
-from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
-from plugins.algorithms.FindSXPeaksConvolve import make_kernel, get_kernel_shape
+from plugins.algorithms.peakdata_utils import (
+    InstrumentArrayConverter,
+    get_fwhm_from_back_to_back_params,
+    round_up_to_odd_number,
+    get_bin_width_at_tof,
+    set_peak_intensity,
+    make_kernel,
+    get_kernel_shape,
+)
 from enum import Enum
 from mantid.dataobjects import PeakShapeDetectorBin
 
@@ -49,6 +56,7 @@ class WeakPeak:
     tof_fwhm: float
     tof_bin_width: float
     ipks_near: np.ndarray
+    kernel_shape: tuple
 
 
 class ShoeboxResult:
@@ -393,7 +401,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
                     fwhm = fwhm if get_nbins_from_b2bexp_params else None  # not calculated but not going to be used
-                    weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, bin_width, ipks_near))
+                    weak_peaks_list.append(
+                        WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, bin_width, ipks_near, (nrows, ncols, nbins))
+                    )
                 else:
                     if status == PEAK_STATUS.STRONG:
                         ipks_strong.append(ipk)
@@ -436,12 +446,43 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
+
                 # integrate at previously found ipos
+                if weak_pk.ispec not in ispecs:
+                    nrows = max(kernel.shape[0], weak_pk.kernel_shape[0])
+                    ncols = max(kernel.shape[0], weak_pk.kernel_shape[0])
+                    peak_data = array_converter.get_peak_data(
+                        peak,
+                        peak.getDetectorID(),
+                        bank_name,
+                        nshoebox * nrows,
+                        nshoebox * ncols,
+                        nrows_edge,
+                        ncols_edge,
+                    )
+                    x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 peaks_det_ids[ipk] = peak_data.detids
 
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
+                    ws,
+                    peaks,
+                    ipk,
+                    kernel,
+                    nrows,
+                    ncols,
+                    nbins,
+                    x,
+                    y,
+                    esq,
+                    ispecs,
+                    ipos,
+                    det_edges,
+                    weak_peak_threshold,
+                    False,
+                )
+
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * weak_pk.tof_bin_width
                 sigma = sigma * weak_pk.tof_bin_width
@@ -545,17 +586,6 @@ def integrate_peak(
             # re-integrate but this time check for overlap with edge
             intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
     return intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins
-
-
-def round_up_to_odd_number(number):
-    if not number % 2:
-        number += 1
-    return number
-
-
-def get_bin_width_at_tof(ws, ispec, tof):
-    itof = ws.yIndexOfX(tof, ispec)
-    return ws.readX(ispec)[itof + 1] - ws.readX(ispec)[itof]
 
 
 def plot_integration_results(output_file, results, prog_reporter):
@@ -734,16 +764,6 @@ def optimise_shoebox(y, esq, peak_shape, ipos, nfail_max=2):
                 if not nfailed < nfail_max:
                     break
     return best_ipos, best_peak_shape
-
-
-def set_peak_intensity(pk, intens, sigma, do_lorz_cor):
-    if do_lorz_cor:
-        L = (np.sin(pk.getScattering() / 2) ** 2) / (pk.getWavelength() ** 4)  # at updated peak pos
-    else:
-        L = 1
-    # set peak object intensity
-    pk.setIntensity(L * intens)
-    pk.setSigmaIntensity(L * sigma)
 
 
 # register algorithm with mantid
