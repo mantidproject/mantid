@@ -60,7 +60,7 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   const DataObjects::TableWorkspace_sptr LHSWorkspace = getProperty("LHSWorkspace");
   const DataObjects::TableWorkspace_sptr RHSWorkspace = getProperty("RHSWorkspace");
 
-  auto expectedCols = LHSWorkspace->columnCount();
+  const auto expectedCols = static_cast<int>(LHSWorkspace->columnCount());
 
   // check correct number of columns
   if (RHSWorkspace->columnCount() != expectedCols) {
@@ -70,8 +70,8 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   }
 
   // get column titles
-  auto lColNames = LHSWorkspace->getColumnNames();
-  auto rColNames = RHSWorkspace->getColumnNames();
+  const auto lColNames = LHSWorkspace->getColumnNames();
+  const auto rColNames = RHSWorkspace->getColumnNames();
 
   const std::map<std::string, int> allowedColumnTypes = allowedTypes();
 
@@ -129,11 +129,11 @@ void CombineTableWorkspaces::exec() {
   // Copy the first workspace to our output workspace
   DataObjects::TableWorkspace_sptr outputWS = LHSWorkspace->clone();
   // Get hold of the peaks in the second workspace
-  auto nRows = RHSWorkspace->rowCount();
-  auto nCols = RHSWorkspace->columnCount();
+  const auto nRows = RHSWorkspace->rowCount();
+  const auto nCols = RHSWorkspace->columnCount();
 
   std::vector<std::string> colTypes = {};
-  for (auto i = 0; i < RHSWorkspace->columnCount(); i++) {
+  for (auto i = 0; i < static_cast<int>(RHSWorkspace->columnCount()); i++) {
     colTypes.emplace_back(RHSWorkspace->getColumn(i)->type());
   }
 
