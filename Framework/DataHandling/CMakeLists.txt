@@ -119,7 +119,6 @@ set(SRC_FILES
     src/LoadRawSpectrum0.cpp
     src/LoadSESANS.cpp
     src/LoadSINQFocus.cpp
-    src/LoadSNSspec.cpp
     src/LoadSPE.cpp
     src/LoadSampleDetailsFromRaw.cpp
     src/LoadSampleEnvironment.cpp
@@ -333,7 +332,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadRawSpectrum0.h
     inc/MantidDataHandling/LoadSESANS.h
     inc/MantidDataHandling/LoadSINQFocus.h
-    inc/MantidDataHandling/LoadSNSspec.h
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSampleEnvironment.h
@@ -541,7 +539,6 @@ set(TEST_FILES
     LoadRawSpectrum0Test.h
     LoadSESANSTest.h
     LoadSINQFocusTest.h
-    LoadSNSspecTest.h
     LoadSPETest.h
     LoadSampleDetailsFromRawTest.h
     LoadSampleEnvironmentTest.h
