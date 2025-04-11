@@ -150,6 +150,19 @@ template <typename ValueType> Json::Value encodeAsJson(const std::vector<ValueTy
 }
 
 /**
+ * Encode a std::map value as a Json::Value dictionaryValue type
+ * @param mapValue The C++ value to encode
+ * @return A new Json::Value
+ */
+template <typename KeyType, typename ValueType> Json::Value encodeAsJson(const std::map<KeyType, ValueType> &mapValue) {
+  Json::Value jsonDictionary(Json::objectValue);
+  for (const auto &element : mapValue) {
+    jsonDictionary[element.first] = encodeAsJson(element.second);
+  }
+  return jsonDictionary;
+}
+
+/**
  * Specialization to encode a std::vector<bool> value as a Json::Value arrayValue type. Needs to
  * deal with the fact that the return value from an iterator is a temporary object
  * @param vectorValue The C++ value to encode
