@@ -76,7 +76,7 @@ public:
   /// Set rotation programmatically
   void setRotation(const Mantid::Kernel::Quat &rot);
   /// Get current rotation
-  Mantid::Kernel::Quat getRotation() const { return m_quaternion; }
+  const Mantid::Kernel::Quat &getRotation() const { return m_quaternion; }
 
   /* Zooming */
 
@@ -114,9 +114,9 @@ private:
   void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const;
   /// Project a point onto a sphere centered at rotation point
-  void projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const;
+  Mantid::Kernel::V3D projectOnSphere(int a, int b) const;
   /// Generate a 3D point coordinates from coordinates on the viewport.
-  void generateTranslationPoint(int x, int y, Mantid::Kernel::V3D &p) const;
+  Mantid::Kernel::V3D generateTranslationPoint(int x, int y) const;
 
   /* Projection */
   QSize m_dimensions;

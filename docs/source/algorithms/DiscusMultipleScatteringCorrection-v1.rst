@@ -180,7 +180,7 @@ The output can be applied to a workspace containing a real sample measurement in
 
 The multiple scattering correction should be applied before applying an absorption correction.
 
-The Discus manual describes a further method of applying an attenuation correction and a multiple scattering correction in one step using a variation of the factor method. To achieve this the real sample measurement should be multipled by :math:`J_1^{*}/(\sum_{n=1}^{\infty} J_n`).
+The Discus manual describes a further method of applying an attenuation correction and a multiple scattering correction in one step using a variation of the factor method. To achieve this the real sample measurement should be multiplied by :math:`J_1^{*}/(\sum_{n=1}^{\infty} J_n`).
 Note that this differs from the approach taken in other Mantid absorption correction algorithms such as MonteCarloAbsorption because of the properties of :math:`J_{1}^{*}`.
 :math:`J_{1}^{*}` corrects for attenuation due to absorption before and after the simulated scattering event (which is the same as MonteCarloAbsorption) but it only corrects for attenuation due to scattering after the simulated scattering event.
 For this reason it's not clear this feature from Discus is useful but it has been left in for historical reasons.

@@ -85,7 +85,7 @@ Usage
 
    print("Number of spectra: {}".format(ws.getNumberHistograms()))
    print("Number of bins: {}".format(ws.blocksize()))
-   print("Each spectra has a level backgound of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
+   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
 
 Output:
 
@@ -93,7 +93,7 @@ Output:
 
    Number of spectra: 200
    Number of bins: 100
-   Each spectra has a level backgound of 0.3 counts and a peak in the centre of 10.3 counts.
+   Each spectra has a level background of 0.3 counts and a peak in the centre of 10.3 counts.
 
 **Example - create a simple event workspace:**
 
@@ -107,7 +107,7 @@ Output:
    print("Number of events: {}".format(ws.getNumberEvents()))
    print("Event Workspaces come with bins set by default to a bin width of {}".format(ws.readX(0)[1]-ws.readX(0)[0]))
    #The data itensity of an EventWorkspce is scaled by the number of events used, so the values differ from the histogram above.
-   print("Each spectra has a level backgound of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
+   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
 
 Output:
 
@@ -117,7 +117,7 @@ Output:
    Number of bins: 100
    Number of events: 190000
    Event Workspaces come with bins set by default to a bin width of 200.0
-   Each spectra has a level backgound of 7.0 counts and a peak in the centre of 257.0 counts.
+   Each spectra has a level background of 7.0 counts and a peak in the centre of 257.0 counts.
 
 **Example - Using the preset functions:**
 
@@ -129,7 +129,7 @@ Output:
 
    # create a workspace with multiple peaks
    wsMulti = CreateSampleWorkspace("Histogram","Multiple Peaks")
-   print("Multiple Peaks has a level backgound of {} counts and two gaussian peaks, the largest of which is {} counts.".
+   print("Multiple Peaks has a level background of {} counts and two gaussian peaks, the largest of which is {} counts.".
          format(wsMulti.readY(0)[0], wsMulti.readY(0)[60]))
 
    # create a workspace with Exponential Decay
@@ -141,7 +141,7 @@ Output:
 .. testoutput:: ExHistPresets
 
    Flat background has a constant value of 1.0 counts.
-   Multiple Peaks has a level backgound of 0.3 counts and two gaussian peaks, the largest of which is 8.3 counts.
+   Multiple Peaks has a level background of 0.3 counts and two gaussian peaks, the largest of which is 8.3 counts.
    Exp Decay starts high and drops rapidly to 0.03 counts at 8,000 us (with the default binning).
 
 **Example - Using the your own function:**

@@ -959,7 +959,8 @@ static void setValueInRange(PropertyManager *manager, PropertyManagerPrivate *ma
                             void (PropertyManager::*propertyChangedSignal)(QtProperty *),
                             void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
                             QtProperty *property, const Value &val,
-                            void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, ValueChangeParameter)) {
+                            void (PropertyManagerPrivate::*setSubPropertyValue)(const QtProperty *,
+                                                                                ValueChangeParameter)) {
   using PrivateData = typename PropertyManagerPrivate::Data;
   using PropertyToData = QMap<const QtProperty *, PrivateData>;
   using PropertyToDataIterator = typename PropertyToData::iterator;
@@ -1318,7 +1319,7 @@ class QtSizeFPropertyManagerPrivate {
 public:
   void slotDoubleChanged(const QtProperty *property, double value);
   void slotPropertyDestroyed(const QtProperty *property);
-  void setValue(QtProperty *property, const QSizeF &val);
+  void setValue(const QtProperty *property, const QSizeF &val);
   void setRange(QtProperty *property, const QSizeF &minVal, const QSizeF &maxVal, const QSizeF &val);
 
   struct Data {
@@ -1378,7 +1379,7 @@ class QtSizePropertyManagerPrivate {
 public:
   void slotIntChanged(const QtProperty *property, int value);
   void slotPropertyDestroyed(const QtProperty *property);
-  void setValue(QtProperty *property, const QSize &val);
+  void setValue(const QtProperty *property, const QSize &val);
   void setRange(QtProperty *property, const QSize &minVal, const QSize &maxVal, const QSize &val);
 
   struct Data {

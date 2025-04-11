@@ -149,7 +149,7 @@ Property Values of Examples
 How it Works
 ############
 
-The algorithm will fetch neighbours using the intesection of those inside
+The algorithm will fetch neighbours using the intersection of those inside
 the radius cut-off and those less than the NumberOfNeighbours specified.
 *Fig. 1* illustrates this process. Searching is relative to the central
 detector, those constrained by both specified number of neighbours have
