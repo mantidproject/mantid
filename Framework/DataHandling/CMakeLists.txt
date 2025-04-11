@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/AlignAndFocusPowderSlim.cpp
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
@@ -212,6 +213,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidDataHandling/AlignAndFocusPowderSlim.h
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/BitStream.h
@@ -429,6 +431,7 @@ set(INC_FILES
 )
 
 set(TEST_FILES
+    AlignAndFocusPowderSlimTest.h
     ApplyDiffCalTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
@@ -451,8 +454,8 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
-    GenerateGroupingPowderTest.h
     GenerateGroupingPowder2Test.h
+    GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
     ISISDataArchiveTest.h
