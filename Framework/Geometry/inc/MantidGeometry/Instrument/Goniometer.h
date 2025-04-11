@@ -90,6 +90,9 @@ public:
   // Return Euler angles acording to a convention
   std::vector<double> getEulerAngles(const std::string &convention = "YZX");
 
+  // determine the convention from the motor axes
+  std::string getConventionFromMotorAxes() const;
+
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);
   /// the method reports if the goniometer was defined with some parameters
