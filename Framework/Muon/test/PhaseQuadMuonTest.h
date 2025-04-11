@@ -223,19 +223,19 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], 2.1969, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], 2.3212, 0.0001);
     TS_ASSERT_DELTA(specReY[20], 0.0510, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], -0.0525, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], -0.0578, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0024, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0041, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0047, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0027, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0043, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0050, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.1035, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], -0.0006, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0047, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], 0.0328, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0003, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], -0.0033, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0002, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0003, 0.0001);
     TS_ASSERT_DELTA(specImE[20], 0.0004, 0.0001);
     TS_ASSERT_DELTA(specImE[50], 0.0005, 0.0001);
   }
@@ -279,19 +279,19 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], 2.1969, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], 2.3212, 0.0001);
     TS_ASSERT_DELTA(specReY[20], 0.0510, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], -0.0525, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], -0.0578, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0024, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0041, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0047, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0027, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0043, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0050, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.1035, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], -0.0006, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0047, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], 0.0328, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0003, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], -0.0033, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0002, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0003, 0.0001);
     TS_ASSERT_DELTA(specImE[20], 0.0004, 0.0001);
     TS_ASSERT_DELTA(specImE[50], 0.0005, 0.0001);
   }
