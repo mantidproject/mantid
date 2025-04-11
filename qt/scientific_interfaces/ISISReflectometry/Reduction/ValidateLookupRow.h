@@ -23,7 +23,8 @@ namespace ISISReflectometry {
     the lookup table on the ExperimentSettings tab are valid.
  */
 
-template <typename T> using ValidatorT = boost::optional<T>;
+// template <typename T> using ValidatorT = boost::optional<T>;
+template <typename T> using ValidatorT = std::pair<boost::optional<T>, bool>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowValidator {
 public:
