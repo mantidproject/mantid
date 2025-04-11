@@ -23,6 +23,7 @@ class PeaksViewerViewTest(unittest.TestCase):
     def test_sort_by_value_not_string(self):
         npeaks = 5
         peaks_ws = WorkspaceCreationHelper.createPeaksWorkspace(npeaks)
+        PeaksViewerView.frame = None  # override to avoid call to SliceViewer
         view = PeaksViewerView(None, None)
         model = PeaksViewerModel(peaks_ws, fg_color="r", bg_color="w")
         presenter = PeaksViewerPresenter(model, view)
