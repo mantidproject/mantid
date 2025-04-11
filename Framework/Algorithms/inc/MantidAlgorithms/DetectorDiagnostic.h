@@ -20,7 +20,7 @@ namespace Mantid {
 namespace Algorithms {
 /**
   A base class for a detector diagnostic algorithm. It has not exec
-  implemenation but provides functions
+  implementation but provides functions
   that are common among these algorithms such as calculating the median and
   writing to a file.
 
