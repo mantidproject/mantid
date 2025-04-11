@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 
@@ -19,7 +20,7 @@ namespace DataHandling {
     @author Stuart Campbell, SNS ORNL
     @date 20/08/2010
 */
-class MANTID_DATAHANDLING_DLL LoadPreNexusMonitors : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadPreNexusMonitors : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// (Empty) Constructor
   LoadPreNexusMonitors();

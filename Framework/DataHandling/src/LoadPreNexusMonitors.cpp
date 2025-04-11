@@ -51,7 +51,9 @@ static const std::string WORKSPACE_OUT("OutputWorkspace");
 // It is used to print out information, warning and error messages
 
 LoadPreNexusMonitors::LoadPreNexusMonitors()
-    : Mantid::API::Algorithm(), nMonitors(0), instrument_loaded_correctly(false) {}
+    : Mantid::API::Algorithm(), nMonitors(0), instrument_loaded_correctly(false) {
+  deprecatedDate("2025-04-10");
+}
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
