@@ -209,9 +209,9 @@ public:
     for (size_t row = 0; row < 10; ++row) {
       for (size_t col = 0; col < 21; ++col) {
         double val = static_cast<double>(col);
-        TS_ASSERT_EQUALS(outputWS->y(row)[col], 3. * (val + 1))
-        TS_ASSERT_EQUALS(outputWS->x(row)[col], 1. + 0.2 * val)
-        TS_ASSERT_EQUALS(outputWS->e(row)[col], sqrt(3. * (val + 1)))
+        TS_ASSERT_DELTA(outputWS->y(row)[col], 3. * (val + 1), 1e-12)
+        TS_ASSERT_DELTA(outputWS->x(row)[col], 1. + 0.2 * val, 1e-12)
+        TS_ASSERT_DELTA(outputWS->e(row)[col], sqrt(3. * (val + 1)), 1e-12)
       }
     }
 
