@@ -293,75 +293,57 @@ class GSAS2Handler(object):
         return json.dumps(inputs_dict, separators=(",", ":"))
 
 
-class GSAS2Model(object):
-    def __init__(self):
-        self.user_save_directory = None
-        self.temporary_save_directory = None
-        self.path_to_gsas2 = None
-        self.gsas2_save_dirs = None
-        self.project_name = None
-        self.data_files = None
-        self.instrument_files = None
-        self.phase_filepaths = None
-        self.x_min = None
-        self.x_max = None
-        self.data_x_min = None
-        self.data_x_max = None
-        self.number_of_regions = None
-        self.number_histograms = None
-        self.refinement_method = None
-        self.dSpacing_min = 1.0
-        self.timeout = 10
-        self.refine_microstrain = None
-        self.refine_sigma_one = None
-        self.refine_gamma = None
-        self.refine_background = None
-        self.refine_unit_cell = None
-        self.refine_histogram_scale_factor = None
-        self.limits = None
-        self.override_cell_length_string = None
-        self.mantid_pawley_reflections = None
-        self.crystal_structures = None
-        self.chosen_cell_lengths = None
-        self.out_call_gsas2 = None
-        self.err_call_gsas2 = None
-        self._data_workspaces = FittingWorkspaceRecordContainer()
-        self._suffix = "_GSASII"
-        self._sample_logs_workspace_group = SampleLogsGroupWorkspace(self._suffix)
-        self.phase_names_list = None
+class GSAS2Model:
+    """
+    GSAS2Model is a class that provides an interface for managing and executing GSAS-II refinements.
+    It handles the preparation of input parameters, validation, execution of GSAS-II subprocesses,
+    and processing of output results. The class is designed to integrate with Mantid's Engineering
+    Diffraction interface.
+    """
 
-    def clear_input_components(self):
-        self.user_save_directory = None
-        self.temporary_save_directory = None
-        self.path_to_gsas2 = None
-        self.gsas2_save_dirs = None
-        self.project_name = None
-        self.data_files = None
-        self.instrument_files = None
-        self.phase_filepaths = None
-        self.x_min = None
-        self.x_max = None
-        self.data_x_min = None
-        self.data_x_max = None
-        self.number_of_regions = None
-        self.number_histograms = None
-        self.refinement_method = None
-        self.dSpacing_min = 1.0
-        self.timeout = 10
-        self.refine_microstrain = None
-        self.refine_sigma_one = None
-        self.refine_gamma = None
-        self.refine_background = None
-        self.refine_unit_cell = None
-        self.refine_histogram_scale_factor = None
-        self.limits = None
-        self.override_cell_length_string = None
-        self.mantid_pawley_reflections = None
-        self.crystal_structures = None
-        self.chosen_cell_lengths = None
-        self.out_call_gsas2 = None
-        self.err_call_gsas2 = None
-        self.phase_names_list = None
+    def __init__(self) -> None:
+        # Configuration
+        self.config = GSAS2ModelConfig()
+
+        # State
+        self.state = GSAS2ModelState()
+
+        # Refinement settings
+        self.refinement_method: str = "Pawley"
+        self.dSpacing_min: float = 1.0
+        self.refine_microstrain: bool = False
+        self.refine_sigma_one: bool = True
+        self.refine_gamma: bool = True
+        self.refine_background: bool = True
+        self.refine_unit_cell: bool = True
+        self.refine_histogram_scale_factor: bool = True
+
+        # Workspace management
+        self._data_workspaces: FittingWorkspaceRecordContainer = FittingWorkspaceRecordContainer()
+        self._suffix: str = "_GSASII"
+        self._sample_logs_workspace_group: SampleLogsGroupWorkspace = SampleLogsGroupWorkspace(self._suffix)
+
+    def clear_input_components(self) -> None:
+        """
+        Clears all input components and resets the configuration, state, and refinement settings
+        to their default values.
+        """
+        # Reset configuration and state to their default values
+        self.config = GSAS2ModelConfig()
+        self.state = GSAS2ModelState()
+
+        # Reset refinement settings
+        refinement_defaults = {
+            "dSpacing_min": 1.0,
+            "refine_microstrain": False,
+            "refine_sigma_one": False,
+            "refine_gamma": False,
+            "refine_background": False,
+            "refine_unit_cell": False,
+            "refine_histogram_scale_factor": False,
+        }
+        for attr, default in refinement_defaults.items():
+            setattr(self, attr, default)
 
     def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_x_limits):
         self.clear_input_components()
