@@ -42,6 +42,7 @@ public:
 
 private:
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   API::MatrixWorkspace_sptr createOutputWorkspace(const size_t numHist, const bool linearBins, const double x_delta);
