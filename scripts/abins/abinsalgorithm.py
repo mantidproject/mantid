@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
+import textwrap
 from typing import Dict, Iterable, List, Literal, Tuple, Union
 
 import yaml
@@ -108,11 +109,16 @@ class AbinsAlgorithm:
 
         self.declareProperty(
             StringArrayProperty("Atoms", Direction.Input),
-            doc="List of atoms to use to calculate partial S."
-            "If left blank, workspaces with S for all types of atoms will be calculated. "
-            "Element symbols will be interpreted as a sum of all atoms of that element in the "
-            "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
-            "individual atoms, indexing from 1 following the order of the input data.",
+            doc=textwrap.dedent("""
+            List of atoms to use to calculate partial S.  If left blank, workspaces with S for all
+            types of atoms will be calculated.  Element symbols will be interpreted as a sum of all
+            atoms of that element in the cell. 'N', 'atomN' or 'atom_N' (where N is a positive
+            integer) will be interpreted as individual atoms, indexing from 1 following the order of
+            the input data.  A range of atoms can be indicated as e.g. '1-3' or '1..3'; this is
+            equivalent to individually selecting atoms 1, 2, 3. Selections are joined with commas
+            and selection styles can be used simultaneously, e.g. 'C,1-4,7' will select atoms
+            1,2,3,4,7 and all C atoms.
+            """).replace("\n", " "),
         )
 
         self.declareProperty(
@@ -304,7 +310,19 @@ class AbinsAlgorithm:
     def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
         """Interpret the user 'Atoms' input as a set of elements and atom indices
 
-        (These atom indices match the user-facing convention and begin at 1.)"""
+        (These atom indices match the user-facing convention and begin at 1.)
+
+        Acceptable items in selection are:
+
+          - element symbol, e.g. "Si"
+          - atom index prefixed by "atom" or "atom_", e.g. "atom1", "atom_2"
+          - bare atom index e.g. "1"
+          - atom index range separated by hyphen, e.g. "1-2"
+
+        A range will be expanded to individual workspaces (currently) so the user
+        will still need to find some elegant way of summing/combining them.
+
+        """
 
         num_atoms = len(atoms_data)
         all_atms_smbls = list(set([atoms_data[atom_index]["symbol"] for atom_index in range(num_atoms)]))
@@ -316,16 +334,42 @@ class AbinsAlgorithm:
         else:  # case selected atoms
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
-            atom_symbols = [item for item in selection if item[: len(ATOM_PREFIX)] != ATOM_PREFIX]
-            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
-                raise ValueError(
-                    "User atom selection (by symbol) contains repeated species. This is not permitted as "
-                    "Abins cannot create multiple workspaces with the same name."
-                )
 
-            numbered_atom_test = re.compile("^" + ATOM_PREFIX + r"_?(\d+)$")
-            atom_numbers = [numbered_atom_test.findall(item) for item in selection]  # Matches will be lists of str
-            atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
+            # Acceptable formats for index: atom_1 atom1 1
+            numbered_atom_test = re.compile(
+                f"""^                  # No arbitrary prefixes
+                    ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
+                    _?                 # optional underscore
+                    (?P<index>[0-9]+)  # capture digits as "index"
+                    $                  # No suffix
+                 """,
+                re.VERBOSE,
+            )
+            atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
+
+            # Acceptable formats for range: 1-2
+            atom_range_test = re.compile(
+                """^                  # No prefix
+                   (?P<start>\\d+)  # Capture starting index
+                   (-|\\.\\.)
+                # range indicated with "-" or ".."
+                   (?P<end>\\d+)    # Capture ending index
+                   $                  # No suffix
+                """,
+                re.VERBOSE,
+            )
+            atom_ranges = [
+                (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
+            ]
+
+            # Acceptable formats for symbol: Ca
+            element_symbol_test = re.compile(
+                f"""^(?!{ATOM_PREFIX})  # Must not start with ATOM_PREFIX (i.e. "atom")
+                    [a-zA-Z]+$           # Must contain only letters
+                 """,
+                re.VERBOSE,
+            )
+            atom_symbols = [item for item in selection if element_symbol_test.match(item)]
 
             if len(atom_numbers) != len(set(atom_numbers)):
                 raise ValueError(
@@ -333,23 +377,37 @@ class AbinsAlgorithm:
                     " cannot create multiple workspaces with the same name."
                 )
 
-            for atom_symbol in atom_symbols:
-                if atom_symbol not in all_atms_smbls:
-                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
-
             for atom_number in atom_numbers:
                 if atom_number < 1 or atom_number > num_atoms:
                     raise ValueError(
                         "Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" % (ATOM_PREFIX, atom_number, 1, num_atoms)
                     )
 
-            # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len(atom_numbers) < len(selection):
-                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
-                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
-                raise ValueError("Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report)
+            for atom_symbol in atom_symbols:
+                if atom_symbol not in all_atms_smbls:
+                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
 
-        return atom_numbers, atom_symbols
+            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
+                raise ValueError(
+                    "User atom selection (by symbol) contains repeated species. This is not permitted as "
+                    "Abins cannot create multiple workspaces with the same name."
+                )
+
+            # Final sanity check that everything in "atoms" field was understood
+            if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
+                elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
+                numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
+                ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
+                raise ValueError(
+                    "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
+                )
+
+            for start, end in atom_ranges:
+                if start > end:
+                    start, end = end, start
+                atom_numbers = atom_numbers + list(range(start, end + 1))
+
+        return sorted(atom_numbers), atom_symbols
 
     @staticmethod
     def get_masses_table(atoms_data):
