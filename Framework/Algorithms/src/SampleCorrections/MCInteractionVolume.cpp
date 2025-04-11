@@ -13,6 +13,7 @@
 #include <iomanip>
 
 namespace Mantid {
+using Geometry::IObject_sptr;
 using Geometry::Track;
 using Kernel::V3D;
 
@@ -22,24 +23,17 @@ namespace Algorithms {
  * Construct the volume encompassing the sample + any environment kit. The
  * active region defines a bounding region for the sampling of the scattering
  * position.
- * @param sample A reference to a sample object that defines a valid shape
- * & material
- * @param maxScatterAttempts The maximum number of tries to generate a random
- * point within the object. [Default=5000]
- * @param pointsIn Where to generate the scattering point in
  */
-MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
-                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn)
-    : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(getFullBoundingBox()),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn) {
-  try {
-    m_env = &sample.getEnvironment();
-    assert(m_env);
-    if (m_env->nelements() == 0) {
-      throw std::invalid_argument("MCInteractionVolume() - Sample enviroment has zero components.");
+void MCInteractionVolume::init() {
+  m_activeRegion = getFullBoundingBox();
+  if (m_env) {
+    try {
+      if (m_env->nelements() == 0) {
+        throw std::invalid_argument("MCInteractionVolume() - Sample enviroment has zero components.");
+      }
+    } catch (std::runtime_error &) {
+      // swallow this as no defined environment from getEnvironment
     }
-  } catch (std::runtime_error &) {
-    // swallow this as no defined environment from getEnvironment
   }
 
   bool atLeastOneValidShape = m_sample->hasValidShape();
@@ -58,19 +52,77 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
 }
 
 /**
- * Returns the axis-aligned bounding box for the volume including env if
- * m_pointsIn != SampleOnly
- * @return The bounding box
+ * Factory Method for constructing the volume encompassing the sample + any environment kit. The
+ * active region defines a bounding region for the sampling of the scattering
+ * position.
+ * @param sample A reference to a sample object that defines a valid shape
+ * & material
+ * @param maxScatterAttempts The maximum number of tries to generate a random
+ * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
+ * @param gaugeVolume Pointer to any gauge volume object defined for the interaction
+ * @return returns a shared pointer to interaction volume object
+ */
+std::shared_ptr<IMCInteractionVolume>
+MCInteractionVolume::create(const API::Sample &sample, const size_t maxScatterAttempts,
+                            const MCInteractionVolume::ScatteringPointVicinity pointsIn, IObject_sptr gaugeVolume) {
+  auto interactionVol =
+      std::shared_ptr<MCInteractionVolume>(new MCInteractionVolume(sample, maxScatterAttempts, pointsIn, gaugeVolume));
+  // init calls member functions that require instantiation of virtual functions so deferring this until after
+  // construction through a factory is preferable.
+  interactionVol->init();
+  return interactionVol;
+}
+
+/**
+ * Construct the volume encompassing the sample + any environment kit. The
+ * active region defines a bounding region for the sampling of the scattering
+ * position.
+ * @param sample A reference to a sample object that defines a valid shape
+ * & material
+ * @param maxScatterAttempts The maximum number of tries to generate a random
+ * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
+ * @param gaugeVolume Pointer to any gauge volume object defined for the interaction
+ */
+MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t maxScatterAttempts,
+                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn,
+                                         IObject_sptr gaugeVolume)
+    : m_sample(sample.getShape().clone()), m_env(sample.hasEnvironment() ? &sample.getEnvironment() : nullptr),
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {}
+
+/**
+ * Returns the defined gauge volume if one is present, otherwise returns nullptr
+ * @return Shared pointer to gauge volume object
+ */
+Geometry::IObject_sptr MCInteractionVolume::getGaugeVolume() const { return m_gaugeVolume; }
+
+/**
+ * Sets the gauge volume on the InteractionVolume
+ * @param gaugeVolume A shared pointer to the gauge volume shape object
+ */
+void MCInteractionVolume::setGaugeVolume(Geometry::IObject_sptr gaugeVolume) { m_gaugeVolume = gaugeVolume; }
+
+/**
+ * Returns the defined gauge volume if one is present, otherwise returns axis-aligned bounding box
+ * for the volume including env if m_pointsIn != SampleOnly
+ * @return The bounding box of the interaction volume
  */
 const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
   auto sampleBox = m_sample->getBoundingBox();
-  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+  if (m_gaugeVolume != nullptr) {
+    sampleBox = m_gaugeVolume->getBoundingBox();
+  } else if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
     const auto &envBox = m_env->boundingBox();
     sampleBox.grow(envBox);
   }
   return sampleBox;
 }
 
+/**
+ * Sets the active region volume on the InteractionVolume
+ * @param region A reference to a Bounding Box for the active region
+ */
 void MCInteractionVolume::setActiveRegion(const Geometry::BoundingBox &region) { m_activeRegion = region; }
 
 /**
@@ -108,8 +160,18 @@ int MCInteractionVolume::getComponentIndex(Kernel::PseudoRandomNumberGenerator &
 std::optional<Kernel::V3D>
 MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
   std::optional<Kernel::V3D> pointGenerated{std::nullopt};
+  std::optional<Kernel::V3D> tmpPoint{std::nullopt};
   if (componentIndex == -1) {
-    pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+    if (m_gaugeVolume != nullptr) {
+      tmpPoint = m_gaugeVolume->generatePointInObject(rng, m_activeRegion, 1);
+      if (tmpPoint) {
+        if (m_sample->isValid(tmpPoint.value())) {
+          pointGenerated = tmpPoint;
+        }
+      }
+    } else {
+      pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+    }
   } else {
     pointGenerated = m_env->getComponent(componentIndex).generatePointInObject(rng, m_activeRegion, 1);
   }
