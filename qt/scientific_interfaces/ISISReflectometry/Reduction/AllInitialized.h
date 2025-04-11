@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -30,11 +31,11 @@ boost::optional<Result> makeIfAllInitialized(boost::optional<Params> const &...p
 template <typename... Params> bool allInitializedPairs(Params... args) { return (... && args); }
 
 template <typename Result, typename... Params>
-boost::optional<Result> makeIfAllInitializedPairs(std::pair<boost::optional<Params>, bool> const &...params) {
+std::optional<Result> makeIfAllInitializedPairs(std::pair<std::optional<Params>, bool> const &...params) {
   if (allInitializedPairs(params.second...)) {
     return Result(params.first.get()...);
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 } // namespace ISISReflectometry

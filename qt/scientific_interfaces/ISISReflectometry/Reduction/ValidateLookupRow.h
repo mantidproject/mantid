@@ -11,7 +11,7 @@
 #include "ParseReflectometryStrings.h"
 #include "TransmissionRunPair.h"
 #include <array>
-#include <boost/optional.hpp>
+#include <optional>
 #include <unordered_set>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,30 +23,29 @@ namespace ISISReflectometry {
     the lookup table on the ExperimentSettings tab are valid.
  */
 
-// template <typename T> using ValidatorT = boost::optional<T>;
-template <typename T> using ValidatorT = std::pair<boost::optional<T>, bool>;
+// The std::optional holds the optional value held by the cell, while the bool flags whether the cell content is valid.
+template <typename T> using ValidatorT = std::pair<std::optional<T>, bool>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowValidator {
 public:
   ValidationResult<LookupRow, std::unordered_set<int>> operator()(LookupRow::ValueArray const &cellText);
 
 private:
-  ValidatorT<boost::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
   ValidatorT<std::optional<boost::regex>> parseTitleMatcherOrWhitespace(LookupRow::ValueArray const &cellText);
   ValidatorT<TransmissionRunPair> parseTransmissionRuns(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<std::string>>
-  parseTransmissionProcessingInstructions(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<std::string>> parseTransmissionProcessingInstructions(LookupRow::ValueArray const &cellText);
   ValidatorT<RangeInQ> parseQRange(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<double>> parseScaleFactor(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<double>> parseScaleFactor(LookupRow::ValueArray const &cellText);
   ValidatorT<std::map<std::string, std::string>> parseOptions(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<std::string>> parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<std::string>> parseROIDetectorIDs(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<std::string>> parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<std::string>> parseROIDetectorIDs(LookupRow::ValueArray const &cellText);
 
   void validateThetaAndRegex();
 
   std::unordered_set<int> m_invalidColumns;
-  ValidatorT<boost::optional<double>> m_thetaOrInvalid;
+  ValidatorT<std::optional<double>> m_thetaOrInvalid;
   ValidatorT<std::optional<boost::regex>> m_titleMatcherOrInvalid;
 };
 

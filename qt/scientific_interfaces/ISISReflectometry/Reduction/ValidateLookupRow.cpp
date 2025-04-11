@@ -7,8 +7,6 @@
 #include "ValidateLookupRow.h"
 #include "AllInitialized.h"
 #include "Common/Parse.h"
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
 #include <unordered_set>
 
@@ -25,13 +23,13 @@ public:
 
   ValidatorT<T> operator()(int errorColumn) const {
     m_invalidParams.insert(m_baseColumn + errorColumn);
-    return std::make_pair(boost::none, false);
+    return std::make_pair(std::nullopt, false);
   }
 
   ValidatorT<T> operator()(const std::vector<int> &errorColumns) const {
     std::transform(errorColumns.cbegin(), errorColumns.cend(), std::inserter(m_invalidParams, m_invalidParams.end()),
                    [this](int column) -> int { return m_baseColumn + column; });
-    return std::make_pair(boost::none, false);
+    return std::make_pair(std::nullopt, false);
   }
 
 private:
@@ -41,23 +39,23 @@ private:
 
 using CellText = LookupRow::ValueArray;
 
-ValidatorT<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
+ValidatorT<std::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
   if (isEntirelyWhitespace(cellText[LookupRow::Column::THETA])) {
-    return std::make_pair(boost::optional<double>(), true);
+    return std::make_pair(std::optional<double>(), true);
   }
   auto theta = parseTheta(cellText[LookupRow::Column::THETA]);
-  if (theta.is_initialized()) {
+  if (theta.has_value()) {
     return std::make_pair(theta, true);
   }
   m_invalidColumns.insert(LookupRow::Column::THETA);
-  return std::make_pair(boost::none, false);
+  return std::make_pair(std::nullopt, false);
 }
 
 ValidatorT<std::optional<boost::regex>> LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
   auto const &text = cellText[LookupRow::Column::TITLE];
   if (isEntirelyWhitespace(text)) {
     // Mark validator as passed, but the enclosed value empty
-    return std::make_pair(boost::make_optional<std::optional<boost::regex>>(std::nullopt), true);
+    return std::make_pair(std::make_optional<std::optional<boost::regex>>(std::nullopt), true);
   }
 
   // This check relies on us checking for whitespace chars before calling parseTitleMatcher
@@ -66,7 +64,7 @@ ValidatorT<std::optional<boost::regex>> LookupRowValidator::parseTitleMatcherOrW
     ;
   } else {
     m_invalidColumns.insert(LookupRow::Column::TITLE);
-    return std::make_pair(boost::none, false);
+    return std::make_pair(std::nullopt, false);
   }
 }
 
@@ -78,13 +76,13 @@ ValidatorT<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellTe
       transmissionRunsOrError);
 }
 
-ValidatorT<boost::optional<std::string>>
+ValidatorT<std::optional<std::string>>
 LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::TRANS_SPECTRA]);
-  if (!optionalInstructionsOrNoneIfError.is_initialized())
+  if (!optionalInstructionsOrNoneIfError.has_value())
     m_invalidColumns.insert(LookupRow::Column::TRANS_SPECTRA);
-  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.is_initialized());
+  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.has_value());
 }
 
 ValidatorT<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
@@ -93,37 +91,37 @@ ValidatorT<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
   return boost::apply_visitor(InsertErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
 }
 
-ValidatorT<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
+ValidatorT<std::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError = ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
-  if (!optionalScaleFactorOrNoneIfError.is_initialized())
+  if (!optionalScaleFactorOrNoneIfError.has_value())
     m_invalidColumns.insert(LookupRow::Column::SCALE);
-  return std::make_pair(optionalScaleFactorOrNoneIfError, optionalScaleFactorOrNoneIfError.is_initialized());
+  return std::make_pair(optionalScaleFactorOrNoneIfError, optionalScaleFactorOrNoneIfError.has_value());
   ;
 }
 
-ValidatorT<boost::optional<std::string>> LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
+ValidatorT<std::optional<std::string>> LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::RUN_SPECTRA]);
-  if (!optionalInstructionsOrNoneIfError.is_initialized())
+  if (!optionalInstructionsOrNoneIfError.has_value())
     m_invalidColumns.insert(LookupRow::Column::RUN_SPECTRA);
-  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.is_initialized());
+  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.has_value());
 }
 
-ValidatorT<boost::optional<std::string>>
+ValidatorT<std::optional<std::string>>
 LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::BACKGROUND_SPECTRA]);
-  if (!optionalInstructionsOrNoneIfError.is_initialized())
+  if (!optionalInstructionsOrNoneIfError.has_value())
     m_invalidColumns.insert(LookupRow::Column::BACKGROUND_SPECTRA);
-  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.is_initialized());
+  return std::make_pair(optionalInstructionsOrNoneIfError, optionalInstructionsOrNoneIfError.has_value());
 }
 
-ValidatorT<boost::optional<std::string>> LookupRowValidator::parseROIDetectorIDs(CellText const &cellText) {
+ValidatorT<std::optional<std::string>> LookupRowValidator::parseROIDetectorIDs(CellText const &cellText) {
   auto optionalROIDetectorsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::ROI_DETECTOR_IDS]);
-  if (!optionalROIDetectorsOrNoneIfError.is_initialized())
+  if (!optionalROIDetectorsOrNoneIfError.has_value())
     m_invalidColumns.insert(LookupRow::Column::ROI_DETECTOR_IDS);
-  return std::make_pair(optionalROIDetectorsOrNoneIfError, optionalROIDetectorsOrNoneIfError.is_initialized());
+  return std::make_pair(optionalROIDetectorsOrNoneIfError, optionalROIDetectorsOrNoneIfError.has_value());
 }
 
 void LookupRowValidator::validateThetaAndRegex() {
@@ -132,11 +130,11 @@ void LookupRowValidator::validateThetaAndRegex() {
     return;
 
   // Check we have a theta value, when we have a titleMatcher
-  if (m_titleMatcherOrInvalid.first.has_value() && !m_thetaOrInvalid.first.is_initialized()) {
+  if (m_titleMatcherOrInvalid.first.has_value() && !m_thetaOrInvalid.first.has_value()) {
     m_invalidColumns.insert(LookupRow::Column::THETA);
     m_invalidColumns.insert(LookupRow::Column::TITLE);
-    m_thetaOrInvalid = std::make_pair(boost::none, false);
-    m_titleMatcherOrInvalid = std::make_pair(boost::none, false);
+    m_thetaOrInvalid = std::make_pair(std::nullopt, false);
+    m_titleMatcherOrInvalid = std::make_pair(std::nullopt, false);
   }
 }
 
@@ -158,8 +156,8 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
       maybeQRange, maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions,
       maybeROIDetectorIDs);
 
-  if (maybeDefaults.is_initialized()) {
-    return ValidationResult<LookupRow, std::unordered_set<int>>(maybeDefaults.get());
+  if (maybeDefaults.has_value()) {
+    return ValidationResult<LookupRow, std::unordered_set<int>>(maybeDefaults.value());
   }
   return ValidationResult<LookupRow, std::unordered_set<int>>(m_invalidColumns);
 }
