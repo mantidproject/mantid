@@ -60,6 +60,8 @@ const std::string X_DELTA("XDelta");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_BANKS_IN_THREAD("ReadBanksInThread");
+const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
+const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
@@ -158,15 +160,11 @@ public:
     auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
 
     // H5Util resizes the vector
-    if (true) { // m_is_time_filtered) {
-      const size_t offset = eventRange.first;
-      const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                  ? std::numeric_limits<size_t>::max()
-                                  : eventRange.second - eventRange.first;
-      NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-    } else {
-      NeXus::H5Util::readArray1DCoerce(tof_SDS, *data);
-    }
+    const size_t offset = eventRange.first;
+    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
+                                ? std::numeric_limits<size_t>::max()
+                                : eventRange.second - eventRange.first;
+    NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
 
     // get the units
     std::string tof_unit;
@@ -183,15 +181,11 @@ public:
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
 
     // H5Util resizes the vector
-    if (true) { // m_is_time_filtered) {
-      const size_t offset = eventRange.first;
-      const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                  ? std::numeric_limits<size_t>::max()
-                                  : eventRange.second - eventRange.first;
-      NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
-    } else {
-      NeXus::H5Util::readArray1DCoerce(detID_SDS, *data);
-    }
+    const size_t offset = eventRange.first;
+    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
+                                ? std::numeric_limits<size_t>::max()
+                                : eventRange.second - eventRange.first;
+    NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
   }
 
 private:
@@ -337,10 +331,12 @@ public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
                   const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked, const double binWidth,
-                  const bool linearBins)
+                  const bool linearBins, const size_t events_per_chunk, const size_t grainsize_event,
+                  std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
-        m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins) {
+        m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins), m_events_per_chunk(events_per_chunk),
+        m_grainsize_event(grainsize_event), m_progress(progress) {
     if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
       throw std::runtime_error("failed to reopen async");
     }
@@ -350,11 +346,6 @@ public:
     // re-use vectors to save malloc/free calls
     std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
     std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-
-    // number of events to histogram in a single thread
-    constexpr size_t GRAINSIZE_EVENT{2000};
-    // number of events to read from disk at one time
-    constexpr size_t EVENTS_PER_CHUNK{50000 * GRAINSIZE_EVENT};
 
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
@@ -382,8 +373,8 @@ public:
       } else {
         // TODO REMOVE debug print
         std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                  << "   and should be read in " << (1 + (eventRangeFull.second / EVENTS_PER_CHUNK)) << " chunks of "
-                  << EVENTS_PER_CHUNK << " (" << (EVENTS_PER_CHUNK / 1024 / 1024) << "MB)" << "\n";
+                  << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
+                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)" << "\n";
 
         // create a histogrammer to process the events
         auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -398,7 +389,7 @@ public:
         while (event_index_start < eventRangeFull.second) {
           // H5Cpp will truncate correctly
           const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
-                                                                event_index_start + EVENTS_PER_CHUNK};
+                                                                event_index_start + m_events_per_chunk};
 
           // load data and reuse chunk memory
           event_detid->clear();
@@ -420,9 +411,9 @@ public:
           // threaded processing of the events
           ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), calibration.get(),
                                  &y_temp, &m_masked);
-          tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, GRAINSIZE_EVENT), task);
+          tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
 
-          event_index_start += EVENTS_PER_CHUNK;
+          event_index_start += m_events_per_chunk;
         }
         // copy the data out into the correct spectrum
         auto &y_values = spectrum.dataY();
@@ -430,6 +421,7 @@ public:
 
         std::cout << bankName << " stop " << timer << std::endl;
       }
+      m_progress->report();
     }
   }
 
@@ -442,6 +434,11 @@ private:
   const std::set<detid_t> m_masked;
   const double m_binWidth;
   const bool m_linearBins;
+  /// number of events to read from disk at one time
+  const size_t m_events_per_chunk;
+  /// number of events to histogram in a single thread
+  const size_t m_grainsize_event;
+  std::shared_ptr<API::Progress> m_progress;
 };
 
 } // anonymous namespace
@@ -493,6 +490,30 @@ void AlignAndFocusPowderSlim::init() {
       std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_BANKS_IN_THREAD, 1, positiveIntValidator),
       "Number of banks to read in a single thread. Lower means more parallelization.");
   setPropertyGroup(PropertyNames::READ_BANKS_IN_THREAD, CHUNKING_PARAM_GROUP);
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000,
+                                                                   positiveIntValidator),
+                  "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
+  setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 2000, positiveIntValidator),
+      "Number of events to read in a single thread. Higher means less threads are created.");
+  setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
+}
+
+std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  // make sure that data is read in larger chunks than the events processed in a single thread
+  const int disk_chunk = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
+  const int grainsize_events = getProperty(PropertyNames::EVENTS_PER_THREAD);
+  if (disk_chunk < grainsize_events) {
+    const std::string msg(PropertyNames::READ_SIZE_FROM_DISK + " must be larger than " +
+                          PropertyNames::EVENTS_PER_THREAD);
+    errors[PropertyNames::READ_SIZE_FROM_DISK] = msg;
+    errors[PropertyNames::EVENTS_PER_THREAD] = msg;
+  }
+
+  return errors;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -547,7 +568,7 @@ void AlignAndFocusPowderSlim::exec() {
   */
 
   // load the events
-  H5::H5File h5file(filename, H5F_ACC_RDONLY);
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   // filter by time
   double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
@@ -619,11 +640,18 @@ void AlignAndFocusPowderSlim::exec() {
       }
     }
 
+    // each NXevent_data is a step
+    const auto num_banks_to_read = bankEntryNames.size();
+
     // threaded processing of the banks
     const int GRAINSIZE_BANK = getProperty(PropertyNames::READ_BANKS_IN_THREAD);
+    const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
+    const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
+    auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, x_delta, linearBins);
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), static_cast<size_t>(GRAINSIZE_BANK)), task);
+                         m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
+                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)), task);
   }
 
   // close the file so child algorithms can do their thing
