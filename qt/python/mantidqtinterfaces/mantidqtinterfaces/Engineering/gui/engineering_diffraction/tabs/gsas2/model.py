@@ -11,10 +11,9 @@ import os
 import platform
 import shutil
 import subprocess
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,7 +29,6 @@ from mantid.simpleapi import (
     LoadGSS,
     logger,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
     SampleLogsGroupWorkspace,
@@ -39,7 +37,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import (
     FittingWorkspaceRecordContainer,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 
 
 @dataclass
@@ -373,11 +370,6 @@ class GSAS2Model:
     # ===============
 
     def set_components_from_inputs(self, load_params, refinement_params, project, rb_number):
-        self.timeout = int(get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "timeout"))
-        self.dSpacing_min = float(
-            get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "dSpacing_min")
-        )
-
         self.path_to_gsas2 = output_settings.get_path_to_gsas2()
         self.project_name = project
         self.organize_save_directories(rb_number)
@@ -426,72 +418,131 @@ class GSAS2Model:
     # ===============
 
     def call_gsas2(self):
-        command_string_list = self.format_gsas2_call()
-        start = time.time()
-        gsas2_called = self.call_subprocess(command_string_list)
-        if not gsas2_called:
-            return None
-        self.out_call_gsas2, self.err_call_gsas2 = gsas2_called
-        gsas_runtime = time.time() - start
-        logger.notice(self.format_shell_output(title="Commandline output from GSAS-II", shell_output_string=self.out_call_gsas2))
-        return gsas_runtime
+        """
+        Prepares and executes the GSAS-II subprocess call.
+        """
+        self._validate_required_attributes()
 
-    def format_gsas2_call(self):
-        gsas2_inputs = parse_inputs.Gsas2InputParameters(
-            path_to_gsas2=self.path_to_gsas2,
+        save_directories = self._create_save_directories()
+        refinement_settings = self._create_refinement_settings()
+        file_paths = self._create_file_paths()
+        config = self._create_gsas2_config()
+
+        gsas2_handler = self._initialize_gsas2_handler(save_directories, refinement_settings, file_paths, config)
+
+        call_g2sc_path = self._locate_call_g2sc_script(gsas2_handler)
+
+        serialized_inputs = gsas2_handler.to_json()
+
+        gsasii_call_args = self._construct_gsasii_call(gsas2_handler, call_g2sc_path, serialized_inputs)
+
+        print(f"GSAS-II call: {gsasii_call_args}")
+
+        return self.call_subprocess(gsasii_call_args, gsas2_handler.python_binaries)
+
+    def _validate_required_attributes(self):
+        if not self.path_to_gsas2.strip():
+            raise ValueError("Path to GSAS-II is not set. Please provide a valid path.")
+        if not self.project_name:
+            raise ValueError("Project name is not set. Please provide a valid project name.")
+
+    def _create_save_directories(self) -> SaveDirectories:
+        if not self.project_name:
+            raise ValueError("Project name is not set. Please provide a valid project name.")
+        return SaveDirectories(
             temporary_save_directory=self.temporary_save_directory,
             project_name=self.project_name,
-            refinement_method=self.refinement_method,
-            refine_background=self.refine_background,
-            refine_microstrain=self.refine_microstrain,
-            refine_sigma_one=self.refine_sigma_one,
-            refine_gamma=self.refine_gamma,
-            refine_histogram_scale_factor=self.refine_histogram_scale_factor,
+        )
+
+    def _create_refinement_settings(self) -> RefinementSettings:
+        return RefinementSettings(
+            method=self.refinement_method,
+            background=self.refine_background,
+            microstrain=self.refine_microstrain,
+            sigma_one=self.refine_sigma_one,
+            gamma=self.refine_gamma,
+            histogram_scale_factor=self.refine_histogram_scale_factor,
+            unit_cell=self.refine_unit_cell,
+        )
+
+    def _create_file_paths(self) -> FilePaths:
+        return FilePaths(
             data_files=self.data_files,
             phase_files=self.phase_filepaths,
             instrument_files=self.instrument_files,
+        )
+
+    def _create_gsas2_config(self) -> GSAS2Config:
+        return GSAS2Config(
             limits=self.limits,
             mantid_pawley_reflections=self.mantid_pawley_reflections,
             override_cell_lengths=self.get_override_lattice_parameters(),
-            refine_unit_cell=self.refine_unit_cell,
             d_spacing_min=self.dSpacing_min,
             number_of_regions=self.number_of_regions,
         )
-        gsas2_python_path = os.path.join(self.path_to_gsas2, "bin", "python")
-        if platform.system() == "Windows":
-            gsas2_python_path = os.path.join(self.path_to_gsas2, "python.exe")
-        call = [
-            gsas2_python_path,
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")),
-            parse_inputs.Gsas2InputParameters_to_json(gsas2_inputs),
-        ]
-        return call
 
-    def call_subprocess(self, command_string_list):
+    def _initialize_gsas2_handler(
+        self, save_directories: SaveDirectories, refinement_settings: RefinementSettings, file_paths: FilePaths, config: GSAS2Config
+    ) -> GSAS2Handler:
+        gsas2_handler = GSAS2Handler(
+            path_to_gsas2=self.path_to_gsas2,
+            save_directories=save_directories,
+            refinement_settings=refinement_settings,
+            file_paths=file_paths,
+            config=config,
+        )
+
+        gsas2_handler.os_platform = platform.system()
+        gsas2_handler.set_gsas2_python_path()
+        gsas2_handler.set_binaries()
+
+        return gsas2_handler
+
+    def _locate_call_g2sc_script(self, gsas2_handler: GSAS2Handler) -> Path:
+        call_g2sc_path = next(
+            gsas2_handler.limited_rglob(Path(__file__).parent, "call_G2sc.py", max_depth=1),
+            None,
+        )
+        if not call_g2sc_path:
+            raise FileNotFoundError("The file 'call_G2sc.py' could not be found in the expected directory.")
+        return call_g2sc_path
+
+    def _construct_gsasii_call(self, gsas2_handler: GSAS2Handler, call_g2sc_path: Path, serialized_inputs: str) -> List[str]:
+        if not gsas2_handler.gsas2_python_path:
+            gsas2_handler.set_gsas2_python_path()
+
+        return [
+            str(gsas2_handler.gsas2_python_path),
+            str(call_g2sc_path),
+            serialized_inputs,
+        ]
+
+    def call_subprocess(self, command_string_list: List[str], gsas_binary_paths: List[str]) -> Optional[Tuple[str, str]]:
+        """
+        Notes:
+        1. **Binary Search Order**:
+            - The GSAS-II binaries are searched in the GSASII directory before the Mantid Conda environment.
+            - Ensure that the GSASII conda environment is activated by calling the "activate" script for proper functionality.
+
+        2. **PyCharm Debugger Behavior**:
+            - The PyCharm debugger attempts to debug into any Python subprocesses spawned by Workbench.
+            - On Windows (see `pydev_monkey.py`), this results in the command line arguments being manipulated,
+            causing the GSASII JSON parameter string to get corrupted.
+            - To avoid this, pass the GSASII Python executable via the `executable` parameter instead of `argv[0]`,
+            and set `argv[0]` to something that does not contain the string 'python'.
+
+        3. **Disabling PyCharm Subprocess Debugging**:
+            - The PyCharm behavior can also be disabled by unchecking the property in File > Settings:
+            "Attach to subprocess automatically while debugging".
+        """
+        shell_process = None  # Initialize shell_process to None to avoid unbound local error if exception occurs before try block
         try:
             env = os.environ.copy()
-            env["PYTHONHOME"] = self.path_to_gsas2
+            env["PYTHONHOME"] = self.config.path_to_gsas2
             # Search for binaries in GSASII directory before Mantid Conda environment
-            # Need to activate GSASII conda environment by calling "activate" script for proper solution
-            if platform.system() == "Windows":
-                extra_paths = [
-                    self.path_to_gsas2,
-                    os.path.join(self.path_to_gsas2, "bin"),
-                    os.path.join(self.path_to_gsas2, "Library", "bin"),
-                    os.path.join(self.path_to_gsas2, "Library", "usr", "bin"),
-                    os.path.join(self.path_to_gsas2, "Library", "mingw-w64", "bin"),
-                    os.path.join(self.path_to_gsas2, "Scripts"),
-                ]
-            else:
-                extra_paths = [os.path.join(self.path_to_gsas2, "bin")]
-            env["PATH"] = ";".join(extra_paths + [env["PATH"]])
-            # The PyCharm debugger attempts to debug into any python subprocesses spawned by Workbench
-            # On Windows (see pydev_monkey.py) this results in the command line arguments being manipulated and
-            # the GSASII json parameter string gets corrupted
-            # Avoid this by passing the GSASII python exe in via the executable parameter instead of argv[0] and also
-            # set argv[0] to something not containing the string 'python'
-            # Note - the PyCharm behaviour can also be disabled by unchecking this property in File, Settings:
-            # "Attach to subprocess automatically while debugging"
+            env["PATH"] = ";".join(gsas_binary_paths + [env["PATH"]])
+            print(f"GSAS-II call environment PATH: {env['PATH']}")
+            print(f"Command string list: {command_string_list[1:]}")
             empty_argv0 = "_"
             shell_process = subprocess.Popen(
                 [empty_argv0] + command_string_list[1:],
@@ -505,7 +556,7 @@ class GSAS2Model:
                 env=env,
             )
 
-            shell_output = shell_process.communicate(timeout=self.timeout)
+            shell_output = shell_process.communicate(timeout=self.config.timeout)
 
             if shell_process.returncode != 0:
                 logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
@@ -513,18 +564,19 @@ class GSAS2Model:
 
             return shell_output
         except subprocess.TimeoutExpired:
-            shell_process.terminate()
+            if shell_process:  # Check if shell_process is not None
+                shell_process.terminate()
             logger.error(
-                f"GSAS-II call did not complete after {self.timeout} seconds, so it was"
+                f"GSAS-II call did not complete after {self.config.timeout} seconds, so it was"
                 f" aborted. Check the inputs, such as Refinement Method are correct. The"
                 f" timeout interval can be increased in the Engineering Diffraction Settings."
             )
             return None
-        except Exception as exc:
+        except (FileNotFoundError, ValueError, subprocess.SubprocessError) as exc:
             logger.error(
                 f"GSAS-II call failed with error: {str(exc)}. "
                 "Please check the Path to GSASII in the Engineering Diffraction Settings is valid. "
-                "Path must be outer most directory of GSAS-II installation."
+                "Path must be outermost directory of GSAS-II installation."
             )
             return None
 
