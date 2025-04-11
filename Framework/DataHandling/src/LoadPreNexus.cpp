@@ -65,6 +65,9 @@ int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 }
 
+/// Default constructor
+LoadPreNexus::LoadPreNexus() : m_outputWorkspace() { deprecatedDate("2025-04-10"); }
+
 /// @copydoc Mantid::API::Algorithm::init()
 void LoadPreNexus::init() {
   // runfile to read in
