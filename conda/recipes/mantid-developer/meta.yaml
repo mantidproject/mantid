@@ -42,6 +42,8 @@ requirements:
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
+    - pyvista
+    - pyvistaqt
     - pyyaml {{ pyyaml }}
     - qscintilla2 {{ qscintilla2 }}
     - qt {{ qt_main }}
