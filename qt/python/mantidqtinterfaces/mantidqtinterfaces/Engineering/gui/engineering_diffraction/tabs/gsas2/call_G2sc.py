@@ -9,9 +9,7 @@ import os
 import sys
 import json
 from pathlib import Path
-import fnmatch
 from types import ModuleType
-from typing import Generator
 
 
 def print_histogram_R_factors(project):
@@ -168,47 +166,40 @@ def export_lattice_parameters(temp_save_directory, name_of_project, project):
             file.write(parameters_json)
 
 
-def limited_rglob(directory: Path, pattern: str, max_depth: int) -> Generator[Path, None, None]:
+def import_gsasii(gsasii_scriptable: Path) -> ModuleType:
     """
-    Recursively search for files matching the pattern in the directory up to a specified depth.
-    """
-    if not directory.is_dir():
-        raise FileNotFoundError(f"The provided directory path '{directory}' is not a valid directory.")
-    for root, dirs, files in os.walk(directory):
-        current_depth = len(Path(root).parts) - len(directory.parts)
-        if current_depth > max_depth:
-            dirs[:] = []
-        if current_depth <= max_depth:
-            for file in files:
-                if fnmatch.fnmatch(file, pattern):
-                    yield Path(root) / file
+    Try to import the GSASIIscriptable module using the provided file path.
 
+    Args:
+        gsasii_scriptable: The full path to the GSASIIscriptable.py file.
 
-def find_gsasii(directory_path: Path, file_name: str) -> ModuleType:
-    """
-    Recursively search for the file_name in the directory_path - the search checks all subdirectories
-    :Raises ImportError: If the file_name is not found in the directory_path
-    """
-    for file_path in limited_rglob(directory_path, file_name, max_depth=3):
-        if file_path.is_file():
-            if str(file_path.parent) not in sys.path:
-                sys.path.append(str(file_path.parent))
-            try:
-                import GSASIIscriptable as G2sc
+    Returns:
+        The imported GSASIIscriptable module.
 
-                return G2sc
-            except ImportError as exc:
-                raise ImportError(
-                    f"GSASIIscriptable ({file_name}) module found in {str(file_path.parent)} but could not be imported"
-                ) from exc
-    raise ImportError(f"GSASIIscriptable module '{file_name}' could not be found using the provided path: {directory_path}")
+    Raises:
+        ImportError: If the module cannot be imported.
+        FileNotFoundError: If the specified file does not exist.
+    """
+    if not gsasii_scriptable.is_file():
+        raise FileNotFoundError(f"The specified GSASIIscriptable.py file does not exist: {gsasii_scriptable}")
+
+    # Add the directory containing GSASIIscriptable.py to sys.path
+    gsasii_directory = gsasii_scriptable.parent
+    if str(gsasii_directory) not in sys.path:
+        sys.path.insert(0, str(gsasii_directory))
+
+    try:
+        import GSASIIscriptable as G2sc
+
+        return G2sc
+    except ImportError as exc:
+        raise ImportError(f"GSASIIscriptable module found at {gsasii_scriptable}, but it could not be imported.") from exc
 
 
 def main():
     # Parse Inputs from Mantid
     inputs_dict = json.loads(sys.argv[1])
 
-    path_to_gsas2 = inputs_dict["path_to_gsas2"]
     temporary_save_directory = inputs_dict["temporary_save_directory"]
     project_name = inputs_dict["project_name"]
     refinement_method = inputs_dict["refinement_settings"]["method"]
@@ -226,9 +217,10 @@ def main():
     mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
     d_spacing_min = inputs_dict["d_spacing_min"]
     number_of_regions = inputs_dict["number_of_regions"]
+    gsasii_scriptable_path = inputs_dict["gsasii_scriptable_path"]
 
     # Call GSASIIscriptable
-    G2sc = find_gsasii(Path(path_to_gsas2), "GSASIIscriptable.py")
+    G2sc = import_gsasii(Path(gsasii_scriptable_path))
 
     project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
     gsas_project = G2sc.G2Project(filename=project_path)
