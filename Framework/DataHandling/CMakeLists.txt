@@ -142,7 +142,6 @@ set(SRC_FILES
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
     src/NXcanSASHelper.cpp
-    src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
@@ -358,7 +357,6 @@ set(INC_FILES
     inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
     inc/MantidDataHandling/NXcanSASHelper.h
-    inc/MantidDataHandling/NexusTester.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
     inc/MantidDataHandling/ParallelEventLoader.h
@@ -563,7 +561,6 @@ set(TEST_FILES
     MeshFileIOTest.h
     ModifyDetectorDotDatFileTest.h
     MoveInstrumentComponentTest.h
-    NexusTesterTest.h
     ORNLDataArchiveTest.h
     PDLoadCharacterizationsTest.h
     PulseIndexerTest.h
