@@ -1,0 +1,1 @@
+- New algorithm :ref:`CombineTableWorkspaces` allows combination of a pair of :ref:`Table Workspaces <TableWorkspace>`, provided they have matching column names and data types.
