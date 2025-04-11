@@ -21,10 +21,20 @@ bool allInitialized(boost::optional<FirstParam> const &first, boost::optional<Se
 
 template <typename Result, typename... Params>
 boost::optional<Result> makeIfAllInitialized(boost::optional<Params> const &...params) {
-  if (allInitialized(params...))
+  if (allInitialized(params...)) {
     return Result(params.get()...);
-  else
-    return boost::none;
+  }
+  return boost::none;
+}
+
+template <typename... Params> bool allInitializedPairs(Params... args) { return (... && args); }
+
+template <typename Result, typename... Params>
+boost::optional<Result> makeIfAllInitializedPairs(std::pair<boost::optional<Params>, bool> const &...params) {
+  if (allInitializedPairs(params.second...)) {
+    return Result(params.first.get()...);
+  }
+  return boost::none;
 }
 
 } // namespace ISISReflectometry
