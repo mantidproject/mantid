@@ -1,17 +1,17 @@
 # import mantid algorithms, numpy and matplotlib
 import numpy as np
 from mantid.kernel import V3D
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, TableWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction, StringMandatoryValidator, FloatBoundedValidator
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.geometry import ReflectionGenerator
 
 
-class CreatePoleFigureTable(PythonAlgorithm):
+class CreatePoleFigureTableWorkspace(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering"
 
     def name(self):
-        return "CreatePoleFigureTable"
+        return "CreatePoleFigureTableWorkspace"
 
     def summary(self):
         return "Creates a table storing the pole figure data extracted from the input workspaces."
@@ -25,17 +25,16 @@ class CreatePoleFigureTable(PythonAlgorithm):
             doc="The workspace containing the input data.",
         )
         self.declareProperty(
-            MatrixWorkspaceProperty("PeakParameterWorkspace", defaultValue="", direction=Direction.Input),
+            ITableWorkspaceProperty("PeakParameterWorkspace", defaultValue="", direction=Direction.Input),
             doc="Optional workspace containing the fitted peak data.",
         )
         self.declareProperty(
-            TableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+            ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
             doc="Output workspace containing the table of alphas, betas and intensities.",
         )
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringMandatoryValidator(),
             direction=Direction.Input,
             doc="Reflection number for peak being fit. If given, algorithm will attempt to use the CrystalStructure on "
             "the InputWorkspace to adjust intensity for scattering power.",
@@ -46,14 +45,15 @@ class CreatePoleFigureTable(PythonAlgorithm):
             defaultValue=2.0,
             direction=Direction.Input,
             validator=positive_float_validator,
-            doc="Minimum chi^2 value to include in table. If set to 0.0, will include all peaks.",
+            doc="Minimum chi^2 value to include in table. If set to 0.0, no chi^2 filtering will be performed.",
         )
         self.declareProperty(
             "PeakPositionThreshold",
             defaultValue=0.1,
             direction=Direction.Input,
             validator=positive_float_validator,
-            doc="Maximum distance of fitted peak X0 from HKL X0 value to include in table. "
+            doc="Maximum distance of fitted peak X0 from HKL X0 value to include in table."
+            "If set to 0.0, no positional filtering will be performed. "
             "If no Reflection is specified, this tolerance can be ignored, "
             "otherwise it will assume X0 in PeakParameterWorkspace is given in dSpacing.",
         )
@@ -90,18 +90,17 @@ class CreatePoleFigureTable(PythonAlgorithm):
                 check_col("chi2")
 
         # check that if a reflection is given it can be parsed to V3D
-        reflection = self.getProperty("Reflection")
-        if reflection != "":
+        if not self.getProperty("Reflection").isDefault:
             try:
-                _parse_hkl(reflection)
+                _parse_hkl(self.getProperty("Reflection").value)
             except:
-                issues["Reflection"] = "If reflection is specified: H, K, and L must be comma separated in string"
+                issues["Reflection"] = "Problem parsing hkl string, ensure H,K,L are separated by commas"
 
             # if a hkl is given, scattering power will be calculated, check that both a sample and CrystalStructure have
             # been defined
             sample = ws.sample()
             if not sample:
-                issues["Reflection"] = "If reflection is specified: InputWorkspace must have a sample"
+                issues["InputWorkspace"] = "If reflection is specified: InputWorkspace must have a sample"
             if sample:
                 try:
                     sample.getCrystalStructure()
@@ -114,6 +113,7 @@ class CreatePoleFigureTable(PythonAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         peak_param_ws = self.getProperty("PeakParameterWorkspace").value
         hkl = self.getProperty("Reflection").value
+        hkl_is_set = not self.getProperty("Reflection").isDefault
         chi_thresh = self.getProperty("Chi2Threshold").value
         x0_thresh = self.getProperty("PeakPositionThreshold").value
 
@@ -156,13 +156,14 @@ class CreatePoleFigureTable(PythonAlgorithm):
             chi2 = np.zeros((len(ab_arr)))
             x0s = np.ones((len(ab_arr)))
 
-        if hkl:
-            xtal = ws.sample().getCrystalStructure
+        if hkl_is_set:
+            hkl = _parse_hkl(hkl)
+            xtal = ws.sample().getCrystalStructure()
             peak = xtal.getUnitCell().d(hkl)
             scat_power = _calc_scattering_power(xtal, hkl)
         else:
-            # if no hkl provided, peak will be set to x0 and scattering power will be 1
-            peak = x0s
+            # if no hkl provided, peak will be set to mean x0 and scattering power will be 1
+            peak = np.mean(x0s)
             scat_power = 1.0
 
         # create the table to hold the data
@@ -174,7 +175,7 @@ class CreatePoleFigureTable(PythonAlgorithm):
         # go through each detector group
         for index, (a, b) in enumerate(ab_arr):
             # check chi2 is under threshold (or threshold is set to be ignored) and peak position is also within tol
-            if (chi2[index] < chi_thresh or chi_thresh == 0.0) and np.abs(x0s[index] - peak) < x0_thresh:
+            if ((chi2[index] < chi_thresh) or chi_thresh == 0.0) and ((np.abs(x0s[index] - peak) < x0_thresh) or x0_thresh == 0.0):
                 # amend intensity for any scattering correction
                 intensity = intensities[index] / scat_power
                 # add data to table
@@ -198,7 +199,7 @@ def _parse_hkl(hkl: str) -> V3D:
 
 def _calc_scattering_power(xtal, hkl) -> float:
     generator = ReflectionGenerator(xtal)
-    d = xtal.getUnitCell.d(hkl)
+    d = xtal.getUnitCell().d(hkl)
     f_sq = generator.getFsSquared(
         [
             hkl,
@@ -208,7 +209,7 @@ def _calc_scattering_power(xtal, hkl) -> float:
     pg = xtal.getSpaceGroup().getPointGroup()
     m = len(pg.getEquivalents(hkl))  # multiplicity
 
-    vol = xtal.getUnitCell().volume() / xtal.getScatterers()  # volume per atom
+    vol = xtal.getUnitCell().volume() / len(xtal.getScatterers())  # volume per atom
     return (m * f_sq * d**4) / vol**2  # Eq 2 of NyRTeX paper
 
 
@@ -220,4 +221,4 @@ def _get_alpha_beta_from_cart(arr: np.ndarray) -> np.ndarray:
     return np.concatenate([alphas[:, None], betas[:, None]], axis=1)
 
 
-AlgorithmFactory.subscribe(CreatePoleFigureTable)
+AlgorithmFactory.subscribe(CreatePoleFigureTableWorkspace)
