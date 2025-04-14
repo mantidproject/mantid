@@ -1,8 +1,11 @@
-#include <cstring>
-// REMOVE
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/napi.h"
+#include "MantidNexus/H5Util.h"
+#include "MantidNexus/NeXusException.hpp"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sstream>
@@ -27,7 +30,11 @@ using std::vector;
  */
 
 namespace { // anonymous namespace to keep it in the file
-template <typename NumT> static string toString(const vector<NumT> &data) {
+
+constexpr std::string group_class_spec("NX_class");
+constexpr std::string target_attr_name("target");
+
+template <typename NumT> static std::string toString(vector<NumT> const &data) {
   stringstream result;
   result << "[";
   size_t size = data.size();
@@ -76,79 +83,102 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
+template <> MANTID_NEXUS_DLL NXnumtype getType(bool const) { return NXnumtype::BOOLEAN; }
+
 } // namespace NeXus
 
 namespace NeXus {
 
-File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(std::string const &filename, NXaccess const access)
+    : H5File(filename, access, defaultFileAcc()), m_filename(filename), m_access(access), m_close_handle(true) {
+  this->m_stack.push_back(nullptr);
+};
 
-File::File(const char *filename, const NXaccess access) : m_filename(filename), m_access(access), m_close_handle(true) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(char const *filename, NXaccess const access)
+    : H5File(filename, access, defaultFileAcc()), m_filename(filename), m_access(access), m_close_handle(true) {
+  this->m_stack.push_back(nullptr);
+};
+
+// copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false) {}
+    : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_stack(file.m_stack), m_close_handle(false) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_stack(pf->m_stack), m_close_handle(false) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_stack(pf->m_stack), m_close_handle(false) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
-    this->m_pfile_id = f.m_pfile_id;
+    this->m_stack = f.m_stack;
     this->m_close_handle = f.m_close_handle;
   }
   return *this;
 }
 
-void File::initOpenFile(const string &filename, const NXaccess access) {
-  if (filename.empty()) {
-    throw Exception("Filename specified is empty constructor", "");
-  }
-
-  NXhandle temp;
-  NXstatus status = NXopen(filename.c_str(), access, &(temp));
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXopen(" << filename << ", " << access << ") failed";
-    throw Exception(msg.str(), filename);
-  } else {
-    this->m_pfile_id = std::make_shared<NXhandle>(temp);
-  }
-}
+// deconstructor
 
 // deconstructor
 
 File::~File() {
-  if (m_close_handle && m_pfile_id != NULL) {
-    NXstatus status = NXclose(&(*this->m_pfile_id));
-    this->m_pfile_id = NULL;
-    if (status != NXstatus::NX_OK) {
-      stringstream msg;
-      msg << "NXclose failed for file " << m_filename << "\n";
-      NXReportError(const_cast<char *>(msg.str().c_str()));
-    }
+  if (this->m_close_handle) {
+    H5::H5File::close();
   }
+  m_stack.clear();
 }
 
 void File::close() {
-  if (this->m_pfile_id != NULL) {
-    NAPI_CALL(NXclose(&(*this->m_pfile_id)), "NXclose failed");
-    this->m_pfile_id = NULL;
-  }
+  H5::H5File::close();
+  m_stack.clear();
 }
 
-void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
+void File::flush(H5F_scope_t scope) const { H5::H5File::flush(scope); }
 
-void File::makeGroup(const string &name, const string &class_name, bool open_group) {
+H5::Group *File::getRoot() { return dynamic_cast<H5::Group *>(this); }
+
+/** Return a pointer corresponding to current location in file stack. */
+H5::H5Location *File::getCurrentLocation() {
+  H5::H5Location *ret = m_stack.back().get();
+  if (m_stack.back() == nullptr) {
+    ret = this->getRoot();
+  }
+  return ret;
+}
+
+/** Return a pointer corresponding to current location in file stack,
+ * cast to pointer of indicated type.
+ */
+template <typename T> T *File::getCurrentLocationAs() {
+  T *loc = dynamic_cast<T *>(this->getCurrentLocation());
+  if (loc == nullptr) {
+    throw Exception("Could not cast current location to needed H5Cpp type\n", m_filename);
+  }
+  return loc;
+}
+
+/** Verify that the class name attribute set on the group
+ *  matches the class name being looked up.
+ */
+bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name) const {
+  H5::DataType dt(H5T_STRING, class_name.size());
+  if (!grp.attrExists(group_class_spec)) {
+    throw Exception("This was not found.\n");
+  }
+  H5::Attribute attr = grp.openAttribute(group_class_spec);
+  std::string res("");
+  attr.read(dt, res);
+  if (res == "") {
+    throw Exception("Error reading the group class name\n", m_filename);
+  }
+  return class_name == res;
+}
+
+void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
   if (name.empty()) {
     throw Exception("Supplied empty name to makeGroup", m_filename);
   }
