@@ -380,6 +380,11 @@ void PDFFourierTransform2::exec() {
   auto inputY = inputWS->y(0).rawData();  //  y for input
   auto inputDY = inputWS->e(0).rawData(); // dy for input
 
+  // need bin edges
+  if (inputX.size() > inputY.size()) {
+    inputX = BinEdges(Points(inputWS->x(0))).rawData();
+  }
+
   // transform input data into Q/MomentumTransfer
   string direction = getProperty("Direction");
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
@@ -484,7 +489,7 @@ void PDFFourierTransform2::exec() {
     outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms", true);
   }
   outputWS->setDistribution(true);
-  BinEdges edges(sizer + 1, LinearGenerator(outDelta, outDelta));
+  BinEdges edges(sizer + 1, LinearGenerator(outDelta / 2, outDelta));
   outputWS->setBinEdges(0, edges);
   auto &outputX = outputWS->mutableX(0);
   g_log.information() << "Using output min = " << outputX.front() << "and output max = " << outputX.back() << "\n";
@@ -500,8 +505,9 @@ void PDFFourierTransform2::exec() {
   if (direction == BACKWARD) {
     corr = 4.0 * M_PI * rho0;
   }
+  const double inXMax = inputX[Xmax_index];
   for (size_t outXIndex = 0; outXIndex < sizer; outXIndex++) {
-    const double outX = outputX[outXIndex];
+    const double outX = 0.5 * (outputX[outXIndex] + outputX[outXIndex + 1]);
     const double outXFac = corr / (outX * outX * outX);
 
     double fs = 0;
@@ -509,7 +515,6 @@ void PDFFourierTransform2::exec() {
     auto pdfIntegral = [outX](const double x) -> double { return sin(x * outX) - x * outX * cos(x * outX); };
     double inX2 = inputX[Xmin_index];
     double integralX2 = pdfIntegral(inX2);
-    const double inXMax = inputX[Xmax_index];
 
     for (size_t inXIndex = Xmin_index; inXIndex < Xmax_index; inXIndex++) {
       const double inX1 = inX2;
@@ -520,7 +525,7 @@ void PDFFourierTransform2::exec() {
 
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
       if (filter && inX1 != 0) {
-        const double lorchKernel = inX1 * M_PI / inXMax;
+        const double lorchKernel = 0.5 * (inX1 + inX2) * M_PI / inXMax;
         defIntegral *= sin(lorchKernel) / lorchKernel;
       }
       fs += defIntegral * inputY[inXIndex];
