@@ -1,12 +1,10 @@
+# cmake-format: off
 set(SRC_FILES
     src/H5Util.cpp
     src/NexusClasses.cpp
-    src/napi.cpp
-    src/napi5.cpp
     src/NexusDescriptor.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
-    src/nxstack.cpp
     src/stptok.cpp
 )
 
@@ -15,16 +13,11 @@ set(INC_FILES
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NeXusFile_fwd.h
-    inc/MantidNexus/napi.h
-    inc/MantidNexus/napi5.h
-    inc/MantidNexus/napiconfig.h
-    inc/MantidNexus/napi_internal.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NeXusException.hpp
     inc/MantidNexus/NeXusFile.hpp
-    inc/MantidNexus/nx_stptok.h
-    inc/MantidNexus/nxstack.h
 )
+# cmake-format: on
 
 set(TEST_FILES
     H5UtilTest.h
