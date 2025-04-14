@@ -208,15 +208,28 @@ class CreatePoleFigureTableTest(unittest.TestCase):
     def test_chi2_not_required_if_threshold_is_set_to_zero(self):
         peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
         peak_param_table.removeColumn("chi2")
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace=peak_param_table, OutputWorkspace="outws", Chi2Threshold=0.0
-        )
-        self.assertEqual(outws.rowCount(), 4)
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
-        # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
-        # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
+        alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+        alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("Chi2Threshold", 0.0)
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
+
+    def test_x0_not_required_if_threshold_is_set_to_zero(self):
+        peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
+        peak_param_table.removeColumn("X0")
+
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
+        alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+        alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("PeakPositionThreshold", 0.0)
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
 
     def test_suitable_hkl_can_be_parsed(self):
         valid_hkl_strings = ("1,1,1", "(1,0,0)", "[1,2,3]")

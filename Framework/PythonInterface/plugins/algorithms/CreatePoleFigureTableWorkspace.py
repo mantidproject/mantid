@@ -69,8 +69,11 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         # check peak parameter ws
         peak_ws = self.getProperty("PeakParameterWorkspace").value
         chi2_thresh = self.getProperty("Chi2Threshold").value
+        x0_thresh = self.getProperty("PeakPositionThreshold").value
         # if the chi2_threshold is set to allow all peaks, no chi2 column is needed
         self.no_chi2_needed = chi2_thresh < 1e-6
+        # if the x0_threshold is set to allow all peaks, no x0 column is needed
+        self.no_x0_needed = x0_thresh < 1e-6
         if peak_ws:
 
             def check_col(col_name):
@@ -81,7 +84,9 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
 
             # if peak parameter ws is given, expect these columns
             check_col("I")
-            check_col("X0")
+
+            if not self.no_x0_needed:
+                check_col("X0")
 
             if not self.no_chi2_needed:
                 check_col("chi2")
@@ -144,7 +149,10 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         if peak_param_ws:
             # assume that the peak_param_ws has only the peak of interest fitted
             intensities = np.asarray(peak_param_ws.column("I"))
-            x0s = np.asarray(peak_param_ws.column("X0"))
+            if not self.no_x0_needed:
+                x0s = np.asarray(peak_param_ws.column("X0"))
+            else:
+                x0s = np.ones((len(ab_arr)))
             if not self.no_chi2_needed:
                 chi2 = np.asarray(peak_param_ws.column("chi2"))
             else:
