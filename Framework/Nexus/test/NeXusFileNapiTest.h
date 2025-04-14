@@ -123,10 +123,6 @@ private:
 #else
     vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-    if (create_code != NXACC_CREATE4) {
-      file.writeData("grosszahl", grossezahl);
-    }
-
     // create a new group inside this one
     file.makeGroup("data", "NXdata", true);
 
@@ -136,9 +132,9 @@ private:
     // compressed data
     array_dims[0] = 100;
     array_dims[1] = 20;
-    vector<int> comp_array;
-    for (int i = 0; i < array_dims[0]; i++) {
-      for (int j = 0; j < array_dims[1]; j++) {
+    vector<size_t> comp_array;
+    for (size_t i = 0; i < array_dims[0]; i++) {
+      for (size_t j = 0; j < array_dims[1]; j++) {
         comp_array.push_back(i);
       }
     }
