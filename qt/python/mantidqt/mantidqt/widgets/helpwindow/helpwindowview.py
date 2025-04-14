@@ -1,5 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
@@ -88,19 +86,16 @@ class HelpWindowView(QMainWindow):
         self.reloadButton.clicked.connect(self.browser.reload)
         self.toolbar.addWidget(self.reloadButton)
 
-        # --- Add Status Indicator ---
-        # Spacer to push the status label to the right
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.toolbar.addWidget(spacer)
 
         # Status Label (Icon + Text)
-        self.statusLabel = QLabel("Status: Initializing...")  # Initial text
+        self.statusLabel = QLabel("Status: Initializing...")
         self.statusLabel.setToolTip("Indicates whether documentation is loaded locally (Offline) or from the web (Online)")
-        # Add some padding/margin for aesthetics
+
         self.statusLabel.setStyleSheet("QLabel { padding-left: 5px; padding-right: 5px; margin-left: 5px; }")
         self.toolbar.addWidget(self.statusLabel)
-        # ---------------------------
 
         # Connect signals for enabling/disabling buttons
         self.browser.urlChanged.connect(self.update_navigation_buttons)

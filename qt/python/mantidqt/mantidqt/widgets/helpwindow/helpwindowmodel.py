@@ -1,170 +1,171 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-import logging
-from qtpy.QtCore import QUrl
-from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo
 
-# Module-level logger for functions outside of classes
-_logger = logging.getLogger(__name__)
+try:
+    from mantid.kernel import Logger
+    from mantid.kernel import ConfigService
+
+except ImportError:
+    print("Warning: Mantid Kernel (Logger/ConfigService) not found, using basic print/dummy.")
+
+    class Logger:
+        def __init__(self, name):
+            self._name = name
+
+        def warning(self, msg):
+            print(f"WARNING [{self._name}]: {msg}")
+
+        def debug(self, msg):
+            print(f"DEBUG [{self._name}]: {msg}")
+
+        def information(self, msg):
+            print(f"INFO [{self._name}]: {msg}")
+
+        def error(self, msg):
+            print(f"ERROR [{self._name}]: {msg}")
+
+    class ConfigService:
+        @staticmethod
+        def Instance():
+            class DummyInstance:
+                def getString(self, key, pathAbsolute=True):
+                    return None  # Default to None
+
+            return DummyInstance()
 
 
-def _get_version_string_for_url():
-    """
-    Returns the Mantid version string formatted for use in documentation URLs.
-    For example, "v6.12.0" from version "6.12.0.1"
+log = Logger("HelpWindowModel")
 
-    Returns:
-        str: Formatted version string in the form "vX.Y.Z" or None if version cannot be determined
-    """
-    versionStr = None
+from qtpy.QtCore import QUrl  # noqa: E402
+from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo  # noqa: E402
+
+
+def getMantidVersionString():
+    """Placeholder function to get Mantid version (e.g., 'v6.13.0')."""
     try:
         import mantid
 
-        # Use the mantid version object (proper way)
-        versionObj = mantid.version()
-        # Retrieve the patch
-        patch = versionObj.patch.split(".")[0]
-        versionStr = f"v{versionObj.major}.{versionObj.minor}.{patch}"
+        if hasattr(mantid, "__version__"):
+            versionParts = str(mantid.__version__).split(".")
+            if len(versionParts) >= 2:
+                return f"v{versionParts[0]}.{versionParts[1]}.0"
     except ImportError:
-        _logger.warning("Could not determine Mantid version for documentation URL.")
-    except Exception as e:
-        _logger.warning(f"Error determining Mantid version for documentation URL: {e}")
-
-    return versionStr
+        pass
+    log.warning("Could not determine Mantid version for documentation URL.")
+    return None
 
 
 class NoOpRequestInterceptor(QWebEngineUrlRequestInterceptor):
-    """
-    A no-op interceptor that does nothing. Used if we're not loading local docs.
-    """
+    """A no-op interceptor used when loading online docs."""
 
     def interceptRequest(self, info: QWebEngineUrlRequestInfo):
         pass
 
 
 class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
-    """
-    Intercepts requests so we can relax the CORS policy for loading MathJax fonts
-    from cdn.jsdelivr.net when using local docs.
-    """
+    """Intercepts requests for local docs (e.g., handle CORS)."""
 
     def interceptRequest(self, info: QWebEngineUrlRequestInfo):
         url = info.requestUrl()
-        if url.host() == "cdn.jsdelivr.net":
+        if url.host() == "cdn.jsdelivr.net":  # Allow MathJax CDN
             info.setHttpHeader(b"Access-Control-Allow-Origin", b"*")
 
 
 class HelpWindowModel:
-    _logger = logging.getLogger(__name__)
-
-    MODE_LOCAL = "Local Docs"
+    MODE_OFFLINE = "Offline Docs"
     MODE_ONLINE = "Online Docs"
 
-    def __init__(self, localDocsBase=None, onlineBase="https://docs.mantidproject.org/"):
-        self._rawLocalDocsBase = localDocsBase
-        self._rawOnlineBase = onlineBase.rstrip("/")
-
-        self._isLocal = False
-        self._modeString = self.MODE_ONLINE
-        self._baseUrl = self._rawOnlineBase
-        self._versionString = None
-
-        self._determine_mode_and_base_url()
-
-    def _determine_mode_and_base_url(self):
-        """
-        Sets the internal state (_isLocal, _modeString, _baseWrl, _versionString)
-        based on the validity of localDocsBase and attempts to find a versioned URL.
-        """
-        if self._rawLocalDocsBase and os.path.isdir(self._rawLocalDocsBase):
-            self._isLocal = True
-            self._modeString = self.MODE_LOCAL
-            absLocalPath = os.path.abspath(self._rawLocalDocsBase)
-            self._baseUrl = QUrl.fromLocalFile(absLocalPath).toString()
-            self._versionString = None
-            self._logger.debug(f"Using {self._modeString} from {self._baseUrl}")
-        else:
-            if self._rawLocalDocsBase:
-                self._logger.warning(f"Local docs path '{self._rawLocalDocsBase}' is invalid or not found. Falling back to online docs.")
-
-            self._isLocal = False
-            self._modeString = self.MODE_ONLINE
-
-            isLikelyRelease = self._rawLocalDocsBase is None
-            if isLikelyRelease:
-                self._versionString = _get_version_string_for_url()
-
-            if self._versionString:
-                baseOnline = self._rawOnlineBase
-                if baseOnline.endswith("/stable"):
-                    baseOnline = baseOnline[: -len("/stable")]
-
-                if self._versionString not in baseOnline:
-                    self._baseUrl = f"{baseOnline.rstrip('/')}/{self._versionString}"
-                    self._logger.debug(f"Using {self._modeString} (Version: {self._versionString}) from {self._baseUrl}")
-                else:
-                    self._baseUrl = self._rawOnlineBase
-                    self._logger.debug(f"Using {self._modeString} (Using provided base URL, possibly stable/latest): {self._baseUrl}")
+    def __init__(self, online_base="https://docs.mantidproject.org/"):
+        local_docs_path_from_config = None
+        try:
+            config_service = ConfigService.Instance()
+            raw_path = config_service.getString("docs.html.root", True)
+            if raw_path:
+                local_docs_path_from_config = raw_path
+                log.debug(f"Retrieved 'docs.html.root' from ConfigService: '{local_docs_path_from_config}'")
             else:
-                self._baseUrl = self._rawOnlineBase
-                self._logger.debug(f"Using {self._modeString} (Version: Unknown/Stable) from {self._baseUrl}")
+                log.debug("'docs.html.root' property is empty or not found in ConfigService.")
+
+        except Exception as e:
+            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}")
+
+        self._raw_online_base = online_base.rstrip("/")
+        self._is_local = False
+        self._mode_string = self.MODE_ONLINE
+        self._base_url = self._raw_online_base
+        self._version_string = None
+        self._determine_mode_and_base_url(local_docs_path_from_config)
+
+    def _determine_mode_and_base_url(self, local_docs_path):
+        """
+        Sets the internal state (_is_local, _mode_string, _base_url, _version_string)
+        based on the validity of the provided local_docs_path.
+        """
+        log.debug(f"Determining mode with local_docs_path='{local_docs_path}'")
+        if local_docs_path and os.path.isdir(local_docs_path):
+            self._is_local = True
+            self._mode_string = self.MODE_OFFLINE
+            abs_local_path = os.path.abspath(local_docs_path)
+            self._base_url = QUrl.fromLocalFile(abs_local_path).toString()
+            self._version_string = None
+            log.debug(f"Using {self._mode_string} from {self._base_url}")
+        else:
+            if local_docs_path:
+                log.warning(
+                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to online docs."  # noqa: E501
+                )
+            else:
+                log.debug("No valid local docs path found from ConfigService. Using online docs.")
+
+            self._is_local = False
+            self._mode_string = self.MODE_ONLINE
+            self._version_string = getMantidVersionString()
+
+            if self._version_string:
+                base_online = self._raw_online_base
+                if base_online.endswith("/stable"):
+                    base_online = base_online[: -len("/stable")]
+                if self._version_string not in base_online:
+                    self._base_url = f"{base_online.rstrip('/')}/{self._version_string}"
+                    log.debug(f"Using {self._mode_string} (Version: {self._version_string}) from {self._base_url}")
+                else:
+                    self._base_url = self._raw_online_base
+                    log.debug(f"Using {self._mode_string} (Using provided base URL, possibly stable/latest): {self._base_url}")
+            else:
+                self._base_url = self._raw_online_base
+                log.debug(f"Using {self._mode_string} (Version: Unknown/Stable) from {self._base_url}")
 
     def is_local_docs_mode(self):
-        """
-        :return: True if using local docs, False otherwise. Based on initial check.
-        """
-        return self._isLocal
+        return self._is_local
 
     def get_mode_string(self):
-        """
-        :return: User-friendly string indicating the mode ("Local Docs" or "Online Docs").
-        """
-        return self._modeString
+        return self._mode_string
 
     def get_base_url(self):
-        """`
-        :return: The determined base URL (either file:///path or https://docs...[/version])
-        """
-        return self._baseUrl.rstrip("/") + "/"
+        return self._base_url.rstrip("/") + "/"
 
-    def build_help_url(self, relativeUrl):
-        """
-        Returns a QUrl pointing to the determined doc source for the given relative URL.
-        """
-        if not relativeUrl or not relativeUrl.lower().endswith((".html", ".htm")):
-            relativeUrl = "index.html"
-
-        relativeUrl = relativeUrl.lstrip("/")
-        fullUrlStr = f"{self.get_base_url()}{relativeUrl}"
-
-        url = QUrl(fullUrlStr)
+    def build_help_url(self, relative_url):
+        if not relative_url or not relative_url.lower().endswith((".html", ".htm")):
+            relative_url = "index.html"
+        relative_url = relative_url.lstrip("/")
+        base = self.get_base_url()
+        full_url_str = f"{base}{relative_url}"
+        url = QUrl(full_url_str)
         if not url.isValid():
-            self._logger.warning(f"Constructed invalid URL: {fullUrlStr} from base '{self.get_base_url()}' and relative '{relativeUrl}'")
+            log.warning(f"Constructed invalid URL: {full_url_str} from base '{base}' and relative '{relative_url}'")
         return url
 
     def get_home_url(self):
-        """
-        Return the 'home' page URL:
-          - local 'index.html' if local docs are enabled
-          - online docs homepage otherwise
-        """
         return self.build_help_url("index.html")
 
     def create_request_interceptor(self):
-        """
-        Return an appropriate request interceptor:
-          - LocalRequestInterceptor if local docs are used (for mathjax CORS)
-          - NoOpRequestInterceptor otherwise
-        """
-        if self._isLocal:
-            self._logger.debug("Using LocalRequestInterceptor.")
+        if self._is_local:
+            log.debug("Using LocalRequestInterceptor.")
             return LocalRequestInterceptor()
         else:
-            self._logger.debug("Using NoOpRequestInterceptor.")
+            log.debug("Using NoOpRequestInterceptor.")
             return NoOpRequestInterceptor()
