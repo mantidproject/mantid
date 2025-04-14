@@ -1,7 +1,7 @@
 # import mantid algorithms, numpy and matplotlib
 import numpy as np
 from mantid.kernel import V3D
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.geometry import ReflectionGenerator
 
@@ -25,7 +25,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             doc="The workspace containing the input data.",
         )
         self.declareProperty(
-            ITableWorkspaceProperty("PeakParameterWorkspace", defaultValue="", direction=Direction.Input),
+            ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Input, PropertyMode.Optional),
             doc="Optional workspace containing the fitted peak data.",
         )
         self.declareProperty(
@@ -62,17 +62,15 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         issues = dict()
         ws = self.getProperty("InputWorkspace").value
 
-        # validate the input ws exists and has a goniometer
+        # validate the input ws exists
         if ws is None:
             issues["InputWorkspace"] = "InputWorkspace must be set"
-        try:
-            ws.run().getGoniometer()
-        except RuntimeError:
-            issues["InputWorkspace"] = "InputWorkspace must have a Goniometer set in order to get sample orientation"
 
         # check peak parameter ws
         peak_ws = self.getProperty("PeakParameterWorkspace").value
         chi2_thresh = self.getProperty("Chi2Threshold").value
+        # if the chi2_threshold is set to allow all peaks, no chi2 column is needed
+        self.no_chi2_needed = chi2_thresh < 1e-6
         if peak_ws:
 
             def check_col(col_name):
@@ -85,8 +83,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             check_col("I")
             check_col("X0")
 
-            # by default, if peak_ws is given, we expect chi2 column as well, this is overridden if thresh == 0.0
-            if chi2_thresh != 0.0:
+            if not self.no_chi2_needed:
                 check_col("chi2")
 
         # check that if a reflection is given it can be parsed to V3D
@@ -98,14 +95,13 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
 
             # if a hkl is given, scattering power will be calculated, check that both a sample and CrystalStructure have
             # been defined
-            sample = ws.sample()
-            if not sample:
+            try:
+                ws.sample().getShape().volume()  # python api hasShape doesn't work as expected
+                # this will check if there is a valid sample
+                if not ws.sample().hasCrystalStructure():
+                    issues["InputWorkspace"] = "If reflection is specified: InputWorkspace sample must have a CrystalStructure"
+            except RuntimeError:
                 issues["InputWorkspace"] = "If reflection is specified: InputWorkspace must have a sample"
-            if sample:
-                try:
-                    sample.getCrystalStructure()
-                except:
-                    issues["Reflection"] = "If reflection is specified: InputWorkspace sample must have a CrystalStructure"
         return issues
 
     def PyExec(self):
@@ -148,8 +144,11 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         if peak_param_ws:
             # assume that the peak_param_ws has only the peak of interest fitted
             intensities = np.asarray(peak_param_ws.column("I"))
-            chi2 = np.asarray(peak_param_ws.column("chi2"))
             x0s = np.asarray(peak_param_ws.column("X0"))
+            if not self.no_chi2_needed:
+                chi2 = np.asarray(peak_param_ws.column("chi2"))
+            else:
+                chi2 = np.zeros((len(ab_arr)))
 
         else:
             intensities = np.ones((len(ab_arr)))

@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import (
     CreatePoleFigureTableWorkspace,
     AnalysisDataService,
+    AlgorithmManager,
     SetSample,
     SetGoniometer,
     CreateWorkspace,
@@ -20,8 +21,7 @@ import numpy as np
 
 
 class CreatePoleFigureTableTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         ws = CreateWorkspace(DataX=[0.0, 1.0], DataY=[1.0, 2.0, 3.0, 4.0], NSpec=4)
 
         # set the instrument to have four detectors
@@ -64,9 +64,25 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             val = 1.0 + (i / 10)
             peak_param_table.addRow([val, 3.14 + (i / 100), i])  # 3.14 hkl (1,1,1) dSpacing
 
-    @classmethod
-    def tearDownClass(cls):
-        AnalysisDataService.Instance().clear()
+    def tearDown(self):
+        AnalysisDataService.clear()
+
+    def eval_arrays(self, arr1, arr2, thresh=0.001):
+        self.assertTrue(np.all(np.abs(arr1 - arr2) < thresh))
+
+    def setup_missing_column(self, column_name):
+        # override PeakParameter Table
+        peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
+        peak_param_table.removeColumn(column_name)
+
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
+        alg.setProperty("PeakParameterWorkspace", peak_param_table)
+        alg.setProperty("OutputWorkspace", "outws")
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues["PeakParameterWorkspace"], f"PeakParameterWorkspace must have column: '{column_name}'")
 
     def test_alg_with_default_parameters(self):
         outws = CreatePoleFigureTableWorkspace(InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws")
@@ -177,8 +193,99 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         scat_power = 13.58
         self.eval_arrays(outws.column("Intensity"), np.array((1.0,)) / scat_power)
 
-    def eval_arrays(self, arr1, arr2, thresh=0.001):
-        self.assertTrue(np.all(np.abs(arr1 - arr2) < thresh))
+    def test_if_no_peak_param_table_default_intensity_used(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            OutputWorkspace="outws",
+        )
+        self.assertEqual(outws.rowCount(), 4)
+        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        # beta
+        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        # intensity
+        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.0, 1.0, 1.0)))
+
+    def test_chi2_not_required_if_threshold_is_set_to_zero(self):
+        peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
+        peak_param_table.removeColumn("chi2")
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace=peak_param_table, OutputWorkspace="outws", Chi2Threshold=0.0
+        )
+        self.assertEqual(outws.rowCount(), 4)
+        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        # beta
+        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        # intensity
+        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+
+    def test_suitable_hkl_can_be_parsed(self):
+        valid_hkl_strings = ("1,1,1", "(1,0,0)", "[1,2,3]")
+        for hkl in valid_hkl_strings:
+            alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+            alg.initialize()
+            alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
+            alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+            alg.setProperty("OutputWorkspace", "outws")
+            alg.setProperty("Reflection", hkl)
+            issues = alg.validateInputs()
+            self.assertEqual(len(issues), 0)
+
+    # failure cases
+
+    def test_error_if_no_intensity_on_peak_parameter_workspace(self):
+        self.setup_missing_column("I")
+
+    def test_error_if_no_x0_on_peak_parameter_workspace(self):
+        self.setup_missing_column("X0")
+
+    def test_error_if_no_chi2_on_peak_parameter_workspace_and_thresh_is_given(self):
+        self.setup_missing_column("chi2")
+
+    def test_error_if_hkl_given_but_no_sample(self):
+        CreateWorkspace(DataX=[0.0, 1.0], DataY=[1.0, 2.0, 3.0, 4.0], NSpec=4, OutputWorkspace="bad_ws")
+
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("bad_ws"))
+        alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+        alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("Reflection", "(1,1,1)")
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues["InputWorkspace"], "If reflection is specified: InputWorkspace must have a sample")
+
+    def test_error_if_hkl_given_but_no_crystal_structure(self):
+        CreateWorkspace(DataX=[0.0, 1.0], DataY=[1.0, 2.0, 3.0, 4.0], NSpec=4, OutputWorkspace="bad_ws")
+        sample_shape = """
+        <cylinder id="A">
+          <centre-of-bottom-base x="0" y="0" z="0.05" />
+          <axis x="0" y="0" z="-1" />
+          <radius val="0.1" />
+          <height val="0.1" />
+        </cylinder>
+        """
+        SetSample("bad_ws", Geometry={"Shape": "CSG", "Value": sample_shape})
+
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("bad_ws"))
+        alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+        alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("Reflection", "(1,1,1)")
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues["InputWorkspace"], "If reflection is specified: InputWorkspace sample must have a CrystalStructure")
+
+    def test_error_if_hkl_cannot_be_parsed(self):
+        alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
+        alg.setProperty("PeakParameterWorkspace", AnalysisDataService.retrieve("PeakParameterWS"))
+        alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("Reflection", "1 and 1 and 1")
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues["Reflection"], "Problem parsing hkl string, ensure H,K,L are separated by commas")
 
 
 if __name__ == "__main__":
