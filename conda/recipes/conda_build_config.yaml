@@ -27,7 +27,7 @@ libboost_python_devel:
   - 1.84 # Aim to follow conda-forge
 
 cmake:
-  - '>=3.21.0'
+  - '>=3.21.0,<4'
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
