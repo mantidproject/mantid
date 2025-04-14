@@ -235,18 +235,18 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
     hFile->putAttr("box_controller_xml", m_bcXMLDescr);
   }
 
-  std::vector<int64_t> exents_dims(2, 0);
-  exents_dims[0] = (int64_t(maxBoxes));
+  ::NeXus::DimVector exents_dims(2, 0);
+  exents_dims[0] = (::NeXus::dimsize_t(maxBoxes));
   exents_dims[1] = (m_nDim * 2);
-  std::vector<int64_t> exents_chunk(2, 0);
-  exents_chunk[0] = int64_t(16384);
+  ::NeXus::DimVector exents_chunk(2, 0);
+  exents_chunk[0] = ::NeXus::dimsize_t(16384);
   exents_chunk[1] = (m_nDim * 2);
 
-  std::vector<int64_t> box_2_dims(2, 0);
-  box_2_dims[0] = int64_t(maxBoxes);
+  ::NeXus::DimVector box_2_dims(2, 0);
+  box_2_dims[0] = ::NeXus::dimsize_t(maxBoxes);
   box_2_dims[1] = (2);
-  std::vector<int64_t> box_2_chunk(2, 0);
-  box_2_chunk[0] = int64_t(16384);
+  ::NeXus::DimVector box_2_chunk(2, 0);
+  box_2_chunk[0] = ::NeXus::dimsize_t(16384);
   box_2_chunk[1] = (2);
 
   if (create) {

@@ -315,7 +315,7 @@ public:
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
-    std::vector<int64_t> datastart, datasize;
+    ::NeXus::DimSizeVector datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
