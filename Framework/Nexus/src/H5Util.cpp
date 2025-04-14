@@ -38,6 +38,14 @@ template <> MANTID_NEXUS_DLL DataType getType<float>() { return PredType::NATIVE
 
 template <> MANTID_NEXUS_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
 
+template <> MANTID_NEXUS_DLL DataType getType<int8_t>() { return PredType::NATIVE_INT8; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint8_t>() { return PredType::NATIVE_UINT8; }
+
+template <> MANTID_NEXUS_DLL DataType getType<int16_t>() { return PredType::NATIVE_INT16; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint16_t>() { return PredType::NATIVE_UINT16; }
+
 template <> MANTID_NEXUS_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
@@ -45,6 +53,12 @@ template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NAT
 template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
+
+template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::NATIVE_CHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::NATIVE_CHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<bool>() { return PredType::NATIVE_HBOOL; }
 
 /** Operations for help with narrowing casts */
 namespace {

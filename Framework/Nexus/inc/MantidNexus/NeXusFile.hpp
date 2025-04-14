@@ -27,42 +27,13 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
  */
-class MANTID_NEXUS_DLL File {
+class MANTID_NEXUS_DLL File : public H5::H5File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  /** The handle for the C-API. */
-  std::shared_ptr<NXhandle> m_pfile_id;
+  std::vector<std::shared_ptr<H5::H5Location>> m_stack;
   /** should be close handle on exit */
   bool m_close_handle;
-
-public:
-  /**
-   * \return A pair of the next entry available in a listing.
-   */
-  Entry getNextEntry();
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
-
-  /**
-   * Initialize the pending group search to start again.
-   */
-  void initGroupDir();
-
-private:
-  /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * Function to consolidate the file opening code for the various constructors
-   * \param filename The name of the file to open.
-   * \param access How to access the file.
-   */
-  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
 
 public:
   /**
@@ -113,10 +84,26 @@ public:
   ~File();
 
   /** Close the file before the constructor is called. */
-  void close();
+  void close() override;
 
   /** Flush the file. */
-  void flush();
+  void flush(H5F_scope_t scope = H5F_SCOPE_LOCAL) const;
+
+  /**
+   * Return the root of the file as a group
+   */
+  H5::Group *getRoot();
+
+  /// @brief  Get the current location in the stack
+  /// @return A pointer to the location, as an H5Location object
+  H5::H5Location *getCurrentLocation();
+
+  /// @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
+  /// @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
+  /// @return A pointer to the current location, treated as a T*
+  template <typename T> T *getCurrentLocationAs();
+
+  bool verifyGroupClass(H5::Group const &, std::string const &) const;
 
   /**
    * Create a new group.
