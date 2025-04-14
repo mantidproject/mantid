@@ -8,9 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidNexus/H5Util.h"
-
+#include "test_helper.h"
 #include <H5Cpp.h>
 #include <boost/numeric/conversion/cast.hpp>
 #include <filesystem>
@@ -18,6 +17,7 @@
 
 using namespace H5;
 using namespace Mantid::NeXus;
+using namespace NexusTest;
 
 class H5UtilTest : public CxxTest::TestSuite {
 public:
