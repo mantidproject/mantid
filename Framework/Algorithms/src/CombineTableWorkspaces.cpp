@@ -79,7 +79,7 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   bool matchingColumnTypes = true;
   bool allColumnTypesAllowed = true;
 
-  for (auto i = 0; i < expectedCols; i++) {
+  for (int i = 0; i < static_cast<int>(expectedCols); i++) {
     if (lColNames[i] != rColNames[i]) {
       matchingColumnNames = false;
       break;
@@ -129,20 +129,20 @@ void CombineTableWorkspaces::exec() {
   // Copy the first workspace to our output workspace
   DataObjects::TableWorkspace_sptr outputWS = LHSWorkspace->clone();
   // Get hold of the peaks in the second workspace
-  const auto nRows = RHSWorkspace->rowCount();
-  const auto nCols = RHSWorkspace->columnCount();
+  const int nRows = static_cast<int>(RHSWorkspace->rowCount());
+  const int nCols = static_cast<int>(RHSWorkspace->columnCount());
 
   std::vector<std::string> colTypes = {};
-  for (auto i = 0; i < static_cast<int>(RHSWorkspace->columnCount()); i++) {
+  for (auto i = 0; i < nCols; i++) {
     colTypes.emplace_back(RHSWorkspace->getColumn(i)->type());
   }
 
   Progress progress(this, 0.0, 1.0, nRows);
 
-  for (std::size_t r = 0; r < nRows; r++) {
+  for (int r = 0; r < nRows; r++) {
     TableRow newRow = outputWS->appendRow();
     TableRow currentRow = RHSWorkspace->getRow(r);
-    for (std::size_t c = 0; c < nCols; c++) {
+    for (int c = 0; c < nCols; c++) {
       auto dType = colTypes[c];
       if (allowedColumnTypes.at(dType) == 0) {
         newRow << currentRow.Double(c);
@@ -152,7 +152,7 @@ void CombineTableWorkspaces::exec() {
         std::string val = currentRow.cell<std::string>(c);
         newRow << val;
       } else if (allowedColumnTypes.at(dType) == 3) {
-        bool val = currentRow.cell<Mantid::API::Boolean>(c);
+        Mantid::API::Boolean val = currentRow.cell<Mantid::API::Boolean>(c);
         newRow << val;
       } else if (allowedColumnTypes.at(dType) == 4) {
         std::size_t val = currentRow.cell<std::size_t>(c);
