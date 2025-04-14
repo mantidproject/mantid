@@ -2,7 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
-#include <map>
+#include <H5Cpp.h>
 #include <memory>
 #include <string>
 #include <utility>
@@ -291,7 +291,7 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
+  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression const comp,
                     DimSizeVector const &bufsize, bool open_data = false);
 
   /**
@@ -356,10 +356,10 @@ public:
   void putAttr(char const *name, char const *value);
 
   /**
-   * Put a string as an attribute in the file.
+   * Put the supplied string literal as an attribute into the currently open data.
    *
    * \param name Name of the attribute to add.
-   * \param value The attribute value.
+   * \param value A string literal.
    */
   void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
@@ -410,7 +410,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *data);
+  template <typename NumT> void getData(NumT *const data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
