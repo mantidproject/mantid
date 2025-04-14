@@ -227,7 +227,13 @@ class MantidORSODatasetTest(unittest.TestCase):
         creator_name = "Creator Name"
         creator_affiliation = "Creator Affiliation"
         dataset = MantidORSODataset(
-            dataset_name, self._data_columns, self._ws, reduction_timestamp, creator_name, creator_affiliation, is_polarized_dataset=False
+            dataset_name,
+            self._data_columns,
+            self._ws,
+            reduction_timestamp,
+            creator_name,
+            creator_affiliation,
+            enable_instrument_settings=False,
         )
 
         orso_dataset = dataset.dataset
@@ -363,7 +369,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
 
     def _create_test_dataset(self, polarized=False):
-        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", is_polarized_dataset=polarized)
+        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", enable_instrument_settings=polarized)
 
     def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
         """Check that the default header contains only the information that can be shared
