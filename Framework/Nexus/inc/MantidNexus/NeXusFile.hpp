@@ -8,10 +8,6 @@
 #include <utility>
 #include <vector>
 
-namespace {
-static const std::string NULL_STR("NULL");
-}
-
 /**
  * \file NeXusFile.hpp Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
@@ -20,8 +16,6 @@ static const std::string NULL_STR("NULL");
  */
 
 namespace NeXus {
-
-static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
 
 /**
  * The Object that allows access to the information in the file.
