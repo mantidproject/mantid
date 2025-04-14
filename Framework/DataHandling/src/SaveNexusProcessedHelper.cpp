@@ -97,8 +97,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
 
   else {
     if (fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size()) {
-      mode = NXACC_CREATEXML;
-      m_nexuscompression = ::NeXus::NONE;
+      // mode = NXACC_CREATEXML;
+      // m_nexuscompression = ::NeXus::NONE;
+      throw Exception::FileError("Cannot save XML files", fileName);
     }
     mantidEntryName = "mantid_workspace_1";
   }
