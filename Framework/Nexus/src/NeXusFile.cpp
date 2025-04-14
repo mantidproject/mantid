@@ -192,7 +192,7 @@ void File::makeGroup(std::string const &name, std::string const &class_name, boo
   }
 }
 
-void File::openGroup(const string &name, const string &class_name) {
+void File::openGroup(std::string const &name, std::string const &class_name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openGroup", m_filename);
   }
@@ -258,15 +258,15 @@ void File::makeData(const string &name, const NXnumtype type, const dimsize_t le
   this->makeData(name, type, DimVector({length}), open_data);
 }
 
-template <typename NumT> void File::writeData(const string &name, const NumT &value) {
+template <typename NumT> void File::writeData(std::string const &name, NumT const &value) {
   std::vector<NumT> v(1, value);
   this->writeData(name, v);
 }
 
-void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
+void File::writeData(std::string const &name, char const *value) { this->writeData(name, std::string(value)); }
 
-void File::writeData(const string &name, const string &value) {
-  string my_value(value);
+void File::writeData(std::string const &name, std::string const &value) {
+  std::string my_value(value);
   // Allow empty strings by defaulting to a space
   if (my_value.empty())
     my_value = " ";
@@ -278,24 +278,25 @@ void File::writeData(const string &name, const string &value) {
   this->closeData();
 }
 
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-  const DimVector dims(1, static_cast<dimsize_t>(value.size()));
+template <typename NumT> void File::writeData(std::string const &name, vector<NumT> const &value) {
+  DimVector dims(1, static_cast<dimsize_t>(value.size()));
   this->writeData(name, value, dims);
 }
 
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const DimVector &dims) {
+template <typename NumT>
+void File::writeData(std::string const &name, vector<NumT> const &value, DimVector const &dims) {
   this->makeData(name, getType<NumT>(), dims, true);
   this->putData(value);
   this->closeData();
 }
 
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> const &value) {
+template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> const &value) {
   // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
   writeExtendibleData(name, value, 4096);
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> const &value, const dimsize_t chunk) {
+void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, dimsize_t const chunk) {
   DimVector dims(1, NX_UNLIMITED);
   DimSizeVector chunk_dims(1, chunk);
   // Use chunking without using compression
@@ -305,7 +306,7 @@ void File::writeExtendibleData(const string &name, vector<NumT> const &value, co
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> const &value, DimVector const &dims,
+void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, DimVector const &dims,
                                DimSizeVector const &chunk) {
   // Create the data with unlimited 0th dimensions
   DimVector unlim_dims(dims);
@@ -325,15 +326,15 @@ template <typename NumT> void File::writeUpdatedData(std::string const &name, st
 }
 
 template <typename NumT>
-void File::writeUpdatedData(const std::string &name, std::vector<NumT> const &value, DimVector const &dims) {
+void File::writeUpdatedData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims) {
   this->openData(name);
   DimSizeVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
   this->closeData();
 }
 
-void File::makeCompData(const string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-                        const DimSizeVector &bufsize, bool open_data) {
+void File::makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression const comp,
+                        DimSizeVector const &bufsize, bool open_data) {
   // error check the parameters
   if (name.empty()) {
     throw Exception("Supplied empty name to makeCompData", m_filename);
@@ -393,11 +394,11 @@ template <typename NumT> void File::putData(NumT const *data) {
   NAPI_CALL(NXputdata(*(this->m_pfile_id), data), "NXputdata failed");
 }
 
-template <typename NumT> void File::putData(const vector<NumT> &data) {
+template <typename NumT> void File::putData(vector<NumT> const &data) {
   if (data.empty()) {
     throw Exception("Supplied empty data to putData", m_filename);
   }
-  this->putData(data.data());
+  this->putData<NumT>(data.data());
 }
 
 template <> MANTID_NEXUS_DLL void File::putData(std::string const *data) { this->putData(*data); }
@@ -441,18 +442,18 @@ void File::putAttr(const char *name, const char *value) {
   this->putAttr(s_name, s_value);
 }
 
-void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
-  string my_value(value);
+void File::putAttr(std::string const &name, std::string const &value, bool const empty_add_space) {
+  std::string my_value(value);
   if (my_value.empty() && empty_add_space)
     my_value = " "; // Make a default "space" to avoid errors.
-  AttrInfo info;
-  info.name = name;
-  info.length = static_cast<unsigned int>(my_value.size());
-  info.type = NXnumtype::CHAR;
-  this->putAttr(info, my_value.data());
+  this->putAttr<std::string>(name, my_value);
 }
 
-template <typename NumT> void File::putSlab(const NumT *data, const DimSizeVector &start, const DimSizeVector &size) {
+// this will handle string literals, which is the preferred way to pass string attributes
+void File::putAttr(std::string const &name, char const *const value) { putAttr(name, std::string(value)); }
+
+template <typename NumT>
+void File::putSlab(NumT const *const data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
     throw Exception("Data specified as null in putSlab", m_filename);
   }
@@ -507,7 +508,7 @@ bool File::isDataSetOpen() {
 
 void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
 
-template <typename NumT> void File::getData(NumT *data) {
+template <typename NumT> void File::getData(NumT *const data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData", m_filename);
   }
@@ -535,38 +536,7 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   this->getData<NumT>(data.data());
 }
 
-void File::getDataCoerce(vector<int> &data) {
-  Info info = this->getInfo();
-  if (info.type == NXnumtype::INT8) {
-    vector<int8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT8) {
-    vector<uint8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT16) {
-    vector<int16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT16) {
-    vector<uint16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT32) {
-    vector<int32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT32) {
-    vector<uint32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else {
-    throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.", m_filename);
-  }
-}
-
-void File::getDataCoerce(vector<double> &data) {
+template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
   Info info = this->getInfo();
   if (info.type == NXnumtype::INT8) {
     vector<int8_t> result;
@@ -639,31 +609,6 @@ bool File::isDataInt() {
   }
 }
 
-string File::getStrData() {
-  string res;
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-    throw Exception(msg.str(), m_filename);
-  }
-  if (info.dims.size() != 1) {
-    stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-    throw Exception(msg.str(), m_filename);
-  }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
-  try {
-    this->getData(value);
-  } catch (const Exception &) {
-    delete[] value;
-    throw; // rethrow the original exception
-  }
-  res = string(value, static_cast<size_t>(info.dims[0]));
-  delete[] value;
-  return res;
-}
-
 Info File::getInfo() {
   int64_t dims[NX_MAXRANK];
   NXnumtype type;
@@ -675,23 +620,6 @@ Info File::getInfo() {
     info.dims.push_back(dims[i]);
   }
   return info;
-}
-
-Entry File::getNextEntry() {
-  // set up temporary variables to get the information
-  NXname name, class_name;
-  NXnumtype datatype;
-
-  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, &datatype);
-  if (status == NXstatus::NX_OK) {
-    string str_name(name);
-    string str_class(class_name);
-    return Entry(str_name, str_class);
-  } else if (status == NXstatus::NX_EOD) {
-    return EOD_ENTRY;
-  } else {
-    throw Exception("NXgetnextentry failed", m_filename);
-  }
 }
 
 Entries File::getEntries() {
@@ -802,10 +730,10 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   }
 }
 
-template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
-  NumT value;
-  this->getAttr(info, &value);
-  return value;
+template <typename NumT> NumT File::getAttr(std::string const &name) {
+  NumT ret;
+  this->getAttr<NumT>(name, ret);
+  return ret;
 }
 
 template <typename NumT> NumT File::getAttr(std::string const &name) {
@@ -868,18 +796,9 @@ vector<AttrInfo> File::getAttrInfos() {
   return infos;
 }
 
-bool File::hasAttr(const std::string &name) {
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
-    }
-    if (temp.name == name)
-      return true;
-  }
-  return false;
+bool File::hasAttr(std::string const &name) {
+  auto *current = this->getCurrentLocationAs<H5::H5Object>();
+  return current->attrExists(name);
 }
 
 NXlink File::getGroupID() {
@@ -887,12 +806,6 @@ NXlink File::getGroupID() {
   NAPI_CALL(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
   return link;
 }
-
-void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(*(this->m_pfile_id)), "NXinitgroupdir failed"); }
-
-void File::initAttrDir() { NAPI_CALL(NXinitattrdir(*(this->m_pfile_id)), "NXinitattrdir failed"); }
-
-NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 
@@ -975,18 +888,6 @@ template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, int64_t co
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, char const &value);
 
-template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
-
 template MANTID_NEXUS_DLL int16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL uint16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL int32_t File::getAttr(std::string const &name);
@@ -1043,6 +944,7 @@ template MANTID_NEXUS_DLL void File::getData(int64_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint64_t *data);
 template MANTID_NEXUS_DLL void File::getData(char *data);
 template MANTID_NEXUS_DLL void File::getData(bool *data);
+template MANTID_NEXUS_DLL void File::getData(std::string *data);
 
 template MANTID_NEXUS_DLL void File::getData(vector<float> &data);
 template MANTID_NEXUS_DLL void File::getData(vector<double> &data);
@@ -1081,29 +983,6 @@ template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<u
 template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value);
 template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value);
 template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value);
-
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value,
-                                               DimVector const &dims);
-template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value,
-                                               DimVector const &dims);
 
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<float> &data);
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<double> &data);
@@ -1254,6 +1133,9 @@ template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vect
                                                    DimVector const &dims, NXcompression const comp,
                                                    DimSizeVector const &bufsize);
 
+template MANTID_NEXUS_DLL void File::getDataCoerce(vector<int> &data);
+template MANTID_NEXUS_DLL void File::getDataCoerce(vector<double> &data);
+
 // READ / WRITE DATA -- SLAB / EXTENDIBLE
 
 template MANTID_NEXUS_DLL void File::getSlab(float *data, const DimSizeVector &start, const DimSizeVector &size);
@@ -1308,24 +1190,3 @@ template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, c
                                              const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
                                              const DimSizeVector &size);
-
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<double> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
