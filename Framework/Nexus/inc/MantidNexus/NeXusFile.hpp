@@ -321,13 +321,6 @@ public:
   /**
    * Put the supplied data as an attribute into the currently open data.
    *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
@@ -387,7 +380,7 @@ public:
 
   /**
    * Create a link in the current location to the supplied id.
-   *
+   *s
    * \param link The object (group or data) in the file to link to.
    */
   void makeLink(NXlink &link);
@@ -409,20 +402,23 @@ public:
    */
   template <typename NumT> void getData(std::vector<NumT> &data);
 
-  /** Get data and coerce into an int vector.
+  /** Get data and coerce into a vector of type NumT.
    *
    * @throw Exception if the data is actually a float or
    *    another type that cannot be coerced to an int.
    * @param data :: vector to be filled.
    */
-  void getDataCoerce(std::vector<int> &data);
+  template <typename NumT> void getDataCoerce(std::vector<NumT> &data);
 
-  /** Get data and coerce into a vector of doubles.
+  /**
+   * Get a section of data from the file.
    *
-   * @throw Exception if the data cannot be coerced to a double.
-   * @param data :: vector to be filled.
+   * \param data The pointer to insert that data into.
+   * \param start The offset into the file's data block to start the read
+   * from.
+   * \param size The size of the block to read from the file.
    */
-  void getDataCoerce(std::vector<double> &data);
+  template <typename NumT> void getSlab(NumT *const data, DimSizeVector const &start, DimSizeVector const &size);
 
   /** Return true if the data opened is of one of the
    * int data types, 32 bits or less.
@@ -485,14 +481,15 @@ public:
   void getEntries(Entries &result);
 
   /**
-   * Get a section of data from the file.
-   *
-   * \param data The pointer to insert that data into.
-   * \param start The offset into the file's data block to start the read
-   * from.
-   * \param size The size of the block to read from the file.
+   * Return all entries in the file, with absolute paths.
    */
-  template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
+  void getEntryDirectory(Entries &result);
+
+  /** Return the string name of the top-level entry
+   *
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
 
   /**
    * \return Information about all attributes on the data that is currently open.
@@ -503,27 +500,7 @@ public:
    *  \return true if the current point in the file has the named attribute
    *  \param name the name of the attribute to look for.
    */
-  bool hasAttr(const std::string &name);
-
-  /**
-   * Get the value of the attribute specified by the AttrInfo supplied.
-   *
-   * \param info Designation of which attribute to read.
-   * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
-   */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
-
-  /**
-   * Get the value of an attribute that is a scalar number.
-   *
-   * \param info Designation of which attribute to read.
-   * \tparam NumT numeric data type of result
-   *
-   * \return The attribute value.
-   */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
+  bool hasAttr(std::string const &name);
 
   template <typename NumT> NumT getAttr(std::string const &name);
 
@@ -537,13 +514,13 @@ public:
   template <typename NumT> void getAttr(std::string const &name, NumT &value);
 
   /**
-   * Get the value of a string attribute.
+   * Get the value of an attribute that is a scalar number.
    *
-   * \param info Which attribute to read.
-   *
-   * \return The value of the attribute.
+   * \param[in] name Name of attribute to read
+   * \return The read attribute value
+   * \tparam NumT numeric data type of \a value
    */
-  std::string getStrAttr(const AttrInfo &info);
+  template <typename NumT> NumT getAttr(std::string const &name);
 
   /**
    * \return The id of the group used for linking.
