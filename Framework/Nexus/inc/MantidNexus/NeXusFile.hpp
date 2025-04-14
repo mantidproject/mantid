@@ -2,7 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
-#include <map>
+#include <H5Cpp.h>
 #include <memory>
 #include <string>
 #include <utility>
@@ -71,7 +71,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const std::string &filename, const NXaccess access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXACC_READ);
 
   /**
    * Create a new File.
@@ -79,7 +79,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const char *filename, const NXaccess access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXACC_READ);
 
   /**
    * Copy constructor
@@ -291,7 +291,7 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
+  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression const comp,
                     DimSizeVector const &bufsize, bool open_data = false);
 
   /**
@@ -356,10 +356,10 @@ public:
   void putAttr(char const *name, char const *value);
 
   /**
-   * Put a string as an attribute in the file.
+   * Put the supplied string literal as an attribute into the currently open data.
    *
    * \param name Name of the attribute to add.
-   * \param value The attribute value.
+   * \param value A string literal.
    */
   void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
@@ -410,7 +410,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *data);
+  template <typename NumT> void getData(NumT *const data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -452,7 +452,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, std::vector<NumT> &data);
+  template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -462,7 +462,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, NumT &data);
+  template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -473,7 +473,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  void readData(const std::string &dataName, std::string &data);
+  void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.
