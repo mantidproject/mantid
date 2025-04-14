@@ -19,7 +19,7 @@ The algorithm supports selection of which spectra from the input are included in
 a threshold on the peak position and on the chi squared value. If a reflection is specified, the algorithm will
 check that the fit ``X0`` value in the peak parameter table is within ``PeakThreshold`` of the d spacing value
 for the specified peak (Note: as such, specifying a reflection requires a
-:ref:`Crystal Structure be set<algm-SetCrystalStructure>` on the Input Workspace). If a chi squared threshold is
+:ref:`Crystal Structure concept page <Crystal structure and reflections>` be set on the Input Workspace). If a chi squared threshold is
 specified, only spectra with a fit ``chi2`` value in the peak parameter table will be included in the output table.
 
 
