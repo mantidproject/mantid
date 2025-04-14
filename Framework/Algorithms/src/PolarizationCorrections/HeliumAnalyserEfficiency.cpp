@@ -12,10 +12,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/Unit.h"
 
 #include <algorithm>

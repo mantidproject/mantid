@@ -1,0 +1,1 @@
+- Add <side-by-side-view-location> elements to the detector banks in ``SNAP_Definition.xml``

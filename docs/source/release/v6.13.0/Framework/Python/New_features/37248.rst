@@ -1,0 +1,6 @@
+- Makes the large offline documentation optional rather than a mandatory install, reducing installer/download size significantly.
+- Improvements:
+    - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space (potentially hundreds of MB).
+    - Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access.
+- Key benefits:
+    - Greater flexibility in how Mantid is set up — you choose whether to save space or have fully locally built docs.

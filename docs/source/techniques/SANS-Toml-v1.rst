@@ -16,6 +16,42 @@ General Notes
 Format Changes
 ==============
 
+V1 (Mantid 6.4+) to V2 (Mantid 6.13+)
+-------------------------------------
+**NOTE: These are valid user file entries but have not yet been implemented as part of the reduction process.**
+
+*polarization* options have been added to the TOML format.
+
+- *flipper_configuration*
+- *spin_configuration*
+- *polarization.flipper.NAME*
+
+  - *idf_component_name*
+  - *device_name*
+  - *location*
+
+    - *x*, *y*, and *z*
+
+  - *transmission*
+  - *efficiency*
+
+- *polarization.polarizer* and *polarization.analyzer*
+
+  - All fields from the flippers plus:
+  - *cell_length*
+  - *gas_pressure*
+  - *empty_cell*
+  - *initial_polarization*
+
+- *polarization.magnetic_field* and *polarization.electric_field*
+
+  - *sample_strength_log*
+  - *sample_direction*
+
+    - *a*, *p*, and *d*
+
+  - *sample_direction_log*
+
 V0 (Mantid 6.3+) to V1 (Mantid 6.4+)
 --------------------------------------
 
@@ -50,6 +86,7 @@ file version. Long-term this allows us to make changes in a backwards compatible
 Available TOML Versions:
 
 - 1
+- 2
 
 ..  code-block:: none
 

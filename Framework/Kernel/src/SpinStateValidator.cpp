@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
-#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidKernel/SpinStateValidator.h"
+
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid::Algorithms {
+namespace Mantid::Kernel {
 
 SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
                                        const char paraIndicator, const char antiIndicator, const bool optional)
@@ -32,7 +33,7 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   const auto &allowedPairs = getAllowedPairStates();
   const auto &allowedSingles = getAllowedSingleStates();
 
-  std::vector<std::string> spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(input);
+  auto spinStates = StringTokenizer{input, ",", StringTokenizer::TOK_TRIM}.asVector();
 
   int numberSpinStates = static_cast<int>(spinStates.size());
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())
@@ -81,4 +82,4 @@ const std::unordered_set<std::string> SpinStateValidator::getAllowedPairStates()
 
 const std::unordered_set<std::string> SpinStateValidator::getAllowedSingleStates() const { return {m_para, m_anti}; }
 
-} // namespace Mantid::Algorithms
+} // namespace Mantid::Kernel

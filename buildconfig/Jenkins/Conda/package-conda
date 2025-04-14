@@ -82,9 +82,9 @@ done
 
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "package-conda" true
-# CMake FindPython doesn't work correctly with conda 25.3.0
-mamba install --yes boa conda-verify versioningit conda=25.1.1
+setup_mamba $WORKSPACE/mambaforge "" true
+mamba activate base
+mamba install --yes boa conda-verify versioningit
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE

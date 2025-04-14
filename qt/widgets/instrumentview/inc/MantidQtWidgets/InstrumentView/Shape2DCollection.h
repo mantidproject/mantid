@@ -150,7 +150,7 @@ protected:
   void removeFromSelection(Shape2D *shape);
   void edit(Shape2D *shape);
   void finishEdit();
-  QList<Shape2D *> getSelectedShapes() const { return m_selectedShapes; }
+  const QList<Shape2D *> &getSelectedShapes() const { return m_selectedShapes; }
 
   QList<Shape2D *> m_shapes;
   mutable RectF m_surfaceRect; ///< original surface window in "real" coordinates

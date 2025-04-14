@@ -17,7 +17,7 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum, double maximum,
+Python::Object newMarker(const FigureCanvasQt *canvas, QString const &colour, double minimum, double maximum,
                          QString const &rangeType, std::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
@@ -42,7 +42,7 @@ namespace MantidQt::Widgets::MplCpp {
  * @param minimum The coordinate of the minimum marker
  * @param maximum The coordinate of the maximum marker
  */
-RangeMarker::RangeMarker(FigureCanvasQt *canvas, QString const &color, double minimum, double maximum,
+RangeMarker::RangeMarker(const FigureCanvasQt *canvas, QString const &color, double minimum, double maximum,
                          QString const &rangeType, QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(newMarker(canvas, color, minimum, maximum, rangeType, otherKwargs)) {}
 

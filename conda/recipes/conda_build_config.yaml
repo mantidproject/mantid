@@ -27,7 +27,7 @@ libboost_python_devel:
   - 1.84 # Aim to follow conda-forge
 
 cmake:
-  - '>=3.21.0'
+  - '>=3.21.0,<4'
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
@@ -125,6 +125,11 @@ qscintilla2:
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
   - '>=2.4,!=2.4.2'
+
+# We must pin this because it is known to be particularly unstable (especially in system tests).
+# 0.3.0 is the first version that supports Python > 3.10.
+quasielasticbayes:
+  - 0.3.0
 
 tbb:
   - 2021

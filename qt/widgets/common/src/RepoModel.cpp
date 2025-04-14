@@ -213,7 +213,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
   using namespace Mantid::API;
   if (!index.isValid())
     return QVariant();
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   try {
     const QString &path = item->path();
     Mantid::API::ScriptInfo inf;

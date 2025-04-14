@@ -25,6 +25,7 @@ requirements:
     - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
+    - lz4  # [linux]
     - matplotlib {{ matplotlib }}
     - muparser {{ muparser }}
     - ninja {{ ninja }}
@@ -37,6 +38,7 @@ requirements:
     - pydantic {{ pydantic }}
     - pyqt {{ pyqt }}
     - pyqtwebengine
+    - pystack # [linux]
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
@@ -46,7 +48,7 @@ requirements:
     - qtconsole {{ qtconsole }}
     - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
-    - quasielasticbayes
+    - quasielasticbayes {{ quasielasticbayes }}
     - requests>=2.25.1
     - scipy {{ scipy }}
     - setuptools
