@@ -19,7 +19,6 @@
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
-using namespace Mantid::DataHandling;
 using Mantid::Algorithms::CombineTableWorkspaces;
 using Mantid::API::TableRow;
 using Mantid::DataObjects::TableWorkspace;
@@ -41,7 +40,7 @@ TableWorkspace_sptr createSingleTypeTableWorkspace(std::string &dataType, const 
   }
   for (int row = 0; row < rowCount; ++row) {
     TableRow newRow = table->appendRow();
-    for (int col = 0; col < names.size(); col++) {
+    for (int col = 0; col < static_cast<int>(names.size()); col++) {
       newRow << defaultVal;
     }
   }
