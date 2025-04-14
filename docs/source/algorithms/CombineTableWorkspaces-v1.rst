@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm can be used to combine a pair of :ref:`Table Workspaces <TableWorkspace>`
+This algorithm can be used to combine a pair of :ref:`Table Workspaces <Table Workspaces>`
 into a single table. The current algorithm is very lightweight and is intended for situations
 where multiple tables are produced by the same processing pipeline, but ultimately the output
 of all the generated data in a single table would suffice. As such, the algorithm requires that
