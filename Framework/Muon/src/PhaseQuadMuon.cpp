@@ -272,12 +272,11 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
 
   std::vector<double> aj(nspec), bj(nspec);
   for (size_t h = 0; h < nspec; h++) {
-  aj[h] = bj[h] = 0;
+    aj[h] = bj[h] = 0;
     if (!emptySpectrum[h]) {
       const auto factors = muLamMatrix * n0Vectors[h];
       aj[h] = factors[0];
       bj[h] = factors[1];
-
     }
   }
 
