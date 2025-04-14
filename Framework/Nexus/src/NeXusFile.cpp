@@ -47,6 +47,132 @@ template <typename NumT> static std::string toString(vector<NumT> const &data) {
   result << "]";
   return result.str();
 }
+
+template <typename T> static DimArray toDimArray(vector<T> const &small_v) {
+  DimArray ret;
+  size_t i = 0;
+  // fill in all values from vector
+  for (; i < small_v.size(); i++) {
+    ret.at(i) = static_cast<hsize_t>(small_v[i]);
+  }
+  // pad rest with zero
+  for (; i < ret.size(); i++) {
+    ret.at(i) = 0;
+  }
+  return ret;
+}
+
+static H5::FileAccPropList defaultFileAcc() {
+  H5::FileAccPropList access_plist;
+  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
+  return access_plist;
+}
+
+static std::map<int, void const *> const nxToHDF5Map{
+    std::pair<int, void const *>(NXnumtype::CHAR, &H5::PredType::NATIVE_CHAR),
+    std::pair<int, void const *>(NXnumtype::INT8, &H5::PredType::NATIVE_SCHAR),
+    std::pair<int, void const *>(NXnumtype::UINT8, &H5::PredType::NATIVE_UCHAR),
+    std::pair<int, void const *>(NXnumtype::INT16, &H5::PredType::NATIVE_INT16),
+    std::pair<int, void const *>(NXnumtype::UINT16, &H5::PredType::NATIVE_UINT16),
+    std::pair<int, void const *>(NXnumtype::INT32, &H5::PredType::NATIVE_INT32),
+    std::pair<int, void const *>(NXnumtype::UINT32, &H5::PredType::NATIVE_UINT32),
+    std::pair<int, void const *>(NXnumtype::INT64, &H5::PredType::NATIVE_INT64),
+    std::pair<int, void const *>(NXnumtype::UINT64, &H5::PredType::NATIVE_UINT64),
+    std::pair<int, void const *>(NXnumtype::FLOAT32, &H5::PredType::NATIVE_FLOAT),
+    std::pair<int, void const *>(NXnumtype::FLOAT64, &H5::PredType::NATIVE_DOUBLE),
+    std::pair<int, void const *>(NXnumtype::BOOLEAN, &H5::PredType::NATIVE_HBOOL)};
+
+static H5::DataType nxToHDF5Type(NXnumtype const &datatype) {
+  H5::DataType type;
+  if (nxToHDF5Map.contains(datatype)) {
+    type = *static_cast<H5::PredType const *>(nxToHDF5Map.at(datatype));
+  } else {
+    type = H5::PredType::NATIVE_HERR;
+  }
+  return type;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: hdf5ToNXType
+ *
+ * Purpose:	Convert a HDF5 class to a NeXus type;  it handles the following HDF5 classes
+ *  H5T_STRING
+ *  H5T_INTEGER
+ *  H5T_FLOAT
+ *
+ * Return: the NeXus type
+ *
+ *-------------------------------------------------------------------------
+ */
+static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
+  NXnumtype iPtype = NXnumtype::BAD;
+
+  if (dt == H5::PredType::NATIVE_CHAR) {
+    iPtype = NXnumtype::CHAR;
+  } else {
+    // if the type is one of the predefined datatypes used by us, just get it
+    auto findit = std::find_if(nxToHDF5Map.begin(), nxToHDF5Map.end(), [dt](auto const &x) -> bool {
+      return *static_cast<H5::DataType const *>(x.second) == dt;
+    });
+
+    if (findit != nxToHDF5Map.end()) {
+      iPtype = findit->first;
+    } else {
+      // if it's not a usual type, try to deduce the type from the datatype object
+      auto tclass = dt.getClass();
+      if (tclass == H5T_STRING) {
+        iPtype = NXnumtype::CHAR;
+      } else if (tclass == H5T_INTEGER) {
+        size_t size = dt.getSize();
+        H5T_sign_t sign = H5T_SGN_2;
+        // NOTE H5Cpp only defines the getSign method for IntType objects
+        // Can cause segfault if used on any other object.  Therefore we
+        // have to default to assuming signed int and only go to unsigned
+        // if we are able to deduce otherwise
+        H5::IntType const *it = dynamic_cast<H5::IntType const *>(&dt);
+        if (it != nullptr) {
+          sign = it->getSign();
+        }
+        // signed integers
+        if (sign == H5T_SGN_2) { // NOTE: the "2" means 2's-complement
+          if (size == 1) {
+            iPtype = NXnumtype::INT8;
+          } else if (size == 2) {
+            iPtype = NXnumtype::INT16;
+          } else if (size == 4) {
+            iPtype = NXnumtype::INT32;
+          } else if (size == 8) {
+            iPtype = NXnumtype::INT64;
+          }
+        }
+        // unsigned integers
+        else {
+          if (size == 1) {
+            iPtype = NXnumtype::UINT8;
+          } else if (size == 2) {
+            iPtype = NXnumtype::UINT16;
+          } else if (size == 4) {
+            iPtype = NXnumtype::UINT32;
+          } else if (size == 8) {
+            iPtype = NXnumtype::UINT64;
+          }
+        }
+      } else if (tclass == H5T_FLOAT) {
+        size_t size = dt.getSize();
+        if (size == 4) {
+          iPtype = NXnumtype::FLOAT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::FLOAT64;
+        }
+      }
+    }
+    if (iPtype == NXnumtype::BAD) {
+      throw Exception("ERROR: hdf5ToNXtype: invalid type");
+    }
+  }
+  return iPtype;
+}
+
 } // end of anonymous namespace
 
 namespace NeXus {
@@ -491,22 +617,44 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 }
 
 NXlink File::getDataID() {
+  // make sure current location is a dataset
+  auto *current = this->getCurrentLocationAs<H5::DataSet>();
+
+  /*
+    this means: if the item is already linked: use the target attribute;
+    else, use the path to the current node
+  */
   NXlink link;
-  NAPI_CALL(NXgetdataID(*(this->m_pfile_id), &link), "NXgetdataID failed");
+  try {
+    link.targetPath = this->getAttr<std::string>(target_attr_name);
+  } catch (Exception &) {
+    link.targetPath = current->getObjName();
+  }
+  link.linkType = NXentrytype::sds;
   return link;
 }
 
 bool File::isDataSetOpen() {
-  NXlink id;
-  if (NXgetdataID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
-    return false;
-  } else {
-    return true;
-  }
+  H5::DataSet *current = dynamic_cast<H5::DataSet *>(m_stack.back());
+  return current != nullptr;
 }
 /*----------------------------------------------------------------------*/
 
-void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
+void File::makeLink(NXlink &link) {
+  // construct a path to the target
+  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::filesystem::path linkTarget = std::string(current->getObjName());
+  linkTarget /= std::filesystem::path(link.targetPath).stem();
+
+  // create link
+  current->link(link.targetPath, H5L_SAME_LOC, linkTarget);
+
+  // set a target attribute on the target
+  std::string here = this->getPath();
+  this->openPath(linkTarget);
+  this->putAttr(target_attr_name, link.targetPath);
+  this->openPath(here);
+}
 
 template <typename NumT> void File::getData(NumT *const data) {
   if (data == NULL) {
@@ -802,8 +950,20 @@ bool File::hasAttr(std::string const &name) {
 }
 
 NXlink File::getGroupID() {
+  // make sure current location is a group
+  auto *current = this->getCurrentLocationAs<H5::Group>();
+
+  /*
+    this means: if the item is already linked: use the target attribute;
+    else, use the path to the current node
+  */
   NXlink link;
-  NAPI_CALL(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
+  if (current->attrExists(target_attr_name)) {
+    link.targetPath = this->getAttr<std::string>(target_attr_name);
+  } else {
+    link.targetPath = current->getObjName();
+  }
+  link.linkType = NXentrytype::group;
   return link;
 }
 
