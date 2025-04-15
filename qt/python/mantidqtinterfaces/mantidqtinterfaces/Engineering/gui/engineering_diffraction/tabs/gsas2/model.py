@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import datetime
-import fnmatch
 import json
 import os
 import platform
@@ -32,6 +31,13 @@ from mantid.simpleapi import (
     logger,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.gsas2_handler import (
+    GSAS2Handler,
+    SaveDirectories,
+    RefinementSettings,
+    FilePaths,
+    GSAS2Config,
+)
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
     SampleLogsGroupWorkspace,
     _generate_workspace_name,
@@ -42,49 +48,54 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.work
 
 
 @dataclass
-class SaveDirectories:
-    temporary_save_directory: str
-    project_name: str
+class GSAS2ModelConfig:
+    """
+    Configuration dataclass for the GSAS-II model, including limits and timeout settings.
 
+    Attributes:
+        limits: A list of limits for the configuration.
+        mantid_pawley_reflections: A nested list containing Mantid Pawley reflections data.
+        override_cell_lengths: A list of cell length overrides.
+        d_spacing_min: The minimum d-spacing value.
+        number_of_regions: The number of regions to configure.
+        timeout: Maximum time (in seconds) to wait for GSAS-II subprocesses.
+    """
 
-@dataclass
-class RefinementSettings:
-    method: str
-    background: bool
-    microstrain: bool
-    sigma_one: bool
-    gamma: bool
-    histogram_scale_factor: bool
-    unit_cell: bool
-
-
-@dataclass
-class FilePaths:
-    data_files: List[str]
-    phase_files: List[str]
-    instrument_files: List[str]
-
-
-@dataclass
-class GSAS2Config:
+    path_to_gsas2: str = ""
+    gsas2_save_dirs: Optional[List[str]] = None
     limits: Optional[List[List[float]]] = field(default_factory=list)
     mantid_pawley_reflections: Optional[List[List[List[Union[float, int]]]]] = None
     override_cell_lengths: Optional[List[List[float]]] = None
     d_spacing_min: float = 1.0
     number_of_regions: int = 1
-
-
-@dataclass
-class GSAS2ModelConfig:
-    path_to_gsas2: str = ""
-    project_name: Optional[str] = None
-    temporary_save_directory: str = ""
-    gsas2_save_dirs: Optional[List[str]] = None
     timeout: int = 10
 
 
 @dataclass
 class GSAS2ModelState:
+    """
+    Represents the state of the GSAS-II model for engineering diffraction.
+
+    Attributes:
+        data_files: Paths to data files.
+        instrument_files: Paths to instrument files.
+        phase_filepaths: File paths for phase information.
+        x_min: Minimum x-values for data regions.
+        x_max: Maximum x-values for data regions.
+        data_x_min: Minimum x-values for the data.
+        data_x_max: Maximum x-values for the data.
+        number_of_regions: Number of regions in the model.
+        number_histograms: Number of histograms in the model.
+        limits: Limits for each region as [min, max] pairs.
+        override_cell_length_string: String to override cell length values.
+        mantid_pawley_reflections: Pawley reflections data.
+        crystal_structures: List of crystal structure objects.
+        chosen_cell_lengths: Chosen cell lengths for the phases.
+        out_call_gsas2: Standard output from a GSAS-II call.
+        err_call_gsas2: Standard error from a GSAS-II call.
+        phase_names_list: List of phase names.
+    """
+
     data_files: List[str] = field(default_factory=list)
     instrument_files: List[str] = field(default_factory=list)
     phase_filepaths: List[str] = field(default_factory=list)
@@ -104,194 +115,6 @@ class GSAS2ModelState:
     phase_names_list: List[str] = field(default_factory=list)
 
 
-class GSAS2Handler(object):
-    """
-    A class that encapsulates logic for managing GSAS-II input parameters, paths, and configurations.
-
-    This class is responsible for:
-    - Validating and organizing input parameters required for GSAS-II refinements.
-    - Locating and configuring the GSAS-II Python executable and associated binaries.
-    - Serializing input parameters into a JSON format for use with GSAS-II scripts.
-    - Providing utility methods for searching files and directories within the GSAS-II installation.
-
-    Attributes:
-        - path_to_gsas2: Path to the GSAS-II installation directory.
-        - save_directories: Directories for temporary and project-specific saves.
-        - refinement_settings: Refinement options such as method and parameters.
-        - file_paths: Paths to data, phase, and instrument files.
-        - limits: X-axis limits for the refinement.
-        - mantid_pawley_reflections: Pawley reflections data.
-        - override_cell_lengths: User-specified lattice parameters.
-        - d_spacing_min: Minimum d-spacing value for reflections.
-        - number_of_regions: Number of regions in the refinement.
-        - os_platform: Operating system platform (e.g., "Windows", "Linux").
-        - python_binaries: Paths to additional binaries required for GSAS-II.
-
-    Methods:
-        - validate_inputs: Validates input parameters to ensure they meet expected criteria.
-        - gsasii_scriptable_path: Finds the path to the GSASIIscriptable.py file.
-        - to_json: Serializes input parameters into a JSON string.
-        - set_gsas2_python_path: Configures the path to the GSAS-II Python executable.
-        - set_binaries: Locates and sets additional binary paths required for GSAS-II.
-        - limited_rglob: Recursively searches for files or directories matching a pattern up to a specified depth.
-        - gsas2_python_path: Returns the path to the GSAS-II Python executable.
-
-    Raises:
-        - ValueError: If required parameters are missing or invalid.
-        - FileNotFoundError: If required files or directories are not found.
-    """
-
-    def __init__(
-        self,
-        path_to_gsas2: Union[str, Path],
-        save_directories: SaveDirectories,
-        refinement_settings: RefinementSettings,
-        file_paths: FilePaths,
-        config: GSAS2Config,
-    ):
-        # Ensure path_to_gsas2 is always a valid Path object
-        if not path_to_gsas2 or not str(path_to_gsas2).strip():
-            raise ValueError("path_to_gsas2 must be provided and cannot be None or empty.")
-        self.path_to_gsas2 = Path(path_to_gsas2).resolve()
-        if not self.path_to_gsas2.exists() or not self.path_to_gsas2.is_dir():
-            raise ValueError(f"Invalid path_to_gsas2: {self.path_to_gsas2} must be a valid directory.")
-
-        # Store grouped parameters
-        self.save_directories = save_directories
-        self.refinement_settings = refinement_settings
-        self.file_paths = file_paths
-        self.config = config
-
-        # GSAS-II configuration
-        self._gsas2_python_path: Optional[Path] = None
-        self.os_platform: Optional[str] = None
-        self.python_binaries: List[str] = []
-
-        # Validate inputs
-        self.validate_inputs()
-
-    def validate_inputs(self) -> None:
-        """
-        Validates the input parameters to ensure they meet the expected criteria.
-        Raises a ValueError if any parameter is invalid.
-        """
-        for attr, name in [
-            (self.file_paths.data_files, "data_files"),
-            (self.file_paths.phase_files, "phase_files"),
-            (self.file_paths.instrument_files, "instrument_files"),
-        ]:
-            if not attr:
-                raise ValueError(f"Invalid {name}: must be a non-empty list.")
-
-    @property
-    def gsas2_python_path(self) -> Path:
-        """
-        Returns the path to the GSAS-II Python executable.
-        Raises an error if the path has not been set.
-        """
-        if self._gsas2_python_path:
-            return self._gsas2_python_path
-        raise ValueError("GSAS-II Python path has not been set. Call set_gsas2_python_path() first.")
-
-    @property
-    def gsasii_scriptable_path(self) -> Path:
-        """
-        Finds the path to the GSASIIscriptable.py file within the GSAS-II directory.
-
-        Returns:
-            Path: The absolute path to GSASIIscriptable.py.
-
-        Raises:
-            FileNotFoundError: If GSASIIscriptable.py is not found.
-        """
-        scriptable_path = next(
-            self.limited_rglob(self.path_to_gsas2, "GSASIIscriptable.py", max_depth=3),
-            None,
-        )
-        if not scriptable_path:
-            raise FileNotFoundError(f"GSASIIscriptable.py could not be found in the specified GSAS-II path: {self.path_to_gsas2}")
-        return scriptable_path
-
-    def set_gsas2_python_path(self) -> None:
-        """
-        Sets the path to the Python executable for GSAS-II based on the operating system.
-
-        Raises:
-            FileNotFoundError: If the Python executable is not found in the specified GSAS-II path.
-        """
-        if self.os_platform == "Windows":
-            python_executable = "python.exe"
-        else:
-            python_executable = "python"
-
-        # Search for the Python executable in the GSAS-II directory
-        python_path = next(
-            self.limited_rglob(self.path_to_gsas2, python_executable, max_depth=2),
-            None,
-        )
-
-        if not python_path:
-            raise FileNotFoundError(f"{python_executable} not found in the specified GSAS-II path: {self.path_to_gsas2}")
-
-        self._gsas2_python_path = python_path
-
-    def set_binaries(self) -> None:
-        """
-        Finds and sets additional binary paths required for GSAS-II.
-        """
-        if self.os_platform == "Windows":
-            # On Windows, search for binaries in specific subdirectories
-            extra_paths = [os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2, "*", max_depth=1, search_for_file=False)]
-            extra_paths.extend(
-                os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2 / "Library", "*", max_depth=2, search_for_file=False)
-            )
-        else:
-            # On Linux/macOS, search for binaries in the "bin" directory
-            extra_paths = [os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2, "bin", max_depth=1, search_for_file=False)]
-
-        self.python_binaries = extra_paths
-
-    def limited_rglob(self, directory: Path, pattern: str, max_depth: int, search_for_file: bool = True):
-        """
-        Recursively search for files or directories matching the pattern in the directory up to a specified depth.
-
-        Args:
-            directory (Path): The root directory to start the search.
-            pattern (str): The pattern to match files or directories.
-            max_depth (int): The maximum depth to search.
-            search_for_file (bool): If True, search for files; if False, search for directories.
-        """
-        if not directory.is_dir():
-            raise FileNotFoundError(f"The provided directory path '{directory}' is not a valid directory.")
-        for root, dirs, files in os.walk(directory):
-            current_depth = len(Path(root).parts) - len(directory.parts)
-            if current_depth > max_depth:
-                dirs[:] = []
-            if current_depth <= max_depth:
-                for file in files if search_for_file else dirs:
-                    if fnmatch.fnmatch(file, pattern):
-                        yield Path(root) / file
-
-    def to_json(self) -> str:
-        """
-        Converts the input parameters to a JSON string, including the GSASIIscriptable.py path.
-        """
-        inputs_dict = {
-            "path_to_gsas2": str(self.path_to_gsas2),
-            "temporary_save_directory": self.save_directories.temporary_save_directory,
-            "project_name": self.save_directories.project_name,
-            "refinement_settings": self.refinement_settings.__dict__,
-            "file_paths": self.file_paths.__dict__,
-            "limits": self.config.limits,  # Access from GSAS2Config
-            "mantid_pawley_reflections": self.config.mantid_pawley_reflections,  # Access from GSAS2Config
-            "override_cell_lengths": self.config.override_cell_lengths,  # Access from GSAS2Config
-            "d_spacing_min": self.config.d_spacing_min,  # Access from GSAS2Config
-            "number_of_regions": self.config.number_of_regions,  # Access from GSAS2Config
-            "gsasii_scriptable_path": str(self.gsasii_scriptable_path),  # Add the path to GSASIIscriptable.py
-        }
-        return json.dumps(inputs_dict, separators=(",", ":"))
-
-
 class GSAS2Model:
     """
     GSAS2Model is a class that provides an interface for managing and executing GSAS-II refinements.
@@ -303,8 +126,10 @@ class GSAS2Model:
     ReflectionType: TypeAlias = Tuple[List[int], float, int]
 
     def __init__(self) -> None:
+        # Configuration and State
         self.config = GSAS2ModelConfig()
         self.state = GSAS2ModelState()
+        self.save_directories = SaveDirectories(temporary_save_directory="", project_name="")
 
         # Refinement settings
         self.refinement_method: str = "Pawley"
@@ -323,7 +148,6 @@ class GSAS2Model:
         self.phase_names_list: List[str] = []
         self.gsas2_save_dirs: List[str] = []
         self.crystal_structures: List[CrystalStructure] = []
-        self.temporary_save_directory = ""
         self.user_save_directory: Optional[str] = None
 
     def clear_input_components(self) -> None:
@@ -396,7 +220,7 @@ class GSAS2Model:
 
     def set_components_from_inputs(self, load_params: list, refinement_params: list, project: str, rb_number: Optional[str] = None) -> None:
         self.path_to_gsas2 = output_settings.get_path_to_gsas2()
-        self.project_name = project
+        self.save_directories.project_name = project
         self.organize_save_directories(rb_number)
 
         self.instrument_files = load_params[0]
@@ -465,15 +289,15 @@ class GSAS2Model:
     def _validate_required_attributes(self) -> None:
         if not self.path_to_gsas2.strip():
             raise ValueError("Path to GSAS-II is not set. Please provide a valid path.")
-        if not self.project_name:
+        if not self.save_directories.project_name:
             raise ValueError("Project name is not set. Please provide a valid project name.")
 
     def _create_save_directories(self) -> SaveDirectories:
-        if not self.project_name:
+        if not self.save_directories.project_name:
             raise ValueError("Project name is not set. Please provide a valid project name.")
         return SaveDirectories(
-            temporary_save_directory=self.temporary_save_directory,
-            project_name=self.project_name,
+            temporary_save_directory=self.save_directories.temporary_save_directory,
+            project_name=self.save_directories.project_name,
         )
 
     def _create_refinement_settings(self) -> RefinementSettings:
@@ -684,7 +508,7 @@ class GSAS2Model:
         if self.override_cell_length_string:
             return [self._get_lattice_parameters_from_crystal_structure(xtal) for xtal in self.crystal_structures]
         else:
-            None
+            return None
 
     def _get_lattice_parameters_from_crystal_structure(self, crystal_structure: CrystalStructure) -> List[float]:
         return [getattr(crystal_structure.getUnitCell(), method)() for method in ("a", "b", "c", "alpha", "beta", "gamma")]
@@ -819,8 +643,8 @@ class GSAS2Model:
         return gsas_result_filepath, logged_success  # Always return a tuple
 
     def check_for_output_file(self, file_extension: str, file_descriptor: str, test: bool = False) -> Optional[Union[str, None]]:
-        gsas_output_filename = self.project_name + file_extension
-        if gsas_output_filename not in os.listdir(self.temporary_save_directory):
+        gsas_output_filename = self.save_directories.project_name + file_extension
+        if gsas_output_filename not in os.listdir(self.save_directories.temporary_save_directory):
             logged_failure = (
                 f"GSAS-II call must have failed, as the output {file_descriptor} file was not found."
                 + self.format_shell_output(title="Errors from GSAS-II", shell_output_string=self.state.err_call_gsas2 or "")
@@ -829,22 +653,22 @@ class GSAS2Model:
             if test:
                 return logged_failure
             return None
-        return os.path.join(self.temporary_save_directory, gsas_output_filename)
+        return os.path.join(self.save_directories.temporary_save_directory, gsas_output_filename)
 
     def organize_save_directories(self, rb_num_string: Optional[str]) -> None:
         save_dir: str = os.path.join(output_settings.get_output_path())
         self.gsas2_save_dirs = [os.path.join(save_dir, "GSAS2", "")]
         save_directory: str = self.gsas2_save_dirs[0]
         if rb_num_string:
-            self.gsas2_save_dirs.append(os.path.join(save_dir, "User", rb_num_string, "GSAS2", self.project_name, ""))
+            self.gsas2_save_dirs.append(os.path.join(save_dir, "User", rb_num_string, "GSAS2", self.save_directories.project_name, ""))
             # TODO: Once texture is supported, pass calibration observer like currently done for focus tab
             # if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
             #     calib_dirs.pop(0)  # only save to RB directory to limit number files saved
-        self.user_save_directory = os.path.join(save_directory, self.project_name)
-        self.temporary_save_directory: str = os.path.join(
+        self.user_save_directory = os.path.join(save_directory, self.save_directories.project_name)
+        self.save_directories.temporary_save_directory = os.path.join(
             save_directory, datetime.datetime.now().strftime("tmp_EngDiff_GSASII_%Y-%m-%d_%H-%M-%S")
         )
-        os.makedirs(self.temporary_save_directory)
+        os.makedirs(self.save_directories.temporary_save_directory)
 
     def move_output_files_to_user_save_location(self) -> str:
         for new_directory in self.gsas2_save_dirs:
@@ -863,14 +687,17 @@ class GSAS2Model:
             os.makedirs(self.user_save_directory, exist_ok=True)
         else:
             raise ValueError("user_save_directory is None. Cannot create directory.")
-        for output_file_index, output_file in enumerate(os.listdir(self.temporary_save_directory)):
-            os.rename(os.path.join(self.temporary_save_directory, output_file), os.path.join(self.user_save_directory, output_file))
+        for output_file_index, output_file in enumerate(os.listdir(self.save_directories.temporary_save_directory)):
+            os.rename(
+                os.path.join(self.save_directories.temporary_save_directory, output_file),
+                os.path.join(self.user_save_directory, output_file),
+            )
             if exist_extra_save_dirs:
                 for extra_save_dir in self.gsas2_save_dirs:
                     shutil.copy(os.path.join(self.user_save_directory, output_file), os.path.join(extra_save_dir, output_file))
                     if output_file_index == 0:
                         save_success_message += f" and in {extra_save_dir}"
-        os.rmdir(self.temporary_save_directory)
+        os.rmdir(self.save_directories.temporary_save_directory)
         return save_success_message
 
     # =============
@@ -878,15 +705,19 @@ class GSAS2Model:
     # =============
 
     def load_basic_outputs(self, gsas_result_filepath: str) -> None:
-        logger.notice(f"GSAS-II .lst result file found. Opening {self.project_name}.lst")
+        logger.notice(f"GSAS-II .lst result file found. Opening {self.save_directories.project_name}.lst")
         self.read_gsas_lst_and_print_wR(gsas_result_filepath, self.data_files)
         save_message = self.move_output_files_to_user_save_location()
         if self.user_save_directory is None:
             raise ValueError("user_save_directory is None. Cannot construct the file path.")
-        self.phase_names_list = self.find_phase_names_in_lst(os.path.join(self.user_save_directory, self.project_name + ".lst"))
+        self.phase_names_list = self.find_phase_names_in_lst(
+            os.path.join(self.user_save_directory, self.save_directories.project_name + ".lst")
+        )
         logger.notice(save_message)
 
-        self.phase_names_list: List[str] = self.find_phase_names_in_lst(os.path.join(self.user_save_directory, self.project_name + ".lst"))
+        self.phase_names_list: List[str] = self.find_phase_names_in_lst(
+            os.path.join(self.user_save_directory, self.save_directories.project_name + ".lst")
+        )
         self.create_lattice_parameter_table()
         self.create_instrument_parameter_table()
         self.create_reflections_table()
@@ -906,7 +737,7 @@ class GSAS2Model:
     def load_gsas_histogram(self, histogram_index: int) -> object:
         if not self.user_save_directory:
             raise ValueError("user_save_directory is None. Cannot construct the file path.")
-        result_csv = os.path.join(self.user_save_directory, self.project_name + f"_{histogram_index}.csv")
+        result_csv = os.path.join(self.user_save_directory, self.save_directories.project_name + f"_{histogram_index}.csv")
         my_data = np.transpose(np.genfromtxt(result_csv, delimiter=",", skip_header=39))
         # x  y_obs	weight	y_calc	y_bkg	Q
         x_values = my_data[0]
@@ -928,7 +759,7 @@ class GSAS2Model:
             if not self.user_save_directory:
                 raise ValueError("user_save_directory is None. Cannot construct the file path.")
             result_reflections_txt = os.path.join(
-                self.user_save_directory, self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt"
+                self.user_save_directory, self.save_directories.project_name + f"_reflections_{histogram_index}_{phase_name}.txt"
             )
             if os.path.exists(result_reflections_txt):
                 # omit first 2 lines in file (which are histogram and phase name)
@@ -954,10 +785,10 @@ class GSAS2Model:
         if not table_rows or self.refinement_method == "Rietveld":
             # cannot generate a valid reflections workspace. If one with the same project_name exists, remove it.
             # This is to cover the case where a user runs a Pawley then Rietveld Refinement for the same project_name.
-            if ADS.doesExist(f"{self.project_name}_GSASII_reflections"):
-                DeleteWorkspace(f"{self.project_name}_GSASII_reflections", EnableLogging=False)
+            if ADS.doesExist(f"{self.save_directories.project_name}_GSASII_reflections"):
+                DeleteWorkspace(f"{self.save_directories.project_name}_GSASII_reflections", EnableLogging=False)
             return None
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections", EnableLogging=False)
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.save_directories.project_name}_GSASII_reflections", EnableLogging=False)
         table.addReadOnlyColumn("str", "Histogram name")
         table.addReadOnlyColumn("str", "Phase name")
         table.addReadOnlyColumn("str", "Reflections")
@@ -980,7 +811,9 @@ class GSAS2Model:
 
     def create_instrument_parameter_table(self, test: bool = False) -> Optional[Union[None, object]]:
         INST_TABLE_PARAMS: List[str] = ["Histogram name", "Sigma-1", "Gamma (Y)"]
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters", EnableLogging=False)
+        table = CreateEmptyTableWorkspace(
+            OutputWorkspace=f"{self.save_directories.project_name}_GSASII_instrument_parameters", EnableLogging=False
+        )
         table.addReadOnlyColumn("str", "Histogram name")
         table.addReadOnlyColumn("double", "Sigma-1{}".format(" (Refined)" if self.refine_sigma_one else ""))
         table.addReadOnlyColumn("double", "Gamma (Y){}".format(" (Refined)" if self.refine_gamma else ""))
@@ -1009,7 +842,9 @@ class GSAS2Model:
     def create_lattice_parameter_table(self, test: bool = False) -> Optional[Union[None, object]]:
         LATTICE_TABLE_PARAMS: List[str] = ["length_a", "length_b", "length_c", "angle_alpha", "angle_beta", "angle_gamma", "volume"]
 
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters", EnableLogging=False)
+        table = CreateEmptyTableWorkspace(
+            OutputWorkspace=f"{self.save_directories.project_name}_GSASII_lattice_parameters", EnableLogging=False
+        )
         table.addReadOnlyColumn("str", "Phase name")
 
         for param in LATTICE_TABLE_PARAMS:
@@ -1018,7 +853,9 @@ class GSAS2Model:
         for phase_name in self.phase_names_list:
             if not self.user_save_directory:
                 raise ValueError("user_save_directory is None. Cannot construct the file path.")
-            parameters_txt: str = os.path.join(self.user_save_directory, self.project_name + f"_cell_parameters_{phase_name}.txt")
+            parameters_txt: str = os.path.join(
+                self.user_save_directory, self.save_directories.project_name + f"_cell_parameters_{phase_name}.txt"
+            )
             with open(parameters_txt, "rt", encoding="utf-8") as file:
                 full_file_string: str = file.read().replace("\n", "")
             parameter_dict: dict = json.loads(full_file_string)
