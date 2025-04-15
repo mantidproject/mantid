@@ -1,14 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-
+# --- Logger and ConfigService Setup ---
 try:
     from mantid.kernel import Logger
     from mantid.kernel import ConfigService
-
 except ImportError:
     print("Warning: Mantid Kernel (Logger/ConfigService) not found, using basic print/dummy.")
 
@@ -28,17 +29,18 @@ except ImportError:
         def error(self, msg):
             print(f"ERROR [{self._name}]: {msg}")
 
-    class ConfigService:
+    class ConfigService:  # Dummy for environments without Mantid
         @staticmethod
         def Instance():
             class DummyInstance:
                 def getString(self, key, pathAbsolute=True):
-                    return None  # Default to None
+                    return None
 
             return DummyInstance()
 
 
 log = Logger("HelpWindowModel")
+# --------------------------------------
 
 from qtpy.QtCore import QUrl  # noqa: E402
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo  # noqa: E402
@@ -80,89 +82,132 @@ class HelpWindowModel:
     MODE_ONLINE = "Online Docs"
 
     def __init__(self, online_base="https://docs.mantidproject.org/"):
-        local_docs_path_from_config = None
+        # Store raw online base early, needed for fallback logic below
+        self._raw_online_base = online_base.rstrip("/")
+
+        # --- Step 1: Attempt to get local path from ConfigService ---
+        local_docs_path_from_config = None  # Default if lookup fails or path is empty
         try:
+            # ConfigService is imported at the top level now
             config_service = ConfigService.Instance()
-            raw_path = config_service.getString("docs.html.root", True)
-            if raw_path:
+            raw_path = config_service.getString("docs.html.root", True)  # pathAbsolute=True
+            if raw_path:  # Only assign if not empty
                 local_docs_path_from_config = raw_path
                 log.debug(f"Retrieved 'docs.html.root' from ConfigService: '{local_docs_path_from_config}'")
             else:
                 log.debug("'docs.html.root' property is empty or not found in ConfigService.")
-
         except Exception as e:
-            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}")
+            # Catch potential errors during ConfigService interaction
+            # This includes cases where the dummy ConfigService might be used
+            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}. Defaulting to online mode.")
+            # local_docs_path_from_config remains None
 
-        self._raw_online_base = online_base.rstrip("/")
-        self._is_local = False
-        self._mode_string = self.MODE_ONLINE
-        self._base_url = self._raw_online_base
-        self._version_string = None
-        self._determine_mode_and_base_url(local_docs_path_from_config)
+        # --- Step 2: Determine final mode and set ALL related state variables ---
+        # This method now sets _is_local, _mode_string, _base_url, _version_string
+        self._determine_mode_and_set_state(local_docs_path_from_config)
 
-    def _determine_mode_and_base_url(self, local_docs_path):
+    def _determine_mode_and_set_state(self, local_docs_path):
         """
-        Sets the internal state (_is_local, _mode_string, _base_url, _version_string)
-        based on the validity of the provided local_docs_path.
+        Sets the final operational state (_is_local, _mode_string, _base_url, _version_string)
+        based *only* on the validity of the provided local_docs_path argument, which is the
+        result of the ConfigService lookup (can be a path string or None).
         """
-        log.debug(f"Determining mode with local_docs_path='{local_docs_path}'")
+        log.debug(f"Determining final mode and state with local_docs_path='{local_docs_path}'")
+
+        # Check if the path from config is valid and points to an existing directory
         if local_docs_path and os.path.isdir(local_docs_path):
+            # --- Configure for LOCAL/OFFLINE Mode ---
+            log.debug("Valid local docs path found. Configuring for Offline Mode.")
             self._is_local = True
             self._mode_string = self.MODE_OFFLINE
-            abs_local_path = os.path.abspath(local_docs_path)
+            abs_local_path = os.path.abspath(local_docs_path)  # Ensure absolute
+            # Base URL for local files needs 'file:///' prefix and correct path format
             self._base_url = QUrl.fromLocalFile(abs_local_path).toString()
-            self._version_string = None
-            log.debug(f"Using {self._mode_string} from {self._base_url}")
+            self._version_string = None  # Version string not applicable for local docs mode
+            log.debug(f"Final state: Mode='{self._mode_string}', Base URL='{self._base_url}'")
+
         else:
-            if local_docs_path:
+            # --- Configure for ONLINE Mode ---
+            # Log reason if applicable
+            if local_docs_path:  # Path was provided but invalid
                 log.warning(
-                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to online docs."  # noqa: E501
+                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to Online Mode."  # noqa: E501
                 )
-            else:
-                log.debug("No valid local docs path found from ConfigService. Using online docs.")
+            else:  # Path was None (not found in config or error during lookup)
+                log.debug("No valid local docs path found from ConfigService. Configuring for Online Mode.")
 
             self._is_local = False
             self._mode_string = self.MODE_ONLINE
-            self._version_string = getMantidVersionString()
 
+            # Attempt to get versioned URL for online mode
+            self._version_string = getMantidVersionString()  # Might return None
+
+            # Set final base URL based on online path and version string
             if self._version_string:
                 base_online = self._raw_online_base
                 if base_online.endswith("/stable"):
                     base_online = base_online[: -len("/stable")]
+                # Avoid double versioning if base_online already has it
                 if self._version_string not in base_online:
                     self._base_url = f"{base_online.rstrip('/')}/{self._version_string}"
-                    log.debug(f"Using {self._mode_string} (Version: {self._version_string}) from {self._base_url}")
-                else:
+                    log.debug(f"Using versioned online URL: {self._base_url}")
+                else:  # Use provided base as-is (likely includes 'stable' or version)
                     self._base_url = self._raw_online_base
-                    log.debug(f"Using {self._mode_string} (Using provided base URL, possibly stable/latest): {self._base_url}")
-            else:
+                    log.debug(f"Using provided online base URL (version/stable implied): {self._base_url}")
+            else:  # No version string found, use raw online base
                 self._base_url = self._raw_online_base
-                log.debug(f"Using {self._mode_string} (Version: Unknown/Stable) from {self._base_url}")
+                log.debug(f"Using default online base URL (version unknown): {self._base_url}")
 
+            log.debug(f"Final state: Mode='{self._mode_string}', Base URL='{self._base_url}', Version='{self._version_string}'")
+
+    # --- Getter methods remain the same ---
     def is_local_docs_mode(self):
+        """
+        :return: True if using local docs, False otherwise. Based on state set during init.
+        """
         return self._is_local
 
     def get_mode_string(self):
+        """
+        :return: User-friendly string indicating the mode ("Offline Docs" or "Online Docs").
+        """
         return self._mode_string
 
     def get_base_url(self):
+        """
+        :return: The determined base URL (either file:///path/ or https://docs...[/version]/) with trailing slash.
+        """
+        # Ensure trailing slash for correct relative URL joining
         return self._base_url.rstrip("/") + "/"
 
+    # --- URL building methods use the state set during init ---
     def build_help_url(self, relative_url):
+        """
+        Returns a QUrl pointing to the determined doc source for the given relative URL.
+        """
         if not relative_url or not relative_url.lower().endswith((".html", ".htm")):
             relative_url = "index.html"
+
         relative_url = relative_url.lstrip("/")
-        base = self.get_base_url()
+        base = self.get_base_url()  # Uses the final URL determined during init
         full_url_str = f"{base}{relative_url}"
+
         url = QUrl(full_url_str)
         if not url.isValid():
             log.warning(f"Constructed invalid URL: {full_url_str} from base '{base}' and relative '{relative_url}'")
         return url
 
     def get_home_url(self):
+        """
+        Return the 'home' page URL (index.html) based on the determined mode/base URL.
+        """
         return self.build_help_url("index.html")
 
+    # --- Interceptor creation uses the state set during init ---
     def create_request_interceptor(self):
+        """
+        Return an appropriate request interceptor based on the determined mode (_is_local).
+        """
         if self._is_local:
             log.debug("Using LocalRequestInterceptor.")
             return LocalRequestInterceptor()
