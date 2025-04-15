@@ -128,10 +128,10 @@ public:
     const auto &GofR = pdfws->y(0);
     const auto &pdfUnit = pdfws->getAxis(0)->unit();
 
-    TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
-    TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(GofR[0], 0.0200, 0.0001);
-    TS_ASSERT_DELTA(GofR[249], -0.4928, 0.0001);
+    TS_ASSERT_DELTA(R[0], 0.005, 0.0001);
+    TS_ASSERT_DELTA(R[249], 2.495, 0.0001);
+    TS_ASSERT_DELTA(GofR[0], 0.001, 0.0001);
+    TS_ASSERT_DELTA(GofR[249], -0.4918, 0.0001);
     TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
   }
 
@@ -201,8 +201,8 @@ public:
     const auto &R = pdfws->x(0);
     const auto &GofR = pdfws->y(0);
 
-    TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
-    TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
+    TS_ASSERT_DELTA(R[0], 0.005, 0.0001);
+    TS_ASSERT_DELTA(R[249], 2.495, 0.0001);
     // make sure that nan didn' slip in
     TS_ASSERT(std::find_if(GofR.begin(), GofR.end(), [](const double d) { return std::isnan(d); }) == GofR.end());
   }
