@@ -362,9 +362,7 @@ class AbinsAlgorithm:
             """,
             re.VERBOSE,
         )
-        atom_ranges = [
-            (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
-        ]
+        atom_ranges = [(int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))]
 
         # Acceptable formats for symbol: Ca
         element_symbol_test = re.compile(
