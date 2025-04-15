@@ -111,18 +111,22 @@
     </component>
   </type>
 
+  <!-- West -->
   <type name="Column1">
     <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.44" y="0.17"/>
       <location name="bank13">  <!-- was bank1 - 720896 -->
         <trans x="-0.167548" y="0.167548" />
       </location>
     </component>
     <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.44" y="0"/>
       <location name="bank12">  <!-- was bank4 - 655360 -->
         <trans x="-0.167548" y="0.0" />
       </location>
     </component>
     <component type="panel"   idstart="0" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.44" y="-0.17"/>
       <location name="bank11">  <!-- was bank7 - 589824 -->
         <trans x="-0.167548" y="-0.167548" />
       </location>
@@ -130,16 +134,19 @@
   </type>
   <type name="Column2">
     <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.27" y="0.17"/>
       <location name="bank23">  <!-- was bank2 - 917504 -->
         <trans x="0.0" y="0.167548" />
       </location>
     </component>
     <component type="panel"  idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.27" y="0"/>
       <location name="bank22">  <!-- was bank5 - 851968 -->
         <trans x="0.0" y="0.0" />
       </location>
     </component>
     <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.27" y="-0.17"/>
       <location name="bank21">  <!-- was bank8 - 786432 -->
         <trans x="0.0" y="-0.167548" />
       </location>
@@ -147,33 +154,40 @@
   </type>
   <type name="Column3">
     <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.1" y="0.17"/>
       <location name="bank33">  <!-- was bank3 - 1114112 -->
         <trans x="0.167548" y="0.167548" />
       </location>
     </component>
     <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.1" y="0"/>
       <location name="bank32">  <!-- was bank6 - 1048576 -->
         <trans x="0.167548" y="0.0" />
       </location>
     </component>
     <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="-0.1" y="-0.17"/>
       <location name="bank31">  <!-- was bank9 - 983040 -->
         <trans x="0.167548" y="-0.167548" />
       </location>
     </component>
   </type>
+  <!-- East -->
   <type name="Column4">
     <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.1" y="0.17"/>
       <location name="bank63">  <!-- was bank10 - 524288 -->
         <trans x="0.167548" y="0.167548" />
       </location>
     </component>
     <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.1" y="0"/>
       <location name="bank62">  <!-- was bank13 - 458752 -->
         <trans x="0.167548" y="0.0" />
       </location>
     </component>
     <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.1" y="-0.17"/>
       <location name="bank61">  <!-- was bank16 - 393216 -->
         <trans x="0.167548" y="-0.167548" />
       </location>
@@ -181,16 +195,19 @@
   </type>
   <type name="Column5">
     <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.27" y="0.17"/>
       <location name="bank53">  <!-- was bank11 - 327680 -->
         <trans x="0.0" y="0.167548" />
       </location>
     </component>
     <component type="panel"   idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.27" y="0"/>
       <location name="bank52">  <!-- was bank14 - 262144 -->
         <trans x="0.0" y="0.0" />
       </location>
     </component>
     <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.27" y="-0.17"/>
       <location name="bank51">  <!-- was bank17 - 196608 -->
         <trans x="0.0" y="-0.167548" />
       </location>
@@ -198,16 +215,19 @@
   </type>
   <type name="Column6">
     <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.44" y="0.17"/>
       <location name="bank43">  <!-- was bank12 - 131072 -->
         <trans x="-0.167548" y="0.167548" />
       </location>
     </component>
     <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.44" y="0"/>
       <location name="bank42">  <!-- was bank15 - 65536 -->
         <trans x="-0.167548" y="0.0" />
       </location>
     </component>
     <component type="panel"  idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
+      <side-by-side-view-location x="0.44" y="-0.17"/>
       <location name="bank41">  <!-- was bank18 - 0 -->
         <trans x="-0.167548" y="-0.167548" />
       </location>
