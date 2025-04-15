@@ -53,7 +53,7 @@ Usage
        tab.addRow([1, 0.2, phi])
    for i in range(0,32):
        phi = 2*pi*i/32.
-       tab.addRow([1, 0.2, phi])
+       tab.addRow([1, 0.21, phi])
    ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
    print("Output workspace has {} histograms".format(ows.getNumberHistograms()))
 
