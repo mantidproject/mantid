@@ -13,7 +13,6 @@ from typing import (
     Generator,
     Iterable,
     List,
-    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -103,55 +102,7 @@ Metadata = Dict[str, Union[str, int, LineData]]
 class AbinsSpectrum1DCollection(Spectrum1DCollection): ...
 
 
-class AbinsSpectrum2DCollection(Spectrum2DCollection):
-    def get_bin_edges(self, bin_ax: Literal["x", "y"] = "x", *, restrict_range: bool = True) -> Quantity:
-        """
-        Get bin edges for the axis specified by bin_ax. If the size of bin_ax
-        is one element larger than z_data along that axis, bin_ax is assumed to
-        contain bin edges. If they are the same size, bin_ax is assumed to
-        contain bin centres and a conversion is made.
-
-        In this case, bin edges are assumed to be halfway between bin centres.
-
-        Parameters
-        ----------
-        bin_ax
-            The axis to get the bin edges for, 'x' or 'y'
-
-        restrict_range
-            If True (default), the bin edges will not go outside the existing
-            data bounds so the first and last bins may be half-size. This may
-            be desirable for plotting.  Otherwise, the outer bin edges will
-            extend from the initial data range.
-        """
-        enum = {"series": 0, "x": 1, "y": 2}
-        bin_data = getattr(self, f"{bin_ax}_data")
-        data_ax_len = self.z_data.shape[enum[bin_ax]]
-        if self._is_bin_edge(data_ax_len, bin_data.shape[0]):
-            return bin_data
-        return self._bin_centres_to_edges(bin_data, restrict_range=restrict_range)
-
-    def get_bin_centres(self, bin_ax: Literal["x", "y"] = "x") -> Quantity:
-        """
-        Get bin centres for the axis specified by bin_ax. If the size of
-        bin_ax is the same size as z_data along that axis, bin_ax is
-        assumed to contain bin centres, but if bin_ax is one element
-        larger, bin_ax is assumed to contain bin centres and a conversion
-        is made. In this conversion, the bin centres are assumed to be in
-        the middle of each bin, which may not be an accurate assumption in
-        the case of differently sized bins.
-
-        Parameters
-        ----------
-        bin_ax
-            The axis to get the bin centres for, 'x' or 'y'
-        """
-        enum = {"series": 0, "x": 1, "y": 2}
-        bin_data = getattr(self, f"{bin_ax}_data")
-        data_ax_len = self.z_data.shape[enum[bin_ax]]
-        if self._is_bin_edge(data_ax_len, bin_data.shape[0]):
-            return self._bin_edges_to_centres(bin_data)
-        return bin_data
+class AbinsSpectrum2DCollection(Spectrum2DCollection): ...
 
 
 def apply_kinematic_constraints(spectra: AbinsSpectrum2DCollection, instrument: DirectInstrument) -> None:
