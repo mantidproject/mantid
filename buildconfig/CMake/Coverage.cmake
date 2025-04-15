@@ -29,7 +29,11 @@ function(coverage_setup _COVERAGE_SRCS _coverage_UPLOAD)
 
   # Remove each of these files littered across build dir
   foreach(_EXT in LISTS *.gcda *.gcno *.gcov)
-    add_custom_command(TARGET coverage_clean COMMAND find "${PROJECT_BINARY_DIR}" -iname "${_EXT}" -type f -delete)
+    add_custom_command(
+      TARGET coverage_clean
+      POST_BUILD
+      COMMAND find "${PROJECT_BINARY_DIR}" -iname "${_EXT}" -type f -delete
+    )
   endforeach()
 
   add_custom_target(
@@ -41,6 +45,8 @@ function(coverage_setup _COVERAGE_SRCS _coverage_UPLOAD)
       --exclude-throw-branches --xml "${COV_CPP_XML_DIR}/Cobertura.xml"
       # The file format will take x.html and turn it into x.Framework.Kernel.y.cpp.html so set x to mantid
       --html --html-details -o "${COV_CPP_HTML_DIR}/mantid.html"
+      # Work around a bug in gcov tool: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080
+      --gcov-ignore-parse-errors=suspicious_hits.warn
       # Run in the binary dir
       "${CMAKE_BINARY_DIR}"
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
