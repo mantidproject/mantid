@@ -37,8 +37,7 @@ public:
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng, const Geometry::BoundingBox &) const = 0;
   virtual Geometry::BoundingBox defineActiveRegion(const Geometry::BoundingBox &) const = 0;
-  Geometry::IObject_sptr getIntersectionWithSample(const Geometry::IObject &sample,
-                                                   const Kernel::V3D beamDirection = Kernel::V3D(0, 0, 1)) const;
+  Geometry::IObject_sptr getIntersectionWithSample(const Geometry::IObject &sample) const;
 
 protected:
   Kernel::V3D m_beamCenter;
