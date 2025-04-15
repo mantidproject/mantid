@@ -113,10 +113,13 @@ const std::string AlignAndFocusPowderSlim::name() const { return "AlignAndFocusP
 int AlignAndFocusPowderSlim::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AlignAndFocusPowderSlim::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string AlignAndFocusPowderSlim::category() const { return "Workflow\\Diffraction"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string AlignAndFocusPowderSlim::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string AlignAndFocusPowderSlim::summary() const {
+  return "VULCAN ONLY Algorithm to focus powder diffraction data into a number of histograms according to a grouping "
+         "scheme defined in a CalFile.";
+}
 
 const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return {"AlignAndFocusPowderFromFiles"}; }
 
@@ -127,7 +130,6 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
   constexpr double deg2rad = M_PI / 180.;
 
   std::vector<double> difc;
-  difc.reserve(l2s.size());
 
   std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
                  [l1, deg2rad](const auto &l2, const auto &polar) {
@@ -237,13 +239,10 @@ public:
     }
   }
 
-  std::optional<size_t> findBin(const double tof) const {
-    // return boost::none;
-    if (tof < m_xmin || tof >= m_xmax) {
-      return std::nullopt;
-    } else {
-      return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
-    }
+  bool inRange(const double tof) const { return !(tof < m_xmin || tof >= m_xmax); }
+
+  const std::optional<size_t> findBin(const double tof) const {
+    return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
   }
 
 private:
@@ -283,9 +282,7 @@ public:
   }
 };
 
-template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector<Type> *vec) {
-  constexpr size_t grainsize{2000};
-
+template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector<Type> *vec, const size_t grainsize) {
   if (vec->size() < grainsize) {
     const auto [minval, maxval] = std::minmax_element(vec->cbegin(), vec->cend());
     return std::make_pair(*minval, *maxval);
@@ -305,15 +302,24 @@ public:
         masked(masked) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
+    const bool no_mask = (masked->empty()); // simplify check for mask
+    // iterators
+    auto detid_ptr = m_detids->cbegin() + range.begin();
+    auto tof_ptr = m_tofs->cbegin() + range.begin();
     for (size_t i = range.begin(); i < range.end(); ++i) {
-      const auto detid = static_cast<detid_t>(m_detids->at(i));
-      if (masked->contains(detid))
-        continue;
-      const auto tof = static_cast<double>(m_tofs->at(i)) * m_calibration->value(detid);
-
-      const auto binnum = m_histogrammer->findBin(tof);
-      if (binnum)
-        y_temp->at(binnum.value())++;
+      const auto detid = static_cast<detid_t>(*detid_ptr);
+      if (no_mask || (!masked->contains(detid))) {
+        // focussed time-off-flight
+        const auto tof = static_cast<double>(*tof_ptr) * m_calibration->value(detid);
+        // increment the bin if it is found
+        if (m_histogrammer->inRange(tof)) {
+          if (const auto binnum = m_histogrammer->findBin(tof)) {
+            y_temp->at(binnum.value())++;
+          }
+        }
+      }
+      ++detid_ptr;
+      ++tof_ptr;
     }
   }
 
@@ -374,7 +380,8 @@ public:
         // TODO REMOVE debug print
         std::cout << bankName << " has " << eventRangeFull.second << " events\n"
                   << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)" << "\n";
+                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
+                  << "\n";
 
         // create a histogrammer to process the events
         auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -383,6 +390,7 @@ public:
         // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
         // counting things
         std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
         // read parts of the bank at a time
         size_t event_index_start = eventRangeFull.first;
@@ -398,10 +406,10 @@ public:
           m_loader.loadDetid(event_group, event_detid, eventRangePartial);
 
           // process the events that were loaded
-          const auto [minval, maxval] = parallel_minmax(event_detid.get());
+          const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
           // only recreate if it doesn't already have the useful information
-          if ((!calibration) || (calibration->idmin() != static_cast<detid_t>(minval)) ||
-              (calibration->idmax() != static_cast<detid_t>(maxval))) {
+          if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
+              (calibration->idmax() < static_cast<detid_t>(maxval))) {
             calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
                 static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
           }
@@ -411,7 +419,13 @@ public:
           // threaded processing of the events
           ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), calibration.get(),
                                  &y_temp, &m_masked);
-          tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
+          if (numEvent > m_grainsize_event) {
+            // use tbb
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
+          } else {
+            // single thread
+            task(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event));
+          }
 
           event_index_start += m_events_per_chunk;
         }
@@ -535,6 +549,12 @@ void AlignAndFocusPowderSlim::exec() {
   MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
+  { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
+    // it needs to be made more generic
+    if (filename.find("VULCAN") == std::string::npos) {
+      throw std::runtime_error("File does not appear to be for VULCAN");
+    }
+  }
   const Kernel::NexusDescriptor descriptor(filename);
 
   // instrument is needed for lots of things
@@ -651,7 +671,12 @@ void AlignAndFocusPowderSlim::exec() {
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)), task);
+    // generate threads only if appropriate
+    if (static_cast<size_t>(GRAINSIZE_BANK) < num_banks_to_read) {
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)), task);
+    } else {
+      task(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)));
+    }
   }
 
   // close the file so child algorithms can do their thing
