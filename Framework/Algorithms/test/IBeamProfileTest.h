@@ -183,6 +183,6 @@ public:
     const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
     const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
-    checkIntersectionVolume(intersectionVolume, 5., 20, 5.);
+    checkIntersectionVolume(intersectionVolume, 5., 20., 5.);
   }
 };
