@@ -126,6 +126,12 @@ qscintilla2:
 qtpy:
   - '>=2.4,!=2.4.2'
 
+# We must pin this because it is known to be particularly unstable (especially in system tests).
+# 0.3.0 is the first version that supports Python > 3.10, but it currently breaks BayesQuasi in the
+# standalone.
+quasielasticbayes:
+  - '<0.3.0'
+
 tbb:
   - 2021
 
