@@ -42,10 +42,12 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
         self.assertTrue(test_url.isLocalFile(), "Expected a local file:// URL")
 
         local_file_path = test_url.toLocalFile()
+        norm_local_file_path = os.path.normpath(local_file_path)
+        norm_expected_prefix = os.path.normpath(os.path.abspath(self.temp_dir))
 
-        expected_prefix = os.path.abspath(self.temp_dir) + os.sep
         self.assertTrue(
-            local_file_path.startswith(expected_prefix), f"URL path '{local_file_path}' should start with temp dir path '{expected_prefix}'"
+            norm_local_file_path.startswith(norm_expected_prefix + os.sep),
+            f"URL path '{norm_local_file_path}' should start with temp dir path '{norm_expected_prefix}{os.sep}'",
         )
 
         home_url = model.get_home_url()
@@ -93,7 +95,6 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
     def test_create_request_interceptor_based_on_mode(self, mock_ConfigService):
         """Test that the correct interceptor is created based on the mode determined from ConfigService."""
-        # --- Test Local Mode ---
         mock_instance_local = mock_ConfigService.Instance.return_value
         mock_instance_local.getString.return_value = self.temp_dir
         local_model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
@@ -102,7 +103,6 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
         mock_instance_local.getString.assert_called_once_with(DOCS_ROOT_KEY, True)
         mock_ConfigService.Instance.reset_mock()
 
-        # --- Test Online Mode ---
         mock_instance_online = mock_ConfigService.Instance.return_value
         mock_instance_online.getString.return_value = None
         online_model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
