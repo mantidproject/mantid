@@ -156,7 +156,7 @@ public:
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 10., 20.);
 
     const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample, V3D(0., 1., 0.));
+    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 4., 5., 6.);
   }
@@ -166,7 +166,7 @@ public:
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 5., 5.);
 
     const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample, V3D(0., 1., 0.));
+    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
     checkIntersectionVolume(intersectionVolume, 5., 2.5, 20.);
   }
