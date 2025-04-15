@@ -90,20 +90,7 @@ internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/WeightedMeanMD.cpp:
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/XorMD.cpp:0
 
 // ----------- New list of suppressions after updating to cppcheck 2.16.0 -------------
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AlgorithmRuntimeProps.h:21
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AnalysisDataService.h:138
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:38
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:41
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:69
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:72
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoxControllerSettingsAlgorithm.h:43
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/CatalogSession.h:25
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhenWorkspaceIsType.h:50
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:71
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:74
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FileProperty.h:90
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionDomain1D.h:89
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionValues.h:86
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IMDWorkspace.h:92
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41

@@ -35,10 +35,10 @@ value of type std::optional<T> will be returned.
  *
  */
 template <typename T>
-T checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
+T checkForMandatoryInstrumentDefault(const Mantid::API::Algorithm *const alg, const std::string &propName,
                                      const Mantid::Geometry::Instrument_const_sptr &instrument,
                                      const std::string &idf_name) {
-  auto algProperty = alg->getPointerToProperty(propName);
+  const auto *algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (defaults.empty()) {
@@ -66,10 +66,10 @@ T checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const st
  *
  */
 template <typename T>
-std::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
+std::optional<T> checkForOptionalInstrumentDefault(const Mantid::API::Algorithm *const alg, const std::string &propName,
                                                    const Mantid::Geometry::Instrument_const_sptr &instrument,
                                                    const std::string &idf_name) {
-  auto algProperty = alg->getPointerToProperty(propName);
+  const auto *algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (!defaults.empty()) {
@@ -87,14 +87,14 @@ std::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const
  * Specializations for std::string
  */
 template <>
-MANTID_API_DLL std::string checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg,
+MANTID_API_DLL std::string checkForMandatoryInstrumentDefault(const Mantid::API::Algorithm *const alg,
                                                               const std::string &propName,
                                                               const Mantid::Geometry::Instrument_const_sptr &instrument,
                                                               const std::string &idf_name);
 
 template <>
 MANTID_API_DLL std::optional<std::string>
-checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
+checkForOptionalInstrumentDefault(const Mantid::API::Algorithm *const alg, const std::string &propName,
                                   const Mantid::Geometry::Instrument_const_sptr &instrument,
                                   const std::string &idf_name);
 } // namespace API
