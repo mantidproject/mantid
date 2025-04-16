@@ -8,7 +8,6 @@
 
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import StringListValidator, Direction
-from mantid.utils.pip import package_installed
 from mantid import logger
 from IndirectCommon import get_two_theta_and_q
 
@@ -232,9 +231,6 @@ class BayesQuasi2(QuickBayesTemplate):
         return get_background_function(bg_str)
 
     def PyExec(self):
-        if not package_installed("quickBayes", show_warning=True):
-            raise RuntimeError("Please install 'quickBayes' missing dependency")
-
         self.log().information("BayesQuasi input")
         program = self.getPropertyValue("Program")
 

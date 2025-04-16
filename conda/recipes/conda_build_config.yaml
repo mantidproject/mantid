@@ -132,6 +132,11 @@ qtpy:
 quasielasticbayes:
   - '<0.3.0'
 
+# There have previously been API breaking changes in patch version updates to quickBayes,
+# so pin this to the patch version number.
+quickbayes:
+  - '1.0.2'
+
 tbb:
   - 2021
 
