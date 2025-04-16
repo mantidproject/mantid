@@ -75,6 +75,9 @@ Goniometer::Goniometer(const DblMatrix &rot) {
     throw std::invalid_argument("rot is not a rotation matrix");
 }
 
+/// Add an explicit copy constructor
+Goniometer::Goniometer(const Goniometer &other) : R(other.R), motors(other.motors), initFromR(other.initFromR) {}
+
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix
 const Kernel::DblMatrix &Goniometer::getR() const { return R; }
