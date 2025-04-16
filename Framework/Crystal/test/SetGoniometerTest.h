@@ -48,6 +48,32 @@ public:
     TS_ASSERT(alg.isExecuted()); // catch for no log values
   }
 
+  void test_goniometer_string_fails_with_too_few_values() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
+    // set only 8 values for the matrix
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0"));
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
+  void test_goniometer_string_fails_on_formatting() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
+    // space separated rather than comma separated
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
   /** Create an "empty" goniometer by NOT giving any axes. */
   void test_exec_emptyGoniometer() {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
@@ -104,6 +130,34 @@ public:
     TS_ASSERT_EQUALS(gon.getAxis(2).sense, 1);
     TS_ASSERT_EQUALS(gon.getAxis(2).angle, 45);
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
+  }
+
+  void test_goniometer_string() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerStringTest_ws", ws);
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerStringTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted()); // no log values
+
+    // Check the results
+    const Goniometer &gon = ws->mutableRun().getGoniometer();
+    Mantid::Kernel::DblMatrix refMat(3, 3, false);
+    refMat[0][0] = -1.0;
+    refMat[1][0] = 0.0;
+    refMat[2][0] = 0.0;
+    refMat[0][1] = 0.0;
+    refMat[1][1] = 0.0;
+    refMat[2][1] = 1.0;
+    refMat[0][2] = 0.0;
+    refMat[1][2] = 1.0;
+    refMat[2][2] = 0.0;
+    TS_ASSERT_EQUALS(gon.getR().equals(refMat), true);
+    AnalysisDataService::Instance().remove("SetGoniometerStringTest_ws");
   }
 
   void test_multiple_goniometers() {
