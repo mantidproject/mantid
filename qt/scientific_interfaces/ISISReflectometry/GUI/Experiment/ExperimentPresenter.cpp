@@ -385,7 +385,7 @@ void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const
   for (auto const &validationError : errors.errors()) {
     for (auto const &column : validationError.invalidColumns()) {
       if (errors.fullTableError()) {
-        showFullTableError(errors.fullTableError().get(), validationError.row(), column);
+        showFullTableError(errors.fullTableError().value(), validationError.row(), column);
       }
       m_view->showLookupRowAsInvalid(validationError.row(), column);
     }

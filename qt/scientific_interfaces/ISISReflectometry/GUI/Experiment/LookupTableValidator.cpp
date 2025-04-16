@@ -37,7 +37,7 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
       return ResultType(std::move(lookupTable));
     }
     // Return the row errors (but no table errors)
-    return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
+    return ResultType(LookupTableValidationError(std::move(validationErrors), std::nullopt));
   }
   // Mark all rows with the search criteria errors, then return both row and table errors
   appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());

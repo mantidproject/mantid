@@ -14,7 +14,6 @@
 #include "RowExceptions.h"
 #include <boost/regex.hpp>
 #include <cmath>
-#include <optional>
 #include <vector>
 
 namespace {
@@ -52,7 +51,7 @@ std::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow
   return findLookupRow(title, previewRow.theta(), tolerance);
 }
 
-std::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, boost::optional<double> const &theta,
+std::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, std::optional<double> const &theta,
                                                     double tolerance) const {
   // First filter lookup rows by title
   auto lookupRows = findMatchingRegexes(title);
@@ -73,7 +72,7 @@ std::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, bo
 }
 
 std::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
-                                                    boost::optional<double> const &thetaAngle, double tolerance) const {
+                                                    std::optional<double> const &thetaAngle, double tolerance) const {
   std::vector<LookupRow> matchingRows;
   auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
     return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().value(), tolerance);

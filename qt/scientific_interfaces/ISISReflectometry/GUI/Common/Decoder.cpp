@@ -389,9 +389,7 @@ RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
   if (stepPresent) {
     step = map[QString("step")].toDouble();
   }
-  // Preffered implementation is using boost::optional<double> instead of bool
-  // and double but older versions of GCC seem to be complaining about
-  // -Wmaybe-uninitialized
+  // Preferred implementation is using std::optional<double> instead of bool
   if (minPresent && maxPresent && stepPresent) {
     return RangeInQ(min, step, max);
   } else if (minPresent && maxPresent) {
