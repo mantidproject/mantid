@@ -313,8 +313,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
       nexusFile->filehandle()->makeGroup("detector", "NXdetector", true);
 
       nexusFile->filehandle()->putAttr("version", 1);
-      saveSpectraDetectorMapNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, ::NeXus::LZW);
-      saveSpectrumNumbersNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, ::NeXus::LZW);
+      saveSpectraDetectorMapNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, NXcompression::LZW);
+      saveSpectrumNumbersNexus(*matrixWorkspace, nexusFile->filehandle().get(), indices, NXcompression::LZW);
       nexusFile->filehandle()->closeGroup();
       nexusFile->filehandle()->closeGroup();
     }
@@ -559,7 +559,7 @@ bool SaveNexusProcessed::processGroups() {
  */
 void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, ::NeXus::File *file,
                                                      const std::vector<int> &wsIndices,
-                                                     const ::NeXus::NXcompression compression) const {
+                                                     const NXcompression compression) const {
 
   std::vector<int32_t> detector_index;
   std::vector<int32_t> detector_count;
@@ -624,7 +624,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, 
  */
 void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file,
                                                   const std::vector<int> &wsIndices,
-                                                  const ::NeXus::NXcompression compression) const {
+                                                  const NXcompression compression) const {
   const auto numberSpec = int(wsIndices.size());
   std::vector<int32_t> spectra;
   spectra.reserve(static_cast<size_t>(numberSpec));
