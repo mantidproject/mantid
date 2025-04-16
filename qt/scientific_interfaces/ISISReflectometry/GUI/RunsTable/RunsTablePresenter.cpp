@@ -472,8 +472,9 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
     m_mainPresenter->notifyRowContentChanged(
-        m_model.mutableReductionJobs().mutableGroups()[groupIndex].mutableRows()[rowIndex].get());
-    notifyRowModelChanged(m_model.reductionJobs().groups()[groupIndex].rows()[rowIndex].get());
+        m_model.mutableReductionJobs().mutableGroups()[groupIndex].mutableRows()[rowIndex].value());
+    Item const &row = m_model.reductionJobs().groups()[groupIndex].rows()[rowIndex].value();
+    notifyRowModelChanged(row);
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
@@ -590,7 +591,7 @@ void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
-  m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(), m_view->jobs().selectedSubtreeRoots());
+  m_clipboard = Clipboard(*m_view->jobs().selectedSubtrees(), *m_view->jobs().selectedSubtreeRoots());
   if (m_clipboard.isInitialized())
     m_view->jobs().clearSelection();
   else
@@ -605,7 +606,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (selected.size() < 1)
     return;
 
-  m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(), m_view->jobs().selectedSubtreeRoots());
+  m_clipboard = Clipboard(*m_view->jobs().selectedSubtrees(), *m_view->jobs().selectedSubtreeRoots());
   if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
     removeRowsAndGroupsFromModel(selected);
@@ -622,8 +623,8 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     return;
 
   auto maybeReplacementRoots = m_view->jobs().selectedSubtreeRoots();
-  if (maybeReplacementRoots.is_initialized() && m_clipboard.isInitialized()) {
-    auto &replacementRoots = maybeReplacementRoots.get();
+  if (maybeReplacementRoots.has_value() && m_clipboard.isInitialized()) {
+    auto &replacementRoots = maybeReplacementRoots.value();
     makePastedGroupNamesUnique(m_clipboard, replacementRoots, m_model.reductionJobs());
     if (replacementRoots.empty())
       pasteGroupsAtEnd();
@@ -766,17 +767,17 @@ void RunsTablePresenter::notifyRowStateChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
+void RunsTablePresenter::notifyRowStateChanged(std::optional<std::reference_wrapper<Item const>> item) {
   if (!item)
     return;
 
   updateProgressBar();
-  auto const location = m_model.reductionJobs().getLocation(item.get());
-  setRowStylingForItem(location, item.get());
-  if (item->isGroup()) {
+  auto const location = m_model.reductionJobs().getLocation(item->get());
+  setRowStylingForItem(location, item->get());
+  if (item->get().isGroup()) {
     return;
   }
-  auto const &row = dynamic_cast<const Row &>(item.get());
+  auto const &row = dynamic_cast<const Row &>(item->get());
   applyStylingToParent(row);
 }
 
@@ -796,11 +797,11 @@ void RunsTablePresenter::notifyRowModelChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowModelChanged(boost::optional<Item const &> item) {
-  if (!item.is_initialized() || item->isGroup())
+void RunsTablePresenter::notifyRowModelChanged(std::optional<std::reference_wrapper<Item const>> item) {
+  if (!item.has_value() || item->get().isGroup())
     return;
 
-  auto const &row = dynamic_cast<Row const &>(item.get());
+  auto const &row = dynamic_cast<Row const &>(item->get());
   auto const location = m_model.reductionJobs().getLocation(row);
   m_jobViewUpdater.rowModified(groupOf(location), rowOf(location), row);
 }
