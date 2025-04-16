@@ -1144,7 +1144,7 @@ template <typename NumT> void File::readData(std::string const &dataName, NumT &
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (!dataVector.empty())
+  if (!dataVector.empty()) // cppcheck-suppress knownConditionTrueFalse
     data = dataVector[0];
   this->closeData();
 }
