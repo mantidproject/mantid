@@ -208,14 +208,14 @@ public:
     auto const algorithms = jobManager.getAlgorithms();
 
     // Check the row was marked with an error
-    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].get();
+    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].value();
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
     TS_ASSERT_EQUALS(row.message(),
                      "The title and angle specified matches multiple rows in the Experiment Settings tab");
     // Check the row was not included in the results
     TS_ASSERT(algorithms.empty());
 
-    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].get();
+    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].value();
     TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
   }
 
@@ -232,13 +232,13 @@ public:
     auto const algorithms = jobManager.getAlgorithms();
 
     // Check the row was marked with an error
-    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].get();
+    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].value();
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
     TS_ASSERT_EQUALS(row.message(), "Error while setting algorithm properties: ");
     // Check the row was not included in the results
     TS_ASSERT(algorithms.empty());
 
-    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].get();
+    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].value();
     TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
   }
 
@@ -298,7 +298,7 @@ public:
 
   void testAlgorithmCompleteSetsParentsSingleRow() {
     auto group = makeGroupWithOneRow();
-    Row *row = &group.mutableRows()[0].get();
+    Row *row = &group.mutableRows()[0].value();
     auto jobManager = makeJobManager();
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
@@ -312,8 +312,8 @@ public:
 
   void testAlgorithmCompleteSetsParentsMultipleRows() {
     auto group = makeGroupWithTwoRows();
-    Row *row1 = &group.mutableRows()[0].get();
-    Row *row2 = &group.mutableRows()[1].get();
+    Row *row1 = &group.mutableRows()[0].value();
+    Row *row2 = &group.mutableRows()[1].value();
     auto jobManager = makeJobManager();
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));
@@ -334,8 +334,8 @@ public:
 
   void testAlgorithmErrorSetsParentIncomplete() {
     auto group = makeGroupWithTwoRows();
-    Row *row1 = &group.mutableRows()[0].get();
-    Row *row2 = &group.mutableRows()[1].get();
+    Row *row1 = &group.mutableRows()[0].value();
+    Row *row2 = &group.mutableRows()[1].value();
     auto jobManager = makeJobManager();
 
     EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));

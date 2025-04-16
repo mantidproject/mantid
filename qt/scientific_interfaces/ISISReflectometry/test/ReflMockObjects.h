@@ -48,6 +48,7 @@
 #include <QVariant>
 #include <gmock/gmock.h>
 #include <memory>
+#include <optional>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace Mantid::API;
@@ -108,7 +109,7 @@ public:
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyPreviewApplyRequested, void());
   MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
-  MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, boost::optional<ProcessingInstructions>());
+  MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, std::optional<ProcessingInstructions>());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -121,9 +122,9 @@ public:
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
-  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD1(notifyRowStateChanged, void(std::optional<std::reference_wrapper<Item const>>));
   MOCK_METHOD0(notifyRowModelChanged, void());
-  MOCK_METHOD1(notifyRowModelChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD1(notifyRowModelChanged, void(std::optional<std::reference_wrapper<Item const>>));
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
@@ -353,14 +354,16 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
-  MOCK_METHOD1(getRunsTableItem, boost::optional<Item &>(MantidQt::API::IConfiguredAlgorithm_sptr const &algorithm));
+  MOCK_METHOD1(getRunsTableItem,
+               std::optional<std::reference_wrapper<Item>>(MantidQt::API::IConfiguredAlgorithm_sptr const &algorithm));
   MOCK_METHOD1(algorithmStarted, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
   MOCK_CONST_METHOD2(algorithmOutputWorkspacesToSave,
                      std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr, bool));
-  MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
-  MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
+  MOCK_METHOD1(notifyWorkspaceDeleted, std::optional<std::reference_wrapper<Item const>>(std::string const &));
+  MOCK_METHOD2(notifyWorkspaceRenamed,
+               std::optional<std::reference_wrapper<Item const>>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());

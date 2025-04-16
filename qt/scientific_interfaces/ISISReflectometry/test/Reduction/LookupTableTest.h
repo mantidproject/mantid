@@ -477,7 +477,7 @@ public:
 private:
   constexpr static const double m_exactMatchTolerance = 1e-6;
 
-  void assertLookupRowAngle(boost::optional<LookupRow> lookupRow, double expected,
+  void assertLookupRowAngle(std::optional<LookupRow> lookupRow, double expected,
                             double match_tolerance = m_exactMatchTolerance) {
     TS_ASSERT(lookupRow)
     if (lookupRow) {
