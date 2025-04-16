@@ -83,7 +83,7 @@ class BayesQuasi2Test(unittest.TestCase):
             self._alg.create_ws,
             N_calls=1,
             call_number=1,
-            OutputWorkspace="test_workspace",
+            OutputWorkspace="test",
             DataX=np.array([1.0, 2.0, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0]),
             DataY=np.array([4, 5, 6, 4.1, 4.9, 6, 0.1, -0.1, 0, 4.1, 4.9, 6, 0.1, -0.1, 0]),
             NSpec=5,
@@ -278,7 +278,7 @@ class BayesQuasi2Test(unittest.TestCase):
             max_features=3,
             ws_list=[],
             x_unit="DeltaE",
-            name="__BayesStretchTest_Sample_QL_0_",
+            name="__BayesStretchTest_Sample_QL_Workspace_0",
         )
         self.assert_mock_called_with(
             self._alg.make_fit_ws,
@@ -288,7 +288,7 @@ class BayesQuasi2Test(unittest.TestCase):
             max_features=3,
             ws_list=["unit", "test"],
             x_unit="DeltaE",
-            name="__BayesStretchTest_Sample_QL_1_",
+            name="__BayesStretchTest_Sample_QL_Workspace_1",
         )
 
     def exec_setup(self, fit_ws, results, probs):
