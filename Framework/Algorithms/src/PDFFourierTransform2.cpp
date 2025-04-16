@@ -381,7 +381,7 @@ void PDFFourierTransform2::exec() {
   auto inputDY = inputWS->e(0).rawData(); // dy for input
 
   // need bin edges
-  if (inputX.size() > inputY.size()) {
+  if (inputX.size() == inputY.size()) {
     inputX = BinEdges(Points(inputWS->x(0))).rawData();
   }
 
@@ -524,8 +524,9 @@ void PDFFourierTransform2::exec() {
       double defIntegral = integralX2 - integralX1;
 
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
-      if (filter && inX1 != 0) {
-        const double lorchKernel = 0.5 * (inX1 + inX2) * M_PI / inXMax;
+      auto inXCen = 0.5 * (inX1 + inX2);
+      if (filter && fabs(inXCen) > 1e-8) {
+        const double lorchKernel = inXCen * M_PI / inXMax;
         defIntegral *= sin(lorchKernel) / lorchKernel;
       }
       fs += defIntegral * inputY[inXIndex];
