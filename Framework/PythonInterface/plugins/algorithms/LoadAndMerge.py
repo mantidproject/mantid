@@ -201,7 +201,7 @@ class LoadAndMerge(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", mtd[output])
 
-        if self.isChild():
+        if not self.getAlwaysStoreInADS():
             self.remove_output_from_ads(output)
 
     def remove_output_from_ads(self, output_ws_name):

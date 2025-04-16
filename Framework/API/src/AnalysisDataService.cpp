@@ -164,7 +164,6 @@ Workspace_sptr AnalysisDataServiceImpl::remove(const std::string &name) {
   } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing - remove will do what's needed
   }
-
   Kernel::DataService<API::Workspace>::remove(name);
   if (ws) {
     ws->setName("");

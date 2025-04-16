@@ -1,0 +1,1 @@
+- Fixes a bug in :ref:`algm-LoadAndMerge` where output workspaces were stored in the ADS when set not to. This caused the leaking of temporary workspaces in algorithms that call :ref:`algm-LoadAndMerge` as a child. Legacy behaviour can be achieved by passing `StoreInADS=True` to the algorithm.
