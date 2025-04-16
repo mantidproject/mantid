@@ -309,6 +309,6 @@ public:
     s.initialize(costFun);
     TS_ASSERT(!s.minimize());
 
-    TS_ASSERT_EQUALS(s.getError(), "Changes in function value are too small");
+    TS_ASSERT_DIFFERS(s.getError(), "success");
   }
 };

@@ -26,6 +26,7 @@ Kernel::Logger g_log("LevenbergMarquardtMinimizer");
 
 bool cannotReachSpecifiedToleranceInF(int errorCode) { return errorCode == GSL_ETOLF; }
 bool cannotReachSpecifiedToleranceInX(int errorCode) { return errorCode == GSL_ETOLX; }
+bool solverIsMakingNoProgress(int errorCode) { return errorCode == GSL_ENOPROG; }
 } // namespace
 
 // clang-format off
@@ -87,18 +88,9 @@ bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
   m_absError = getProperty("AbsError");
   m_relError = getProperty("RelError");
 
-  int retVal = gsl_multifit_fdfsolver_iterate(m_gslSolver);
+  const int retVal = gsl_multifit_fdfsolver_iterate(m_gslSolver);
 
-  // From experience it is found that gsl_multifit_fdfsolver_iterate
-  // occasionally get
-  // stock - even after having achieved a sensible fit. This seem in particular
-  // to be a
-  // problem on Linux. However, to force GSL not to return ga ga have to do
-  // stuff in the
-  // if statement below
-  // GSL 1.14 changed return value from GSL_CONTINUE->GSL_ENOPROG for
-  // non-converging fits at 10 iterations
-  if (retVal == GSL_CONTINUE || retVal == GSL_ENOPROG) {
+  if (retVal == GSL_CONTINUE) {
     size_t ia = 0;
     for (size_t i = 0; i < m_function->nParams(); i++) {
       if (m_function->isActive(i)) {
@@ -107,21 +99,24 @@ bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
       }
     }
     m_function->applyTies();
-    retVal = GSL_CONTINUE;
+    const int gslConvergedStatus = hasConverged();
+    return gslConvergedStatus != GSL_SUCCESS;
   }
 
-  if (retVal && retVal != GSL_CONTINUE) {
+  if (retVal) {
     m_errorString = gsl_strerror(retVal);
     if (cannotReachSpecifiedToleranceInF(retVal)) {
       m_errorString = "Changes in function value are too small";
     } else if (cannotReachSpecifiedToleranceInX(retVal)) {
       m_errorString = "Changes in parameter value are too small";
+    } else if (solverIsMakingNoProgress(retVal)) {
+      m_errorString = "Solver is making no progress towards a solution";
     }
     return false;
   }
 
-  retVal = hasConverged();
-  return retVal != GSL_SUCCESS;
+  const int gslConvergedStatus = hasConverged();
+  return gslConvergedStatus != GSL_SUCCESS;
 }
 
 int LevenbergMarquardtMinimizer::hasConverged() {
