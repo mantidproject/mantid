@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -53,6 +54,38 @@ void SetGoniometer::init() {
   declareProperty("Average", true,
                   "Use the average value of the log, if false a separate "
                   "goniometer will be created for each value in the logs");
+  declareProperty("GoniometerMatrix", "",
+                  "Directly set the goniometer rotation matrix. Input should be in the form of a flattened 3x3 matrix");
+}
+
+Kernel::DblMatrix SetGoniometer::parseMatrixString(std::string gonMat) {
+  Kernel::DblMatrix rotMat(3, 3, true);
+  // validate input before assigning it to rotMat
+  std::vector<double> matVals;
+  std::stringstream ss(gonMat);
+  std::string val;
+  double dblVal;
+
+  while (std::getline(ss, val, ',')) {
+    try {
+      dblVal = std::stod(val);
+    } catch (const std::invalid_argument &) {
+      throw std::invalid_argument(
+          "Goniometer Matrix values must be interpretable as decimal numbers separated by commas");
+    }
+    matVals.push_back(dblVal);
+  }
+  if (matVals.size() != 9) {
+    throw std::invalid_argument("Goniometer Matrix must contain 9 comma separated values");
+  }
+  int x = 0;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      rotMat[i][j] = matVals[x];
+      x++;
+    }
+  }
+  return rotMat;
 }
 
 /** Execute the algorithm.
@@ -78,79 +111,85 @@ void SetGoniometer::exec() {
   // Create the goniometer
   Goniometer gon;
 
-  if (gonioDefined == "Universal")
-    gon.makeUniversalGoniometer();
-  else
-    for (size_t i = 0; i < NUM_AXES; i++) {
-      std::ostringstream propName;
-      propName << "Axis" << i;
-      std::string axisDesc = getPropertyValue(propName.str());
+  std::string gonMat = getPropertyValue("GoniometerMatrix");
 
-      if (!axisDesc.empty()) {
-        std::vector<std::string> tokens;
-        boost::split(tokens, axisDesc, boost::algorithm::detail::is_any_ofF<char>(","));
-        if (tokens.size() != 5)
-          throw std::invalid_argument("Wrong number of arguments to parameter " + propName.str() +
-                                      ". Expected 5 comma-separated arguments.");
-
-        std::string axisName = tokens[0];
-        axisName = Strings::strip(axisName);
-        if (axisName.empty())
-          throw std::invalid_argument("The name must not be empty");
-
-        // If axisName is a number, add a new log value
-        double angle = 0;
-        if (Strings::convert(axisName, angle)) {
-          g_log.information() << "Axis " << i << " - create a new log value GoniometerAxis" << i << "_FixedValue\n";
-          axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
-          try {
-            Types::Core::DateAndTime now = Types::Core::DateAndTime::getCurrentTime();
-            auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
-            tsp->addValue(now, angle);
-            tsp->setUnits("degree");
-            if (ei->mutableRun().hasProperty(axisName)) {
-              ei->mutableRun().removeLogData(axisName);
-            }
-            ei->mutableRun().addLogData(tsp);
-          } catch (...) {
-            g_log.error("Could not add axis");
-          }
-        }
-
-        double x = 0, y = 0, z = 0;
-        if (!Strings::convert(tokens[1], x))
-          throw std::invalid_argument("Error converting string '" + tokens[1] + "' to a number.");
-        if (!Strings::convert(tokens[2], y))
-          throw std::invalid_argument("Error converting string '" + tokens[2] + "' to a number.");
-        if (!Strings::convert(tokens[3], z))
-          throw std::invalid_argument("Error converting string '" + tokens[3] + "' to a number.");
-        V3D vec(x, y, z);
-        if (vec.norm() < 1e-4)
-          throw std::invalid_argument("Rotation axis vector should be non-zero!");
-
-        int ccw = 0;
-        Strings::convert(tokens[4], ccw);
-        if (ccw != 1 && ccw != -1)
-          throw std::invalid_argument("The ccw parameter must be 1 (ccw) or -1 "
-                                      "(cw) but no other value.");
-        // Default to degrees
-        gon.pushAxis(axisName, x, y, z, 0.0, ccw);
-      }
-    }
-
-  if (gon.getNumberAxes() == 0)
-    g_log.warning() << "Empty goniometer created; will always return an "
-                       "identity rotation matrix.\n";
-
-  // All went well, copy the goniometer into it. It will throw if the log values
-  // cannot be found
-  try {
-    if (getProperty("Average"))
-      ei->mutableRun().setGoniometer(gon, true);
+  if (gonMat == "") {
+    if (gonioDefined == "Universal")
+      gon.makeUniversalGoniometer();
     else
-      ei->mutableRun().setGoniometers(gon);
-  } catch (std::runtime_error &) {
-    g_log.error("No log values for goniometers");
+      for (size_t i = 0; i < NUM_AXES; i++) {
+        std::ostringstream propName;
+        propName << "Axis" << i;
+        std::string axisDesc = getPropertyValue(propName.str());
+
+        if (!axisDesc.empty()) {
+          std::vector<std::string> tokens;
+          boost::split(tokens, axisDesc, boost::algorithm::detail::is_any_ofF<char>(","));
+          if (tokens.size() != 5)
+            throw std::invalid_argument("Wrong number of arguments to parameter " + propName.str() +
+                                        ". Expected 5 comma-separated arguments.");
+
+          std::string axisName = tokens[0];
+          axisName = Strings::strip(axisName);
+          if (axisName.empty())
+            throw std::invalid_argument("The name must not be empty");
+
+          // If axisName is a number, add a new log value
+          double angle = 0;
+          if (Strings::convert(axisName, angle)) {
+            g_log.information() << "Axis " << i << " - create a new log value GoniometerAxis" << i << "_FixedValue\n";
+            axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
+            try {
+              Types::Core::DateAndTime now = Types::Core::DateAndTime::getCurrentTime();
+              auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
+              tsp->addValue(now, angle);
+              tsp->setUnits("degree");
+              if (ei->mutableRun().hasProperty(axisName)) {
+                ei->mutableRun().removeLogData(axisName);
+              }
+              ei->mutableRun().addLogData(tsp);
+            } catch (...) {
+              g_log.error("Could not add axis");
+            }
+          }
+
+          double x = 0, y = 0, z = 0;
+          if (!Strings::convert(tokens[1], x))
+            throw std::invalid_argument("Error converting string '" + tokens[1] + "' to a number.");
+          if (!Strings::convert(tokens[2], y))
+            throw std::invalid_argument("Error converting string '" + tokens[2] + "' to a number.");
+          if (!Strings::convert(tokens[3], z))
+            throw std::invalid_argument("Error converting string '" + tokens[3] + "' to a number.");
+          V3D vec(x, y, z);
+          if (vec.norm() < 1e-4)
+            throw std::invalid_argument("Rotation axis vector should be non-zero!");
+
+          int ccw = 0;
+          Strings::convert(tokens[4], ccw);
+          if (ccw != 1 && ccw != -1)
+            throw std::invalid_argument("The ccw parameter must be 1 (ccw) or -1 "
+                                        "(cw) but no other value.");
+          // Default to degrees
+          gon.pushAxis(axisName, x, y, z, 0.0, ccw);
+        }
+      }
+
+    if (gon.getNumberAxes() == 0)
+      g_log.warning() << "Empty goniometer created; will always return an "
+                         "identity rotation matrix.\n";
+
+    // All went well, copy the goniometer into it. It will throw if the log values
+    // cannot be found
+    try {
+      if (getProperty("Average"))
+        ei->mutableRun().setGoniometer(gon, true);
+      else
+        ei->mutableRun().setGoniometers(gon);
+    } catch (std::runtime_error &) {
+      g_log.error("No log values for goniometers");
+    }
+  } else {
+    ei->mutableRun().setGoniometer(Goniometer(parseMatrixString(gonMat)), false);
   }
 }
 
