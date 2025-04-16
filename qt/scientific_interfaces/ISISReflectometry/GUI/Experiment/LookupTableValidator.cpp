@@ -35,16 +35,14 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
     if (validationErrors.empty()) {
       // No errors - return the valid table
       return ResultType(std::move(lookupTable));
-    } else {
-      // Return the row errors (but no table errors)
-      return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
     }
-  } else {
-    // Mark all rows with the search criteria errors, then return both row and table errors
-    appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());
-    return ResultType(
-        LookupTableValidationError(std::move(validationErrors), searchCriteriaValidationResult.assertError()));
+    // Return the row errors (but no table errors)
+    return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
   }
+  // Mark all rows with the search criteria errors, then return both row and table errors
+  appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());
+  return ResultType(
+      LookupTableValidationError(std::move(validationErrors), searchCriteriaValidationResult.assertError()));
 }
 
 ValidationResult<boost::blank, LookupCriteriaError>
@@ -113,8 +111,8 @@ void LookupTableValidator::sortInPlaceByThetaThenTitleMatcher(LookupTableRows &l
 
   auto lookupRowLessThan = [](LookupRow const &lhs, LookupRow const &rhs) -> bool {
     // This method should never be called with wildcard rows
-    assert(lhs.thetaOrWildcard().is_initialized());
-    assert(rhs.thetaOrWildcard().is_initialized());
+    assert(lhs.thetaOrWildcard().has_value());
+    assert(rhs.thetaOrWildcard().has_value());
     if (*lhs.thetaOrWildcard() != *rhs.thetaOrWildcard()) {
       return *lhs.thetaOrWildcard() < *rhs.thetaOrWildcard();
     }

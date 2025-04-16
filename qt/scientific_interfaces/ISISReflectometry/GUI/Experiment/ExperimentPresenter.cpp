@@ -105,7 +105,7 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 namespace {
-bool hasUpdatedSettings(boost::optional<LookupRow> const lookupRow, PreviewRow const &previewRow) {
+bool hasUpdatedSettings(std::optional<LookupRow> const lookupRow, PreviewRow const &previewRow) {
   return lookupRow->roiDetectorIDs() != previewRow.getSelectedBanks() ||
          lookupRow->processingInstructions() != previewRow.getProcessingInstructions(ROIType::Signal) ||
          lookupRow->backgroundProcessingInstructions() != previewRow.getProcessingInstructions(ROIType::Background) ||
@@ -338,9 +338,9 @@ TransmissionStitchOptions ExperimentPresenter::transmissionStitchOptionsFromView
 
 std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView() {
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
-  if (maybeStitchParameters.is_initialized()) {
+  if (maybeStitchParameters.has_value()) {
     m_view->showStitchParametersValid();
-    return maybeStitchParameters.get();
+    return maybeStitchParameters.value();
   }
 
   m_view->showStitchParametersInvalid();

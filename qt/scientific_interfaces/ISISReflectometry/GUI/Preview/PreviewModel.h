@@ -14,8 +14,6 @@
 #include "ROIType.h"
 #include "Reduction/PreviewRow.h"
 
-#include <boost/optional.hpp>
-
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -36,9 +34,9 @@ public:
   void reduceAsync(IJobManager &jobManager) override;
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
-  boost::optional<ProcessingInstructions> getSelectedBanks() const override;
+  std::optional<ProcessingInstructions> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
-  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
+  std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
   std::optional<double> getDefaultTheta() const override;
   PreviewRow const &getPreviewRow() const override;
@@ -47,7 +45,7 @@ public:
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void setTheta(double theta) override;
-  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) override;
+  void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;
 
   void exportSummedWsToAds() const override;
