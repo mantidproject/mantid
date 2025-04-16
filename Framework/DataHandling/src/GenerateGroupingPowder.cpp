@@ -80,7 +80,7 @@ public:
         num_aa_step(int(std::ceil(360.0 / a_step))) {};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<size_t>(
-        spectrumInfo.twoTheta(i) * inv_tt_step * num_aa_step +
+        static_cast<int64_t>(spectrumInfo.twoTheta(i) * inv_tt_step * num_aa_step) +
         static_cast<int64_t>(std::floor((spectrumInfo.azimuthal(i) - aa_start) * inv_aa_step)) % num_aa_step + 1);
   };
 };
