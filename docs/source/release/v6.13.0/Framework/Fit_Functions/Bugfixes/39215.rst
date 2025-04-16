@@ -1,0 +1,1 @@
+- Improved error handling in the Levenberg Marquardt minimization algorithm, where a failed solve could incorrectly be reported as a success.
