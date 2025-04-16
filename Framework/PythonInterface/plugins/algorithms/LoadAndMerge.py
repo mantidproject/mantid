@@ -16,6 +16,7 @@ from mantid.kernel import (
 from mantid.api import (
     AlgorithmFactory,
     AlgorithmManager,
+    WorkspaceGroup,
     MultipleFileProperty,
     WorkspaceProperty,
     PythonAlgorithm,
@@ -112,8 +113,9 @@ class LoadAndMerge(PythonAlgorithm):
         # We need to create a fresh instance for each file, since
         # there might be loaders that do not reset their private members after execution.
         # So running on the same instance can potentially cause problems.
-        # Also the output will always be on ADS, since this algorithm relies on
-        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
+        # Also the target file will always be loaded onto ADS, since this algorithm relies on
+        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input).
+        # The resultant output workspace is removed from the ADS if this alg is a child.
         alg = self.createChildAlgorithm(name=self._loader, version=self._version)
         alg.setAlwaysStoreInADS(True)
         alg.setLogging(self.isLogging())
@@ -198,6 +200,20 @@ class LoadAndMerge(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=to_group[0], OutputWorkspace=output)
 
         self.setProperty("OutputWorkspace", mtd[output])
+
+        if self.isChild():
+            self.remove_output_from_ads(output)
+
+    def remove_output_from_ads(self, output_ws_name):
+        remove_ws = [output_ws_name]
+        if self.is_group_ws(output_ws_name):
+            remove_ws.extend(list(mtd[output_ws_name].getNames()))
+        for ws in remove_ws:
+            mtd.remove(ws)
+
+    @staticmethod
+    def is_group_ws(ws_name):
+        return issubclass(type(mtd[ws_name]), WorkspaceGroup)
 
 
 AlgorithmFactory.subscribe(LoadAndMerge)

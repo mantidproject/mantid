@@ -153,6 +153,7 @@ void AnalysisDataServiceImpl::rename(const std::string &oldName, const std::stri
 /**
  * Overridden remove member to delete its name held by the workspace itself.
  * It is important to do if the workspace isn't deleted after removal.
+ * If member is group workspace, stop ADS observing
  * @param name The name of a workspace to remove.
  * @return The workspace being removed from the ADS
  */
@@ -163,9 +164,15 @@ Workspace_sptr AnalysisDataServiceImpl::remove(const std::string &name) {
   } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing - remove will do what's needed
   }
+
   Kernel::DataService<API::Workspace>::remove(name);
   if (ws) {
     ws->setName("");
+  }
+
+  auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
+  if (group) {
+    group->observeADSNotifications(false);
   }
   return ws;
 }
