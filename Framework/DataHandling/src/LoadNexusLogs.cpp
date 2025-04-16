@@ -958,6 +958,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
   if (foundValueLog) {
     try {
       try {
+        // NOTE delete?
         file.openGroup("value_log", "NXlog");
       } catch (::NeXus::Exception &) {
         file.closeGroup();

@@ -17,7 +17,6 @@ set(INC_FILES
     inc/MantidNexus/NeXusException.hpp
     inc/MantidNexus/NeXusFile.hpp
 )
-# cmake-format: on
 
 set(TEST_FILES
     H5UtilTest.h
@@ -29,6 +28,7 @@ set(TEST_FILES
     NeXusFileNapiTest.h
     NeXusFileReadWriteTest.h
 )
+# cmake-format: on
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})

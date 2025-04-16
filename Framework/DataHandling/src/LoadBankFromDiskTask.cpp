@@ -416,8 +416,8 @@ void LoadBankFromDiskTask::run() {
   }
 
   // Close up the file even if errors occured.
-  file.closeGroup();
-  file.close();
+  // file.closeGroup();
+  // file.close();
 
   // Abort if anything failed
   if (m_loadError) {

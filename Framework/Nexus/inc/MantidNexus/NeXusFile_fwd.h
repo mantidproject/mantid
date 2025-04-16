@@ -139,13 +139,7 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &val
  * \li HUF Huffmann encoding (only HDF-4)
  * \ingroup cpp_types
  */
-enum NXcompression : int {
-  CHUNK = NX_CHUNK,
-  NONE = NX_COMP_NONE,
-  LZW = NX_COMP_LZW,
-  RLE = NX_COMP_RLE,
-  HUF = NX_COMP_HUF
-};
+enum class NXcompression { CHUNK = 0, NONE = 100, LZW = 200, RLE = 300, HUF = 400 };
 
 // forward declare
 namespace NeXus {
@@ -156,16 +150,6 @@ typedef std::int64_t dimsize_t;
 typedef std::vector<dimsize_t> DimVector; ///< use specifically for the dims array
 //  TODO this is probably the same as DimVector
 typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
-
-/**
- * The available compression types. These are all ignored in xml files.
- * \li NONE no compression
- * \li LZW Lossless Lempel Ziv Welch compression (recommended)
- * \li RLE Run length encoding (only HDF-4)
- * \li HUF Huffmann encoding (only HDF-4)
- * \ingroup cpp_types
- */
-enum NXcompression { CHUNK = 0, NONE = 100, LZW = 200, RLE = 300, HUF = 400 };
 
 typedef std::pair<std::string, std::string> Entry;
 typedef std::map<std::string, std::string> Entries;

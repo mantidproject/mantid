@@ -272,7 +272,7 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression const comp,
+  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
                     DimSizeVector const &bufsize, bool open_data = false);
 
   /**
