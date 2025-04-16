@@ -380,12 +380,11 @@ void File::openPath(std::string const &pathname) {
   // create a new stack -- will replace old if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
 
-  std::string name;
   H5::H5Object *current;
 
   // open all entries in path iteratively
   for (auto isubpath = ++path.begin(); isubpath != path.end(); isubpath++) {
-    name = (*isubpath);
+    std::string name = (*isubpath);
     // get most recent pointer on new stack
     current = dynamic_cast<H5::H5Object *>(new_stack.back().get());
     if (current == nullptr) {
@@ -423,12 +422,11 @@ void File::openGroupPath(std::string const &pathname) {
   // create a new stack to replace old -- will only happen if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
 
-  std::string name;
   H5::H5Object *current;
 
   // open all entries in path iteratively
   for (auto isubpath = ++path.begin(); isubpath != path.end(); isubpath++) {
-    name = (*isubpath);
+    std::string name = (*isubpath);
     // get most recent pointer on new stack
     current = dynamic_cast<H5::H5Object *>(new_stack.back().get());
     if (current == nullptr) {
@@ -914,7 +912,7 @@ NXlink File::getDataID() {
 }
 
 bool File::isDataSetOpen() {
-  H5::DataSet *current = dynamic_cast<H5::DataSet *>(getCurrentLocation());
+  H5::DataSet const *current = dynamic_cast<H5::DataSet const *>(getCurrentLocation());
   return current != nullptr;
 }
 /*----------------------------------------------------------------------*/
@@ -1146,7 +1144,7 @@ template <typename NumT> void File::readData(std::string const &dataName, NumT &
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (dataVector.size() > 0)
+  if (!dataVector.empty())
     data = dataVector[0];
   this->closeData();
 }
