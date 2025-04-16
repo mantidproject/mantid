@@ -68,7 +68,7 @@ class FittingPlotModel(object):
                 fnames = [fit_functions.name()]
                 nparams = [fit_functions.nParams()]
             params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
-            ws_is_tof = ADS.retrieve(wsname).getXDimension().getUnits() == "microsecond"
+            ws_is_tof = self._ws_is_tof(wsname)
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
             for ifunc, fname in enumerate(fnames):
@@ -246,3 +246,6 @@ class FittingPlotModel(object):
             table_dict.pop("SpecIndex", None)
             return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
         return None
+
+    def _ws_is_tof(self, wsname):
+        return ADS.retrieve(wsname).getXDimension().getUnits() == "microsecond"
