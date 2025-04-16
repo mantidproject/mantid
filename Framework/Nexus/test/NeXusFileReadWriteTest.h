@@ -241,10 +241,10 @@ public:
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-    do_rwslabvec_test(fileid, "r4_slab", r4_vec);
-    do_rwslabvec_test(fileid, "r8_slab", r8_vec);
-    do_rwslab_test(fileid, "r4_slab2d", r4_array);
-    do_rwslab_test(fileid, "r8_slab2d", r8_array);
+    do_rwslabvec_test<float>(fileid, "r4_slab", r4_vec);
+    do_rwslabvec_test<double>(fileid, "r8_slab", r8_vec);
+    do_rwslab_test<float>(fileid, "r4_slab2d", r4_array);
+    do_rwslab_test<double>(fileid, "r8_slab2d", r8_array);
 
     // check all entries
     vector<string> entry_names({"r4_slab", "r4_slab2d", "r8_slab", "r8_slab2d"});

@@ -62,6 +62,7 @@ public:
     // create the file
     std::ofstream outfile{filename};
     outfile.close();
+    outfile << "nothing never\n";
     TS_ASSERT(std::filesystem::exists(filename));
 
     // remove it, make sure removed
@@ -79,6 +80,56 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.close();
     TS_ASSERT(std::filesystem::exists(filename));
+  }
+
+  void test_can_readwrite() {
+    cout << "\ntest readwrite\n";
+
+    // create the file and ensure it exists
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read/write mode, edit it
+    file.openFile(filename, NXACC_RDWR);
+    string groupName("test_grp"), input("test"), output;
+    file.createGroup(groupName);
+    file.setComment(groupName, input);
+    file.close();
+
+    // reopen, check still there
+    file.openFile(filename, NXACC_READ);
+    output = file.getComment(groupName);
+    TS_ASSERT_EQUALS(input, output);
+    file.close();
+  }
+
+  void test_create_readonly() {
+    cout << "\ntest readonly\n";
+    fflush(stdout);
+
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+
+    string grp("test_grp"), expected("teststring"), notexpected("never used"), actual;
+
+    // create the file and ensure it exists
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.createGroup(grp);
+    file.setComment(grp, expected);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read-only mode, edit it -- should fail, and still be same
+    file.openFile(filename, NXACC_READ);
+    TS_ASSERT(file.exists(grp));
+    TS_ASSERT_THROWS_ANYTHING(file.setComment(grp, notexpected));
+    actual = file.getComment(grp);
+    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_DIFFERS(actual, notexpected);
+    file.close();
   }
 
   void test_flush() {
@@ -100,14 +151,18 @@ public:
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
 
     string grp("test_group"), cls("NXsample");
 
+    // check there are no groups
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
     // check error conditions
     TS_ASSERT_THROWS(file.makeGroup(grp, ""), NeXus::Exception &);
     TS_ASSERT_THROWS(file.makeGroup("", cls), NeXus::Exception &);
     // check works when correct
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
   }
 
   void test_open_group() {
@@ -116,9 +171,14 @@ public:
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
+    // get location of root file
+    auto loc = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", loc);
+
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // check error conditions
     TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
@@ -127,6 +187,9 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
+    auto new_loc = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", new_loc);
+    TS_ASSERT_DIFFERS(loc, new_loc);
   }
 
   void test_open_group_bad() {
@@ -138,6 +201,7 @@ public:
     // create a group, to be opened
     string grp("test_group"), cls("NXpants");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // try to open it with wrong class name
     string notcls("NXshorts");
@@ -154,10 +218,17 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
+    auto layer1 = file.getCurrentLocation();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 0);
 
     // create a group inside the group -- open it
     file.makeGroup(grp2, cls2, false);
     file.openGroup(grp2, cls2);
+    auto layer2 = file.getCurrentLocation();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 1);
+    TS_ASSERT_DIFFERS(layer1, layer2);
   }
 
   void test_closeGroup() {
@@ -165,6 +236,7 @@ public:
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    auto begin = file.getCurrentLocation();
 
     // check error at root
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
@@ -172,9 +244,11 @@ public:
     // now make group, close it, and check we are back at root
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, true);
-    file.closeGroup();
-
+    auto ingrp = file.getCurrentLocation();
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
+    auto outgrp = file.getCurrentLocation();
+    TS_ASSERT_DIFFERS(outgrp, ingrp);
+    TS_ASSERT_EQUALS(outgrp, begin);
   }
 
   // #################################################################################################################
@@ -197,13 +271,19 @@ public:
 
     // now make a NXentry group and try
     file.makeGroup("entry", "NXentry", true);
+    H5::Group *grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     // check some failing cases
     TS_ASSERT_THROWS(file.makeData("", type, dims), NeXus::Exception &);
     TS_ASSERT_THROWS(file.makeData(name, type, DimVector()), NeXus::Exception &);
 
     // check it works when it works
-    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims, true));
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 1);
+
+    H5::DataSet *data = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_EQUALS(data->getObjName(), "/entry/some_data");
   }
 
   void test_makeData_length() {
@@ -213,6 +293,8 @@ public:
 
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
+    H5::Group *grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     NXnumtype type(NXnumtype::CHAR);
 
@@ -229,10 +311,15 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
+    // get location of to-level
+    auto top = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", top);
+
     // create a dataset, to be opened
     string data("test_group");
     NXnumtype type(NXnumtype::CHAR);
     file.makeData(data, type, 3, false);
+    TS_ASSERT_EQUALS(top->getNumObjs(), 1);
 
     // check error conditions
     TS_ASSERT_THROWS(file.openData(string()), NeXus::Exception &);
@@ -240,6 +327,27 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
+    auto layer1 = file.getCurrentLocation();
+    cout << strmakef("Located at %p\n", layer1);
+    TS_ASSERT_DIFFERS(top, layer1);
+  }
+
+  void test_make_data_layers_bad() {
+    cout << "\ntest makeData layers -- bad\n";
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    NXnumtype type(NXnumtype::CHAR);
+    string data1("layer1"), data2("layer2");
+
+    // create a file with data -- open data
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData(data1, type, 1, false);
+    file.openData(data1);
+
+    // try to create a dataset inside the dataset -- this throws an errpr
+    TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
   }
 
   void test_make_data_layers_bad() {
@@ -263,14 +371,19 @@ public:
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
+    auto begin = file.getCurrentLocation();
 
     // check error at root
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
 
     // now make data, close it, and check we are back at root
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
+    auto indata = file.getCurrentLocation();
     TS_ASSERT_THROWS_NOTHING(file.closeData());
+    auto outdata = file.getCurrentLocation();
 
+    TS_ASSERT_DIFFERS(outdata, indata);
+    TS_ASSERT_EQUALS(outdata, begin);
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
   }
 
@@ -349,6 +462,23 @@ public:
     // put/get a string
     cout << "\nread/write string...\n";
     string in("this is a string"), out;
+    file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // do it another way
+    in = "this is some different data";
+    DimVector dims({(dimsize_t)in.size()});
+    file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // yet another way
+    in = "even more data";
     file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
     out = file.getStrData();
@@ -421,7 +551,8 @@ public:
     file.closeData();
     // confirm
     TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 17);
+    TS_ASSERT_EQUALS(info.dims.front(), 18);
+    TS_ASSERT_EQUALS(string(word), string(read));
   }
 
   void test_data_putget_vector() {
@@ -553,13 +684,14 @@ public:
     file.closeGroup();
     file.closeGroup();
 
-    // tests invalid cases
-    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
-
     // make sure we are at root
     file.openPath("/");
+
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
 
     // open the root
     file.openGroup("entry1", "NXentry");
@@ -656,11 +788,16 @@ public:
 
     std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
 
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
+
     // put/get an int attribute
     do_test_putget_attr(file, expected_names[0], 12);
 
     // put/get a double attribute
     do_test_putget_attr(file, expected_names[1], 120.2e6);
+
+    // put/get a single char attribute
+    do_test_putget_attr(file, expected_names[2], 'x');
 
     // check attr infos
     auto attrInfos = file.getAttrInfos();
@@ -696,7 +833,7 @@ public:
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
     TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
     TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
+    TS_ASSERT_EQUALS(attrInfos[0].length, 1);
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
     TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
@@ -774,6 +911,16 @@ public:
     actual = file.getEntries();
     expected = Entries({Entry{"layer3c", "NXentry"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // also test root level name
+    TS_ASSERT_EQUALS("entry1", file.getTopLevelEntryName());
+
+    // also test getting the directory
+    file.getEntryDirectory(actual);
+    for (auto it = tree.cbegin(); it != tree.cend(); it++) {
       TS_ASSERT_EQUALS(actual.count(it->first), 1);
       TS_ASSERT_EQUALS(it->second, actual[it->first]);
     }
