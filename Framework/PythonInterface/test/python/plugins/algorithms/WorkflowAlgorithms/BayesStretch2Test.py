@@ -14,7 +14,7 @@ from BayesStretch2 import BayesStretch2
 from unittest import mock
 
 from quickBayes.functions.qse_fixed import QSEFixFunction
-from quickBayes.workflow.qse_search import QSEGridSearch
+from quickBayes.workflow.grid_search.qse_grid_search import QSEGridSearch
 
 SAMPLE_NAME = "__BayesStretchTest_Sample"
 RES_NAME = "__BayesStretchTest_Resolution"

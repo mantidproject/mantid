@@ -66,7 +66,7 @@ class BayesStretch2(QuickBayesTemplate):
         return QSEFixFunction(bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x)
 
     def QSEGridSearch(self):
-        from quickBayes.workflow.qse_search import QSEGridSearch
+        from quickBayes.workflow.grid_search.qse_grid_search import QSEGridSearch
 
         return QSEGridSearch()
 

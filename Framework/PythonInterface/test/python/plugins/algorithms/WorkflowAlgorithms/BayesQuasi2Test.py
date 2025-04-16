@@ -13,7 +13,7 @@ from BayesQuasi2 import BayesQuasi2
 from unittest import mock
 
 from quickBayes.fitting.fit_engine import FitEngine
-from quickBayes.workflow.QlData import QLData
+from quickBayes.workflow.model_selection.QlData import QLData
 from quickBayes.functions.qldata_function import QlDataFunction
 
 SAMPLE_NAME = "__BayesStretchTest_Sample"
