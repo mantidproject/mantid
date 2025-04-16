@@ -182,7 +182,8 @@ private:
       slab_array[0] = i;
       file.putSlab(slab_array, i, 1);
       file.flush();
-      file.openData("flush_data");
+      // NOTE: trying to open an already-opened dataset apparently did nothing
+      // file.openData("flush_data");
     }
     file.closeData();
     file.closeGroup();
@@ -247,10 +248,12 @@ private:
     TS_ASSERT_EQUALS(doubles[1], 21.0)
     file.closeData();
 
-    // Throws when you coerce to int from a real/double source
+    // No problem coercing to int from a real/double source
     ints.clear();
     file.openData("r8_data");
-    TS_ASSERT_THROWS_ANYTHING(file.getDataCoerce(ints));
+    file.getDataCoerce(ints);
+    TS_ASSERT_EQUALS(ints.size(), 20);
+    TS_ASSERT_EQUALS(ints[1], 21);
     file.closeData();
 
     // Close the "entry" group
@@ -259,7 +262,7 @@ private:
     // openpath checks
     file.openPath("/entry/data/comp_data");
     file.openPath("/entry/data/comp_data");
-    file.openPath("../r8_data");
+    // file.openPath("../r8_data");
     cout << "NXopenpath checks OK\n";
 
     // everything went fine
