@@ -42,6 +42,7 @@ except ImportError:
 log = Logger("HelpWindowModel")
 # --------------------------------------
 
+# Imports moved below logger/config setup to ensure log is defined
 from qtpy.QtCore import QUrl  # noqa: E402
 from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo  # noqa: E402
 
@@ -49,14 +50,14 @@ from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlR
 def getMantidVersionString():
     """Placeholder function to get Mantid version (e.g., 'v6.13.0')."""
     try:
-        import mantid
+        import mantid  # Keep import local as it might fail
 
         if hasattr(mantid, "__version__"):
             versionParts = str(mantid.__version__).split(".")
             if len(versionParts) >= 2:
                 return f"v{versionParts[0]}.{versionParts[1]}.0"
     except ImportError:
-        pass
+        pass  # Mantid might not be available
     log.warning("Could not determine Mantid version for documentation URL.")
     return None
 
@@ -184,23 +185,60 @@ class HelpWindowModel:
     def build_help_url(self, relative_url):
         """
         Returns a QUrl pointing to the determined doc source for the given relative URL.
+        Raises FileNotFoundError if building a URL for local mode and the target file doesn't exist.
         """
+        # Default page logic
         if not relative_url or not relative_url.lower().endswith((".html", ".htm")):
             relative_url = "index.html"
-
+        # Ensure relative path format
         relative_url = relative_url.lstrip("/")
-        base = self.get_base_url()  # Uses the final URL determined during init
-        full_url_str = f"{base}{relative_url}"
 
-        url = QUrl(full_url_str)
-        if not url.isValid():
-            log.warning(f"Constructed invalid URL: {full_url_str} from base '{base}' and relative '{relative_url}'")
-        return url
+        base = self.get_base_url()  # Get base URL (file:/// or https://)
+
+        # --- Check local file existence if in local mode ---
+        if self._is_local:
+            # Convert base file:/// URL back to a filesystem path
+            # Note: QUrl().toLocalFile() handles platform specifics
+            base_path = QUrl(base).toLocalFile()
+            if not base_path:  # Defensive check
+                err_msg = f"Cannot determine local base path from URL: {base}"
+                log.error(err_msg)
+                # Raise a different error as this indicates a problem with the base URL itself
+                raise ValueError(err_msg)
+
+            # Construct the full potential path to the target HTML file
+            full_path = os.path.join(base_path, relative_url)
+            # Normalize for consistent checking and clearer error messages
+            norm_full_path = os.path.normpath(full_path)
+
+            log.debug(f"Checking local file existence: {norm_full_path}")
+            # Check if it exists AND is a file (not a directory)
+            if not os.path.isfile(norm_full_path):
+                err_msg = f"Local help file not found: {norm_full_path}"
+                log.warning(err_msg)
+                # Raise FileNotFoundError as requested by reviewer suggestion
+                raise FileNotFoundError(err_msg)
+            else:
+                # File exists, return the QUrl for the local file
+                log.debug(f"Local file found. Returning URL: file:///{norm_full_path}")
+                return QUrl.fromLocalFile(norm_full_path)
+        # -------------------------------------------------
+        else:  # Online mode
+            # Construct the full online URL string
+            full_url_str = f"{base}{relative_url}"
+            url = QUrl(full_url_str)
+            # Basic validation check
+            if not url.isValid():
+                log.warning(f"Constructed invalid Online URL: {full_url_str} from base '{base}' and relative '{relative_url}'")
+            log.debug(f"Returning online URL: {url.toString()}")
+            return url
 
     def get_home_url(self):
         """
         Return the 'home' page URL (index.html) based on the determined mode/base URL.
+        May raise FileNotFoundError if in local mode and index.html does not exist.
         """
+        # This call now incorporates the existence check from build_help_url
         return self.build_help_url("index.html")
 
     # --- Interceptor creation uses the state set during init ---

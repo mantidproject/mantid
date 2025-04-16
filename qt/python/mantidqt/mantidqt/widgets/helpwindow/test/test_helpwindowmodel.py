@@ -38,13 +38,31 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
 
         self.assertTrue(model.is_local_docs_mode(), "Expected is_local_docs_mode() True")
         self.assertEqual(model.MODE_OFFLINE, model.get_mode_string(), "Expected mode string 'Offline Docs'")
-        test_url = model.build_help_url("algorithms/MyAlgorithm-v1.html")
+
+        dummy_home_path = os.path.join(self.temp_dir, "index.html")
+        with open(dummy_home_path, "w") as f:
+            f.write("<html></html>")
+
+        algo_subdir = os.path.join(self.temp_dir, "algorithms")
+        os.makedirs(algo_subdir, exist_ok=True)
+        algo_file_rel_path = "algorithms/MyAlgorithm-v1.html"
+        dummy_algo_path = os.path.join(self.temp_dir, algo_file_rel_path)
+        with open(dummy_algo_path, "w") as f:
+            f.write("<html></html>")
+
+        test_url = model.build_help_url(algo_file_rel_path)
         self.assertTrue(test_url.isLocalFile(), "Expected a local file:// URL")
 
         local_file_path = test_url.toLocalFile()
         norm_local_file_path = os.path.normpath(local_file_path)
-        norm_expected_prefix = os.path.normpath(os.path.abspath(self.temp_dir))
+        norm_expected_file_path = os.path.normpath(dummy_algo_path)
+        self.assertEqual(
+            norm_local_file_path,
+            norm_expected_file_path,
+            f"URL path '{norm_local_file_path}' should match dummy file path '{norm_expected_file_path}'",
+        )
 
+        norm_expected_prefix = os.path.normpath(os.path.abspath(self.temp_dir))
         self.assertTrue(
             norm_local_file_path.startswith(norm_expected_prefix + os.sep),
             f"URL path '{norm_local_file_path}' should start with temp dir path '{norm_expected_prefix}{os.sep}'",
@@ -52,6 +70,9 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
 
         home_url = model.get_home_url()
         self.assertTrue(home_url.isLocalFile(), "Expected a local file:// for home URL")
+        norm_home_path = os.path.normpath(home_url.toLocalFile())
+        norm_expected_home_path = os.path.normpath(dummy_home_path)
+        self.assertEqual(norm_home_path, norm_expected_home_path, "Home URL should point to dummy index.html")
 
         mock_instance.getString.assert_called_once_with(DOCS_ROOT_KEY, True)
         mock_ConfigService.Instance.assert_called_once()
