@@ -12,9 +12,9 @@
 #include "PreviewRow.h"
 #include "Row.h"
 #include "RowExceptions.h"
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
+#include <optional>
 #include <vector>
 
 namespace {
@@ -37,24 +37,23 @@ LookupTable::LookupTable(std::initializer_list<LookupRow> rowsIn) : m_lookupRows
 
 std::vector<LookupRow> const &LookupTable::rows() const { return m_lookupRows; }
 
-boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
+std::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
   auto const &title = !row.getParent() ? EMPTY_SEARCH_TITLE : row.getParent()->name();
   return findLookupRow(title, row.theta(), tolerance);
 }
 
-boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
+std::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
   auto const title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
-  if (titleAndTheta.is_initialized()) {
-    return findLookupRow(titleAndTheta.get()[0], previewRow.theta(), tolerance);
-  } else {
-    return findLookupRow(title, previewRow.theta(), tolerance);
+  if (titleAndTheta.has_value()) {
+    return findLookupRow(titleAndTheta.value()[0], previewRow.theta(), tolerance);
   }
+  return findLookupRow(title, previewRow.theta(), tolerance);
 }
 
-boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, boost::optional<double> const &theta,
-                                                      double tolerance) const {
+std::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, boost::optional<double> const &theta,
+                                                    double tolerance) const {
   // First filter lookup rows by title
   auto lookupRows = findMatchingRegexes(title);
   if (auto found = searchByTheta(lookupRows, theta, tolerance)) {
@@ -73,18 +72,17 @@ boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, 
   return result;
 }
 
-boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
-                                                      boost::optional<double> const &thetaAngle,
-                                                      double tolerance) const {
+std::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
+                                                    boost::optional<double> const &thetaAngle, double tolerance) const {
   std::vector<LookupRow> matchingRows;
   auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
+    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().value(), tolerance);
   };
 
   std::copy_if(lookupRows.cbegin(), lookupRows.cend(), std::back_inserter(matchingRows), predicate);
 
   if (matchingRows.empty())
-    return boost::none;
+    return std::nullopt;
   else if (matchingRows.size() == 1) {
     return matchingRows[0];
   } else {
@@ -108,13 +106,13 @@ std::vector<LookupRow> LookupTable::findEmptyRegexes() const {
   return results;
 }
 
-boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
+std::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
   auto match = std::find_if(m_lookupRows.cbegin(), m_lookupRows.cend(),
                             [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  if (match == m_lookupRows.cend())
-    return boost::none;
-  else
-    return *match;
+  if (match == m_lookupRows.cend()) {
+    return std::nullopt;
+  }
+  return *match;
 }
 
 void LookupTable::updateLookupRow(LookupRow lookupRow, double tolerance) {

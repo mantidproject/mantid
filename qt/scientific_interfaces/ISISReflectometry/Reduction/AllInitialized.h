@@ -12,30 +12,27 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-template <typename Param> bool allInitialized(boost::optional<Param> const &param) { return param.is_initialized(); }
+template <typename Param> bool allInitialized(std::optional<Param> const &param) { return param.has_value(); }
 
 template <typename FirstParam, typename SecondParam, typename... Params>
-bool allInitialized(boost::optional<FirstParam> const &first, boost::optional<SecondParam> const &second,
-                    boost::optional<Params> const &...params) {
-  return first.is_initialized() && allInitialized(second, params...);
+bool allInitialized(std::optional<FirstParam> const &first, std::optional<SecondParam> const &second,
+                    std::optional<Params> const &...params) {
+  return first.has_value() && allInitialized(second, params...);
 }
 
 template <typename Result, typename... Params>
-boost::optional<Result> makeIfAllInitialized(boost::optional<Params> const &...params) {
+std::optional<Result> makeIfAllInitialized(std::optional<Params> const &...params) {
   if (allInitialized(params...)) {
-    return Result(params.get()...);
+    return Result(params.value()...);
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 template <typename... Params> bool allInitializedPairs(Params... args) { return (... && args); }
 
 template <typename Result, typename... Params>
-std::optional<Result> makeIfAllInitializedPairs(std::pair<std::optional<Params>, bool> const &...params) {
-  if (allInitializedPairs(params.second...)) {
-    return Result(params.first.get()...);
-  }
-  return std::nullopt;
+std::optional<Result> makeIfAllInitializedPairs(std::optional<Params> const &...params) {
+  return Result(params.value()...);
 }
 
 } // namespace ISISReflectometry

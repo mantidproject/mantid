@@ -9,8 +9,8 @@
 
 #include "Common/DllConfig.h"
 #include "LookupRow.h"
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -23,9 +23,9 @@ public:
   LookupTable(std::vector<LookupRow> rowsIn);
   LookupTable(std::initializer_list<LookupRow> rowsIn);
 
-  boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
-  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
-  boost::optional<LookupRow> findWildcardLookupRow() const;
+  std::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  std::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
+  std::optional<LookupRow> findWildcardLookupRow() const;
   void updateLookupRow(LookupRow lookupRow, double tolerance);
   size_t getIndex(LookupRow const &) const;
   std::vector<LookupRow> const &rows() const;
@@ -37,9 +37,9 @@ public:
 private:
   std::vector<LookupRow> m_lookupRows;
 
-  boost::optional<LookupRow> findLookupRow(std::string const &title, boost::optional<double> const &, double) const;
-  boost::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
-                                           double) const;
+  std::optional<LookupRow> findLookupRow(std::string const &title, boost::optional<double> const &, double) const;
+  std::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
+                                         double) const;
   std::vector<LookupRow> findMatchingRegexes(std::string const &title) const;
   std::vector<LookupRow> findEmptyRegexes() const;
 };
