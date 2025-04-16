@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ParseReflectometryStrings.h"
-#include "AllInitialized.h"
 #include "Common/Parse.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
@@ -184,7 +183,7 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
   auto first = parseRunNumbersOrWhitespace(firstTransmissionRun);
   auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);
 
-  if (allInitialized(first, second)) {
+  if (first.has_value() && second.has_value()) {
     if (first.value().empty() && !second.value().empty()) {
       errorColumns.emplace_back(0);
       return errorColumns;
