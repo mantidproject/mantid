@@ -57,7 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
     // set only 8 values for the matrix
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_EQUALS(alg.isExecuted(), false);
   }
 
