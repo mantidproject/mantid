@@ -72,7 +72,6 @@ IBeamProfile::IBeamProfile(const V3D center) : m_beamCenter(center) {}
  * @brief Get the intersection of the beam with the sample
  *
  * @param sample Sample object to be intersected with
- * @param beamDirection Direction from sample to beam to get correct intersection
  * @return Geometry::IObject_sptr
  */
 Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::IObject &sample) const {
