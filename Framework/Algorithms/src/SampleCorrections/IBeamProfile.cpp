@@ -84,6 +84,10 @@ Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::I
     return nullptr;
   }
 
+  if ((sampleBB.minPoint() == intersectionBox.minPoint()) && (sampleBB.maxPoint() == intersectionBox.maxPoint())) {
+    return std::shared_ptr<Geometry::IObject>(sample.clone());
+  }
+
   double yExtent = intersectionBox.yMax() - intersectionBox.yMin();
   double xExtent = intersectionBox.xMax() - intersectionBox.xMin();
   double zExtent = intersectionBox.zMax() - intersectionBox.zMin();

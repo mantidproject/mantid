@@ -57,6 +57,8 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
           Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
       integrationVolume = beamProfile->getIntersectionWithSample(*m_sampleObject);
     } catch (...) {
+    }
+    if (integrationVolume == nullptr) {
       // If the beam profile is not defined, use the sample object
       integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
     }
