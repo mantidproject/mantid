@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"
@@ -29,7 +30,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 */
-class MANTID_ALGORITHMS_DLL UnwrapMonitor final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapMonitor final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   UnwrapMonitor();
   ~UnwrapMonitor() override = default;
