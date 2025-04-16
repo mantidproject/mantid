@@ -605,6 +605,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             OutputWorkspace=ws,
             startProgress=0.0,
             endProgress=0.6,
+            StoreInADS=True,
         )
         if (
             self.getPropertyValue("OutputTreatment") not in ["AverageTwoTheta", "IndividualXY"]
