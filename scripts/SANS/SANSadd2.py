@@ -26,6 +26,7 @@ from mantid.simpleapi import (
     SaveNexusProcessed,
     UnGroupWorkspace,
 )
+from sans.common.file_information import get_geometry_information_isis_nexus, convert_to_flag
 from SANSUtility import (
     AddOperation,
     transfer_special_sample_logs,
@@ -378,6 +379,13 @@ def _load_ws(entry, ext, inst, ws_name, raw_types, period=_NO_INDIVIDUAL_PERIODS
 
     if _is_type(ext, raw_types):
         LoadSampleDetailsFromRaw(InputWorkspace=ws_name, Filename=path + "/" + f_name)
+    else:
+        height, width, thickness, shape = get_geometry_information_isis_nexus(full_path)
+        sample = mtd[ws_name].sample()
+        sample.setGeometryFlag(convert_to_flag(shape))
+        sample.setHeight(height)
+        sample.setWidth(width)
+        sample.setThickness(thickness)
 
     # Change below when logs in Nexus files work  file types of .raw need their log files to be copied too
     # if isType(ext, raw_types):
