@@ -16,10 +16,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 Clipboard::Clipboard() : m_subtrees(std::nullopt), m_subtreeRoots(std::nullopt) {}
 
 Clipboard::Clipboard(std::vector<MantidQt::MantidWidgets::Batch::Subtree> subtrees,
-                     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> subtreeRoots) {
-  m_subtrees = std::optional(subtrees);
-  m_subtreeRoots = std::optional(subtreeRoots);
-}
+                     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> subtreeRoots)
+    : m_subtrees(std::optional(subtrees)), m_subtreeRoots(std::optional(subtreeRoots)) {}
 
 bool Clipboard::isInitialized() const { return m_subtrees.has_value() && m_subtreeRoots.has_value(); }
 
@@ -79,7 +77,7 @@ Group Clipboard::createGroupForRoot(int rootIndex) const {
 
   auto result = Group(groupName(rootIndex));
   auto rowsToAdd = createRowsForRootChildren(rootIndex);
-  for (auto &row : rowsToAdd)
+  for (auto const &row : rowsToAdd)
     result.appendRow(row);
   return result;
 }

@@ -15,7 +15,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IGroup : public Item {
 public:
-  virtual ~IGroup() = default;
+  ~IGroup() override = default;
 
   virtual std::string const &name() const = 0;
   virtual void setName(std::string const &name) = 0;

@@ -508,7 +508,7 @@ void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocatio
 }
 
 void RunsTablePresenter::applyStylingToParent(Row const &row) {
-  auto *parent = row.getParent();
+  const auto *parent = row.getParent();
   if (parent) {
     auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
     setRowStylingForItem(parentLocation, *parent);
@@ -747,12 +747,12 @@ void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
 
   int groupIndex = 0;
-  for (auto &group : m_model.mutableReductionJobs().mutableGroups()) {
+  for (auto const &group : m_model.mutableReductionJobs().mutableGroups()) {
     auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     setRowStylingForItem(groupLocation, group);
 
     int rowIndex = 0;
-    for (auto &row : group.rows()) {
+    for (auto const &row : group.rows()) {
       auto rowLocation = MantidWidgets::Batch::RowLocation({groupIndex, rowIndex});
 
       if (!row)
@@ -783,10 +783,10 @@ void RunsTablePresenter::notifyRowStateChanged(std::optional<std::reference_wrap
 
 void RunsTablePresenter::notifyRowModelChanged() {
   int groupIndex = 0;
-  for (auto &group : m_model.reductionJobs().groups()) {
-    auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
+  for (auto const &group : m_model.reductionJobs().groups()) {
+    // auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     int rowIndex = 0;
-    for (auto &row : group.rows()) {
+    for (auto const &row : group.rows()) {
       if (row) {
         auto rowLocation = MantidWidgets::Batch::RowLocation({groupIndex, rowIndex});
         m_jobViewUpdater.rowModified(groupOf(rowLocation), rowOf(rowLocation), *row);

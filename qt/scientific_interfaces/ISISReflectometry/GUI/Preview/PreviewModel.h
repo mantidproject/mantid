@@ -26,7 +26,7 @@ class IJobManager;
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel final : public IPreviewModel {
 public:
   PreviewModel();
-  virtual ~PreviewModel() = default;
+  ~PreviewModel() override = default;
 
   bool loadWorkspaceFromAds(std::string const &workspaceName) override;
   void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
