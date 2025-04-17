@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -24,12 +25,18 @@ using Mantid::API::ExperimentInfo_sptr;
 using Mantid::Geometry::Component;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_sptr;
+using Mantid::Geometry::ReferenceFrame;
+using Mantid::Geometry::Handedness::Left;
+using Mantid::Geometry::Handedness::Right;
+using Mantid::Geometry::PointingAlong::X;
+using Mantid::Geometry::PointingAlong::Y;
+using Mantid::Geometry::PointingAlong::Z;
 using Mantid::Kernel::V3D;
 
 class IBeamProfileTest : public CxxTest::TestSuite {
 private:
   void checkIntersectionVolume(const std::shared_ptr<IObject> &intersectionVolume, double expectedX, double expectedY,
-                               double expectedZ) {
+                               double expectedZ, const V3D &expectedCenter = V3D(0., 0., 0.)) {
     TS_ASSERT(intersectionVolume);
     double yExtent, xExtent, zExtent;
     xExtent = intersectionVolume->getBoundingBox().xMax() - intersectionVolume->getBoundingBox().xMin();
@@ -39,6 +46,11 @@ private:
     TS_ASSERT_EQUALS(yExtent, expectedY);
     TS_ASSERT_EQUALS(xExtent, expectedX);
     TS_ASSERT_EQUALS(zExtent, expectedZ);
+
+    auto center = intersectionVolume->getBoundingBox().centrePoint();
+    TS_ASSERT_EQUALS(center.X(), expectedCenter.X());
+    TS_ASSERT_EQUALS(center.Y(), expectedCenter.Y());
+    TS_ASSERT_EQUALS(center.Z(), expectedCenter.Z());
   }
 
   ExperimentInfo_sptr createInstrument(const V3D &sourcePos) {
@@ -53,6 +65,9 @@ private:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
     instrument->markAsSource(source);
+    if (sourcePos.Z() == 0.0 && sourcePos.Y() != 0.0) {
+      instrument->setReferenceFrame(std::shared_ptr<ReferenceFrame>(new ReferenceFrame(Z, Y, Z, Right, "source")));
+    }
     experiment->setInstrument(instrument);
     return experiment;
   }
@@ -152,13 +167,13 @@ public:
   }
 
   void test_beamNotOnZAxis() {
-    const auto sample = createCuboid(2., 3., 5., V3D(0., 0., 0.), "sample");
+    const auto sample = createCuboid(2., 15., 5., V3D(0., 0., 0.), "sample");
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 10., 20.);
 
     const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample, V3D(0., 1., 0.));
+    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
-    checkIntersectionVolume(intersectionVolume, 4., 5., 6.);
+    checkIntersectionVolume(intersectionVolume, 4., 30., 10.);
   }
 
   void test_bigSampleSmallBeamNotOnZAxis() {
@@ -166,8 +181,8 @@ public:
     auto experiment = createExperimentWithSlitBeam(V3D(0., -10., 0.), 5., 5.);
 
     const auto beamProfile = BeamProfileFactory::createBeamProfile(*experiment->getInstrument(), experiment->sample());
-    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample, V3D(0., 1., 0.));
+    const auto intersectionVolume = beamProfile->getIntersectionWithSample(*sample);
 
-    checkIntersectionVolume(intersectionVolume, 5., 2.5, 20.);
+    checkIntersectionVolume(intersectionVolume, 5., 20, 5.);
   }
 };

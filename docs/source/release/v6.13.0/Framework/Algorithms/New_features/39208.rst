@@ -1,0 +1,1 @@
+- ``AnyShapeAbsorption`` can now determine the gauge volume by using the BeamProfile

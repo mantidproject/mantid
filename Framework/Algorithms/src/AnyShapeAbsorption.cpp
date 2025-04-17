@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -21,6 +22,7 @@ DECLARE_ALGORITHM(AnyShapeAbsorption)
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
+using Mantid::Algorithms::BeamProfileFactory;
 
 AnyShapeAbsorption::AnyShapeAbsorption() : AbsorptionCorrection(), m_cubeSide(0.0) {}
 
@@ -47,12 +49,20 @@ std::string AnyShapeAbsorption::sampleXML() {
 void AnyShapeAbsorption::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
-  auto integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
+  IObject_const_sptr integrationVolume;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = constructGaugeVolume();
+  } else {
+    try {
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      integrationVolume = beamProfile->getIntersectionWithSample(*m_sampleObject);
+    } catch (std::invalid_argument &e) {
+      // If the beam profile is not defined, we will get an invalid_argument error, so use the sample object instead
+      integrationVolume = IObject_const_sptr(m_sampleObject->clone());
+    }
   }
 
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_sampleObject, m_cubeSide);
+  const auto &raster = Geometry::Rasterize::calculate(m_beamDirection, *m_sampleObject, *integrationVolume, m_cubeSide);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
