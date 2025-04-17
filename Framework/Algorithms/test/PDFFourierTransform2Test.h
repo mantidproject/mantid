@@ -46,10 +46,10 @@ namespace {
  * Create Workspace from 0 to N*dx
  */
 Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx, const std::string &name, const std::string &unitlabel,
-                                           const bool withBadValues = false) {
-
+                                           const bool withBadValues = false, const bool makePoints = true) {
+  auto nx = (makePoints) ? n : n + 1;
   Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, n, n));
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, nx, n));
 
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
@@ -59,8 +59,13 @@ Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx, const std::strin
     X[i] = double(i) * dx;
     Y[i] = X[i] + 1.0;
     E[i] = sqrt(fabs(X[i]));
+    if (!makePoints) {
+      X[i] = X[i] - dx / 2; // convert to bin edge
+    }
   }
-
+  if (!makePoints) {
+    X[n] = X[n - 1] + dx; // final bin edge
+  }
   if (withBadValues) {
     Y[0] = std::numeric_limits<double>::quiet_NaN();
     Y[Y.size() - 1] = std::numeric_limits<double>::quiet_NaN();
@@ -128,10 +133,10 @@ public:
     const auto &GofR = pdfws->y(0);
     const auto &pdfUnit = pdfws->getAxis(0)->unit();
 
-    TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
-    TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(GofR[0], 0.0200, 0.0001);
-    TS_ASSERT_DELTA(GofR[249], -0.4928, 0.0001);
+    TS_ASSERT_DELTA(R[0], 0.005, 0.0001);
+    TS_ASSERT_DELTA(R[249], 2.495, 0.0001);
+    TS_ASSERT_DELTA(GofR[0], 0.01150, 0.0001);
+    TS_ASSERT_DELTA(GofR[249], -0.6148, 0.0001);
     TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
   }
 
@@ -201,8 +206,8 @@ public:
     const auto &R = pdfws->x(0);
     const auto &GofR = pdfws->y(0);
 
-    TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
-    TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
+    TS_ASSERT_DELTA(R[0], 0.005, 0.0001);
+    TS_ASSERT_DELTA(R[249], 2.495, 0.0001);
     // make sure that nan didn' slip in
     TS_ASSERT(std::find_if(GofR.begin(), GofR.end(), [](const double d) { return std::isnan(d); }) == GofR.end());
   }
@@ -231,7 +236,7 @@ public:
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("PDFGofR"));
     const auto &GofR = pdfws->y(0);
 
-    TS_ASSERT(GofR[0] > 40.0);
+    TS_ASSERT(GofR[0] > 10.0);
     for (size_t i = 1; i < GofR.size(); i++) {
       TS_ASSERT_LESS_THAN(fabs(GofR[i]), 0.2);
     }
@@ -263,10 +268,10 @@ public:
     const auto &SofQ = sofqws->y(0);
     const auto &SofQUnit = sofqws->getAxis(0)->unit();
 
-    TS_ASSERT_DELTA(Q[0], 0.01, 0.0001);
-    TS_ASSERT_DELTA(Q[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(SofQ[0], 5.1875, 0.0001);
-    TS_ASSERT_DELTA(SofQ[249], 1.1068, 0.0001);
+    TS_ASSERT_DELTA(Q[0], 0.005, 0.0001);
+    TS_ASSERT_DELTA(Q[249], 2.495, 0.0001);
+    TS_ASSERT_DELTA(SofQ[0], 5.58335, 0.0001);
+    TS_ASSERT_DELTA(SofQ[249], 1.0678, 0.0001);
     TS_ASSERT_EQUALS(SofQUnit->caption(), "q");
   }
 
@@ -330,7 +335,7 @@ public:
     // check g(r) returns correct value
     DataObjects::Workspace2D_sptr pdfws_gr = run_pdfft2_alg(ws, "g(r)", "Forward");
     const auto little_gofR = pdfws_gr->y(0);
-    const auto gofR_comparison = 3.2015617108;
+    const auto gofR_comparison = 3.5310290237;
     TS_ASSERT_DELTA(little_gofR[10], gofR_comparison, 1e-8);
 
     // check G(r) returns correct value
@@ -410,15 +415,31 @@ public:
     TS_ASSERT_DELTA(actual_from_gkr, exp_from_gkr, 1e-8);
   }
 
+  void test_points_and_hist_input_give_same_answer() {
+    API::MatrixWorkspace_sptr wsPoints = createWS(20, 0.1, "CheckResultPoints", "MomentumTransfer", false, true);
+    API::MatrixWorkspace_sptr wsHist = createWS(20, 0.1, "CheckResultHist", "MomentumTransfer", false, false);
+
+    // check g(r) returns correct value
+    DataObjects::Workspace2D_sptr grPoints = run_pdfft2_alg(wsPoints, "g(r)", "Forward");
+    DataObjects::Workspace2D_sptr grHist = run_pdfft2_alg(wsHist, "g(r)", "Forward");
+
+    const auto grPointsY = grPoints->y(0);
+    const auto grHistY = grHist->y(0);
+    for (size_t ibin = 1; ibin < grPointsY.size(); ibin++) {
+      TS_ASSERT_DELTA(grPointsY[ibin], grHistY[ibin], 1e-8);
+    }
+  }
+
 private:
   DataObjects::Workspace2D_sptr run_pdfft2_alg(API::MatrixWorkspace_sptr ws, std::string PDFType,
                                                std::string Direction) {
     // 1. Run PDFFT
+    const auto outName = ws->getName() + "_outputWS";
     PDFFourierTransform2 pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
     pdfft.setProperty("Direction", Direction);
-    pdfft.setProperty("OutputWorkspace", "outputWS");
+    pdfft.setProperty("OutputWorkspace", outName);
     pdfft.setProperty("SofQType", "S(Q)");
     pdfft.setProperty("Rmax", 20.0);
     pdfft.setProperty("DeltaR", 0.01);
@@ -429,7 +450,7 @@ private:
     pdfft.execute();
 
     DataObjects::Workspace2D_sptr output_ws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("outputWS"));
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve(outName));
 
     return output_ws;
   }
