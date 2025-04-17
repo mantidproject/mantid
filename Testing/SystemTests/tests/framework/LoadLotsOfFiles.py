@@ -128,6 +128,7 @@ BANNED_FILES = [
     "BioSANS_exp61_scan0004_0001_Iq.txt",
     "test_data_Iq.txt",
     "BioSANS_test_data_Iq.txt",
+    "VULCAN_218062.nxs.h5",  # 1GB file for AlignAndFocusPowderSlim
 ]
 
 EXPECTED_EXT = ".expected"
