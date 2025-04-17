@@ -35,7 +35,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         self.declareProperty(
             name="Model",
             defaultValue="Einstein",
-            validator=StringListValidator(["Debye", "Einstein"]),
+            validator=StringListValidator(["Debye", "Einstein", "Classical"]),
             doc="Model used to make predictions",
         )
 
@@ -106,6 +106,23 @@ class VesuvioPeakPrediction(VesuvioBase):
                 rms_disp = self.displacement(temp, self._debye_temp, self._atomic_mass)
 
                 vesuvio_params.addRow([temp, self._atomic_mass, self._debye_temp, kinetic, rms_momentum, rms_disp])
+
+        if self._model == "Classical":
+            vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
+            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+
+            for temp in self._temperature:
+                if temp == 0:
+                    temp = MIN_TEMPERATURE
+
+                temp_mev = temp / K_IN_MEV
+                # Reduced Planck constant in units sqrt(mev * amu) / A-1
+                h_bar = 2.04434
+
+                rms_momentum = math.sqrt(temp_mev * self._atomic_mass / h_bar**2)  # Units A-1
+                kinetic_energy = 3 * h_bar**2 * rms_momentum**2 / (2 * self._atomic_mass)  # Units mev
+
+                vesuvio_params.addRow([temp, self._atomic_mass, rms_momentum, kinetic_energy])
 
         self.setProperty("OutputTable", vesuvio_params)
 

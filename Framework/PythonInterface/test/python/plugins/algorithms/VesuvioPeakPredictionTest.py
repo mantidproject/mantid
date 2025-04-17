@@ -34,6 +34,17 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         self.assertEqual(vesuvio_einstein_params.cell(1, 1), 63.5)
         self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 5), 18.47381)
 
+    def test_classical(self):
+        """
+        Test of Classical model with multiple temperatures
+        """
+        vesuvio_classical_params = VesuvioPeakPrediction(Model="Classical", Temperature=[100, 120, 240, 300], AtomicMass=50.94)
+
+        self.assertTrue(isinstance(vesuvio_classical_params, ITableWorkspace))
+        # Values slightly different from matlab script becaused used scipy constant for K/mev conversion
+        self.assertEqual(round(vesuvio_classical_params.cell(3, 2), 4), 17.751)
+        self.assertEqual(round(vesuvio_classical_params.cell(3, 3), 4), 38.778)
+
     # -------------------------Failure Cases-------------------------
 
     def test_temperature(self):
