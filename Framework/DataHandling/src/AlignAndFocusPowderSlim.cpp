@@ -206,7 +206,7 @@ public:
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
-      uint64_t start_event = event_index->at(m_pulse_stop_index);
+      uint64_t start_event = event_index->at(m_pulse_start_index);
       uint64_t stop_event = STOP_DEFAULT;
       if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
         stop_event = event_index->at(m_pulse_stop_index);
