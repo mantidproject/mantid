@@ -55,13 +55,14 @@ class FilePaths:
 
     Attributes:
         data_files: A list of paths to data files.
-        phase_files: A list of paths to phase files.
+        phase_filepaths: A list of paths to phase files.
         instrument_files: A list of paths to instrument files.
     """
 
-    data_files: List[str]
-    phase_files: List[str]
-    instrument_files: List[str]
+    data_files: List[str] = field(default_factory=list)
+    phase_filepaths: List[str] = field(default_factory=list)
+    instrument_files: List[str] = field(default_factory=list)
+    gsas2_save_dirs: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -77,8 +78,8 @@ class GSAS2Config:
         number_of_regions: The number of regions to configure.
     """
 
-    limits: Optional[List[List[float]]] = field(default_factory=list)
-    mantid_pawley_reflections: Optional[List[List[List[Union[float, int]]]]] = None
+    limits: Optional[List[Union[int, float]]] = field(default_factory=list)
+    mantid_pawley_reflections: Optional[List[Union[str, int]]] = None
     override_cell_lengths: Optional[List[List[float]]] = None
     d_spacing_min: float = 1.0
     number_of_regions: int = 1
@@ -157,7 +158,7 @@ class GSAS2Handler(object):
         """
         for attr, name in [
             (self.file_paths.data_files, "data_files"),
-            (self.file_paths.phase_files, "phase_files"),
+            (self.file_paths.phase_filepaths, "phase_filepaths"),
             (self.file_paths.instrument_files, "instrument_files"),
         ]:
             if not attr:
