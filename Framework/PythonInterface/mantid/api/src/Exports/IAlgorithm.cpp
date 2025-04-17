@@ -427,6 +427,9 @@ void export_ialgorithm() {
       .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS, (arg("self"), arg("do_store")),
            "If true then even child algorithms will have their workspaces "
            "stored in the ADS.")
+      .def("getAlwaysStoreInADS", &IAlgorithm::getAlwaysStoreInADS, arg("self"),
+           "Returns true if child algorithms set tol have their workspaces "
+           "stored in the ADS.")
       .def("isChild", &IAlgorithm::isChild, arg("self"),
            "Returns True if the algorithm has been marked to run as a child. "
            "If True then Output workspaces "
