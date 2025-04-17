@@ -22,6 +22,7 @@ DECLARE_ALGORITHM(AnyShapeAbsorption)
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
+using Mantid::Algorithms::BeamProfileFactory;
 
 AnyShapeAbsorption::AnyShapeAbsorption() : AbsorptionCorrection(), m_cubeSide(0.0) {}
 
@@ -53,16 +54,15 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   } else {
     try {
-      auto beamProfile =
-          Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
       integrationVolume = beamProfile->getIntersectionWithSample(*m_sampleObject);
-    } catch (...) {
-      // If the beam profile is not defined, use the sample object
-      integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
+    } catch (std::invalid_argument &e) {
+      // If the beam profile is not defined, we will get an invalid_argument error, so use the sample object instead
+      integrationVolume = IObject_const_sptr(m_sampleObject->clone());
     }
   }
 
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *m_sampleObject, *integrationVolume, m_cubeSide);
+  const auto &raster = Geometry::Rasterize::calculate(m_beamDirection, *m_sampleObject, *integrationVolume, m_cubeSide);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
