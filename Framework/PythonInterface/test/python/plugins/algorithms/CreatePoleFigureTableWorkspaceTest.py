@@ -289,7 +289,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             issues = alg.validateInputs()
             self.assertEqual(len(issues), 0)
 
-    def _setup_offset_rod(self):
+    def _setup_offset_rod(self, offset):
         offset_rod_shape = """
                         <cylinder id="A">
                           <centre-of-bottom-base x="0.125" y="0" z="0" />
@@ -305,10 +305,11 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         ws.sample().setCrystalStructure(xtal)
         # offset the centre of mass
         comp_info = ws.componentInfo()
-        comp_info.setPosition(comp_info.sample(), V3D(0.075, 0.0, 0.0))
+        comp_info.setPosition(comp_info.sample(), V3D(*offset))
 
     def test_sample_offset_using_set_pos_with_same_beam_centre(self):
-        self._setup_offset_rod()
+        sample_offset = [0.075, 0.0, 0.0]
+        self._setup_offset_rod(sample_offset)
 
         # for the situation where the beam is still defining a gauge vol at (0,0,0) we want UseSamplePosition=False
         # as the Q vectors should still be defined from this point
@@ -318,7 +319,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             OutputWorkspace="outws",
             PeakPositionThreshold=0.0,
             Chi2Threshold=0.0,
-            UseSamplePosition=False,
+            ScatteringVolumePosition=(0, 0, 0),
         )
         self.assertEqual(outws.rowCount(), 4)  # all should have suitable chi2
 
@@ -332,7 +333,8 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
 
     def test_offset_shape_fully_illuminated(self):
-        self._setup_offset_rod()
+        sample_offset = [0.075, 0.0, 0.0]
+        self._setup_offset_rod(sample_offset)
 
         # for the situation where the rod is fully illuminated we want UseSamplePosition=True
         # as the Q vectors should be approximated from the COM, which is now offset
@@ -342,7 +344,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             OutputWorkspace="outws",
             PeakPositionThreshold=0.0,
             Chi2Threshold=0.0,
-            UseSamplePosition=True,
+            ScatteringVolumePosition=sample_offset,
         )
         self.assertEqual(outws.rowCount(), 4)  # all should have suitable chi2
 

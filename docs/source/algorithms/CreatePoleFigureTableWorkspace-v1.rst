@@ -30,9 +30,9 @@ If a chi squared threshold is specified, only spectra with a fit ``chi2`` value 
 will be included in the output table.
 
 By default, the beam is anticipated to be incident on ``(0,0,0)`` for calculation of incident beam diffraction vector and the detector scattering vectors,
-if this is not the case, setting ``UseSamplePosition`` to ``True`` will read the sample position off the workspace and calculate scattering vectors from this position instead.
+if this is not the case, set ``ScatteringVolumePosition`` to calculate scattering vectors from another position instead.
 
-Note: If a reflection is provided, the intensity is also, by default, normalised by scattering power, as described in ref [1].
+Note: If a reflection is provided, the intensity is also, by default, normalised by scattering power, as described in ref [1]_.
 This can be prevented by setting, ``ApplyScatteringPowerCorrection`` to ``False``
 
 References

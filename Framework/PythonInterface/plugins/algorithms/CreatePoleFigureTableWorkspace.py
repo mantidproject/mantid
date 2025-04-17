@@ -63,10 +63,8 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             doc="Flag for determining whether the provided intensities should be corrected for scattering power",
         )
         self.declareProperty(
-            "UseSamplePosition",
-            defaultValue=False,
-            direction=Direction.Input,
-            doc="Flag for determining whether the diffraction vectors should be calculated from the sample position or from the origin",
+            FloatArrayProperty("ScatteringVolumePosition", [0.0, 0.0, 0.0], FloatArrayLengthValidator(3), direction=Direction.Input),
+            doc="Position where the diffraction vectors should be calculated from, defaults as the origin",
         )
 
     def validateInputs(self):
@@ -125,10 +123,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         chi_thresh = self.getProperty("Chi2Threshold").value
         x0_thresh = self.getProperty("PeakPositionThreshold").value
         apply_scatt_corr = self.getProperty("ApplyScatteringPowerCorrection").value
-        if self.getProperty("UseSamplePosition").value:
-            sample_pos = np.asarray(ws.getInstrument().getSample().getPos())
-        else:
-            sample_pos = np.zeros(3)
+        sample_pos = np.asarray(self.getProperty("ScatteringVolumePosition").value)
 
         # generate a detector table to get detector positions
         det_table = self.exec_child_alg(
