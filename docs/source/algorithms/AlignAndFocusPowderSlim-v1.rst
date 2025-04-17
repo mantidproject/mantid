@@ -1,6 +1,11 @@
 
 .. algorithm::
 
+.. warning::
+
+    This algorithm is currently for the VULCAN instrument testing purposes
+
+
 .. summary::
 
 .. relatedalgorithms::
@@ -10,35 +15,28 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This is a simplified version of :ref:`algm-AlignAndFocusPowderFromFiles` which uses very few child algorithms.
+The main feature is that this reads the events, filters and adjusts their time-of-flight, then increments the correct bin in the output workspace.
+As a result, there is a significantly smaller memory usage and the processing is significantly faster.
 
+Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
-Usage
------
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
+- only supports the VULCAN instrument
+- hard coded for 6 particular groups
+- common binning across all output spectra
+- only specify binning in time-of-flight
+- does not support event filtering
+- does not support copping data
+- does not support removing prompt pulse
+- does not support removing bad pulses
 
-**Example - AlignAndFocusPowderSlim**
+Child algorithms used are
 
-.. testcode:: AlignAndFocusPowderSlimExample
+- :ref:`algm-LoadDiffCal`
+- :ref:`algm-LoadIDFFromNexus-v1`
+- :ref:`algm-EditInstrumentGeometry`
+- :ref:`algm-LoadNexusLogs`
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = AlignAndFocusPowderSlim()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: AlignAndFocusPowderSlimExample
-
-  The output workspace has ?? spectra
 
 .. categories::
 
