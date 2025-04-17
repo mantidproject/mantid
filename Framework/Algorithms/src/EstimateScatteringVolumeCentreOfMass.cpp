@@ -53,9 +53,6 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   // Construct Sample
   constructSample(m_inputWS->mutableSample());
 
-  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
-
   // Calculate the cached values of L1, element volumes, and geometry size
   auto integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
@@ -99,10 +96,7 @@ std::shared_ptr<const Geometry::IObject> EstimateScatteringVolumeCentreOfMass::c
 }
 
 std::vector<double> EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::vector<V3D> &pos) {
-  V3D sum(0.0, 0.0, 0.0);
-  for (const auto &indiPos : pos) {
-    sum += indiPos;
-  }
+  V3D sum = std::accumulate(pos.begin(), pos.end(), V3D(0.0, 0.0, 0.0));
 
   if (!pos.empty()) {
     sum /= static_cast<double>(pos.size());
