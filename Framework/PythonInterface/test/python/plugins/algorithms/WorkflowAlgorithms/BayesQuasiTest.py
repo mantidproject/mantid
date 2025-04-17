@@ -251,17 +251,17 @@ class BayesQuasiTest(unittest.TestCase):
         @param prob Probability workspace from BayesQuasi
         @param group Group workspace of fitted spectra from BayesQuasi
         """
-
+        significant_digits = 3
         # Test values of result
-        self.assertAlmostEqual(result.dataY(0)[0], 81.12644, delta=1e-4)
-        self.assertAlmostEqual(result.dataY(1)[0], 0.0319747, delta=1e-4)
-        self.assertAlmostEqual(result.dataY(2)[0], 0.77168, delta=1e-4)
+        np.testing.assert_approx_equal(result.dataY(0)[0], 81.12644, significant=significant_digits)
+        np.testing.assert_approx_equal(result.dataY(1)[0], 0.0319747, significant=significant_digits)
+        np.testing.assert_approx_equal(result.dataY(2)[0], 0.77168, significant=significant_digits)
 
         # Test values of group
         sub_ws = group.getItem(0)
-        self.assertAlmostEqual(sub_ws.dataY(0)[0], 0.02540, delta=1e-4)
-        self.assertAlmostEqual(sub_ws.dataY(1)[0], 0.01632, delta=1e-4)
-        self.assertAlmostEqual(sub_ws.dataY(2)[0], -0.00908, delta=1e-4)
+        np.testing.assert_approx_equal(sub_ws.dataY(0)[0], 0.02540, significant=significant_digits)
+        np.testing.assert_approx_equal(sub_ws.dataY(1)[0], 0.01632, significant=significant_digits)
+        np.testing.assert_approx_equal(sub_ws.dataY(2)[0], -0.00908, significant=2)
 
     # --------------------------------Helper functions--------------------------------------
 

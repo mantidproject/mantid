@@ -209,6 +209,49 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_update_model_when_workspace_loaded_with_roi_detector_ids_set() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+    auto mainPresenter = MockBatchPresenter();
+    auto mockDockedWidgets = std::make_unique<MockPreviewDockedWidgets>();
+
+    expectLoadWorkspaceCompletedUpdatesModelSelectedBanks(*mockModel, mainPresenter, *mockView, *mockDockedWidgets);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                         std::move(mockDockedWidgets));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_plot_existing_ROIs_on_region_selector_when_workspace_loaded() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+    auto mockJobManager = makeJobManager();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectLoadWorkspaceCompletedSumsBanksIfROIDetectorIDsSet(*mockModel, *mockJobManager, mainPresenter, *mockView);
+
+    auto rawMockModel = mockModel.get();
+    auto rawMockRegionSelector = mockRegionSelector.get();
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                         std::make_unique<MockPreviewDockedWidgets>(), std::move(mockRegionSelector));
+    auto presenter = PreviewPresenter(std::move(deps));
+
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyLoadWorkspaceCompleted();
+
+    std::map<ROIType, ProcessingInstructions> roiMap;
+    roiMap[ROIType::Signal] = ProcessingInstructions{"4-6"};
+    roiMap[ROIType::Background] = ProcessingInstructions{"10-15"};
+    roiMap[ROIType::Transmission] = ProcessingInstructions{"5-7"};
+    expectExistingRegionsAddedToRegionSelectorPlot(rawMockModel, rawMockRegionSelector, mainPresenter, roiMap);
+
+    presenter.notifySumBanksCompleted();
+  }
+
   void test_run_title_is_set_when_workspace_loaded() {
     auto mockModel = makeModel();
     auto mockView = std::make_unique<MockPreviewView>();
@@ -356,6 +399,29 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
+  void test_notify_inst_view_shape_changed_no_existing_ROIs_plotted_on_region_selector() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    expectSumBanksCalledOnSelectedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
+    expectExistingRegionsNotAddedToRegionSelectorPlot(mockModel.get(), mockRegionSelector.get(), mainPresenter);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets),
+                                               std::move(mockRegionSelector)));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    // Calling this before notifySumBanksCompleted should set m_plotExistingROIs to false
+    presenter.notifyInstViewShapeChanged();
+    presenter.notifySumBanksCompleted();
+  }
+
   void test_notify_region_selector_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -383,9 +449,7 @@ public:
     auto mockRegionSelector = makeRegionSelector();
     auto mockDockedWidgets = makePreviewDockedWidgets();
 
-    auto ws = createRectangularDetectorWorkspace();
-    EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
+    expectUpdateRegionSelectorWorkspace(*mockModel, *mockRegionSelector);
     expectRegionSelectorToolbarEnabled(*mockDockedWidgets, false);
 
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
@@ -417,6 +481,81 @@ public:
     presenter.acceptMainPresenter(&mainPresenter);
 
     presenter.notifyUpdateAngle();
+  }
+
+  void test_notify_update_angle_updates_model_if_have_detector_roi_and_no_inst_view_shape() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectRunSumBanksWithPlotExistingROIs(*mockModel, mainPresenter, *mockDockedWidgets, false);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), makeRegionSelector()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    presenter.notifyUpdateAngle();
+  }
+
+  void test_notify_update_angle_does_not_update_model_if_have_detector_roi_and_inst_view_shape() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectRunSumBanksWithPlotExistingROIs(*mockModel, mainPresenter, *mockDockedWidgets, true);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), makeRegionSelector()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    presenter.notifyUpdateAngle();
+  }
+
+  void test_notify_update_angle_plots_existing_ROIs_on_region_selector() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mainPresenter = MockBatchPresenter();
+
+    std::map<ROIType, ProcessingInstructions> roiMap;
+    roiMap[ROIType::Signal] = ProcessingInstructions{"4-6"};
+    roiMap[ROIType::Background] = ProcessingInstructions{"10-15"};
+    roiMap[ROIType::Transmission] = ProcessingInstructions{"5-7"};
+    expectRunSumBanksWithPlotExistingROIs(*mockModel, mainPresenter, *mockDockedWidgets, false);
+    expectExistingRegionsAddedToRegionSelectorPlot(mockModel.get(), mockRegionSelector.get(), mainPresenter, roiMap);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    presenter.notifyUpdateAngle();
+    presenter.notifySumBanksCompleted();
+  }
+
+  void test_notify_update_angle_does_not_clear_region_selector_if_no_existing_ROIs() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mainPresenter = MockBatchPresenter();
+
+    std::map<ROIType, ProcessingInstructions> roiMap;
+    expectRunSumBanksWithPlotExistingROIs(*mockModel, mainPresenter, *mockDockedWidgets, false);
+    expectExistingRegionsAddedToRegionSelectorPlot(mockModel.get(), mockRegionSelector.get(), mainPresenter, roiMap);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    presenter.notifyUpdateAngle();
+    presenter.notifySumBanksCompleted();
   }
 
   void test_notify_update_angle_with_no_loaded_ws_does_not_run_reduction() {
@@ -802,12 +941,13 @@ private:
                                                                 MockPreviewView &mockView) {
     auto ws = createRectangularDetectorWorkspace();
     auto theta = 0.3;
+    auto detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillRepeatedly(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(2)).WillOnce(Return(ws)).WillOnce(Return(ws));
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(boost::none));
-    EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(true));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
@@ -816,8 +956,8 @@ private:
     auto ws = createRectangularDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(4).WillRepeatedly(Return(ws));
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(boost::none));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(boost::none));
-    EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(false));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
@@ -829,7 +969,7 @@ private:
     auto previousDetIDsStr = boost::optional<ProcessingInstructions>{};
     auto detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
     auto ws = createRectangularDetectorWorkspace();
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(1)).WillOnce(Return(ws));
     expectInstViewShapeChanged(mockDockedWidgets, mockInstViewModel, mockModel, detIndices, detIDs, previousDetIDsStr,
                                detIDsStr);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
@@ -846,7 +986,7 @@ private:
 
     expectInstViewShapeChanged(mockDockedWidgets, mockInstViewModel, mockModel, detIndices, detIDs, previousDetIDsStr,
                                detIDsStr);
-    EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(false));
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(boost::none));
     EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws)).WillOnce(Return(ws)).WillOnce(Return(nullptr));
     EXPECT_CALL(mockModel, setSummedWs(Eq(ws))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
@@ -866,7 +1006,7 @@ private:
     expectInstViewShapeChanged(mockDockedWidgets, mockInstViewModel, mockModel, detIndices, detIDs, previousDetIDsStr,
                                detIDsStr);
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(true));
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(previousDetIDsStr));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
@@ -903,9 +1043,43 @@ private:
     // Following the pathway through runSumBanks that doesn't actually run the sum banks step
     // is the only way we can check that the reduction will be called afterwards
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(boost::none));
-    EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(false));
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(boost::none));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
     expectRunReduction(mockView, mockModel, mockJobManager, mockRegionSelector, false);
+  }
+
+  void expectRunSumBanksWithPlotExistingROIs(MockPreviewModel &mockModel, MockBatchPresenter &mockMainPresenter,
+                                             MockPreviewDockedWidgets &mockDockedWidgets,
+                                             bool const hasSelectedDetectors) {
+    auto const ws = createRectangularDetectorWorkspace();
+    auto const detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
+    auto const detIDs = hasSelectedDetectors ? std::vector<size_t>{44, 45, 46} : std::vector<size_t>{};
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(1)).WillOnce(Return(ws));
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).WillOnce(Return(detIDs));
+    if (hasSelectedDetectors) {
+      EXPECT_CALL(mockModel, setSelectedBanks(detIDsStr)).Times(0);
+    } else {
+      EXPECT_CALL(mockModel, setSelectedBanks(detIDsStr)).Times(1);
+    }
+  }
+
+  void expectLoadWorkspaceCompletedUpdatesModelSelectedBanks(MockPreviewModel &mockModel,
+                                                             MockBatchPresenter &mockMainPresenter,
+                                                             MockPreviewView &mockView,
+                                                             MockPreviewDockedWidgets &mockDockedWidgets) {
+    auto const ws = createRectangularDetectorWorkspace();
+    auto const theta = 0.3;
+    auto const detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
+    auto const detIDs = std::vector<size_t>{};
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillRepeatedly(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
+    EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
+    EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, setSelectedBanks(detIDsStr)).Times(1);
   }
 
   void expectInstViewShapeChanged(MockPreviewDockedWidgets &mockDockedWidgets, MockInstViewModel &mockInstViewModel,
@@ -1088,6 +1262,33 @@ private:
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {
     EXPECT_CALL(*mockPlotPresenter, clearModel()).Times(1);
     EXPECT_CALL(*mockPlotPresenter, plot()).Times(1);
+  }
+
+  void expectUpdateRegionSelectorWorkspace(MockPreviewModel &mockModel, MockRegionSelector &mockRegionSelector) {
+    auto ws = createRectangularDetectorWorkspace();
+    EXPECT_CALL(mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
+  }
+
+  void expectExistingRegionsNotAddedToRegionSelectorPlot(MockPreviewModel *mockModel,
+                                                         MockRegionSelector *mockRegionSelector,
+                                                         MockBatchPresenter &mockMainPresenter) {
+    expectUpdateRegionSelectorWorkspace(*mockModel, *mockRegionSelector);
+    EXPECT_CALL(mockMainPresenter, getMatchingProcessingInstructionsForPreviewRow()).Times(0);
+  }
+
+  void expectExistingRegionsAddedToRegionSelectorPlot(MockPreviewModel *mockModel,
+                                                      MockRegionSelector *mockRegionSelector,
+                                                      MockBatchPresenter &mockMainPresenter,
+                                                      std::map<ROIType, ProcessingInstructions> &roiMap) {
+    EXPECT_CALL(mockMainPresenter, getMatchingProcessingInstructionsForPreviewRow()).WillOnce(Return(roiMap));
+    if (roiMap.size() > 0) {
+      EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
+    } else {
+      EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(0);
+    }
+    expectUpdateRegionSelectorWorkspace(*mockModel, *mockRegionSelector);
+    EXPECT_CALL(*mockRegionSelector, displayRectangularRegion(_, _, _, _, _)).Times(static_cast<int>(roiMap.size()));
   }
 
   Mantid::API::MatrixWorkspace_sptr createLinearDetectorWorkspace() {

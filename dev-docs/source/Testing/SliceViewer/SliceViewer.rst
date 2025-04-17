@@ -1,4 +1,7 @@
 .. _sliceviewer_testing:
+.. only:: html
+
+  :math:`\renewcommand\AA{\mathring{A}}`
 
 SliceViewer Testing
 ===================
@@ -85,7 +88,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     a. Confirm it tracks with the cursor when Track Cursor is checked
     b. Uncheck the track cursor and confirm it updates when the cursor is clicked.
-    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct (note if Track Cursor is checked you will need to click on the colorfill plot again).
+    c. Transpose the axes (as in step 6) and click on the colorfill plot. Confirm the clicked cursor position is correctly displayed in the table. If Track Cursor is checked, the table should still track the cursor correctly.
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
 
@@ -190,7 +193,7 @@ Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 
 3. Double click a row
 
-    - It should change the slicepoint along the integrated momentum axis and zoom into the peak - e.g. in (X,Y) = (H,K) then the slicepoint along L will be set to 1 and there will be a cross at (0,0).
+    - It should change the slicepoint along the integrated momentum axis and zoom into the peak - e.g. When double clicked on the row with HKL = (1,0,1) or HKL = (1,0,0) the slicepoint along L will be set to 1 or 0 respectively, and there will be a cross at (X,Y) = (H,K) = (1,0) in both cases.
     - Note for ``md_4D`` a peak will not be plotted if a non-Q axis is viewed, if both axes are Q-dimensions then the cross should be plotted at all E (obviously a Bragg peak will only be on the elastic line but the peak object has no elastic/inelastic logic and the sliceviewer only knows that `E` is not a momentum axis, it could be temperature etc.).
 
 4. Click Add Peaks in the Peak Actions section at the top of the peak viewer (note for 4D workspaces the peak overlay won't work for non_Q dimensions).
@@ -327,13 +330,13 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
-    - The axes label of the 1D plot should be similar to ``(0.0, 2.0,0.0-1.0x) in 3.14 Ang^-1``
+    - The axes label of the 1D plot should be similar to :math:`(0.0, 2.0,0.0-1.0x) \ in \ 3.14 \AA^{-1}`
     - There should be no peak on the 1D plot
 
 21. Increase the thickness by dragging the left red marker of the cut representation to encompass the peak in the data - check the peak appears in the 1D plot at the right thickness.
 22. Play around with the direction of the cut by dragging the white markers at the end points of the white line - the vectors u1 and u3 should be orthogonal unit vectors.
 23. Reset the cut by transposing the axes so (X,Y) = (L,K)
-24. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~2000 -> ~4000)
+24. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~1750 -> ~3500)
 25. Change c* of u1 from 1 -> -1
 
     - The peak in the 1D plot should move from x= 1 -> -1
@@ -343,7 +346,13 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
     - Check that the table values are updated correctly (use the HKL in the cursor info table to help determine this)
 
-27. Produce a non-axis aligned cut where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
+27. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
+
+    - In the example below, the x axis label is :math:`(0.0, -0.24 + 0.97x, 0.93 + 0.25x) \ in \ 7.07 \AA^{-1}`. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)``, which is very close to actual peak HKL = ``(0,0,1)``
+
+.. figure:: ../../images/SliceViewer/CutViewer_nonAxisAlignedCut.png
+   :class: screenshot
+   :align: center
 
 Specific Tests
 --------------

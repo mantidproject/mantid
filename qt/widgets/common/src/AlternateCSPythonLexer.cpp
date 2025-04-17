@@ -32,11 +32,19 @@ QColor AlternateCSPythonLexer::defaultColor(int style) const {
   case SingleQuotedString:
     return QColor(0x00, 0xaa, 0x00);
 
+  case DoubleQuotedFString:
+  case SingleQuotedFString:
+    return QColor(0x00, 0xaa, 0x00);
+
   case Keyword:
     return QColor(0x00, 0x00, 0xff);
 
   case TripleSingleQuotedString:
   case TripleDoubleQuotedString:
+    return QColor(0x00, 0xaa, 0x00);
+
+  case TripleSingleQuotedFString:
+  case TripleDoubleQuotedFString:
     return QColor(0x00, 0xaa, 0x00);
 
   case ClassName:
@@ -73,4 +81,24 @@ QColor AlternateCSPythonLexer::defaultColor(int style) const {
 QFont AlternateCSPythonLexer::defaultFont(int style) const {
   Q_UNUSED(style);
   return m_font;
+}
+
+///**
+// * Returns the keywords used by the lexer for a given set.
+// * @param set The keyword set to retrieve (1 is for keywords)
+// * @return A string containing the keywords
+// */
+const char *AlternateCSPythonLexer::keywords(int set) const {
+  if (set == 1) {
+    // Retrieve default Python keywords from qscintilla
+    const char *defaultKeywords = QsciLexerPython::keywords(1);
+    static std::string combinedKeywords;
+    std::ostringstream stream;
+    stream << defaultKeywords << " " << customKeywords;
+
+    combinedKeywords = stream.str();
+    return combinedKeywords.c_str();
+  }
+
+  return QsciLexerPython::keywords(set);
 }

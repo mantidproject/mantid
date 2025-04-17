@@ -25,14 +25,17 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
-MultiDomainFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, 1);
+static const std::string WS_NAME = "wsName";
+
+MultiDomainFunction_sptr getFunction(std::string const &functionString, size_t domainNumber = 1) {
+  return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, domainNumber);
 }
 
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
-void setFittingFunction(std::unique_ptr<FittingModel> &model, std::string const &functionString) {
-  model->setFitFunction(getFunction(functionString));
+void setFittingFunction(std::unique_ptr<FittingModel> &model, std::string const &functionString,
+                        size_t domainNumber = 1) {
+  model->setFitFunction(getFunction(functionString, domainNumber));
 }
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
@@ -52,15 +55,19 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::st
   return alg;
 }
 
+std::string getSingleDomainTestFunction(std::string const &workspaceName) {
+  return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+         "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+         "name=Resolution,Workspace=" +
+         workspaceName +
+         ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+         "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+         "0175)))";
+}
+
 IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<FittingModel> &model, const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
-  std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-                               "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-                               "name=Resolution,Workspace=" +
-                               workspaceName +
-                               ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-                               "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                               "0175)))";
+  std::string const function = getSingleDomainTestFunction(workspaceName);
   setFittingFunction(model, function);
   auto alg = setupFitAlgorithm(std::move(workspace), function);
   return alg;
@@ -94,36 +101,36 @@ public:
   }
 
   void test_that_a_workspace_is_stored_correctly_in_the_ADS() {
-    SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(3));
+    SetUpADSWithWorkspace ads(WS_NAME, createWorkspace(3));
 
-    TS_ASSERT(ads.doesExist("WorkspaceName"));
-    auto const storedWorkspace = ads.retrieveWorkspace("WorkspaceName");
+    TS_ASSERT(ads.doesExist(WS_NAME));
+    auto const storedWorkspace = ads.retrieveWorkspace(WS_NAME);
     TS_ASSERT_EQUALS(storedWorkspace->getNumberHistograms(), 3);
   }
 
   void test_that_getWorkspace_returns_a_nullptr_when_getWorkspace_is_provided_an_out_of_range_index() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT_EQUALS(m_model->getWorkspace(1), nullptr);
   }
 
   void test_that_isMultiFit_returns_true_when_there_are_more_than_one_workspaces_stored_in_the_model() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    addWorkspaceToModel("Workspace2", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
+    addWorkspaceToModel(WS_NAME + "_1", 3, "0-2");
     TS_ASSERT(m_model->isMultiFit());
   }
 
   void test_that_isMultiFit_returns_false_when_there_is_one_workspace_stored_in_the_model() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT(!m_model->isMultiFit());
   }
 
   void test_that_isPreviouslyFit_returns_false_if_there_is_no_previous_fit_output_data() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT(!m_model->isPreviouslyFit(0, 0));
   }
 
   void test_that_isPreviouslyFit_returns_false_if_the_dataIndex_is_out_of_range() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT(!m_model->isPreviouslyFit(4, 0));
   }
 
@@ -140,29 +147,29 @@ public:
   }
 
   void test_that_ConvolutionSequentialFit_algorithm_initializes() {
-    addInstrumentWorkspaceToModel("WorkspaceName", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getSetupFitAlgorithm(m_model, modelWorkspace, "WorkspaceName");
+    auto const alg = getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
 
     TS_ASSERT(alg->isInitialized());
   }
 
   void test_that_ConvolutionSequentialFit_algorithm_executes_without_error() {
-    addInstrumentWorkspaceToModel("WorkspaceName", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getSetupFitAlgorithm(m_model, modelWorkspace, "WorkspaceName");
+    auto const alg = getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
   }
 
   void test_that_addOutput_adds_the_output_of_a_fit_into_the_model() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, WS_NAME);
     m_model->addOutput(alg);
 
     TS_ASSERT(m_model->getResultWorkspace());
@@ -170,10 +177,10 @@ public:
   }
 
   void test_that_addOutput_adds_the_output_of_a_single_fit_into_the_model() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, WS_NAME);
     m_model->addOutput(alg);
 
     TS_ASSERT(m_model->getResultWorkspace());
@@ -181,18 +188,18 @@ public:
   }
 
   void test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->isPreviouslyFit(WorkspaceID(0), WorkspaceIndex(0)));
   }
 
   void test_that_isInvalidFunction_returns_a_message_when_no_activeFunction_exists() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT(m_model->isInvalidFunction());
   }
 
   void test_that_isInvalidFunction_returns_a_message_when_the_activeFunction_contains_zero_parameters_or_functions() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     auto const function = getFunction("name=Convolution;name=Resolution");
     m_model->setFitFunction(function);
 
@@ -200,39 +207,39 @@ public:
   }
 
   void test_isInvalidFunction_returns_none_if_the_activeFunction_is_valid() {
-    addInstrumentWorkspaceToModel("WorkspaceName", 6, 5, "0-2");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-2");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "WorkspaceName");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
 
     TS_ASSERT(!m_model->isInvalidFunction());
   }
 
   void test_that_getNumberOfWorkspace_returns_the_number_of_workspace_stored_by_model() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    addWorkspaceToModel("Workspace2", 3, "0-2");
-    addWorkspaceToModel("Workspace3", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
+    addWorkspaceToModel(WS_NAME + "_1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME + "_2", 3, "0-2");
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), 3);
   }
 
   void test_that_getFitParameterNames_returns_an_empty_vector_if_the_fitOutput_is_empty() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT_EQUALS(m_model->getFitParameterNames(), std::vector<std::string>());
   }
 
   void test_that_getFitParameterNames_returns_a_vector_of_fit_parameters_if_the_fitOutput_contains_parameters() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-2");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-2");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, "__Convolution");
+    auto const alg = getExecutedFitAlgorithm(m_model, modelWorkspace, WS_NAME);
     m_model->addOutput(alg);
 
     TS_ASSERT(!m_model->getFitParameterNames().empty());
   }
 
   void test_that_clearWorkspaces_will_empty_the_fittingData() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    addWorkspaceToModel("Workspace2", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
+    addWorkspaceToModel(WS_NAME + "_1", 3, "0-2");
     m_model->clearWorkspaces();
 
     TS_ASSERT(!m_model->getWorkspace(0));
@@ -240,11 +247,56 @@ public:
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), 0);
   }
 
+  void test_output_group_name_ends_with_correct_suffix_for_single_fit_function_sequential_fitting() {
+    addWorkspaceToModel(WS_NAME, 1, "0");
+    setFittingFunction(m_model,
+                       "composite=MultiDomainFunction,NumDeriv=true;"
+                       "name=FlatBackground,A0=1,$domains=i;",
+                       2);
+    setFittingFunction(m_model, getSingleDomainTestFunction(WS_NAME));
+    auto fitAlg = m_model->getFittingAlgorithm(FittingMode::SEQUENTIAL);
+
+    TS_ASSERT(fitAlg->getPropertyValue("OutputWorkspace").ends_with("_Result"));
+  }
+
+  void test_output_group_name_ends_with_correct_suffix_for_single_fit_function_simultaneous_fitting() {
+    addWorkspaceToModel(WS_NAME, 1, "0");
+    setFittingFunction(m_model, getSingleDomainTestFunction(WS_NAME));
+    auto fitAlg = m_model->getFittingAlgorithm(FittingMode::SIMULTANEOUS);
+
+    TS_ASSERT(fitAlg->getPropertyValue("OutputWorkspace").ends_with("_Result"));
+  }
+
+  void test_output_group_name_ends_with_correct_suffix_for_multi_fit_function_sequential_fitting() {
+    addWorkspaceToModel(WS_NAME, 1, "0");
+    addWorkspaceToModel(WS_NAME + "_1", 1, "0");
+    setFittingFunction(m_model,
+                       "composite=MultiDomainFunction,NumDeriv=true;"
+                       "name=FlatBackground,A0=1,$domains=i;",
+                       2);
+
+    auto fitAlg = m_model->getFittingAlgorithm(FittingMode::SEQUENTIAL);
+
+    TS_ASSERT(fitAlg->getPropertyValue("OutputWorkspace").ends_with("_Results"));
+  }
+
+  void test_output_group_name_ends_with_correct_suffix_for_multi_fit_function_simultaneous_fitting() {
+    addWorkspaceToModel(WS_NAME, 1, "0");
+    addWorkspaceToModel(WS_NAME + "_1", 1, "0");
+    setFittingFunction(m_model,
+                       "composite=MultiDomainFunction,NumDeriv=true;"
+                       "name=FlatBackground,A0=1,$domains=i;",
+                       2);
+
+    auto fitAlg = m_model->getFittingAlgorithm(FittingMode::SIMULTANEOUS);
+
+    TS_ASSERT(fitAlg->getPropertyValue("OutputWorkspace").ends_with("_Results"));
+  }
   void test_that_setDefaultParameterValue_will_set_the_value_of_the_provided_parameter() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "WorkspaceName");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
     m_model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
     auto const parameters = m_model->getDefaultParameters(0);
@@ -252,16 +304,16 @@ public:
   }
 
   void test_that_getParameterValues_returns_an_empty_map_if_the_dataIndex_is_out_of_range() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getParameterValues(1, 0).empty());
   }
 
   void test_that_getParameterValues_returns_the_default_parameters_if_there_are_no_fit_parameters() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__Convolution");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
     m_model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
     auto const parameters = m_model->getParameterValues(0, 0);
@@ -269,7 +321,7 @@ public:
   }
 
   void test_that_getParameterValues_returns_the_fit_parameters_after_a_fit_has_been_executed() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     auto const parameters = m_model->getParameterValues(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -278,16 +330,16 @@ public:
   }
 
   void test_getFitParameters_returns_an_empty_map_when_there_is_no_fitOutput() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
 
-    (void)getSetupFitAlgorithm(m_model, modelWorkspace, "__Convolution");
+    (void)getSetupFitAlgorithm(m_model, modelWorkspace, WS_NAME);
 
     TS_ASSERT(m_model->getFitParameters(0, 0).empty());
   }
 
   void test_getFitParameters_returns_the_fitParameters_after_a_fit() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     auto const parameters = m_model->getFitParameters(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -296,13 +348,13 @@ public:
   }
 
   void test_getDefaultParameters_returns_an_empty_map_when_the_dataIndex_is_out_of_range() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getDefaultParameters(1).empty());
   }
 
   void test_getDefaultParameters_returns_the_default_parameters_which_have_been_set() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
 
     m_model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -313,18 +365,18 @@ public:
   }
 
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(m_model->getResultLocation(0, 0));
   }
 
   void test_that_cleanFailedRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
+    SetUpADSWithWorkspace ads(WS_NAME, modelWorkspace);
 
-    std::string const functionString = "name=Convolution;name=Resolution,Workspace=Name,WorkspaceIndex=0;";
+    std::string const functionString = "name=Convolution;name=Resolution,Workspace=wsName,WorkspaceIndex=0;";
     auto alg = setupFitAlgorithm(modelWorkspace, functionString);
     alg->execute();
 
@@ -336,11 +388,11 @@ public:
   void
   test_that_cleanFailedRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails_for_a_single_workspaceIndex() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     auto const modelWorkspace = m_model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
+    SetUpADSWithWorkspace ads(WS_NAME, modelWorkspace);
 
-    std::string const functionString = "name=Convolution;name=Resolution,Workspace=Name,WorkspaceIndex=0;";
+    std::string const functionString = "name=Convolution;name=Resolution,Workspace=wsName,WorkspaceIndex=0;";
     auto alg = setupFitAlgorithm(modelWorkspace, functionString);
     alg->execute();
 
@@ -350,7 +402,7 @@ public:
   }
 
   void test_that_getDefaultParameters_returns_full_list_of_names_for_multi_domain_functions() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     auto const function = getFunction("composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
                                       "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
                                       "WorkspaceIndex=0,X=(),Y=();(name=Lorentzian,Amplitude=1,PeakCentre=0,"
@@ -367,7 +419,7 @@ public:
   }
 
   void test_set_fitting_mode_fucntions() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     auto sequential = FittingMode::SEQUENTIAL;
     auto simultaneous = FittingMode::SIMULTANEOUS;
     m_model->setFittingMode(sequential);
@@ -377,61 +429,43 @@ public:
   }
 
   void test_updateFitTypeString_does_not_throw() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
     TS_ASSERT_THROWS_NOTHING(m_model->updateFitTypeString());
   }
 
   void test_getResultLocation_returns_none_when_out_of_index() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT(!m_model->getResultLocation(WorkspaceID{1}, WorkspaceIndex{0}));
   }
 
   void test_getResultWorkspace_does_not_throw() {
-    addInstrumentWorkspaceToModel("__Convolution", 6, 5, "0-5");
+    addInstrumentWorkspaceToModel(WS_NAME, 6, 5, "0-5");
     addFitOutputDataToModel();
     TS_ASSERT_THROWS_NOTHING(m_model->getResultWorkspace());
   }
 
   void test_getFittingAlgorithm_does_not_throw() {
-    addWorkspaceToModel("wsName", 3, "0");
-    std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-                                 "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-                                 "name=Resolution,Workspace=wsName,WorkspaceIndex=0;((composite="
-                                 "ProductFunction,NumDeriv="
-                                 "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                                 "0175)))";
-    setFittingFunction(m_model, function);
+    addWorkspaceToModel(WS_NAME, 3, "0");
+    setFittingFunction(m_model, getSingleDomainTestFunction(WS_NAME));
     TS_ASSERT_THROWS_NOTHING(m_model->getFittingAlgorithm(FittingMode::SEQUENTIAL));
   }
 
   void test_getSingleFit_does_not_throw() {
-    addWorkspaceToModel("wsName", 3, "0");
-    std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-                                 "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-                                 "name=Resolution,Workspace=wsName,WorkspaceIndex=0;((composite="
-                                 "ProductFunction,NumDeriv="
-                                 "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                                 "0175)))";
-    setFittingFunction(m_model, function);
+    addWorkspaceToModel(WS_NAME, 3, "0");
+    setFittingFunction(m_model, getSingleDomainTestFunction(WS_NAME));
     TS_ASSERT_THROWS_NOTHING(m_model->getSingleFittingAlgorithm());
   }
 
   void test_getSingleFunction_does_not_throw() {
-    addWorkspaceToModel("wsName", 3, "0");
-    std::string const function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-                                 "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-                                 "name=Resolution,Workspace=wsName,WorkspaceIndex=0;((composite="
-                                 "ProductFunction,NumDeriv="
-                                 "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                                 "0175)))";
-    setFittingFunction(m_model, function);
+    addWorkspaceToModel(WS_NAME, 3, "0");
+    setFittingFunction(m_model, getSingleDomainTestFunction(WS_NAME));
     TS_ASSERT_THROWS_NOTHING(m_model->getSingleFunction(WorkspaceID{0}, WorkspaceIndex{0}));
   }
 
   void test_getOutputBasename_returns_correct_sequential_name() {
-    addWorkspaceToModel("wsName", 3, "0-2");
-    std::string outputString = "wsName_FitType_seq_FitString_0-2";
+    addWorkspaceToModel(WS_NAME, 3, "0-2");
+    std::string outputString = WS_NAME + "_FitType_seq_FitString_0-2";
     TS_ASSERT_EQUALS(m_model->getOutputBasename(), outputString);
   }
 
@@ -476,13 +510,14 @@ public:
   }
 
 private:
-  void addWorkspaceToModel(std::string workspaceName, int numberOfSpectra, std::string const &spectra) {
+  void addWorkspaceToModel(std::string const &workspaceName, int numberOfSpectra, std::string const &spectra) {
     SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
     m_model->getFitDataModel()->addWorkspace(workspaceName, FunctionModelSpectra(spectra));
     m_model->addDefaultParameters();
   }
 
-  void addInstrumentWorkspaceToModel(std::string workspaceName, int xLength, int yLength, std::string const &spectra) {
+  void addInstrumentWorkspaceToModel(std::string const &workspaceName, int xLength, int yLength,
+                                     std::string const &spectra) {
     SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInstrument(xLength, yLength));
     m_model->getFitDataModel()->addWorkspace(workspaceName, FunctionModelSpectra(spectra));
     m_model->addDefaultParameters();
