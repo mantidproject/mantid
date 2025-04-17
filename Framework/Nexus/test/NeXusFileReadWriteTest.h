@@ -111,6 +111,7 @@ private:
     T output[Ncheck];
     fileid.openData(dataname);
     fileid.getSlab(&(output[0]), start, size);
+    fileid.closeData();
 
     // compare
     for (int i = 0; i < Ncheck; i++) {
@@ -118,8 +119,8 @@ private:
     }
   }
 
-  template <size_t N, size_t M, typename T>
-  void do_rwslab_test(File &fileid, std::string const dataname, T const (&data)[N][M]) {
+  template <typename T, size_t N, size_t M>
+  void do_rwslab_test(File &fileid, char const *const dataname, T const (&data)[N][M]) {
     cout << "Testing slab " << dataname << "\n";
 
     // write
@@ -132,9 +133,9 @@ private:
 
     // prepare to read/compare
     T output[N][M];
-    fileid.openData(dataname);
 
     // read, compare, row-by-row
+    fileid.openData(dataname);
     for (size_t i = 1; i <= N; i++) {
       size = {(dimsize_t)i, (dimsize_t)M};
       fileid.getSlab(&(output[0][0]), start, size);
@@ -142,6 +143,7 @@ private:
         TS_ASSERT_EQUALS(data[0][j], output[0][j]);
       }
     }
+    fileid.closeData();
   }
 
 public:
@@ -223,13 +225,13 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "napi slab test done\n";
+    cout << "napi vec test done\n";
     removeFile(nxFile);
   }
 
   void test_napi_slab() {
     cout << "Starting NAPI SLAB Test\n";
-    std::string const nxFile("NExusFile_test_vec.h5");
+    std::string const nxFile("NexusFile_test_slab.h5");
     File fileid = do_prep_files(nxFile);
 
     // test of slab read/write
@@ -239,10 +241,10 @@ public:
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
     double const r8_array[5][4] = {
         {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-    do_rwslabvec_test(fileid, "r4_slab", r4_vec);
-    do_rwslabvec_test(fileid, "r8_slab", r8_vec);
-    do_rwslab_test(fileid, "r4_slab2d", r4_array);
-    do_rwslab_test(fileid, "r8_slab2d", r8_array);
+    do_rwslabvec_test<float>(fileid, "r4_slab", r4_vec);
+    do_rwslabvec_test<double>(fileid, "r8_slab", r8_vec);
+    do_rwslab_test<float>(fileid, "r4_slab2d", r4_array);
+    do_rwslab_test<double>(fileid, "r8_slab2d", r8_array);
 
     // check all entries
     vector<string> entry_names({"r4_slab", "r4_slab2d", "r8_slab", "r8_slab2d"});
@@ -343,8 +345,9 @@ public:
     // TS_ASSERT_EQUALS(somedata, output1);
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-    TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
+    TS_ASSERT_EQUALS(datalink.targetPath, res1.targetPath);
     cout << "data link works\n";
+    fileid.closeGroup();
 
     fileid.openPath("/entry");
 

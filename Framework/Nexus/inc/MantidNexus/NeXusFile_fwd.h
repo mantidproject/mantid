@@ -11,81 +11,33 @@
 #include <string>
 #include <vector>
 
-typedef const char CONSTCHAR;
-
-/*
- * Any new NXaccess_mode options should be numbered in 2^n format
- * (8, 16, 32, etc) so that they can be bit masked and tested easily.
- *
- * To test older non bit masked options (values below 8) use e.g.
- *
- *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
- *
- * To test new (>=8) options just use normal bit masking e.g.
- *
- *       if ( mode & NXACC_NOSTRIP )
- *
- */
-constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
-
-constexpr int NX_UNLIMITED = -1;
-
-constexpr int NX_MAXRANK = 32;
-constexpr int NX_MAXNAMELEN = 64;
-constexpr int NX_MAXPATHLEN = 1024;
-
-constexpr int NXMAXSTACK = 50;
-
-typedef void *NXhandle; /* really a pointer to a NexusFile structure */
-typedef char NXname[128];
-
-/** \enum NXaccess_mode
+/** \enum NXaccess
  * NeXus file access codes.
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
- * \li NXACC_CREATE create a NeXus HDF-4 file
- * \li NXACC_CREATE4 create a NeXus HDF-4 file -- this is discouraged, and will no loger be supported
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.
- * \li NXACC_CREATEXML create a NeXus XML file -- this is no longer be supported, exists for legacy reasons
- * \li NXACC_CHECKNAMESYNTAX Check names conform to NeXus allowed characters.
  */
-typedef enum {
-  NXACC_READ = 1,
-  NXACC_RDWR = 2,
-  NXACC_CREATE = 3,
-  NXACC_CREATE4 = 4,
-  NXACC_CREATE5 = 5,
-  NXACC_CREATEXML = 6,
-  NXACC_TABLE = 8,
-  NXACC_NOSTRIP = 128,
-  NXACC_CHECKNAMESYNTAX = 256
-} NXaccess_mode;
+enum NXaccess : unsigned int { NXACC_READ = 0x0000u, NXACC_RDWR = 0x0001u, NXACC_CREATE5 = 0x0002u };
+
+/** \enum NXentrytype
+ * Describes the type of entry in a NeXus file, either group or dataset
+ * \li group the entry is a group
+ * \li sds the entry is a dataset (class SDS)
+ */
+enum class NXentrytype { group = 0, sds = 1 };
 
 /**
- * A combination of options from #NXaccess_mode
+ * \struct NXlink
+ * Represents a link between entries in a NeXus file
+ * \li targetPath path to item to link
+ * \li linkType 0 for group link, 1 for SDS link
  */
-typedef int NXaccess;
-
 typedef struct {
-  char *iname;
-  int type;
-} info_type, *pinfo;
-
-typedef struct {
-  long iTag;             /* HDF4 variable */
-  long iRef;             /* HDF4 variable */
-  char targetPath[1024]; /* path to item to link */
-  int linkType;          /* HDF5: 0 for group link, 1 for SDS link */
+  std::string targetPath; /* path to item to link */
+  NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
-/* Map NeXus compression methods to HDF compression methods */
-constexpr int NX_CHUNK = 0;
-constexpr int NX_COMP_NONE = 100;
-constexpr int NX_COMP_LZW = 200;
-constexpr int NX_COMP_RLE = 300;
-constexpr int NX_COMP_HUF = 400;
-
-/**
+/** \enum NXstatus
  * Special codes for NeXus file status.
  * \li OKAY success +1.
  * \li ERROR error 0
@@ -134,7 +86,7 @@ constexpr int NX_UINT64{27};
 constexpr int NX_CHAR{4};
 constexpr int NX_BINARY{21};
 
-/**
+/** \class NXnumtype
  * The primitive types published by this API.
  * \li FLOAT32 float.
  * \li FLOAT64 double
@@ -177,6 +129,16 @@ public:
   operator std::string() const;
 };
 
+/**
+ * The available compression types. These are all ignored in xml files.
+ * \li NONE no compression
+ * \li LZW Lossless Lempel Ziv Welch compression (recommended)
+ * \li RLE Run length encoding (only HDF-4)
+ * \li HUF Huffmann encoding (only HDF-4)
+ * \ingroup cpp_types
+ */
+enum class NXcompression { CHUNK = 0, NONE = 100, LZW = 200, RLE = 300, HUF = 400 };
+
 // forward declare
 namespace NeXus {
 
@@ -187,23 +149,8 @@ typedef std::vector<dimsize_t> DimVector; ///< use specifically for the dims arr
 //  TODO this is probably the same as DimVector
 typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
 
-/**
- * The available compression types. These are all ignored in xml files.
- * \li NONE no compression
- * \li LZW Lossless Lempel Ziv Welch compression (recommended)
- * \li RLE Run length encoding (only HDF-4)
- * \li HUF Huffmann encoding (only HDF-4)
- * \ingroup cpp_types
- */
-enum NXcompression { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, RLE = NX_COMP_RLE, HUF = NX_COMP_HUF };
-
 typedef std::pair<std::string, std::string> Entry;
 typedef std::map<std::string, std::string> Entries;
-
-/**
- * Type definition for a type-keyed multimap
- */
-typedef std::multimap<std::string, std::string> TypeMap;
 
 /**
  * This structure holds the type and dimensions of a primative field/array.
@@ -217,16 +164,17 @@ struct Info {
 
 /** Information about an attribute. */
 struct AttrInfo {
-  /** The primative type for the attribute. */
+  /** The primitive type for the attribute. */
   NXnumtype type;
-  /** The length of the attribute. */
-  unsigned length;
+  /** The length of the attribute */
+  std::size_t length;
   /** The name of the attribute. */
   std::string name;
-  /** The dimensions of the attribute. */
-  DimVector dims;
 };
 
 /** Forward declare of NeXus::File */
 class File;
 } // namespace NeXus
+
+constexpr unsigned NX_MAXRANK(32);
+constexpr NeXus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long

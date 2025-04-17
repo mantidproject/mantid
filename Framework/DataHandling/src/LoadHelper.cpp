@@ -130,11 +130,7 @@ void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runD
   // follows
   std::string entryNameActual(entryName);
   if (entryName.empty()) {
-    try {
-      const auto entryNameAndClass = filehandle.getNextEntry();
-      entryNameActual = entryNameAndClass.first;
-    } catch (const ::NeXus::Exception &) { /* ignore */
-    }
+    entryNameActual = filehandle.getTopLevelEntryName();
   }
 
   // open the group and parse down
