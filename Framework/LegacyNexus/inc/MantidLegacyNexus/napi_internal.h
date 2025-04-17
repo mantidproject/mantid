@@ -48,16 +48,12 @@ struct LgcyFunction {
   NXstatus (*nxclosegroup)(NXhandle handle) = nullptr;
   NXstatus (*nxopendata)(NXhandle handle, CONSTCHAR *label) = nullptr;
   NXstatus (*nxclosedata)(NXhandle handle) = nullptr;
-  NXstatus (*nxputdata)(NXhandle handle, const void *data) = nullptr;
   NXstatus (*nxgetdataID)(NXhandle handle, NXlink *pLink) = nullptr;
   NXstatus (*nxgetdata)(NXhandle handle, void *data) = nullptr;
   NXstatus (*nxgetinfo64)(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype) = nullptr;
   NXstatus (*nxgetnextentry)(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype) = nullptr;
-  NXstatus (*nxgetnextattr)(NXhandle handle, NXname pName, int *iLength, NXnumtype *iType) = nullptr;
   NXstatus (*nxgetnextattra)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) = nullptr;
   NXstatus (*nxgetattr)(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType) = nullptr;
-  NXstatus (*nxgetattrainfo)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) = nullptr;
-  NXstatus (*nxgetattrinfo)(NXhandle handle, int *no_items) = nullptr;
   NXstatus (*nxgetgroupID)(NXhandle handle, NXlink *pLink) = nullptr;
   NXstatus (*nxinitgroupdir)(NXhandle handle) = nullptr;
   NXstatus (*nxinitattrdir)(NXhandle handle) = nullptr;

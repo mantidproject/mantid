@@ -1458,13 +1458,11 @@ void NX5assignFunctions(LgcyFunction &fHandle) {
   fHandle.nxgetdata = NX5getdata;
   fHandle.nxgetinfo64 = NX5getinfo64;
   fHandle.nxgetnextentry = NX5getnextentry;
-  fHandle.nxgetnextattr = NULL;
   fHandle.nxgetattr = NX5getattr;
   fHandle.nxgetgroupID = NX5getgroupID;
   fHandle.nxinitgroupdir = NX5initgroupdir;
   fHandle.nxinitattrdir = NX5initattrdir;
   fHandle.nxgetnextattra = NX5getnextattra;
-  fHandle.nxgetattrainfo = NX5getattrainfo;
 }
 
 #endif /* HDF5 */

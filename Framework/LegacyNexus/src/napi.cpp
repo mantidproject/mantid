@@ -381,11 +381,14 @@ static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if ((my_am == NXACC_CREATE4) || (my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5) || (my_am == NXACC_CREATEXML) ||
-      (my_am == NXACC_RDWR)) {
+  switch (my_am) {
+  case NXACC_CREATE4:
+  case NXACC_CREATE:
+  case NXACC_CREATE5:
+  case NXACC_CREATEXML:
     NXReportError("Write operations have been deprecated from LegacyNexus");
     return NXstatus::NX_ERROR;
-  } else {
+  default:
     filename = locateNexusFileInPath(fileRecord->getUserFilePath().c_str());
     if (filename == NULL) {
       NXReportError("Out of memory in NeXus-API");
@@ -406,6 +409,7 @@ static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
       return NXstatus::NX_ERROR;
     }
     backend_type = iRet;
+    break;
   }
   if (filename == NULL) {
     NXReportError("Out of memory in NeXus-API");

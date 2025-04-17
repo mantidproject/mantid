@@ -1020,13 +1020,11 @@ void NX4assignFunctions(LgcyFunction &fHandle) {
   fHandle.nxgetdata = NX4getdata;
   fHandle.nxgetinfo64 = NX4getinfo64;
   fHandle.nxgetnextentry = NX4getnextentry;
-  fHandle.nxgetnextattr = NX4getnextattr;
   fHandle.nxgetattr = NX4getattr;
   fHandle.nxgetgroupID = NX4getgroupID;
   fHandle.nxinitgroupdir = NX4initgroupdir;
   fHandle.nxinitattrdir = NX4initattrdir;
   fHandle.nxgetnextattra = NX4getnextattra;
-  fHandle.nxgetattrainfo = NULL;
 }
 
 #endif /*HDF4*/

@@ -1,7 +1,4 @@
 /*
-  This is some code to handle a stack of NeXus files. This is used to implement
-  external linking within the NeXus-API
-
   Copyright (C) 1997-2006 Mark Koennecke
 
   This library is free software; you can redistribute it and/or
@@ -23,12 +20,14 @@
   Added functions to deal with the path stack for NXgetpath
   Mark Koennecke, October 2009
 
+  This file has been reworked to simplify a minimal functionality legacy library.
+  Stacks of NeXus files are no longer supported.
+  Mial Lewis, April 2025
 */
 #pragma once
 
-const int EXPECTED_PATH_STACK_HEIGHT = 5;
+constexpr int EXPECTED_PATH_STACK_HEIGHT = 5;
 
-// get nxlink
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include "MantidLegacyNexus/napi_internal.h"
 
