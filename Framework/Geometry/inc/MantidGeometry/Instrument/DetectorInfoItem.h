@@ -50,7 +50,11 @@ public:
 
   double l2() const { return m_detectorInfo->l2(m_index); }
 
+  double difcUncalibrated() const { return m_detectorInfo->difcUncalibrated(m_index); }
+
   size_t index() const { return m_index; }
+
+  size_t detid() const { return m_detectorInfo->detid(m_index); }
 
   DetectorInfoItem(T &detectorInfo, const size_t index) : m_detectorInfo(&detectorInfo), m_index(index) {}
 
