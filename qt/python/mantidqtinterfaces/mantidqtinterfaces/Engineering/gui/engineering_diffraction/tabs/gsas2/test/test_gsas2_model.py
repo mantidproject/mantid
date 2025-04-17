@@ -39,8 +39,8 @@ class TestGSAS2Model(unittest.TestCase):
         self.lst_result_filepath = FileFinder.getFullPath(os.path.join("EngDiff_gsas2_tab", "gsas2_output.lst"))
         self.maxDiff = None
         self.model.user_save_directory = os.path.dirname(self.lst_result_filepath)
-        self.model.project_name = "gsas2_output"
-        self.model.path_to_gsas2 = "/opt/gsas2"
+        self.model.save_directories.project_name = "gsas2_output"
+        self.model.config.path_to_gsas2 = "/opt/gsas2"
         # setup a mock workspace
         self.mock_inst = MagicMock()
         self.mock_inst.getFullName.return_value = "instrument"
@@ -84,33 +84,33 @@ class TestGSAS2Model(unittest.TestCase):
         self.assertFalse(no_load)
 
     def test_further_validation(self):
-        self.model.limits = []
+        self.model.x_limits.limits = []
         self.model.refinement_method = "Rietveld"
-        self.model.mantid_pawley_reflections = []
+        self.model.refinement_state.mantid_pawley_reflections = []
         no_limits = self.model.further_validation()
         self.assertFalse(no_limits)
 
-        self.model.limits = [18000, 50000]
+        self.model.x_limits.limits = [18000, 50000]
         self.model.refinement_method = "Rietveld"
-        self.model.mantid_pawley_reflections = []
+        self.model.refinement_state.mantid_pawley_reflections = []
         success = self.model.further_validation()
         self.assertTrue(success)
 
-        self.model.limits = [18000, 50000]
+        self.model.x_limits.limits = [18000, 50000]
         self.model.refinement_method = "Pawley"
-        self.model.mantid_pawley_reflections = []
+        self.model.refinement_state.mantid_pawley_reflections = []
         no_reflections = self.model.further_validation()
         self.assertFalse(no_reflections)
 
-        self.model.limits = [18000, 50000]
+        self.model.x_limits.limits = [18000, 50000]
         self.model.refinement_method = "Pawley"
-        self.model.mantid_pawley_reflections = ["valid_reflections", 1, 2, 3]
+        self.model.refinement_state.mantid_pawley_reflections = ["valid_reflections", 1, 2, 3]
         success_2 = self.model.further_validation()
         self.assertTrue(success_2)
 
-        self.model.limits = []
+        self.model.x_limits.limits = []
         self.model.refinement_method = "Pawley"
-        self.model.mantid_pawley_reflections = ["valid_reflections", 1, 2, 3]
+        self.model.refinement_state.mantid_pawley_reflections = ["valid_reflections", 1, 2, 3]
         no_limits_2 = self.model.further_validation()
         self.assertFalse(no_limits_2)
 
@@ -128,48 +128,49 @@ class TestGSAS2Model(unittest.TestCase):
 
     def test_generate_reflections_from_space_group(self):
         self.model.dSpacing_min = 1.15
-        self.model.crystal_structures = [CrystalStructure("3.6105 3.6105 3.6105", "F m -3 m", "Fe 0.0 0.0 0.0 1 0.025")]
+        self.model.refinement_state.crystal_structures = [CrystalStructure("3.6105 3.6105 3.6105", "F m -3 m", "Fe 0.0 0.0 0.0 1 0.025")]
         self.model.generate_reflections_from_space_group()
-        self.assertEqual(len(self.model.mantid_pawley_reflections), 1)  # 1 phase
-        self.assertEqual(len(self.model.mantid_pawley_reflections[0]), 3)  # 3 reflections
+        self.assertEqual(len(self.model.refinement_state.mantid_pawley_reflections), 1)  # 1 phase
+        self.assertEqual(len(self.model.refinement_state.mantid_pawley_reflections[0]), 3)  # 3 reflections
         hkls = ([1.0, 1.0, 1.0], [2.0, 0.0, 0.0], [2.0, 2.0, 0.0])
         multiplicities = (8, 6, 12)
         dspacs = (2.0845, 1.8052, 1.2765)
-        for irefl, refl in enumerate(self.model.mantid_pawley_reflections[0]):
+        for irefl, refl in enumerate(self.model.refinement_state.mantid_pawley_reflections[0]):
             hkl, dspac, mult = refl
             self.assertListEqual(hkl, hkls[irefl])
             self.assertAlmostEqual(dspac, dspacs[irefl], delta=1e-4)
             self.assertEqual(mult, multiplicities[irefl])
 
     def test_read_phase_files_no_override_lattice(self):
-        self.model.phase_filepaths = [self.phase_file_path]
-        self.model.override_cell_length_string = None
+        self.model.file_paths.phase_filepaths = [self.phase_file_path]
+        self.model.refinement_state.override_cell_length_string = None
         self.model.read_phase_files()
 
-        self.assertEqual(len(self.model.crystal_structures), len(self.model.phase_filepaths))  # 1 phase
+        self.assertEqual(len(self.model.refinement_state.crystal_structures), len(self.model.file_paths.phase_filepaths))  # 1 phase
         self.assertListEqual(
-            self.model._get_lattice_parameters_from_crystal_structure(self.model.crystal_structures[0]),
+            self.model._get_lattice_parameters_from_crystal_structure(self.model.refinement_state.crystal_structures[0]),
             [3.6105, 3.6105, 3.6105, 90.0, 90.0, 90.0],
         )
-        self.assertEqual(self.model.crystal_structures[0].getSpaceGroup().getHMSymbol(), "F m -3 m")
+        self.assertEqual(self.model.refinement_state.crystal_structures[0].getSpaceGroup().getHMSymbol(), "F m -3 m")
 
     def test_read_phase_files_with_override_lattice(self):
-        self.model.phase_filepaths = [self.phase_file_path]
-        self.model.override_cell_length_string = "3.5"
+        self.model.file_paths.phase_filepaths = [self.phase_file_path]
+        self.model.refinement_state.override_cell_length_string = "3.5"
         self.model.read_phase_files()
 
         self.assertListEqual(
-            self.model._get_lattice_parameters_from_crystal_structure(self.model.crystal_structures[0]), [3.5, 3.5, 3.5, 90.0, 90.0, 90.0]
+            self.model._get_lattice_parameters_from_crystal_structure(self.model.refinement_state.crystal_structures[0]),
+            [3.5, 3.5, 3.5, 90.0, 90.0, 90.0],
         )
 
     def test_understand_data_structure(self):
         # note this gss-ExtendedHeader.gsa test file is not widely relevant for this interface
         gsa_file_path = FileFinder.getFullPath("gss-ExtendedHeader.gsa")
-        self.model.data_files = [gsa_file_path]
+        self.model.file_paths.data_files = [gsa_file_path]
         self.model.understand_data_structure()
-        self.assertEqual(self.model.number_of_regions, 1)
-        self.assertEqual(self.model.data_x_min, [41.7276698840232])
-        self.assertEqual(self.model.data_x_max, [41.82791649202319])
+        self.assertEqual(self.model.state.number_of_regions, 1)
+        self.assertEqual(self.model.x_limits.data_x_min, [41.7276698840232])
+        self.assertEqual(self.model.x_limits.data_x_max, [41.82791649202319])
 
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_crystal_params_from_instrument_split_on_spaces(self, mock_find_in_file):
@@ -190,43 +191,43 @@ class TestGSAS2Model(unittest.TestCase):
     def test_determine_tof_min(self, mock_find_in_file):
         # 2 instrument files
         mock_find_in_file.return_value = "18000\t3.0\t14.0"
-        self.model.instrument_files = ["first", "second"]
-        self.model.number_of_regions = 2
+        self.model.file_paths.instrument_files = ["first", "second"]
+        self.model.state.number_of_regions = 2
         self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0, 18017.0])
 
         # 1 instrument file
-        self.model.instrument_files = ["first file containing 2 banks"]
-        self.model.number_of_regions = 2
+        self.model.file_paths.instrument_files = ["first file containing 2 banks"]
+        self.model.state.number_of_regions = 2
         self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0, 18017.0])
 
     @patch(model_path + ".GSAS2Model.understand_data_structure")
     def test_validate_x_limits(self, mock_understand_data):
-        self.model.number_of_regions = 1
-        self.model.instrument_files = ["inst1", "inst2"]
-        self.model.data_files = ["data1", "data2", "data3"]
+        self.model.state.number_of_regions = 1
+        self.model.file_paths.instrument_files = ["inst1", "inst2"]
+        self.model.file_paths.data_files = ["data1", "data2", "data3"]
 
         two_inst_three_histograms = self.model.validate_x_limits([[18000], [50000]])
-        self.assertEqual(two_inst_three_histograms, None)
+        self.assertEqual(two_inst_three_histograms, False)
 
-        self.model.instrument_files = ["inst1"]
+        self.model.file_paths.instrument_files = ["inst1"]
         one_inst_three_histograms = self.model.validate_x_limits([[18000], [50000]])
         self.assertEqual(one_inst_three_histograms, True)
-        self.assertEqual(self.model.limits, [[18000.0, 18000.0, 18000.0], [50000.0, 50000.0, 50000.0]])
+        self.assertEqual(self.model.x_limits.limits, [[18000.0, 18000.0, 18000.0], [50000.0, 50000.0, 50000.0]])
 
-        self.model.number_of_regions = 2
-        self.model.instrument_files = ["inst1"]
-        self.model.data_files = ["data1"]
+        self.model.state.number_of_regions = 2
+        self.model.file_paths.instrument_files = ["inst1"]
+        self.model.file_paths.data_files = ["data1"]
         one_inst_one_hist_two_regions = self.model.validate_x_limits([[18000], [50000]])
         self.assertEqual(one_inst_one_hist_two_regions, True)
-        self.assertEqual(self.model.limits, [[18000.0, 18000.0], [50000.0, 50000.0]])
+        self.assertEqual(self.model.x_limits.limits, [[18000.0, 18000.0], [50000.0, 50000.0]])
 
-        self.model.data_x_min = [18000]
-        self.model.data_x_max = [40000]
-        self.model.instrument_files = ["inst1"]
-        self.model.data_files = ["data1"]
+        self.model.x_limits.data_x_min = [18000]
+        self.model.x_limits.data_x_max = [40000]
+        self.model.file_paths.instrument_files = ["inst1"]
+        self.model.file_paths.data_files = ["data1"]
         no_user_limits = self.model.validate_x_limits(None)
         self.assertEqual(no_user_limits, True)
-        self.assertEqual(self.model.limits, [[18000], [40000]])
+        self.assertEqual(self.model.x_limits.limits, [[18000], [40000]])
 
     def test_read_gsas_lst(self):
         logged_lst_result = self.model.read_gsas_lst_and_print_wR(
@@ -240,13 +241,13 @@ class TestGSAS2Model(unittest.TestCase):
 
     def test_report_on_outputs(self):
         test_directory = os.path.join(os.getcwd(), "GSASModelTesting")
-        result_path = os.path.join(test_directory, f"{self.model.project_name}.lst")
-        project_path = os.path.join(test_directory, f"{self.model.project_name}.gpx")
+        result_path = os.path.join(test_directory, f"{self.model.save_directories.project_name}.lst")
+        project_path = os.path.join(test_directory, f"{self.model.save_directories.project_name}.gpx")
         os.makedirs(test_directory)
         try:
             # No output GSAS-II files
-            self.model.err_call_gsas2 = "Errors from GSAS-II"
-            self.model.temporary_save_directory = test_directory
+            self.model.output_state.err_call_gsas2 = "Errors from GSAS-II"
+            self.model.save_directories.temporary_save_directory = test_directory
 
             files_not_found = self.model.report_on_outputs(3.14)
             self.assertEqual(files_not_found, None)
@@ -255,7 +256,7 @@ class TestGSAS2Model(unittest.TestCase):
                 pass
             with open(project_path, mode="w"):
                 pass
-            self.model.temporary_save_directory = test_directory
+            self.model.save_directories.temporary_save_directory = test_directory
             found_result_filepath, logged_success = self.model.report_on_outputs(3.14, test=True)
             self.assertEqual(found_result_filepath, result_path)
             self.assertEqual(logged_success, "\nGSAS-II call complete in 3.14 seconds.\n")
@@ -273,9 +274,9 @@ class TestGSAS2Model(unittest.TestCase):
         os.makedirs(test_directory)
         try:
             # No output GSAS-II files
-            self.model.err_call_gsas2 = "Detailed\nError\nMessage"
-            self.model.temporary_save_directory = test_directory
-            self.model.project_name = project_name
+            self.model.output_state.err_call_gsas2 = "Detailed\nError\nMessage"
+            self.model.save_directories.temporary_save_directory = test_directory
+            self.model.save_directories.project_name = project_name
             logged_failure = self.model.check_for_output_file(".gpx", "project", test=True)
             expected_logged_failure = (
                 "GSAS-II call must have failed, as the output project file was not found."
@@ -293,7 +294,7 @@ class TestGSAS2Model(unittest.TestCase):
             # Output GSAS-II files found
             with open(project_path, mode="w"):
                 pass
-            self.model.temporary_save_directory = test_directory
+            self.model.save_directories.temporary_save_directory = test_directory
             found_project_filepath = self.model.check_for_output_file(".gpx", "project file", test=True)
             self.assertEqual(found_project_filepath, project_path)
 
@@ -306,7 +307,7 @@ class TestGSAS2Model(unittest.TestCase):
     def test_organize_save_directories(self, mock_output_path):
         try:
             project_name = "project_name"
-            self.model.project_name = project_name
+            self.model.save_directories.project_name = project_name
             current_directory = os.getcwd()
             stem_save_dir = os.path.join(current_directory, "GSAS2")
             expected_temp_directory = os.path.join(stem_save_dir, "tmp_EngDiff_GSASII")
@@ -315,10 +316,12 @@ class TestGSAS2Model(unittest.TestCase):
             rb_num = "valid_rb_number"
             self.model.organize_save_directories(rb_num)
             self.assertEqual(self.model.user_save_directory, mock_user_directory)
-            self.assertEqual(self.model.temporary_save_directory[:-20], expected_temp_directory)
-            self.assertEqual(self.model.gsas2_save_dirs[0], os.path.join(current_directory, "GSAS2", ""))
-            self.assertEqual(len(self.model.gsas2_save_dirs), 2)
-            self.assertEqual(self.model.gsas2_save_dirs[1], os.path.join(current_directory, "User", rb_num, "GSAS2", project_name, ""))
+            self.assertEqual(self.model.save_directories.temporary_save_directory[:-20], expected_temp_directory)
+            self.assertEqual(self.model.file_paths.gsas2_save_dirs[0], os.path.join(current_directory, "GSAS2", ""))
+            self.assertEqual(len(self.model.file_paths.gsas2_save_dirs), 2)
+            self.assertEqual(
+                self.model.file_paths.gsas2_save_dirs[1], os.path.join(current_directory, "User", rb_num, "GSAS2", project_name, "")
+            )
         finally:
             _try_delete(stem_save_dir)
 
@@ -330,11 +333,11 @@ class TestGSAS2Model(unittest.TestCase):
         rb_directory = os.path.join(stem_user_dir, "rb_num", "GSAS2", project_name, "")
         save_directory = os.path.join(current_directory, "GSAS2")
         try:
-            self.model.gsas2_save_dirs = [save_directory, rb_directory]
+            self.model.file_paths.gsas2_save_dirs = [save_directory, rb_directory]
             self.model.user_save_directory = os.path.join(save_directory, project_name)
-            self.model.temporary_save_directory = os.path.join(current_directory, "GSAS2", "tmp_EngDiff_GSASII")
-            project_path = os.path.join(self.model.temporary_save_directory, file_name)
-            os.makedirs(self.model.temporary_save_directory)
+            self.model.save_directories.temporary_save_directory = os.path.join(current_directory, "GSAS2", "tmp_EngDiff_GSASII")
+            project_path = os.path.join(self.model.save_directories.temporary_save_directory, file_name)
+            os.makedirs(self.model.save_directories.temporary_save_directory)
             with open(project_path, mode="w"):
                 pass
             save_message = self.model.move_output_files_to_user_save_location()
@@ -348,7 +351,7 @@ class TestGSAS2Model(unittest.TestCase):
         phase_names = ["Fe", "Fe_gamma"]
         positions = [[1.0, 2.0], [3.0, 4.0]]
 
-        self.model.phase_names_list = phase_names
+        self.model.output_state.phase_names_list = phase_names
         labels = self.model._create_reflection_labels(positions)
 
         self.assertEqual(["reflections_Fe", "reflections_Fe_gamma"], labels)
@@ -357,14 +360,14 @@ class TestGSAS2Model(unittest.TestCase):
         phase_names = ["Fe", "Fe_gamma"]
         positions = [[1.0, 2.0]]
 
-        self.model.phase_names_list = phase_names
+        self.model.output_state.phase_names_list = phase_names
         labels = self.model._create_reflection_labels(positions)
 
         self.assertEqual(["reflections_phase_1"], labels)
 
     def test_load_gsas_histogram(self):
-        self.model.x_min = [20000]
-        self.model.x_max = [21000]
+        self.model.x_limits.x_min = [20000]
+        self.model.x_limits.x_max = [21000]
         histogram_workspace = self.model.load_gsas_histogram(1)
         ReplaceSpecialValues(InputWorkspace=histogram_workspace, OutputWorkspace=histogram_workspace, NaNValue=0)
         expected_workspace = LoadNexus(FileFinder.getFullPath(os.path.join("EngDiff_gsas2_tab", "gsas2_output_workspace_1.nxs")))
@@ -373,7 +376,7 @@ class TestGSAS2Model(unittest.TestCase):
         self.assertTrue(match_bool)
 
     def test_load_gsas2_reflections(self):
-        self.model.phase_names_list = ["Fe_gamma"]
+        self.model.output_state.phase_names_list = ["Fe_gamma"]
         reflections = self.model.load_gsas_reflections_per_histogram_for_plot(1)
         expected_reflections = [np.array([38789.37179684, 33592.5813729, 23753.54208634, 20257.08875516, 19394.68589842])]
         # check all values in two numpy arrays are the same
@@ -382,19 +385,19 @@ class TestGSAS2Model(unittest.TestCase):
     @patch(model_path + ".os.path.exists")
     def test_load_gsas2_reflections_file_not_exist(self, mock_path_exists):
         mock_path_exists.return_value = False
-        self.model.phase_names_list = ["Fe_gamma"]
+        self.model.output_state.phase_names_list = ["Fe_gamma"]
         reflections = self.model.load_gsas_reflections_per_histogram_for_plot(1)
         self.assertTrue(len(reflections) == 0)
 
     def test_create_lattice_parameter_table(self):
-        self.model.phase_names_list = ["Fe_gamma"]
+        self.model.output_state.phase_names_list = ["Fe_gamma"]
         table_ws = self.model.create_lattice_parameter_table(test=True)
         expected_table_ws = self.expected_lattice_table_workspace()
         match_bool, _ = CompareWorkspaces(table_ws, expected_table_ws, tolerance=1e-4)
         self.assertTrue(match_bool)
 
     def test_create_lattice_parameter_table_microstrain_refined(self):
-        self.model.phase_names_list = ["Fe_gamma"]
+        self.model.output_state.phase_names_list = ["Fe_gamma"]
         self.model.refine_microstrain = True
         table_ws = self.model.create_lattice_parameter_table(test=True)
         expected_table_ws = self.expected_lattice_table_workspace(refined=True)
@@ -428,8 +431,8 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.refine_sigma_one = refine_sigma_one
         self.model.refine_gamma = refine_gamma
 
-        self.model.x_min = [-1, -3]
-        self.model.x_max = [100, 200]
+        self.model.x_limits.x_min = [-1, -3]
+        self.model.x_limits.x_max = [100, 200]
         table_ws = self.model.create_instrument_parameter_table(test=True)
         expected_table_ws = self.expected_instrument_table_workspace(sigma_refined=refine_sigma_one, gamma_refined=refine_gamma)
         match_bool, _ = CompareWorkspaces(table_ws, expected_table_ws)
