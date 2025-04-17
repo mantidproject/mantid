@@ -127,15 +127,15 @@ Output:
    SetGoniometer(ws, GoniometerMatrix = "0.0,0.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0")
 
    print('Goniometer rotation matrix =', ws.run().getGoniometer().getR())
-   print('Goniometer rotation matrix matches target: ', ws.run().getGoniometer().getR() == target_matrix)
+   print('Goniometer rotation matrix matches target: ', np.all(ws.run().getGoniometer().getR() == target_matrix))
 
 Output:
 
 .. testoutput:: GoniometerStringExample
 
    Goniometer rotation matrix = [[0. 0. 1.]
-                                 [1. 0. 0.]
-                                 [0. 1. 0.]]
+    [1. 0. 0.]
+    [0. 1. 0.]]
    Goniometer rotation matrix matches target:  True
 
 **Example: WISH goniometer**
