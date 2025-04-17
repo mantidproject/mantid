@@ -10,7 +10,7 @@
 #include "Reduction/RowLocation.h"
 #include "Slicing.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -33,10 +33,10 @@ public:
   virtual RunsTable const &runsTable() const = 0;
   virtual Slicing const &slicing() const = 0;
 
-  virtual boost::optional<LookupRow> findLookupRow(Row const &row) const = 0;
-  virtual boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const = 0;
-  virtual boost::optional<LookupRow> findWildcardLookupRow() const = 0;
-  virtual boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
+  virtual std::optional<LookupRow> findLookupRow(Row const &row) const = 0;
+  virtual std::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const = 0;
+  virtual std::optional<LookupRow> findWildcardLookupRow() const = 0;
+  virtual std::optional<std::reference_wrapper<Item>> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
   virtual bool isInSelection(const Item &item,
                              const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) = 0;
   virtual bool isInSelection(const Row &item,

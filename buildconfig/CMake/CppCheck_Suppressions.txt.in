@@ -527,7 +527,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLo
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:196
 missingOverride:${CMAKE_SOURCE_DIR}/Testing/Tools/cxxtest/cxxtest/GlobalFixture.h:22
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/icons/src/Icon.cpp:80
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:80
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.h:47
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/IReflMessageHandler.h:21
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:267
@@ -544,16 +543,9 @@ constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflect
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:91
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:95
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Options/OptionsDialogModel.h:20
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Preview/PreviewModel.h:31
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/IRunsView.h:66
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/QtCatalogSearcher.h:32
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/IRunsTableView.h:31
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:510
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:749
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:754
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:785
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:786
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:788
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h:60
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Save/SaveAlgorithmRunner.h:18
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.h:54

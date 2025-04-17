@@ -16,7 +16,7 @@
 #include <QString>
 #include <QTableWidget>
 #include <QVariant>
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -70,9 +70,9 @@ private:
                        const QMap<QString, QVariant> &map, std::optional<int> precision);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
   MantidQt::CustomInterfaces::ISISReflectometry::Group decodeGroup(const QMap<QString, QVariant> &map);
-  std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
+  std::vector<std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
   decodeRows(const QList<QVariant> &list);
-  boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row> decodeRow(const QMap<QString, QVariant> &map);
+  std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row> decodeRow(const QMap<QString, QVariant> &map);
   RangeInQ decodeRangeInQ(const QMap<QString, QVariant> &map);
   TransmissionRunPair decodeTransmissionRunPair(const QMap<QString, QVariant> &map);
   MantidQt::CustomInterfaces::ISISReflectometry::SearchResults decodeSearchResults(const QList<QVariant> &list);

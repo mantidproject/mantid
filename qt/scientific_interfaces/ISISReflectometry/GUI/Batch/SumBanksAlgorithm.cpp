@@ -27,7 +27,7 @@ using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
 void updateInputProperties(Mantid::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
-                           boost::optional<ProcessingInstructions> const &detIDsStr) {
+                           std::optional<ProcessingInstructions> const &detIDsStr) {
   properties.setProperty("InputWorkspace", workspace);
   if (detIDsStr) {
     AlgorithmProperties::update("ROIDetectorIDs", *detIDsStr, properties);

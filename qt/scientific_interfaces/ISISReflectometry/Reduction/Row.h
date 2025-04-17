@@ -10,7 +10,6 @@
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
-#include <boost/optional.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/variant.hpp>
 #include <optional>
@@ -31,7 +30,7 @@ class IGroup;
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:
   Row(std::vector<std::string> number, double theta, TransmissionRunPair tranmissionRuns, RangeInQ qRange,
-      boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
+      std::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
 
   bool isGroup() const override;
@@ -41,7 +40,7 @@ public:
   double theta() const;
   RangeInQ const &qRange() const;
   RangeInQ const &qRangeOutput() const;
-  boost::optional<double> scaleFactor() const;
+  std::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
   std::optional<size_t> const &lookupIndex() const;
@@ -72,7 +71,7 @@ private:
   double m_theta;
   RangeInQ m_qRange;       // user-defined Q values
   RangeInQ m_qRangeOutput; // output Q values if inputs were not specified
-  boost::optional<double> m_scaleFactor;
+  std::optional<double> m_scaleFactor;
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;

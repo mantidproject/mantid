@@ -13,13 +13,13 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
+Clipboard::Clipboard() : m_subtrees(std::nullopt), m_subtreeRoots(std::nullopt) {}
 
-Clipboard::Clipboard(boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
-                     boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots)
-    : m_subtrees(std::move(subtrees)), m_subtreeRoots(std::move(subtreeRoots)) {}
+Clipboard::Clipboard(std::vector<MantidQt::MantidWidgets::Batch::Subtree> subtrees,
+                     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> subtreeRoots)
+    : m_subtrees(std::optional(subtrees)), m_subtreeRoots(std::optional(subtreeRoots)) {}
 
-bool Clipboard::isInitialized() const { return m_subtrees.is_initialized() && m_subtreeRoots.is_initialized(); }
+bool Clipboard::isInitialized() const { return m_subtrees.has_value() && m_subtreeRoots.has_value(); }
 
 int Clipboard::numberOfRoots() const {
   if (!isInitialized())
@@ -77,16 +77,16 @@ Group Clipboard::createGroupForRoot(int rootIndex) const {
 
   auto result = Group(groupName(rootIndex));
   auto rowsToAdd = createRowsForRootChildren(rootIndex);
-  for (auto &row : rowsToAdd)
+  for (auto const &row : rowsToAdd)
     result.appendRow(row);
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
+std::vector<std::optional<Row>> Clipboard::createRowsForAllRoots() const {
   if (containsGroups(*this))
     throw std::runtime_error("Attempted to get row for group clipboard item");
 
-  auto result = std::vector<boost::optional<Row>>();
+  auto result = std::vector<std::optional<Row>>();
   std::for_each(subtrees().cbegin(), subtrees().cend(), [this, &result](const auto &subtree) {
     const auto rowsToAdd = createRowsForSubtree(subtree);
     std::copy(rowsToAdd.cbegin(), rowsToAdd.cend(), std::back_inserter(result));
@@ -94,13 +94,13 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::createRowsForRootChildren(int rootIndex) const {
+std::vector<std::optional<Row>> Clipboard::createRowsForRootChildren(int rootIndex) const {
   return createRowsForSubtree(subtrees()[rootIndex]);
 }
 
-std::vector<boost::optional<Row>>
+std::vector<std::optional<Row>>
 Clipboard::createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const {
-  auto result = std::vector<boost::optional<Row>>();
+  auto result = std::vector<std::optional<Row>>();
 
   for (auto const &row : subtree) {
     // Skip the root item if it is a group
@@ -111,25 +111,26 @@ Clipboard::createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &s
     std::transform(row.cells().cbegin(), row.cells().cend(), std::back_inserter(cells),
                    [](MantidQt::MantidWidgets::Batch::Cell const &cell) { return cell.contentText(); });
     auto validationResult = validateRow(cells);
-    if (validationResult.isValid())
+    if (validationResult.isValid()) {
       result.emplace_back(validationResult.assertValid());
-    else
-      result.emplace_back(boost::none);
+    } else {
+      result.emplace_back(std::nullopt);
+    }
   }
 
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Subtree> &Clipboard::mutableSubtrees() { return m_subtrees.get(); }
+std::vector<MantidQt::MantidWidgets::Batch::Subtree> &Clipboard::mutableSubtrees() { return m_subtrees.value(); }
 
-std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &Clipboard::subtrees() const { return m_subtrees.get(); }
+std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &Clipboard::subtrees() const { return m_subtrees.value(); }
 
 std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &Clipboard::subtreeRoots() const {
-  return m_subtreeRoots.get();
+  return m_subtreeRoots.value();
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &Clipboard::mutableSubtreeRoots() {
-  return m_subtreeRoots.get();
+  return m_subtreeRoots.value();
 }
 
 bool containsGroups(Clipboard const &clipboard) {

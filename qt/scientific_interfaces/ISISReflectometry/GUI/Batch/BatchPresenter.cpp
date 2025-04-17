@@ -396,13 +396,13 @@ std::map<ROIType, ProcessingInstructions> BatchPresenter::getMatchingProcessingI
   try {
     if (auto const lookupRow = m_model->findLookupRow(previewRow)) {
       if (auto const signalROI = lookupRow->processingInstructions()) {
-        roiMap[ROIType::Signal] = signalROI.get();
+        roiMap[ROIType::Signal] = signalROI.value();
       }
       if (auto const backgroundROI = lookupRow->backgroundProcessingInstructions()) {
-        roiMap[ROIType::Background] = backgroundROI.get();
+        roiMap[ROIType::Background] = backgroundROI.value();
       }
       if (auto const transmissionROI = lookupRow->transmissionProcessingInstructions()) {
-        roiMap[ROIType::Transmission] = transmissionROI.get();
+        roiMap[ROIType::Transmission] = transmissionROI.value();
       }
     }
   } catch (MultipleRowsFoundException const &) {
@@ -412,7 +412,7 @@ std::map<ROIType, ProcessingInstructions> BatchPresenter::getMatchingProcessingI
   return roiMap;
 }
 
-boost::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsForPreviewRow() const {
+std::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsForPreviewRow() const {
   auto const &previewRow = m_previewPresenter->getPreviewRow();
   try {
     if (auto const lookupRow = m_model->findLookupRow(previewRow)) {
@@ -421,6 +421,6 @@ boost::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorID
   } catch (MultipleRowsFoundException const &) {
     // Do nothing
   }
-  return boost::none;
+  return std::nullopt;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

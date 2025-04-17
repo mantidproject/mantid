@@ -28,21 +28,21 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
   return m_runsTable.selectedRowLocations();
 }
 
-boost::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
+std::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
   return experiment().findLookupRow(row, runsTable().thetaTolerance());
 }
 
-boost::optional<LookupRow> Batch::findLookupRow(PreviewRow const &previewRow) const {
+std::optional<LookupRow> Batch::findLookupRow(PreviewRow const &previewRow) const {
   return experiment().findLookupRow(previewRow, runsTable().thetaTolerance());
 }
 
-boost::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }
+std::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 
-boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+std::optional<std::reference_wrapper<Item>> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
 
@@ -56,8 +56,8 @@ void Batch::updateLookupIndex(Row &row) {
 
 void Batch::updateLookupIndexesOfGroup(Group &group) {
   for (auto &row : group.mutableRows()) {
-    if (row.is_initialized()) {
-      updateLookupIndex(row.get());
+    if (row.has_value()) {
+      updateLookupIndex(row.value());
     }
   }
 }

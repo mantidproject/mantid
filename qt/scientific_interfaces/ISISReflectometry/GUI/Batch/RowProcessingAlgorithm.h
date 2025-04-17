@@ -11,10 +11,10 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 #include "Reduction/Item.h"
-#include <boost/optional.hpp>
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -42,5 +42,5 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
                                                                                                   Row &row);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(IBatch const &model, boost::optional<Row const &> row = boost::none);
+createAlgorithmRuntimeProps(IBatch const &model, std::optional<std::reference_wrapper<Row const>> row = std::nullopt);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

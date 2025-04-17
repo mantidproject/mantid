@@ -268,7 +268,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.value(), precision));
       }
     }
   }
@@ -328,9 +328,9 @@ MantidQt::CustomInterfaces::ISISReflectometry::Group Decoder::decodeGroup(const 
   return group;
 }
 
-std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
+std::vector<std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
 Decoder::decodeRows(const QList<QVariant> &list) {
-  std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>> rows;
+  std::vector<std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>> rows;
   std::transform(list.cbegin(), list.cend(), std::back_inserter(rows),
                  [this](const auto &rowMap) { return decodeRow(rowMap.toMap()); });
   return rows;
@@ -346,16 +346,16 @@ ReductionOptionsMap decodeReductionOptions(const QMap<QString, QVariant> &map) {
 }
 } // namespace
 
-boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
 Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   if (map.size() == 0) {
-    return boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>();
+    return std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>();
   }
   std::vector<std::string> number;
   const auto runNoList = map[QString("runNumbers")].toList();
   std::transform(runNoList.cbegin(), runNoList.cend(), std::back_inserter(number),
                  [](const auto &runNumber) { return runNumber.toString().toStdString(); });
-  boost::optional<double> maybeScaleFactor = boost::make_optional<double>(false, 0.0);
+  auto maybeScaleFactor = std::optional<double>();
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
   if (scaleFactorPresent) {
     maybeScaleFactor = map[QString("scaleFactor")].toDouble();
@@ -389,9 +389,7 @@ RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
   if (stepPresent) {
     step = map[QString("step")].toDouble();
   }
-  // Preffered implementation is using boost::optional<double> instead of bool
-  // and double but older versions of GCC seem to be complaining about
-  // -Wmaybe-uninitialized
+  // Preferred implementation is using std::optional<double> instead of bool
   if (minPresent && maxPresent && stepPresent) {
     return RangeInQ(min, step, max);
   } else if (minPresent && maxPresent) {

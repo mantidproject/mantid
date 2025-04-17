@@ -251,7 +251,7 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
 
 // Get the lookup row from the model. Because using a wildcard row or algorithm defaults
 // can be confusing this function also logs warnings about what is happening.
-boost::optional<LookupRow> findLookupRow(Row const &row, IBatch const &model) {
+std::optional<LookupRow> findLookupRow(Row const &row, IBatch const &model) {
   auto lookupRow = model.findLookupRow(row);
   if (!lookupRow) {
     g_log.warning(
@@ -269,7 +269,7 @@ boost::optional<LookupRow> findLookupRow(Row const &row, IBatch const &model) {
 
 // Get the wildcard lookup row from the model. Because using a wildcard row or algorithm defaults
 // can be confusing this function also logs warnings about what is happening.
-boost::optional<LookupRow> findWildcardLookupRow(IBatch const &model) {
+std::optional<LookupRow> findWildcardLookupRow(IBatch const &model) {
   auto lookupRow = model.findWildcardLookupRow();
   if (lookupRow) {
     g_log.warning("Using experiment settings from the wildcard row.");
@@ -344,7 +344,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
   if (previewRow.getSelectedBanks().has_value()) {
-    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().value());
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 
@@ -389,8 +389,8 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &ro
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                 boost::optional<Row const &> row) {
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
+createAlgorithmRuntimeProps(IBatch const &model, std::optional<std::reference_wrapper<Row const>> row) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
   updatePropertiesFromBatchModel(*properties, model);

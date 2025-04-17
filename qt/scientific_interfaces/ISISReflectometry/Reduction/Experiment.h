@@ -16,8 +16,8 @@
 #include "ReductionType.h"
 #include "SummationType.h"
 #include "TransmissionStitchOptions.h"
-#include <boost/optional.hpp>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -56,9 +56,9 @@ public:
   std::vector<LookupRow> const &lookupTableRows() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
-  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
-  boost::optional<LookupRow> findWildcardLookupRow() const;
+  std::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  std::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
+  std::optional<LookupRow> findWildcardLookupRow() const;
 
   void updateLookupRow(LookupRow lookupRow, double tolerance);
 

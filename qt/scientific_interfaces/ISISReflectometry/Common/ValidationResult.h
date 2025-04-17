@@ -5,12 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+// Use TaggedOptional to avoid nested std::optionals in LookupRow validator classes.
+// The first pair holds the value of type T held by the optional, while the second pair tags whether the content is in
+// a valid state.
+template <typename T> using TaggedOptional = std::pair<std::optional<T>, bool>;
 
 template <typename Validated, typename Error = boost::blank> class ValidationResult {
 public:
@@ -22,7 +27,7 @@ public:
   bool isError() const;
   Validated const &assertValid() const;
   Error const &assertError() const;
-  boost::optional<Validated> validElseNone() const;
+  std::optional<Validated> validElseNone() const;
 
 private:
   boost::variant<Validated, Error> m_innerResult;
@@ -55,11 +60,11 @@ template <typename Validated, typename Error> Error const &ValidationResult<Vali
 }
 
 template <typename Validated, typename Error>
-boost::optional<Validated> ValidationResult<Validated, Error>::validElseNone() const {
-  if (isValid())
+std::optional<Validated> ValidationResult<Validated, Error>::validElseNone() const {
+  if (isValid()) {
     return assertValid();
-  else
-    return boost::none;
+  }
+  return std::nullopt;
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

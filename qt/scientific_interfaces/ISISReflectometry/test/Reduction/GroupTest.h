@@ -162,7 +162,7 @@ public:
 
   void test_no_postprocessing_if_one_valid_and_one_invalid_row() {
     auto group = makeGroupWithOneRow();
-    group.appendRow(boost::none);
+    group.appendRow(std::nullopt);
     checkPostprocessingNotApplicable(group);
   }
 
@@ -174,7 +174,7 @@ public:
 
   void test_has_postprocessing_if_two_valid_rows_and_one_invalid_row() {
     auto group = makeGroupWithTwoRows();
-    group.appendRow(boost::none);
+    group.appendRow(std::nullopt);
     checkPostprocessingIsApplicable(group);
     checkDoesNotRequirePostprocessing(group);
   }
@@ -298,24 +298,24 @@ public:
     auto rowToAdd = makeRow("12345", 0.5);
     group.appendRow(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 1);
-    TS_ASSERT(group[0].is_initialized());
-    TS_ASSERT_EQUALS(group[0].get(), rowToAdd);
+    TS_ASSERT(group[0].has_value());
+    TS_ASSERT_EQUALS(group[0].value(), rowToAdd);
   }
 
   void test_append_empty_row() {
     auto group = makeEmptyGroup();
     group.appendEmptyRow();
     TS_ASSERT_EQUALS(group.rows().size(), 1);
-    TS_ASSERT_EQUALS(group[0].is_initialized(), false);
+    TS_ASSERT_EQUALS(group[0].has_value(), false);
   }
 
   void test_append_uninitialized_row() {
     // manually append an empty (uninitialized) row
     auto group = makeEmptyGroup();
-    auto rowToAdd = boost::optional<Row>{boost::none};
+    auto rowToAdd = std::optional<Row>{std::nullopt};
     group.appendRow(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 1);
-    TS_ASSERT_EQUALS(group[0].is_initialized(), false);
+    TS_ASSERT_EQUALS(group[0].has_value(), false);
   }
 
   void test_insert_row_at_position() {
@@ -324,8 +324,8 @@ public:
     auto const index = 1;
     group.insertRow(rowToAdd, index);
     TS_ASSERT_EQUALS(group.rows().size(), 3);
-    TS_ASSERT(group[index].is_initialized());
-    TS_ASSERT_EQUALS(group[index].get(), rowToAdd);
+    TS_ASSERT(group[index].has_value());
+    TS_ASSERT_EQUALS(group[index].value(), rowToAdd);
   }
 
   void test_insert_row_sorted_by_angle() {
@@ -334,8 +334,8 @@ public:
     auto const index = 1; // angle 0.5 is between the two existing rows
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 3);
-    TS_ASSERT(group[index].is_initialized());
-    TS_ASSERT_EQUALS(group[index].get(), rowToAdd);
+    TS_ASSERT(group[index].has_value());
+    TS_ASSERT_EQUALS(group[index].value(), rowToAdd);
   }
 
   void test_insert_row_sorted_by_angle_at_start() {
@@ -344,8 +344,8 @@ public:
     auto const index = 0; // angle 0.1 is before the current two rows
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 3);
-    TS_ASSERT(group[index].is_initialized());
-    TS_ASSERT_EQUALS(group[index].get(), rowToAdd);
+    TS_ASSERT(group[index].has_value());
+    TS_ASSERT_EQUALS(group[index].value(), rowToAdd);
   }
 
   void test_insert_row_sorted_by_angle_at_end() {
@@ -354,8 +354,8 @@ public:
     auto const index = 2; // angle 1.5 is after the current two rows
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 3);
-    TS_ASSERT(group[index].is_initialized());
-    TS_ASSERT_EQUALS(group[index].get(), rowToAdd);
+    TS_ASSERT(group[index].has_value());
+    TS_ASSERT_EQUALS(group[index].value(), rowToAdd);
   }
 
   void test_insert_row_sorted_by_angle_into_empty_group() {
@@ -364,26 +364,26 @@ public:
     auto const index = 0;
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 1);
-    TS_ASSERT(group[index].is_initialized());
-    TS_ASSERT_EQUALS(group[index].get(), rowToAdd);
+    TS_ASSERT(group[index].has_value());
+    TS_ASSERT_EQUALS(group[index].value(), rowToAdd);
   }
 
   void test_insert_row_sorted_by_angle_adds_uninitialized_row_at_end() {
     auto group = makeGroupWithTwoRowsWithDifferentAngles();
-    auto rowToAdd = boost::optional<Row>{boost::none};
+    auto rowToAdd = std::optional<Row>{std::nullopt};
     auto const index = 2; // should be added at the end
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 3);
-    TS_ASSERT_EQUALS(group[index].is_initialized(), false);
+    TS_ASSERT_EQUALS(group[index].has_value(), false);
   }
 
   void test_insert_uninitialized_row_sorted_by_angle_into_empty_group() {
     auto group = makeEmptyGroup();
-    auto rowToAdd = boost::optional<Row>{boost::none};
+    auto rowToAdd = std::optional<Row>{std::nullopt};
     auto const index = 0;
     group.insertRowSortedByAngle(rowToAdd);
     TS_ASSERT_EQUALS(group.rows().size(), 1);
-    TS_ASSERT_EQUALS(group[index].is_initialized(), false);
+    TS_ASSERT_EQUALS(group[index].has_value(), false);
   }
 
   /** Removing rows
@@ -523,15 +523,15 @@ public:
     group.mutableRows()[1]->setOutputNames({"12346_Lam", "12346_Q", "12346_QBin"});
     group.mutableRows()[1]->setSuccess();
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone("12346_Q");
-    TS_ASSERT(maybeRow.is_initialized());
-    if (maybeRow.is_initialized())
-      TS_ASSERT(maybeRow->success());
+    TS_ASSERT(maybeRow.has_value());
+    if (maybeRow.has_value())
+      TS_ASSERT(maybeRow->get().success());
   }
 
   void test_find_row_by_output_name_fails() {
     auto group = makeGroupWithThreeRows();
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone("99999");
-    TS_ASSERT(!maybeRow.is_initialized());
+    TS_ASSERT(!maybeRow.has_value());
   }
 
   void test_set_all_row_parents() {
@@ -592,8 +592,8 @@ public:
 
 private:
   Group makeGroupWithThreeRows() {
-    return Group("three_row_group", std::vector<boost::optional<Row>>{makeRow("12345", 0.1), makeRow("12346", 0.2),
-                                                                      makeRow("12347", 0.3)});
+    return Group("three_row_group",
+                 std::vector<std::optional<Row>>{makeRow("12345", 0.1), makeRow("12346", 0.2), makeRow("12347", 0.3)});
   }
 
   Group makeGroupWithTwoCompleteRows() {

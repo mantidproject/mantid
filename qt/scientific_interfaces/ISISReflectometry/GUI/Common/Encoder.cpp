@@ -122,7 +122,7 @@ QList<QVariant> Encoder::encodeRows(const MantidQt::CustomInterfaces::ISISReflec
   QList<QVariant> rows;
   for (const auto &row : group.m_rows) {
     if (row) {
-      rows.append(QVariant(encodeRow(row.get())));
+      rows.append(QVariant(encodeRow(row.value())));
     } else {
       rows.append(QVariant(QMap<QString, QVariant>()));
     }
@@ -197,7 +197,7 @@ QMap<QString, QVariant> Encoder::encodeRow(const MantidQt::CustomInterfaces::ISI
   rowMap.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
   rowMap.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));
   if (row.m_scaleFactor) {
-    rowMap.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.get()));
+    rowMap.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.value()));
   }
   rowMap.insert(QString("transRunNums"), QVariant(encodeTransmissionRunPair(row.m_transmissionRuns)));
   rowMap.insert(QString("reductionWorkspaces"), QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));

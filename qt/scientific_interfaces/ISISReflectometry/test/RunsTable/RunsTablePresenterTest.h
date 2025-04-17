@@ -80,7 +80,7 @@ public:
 
   Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
     auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].get();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].value();
     return row;
   }
 

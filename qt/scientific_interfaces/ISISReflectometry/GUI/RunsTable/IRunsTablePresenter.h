@@ -30,10 +30,10 @@ public:
   virtual RunsTable &mutableRunsTable() = 0;
 
   virtual void notifyRowStateChanged() = 0;
-  virtual void notifyRowStateChanged(boost::optional<Item const &> item) = 0;
+  virtual void notifyRowStateChanged(std::optional<std::reference_wrapper<Item const>> item) = 0;
 
   virtual void notifyRowModelChanged() = 0;
-  virtual void notifyRowModelChanged(boost::optional<Item const &> item) = 0;
+  virtual void notifyRowModelChanged(std::optional<std::reference_wrapper<Item const>> item) = 0;
   virtual void notifyRemoveAllRowsAndGroupsRequested() = 0;
 
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;

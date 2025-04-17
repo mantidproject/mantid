@@ -25,10 +25,11 @@ public:
   MOCK_METHOD(RunsTable const &, runsTable, (), (const, override));
   MOCK_METHOD(Slicing const &, slicing, (), (const, override));
 
-  MOCK_METHOD(boost::optional<LookupRow>, findLookupRowProxy, (Row const &), (const));
-  MOCK_METHOD(boost::optional<LookupRow>, findLookupPreviewRowProxy, (PreviewRow const &), (const));
-  MOCK_METHOD(boost::optional<LookupRow>, findWildcardLookupRow, (), (const, override));
-  MOCK_METHOD(boost::optional<Item &>, getItemWithOutputWorkspaceOrNone, (std::string const &), (override));
+  MOCK_METHOD(std::optional<LookupRow>, findLookupRowProxy, (Row const &), (const));
+  MOCK_METHOD(std::optional<LookupRow>, findLookupPreviewRowProxy, (PreviewRow const &), (const));
+  MOCK_METHOD(std::optional<LookupRow>, findWildcardLookupRow, (), (const, override));
+  MOCK_METHOD(std::optional<std::reference_wrapper<Item>>, getItemWithOutputWorkspaceOrNone, (std::string const &),
+              (override));
   MOCK_METHOD(bool, isInSelection, (const Item &, const std::vector<MantidWidgets::Batch::RowLocation> &), (override));
   MOCK_METHOD(bool, isInSelection, (const Row &, const std::vector<MantidWidgets::Batch::RowLocation> &), (override));
   MOCK_METHOD(bool, isInSelection, (const Group &, const std::vector<MantidWidgets::Batch::RowLocation> &), (override));
@@ -40,8 +41,8 @@ public:
   MOCK_METHOD(void, updateLookupIndexesOfTable, (), (override));
 
   // gtest struggles with the combination of overrides and references, so create proxies
-  boost::optional<LookupRow> findLookupRow(Row const &row) const override { return findLookupRowProxy(row); }
-  boost::optional<LookupRow> findLookupRow(PreviewRow const &row) const override {
+  std::optional<LookupRow> findLookupRow(Row const &row) const override { return findLookupRowProxy(row); }
+  std::optional<LookupRow> findLookupRow(PreviewRow const &row) const override {
     return findLookupPreviewRowProxy(row);
   }
 };

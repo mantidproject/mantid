@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -48,7 +48,7 @@ public:
 
 private:
   State m_state;
-  boost::optional<std::string> m_message;
+  std::optional<std::string> m_message;
   double m_progress;
 
   bool requiresMessage() const;

@@ -37,7 +37,7 @@ void RunsTable::resetState() { m_reductionJobs.resetState(); }
 
 void RunsTable::resetSkippedItems() { m_reductionJobs.resetSkippedItems(); }
 
-boost::optional<Item &> RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+std::optional<std::reference_wrapper<Item>> RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_reductionJobs.getItemWithOutputWorkspaceOrNone(wsName);
 }
 
@@ -58,8 +58,8 @@ std::vector<Row> RunsTable::selectedRows() const {
     if (!isRowLocation(rowLocation))
       continue;
     const auto row = m_reductionJobs.getRowFromPath(rowLocation);
-    if (row.is_initialized())
-      rows.emplace_back(row.get());
+    if (row.has_value())
+      rows.emplace_back(row.value());
   }
   return rows;
 }
