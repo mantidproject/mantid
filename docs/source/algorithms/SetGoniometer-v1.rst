@@ -123,8 +123,8 @@ Output:
         DataX=[0., 1.],
         DataY=[1., 2., 3.,4.],
         NSpec=4)
-   target_matrix = np.array(([0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,0.0,1.0]))
-   SetGoniometer(ws, GoniometerMatrix = "0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0")
+   target_matrix = np.array(([0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,1.0,0.0]))
+   SetGoniometer(ws, GoniometerMatrix = "0.0,0.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0")
 
    print('Goniometer rotation matrix =', ws.run().getGoniometer().getR())
    print('Goniometer rotation matrix matches target: ', ws.run().getGoniometer().getR() == target_matrix)
