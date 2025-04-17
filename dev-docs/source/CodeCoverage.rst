@@ -16,6 +16,13 @@ GCC and LLVM have tooling built in to allow a developer to view the code coverag
 
 This will work for native C++ code and any code executed via Python, as the instrumentation is compiled into the binary output. Gcovr will also filter out any non-project code automatically.
 
+Coverage on Conda
+#################
+
+Since the move to `conda`, `GCC` is installed through the conda package `gxx_linux-64`. This conda package does NOT include `gcov`, required to assess code coverage. `gcov` is not currently available on `conda`, so you will need to ensure that `gcov` can be instead found on your system, and that this version of `gcov` is the same version as the `GCC` compiler we install using `conda`. If this is not the case, errors will be raised during the generation of coverage data.
+
+As `gcov` is packaged with `GCC`, you will need to install `GCC` on your system. You can typically do this using the `apt` package manager. If an appropriate version of `GCC` is not available for your OS you will unfortunately have to build it from source: https://gcc.gnu.org/wiki/InstallingGCC
+
 C++ Specific Notes
 ##################
 
@@ -31,7 +38,7 @@ Setup
     cmake /path/to/src -DCOVERAGE=ON
     ninja # or make
 
-- Install gcovr
+- Install gcovr (already included in mantid-developer environments)
 
   .. code-block:: shell
 
@@ -51,6 +58,8 @@ The following targets are available to make/ninja:
 HTML output is written into: `<build_dir>/coverage/<lang>/html`
 
 Where `<lang>` is either `cpp` or `python`.
+
+Note: If errors are thrown on certain directories during automatic report production, you may have more luck specifying individual directories manually.
 
 Producing a coverage report manually
 ####################################
