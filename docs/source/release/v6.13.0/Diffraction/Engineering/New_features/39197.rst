@@ -1,0 +1,1 @@
+- New algorithm :ref:`algm-CreatePoleFigureTableWorkspace` which creates a table with the information required to produce a pole figure (a collection of alphas, betas, and intensities), for use in texture analysis.
