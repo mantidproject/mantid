@@ -10,6 +10,7 @@ DNS powder elastic options tab presenter of DNS reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import DNSCommonOptionsPresenter
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import get_automatic_two_theta_binning
 
 
 class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
@@ -75,22 +76,3 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
             two_theta_max = own_options["two_theta_max"]
             two_theta_min = own_options["two_theta_min"]
             self.view._map["two_theta_bin_size"].setMaximum(two_theta_max - two_theta_min)
-
-
-def get_automatic_two_theta_binning(sample_data):
-    """
-    Determines automatic two theta binning parameters from selected sample data.
-    """
-    det_rot = [-x["det_rot"] for x in sample_data]
-    two_theta_last_det = 115.0
-    two_theta_max = max(det_rot) + two_theta_last_det
-    two_theta_min = min(det_rot)
-    two_theta_step = 0.5
-    number_two_theta_bins = int(round((two_theta_max - two_theta_min) / two_theta_step) + 1)
-    two_theta_binning_dict = {
-        "two_theta_min": two_theta_min,
-        "two_theta_max": two_theta_max,
-        "two_theta_bin_size": two_theta_step,
-        "nbins": number_two_theta_bins,
-    }
-    return two_theta_binning_dict

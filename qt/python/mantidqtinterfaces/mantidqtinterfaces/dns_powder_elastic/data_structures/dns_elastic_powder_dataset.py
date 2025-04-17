@@ -13,7 +13,8 @@ in a dictionary.
 import os
 import numpy as np
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import DNSBinning
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import DNSBinning, get_automatic_omega_binning
+
 from mantidqtinterfaces.dns_powder_elastic.data_structures.field_names import field_dict
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import list_to_multirange
@@ -30,7 +31,7 @@ class DNSElasticDataset(ObjectDict):
         if data:
             self["is_sample"] = is_sample
             if is_sample:
-                self["angle_fields_data"] = get_sample_fields_each_bank(data)
+                self["angle_fields_data"], self["angle_fields_files_data"] = get_sample_fields_each_bank(data)
             if not is_sample and banks is not None:
                 data = remove_unnecessary_standard_banks(data, banks)
             if not is_sample and fields is not None:
@@ -118,11 +119,10 @@ def list_to_set(bank_list, rounding_limit=0.05):
 
 def automatic_omega_binning(sample_data):
     if sample_data:
-        omega = [x["sample_rot"] - x["det_rot"] for x in sample_data]
-        omega_max = max(omega)
-        omega_min = min(omega)
-        sample_rot = [x["sample_rot"] for x in sample_data]
-        omega_step = get_omega_step(sample_rot)
+        binning_dict = get_automatic_omega_binning(sample_data)
+        omega_max = binning_dict["omega_max"]
+        omega_min = binning_dict["omega_min"]
+        omega_step = binning_dict["omega_bin_size"]
         return DNSBinning(omega_min, omega_max, omega_step)
 
 
@@ -203,32 +203,30 @@ def remove_unnecessary_standard_fields(standard_data, sample_fields, ignore_van)
     return standard_data_clean
 
 
-def get_bank_positions(sample_data, rounding_limit=0.05):
-    new_arr = []
-    inside = False
+def get_bank_positions(sample_data):
     banks = set(entry["det_rot"] for entry in sample_data)
-    for bank in banks:
-        for compare in new_arr:
-            if abs(compare - bank) < rounding_limit:
-                inside = True
-                break
-            inside = False
-        if not inside:
-            new_arr.append(bank)
-    return new_arr
+    unique_bank_positions = list(sorted(banks))
+    return unique_bank_positions
 
 
 def get_sample_fields_each_bank(sample_data):
     det_banks = get_bank_positions(sample_data)
     angle_and_fields_data = {}
+    angle_fields_files_data = {}
     for det_bank in det_banks:
         fields = []
+        angle_fields_files_data[det_bank] = {}
         for file_dict in sample_data:
             if det_bank == file_dict["det_rot"]:
                 field = field_dict.get(file_dict["field"], file_dict["field"])
+                if field not in angle_fields_files_data[det_bank]:
+                    angle_fields_files_data[det_bank][field] = []
+                file = field_dict.get(file_dict["file_number"], file_dict["file_number"])
+                angle_fields_files_data[det_bank][field].append(file)
                 fields.append(field)
-        angle_and_fields_data[det_bank] = set(fields)
-    return angle_and_fields_data
+        unique_fields = list(set(fields))
+        angle_and_fields_data[det_bank] = unique_fields
+    return angle_and_fields_data, angle_fields_files_data
 
 
 def _get_path_string(dataset, sample_name):
