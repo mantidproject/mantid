@@ -120,7 +120,9 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng, c
                                    std::to_string(m_maxScatterAttempts) +
                                    " attempts. Try increasing the maximum "
                                    "threshold or if this does not help then "
-                                   "please check the defined shape.");
+                                   "please check the defined shape and, "
+                                   "if defined, the gauge volume (both its shape "
+                                   "and its intersection with the defined sample shape).");
         }
       } while (true);
     }
