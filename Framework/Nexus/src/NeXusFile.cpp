@@ -315,22 +315,16 @@ template <typename T> T *File::getCurrentLocationAs() {
  *  matches the class name being looked up.
  */
 bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name) const {
-  printf("NEXUSFILE L%d %s \n", __LINE__, class_name.c_str());
-  H5::DataType dt(H5T_STRING, class_name.size());
-  printf("NEXUSFILE L%d %s \n", __LINE__, class_name.c_str());
   if (!grp.attrExists(group_class_spec)) {
-    printf("NEXUSFILE L%d %s \n", __LINE__, class_name.c_str());
     throw Exception("NeXusFile::verifyGroupClass -- This was not found.\n");
   }
-  printf("NEXUSFILE L%d %s \n", __LINE__, class_name.c_str());
   H5::Attribute attr = grp.openAttribute(group_class_spec);
+  H5::DataType dt = attr.getDataType();
   std::string res("");
   attr.read(dt, res);
   if (res == "") {
-    printf("NEXUSFILE L%d %s \n", __LINE__, class_name.c_str());
     throw Exception("NeXusFile::verifyGroupClass -- Error reading the group class name\n", m_filename);
   }
-  printf("NEXUSFILE L%d %s %s \n", __LINE__, class_name.c_str(), res.c_str());
   return class_name == res;
 }
 
@@ -345,7 +339,7 @@ void File::makeGroup(std::string const &name, std::string const &class_name, boo
   H5::Group grp = this->getCurrentLocation()->createGroup(name);
   // add the class name as a std::string attribute
   H5::DataSpace aid2(H5S_SCALAR);
-  H5::DataType aid1(H5T_STRING, class_name.size());
+  H5::DataType aid1(H5T_STRING, class_name.size() + 1);
   H5::Attribute attr = grp.createAttribute(group_class_spec, aid1, aid2);
   attr.write(aid1, class_name);
   if (open_group) {
@@ -354,28 +348,19 @@ void File::makeGroup(std::string const &name, std::string const &class_name, boo
 }
 
 void File::openGroup(std::string const &name, std::string const &class_name) {
-  printf("NEXUSFILE L%d %s %s\n", __LINE__, name.c_str(), class_name.c_str());
   if (name.empty()) {
-    printf("NEXUSFILE L%d %s %s\n", __LINE__, name.c_str(), class_name.c_str());
     throw Exception("NeXusFile::openGroup -- Supplied empty name to openGroup", m_filename);
   }
   if (class_name.empty()) {
-    printf("NEXUSFILE L%d %s %s\n", __LINE__, name.c_str(), class_name.c_str());
     throw Exception("NeXusFile::openGroup -- Supplied empty class name to openGroup", m_filename);
   }
-  auto current = this->getCurrentLocation();
+  auto current = this->getCurrentLocationAs<H5::Group>();
   if (!current->nameExists(name)) {
-    printf("NEXUSFILE L%d %s %s\n", __LINE__, name.c_str(), class_name.c_str());
     throw Exception("NeXusFile::openGroup -- The supplied group name does not exist", m_filename);
   }
   std::shared_ptr<H5::Group> grp;
-  if (current == this) {
-    grp = std::make_shared<H5::Group>(H5::H5File::openGroup(name));
-  } else {
-    grp = std::make_shared<H5::Group>(current->openGroup(name));
-  }
+  grp = std::make_shared<H5::Group>(current->openGroup(name));
   if (!verifyGroupClass(*(grp.get()), class_name)) {
-    printf("NEXUSFILE L%d %s %s\n", __LINE__, name.c_str(), class_name.c_str());
     throw Exception("NeXusFile::openGroup -- Invalid group class name\n", m_filename);
   }
   this->m_stack.push_back(grp);
@@ -981,15 +966,9 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
     msg << "File::getData<string>() only understand rank=1 data. Found rank=" << info.dims.size();
     throw Exception(msg.str(), m_filename);
   }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1];
-  try {
-    this->getData<char>(value);
-  } catch (Exception const &) {
-    delete[] value;
-    throw; // rethrow the original exception
-  }
-  *data = string(value, static_cast<size_t>(info.dims[0]));
-  delete[] value;
+  auto *current = this->getCurrentLocationAs<H5::DataSet>();
+  H5::DataType dt = current->getDataType();
+  current->read(*data, dt);
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -1012,7 +991,7 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
 }
 
 std::string File::getStrData() {
-  std::string ret;
+  std::string ret("");
   this->getData<std::string>(&ret);
   return ret;
 }

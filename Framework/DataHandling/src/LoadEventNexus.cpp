@@ -346,7 +346,8 @@ void LoadEventNexus::setTopEntryName() {
       break;
     }
   }
-  if (firstGoodEntry.empty()) {
+  m_top_entry_name = firstGoodEntry;
+  if (m_top_entry_name.empty()) {
     g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\".\n";
     m_top_entry_name = "entry";
   }
