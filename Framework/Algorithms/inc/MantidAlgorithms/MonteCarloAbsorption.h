@@ -52,12 +52,10 @@ public:
   }
 
 protected:
-  virtual std::shared_ptr<IMCAbsorptionStrategy>
-  createStrategy(IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile, Kernel::DeltaEMode::Type EMode,
-                 const size_t nevents, const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda);
-  virtual std::shared_ptr<IMCInteractionVolume>
-  createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
-                          const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+  [[nodiscard]] virtual std::shared_ptr<IMCAbsorptionStrategy>
+  createStrategy(std::shared_ptr<IMCInteractionVolume> interactionVol, const IBeamProfile &beamProfile,
+                 Kernel::DeltaEMode::Type EMode, const size_t nevents, const size_t maxScatterPtAttempts,
+                 const bool regenerateTracksForEachLambda);
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);
@@ -74,7 +72,7 @@ private:
                                          const bool simulateTracksForEachWavelength, const int seed,
                                          const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
                                          const size_t maxScatterPtAttempts,
-                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+                                         MCInteractionVolume::ScatteringPointVicinity pointsIn);
   API::MatrixWorkspace_uptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
