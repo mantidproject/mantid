@@ -193,13 +193,16 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     std::array<double, 4> expectedValues;
-    expectedValues = {0.0598354319, 0.0851820257, 0.1082668804, 0.0665718522};
+    expectedValues = {0.1468305595, 0.1972436849, 0.2506198619, 0.1567429952};
     checkOutput(outWSgroup + "_ass", expectedValues);
-    expectedValues = {0.0575985518, 0.0820397761, 0.1044455299, 0.0635469209};
+
+    expectedValues = {0.1408542645, 0.1898304692, 0.2411614445, 0.1495443008};
     checkOutput(outWSgroup + "_assc", expectedValues);
-    expectedValues = {0.4115165520, 0.4120483148, 0.4128312585, 0.4071160275};
+
+    expectedValues = {0.9440690762, 0.9444321060, 0.9445980596, 0.9334543080};
     checkOutput(outWSgroup + "_acc", expectedValues);
-    expectedValues = {0.1434953906, 0.2010954404, 0.2785605844, 0.1882925609911};
+
+    expectedValues = {0.3225373817, 0.4193655242, 0.5768073083, 0.3923031636};
     checkOutput(outWSgroup + "_acsc", expectedValues);
 
     std::string gaugeVolumeXML = "<cuboid id=\"some-cuboid\">  <width val=\"0.0059\" />  <height val=\"0.03\"  />  "

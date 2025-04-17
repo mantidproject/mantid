@@ -300,7 +300,7 @@ Raster PaalmanPingsAbsorptionCorrection::rasterize(const IObject *object) {
     }
   }
 
-  return Geometry::Rasterize::calculate(m_beamDirection, *object, *integrationVolume, m_cubeSideSample);
+  return Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *object, m_cubeSideSample);
 }
 
 /// Calculate the distances for L1 (for both self-absorption and
@@ -309,6 +309,7 @@ Raster PaalmanPingsAbsorptionCorrection::rasterize(const IObject *object) {
 void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
   auto raster = rasterize(m_sampleObject);
   m_sampleVolume = raster.totalvolume;
+  printf("SampleVolume: %f\n", m_sampleVolume * 10000);
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize sample shape");
   // move over the information
@@ -319,6 +320,7 @@ void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
   // now for the container
   raster = rasterize(m_containerObject);
   m_containerVolume = raster.totalvolume;
+  printf("ContainerVolume: %f\n", m_containerVolume * 10000);
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize container shape");
   // move over the information
