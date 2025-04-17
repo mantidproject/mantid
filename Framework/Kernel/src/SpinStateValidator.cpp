@@ -9,6 +9,7 @@
 
 #include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 
 namespace Mantid::Kernel {
 
