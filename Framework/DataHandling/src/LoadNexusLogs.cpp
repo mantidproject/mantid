@@ -449,8 +449,14 @@ void LoadNexusLogs::execLoader() {
   ::NeXus::File file(filename);
   // Find the root entry
   try {
+    printf("LOADNEXUSLOGS L%d %s\n", __LINE__, entry_name.c_str());
+    fflush(stdout);
     file.openGroup(entry_name, "NXentry");
+    printf("LOADNEXUSLOGS L%d\n", __LINE__);
+    fflush(stdout);
   } catch (::NeXus::Exception &) {
+    printf("LOADNEXUSLOGS L%d\n", __LINE__);
+    fflush(stdout);
     throw std::invalid_argument("Unknown NeXus file format found in file '" + filename + "', or '" + entry_name +
                                 "' is not a valid NXentry");
   }
