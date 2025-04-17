@@ -211,7 +211,7 @@ def main():
     refine_unit_cell = inputs_dict["refinement_settings"]["unit_cell"]
     override_cell_lengths = inputs_dict["override_cell_lengths"]
     data_files = inputs_dict["file_paths"]["data_files"]
-    phase_files = inputs_dict["file_paths"]["phase_files"]
+    phase_files = inputs_dict["file_paths"]["phase_filepaths"]
     instrument_files = inputs_dict["file_paths"]["instrument_files"]
     limits = inputs_dict["limits"]
     mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
