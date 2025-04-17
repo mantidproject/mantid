@@ -122,6 +122,7 @@ set(SRC_FILES
     src/ElasticWindow.cpp
     src/EstimateDivergence.cpp
     src/EstimateResolutionDiffraction.cpp
+    src/EstimateScatteringVolumeCentreOfMass.cpp
     src/EventWorkspaceAccess.cpp
     src/Exponential.cpp
     src/ExponentialCorrection.cpp
@@ -474,6 +475,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ElasticWindow.h
     inc/MantidAlgorithms/EstimateDivergence.h
     inc/MantidAlgorithms/EstimateResolutionDiffraction.h
+    inc/MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h
     inc/MantidAlgorithms/EventWorkspaceAccess.h
     inc/MantidAlgorithms/Exponential.h
     inc/MantidAlgorithms/ExponentialCorrection.h
@@ -831,6 +833,7 @@ set(TEST_FILES
     ElasticWindowTest.h
     EstimateDivergenceTest.h
     EstimateResolutionDiffractionTest.h
+    EstimateScatteringVolumeCentreOfMassTest.h
     ExponentialCorrectionTest.h
     ExponentialTest.h
     ExportTimeSeriesLogTest.h
