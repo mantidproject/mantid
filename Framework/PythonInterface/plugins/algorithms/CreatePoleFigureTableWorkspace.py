@@ -2,8 +2,9 @@
 import numpy as np
 from mantid.kernel import V3D
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, FloatBoundedValidator
-from mantid.geometry import ReflectionGenerator
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, FloatArrayLengthValidator
+from mantid.geometry import ReflectionGenerator, CrystalStructure
+from typing import Optional
 
 
 class CreatePoleFigureTableWorkspace(PythonAlgorithm):
@@ -33,9 +34,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             doc="Output workspace containing the table of alphas, betas and intensities.",
         )
         self.declareProperty(
-            name="Reflection",
-            defaultValue="",
-            direction=Direction.Input,
+            FloatArrayProperty("Reflection", [0, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
             doc="Reflection number for peak being fit. If given, algorithm will attempt to use the CrystalStructure on "
             "the InputWorkspace to adjust intensity for scattering power.",
         )
@@ -57,6 +56,18 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             "If no Reflection is specified, this tolerance can be ignored, "
             "otherwise it will assume X0 in PeakParameterWorkspace is given in dSpacing.",
         )
+        self.declareProperty(
+            "ApplyScatteringPowerCorrection",
+            defaultValue=True,
+            direction=Direction.Input,
+            doc="Flag for determining whether the provided intensities should be corrected for scattering power",
+        )
+        self.declareProperty(
+            "UseSamplePosition",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="Flag for determining whether the diffraction vectors should be calculated from the sample position or from the origin",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -75,6 +86,9 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         # if the x0_threshold is set to allow all peaks, no x0 column is needed
         self.no_x0_needed = x0_thresh < 1e-6
         if peak_ws:
+            # check num rows in table matches num spectra in ws
+            if peak_ws.rowCount() != ws.getNumberHistograms():
+                issues["PeakParameterWorkspace"] = "PeakParameterWorkspace must have same number of rows as Input Workspace has spectra"
 
             def check_col(col_name):
                 try:
@@ -90,13 +104,6 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
 
             if not self.no_chi2_needed:
                 check_col("chi2")
-
-        # check that if a reflection is given it can be parsed to V3D
-        if not self.getProperty("Reflection").isDefault:
-            try:
-                _parse_hkl(self.getProperty("Reflection").value)
-            except:
-                issues["Reflection"] = "Problem parsing hkl string, ensure H,K,L are separated by commas"
 
             # if a hkl is given, scattering power will be calculated, check that both a sample and CrystalStructure have
             # been defined
@@ -117,15 +124,23 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         hkl_is_set = not self.getProperty("Reflection").isDefault
         chi_thresh = self.getProperty("Chi2Threshold").value
         x0_thresh = self.getProperty("PeakPositionThreshold").value
+        apply_scatt_corr = self.getProperty("ApplyScatteringPowerCorrection").value
+        if self.getProperty("UseSamplePosition").value:
+            sample_pos = np.asarray(ws.getInstrument().getSample().getPos())
+        else:
+            sample_pos = np.zeros(3)
 
         # generate a detector table to get detector positions
         det_table = self.exec_child_alg(
             "CreateDetectorTable", InputWorkspace=ws, IncludeDetectorPosition=True, DetectorTableWorkspace="det_table"
         )
-        det_pos = np.asarray(det_table.column("Position"))
+        # get the detector position relative to the sample
+        det_pos = np.asarray(det_table.column("Position")) - sample_pos
 
-        # get the source pos for ki
-        source_pos = np.asarray(ws.getInstrument().getSource().getPos())
+        # get the normalised source pos for qi
+        source_pos = ws.getInstrument().getSource().getPos()
+        source_pos = np.asarray(source_pos) / source_pos.norm()
+        qi = sample_pos - source_pos
 
         # get the rotation matrix of the sample
         rot_mat = ws.run().getGoniometer().getR()
@@ -136,7 +151,6 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         # get Qs
         qds = det_pos / np.linalg.norm(det_pos, axis=1)[:, None]
         # normalise source pos then take away from sample pos for ki
-        qi = np.zeros(3) - source_pos / np.linalg.norm(source_pos)
         Qs = qds - qi
         Qs = Qs / np.linalg.norm(Qs, axis=1)[:, None]
 
@@ -146,32 +160,35 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         # calculate alpha and beta for the Qs in the sample ref frame
         ab_arr = _get_alpha_beta_from_cart(sample_frame_Qs)
 
+        # set default values
+        default_intensity = 1.0
+        use_default_intensity = True
+        intensities = None
+        chi2 = None
+        x0s = None
+        peak = None
+        scat_power = 1.0
+
         if peak_param_ws:
             # assume that the peak_param_ws has only the peak of interest fitted
             intensities = np.asarray(peak_param_ws.column("I"))
+            use_default_intensity = False
             if not self.no_x0_needed:
                 x0s = np.asarray(peak_param_ws.column("X0"))
-            else:
-                x0s = np.ones((len(ab_arr)))
+                # if no hkl provided, peak will be set to mean x0
+                peak = np.mean(x0s)
             if not self.no_chi2_needed:
                 chi2 = np.asarray(peak_param_ws.column("chi2"))
-            else:
-                chi2 = np.zeros((len(ab_arr)))
-
         else:
-            intensities = np.ones((len(ab_arr)))
-            chi2 = np.zeros((len(ab_arr)))
-            x0s = np.ones((len(ab_arr)))
+            self.no_x0_needed = True
+            self.no_chi2_needed = True
 
         if hkl_is_set:
-            hkl = _parse_hkl(hkl)
+            hkl = V3D(*hkl)
             xtal = ws.sample().getCrystalStructure()
             peak = xtal.getUnitCell().d(hkl)
-            scat_power = _calc_scattering_power(xtal, hkl)
-        else:
-            # if no hkl provided, peak will be set to mean x0 and scattering power will be 1
-            peak = np.mean(x0s)
-            scat_power = 1.0
+            if apply_scatt_corr:
+                scat_power = _calc_scattering_power(xtal, hkl)
 
         # create the table to hold the data
         table_ws = self.exec_child_alg("CreateEmptyTableWorkspace", OutputWorkspace="_tmp")
@@ -179,14 +196,14 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         table_ws.addColumn(type="double", name="Beta", plottype=2)
         table_ws.addColumn(type="double", name="Intensity", plottype=2)
 
-        # go through each detector group
-        for index, (a, b) in enumerate(ab_arr):
-            # check chi2 is under threshold (or threshold is set to be ignored) and peak position is also within tol
-            if ((chi2[index] < chi_thresh) or chi_thresh == 0.0) and ((np.abs(x0s[index] - peak) < x0_thresh) or x0_thresh == 0.0):
+        # check which spectra meet inclusion thresholds
+        valid_spec_mask = self._thresh_criteria_mask(ab_arr.shape[0], chi_thresh, x0_thresh, chi2, x0s, peak)
+        for spec_index, is_valid in enumerate(valid_spec_mask):
+            if is_valid:
                 # amend intensity for any scattering correction
-                intensity = intensities[index] / scat_power
+                intensity = intensities[spec_index] / scat_power if not use_default_intensity else default_intensity
                 # add data to table
-                table_ws.addRow({"Alpha": a, "Beta": b, "Intensity": intensity})
+                table_ws.addRow({"Alpha": ab_arr[spec_index, 0], "Beta": ab_arr[spec_index, 1], "Intensity": intensity})
 
         self.setProperty("OutputWorkspace", table_ws)
 
@@ -199,12 +216,31 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
+    def _thresh_criteria_mask(
+        self,
+        n_rows: int,
+        chi2_thresh: float,
+        x0_thresh: float,
+        chi2_vals: Optional[np.ndarray] = None,
+        x0_vals: Optional[np.ndarray] = None,
+        peak: Optional[float] = None,
+    ) -> np.ndarray:
+        mask = np.ones(n_rows, dtype=bool)
+        if not self.no_chi2_needed:
+            mask[chi2_vals >= chi2_thresh] = False
+        if not self.no_x0_needed:
+            mask[np.abs(x0_vals - peak) >= x0_thresh] = False
+        return mask
 
-def _parse_hkl(hkl: str) -> V3D:
-    return V3D(*[int("".join([char for char in part if char.isnumeric()])) for part in hkl.split(",")])
 
+def _calc_scattering_power(xtal: CrystalStructure, hkl: V3D) -> float:
+    """
+    Calculate the scattering power of a reflection as described in:
+    Malamud, F., Santisteban, J. R., Vicente Alvarez, M. A., Bolmaro, R., Kelleher, J., Kabra,
+    S. & Kockelmann, W. (2014). Texture analysis with a time-of-flight neutron
+    strain scanner. J. Appl. Cryst. 47, https://doi.org/10.1107/S1600576714012710
 
-def _calc_scattering_power(xtal, hkl) -> float:
+    """
     generator = ReflectionGenerator(xtal)
     d = xtal.getUnitCell().d(hkl)
     f_sq = generator.getFsSquared(
@@ -220,11 +256,16 @@ def _calc_scattering_power(xtal, hkl) -> float:
     return (m * f_sq * d**4) / vol**2  # Eq 2 of NyRTeX paper
 
 
-def _get_alpha_beta_from_cart(arr: np.ndarray) -> np.ndarray:
-    arr = arr.copy()
-    arr = np.where(arr[1] < -0.001, -arr, arr)  # invert the southern points
-    alphas = np.arctan2(arr[2], arr[0])
-    betas = np.arccos(arr[1])
+def _get_alpha_beta_from_cart(q_sample_cart: np.ndarray) -> np.ndarray:
+    """
+    get spherical angles from cartesian coordinates
+    alpha is angle from positive x towards positive z
+    beta is angle from positive y
+    """
+    q_sample_cart = q_sample_cart.copy()
+    q_sample_cart = np.where(q_sample_cart[1] < 0, -q_sample_cart, q_sample_cart)  # invert the southern points
+    alphas = np.arctan2(q_sample_cart[2], q_sample_cart[0])
+    betas = np.arccos(q_sample_cart[1])
     return np.concatenate([alphas[:, None], betas[:, None]], axis=1)
 
 
