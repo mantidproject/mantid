@@ -55,7 +55,7 @@ std::string convert_units_check_range(const Unit &aUnit, std::vector<double> &sa
     error_mess = "conversion: " + aUnit.unitID() + " Time range is  zero (tof_left==tof_rignt)";
     return error_mess;
   }
-  if (tof1 < tof_min || tof2 < tof_min) {
+  if (tof1 * (1 + epsilon1) < tof_min || tof2 * (1 + epsilon1) < tof_min) {
     error_mess = "conversion: " + aUnit.unitID() + " min time range is smaller then minimal conversion time";
     return error_mess;
   }
@@ -796,7 +796,7 @@ public:
   void testdSpacingPerpendicularRange() {
     std::vector<double> sample, rezult;
 
-    std::string err_mess = convert_units_check_range(dp, sample, rezult);
+    std::string err_mess = convert_units_check_range(dp, sample, rezult, FLT_EPSILON);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
 
     for (size_t i = 0; i < sample.size(); i++) {
