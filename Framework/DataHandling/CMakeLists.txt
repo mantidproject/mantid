@@ -662,7 +662,6 @@ set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   DataHandling
   PUBLIC Mantid::Nexus
-         Mantid::Algorithms
          Mantid::API
          Mantid::HistogramData
          Mantid::Catalog
