@@ -80,7 +80,8 @@ Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::I
 
   try {
     intersectionBox = defineActiveRegion(sampleBB);
-  } catch (...) {
+  } catch (std::invalid_argument &e) {
+    // Exception means the beam missed the object and cannot create an intersection BoundingBox
     return nullptr;
   }
 

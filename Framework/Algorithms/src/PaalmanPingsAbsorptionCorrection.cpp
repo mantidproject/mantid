@@ -36,6 +36,7 @@ using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Algorithms::BeamProfileFactory;
 using Mantid::Geometry::Raster;
 
 namespace {
@@ -286,10 +287,12 @@ Raster PaalmanPingsAbsorptionCorrection::rasterize(const IObject *object) {
     integrationVolume = constructGaugeVolume();
   } else {
     try {
-      auto beamProfile =
-          Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
       integrationVolume = beamProfile->getIntersectionWithSample(*object);
-    } catch (...) {
+    } catch (std::invalid_argument &e) {
+      // If createBeamProfile fails, the beam parameters are not defined
+      // If getIntersectionWithSample fails, the beam misses the object
+      // In either case we will just fall back to using the whole sample below.
     }
     if (integrationVolume == nullptr) {
       // If the beam profile is not defined, use the sample object
