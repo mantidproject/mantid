@@ -31,9 +31,7 @@
     NAPI internals
 ------------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include <memory>
 
 using Mantid::LegacyNexus::CONSTCHAR;
 using Mantid::LegacyNexus::NXaccess;
@@ -43,54 +41,28 @@ using Mantid::LegacyNexus::NXname;
 using Mantid::LegacyNexus::NXnumtype;
 using Mantid::LegacyNexus::NXstatus;
 
-typedef struct {
-  NXhandle pNexusData;
-  NXstatus (*nxreopen)(NXhandle pOrigHandle, NXhandle *pNewHandle);
-  NXstatus (*nxclose)(NXhandle *pHandle);
-  NXstatus (*nxflush)(NXhandle *pHandle);
-  NXstatus (*nxmakegroup)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
-  NXstatus (*nxopengroup)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
-  NXstatus (*nxclosegroup)(NXhandle handle);
-  NXstatus (*nxmakedata64)(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
-  NXstatus (*nxcompmakedata64)(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[],
-                               int comp_typ, int64_t const bufsize[]);
-  NXstatus (*nxcompress)(NXhandle handle, int compr_type);
-  NXstatus (*nxopendata)(NXhandle handle, CONSTCHAR *label);
-  NXstatus (*nxclosedata)(NXhandle handle);
-  NXstatus (*nxputdata)(NXhandle handle, const void *data);
-  NXstatus (*nxputattr)(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
-  NXstatus (*nxputattra)(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                         const NXnumtype iType);
-  NXstatus (*nxputslab64)(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
-  NXstatus (*nxgetdataID)(NXhandle handle, NXlink *pLink);
-  NXstatus (*nxmakelink)(NXhandle handle, NXlink *pLink);
-  NXstatus (*nxmakenamedlink)(NXhandle handle, CONSTCHAR *newname, NXlink *pLink);
-  NXstatus (*nxgetdata)(NXhandle handle, void *data);
-  NXstatus (*nxgetinfo64)(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
-  NXstatus (*nxgetnextentry)(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype);
-  NXstatus (*nxgetslab64)(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
-  NXstatus (*nxgetnextattr)(NXhandle handle, NXname pName, int *iLength, NXnumtype *iType);
-  NXstatus (*nxgetnextattra)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
-  NXstatus (*nxgetattr)(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType);
-  NXstatus (*nxgetattra)(NXhandle handle, const char *name, void *data);
-  NXstatus (*nxgetattrainfo)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
-  NXstatus (*nxgetattrinfo)(NXhandle handle, int *no_items);
-  NXstatus (*nxgetgroupID)(NXhandle handle, NXlink *pLink);
-  NXstatus (*nxgetgroupinfo)(NXhandle handle, int *no_items, NXname name, NXname nxclass);
-  NXstatus (*nxsameID)(NXhandle handle, NXlink const *pFirstID, NXlink const *pSecondID);
-  NXstatus (*nxinitgroupdir)(NXhandle handle);
-  NXstatus (*nxinitattrdir)(NXhandle handle);
-  NXstatus (*nxprintlink)(NXhandle handle, NXlink const *link);
-  NXstatus (*nxnativeexternallink)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *externalfile, CONSTCHAR *remotetarget);
-  NXstatus (*nxnativeinquirefile)(NXhandle handle, char *externalfile, const int filenamelength);
-  NXstatus (*nxnativeisexternallink)(NXhandle handle, CONSTCHAR *name, char *url, int urllen);
-  int stripFlag;
-  int checkNameSyntax;
-  NXaccess access_mode;
-} LgcyFunction, *pLgcyFunction;
+struct LgcyFunction {
+  NXhandle pNexusData = nullptr;
+  NXstatus (*nxclose)(NXhandle *pHandle) = nullptr;
+  NXstatus (*nxopengroup)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass) = nullptr;
+  NXstatus (*nxclosegroup)(NXhandle handle) = nullptr;
+  NXstatus (*nxopendata)(NXhandle handle, CONSTCHAR *label) = nullptr;
+  NXstatus (*nxclosedata)(NXhandle handle) = nullptr;
+  NXstatus (*nxgetdataID)(NXhandle handle, NXlink *pLink) = nullptr;
+  NXstatus (*nxgetdata)(NXhandle handle, void *data) = nullptr;
+  NXstatus (*nxgetinfo64)(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype) = nullptr;
+  NXstatus (*nxgetnextentry)(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype) = nullptr;
+  NXstatus (*nxgetnextattra)(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) = nullptr;
+  NXstatus (*nxgetattr)(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType) = nullptr;
+  NXstatus (*nxgetgroupID)(NXhandle handle, NXlink *pLink) = nullptr;
+  NXstatus (*nxinitgroupdir)(NXhandle handle) = nullptr;
+  NXstatus (*nxinitattrdir)(NXhandle handle) = nullptr;
+  int stripFlag = 0;
+  int checkNameSyntax = 0;
+  NXaccess access_mode = 0;
+};
+
+using LgcyFunctionPtr = std::unique_ptr<LgcyFunction>;
+
 /*---------------------*/
 extern long nx_cacheSize;
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
