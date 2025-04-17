@@ -78,6 +78,30 @@ Goniometer::Goniometer(const DblMatrix &rot) {
 /// Add an explicit copy constructor
 Goniometer::Goniometer(const Goniometer &other) : R(other.R), motors(other.motors), initFromR(other.initFromR) {}
 
+/// Copy assigment constructor
+Goniometer &Goniometer::operator=(const Goniometer &other) {
+  if (this != &other) {
+    R = other.R;
+    motors = other.motors;
+    initFromR = other.initFromR;
+  }
+  return *this;
+}
+
+// Move constructor
+Goniometer::Goniometer(Goniometer &&other) noexcept
+    : R(std::move(other.R)), motors(std::move(other.motors)), initFromR(other.initFromR) {}
+
+// Move assignment operator
+Goniometer &Goniometer::operator=(Goniometer &&other) noexcept {
+  if (this != &other) {
+    R = std::move(other.R);
+    motors = std::move(other.motors);
+    initFromR = other.initFromR;
+  }
+  return *this;
+}
+
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix
 const Kernel::DblMatrix &Goniometer::getR() const { return R; }
