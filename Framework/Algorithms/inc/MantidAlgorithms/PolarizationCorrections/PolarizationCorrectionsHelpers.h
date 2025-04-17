@@ -66,11 +66,4 @@ MANTID_ALGORITHMS_DLL const std::string &getORSONotationForSpinState(const std::
 MANTID_ALGORITHMS_DLL void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws,
                                                   const std::string &spinState);
 } // namespace SpinStatesORSO
-
-namespace SpinStateNXcanSAS {
-static const std::string SPIN_PARA = "+1";
-static const std::string SPIN_ANTIPARA = "-1";
-static const std::string SPIN_ZERO = "0";
-} // namespace SpinStateNXcanSAS
-
 } // namespace Mantid::Algorithms

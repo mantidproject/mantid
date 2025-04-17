@@ -12,20 +12,18 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
 #include <algorithm>
 
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling::NXcanSAS;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
@@ -61,21 +59,26 @@ static const std::string MAG_FIELD_STRENGTH_LOGNAME = "MagneticFieldStrengthLogN
 static const std::string MAG_FIELD_DIR = "MagneticFieldDirection";
 std::map<std::string, std::string> POL_COMPONENTS = {
     {"polarizer", POLARIZER_COMP_NAME}, {"analyzer", ANALYZER_COMP_NAME}, {"flipper", FLIPPER_COMP_NAMES}};
-
 } // namespace PolProperties
+
+namespace SpinStateNXcanSAS {
+static const std::string SPIN_PARA = "+1";
+static const std::string SPIN_ANTIPARA = "-1";
+static const std::string SPIN_ZERO = "0";
+} // namespace SpinStateNXcanSAS
 
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
   if (ws->axes() == 0) {
     return false;
   }
-  auto const unit = ws->getAxis(0)->unit();
+  const auto unit = ws->getAxis(0)->unit();
   return (unit && unit->unitID() == unitToCompareWith);
 }
 
 void areAxesNumeric(const MatrixWorkspace_sptr &workspace, int numberOfDims = 1) {
   std::vector<int> indices(numberOfDims);
   std::generate(indices.begin(), indices.end(), [i = 0]() mutable { return i++; });
-  if (numberOfDims == 0 || !std::all_of(indices.cbegin(), indices.cend(), [workspace](auto const &index) {
+  if (numberOfDims == 0 || !std::all_of(indices.cbegin(), indices.cend(), [workspace](const auto &index) {
         return workspace->getAxis(index)->isNumeric();
       })) {
     throw std::invalid_argument("Incorrect number of numerical axis");
@@ -83,7 +86,7 @@ void areAxesNumeric(const MatrixWorkspace_sptr &workspace, int numberOfDims = 1)
 }
 
 bool checkValidMatrixWorkspace(const Workspace_sptr &ws) {
-  auto const &ws_input = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  const auto &ws_input = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   return (ws_input && hasUnit("MomentumTransfer", ws_input) && ws_input->isCommonBins());
 }
 
@@ -93,9 +96,9 @@ std::string validateGroupWithProperties(const Workspace_sptr &ws) {
   }
 
   if (ws->isGroup()) {
-    auto const &groupItems = std::dynamic_pointer_cast<WorkspaceGroup>(ws)->getAllItems();
+    const auto &groupItems = std::dynamic_pointer_cast<WorkspaceGroup>(ws)->getAllItems();
     if (std::any_of(groupItems.cbegin(), groupItems.cend(),
-                    [](auto const &childWs) { return !checkValidMatrixWorkspace(childWs); })) {
+                    [](const auto &childWs) { return !checkValidMatrixWorkspace(childWs); })) {
       return "Workspace must have common bins and Momentum transfer units";
     }
     return "";
@@ -180,7 +183,7 @@ void SaveNXcanSASBase::initStandardProperties() {
 }
 
 void SaveNXcanSASBase::initPolarizedProperties() {
-  const auto spinStateValidator = std::make_shared<Algorithms::SpinStateValidator>(
+  const auto spinStateValidator = std::make_shared<Kernel::SpinStateValidator>(
       std::unordered_set<int>{2, 4}, false, SpinStateNXcanSAS::SPIN_PARA, SpinStateNXcanSAS::SPIN_ANTIPARA, true,
       SpinStateNXcanSAS::SPIN_ZERO);
 
@@ -205,14 +208,14 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() co
 
   /* If input workspace is a group, check that each group members is a valid 2D Workspace,
      otherwise check that the input is a valid 2D workspace.*/
-  Workspace_sptr const workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
+  const Workspace_sptr workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
   auto valid2DWorkspace = [](const Workspace_sptr &ws) {
     return ws && std::dynamic_pointer_cast<const Mantid::DataObjects::Workspace2D>(ws);
   };
   if (workspace->isGroup()) {
-    auto const &groupItems = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
+    const auto &groupItems = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
     if (std::any_of(groupItems.cbegin(), groupItems.cend(),
-                    [&](auto const &childWs) { return !valid2DWorkspace(childWs); })) {
+                    [&](const auto &childWs) { return !valid2DWorkspace(childWs); })) {
       result.emplace("InputWorkspace",
                      "All input workspaces in the input group must be a Workspace2D wit numeric axis.");
     }
@@ -245,16 +248,16 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() co
 std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() const {
   std::map<std::string, std::string> result;
 
-  Workspace_sptr const workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
-  std::string const spins = getProperty(PolProperties::INPUT_SPIN_STATES);
-  auto const spinVec = VectorHelper::splitStringIntoVector<std::string>(spins);
+  const Workspace_sptr workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
+  const std::string spins = getProperty(PolProperties::INPUT_SPIN_STATES);
+  const auto spinVec = VectorHelper::splitStringIntoVector<std::string>(spins);
 
   if (!workspace->isGroup())
     result.emplace(StandardProperties::INPUT_WORKSPACE,
                    "Input Workspaces for polarized data can only be workspace groups.");
   else {
-    auto const wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-    auto const &entries = wsGroup->getNumberOfEntries();
+    const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    const auto &entries = wsGroup->getNumberOfEntries();
     if (entries != 2 && entries != 4) {
       result.emplace(StandardProperties::INPUT_WORKSPACE,
                      "Input Group Workspace can only contain 2 or 4 workspace members.");
@@ -265,10 +268,10 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
                                                        " member workspaces on the InputWorkspace group");
     }
 
-    auto const wsVec = wsGroup->getAllItems();
+    const auto wsVec = wsGroup->getAllItems();
     // The group has been validated in StandardInputs, so workspaces are safely downcasted to MatrixWorkspaces
     auto dim0 = getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(wsVec.at(0)));
-    if (std::any_of(wsVec.begin(), wsVec.end(), [&dim0](const Workspace_sptr &ws) {
+    if (std::any_of(wsVec.cbegin(), wsVec.cend(), [&dim0](const Workspace_sptr &ws) {
           return dim0 != getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(ws));
         })) {
       result.emplace(StandardProperties::INPUT_WORKSPACE, "All workspaces in group must have the same dimensionality");
@@ -276,14 +279,14 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
   }
 
   // Validating spin strings
-  if (spinVec.size() == 4 && std::any_of(spinVec.begin(), spinVec.end(), [](std::string const &spinPair) {
+  if (spinVec.size() == 4 && std::any_of(spinVec.cbegin(), spinVec.cend(), [](const std::string &spinPair) {
         return (spinPair.find(SpinStateNXcanSAS::SPIN_ZERO) != std::string::npos);
       })) {
     result.emplace(PolProperties::INPUT_SPIN_STATES, "Full polarized group can't contain spin state 0");
   }
 
   if (spinVec.size() == 2) {
-    if (std::any_of(spinVec.begin(), spinVec.end(),
+    if (std::any_of(spinVec.cbegin(), spinVec.cend(),
                     [](const std::string &state) { return state.find('1') == std::string::npos; })) {
       result.emplace(PolProperties::INPUT_SPIN_STATES, "There can't be 00 state");
     }
@@ -297,11 +300,11 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
     }
   }
 
-  std::string const magneticFieldDirection = getProperty(PolProperties::MAG_FIELD_DIR);
+  const std::string magneticFieldDirection = getProperty(PolProperties::MAG_FIELD_DIR);
   if (!magneticFieldDirection.empty()) {
     auto direction = VectorHelper::splitStringIntoVector<std::string>(magneticFieldDirection);
     try {
-      std::for_each(direction.begin(), direction.end(), [](const std::string &val) { std::stod(val); });
+      std::for_each(direction.cbegin(), direction.cend(), [](const std::string &val) { std::stod(val); });
     } catch (const std::invalid_argument &) {
       result.emplace(PolProperties::MAG_FIELD_DIR, "Some value of the magnetic field direction vector is not a number");
     }
@@ -396,14 +399,14 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
  */
 void SaveNXcanSASBase::addPolarizedMetadata(const MatrixWorkspace_sptr &workspace, H5::Group &sasEntry) const {
 
-  for (auto const &[compType, compVec] : createPolarizedComponentMap()) {
+  for (const auto &[compType, compVec] : createPolarizedComponentMap()) {
     for (size_t i = 0; i < compVec.size(); i++) {
-      auto const suffix = compVec.size() > 1 ? addDigit(i + 1) : "";
+      const auto suffix = compVec.size() > 1 ? addDigit(i + 1) : "";
       addPolarizer(sasEntry, workspace, compVec.at(i), compType, suffix);
     }
   }
-  std::string const &sasSampleMagneticField = getProperty(PolProperties::MAG_FIELD_STRENGTH_LOGNAME);
-  std::string const &magneticFieldDirStr = getProperty(PolProperties::MAG_FIELD_DIR);
+  const std::string &sasSampleMagneticField = getProperty(PolProperties::MAG_FIELD_STRENGTH_LOGNAME);
+  const std::string &magneticFieldDirStr = getProperty(PolProperties::MAG_FIELD_DIR);
   addSampleEMFields(sasEntry, workspace, sasSampleMagneticField, magneticFieldDirStr);
 }
 
@@ -413,10 +416,10 @@ void SaveNXcanSASBase::addPolarizedMetadata(const MatrixWorkspace_sptr &workspac
 std::map<std::string, std::vector<std::string>> SaveNXcanSASBase::createPolarizedComponentMap() const {
   // Assumption here is that we will pass the IDF component names as comma separated lists
   std::map<std::string, std::vector<std::string>> componentMap;
-  for (auto const &[compType, compName] : PolProperties::POL_COMPONENTS) {
+  for (const auto &[compType, compName] : PolProperties::POL_COMPONENTS) {
     std::string const &componentName = getProperty(compName);
     if (!componentName.empty()) {
-      auto const componentVec = VectorHelper::splitStringIntoVector<std::string>(componentName);
+      const auto componentVec = VectorHelper::splitStringIntoVector<std::string>(componentName);
       componentMap.emplace(std::make_pair(compType, componentVec));
     }
   }
@@ -442,7 +445,7 @@ H5::Group SaveNXcanSASBase::addSasEntry(H5::H5File &file, const MatrixWorkspace_
   H5Util::write(sasEntry, sasEntryDefinition, sasEntryDefinitionFormat);
 
   // Add title
-  auto const workspaceTitle = workspace->getTitle();
+  const auto workspaceTitle = workspace->getTitle();
   H5Util::write(sasEntry, sasEntryTitle, workspaceTitle);
 
   // Add run

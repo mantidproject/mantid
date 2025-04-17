@@ -17,9 +17,9 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SaveNXcanSASBase : Base class to save a reduced workspace in the NXcanSAS format. Depending on the derived
- * algorithm, it contains member that store standard SANS reduced data in 1D or 2D from group or matrix workspaces or
- * polarized SANS reduced data in 1D or 2D from group workspaces.
+/** SaveNXcanSASBase : Base class to save a reduced workspace in the NXcanSAS format.
+ *  Depending on the derived algorithm, it contains a member that stores standard SANS reduced data
+ *  in 1D or 2D from group or matrix workspaces,or polarized SANS reduced data in 1D or 2D from group workspaces.
  */
 class MANTID_DATAHANDLING_DLL SaveNXcanSASBase : public API::Algorithm {
 protected:
