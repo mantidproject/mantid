@@ -33,6 +33,7 @@ public:
 protected:
   void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) override;
   std::vector<double> getFitWeights(API::FunctionValues_sptr values) const override;
+  void updateFitWeights() override;
 
   double getResidualVariance() const;
 };
