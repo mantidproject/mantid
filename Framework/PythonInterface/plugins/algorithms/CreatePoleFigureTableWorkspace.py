@@ -103,6 +103,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             if not self.no_chi2_needed:
                 check_col("chi2")
 
+        if not self.getProperty("Reflection").isDefault:
             # if a hkl is given, scattering power will be calculated, check that both a sample and CrystalStructure have
             # been defined
             try:
