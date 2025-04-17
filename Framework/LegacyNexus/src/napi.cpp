@@ -386,6 +386,7 @@ static NXstatus NXinternalopenImpl(NXaccess am, NexusFileID *fileRecord) {
   case NXACC_CREATE:
   case NXACC_CREATE5:
   case NXACC_CREATEXML:
+  case NXACC_RDWR:
     NXReportError("Write operations have been deprecated from LegacyNexus");
     return NXstatus::NX_ERROR;
   default:
