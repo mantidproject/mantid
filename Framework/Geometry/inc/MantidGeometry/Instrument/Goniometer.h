@@ -60,6 +60,12 @@ public:
   Goniometer(const Kernel::DblMatrix &rot);
   // Copy Constructor
   Goniometer(const Goniometer &other);
+  // Copy assignment Constructor
+  Goniometer &operator=(const Goniometer &other);
+  // Move constructor
+  Goniometer(Goniometer &&other) noexcept;
+  // Move assignment Constructor
+  Goniometer &operator=(Goniometer &&other) noexcept;
   // Default destructor
   virtual ~Goniometer() = default;
   // Return rotation matrix
