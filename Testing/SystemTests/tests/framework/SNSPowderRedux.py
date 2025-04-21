@@ -248,9 +248,10 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         UnwrapSNS(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", LRef=62)
         RemoveLowResTOF(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", ReferenceDIFC=1500)
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="dSpacing")
-        Rebin(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Params=(0.1, -0.0004, 2.2))
         SortEvents(InputWorkspace="PG3_4866")
-        DiffractionFocussing(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", GroupingWorkspace="PG3_group")
+        DiffractionFocussing(
+            InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", GroupingWorkspace="PG3_group", DMin=0.1, Delta=-0.0004, DMax=2.2
+        )
         EditInstrumentGeometry(Workspace="PG3_4866", PrimaryFlightPath=60, SpectrumIDs=[1], L2=[3.2208], Polar=[90.8074], Azimuthal=[0])
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="TOF")
         Rebin(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Params=[-0.0004])
@@ -274,12 +275,12 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
 
     def validateMethod(self):
-        self.tolerance = 1.0e-1
+        self.tolerance = 0.1
         self.tolerance_is_rel_err = True
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1.0e-1
+        self.tolerance = 0.1
         self.tolerance_is_rel_err = True
         return ("PG3_4866", "PG3_4866_golden")
 
