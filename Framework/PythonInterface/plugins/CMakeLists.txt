@@ -36,6 +36,7 @@ set(PYTHON_PLUGINS
     algorithms/CorrectTOF.py
     algorithms/CreateCacheFilename.py
     algorithms/CreateEmptyTableWorkspace.py
+    algorithms/CreatePoleFigureTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
     algorithms/CylinderPaalmanPingsCorrection2.py
