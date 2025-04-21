@@ -50,6 +50,7 @@
 #include "MantidLegacyNexus/DllConfig.h"
 #include "MantidLegacyNexus/NeXusFile_fwd.h"
 #include <stdint.h>
+#include <string>
 
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
@@ -101,62 +102,27 @@
 #define MANGLE(__arg) CONCAT(__arg, _)
 
 #define NXopen MANGLE(nxiopen)
-#define NXreopen MANGLE(nxireopen)
 #define NXclose MANGLE(nxiclose)
-#define NXmakegroup MANGLE(nximakegroup)
 #define NXopengroup MANGLE(nxiopengroup)
 #define NXopenpath MANGLE(nxiopenpath)
 #define NXgetpath MANGLE(nxigetpath)
 #define NXopengrouppath MANGLE(nxiopengrouppath)
 #define NXclosegroup MANGLE(nxiclosegroup)
-#define NXmakedata MANGLE(nximakedata)
-#define NXmakedata64 MANGLE(nximakedata64)
-#define NXcompmakedata MANGLE(nxicompmakedata)
-#define NXcompmakedata64 MANGLE(nxicompmakedata64)
-#define NXcompress MANGLE(nxicompress)
 #define NXopendata MANGLE(nxiopendata)
 #define NXclosedata MANGLE(nxiclosedata)
-#define NXputdata MANGLE(nxiputdata)
-#define NXputslab MANGLE(nxiputslab)
-#define NXputslab64 MANGLE(nxiputslab64)
-#define NXputattr MANGLE(nxiputattr)
-#define NXputattra MANGLE(nxiputattra)
 #define NXgetdataID MANGLE(nxigetdataid)
-#define NXmakelink MANGLE(nximakelink)
-#define NXmakenamedlink MANGLE(nximakenamedlink)
-#define NXopensourcegroup MANGLE(nxiopensourcegroup)
-#define NXmalloc MANGLE(nximalloc)
-#define NXmalloc64 MANGLE(nximalloc64)
-#define NXfree MANGLE(nxifree)
-#define NXflush MANGLE(nxiflush)
 
 #define NXgetinfo MANGLE(nxigetinfo)
 #define NXgetinfo64 MANGLE(nxigetinfo64)
-#define NXgetrawinfo MANGLE(nxigetrawinfo)
-#define NXgetrawinfo64 MANGLE(nxigetrawinfo64)
 #define NXgetnextentry MANGLE(nxigetnextentry)
 #define NXgetdata MANGLE(nxigetdata)
 
-#define NXgetslab MANGLE(nxigetslab)
-#define NXgetslab64 MANGLE(nxigetslab64)
 #define NXgetnextattr MANGLE(nxigetnextattr)
 #define NXgetattr MANGLE(nxigetattr)
 #define NXgetnextattra MANGLE(nxigetnextattra)
-#define NXgetattra MANGLE(nxigetattra)
-#define NXgetattrinfo MANGLE(nxigetattrinfo)
-#define NXgetattrainfo MANGLE(nxigetattrainfo)
 #define NXgetgroupID MANGLE(nxigetgroupid)
-#define NXgetgroupinfo MANGLE(nxigetgroupinfo)
-#define NXsameID MANGLE(nxisameid)
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXsetcache MANGLE(nxisetcache)
-#define NXinquirefile MANGLE(nxiinquirefile)
-#define NXisexternalgroup MANGLE(nxiisexternalgroup)
-#define NXisexternaldataset MANGLE(nxiisexternaldataset)
-#define NXlinkexternal MANGLE(nxilinkexternal)
-#define NXlinkexternaldataset MANGLE(nxilinkexternaldataset)
-#define NXgetversion MANGLE(nxigetversion)
 
 /*
  * Standard interface
@@ -193,14 +159,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopen(Mantid::LegacyNexus:
                                                             Mantid::LegacyNexus::NXhandle *pHandle);
 
 /**
- * Opens an existing NeXus file a second time for e.g. access from another thread.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_init
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXreopen(Mantid::LegacyNexus::NXhandle pOrigHandle,
-                                                              Mantid::LegacyNexus::NXhandle *pNewHandle);
-
-/**
  * close a NeXus file
  * \param pHandle A NeXus file handle as returned from NXopen. pHandle is invalid after this
  * call.
@@ -208,27 +166,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXreopen(Mantid::LegacyNexu
  * \ingroup c_init
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclose(Mantid::LegacyNexus::NXhandle *pHandle);
-
-/**
- * flush data to disk
- * \param pHandle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXflush(Mantid::LegacyNexus::NXhandle *pHandle);
-
-/**
- * NeXus groups are NeXus way of structuring information into a hierarchy.
- * This function creates a group but does not open it.
- * \param handle A NeXus file handle as initialized NXopen.
- * \param name The name of the group
- * \param NXclass the class name of the group. Should start with the prefix NX
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_group
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakegroup(Mantid::LegacyNexus::NXhandle handle,
-                                                                 Mantid::LegacyNexus::CONSTCHAR *name,
-                                                                 Mantid::LegacyNexus::CONSTCHAR *NXclass);
 
 /**
  * Step into a group. All further access will be within the opened group.
@@ -269,13 +206,10 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopengrouppath(Mantid::Leg
 /**
  * Retrieve the current path in the NeXus file
  * \param handle a NeXus file handle
- * \param path A buffer to copy the path too
- * \param  pathlen The maximum number of characters to copy into path
- * \return NX_OK or NX_ERROR
+ * \return the nexus path
  * \ingroup c_navigation
  */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNexus::NXhandle handle, char *path,
-                                                               int pathlen);
+MANTID_LEGACYNEXUS_DLL std::string NXgetpath(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
@@ -284,64 +218,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetpath(Mantid::LegacyNex
  * \ingroup c_group
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosegroup(Mantid::LegacyNexus::NXhandle handle);
-
-/**
- * Create a multi dimensional data array or dataset. The dataset is NOT opened.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param label The name of the dataset
- * \param datatype The data type of this data set.
- * \param rank The number of dimensions this dataset is going to have
- * \param dim An array of size rank holding the size of the dataset in each dimension. The first dimension
- * can be NX_UNLIMITED. Data can be appended to such a dimension using NXputslab.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakedata(Mantid::LegacyNexus::NXhandle handle,
-                                                                Mantid::LegacyNexus::CONSTCHAR *label,
-                                                                Mantid::LegacyNexus::NXnumtype datatype, int rank,
-                                                                int dim[]);
-
-/**
- * @copydoc NXmakedata()
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakedata64(Mantid::LegacyNexus::NXhandle handle,
-                                                                  Mantid::LegacyNexus::CONSTCHAR *label,
-                                                                  Mantid::LegacyNexus::NXnumtype datatype, int rank,
-                                                                  int64_t dim[]);
-
-/**
- * Create a compressed dataset. The dataset is NOT opened. Data from this set will automatically be compressed when
- * writing and decompressed on reading.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param label The name of the dataset
- * \param datatype The data type of this data set.
- * \param rank The number of dimensions this dataset is going to have
- * \param comp_typ The compression scheme to use. Possible values:
- * \li NX_COMP_NONE no compression
- * \li NX_COMP_LZW (recommended) despite the name this enabled zlib compression (of various levels, see above)
- * \li NX_COMP_RLE run length encoding (only HDF-4)
- * \li NX_COMP_HUF Huffmann encoding (only HDF-4)
- * \param dim An array of size rank holding the size of the dataset in each dimension. The first dimension
- * can be NX_UNLIMITED. Data can be appended to such a dimension using NXputslab.
- * \param bufsize The dimensions of the subset of the data which usually be writen in one go.
- * This is a parameter used by HDF for performance optimisations. If you write your data in one go, this
- * should be the same as the data dimension. If you write it in slabs, this is your preferred slab size.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata(Mantid::LegacyNexus::NXhandle handle,
-                                                                    Mantid::LegacyNexus::CONSTCHAR *label,
-                                                                    Mantid::LegacyNexus::NXnumtype datatype, int rank,
-                                                                    int dim[], int comp_typ, int const bufsize[]);
-
-/**
- * @copydoc NXcompmakedata()
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXcompmakedata64(Mantid::LegacyNexus::NXhandle handle,
-                                                                      Mantid::LegacyNexus::CONSTCHAR *label,
-                                                                      Mantid::LegacyNexus::NXnumtype datatype, int rank,
-                                                                      int64_t dim[], int comp_typ,
-                                                                      int64_t const chunk_size[]);
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or
@@ -363,73 +239,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopendata(Mantid::LegacyNe
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXclosedata(Mantid::LegacyNexus::NXhandle handle);
 
 /**
- * Write data to a datset which has previouly been opened with NXopendata.
- * This writes all the data in one go. Data should be a pointer to a memory
- * area matching the datatype and dimensions of the dataset.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param data Pointer to data to write.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputdata(Mantid::LegacyNexus::NXhandle handle, const void *data);
-
-/**
- * Write an attribute. The kind of attribute written depends on the
- * position in the file: at root level, a global attribute is written, if
- * agroup is open but no dataset, a group attribute is written, if a dataset is
- * open, a dataset attribute is written.
- * This type of attribute can only contain a signle numerical value or a
- * single string. For multiple values use NXputattra
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the attribute.
- * \param data A pointer to the data to write for the attribute.
- * \param iDataLen The length of the data in data in bytes.
- * \param iType The NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattr(Mantid::LegacyNexus::NXhandle handle,
-                                                               Mantid::LegacyNexus::CONSTCHAR *name, const void *data,
-                                                               int iDataLen, Mantid::LegacyNexus::NXnumtype iType);
-
-/**
- * Write an attribute of any rank. The kind of attribute written depends on the
- * position in the file: at root level, a global attribute is written, if
- * agroup is open but no dataset, a group attribute is written, if a dataset is
- * open, a dataset attribute is written.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the attribute.
- * \param data A pointer to the data to write for the attribute.
- * \param rank Rank of the attribute data
- * \param dim Dimension array for the attribute data
- * \param iType The NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputattra(Mantid::LegacyNexus::NXhandle handle,
-                                                                Mantid::LegacyNexus::CONSTCHAR *name, const void *data,
-                                                                const int rank, const int dim[],
-                                                                const Mantid::LegacyNexus::NXnumtype iType);
-
-/**
- * Write  a subset of a multi dimensional dataset.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param data A pointer to a memory area holding the data to write.
- * \param start An array holding the start indices where to start the data subset.
- * \param size An array holding the size of the data subset to write in each dimension.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab(Mantid::LegacyNexus::NXhandle handle, const void *data,
-                                                               const int start[], const int size[]);
-
-/**
- * @copydoc NXputdata()
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab64(Mantid::LegacyNexus::NXhandle handle, const void *data,
-                                                                 const int64_t start[], const int64_t size[]);
-
-/**
  * Retrieve link data for a dataset. This link data can later on be used to link this
  * dataset into a different group.
  * \param handle A NeXus file handle as initialized by NXopen.
@@ -440,41 +249,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXputslab64(Mantid::LegacyN
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetdataID(Mantid::LegacyNexus::NXhandle handle,
                                                                  Mantid::LegacyNexus::NXlink *pLink);
-
-/**
- * Create a link to the group or dataset described by pLink in the currently open
- * group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pLink A link data structure describing the object to link. This must have been initialized
- * by either a call to NXgetdataID or NXgetgroupID.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakelink(Mantid::LegacyNexus::NXhandle handle,
-                                                                Mantid::LegacyNexus::NXlink *pLink);
-
-/**
- * Create a link to the group or dataset described by pLink in the currently open
- * group. But give the linked item a new name.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param newname The new name of the item in the currently open group.
- * \param pLink A link data structure describing the object to link. This must have been initialized
- * by either a call to NXgetdataID or NXgetgroupID.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmakenamedlink(Mantid::LegacyNexus::NXhandle handle,
-                                                                     Mantid::LegacyNexus::CONSTCHAR *newname,
-                                                                     Mantid::LegacyNexus::NXlink *pLink);
-
-/**
- * Open the source group of a linked group or dataset. Returns an error when the item is
- * not a linked item.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXopensourcegroup(Mantid::LegacyNexus::NXhandle handle);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -526,47 +300,22 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextentry(Mantid::Lega
                                                                     Mantid::LegacyNexus::NXnumtype *datatype);
 
 /**
- * Read a subset of data from file into memory.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param data A pointer to the memory data where to copy the data too. The pointer must point
- * to a memory area large enough to accomodate the size of the data read.
- * \param start An array holding the start indices where to start reading the data subset.
- * \param size An array holding the size of the data subset to read for each dimension.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab(Mantid::LegacyNexus::NXhandle handle, void *data,
-                                                               const int start[], const int size[]);
-
-/**
- * @copydoc NXgetslab()
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetslab64(Mantid::LegacyNexus::NXhandle handle, void *data,
-                                                                 const int64_t start[], const int64_t size[]);
-
-/**
  * Read an attribute containing a single string or numerical value.
- * Use NXgetattra for attributes with dimensions. (Recommened as the general case.)
+ * Use NXgetattra for attributes with dimensions. (Recommened as the general
+ case.)
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param name The name of the atrribute to read.
- * \param data A pointer to a memory area large enough to hold the attributes value.
+ * \param data A pointer to a memory area large enough to hold the attributes
+ value.
  * \param iDataLen The length of data in bytes.
- * \param iType A pointer to an integer which will had been set to the NeXus data type of the attribute.
+ * \param iType A pointer to an integer which will had been set to the NeXus
+ data type of the attribute.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattr(Mantid::LegacyNexus::NXhandle handle, const char *name,
                                                                void *data, int *iDataLen,
                                                                Mantid::LegacyNexus::NXnumtype *iType);
-
-/**
- * Get the count of attributes in the currently open dataset, group or global attributes when at root level.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param no_items A pointer to an integer which be set to the number of attributes available.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrinfo(Mantid::LegacyNexus::NXhandle handle, int *no_items);
 
 /**
  * Iterate over global, group or dataset attributes depending on the currently open group or
@@ -587,30 +336,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetnextattra(Mantid::Lega
                                                                     int dim[], Mantid::LegacyNexus::NXnumtype *iType);
 
 /**
- * Read an arbitrarily shaped attribute.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the atrribute to read.
- * \param data A pointer to a memory area large enough to hold the attributes value.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattra(Mantid::LegacyNexus::NXhandle handle, const char *name,
-                                                                void *data);
-
-/**
- * Get the information about the storage of the named attribute.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param rank Rank of the attribute data.
- * \param dim Dimension array for the attribute content.
- * \param iType A pointer to an integer which be set to the NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrainfo(Mantid::LegacyNexus::NXhandle handle,
-                                                                    Mantid::LegacyNexus::NXname pName, int *rank,
-                                                                    int dim[], Mantid::LegacyNexus::NXnumtype *iType);
-
-/**
  * Retrieve link data for the currently open group. This link data can later on be used to link this
  * group into a different group.
  * \param handle A NeXus file handle as initialized by NXopen.
@@ -621,33 +346,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetattrainfo(Mantid::Lega
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupID(Mantid::LegacyNexus::NXhandle handle,
                                                                   Mantid::LegacyNexus::NXlink *pLink);
-
-/**
- * Retrieve information about the currently open group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param no_items A pointer to an integer which will be set to the count
- *   of group elements available. This is the count of other groups and
- * data sets in this group.
- * \param name The name of the group.
- * \param nxclass The NeXus class name of the group.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetgroupinfo(Mantid::LegacyNexus::NXhandle handle, int *no_items,
-                                                                    Mantid::LegacyNexus::NXname name,
-                                                                    Mantid::LegacyNexus::NXname nxclass);
-
-/**
- * Tests if two link data structures describe the same item.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pFirstID The first link data for the test.
- * \param pSecondID The second link data structure.
- * \return NX_OK when both link data structures describe the same item, NX_ERROR else.
- * \ingroup c_linking
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsameID(Mantid::LegacyNexus::NXhandle handle,
-                                                              Mantid::LegacyNexus::NXlink const *pFirstID,
-                                                              Mantid::LegacyNexus::NXlink const *pSecondID);
 
 /**
  * Resets a pending group search to the start again. To be called in a #NXgetnextentry loop when
@@ -667,139 +365,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitgroupdir(Mantid::Lega
  */
 MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinitattrdir(Mantid::LegacyNexus::NXhandle handle);
 
-/**
- * Inquire the filename of the currently open file. FilenameBufferLength of the file name
- * will be copied into the filename buffer.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param filename The buffer to hold the filename.
- * \param  filenameBufferLength The length of the filename buffer.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXinquirefile(Mantid::LegacyNexus::NXhandle handle, char *filename,
-                                                                   int filenameBufferLength);
-
-/**
- * Test if a group is actually pointing to an external file. If so, retrieve the URL of the
- * external file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the group to test.
- * \param nxclass The class name of the group to test.
- * \param url A buffer to copy the URL too.
- * \param urlLen The length of the Url buffer. At maximum urlLen bytes will be copied to url.
- * \return NX_OK when the group is pointing to an external file, NX_ERROR else.
- * \ingroup c_external
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXisexternalgroup(Mantid::LegacyNexus::NXhandle handle,
-                                                                       Mantid::LegacyNexus::CONSTCHAR *name,
-                                                                       Mantid::LegacyNexus::CONSTCHAR *nxclass,
-                                                                       char *url, int urlLen);
-
-/**
- * Test if a dataset is actually pointing to an external file. If so, retrieve the URL of the
- * external file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the dataset to test.
- * \param url A buffer to copy the URL too.
- * \param urlLen The length of the Url buffer. At maximum urlLen bytes will be copied to url.
- * \return NX_OK when the dataset is pointing to an external file, NX_ERROR else.
- * \ingroup c_external
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus
-NXisexternaldataset(Mantid::LegacyNexus::NXhandle handle, Mantid::LegacyNexus::CONSTCHAR *name, char *url, int urlLen);
-
-/**
- * Create a link to a group in an external file. This works by creating a NeXus group under the current level in
- * the hierarchy which actually points to a group in another file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the group which points to the external file.
- * \param nxclass The class name of the group which points to the external file.
- * \param url The URL of the external file. Currently only one URL format is supported:
- * nxfile://path-tofile\#path-in-file. This consists of two parts: the first part is of course the path to the file. The
- * second part, path-in-file, is the path to the group in the external file which appears in the first file.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_external
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternal(Mantid::LegacyNexus::NXhandle handle,
-                                                                    Mantid::LegacyNexus::CONSTCHAR *name,
-                                                                    Mantid::LegacyNexus::CONSTCHAR *nxclass,
-                                                                    Mantid::LegacyNexus::CONSTCHAR *url);
-
-/**
- * Create a link to a dataset in an external file. This works by creating a dataset under the current level in
- * the hierarchy which actually points to a dataset in another file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the dataset which points to the external file.
- * \param url The URL of the external file. Currently only one URL format is supported:
- * nxfile://path-tofile\#path-in-file. This consists of two parts: the first part is of course the path to the file. The
- * second part, path-in-file, is the path to the dataset in the external file which appears in the first file.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_external
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXlinkexternaldataset(Mantid::LegacyNexus::NXhandle handle,
-                                                                           Mantid::LegacyNexus::CONSTCHAR *name,
-                                                                           Mantid::LegacyNexus::CONSTCHAR *url);
-
-/**
- * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
- * \param data A pointer to a pointer which will be initialized with a pointer to a suitably sized memory area.
- * \param rank the rank of the data.
- * \param dimensions An array holding the size of the data in each dimension.
- * \param datatype The NeXus data type of the data.
- * \return NX_OK when allocation succeeds, NX_ERROR in the case of an error.
- * \ingroup c_memory
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmalloc(void **data, int rank, const int dimensions[],
-                                                              Mantid::LegacyNexus::NXnumtype datatype);
-
-/**
- * @copydoc NXmalloc()
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[],
-                                                                Mantid::LegacyNexus::NXnumtype datatype);
-
-/**
- * Utility function to return NeXus version
- * \return pointer to string in static storage. Version in
- * same format as NEXUS_VERSION string in napi.h i.e. "major.minor.patch"
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL const char *NXgetversion();
-
-/**
- * Utility function to release the memory for data.
- * \param data A pointer to a pointer to free.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_memory
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXfree(void **data);
-
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXIprintlink(Mantid::LegacyNexus::NXhandle fid,
-                                                                  Mantid::LegacyNexus::NXlink const *link);
-
-/**
- * Retrieve information about the currently open dataset. In contrast to the main function below,
- * this function does not try to find out about the size of strings properly.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param rank A pointer to an integer which will be filled with the rank of
- * the dataset.
- * \param dimension An array which will be initialized with the size of the dataset in any of its
- * dimensions. The array must have at least the size of rank.
- * \param datatype A pointer to an integer which be set to the NeXus data type code for this dataset.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo(Mantid::LegacyNexus::NXhandle handle, int *rank,
-                                                                  int dimension[],
-                                                                  Mantid::LegacyNexus::NXnumtype *datatype);
-
-/**
- * @copydoc NXgetrawinfo
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo64(Mantid::LegacyNexus::NXhandle handle, int *rank,
-                                                                    int64_t dimension[],
-                                                                    Mantid::LegacyNexus::NXnumtype *datatype);
-
 /** \typedef void (*ErrFunc)(void *data, const char *text)
  * All NeXus error reporting happens through this special function, the
  * ErrFunc. The NeXus-API allows this error reporting function to be replaced
@@ -809,25 +374,6 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXgetrawinfo64(Mantid::Lega
  * \param text The text of the error message to display.
  */
 typedef void (*ErrFunc)(void *data, const char *text);
-
-/**
- * Set a global error function.
- * Not threadsafe.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_LEGACYNEXUS_DLL void NXMSetError(void *pData, ErrFunc newErr);
-
-/**
- * Set an error function for the current thread.
- * When used this overrides anything set in NXMSetError (for the current thread).
- * Use this method in threaded applications.
- * \param pData A pointer to a user defined data structure which be passed to
- * the error display function.
- * \param newErr The new error display function.
- */
-MANTID_LEGACYNEXUS_DLL void NXMSetTError(void *pData, ErrFunc newErr);
 
 /**
  * Suppress error reports from the NeXus-API
@@ -844,18 +390,8 @@ MANTID_LEGACYNEXUS_DLL void NXMEnableErrorReporting();
  */
 MANTID_LEGACYNEXUS_DLL void NXReportError(const char *text);
 
-/**
- * Do not use, first parameter should be set by NXMSetTError
- */
-MANTID_LEGACYNEXUS_DLL void NXIReportError(void *pData, const char *text);
 /* extern void *NXpData; */
 MANTID_LEGACYNEXUS_DLL char *NXIformatNeXusTime();
-
-/**
- * A function for setting the default cache size for HDF-5
- * \ingroup c_init
- */
-MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsetcache(long newVal);
 
 /**
  * Freddie Akeroyd 11/8/2009
@@ -866,5 +402,5 @@ MANTID_LEGACYNEXUS_DLL Mantid::LegacyNexus::NXstatus NXsetcache(long newVal);
 #define NEXUS_SCHEMA_NAMESPACE NEXUS_SCHEMA_ROOT NEXUS_SCHEMA_VERSION /**< XML schema namespace specified by xmlns */
 #define NEXUS_SCHEMA_BASE "BASE"
 #define NEXUS_SCHEMA_FILE NEXUS_SCHEMA_BASE ".xsd" /**< default schema file for namespace */
-#define NEXUS_SCHEMA_URL                                                                                               \
-  NEXUS_SCHEMA_NAMESPACE "/" NEXUS_SCHEMA_FILE /**< location of default schema file for namespace */
+/** location of default schema file for namespace */
+#define NEXUS_SCHEMA_URL NEXUS_SCHEMA_NAMESPACE "/" NEXUS_SCHEMA_FILE
