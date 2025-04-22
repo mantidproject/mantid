@@ -211,7 +211,7 @@ void runCrossEntropy(CostFunctions::CostFuncFitting &costFunction, const std::ve
   // Initialise the normal distribution parameters (mean and sigma for each
   // function parameter).
   std::vector<std::pair<double, double>> distributionParams;
-  for (auto &range : ranges) {
+  for (const auto &range : ranges) {
     auto mean = (range.first + range.second) / 2;
     auto sigma = std::fabs(range.first - range.second) / 2;
     distributionParams.emplace_back(mean, sigma);
@@ -257,7 +257,7 @@ void runCrossEntropy(CostFunctions::CostFuncFitting &costFunction, const std::ve
     EigenVector means(nParams);
     EigenVector variances(nParams);
     for (size_t isam = 0; isam < nSelection; ++isam) {
-      auto &paramSet = sampleSets[isam];
+      const auto &paramSet = sampleSets[isam];
       for (size_t i = 0; i < nParams; ++i) {
         auto p = paramSet.second[i];
         means[i] += p;
@@ -359,7 +359,7 @@ void EstimateFitParameters::execConcrete() {
       func->fix(i);
       continue;
     }
-    auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
+    const auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
     if (!boundary) {
       throw std::runtime_error("Parameter " + func->parameterName(i) + " must have a boundary constraint. ");
     }
@@ -386,7 +386,7 @@ void EstimateFitParameters::execConcrete() {
 
   if (getPropertyValue("Type") == "Monte Carlo") {
     int nOutput = getProperty("NOutputs");
-    auto outputWorkspaceProp = getPointerToProperty("OutputWorkspace");
+    const auto outputWorkspaceProp = getPointerToProperty("OutputWorkspace");
     if (outputWorkspaceProp->isDefault() || nOutput <= 0) {
       nOutput = 1;
     }
@@ -405,7 +405,7 @@ void EstimateFitParameters::execConcrete() {
         if (m_function->isActive(i)) {
           TableRow row = table->appendRow();
           row << m_function->parameterName(i);
-          for (auto &j : output) {
+          for (const auto &j : output) {
             row << j[ia];
           }
           ++ia;

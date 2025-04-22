@@ -429,9 +429,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
  */
 MatrixWorkspace_sptr ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   MatrixWorkspace_sptr IvsLam;
-  Property *monProperty = getProperty("I0MonitorIndex");
-  Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
-  Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMax");
+  const Property *monProperty = getProperty("I0MonitorIndex");
+  const Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
+  const Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMax");
   if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() && !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors = getProperty("NormalizeByIntegratedMonitors");
     int index = getProperty("I0MonitorIndex");
@@ -753,7 +753,7 @@ void ReflectometryReductionOne2::findTheta0() {
     // theta0 is the horizon angle, which is half the twoTheta angle of the
     // detector position. This is the angle the detector has been rotated
     // to, which we can get from ThetaIn
-    Property *thetaIn = getProperty("ThetaIn");
+    const Property *thetaIn = getProperty("ThetaIn");
     if (!thetaIn->isDefault()) {
       m_theta0 = getProperty("ThetaIn");
     } else {
@@ -824,7 +824,7 @@ void ReflectometryReductionOne2::findWavelengthMinMax(const MatrixWorkspace_sptr
   bool first = true;
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
-    auto &detectors = detectorGroups()[groupIdx];
+    const auto &detectors = detectorGroups()[groupIdx];
     double projectedMin = 0;
     double projectedMax = 0;
     // Get the projected lambda for this detector group
