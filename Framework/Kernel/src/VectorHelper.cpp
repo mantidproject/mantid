@@ -548,17 +548,16 @@ bool isConstantValue(const std::vector<double> &arra) {
 /** Take a string of comma or space-separated values, and splits it into
  * a vector of doubles.
  * @param listString :: a string like "0.0 1.2" or "2.4, 5.67, 88"
- * @return a vector of doubles
+ * @param separator :: Specify the string in which to split into vector. Default space and comma: " ,"
+ * @return a vector of numT
  * @throw an error if there was a string that could not convert to a double.
  */
-template <typename NumT> std::vector<NumT> splitStringIntoVector(std::string listString) {
+template <typename NumT> std::vector<NumT> splitStringIntoVector(std::string listString, const std::string &separator) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
+  std::vector<std::string> strs;
 
-  using split_vector_type = std::vector<std::string>;
-  split_vector_type strs;
-
-  boost::split(strs, listString, boost::is_any_of(", "));
+  boost::split(strs, listString, boost::is_any_of(separator));
   for (auto &str : strs) {
     if (!str.empty()) {
       // String not empty
@@ -765,11 +764,17 @@ void smoothInRange(const std::vector<double> &input, std::vector<double> &output
 }
 
 /// Declare all version of this
-template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString);
-template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString);
-template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString);
-template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString);
-template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
-template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
+template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString,
+                                                                       const std::string &separator);
+template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString,
+                                                                       const std::string &separator);
+template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString,
+                                                                     const std::string &separator);
+template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString,
+                                                                   const std::string &separator);
+template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString,
+                                                                     const std::string &separator);
+template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString,
+                                                                               const std::string &separator);
 
 } // namespace Mantid::Kernel::VectorHelper
