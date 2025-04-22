@@ -86,10 +86,10 @@ H5::DSetCreatPropList setCompression(size_t rank, const hsize_t *chunkDims, int 
 class DataDimensions {
 public:
   // Prepares size and shape vectors and variables for data to be stored in file
-  DataDimensions(const MatrixWorkspace_sptr &workspace,
-                 const std::optional<std::pair<size_t, size_t>> &spinVecSize = std::nullopt) {
-    m_numberOfPoints = static_cast<hsize_t>(workspace->dataY(0).size());
-    m_numberOfHistograms = static_cast<hsize_t>(workspace->getNumberHistograms());
+  explicit DataDimensions(const MatrixWorkspace_sptr &workspace,
+                          const std::optional<std::pair<size_t, size_t>> &spinVecSize = std::nullopt)
+      : m_numberOfPoints(static_cast<hsize_t>(workspace->dataY(0).size())),
+        m_numberOfHistograms(static_cast<hsize_t>(workspace->getNumberHistograms())) {
     auto dataShape = std::vector<hsize_t>({m_numberOfPoints});
     auto slabShape = dataShape;
     if (m_numberOfHistograms > 1) {
@@ -102,10 +102,10 @@ public:
       dataShape.insert(dataShape.cbegin(), {PinSize, PoutSize});
       slabShape.insert(slabShape.cbegin(), {1, 1});
     }
-    m_dataSpace = H5::DataSpace(static_cast<int>(dataShape.size()), dataShape.data());
-    m_dataType = H5::DataType(H5Util::getType<double>());
     m_dataShape = dataShape;
     m_slabShape = slabShape;
+    m_dataSpace = H5::DataSpace(static_cast<int>(dataShape.size()), dataShape.data());
+    m_dataType = H5::DataType(H5Util::getType<double>());
   }
 
   const hsize_t &numberOfPoints() const { return m_numberOfPoints; }
