@@ -147,11 +147,11 @@ public:
 
   static void loadPulseTimes(H5::Group &entry, std::unique_ptr<std::vector<double>> &data) {
     // /entry/DASlogs/frequency/time
-    auto logs = entry.openGroup("DASlogs");        // type=NXcollection
-    auto frequency = entry.openGroup("frequency"); // type=NXlog"
+    auto logs = entry.openGroup("DASlogs");       // type=NXcollection
+    auto frequency = logs.openGroup("frequency"); // type=NXlog"
 
-    auto dataset = entry.openDataSet("time");
-    NeXus::H5Util::readArray1DCoerce(dataset, *data);
+    auto dataset = frequency.openDataSet("time");
+    NeXus::H5Util::readArray1DCoerce(dataset, *data); // pass by reference
 
     // groups close themselves
   }
@@ -177,7 +177,7 @@ public:
       Kernel::Units::timeConversionVector(*data, tof_unit, MICROSEC);
   }
 
-  void loadDetid(H5::Group &event_group, std::unique_ptr<std::vector<uint32_t>> &data,
+  void loadDetid(H5::Group &event_group, std::unique_ptr<std::vector<detid_t>> &data,
                  const std::pair<uint64_t, uint64_t> &eventRange) {
     // g_log.information(NxsFieldNames::DETID);
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
@@ -203,7 +203,8 @@ public:
     constexpr uint64_t STOP_DEFAULT = std::numeric_limits<uint64_t>::max();
 
     if (m_is_time_filtered) {
-      std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
+      // TODO this should be made smarter to only read the necessary range
+      std::unique_ptr<std::vector<uint64_t>> event_index;
       this->loadEventIndex(event_group, event_index);
 
       uint64_t start_event = event_index->at(m_pulse_start_index);
@@ -295,22 +296,21 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
 
 template <typename CountsType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<uint32_t> *detids,
+  ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<detid_t> *detids,
                     const std::vector<float> *tofs, const AlignAndFocusPowderSlim::BankCalibration *calibration,
                     std::vector<CountsType> *y_temp, const std::set<detid_t> *masked)
       : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp),
-        masked(masked) {}
+        masked(masked), no_mask(masked->empty()) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-    const bool no_mask = (masked->empty()); // simplify check for mask
-    // iterators
+    // both iterators need to be incremented in each loop
     auto detid_ptr = m_detids->cbegin() + range.begin();
     auto tof_ptr = m_tofs->cbegin() + range.begin();
+
     for (size_t i = range.begin(); i < range.end(); ++i) {
-      const auto detid = static_cast<detid_t>(*detid_ptr);
-      if (no_mask || (!masked->contains(detid))) {
+      if (no_mask || (!masked->contains(*detid_ptr))) {
         // focussed time-off-flight
-        const auto tof = static_cast<double>(*tof_ptr) * m_calibration->value(detid);
+        const auto tof = static_cast<double>(*tof_ptr) * m_calibration->value(*detid_ptr);
         // increment the bin if it is found
         if (m_histogrammer->inRange(tof)) {
           if (const auto binnum = m_histogrammer->findBin(tof)) {
@@ -325,11 +325,12 @@ public:
 
 private:
   const Histogrammer *m_histogrammer;
-  const std::vector<uint32_t> *m_detids;
+  const std::vector<detid_t> *m_detids;
   const std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   std::vector<CountsType> *y_temp;
   const std::set<detid_t> *masked;
+  const bool no_mask; // whether there are any masked pixels
 };
 
 class ProcessBankTask {
@@ -350,8 +351,8 @@ public:
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     // re-use vectors to save malloc/free calls
-    std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
-    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+    std::unique_ptr<std::vector<detid_t>> event_detid;
+    std::unique_ptr<std::vector<float>> event_time_of_flight;
 
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
@@ -466,19 +467,19 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::FILENAME, "", FileProperty::Load, exts),
                   "The name of the Event NeXus file to read, including its full or relative path. "
                   "The file name is typically of the form INST_####_event.nxs.");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(),
-                                                                      Direction::Input),
-                  "Optional: To only include events after the provided start "
-                  "time, in seconds (relative to the start of the run).");
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(),
+                                                          Direction::Input),
+      "To only include events after the provided start time, in seconds (relative to the start of the run).");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(),
-                                                                      Direction::Input),
-                  "Optional: To only include events before the provided stop "
-                  "time, in seconds (relative to the start of the run).");
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(),
+                                                          Direction::Input),
+      "To only include events before the provided stop time, in seconds (relative to the start of the run).");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
-                  "Optional: The .cal file containing the position correction factors. "
-                  "Either this or OffsetsWorkspace needs to be specified.");
+                  "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
+                  "be specified.");
   auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   positiveDblValidator->setLower(0);
   declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveDblValidator,
@@ -597,7 +598,7 @@ void AlignAndFocusPowderSlim::exec() {
     this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
-    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
+    std::unique_ptr<std::vector<double>> pulse_times;
     auto entry = h5file.openGroup(ENTRY_TOP_LEVEL);
     NexusLoader::loadPulseTimes(entry, pulse_times);
     g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
