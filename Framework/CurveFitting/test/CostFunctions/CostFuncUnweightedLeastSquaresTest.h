@@ -61,6 +61,7 @@ public:
     for (size_t i = 0; i < 10; ++i) {
       values->setCalculated(2.0);
       values->setFitData(i, obsValues[i]);
+      values->setFitWeights(0.0);
     }
 
     // Function has 1 parameter, so degrees of freedom = 9
@@ -72,6 +73,24 @@ public:
 
     double variance = uwls.getResidualVariance();
     TS_ASSERT_DELTA(variance, 0.0204877770575, 1e-13);
+  }
+
+  void testUpdatedFitWeights() {
+    FunctionDomain1DVector d1d(std::vector<double>(10, 1.0));
+    FunctionValues_sptr values = std::make_shared<FunctionValues>(d1d);
+    for (size_t i = 0; i < 10; ++i) {
+      values->setFitWeights(5.0); // These weights would be reset to 1 when fitting func is set
+    }
+
+    IFunction_sptr fn = FunctionFactory::Instance().createFunction("FlatBackground");
+    FunctionDomain_sptr domain = std::make_shared<FunctionDomain1DVector>(d1d);
+
+    TestableCostFuncUnweightedLeastSquares uwls;
+    uwls.setFittingFunction(fn, domain, values);
+    auto updated_values = uwls.getValues();
+    for (size_t i = 0; i < updated_values->size(); i++) {
+      TS_ASSERT_EQUALS(updated_values->getFitWeight(i), 1.0);
+    }
   }
 
 private:

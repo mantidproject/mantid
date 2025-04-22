@@ -1,0 +1,1 @@
+- Fixed a bug in 'Unweighted least squares' cost function in Mantid fit. It was discovered not to work as expected when the fit was compared with scipy library.
