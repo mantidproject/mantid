@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <H5Cpp.h>
-#include <MantidAPI/WorkspaceGroup_fwd.h>
 #include <filesystem>
 #include <vector>
 
