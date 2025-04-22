@@ -204,7 +204,7 @@ public:
 
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
-      std::unique_ptr<std::vector<uint64_t>> event_index;
+      std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
       uint64_t start_event = event_index->at(m_pulse_start_index);
@@ -351,8 +351,8 @@ public:
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     // re-use vectors to save malloc/free calls
-    std::unique_ptr<std::vector<detid_t>> event_detid;
-    std::unique_ptr<std::vector<float>> event_time_of_flight;
+    std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
+    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
 
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
@@ -598,7 +598,7 @@ void AlignAndFocusPowderSlim::exec() {
     this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
-    std::unique_ptr<std::vector<double>> pulse_times;
+    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
     auto entry = h5file.openGroup(ENTRY_TOP_LEVEL);
     NexusLoader::loadPulseTimes(entry, pulse_times);
     g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
