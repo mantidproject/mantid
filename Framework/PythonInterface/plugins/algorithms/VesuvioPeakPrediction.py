@@ -80,7 +80,7 @@ class VesuvioPeakPrediction(VesuvioBase):
                 vesuvio_params.addColumn("float", "RMS Momentum(A)")
 
                 for temp in self._temperature:
-                    if temp == 0:
+                    if temp < MIN_TEMPERATURE:
                         temp = MIN_TEMPERATURE
 
                     # Convert to mEV
@@ -101,7 +101,7 @@ class VesuvioPeakPrediction(VesuvioBase):
                 vesuvio_params.addColumn("float", "RMS Displacement(A)")
 
                 for temp in self._temperature:
-                    if temp == 0:
+                    if temp < MIN_TEMPERATURE:
                         temp = MIN_TEMPERATURE
 
                     kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
@@ -114,7 +114,7 @@ class VesuvioPeakPrediction(VesuvioBase):
                 vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
 
                 for temp in self._temperature:
-                    if temp == 0:
+                    if temp < MIN_TEMPERATURE:
                         temp = MIN_TEMPERATURE
 
                     temp_mev = temp / K_IN_MEV
