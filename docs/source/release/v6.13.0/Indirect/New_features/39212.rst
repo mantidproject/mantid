@@ -1,1 +1,1 @@
-- Algorithm :ref:`algm-VesuvioPeakPrediction` now supports option `Classical`, used to estimate the lower bounds of the width of the Neutron Compton Profiles when running analysis routines.
+- Algorithm :ref:`algm-VesuvioPeakPrediction` now supports option ``Classical``, used to estimate the lower bounds of the width of the Neutron Compton Profiles when running analysis routines.
