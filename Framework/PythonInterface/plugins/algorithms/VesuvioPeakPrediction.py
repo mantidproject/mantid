@@ -71,58 +71,59 @@ class VesuvioPeakPrediction(VesuvioBase):
         vesuvio_params.addColumn("float", "Temperature(K)")
         vesuvio_params.addColumn("float", "Atomic Mass(AMU)")
 
-        if self._model == "Einstein":
-            vesuvio_params.addColumn("float", "Frequency(mEV)")
-            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
-            vesuvio_params.addColumn("float", "Effective Temp(K)")
-            vesuvio_params.addColumn("float", "RMS Momentum(A)")
+        match self._model:
+            case "Einstein":
+                vesuvio_params.addColumn("float", "Frequency(mEV)")
+                vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+                vesuvio_params.addColumn("float", "Effective Temp(K)")
+                vesuvio_params.addColumn("float", "RMS Momentum(A)")
 
-            for temp in self._temperature:
-                if temp == 0:
-                    temp = MIN_TEMPERATURE
+                for temp in self._temperature:
+                    if temp == 0:
+                        temp = MIN_TEMPERATURE
 
-                # Convert to mEV
-                temp_mev = temp / K_IN_MEV
-                # Kinetic Energy
-                kinetic_energy = 0.25 * self._frequency / math.tanh(self._frequency / (2 * temp_mev))
-                # Effective temperature in K
-                t_star = 2 * kinetic_energy * K_IN_MEV
-                # RMS moment
-                sig = math.sqrt(self._atomic_mass * kinetic_energy / EINSTEIN_CONSTANT)
+                    # Convert to mEV
+                    temp_mev = temp / K_IN_MEV
+                    # Kinetic Energy
+                    kinetic_energy = 0.25 * self._frequency / math.tanh(self._frequency / (2 * temp_mev))
+                    # Effective temperature in K
+                    t_star = 2 * kinetic_energy * K_IN_MEV
+                    # RMS moment
+                    sig = math.sqrt(self._atomic_mass * kinetic_energy / EINSTEIN_CONSTANT)
 
-                vesuvio_params.addRow([temp, self._atomic_mass, self._frequency, kinetic_energy, t_star, sig])
+                    vesuvio_params.addRow([temp, self._atomic_mass, self._frequency, kinetic_energy, t_star, sig])
 
-        if self._model == "Debye":
-            vesuvio_params.addColumn("float", "Debye Temp(K)")
-            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
-            vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
-            vesuvio_params.addColumn("float", "RMS Displacement(A)")
+            case "Debye":
+                vesuvio_params.addColumn("float", "Debye Temp(K)")
+                vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+                vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
+                vesuvio_params.addColumn("float", "RMS Displacement(A)")
 
-            for temp in self._temperature:
-                if temp == 0:
-                    temp = MIN_TEMPERATURE
+                for temp in self._temperature:
+                    if temp == 0:
+                        temp = MIN_TEMPERATURE
 
-                kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
-                rms_disp = self.displacement(temp, self._debye_temp, self._atomic_mass)
+                    kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
+                    rms_disp = self.displacement(temp, self._debye_temp, self._atomic_mass)
 
-                vesuvio_params.addRow([temp, self._atomic_mass, self._debye_temp, kinetic, rms_momentum, rms_disp])
+                    vesuvio_params.addRow([temp, self._atomic_mass, self._debye_temp, kinetic, rms_momentum, rms_disp])
 
-        if self._model == "Classical":
-            vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
-            vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
+            case "Classical":
+                vesuvio_params.addColumn("float", "RMS Momentum(A-1)")
+                vesuvio_params.addColumn("float", "Kinetic Energy(mEV)")
 
-            for temp in self._temperature:
-                if temp == 0:
-                    temp = MIN_TEMPERATURE
+                for temp in self._temperature:
+                    if temp == 0:
+                        temp = MIN_TEMPERATURE
 
-                temp_mev = temp / K_IN_MEV
-                # Reduced Planck constant in units sqrt(mev * amu) / A-1
-                h_bar = 2.04434
+                    temp_mev = temp / K_IN_MEV
+                    # Reduced Planck constant in units sqrt(mev * amu) / A-1
+                    h_bar = 2.04434
 
-                rms_momentum = math.sqrt(temp_mev * self._atomic_mass / h_bar**2)  # Units A-1
-                kinetic_energy = 3 * h_bar**2 * rms_momentum**2 / (2 * self._atomic_mass)  # Units mev
+                    rms_momentum = math.sqrt(temp_mev * self._atomic_mass / h_bar**2)  # Units A-1
+                    kinetic_energy = 3 * h_bar**2 * rms_momentum**2 / (2 * self._atomic_mass)  # Units mev
 
-                vesuvio_params.addRow([temp, self._atomic_mass, rms_momentum, kinetic_energy])
+                    vesuvio_params.addRow([temp, self._atomic_mass, rms_momentum, kinetic_energy])
 
         self.setProperty("OutputTable", vesuvio_params)
 
