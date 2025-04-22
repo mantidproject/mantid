@@ -22,9 +22,9 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         self.assertEqual(round(vesuvio_debye_params.cell(2, 5), 7), 0.0694458)
 
     def test_debye_zero_temperature(self):
-        vesuvio_debye_params = VesuvioPeakPrediction(Model="Debye", Temperature=[0], AtomicMass=63.5)
-        self.assertEqual(round(vesuvio_debye_params.cell(0, 2), 4), 1.0)
-        self.assertEqual(round(vesuvio_debye_params.cell(0, 3), 4), 0.0483)
+        vesuvio_debye_params = VesuvioPeakPrediction(Model="Debye", Temperature=[0], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+        self.assertEqual(round(vesuvio_debye_params.cell(0, 2), 4), 347)
+        self.assertEqual(round(vesuvio_debye_params.cell(0, 3), 4), 16.7528)
 
     def test_einstein(self):
         """
@@ -38,9 +38,11 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 5), 18.47381)
 
     def test_einstein_zero_temperature(self):
-        vesuvio_einstein_params = VesuvioPeakPrediction(Model="Einstein", Temperature=[0], AtomicMass=63.5)
-        self.assertEqual(round(vesuvio_einstein_params.cell(0, 2), 4), 1.0)
-        self.assertEqual(round(vesuvio_einstein_params.cell(0, 3), 4), 0.25)
+        vesuvio_einstein_params = VesuvioPeakPrediction(
+            Model="Einstein", Temperature=[0], AtomicMass=63.5, Frequency=20, DebyeTemperature=347
+        )
+        self.assertEqual(round(vesuvio_einstein_params.cell(0, 2), 4), 20)
+        self.assertEqual(round(vesuvio_einstein_params.cell(0, 3), 4), 5.0)
 
     def test_classical(self):
         """
