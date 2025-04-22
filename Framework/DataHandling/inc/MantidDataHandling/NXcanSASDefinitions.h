@@ -12,6 +12,44 @@ namespace Mantid {
 namespace DataHandling {
 
 namespace NXcanSAS {
+
+/// Property names for save algorithms.
+namespace StandardProperties {
+static const std::string INPUT_WORKSPACE = "InputWorkspace";
+static const std::string FILENAME = "Filename";
+static const std::string RADIATION_SOURCE = "RadiationSource";
+static const std::string DETECTOR_NAMES = "DetectorNames";
+static const std::string TRANSMISSION = "Transmission";
+static const std::string TRANSMISSION_CAN = "TransmissionCan";
+static const std::string SAMPLE_TRANS_RUN_NUMBER = "SampleTransmissionRunNumber";
+static const std::string SAMPLE_DIRECT_RUN_NUMBER = "SampleDirectRunNumber";
+static const std::string CAN_SCATTER_RUN_NUMBER = "CanScatterRunNumber";
+static const std::string CAN_DIRECT_RUN_NUMBER = "CanDirectRunNumber";
+static const std::string BKG_SUB_WORKSPACE = "BackgroundSubtractionWorkspace";
+static const std::string BKG_SUB_SCALE = "BackgroundSubtractionScaleFactor";
+static const std::string GEOMETRY = "Geometry";
+static const std::string SAMPLE_HEIGHT = "SampleHeight";
+static const std::string SAMPLE_WIDTH = "SampleWidth";
+static const std::string SAMPLE_THICKNESS = "SampleThickness";
+} // namespace StandardProperties
+
+namespace PolProperties {
+static const std::string INPUT_SPIN_STATES = "InputSpinStates";
+static const std::string POLARIZER_COMP_NAME = "PolarizerComponentName";
+static const std::string ANALYZER_COMP_NAME = "AnalyzerComponentName";
+static const std::string FLIPPER_COMP_NAMES = "FlipperComponentNames";
+static const std::string MAG_FIELD_STRENGTH_LOGNAME = "MagneticFieldStrengthLogName";
+static const std::string MAG_FIELD_DIR = "MagneticFieldDirection";
+inline std::map<std::string, std::string> POL_COMPONENTS = {
+    {"polarizer", POLARIZER_COMP_NAME}, {"analyzer", ANALYZER_COMP_NAME}, {"flipper", FLIPPER_COMP_NAMES}};
+} // namespace PolProperties
+
+namespace SpinStateNXcanSAS {
+static const std::string SPIN_PARA = "+1";
+static const std::string SPIN_ANTIPARA = "-1";
+static const std::string SPIN_ZERO = "0";
+} // namespace SpinStateNXcanSAS
+
 // General
 enum class WorkspaceDimensionality { other, oneD, twoD };
 
