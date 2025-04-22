@@ -9,7 +9,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/NXcanSASHelper.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
 
@@ -27,12 +29,20 @@ void SavePolarizedNXcanSAS::init() {
 
 std::map<std::string, std::string> SavePolarizedNXcanSAS::validateInputs() {
   std::map<std::string, std::string> results;
+  const std::string spins = getProperty(NXcanSAS::PolProperties::INPUT_SPIN_STATES);
+  const auto spinVec = Kernel::VectorHelper::splitStringIntoVector<std::string>(spins);
 
   auto const standardResults = validateStandardInputs();
-  results.insert(standardResults.begin(), standardResults.end());
+  results.insert(standardResults.cbegin(), standardResults.cend());
 
-  auto const polarizedResults = validatePolarizedInputs();
-  results.insert(polarizedResults.begin(), polarizedResults.end());
+  auto const polarizedWSResults = validatePolarizedInputWorkspace(spinVec);
+  results.insert(polarizedWSResults.cbegin(), polarizedWSResults.cend());
+
+  auto const polarizedSpinStatesResults = validateSpinStateStrings(spinVec);
+  results.insert(polarizedSpinStatesResults.cbegin(), polarizedSpinStatesResults.cend());
+
+  auto const polarizedMetadata = validatePolarizedMetadata();
+  results.insert(polarizedMetadata.cbegin(), polarizedMetadata.cend());
 
   return results;
 }

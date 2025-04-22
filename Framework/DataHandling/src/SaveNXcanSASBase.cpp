@@ -29,44 +29,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
 
 namespace {
-
-/// Property names.
-namespace StandardProperties {
-static const std::string INPUT_WORKSPACE = "InputWorkspace";
-static const std::string FILENAME = "Filename";
-static const std::string RADIATION_SOURCE = "RadiationSource";
-static const std::string DETECTOR_NAMES = "DetectorNames";
-static const std::string TRANSMISSION = "Transmission";
-static const std::string TRANSMISSION_CAN = "TransmissionCan";
-static const std::string SAMPLE_TRANS_RUN_NUMBER = "SampleTransmissionRunNumber";
-static const std::string SAMPLE_DIRECT_RUN_NUMBER = "SampleDirectRunNumber";
-static const std::string CAN_SCATTER_RUN_NUMBER = "CanScatterRunNumber";
-static const std::string CAN_DIRECT_RUN_NUMBER = "CanDirectRunNumber";
-static const std::string BKG_SUB_WORKSPACE = "BackgroundSubtractionWorkspace";
-static const std::string BKG_SUB_SCALE = "BackgroundSubtractionScaleFactor";
-static const std::string GEOMETRY = "Geometry";
-static const std::string SAMPLE_HEIGHT = "SampleHeight";
-static const std::string SAMPLE_WIDTH = "SampleWidth";
-static const std::string SAMPLE_THICKNESS = "SampleThickness";
-} // namespace StandardProperties
-
-namespace PolProperties {
-static const std::string INPUT_SPIN_STATES = "InputSpinStates";
-static const std::string POLARIZER_COMP_NAME = "PolarizerComponentName";
-static const std::string ANALYZER_COMP_NAME = "AnalyzerComponentName";
-static const std::string FLIPPER_COMP_NAMES = "FlipperComponentNames";
-static const std::string MAG_FIELD_STRENGTH_LOGNAME = "MagneticFieldStrengthLogName";
-static const std::string MAG_FIELD_DIR = "MagneticFieldDirection";
-std::map<std::string, std::string> POL_COMPONENTS = {
-    {"polarizer", POLARIZER_COMP_NAME}, {"analyzer", ANALYZER_COMP_NAME}, {"flipper", FLIPPER_COMP_NAMES}};
-} // namespace PolProperties
-
-namespace SpinStateNXcanSAS {
-static const std::string SPIN_PARA = "+1";
-static const std::string SPIN_ANTIPARA = "-1";
-static const std::string SPIN_ZERO = "0";
-} // namespace SpinStateNXcanSAS
-
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
   if (ws->axes() == 0) {
     return false;
@@ -245,12 +207,10 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() co
   return result;
 }
 
-std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() const {
+std::map<std::string, std::string>
+SaveNXcanSASBase::validatePolarizedInputWorkspace(const std::vector<std::string> &spinVec) const {
   std::map<std::string, std::string> result;
-
   const Workspace_sptr workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
-  const std::string spins = getProperty(PolProperties::INPUT_SPIN_STATES);
-  const auto spinVec = VectorHelper::splitStringIntoVector<std::string>(spins);
 
   if (!workspace->isGroup())
     result.emplace(StandardProperties::INPUT_WORKSPACE,
@@ -277,6 +237,11 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
       result.emplace(StandardProperties::INPUT_WORKSPACE, "All workspaces in group must have the same dimensionality");
     }
   }
+  return result;
+}
+std::map<std::string, std::string>
+SaveNXcanSASBase::validateSpinStateStrings(const std::vector<std::string> &spinVec) const {
+  std::map<std::string, std::string> result;
 
   // Validating spin strings
   if (spinVec.size() == 4 && std::any_of(spinVec.cbegin(), spinVec.cend(), [](const std::string &spinPair) {
@@ -299,7 +264,11 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
                      "The 0 polarized state can only be either Pin or Pout for 2 spin configurations");
     }
   }
+  return result;
+}
 
+std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedMetadata() const {
+  std::map<std::string, std::string> result;
   const std::string magneticFieldDirection = getProperty(PolProperties::MAG_FIELD_DIR);
   if (!magneticFieldDirection.empty()) {
     auto direction = VectorHelper::splitStringIntoVector<std::string>(magneticFieldDirection);
@@ -313,7 +282,6 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedInputs() c
                      "Magnetic Field Direction should contain 3 comma separated values to represent a 3D vector");
     }
   }
-
   return result;
 }
 
@@ -411,7 +379,8 @@ void SaveNXcanSASBase::addPolarizedMetadata(const MatrixWorkspace_sptr &workspac
 }
 
 /**
- * Creates a component map to access the polarizer component names defined in input properties on the corresponding IDF.
+ * Creates a component map to access the polarizer component names defined in input properties on the corresponding
+ * IDF.
  */
 std::map<std::string, std::vector<std::string>> SaveNXcanSASBase::createPolarizedComponentMap() const {
   // Assumption here is that we will pass the IDF component names as comma separated lists

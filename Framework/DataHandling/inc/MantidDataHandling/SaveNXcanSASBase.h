@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
-#include <MantidAPI/WorkspaceGroup_fwd.h>
 
 #include <H5Cpp.h>
 #include <filesystem>
@@ -33,7 +33,10 @@ protected:
   void initStandardProperties();
   void initPolarizedProperties();
   std::map<std::string, std::string> validateStandardInputs() const;
-  std::map<std::string, std::string> validatePolarizedInputs() const;
+  // Polarized data and metadata
+  std::map<std::string, std::string> validatePolarizedInputWorkspace(const std::vector<std::string> &spinVec) const;
+  std::map<std::string, std::string> validateSpinStateStrings(const std::vector<std::string> &spinVec) const;
+  std::map<std::string, std::string> validatePolarizedMetadata() const;
 
   void saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace, const std::filesystem::path &path) const;
   void savePolarizedGroup(const API::WorkspaceGroup_sptr &wsGroup, const std::filesystem::path &path) const;
