@@ -173,9 +173,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   // Only if I0MonitorIndex, MonitorBackgroundWavelengthMin
   // and MonitorBackgroundWavelengthMax have been given
 
-  Property *monProperty = getProperty("I0MonitorIndex");
-  Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
-  Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMin");
+  const Property *monProperty = getProperty("I0MonitorIndex");
+  const Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
+  const Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMin");
   if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
     return detectorWS;
   }
