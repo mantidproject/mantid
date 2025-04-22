@@ -92,7 +92,7 @@ protected:
                                   API::FunctionValues_sptr values, bool evalDeriv = true,
                                   bool evalHessian = true) const = 0;
 
-  /// Update the fit weights m_values in m_values when necessary
+  /// Update the fit weights in m_values when necessary
   virtual void updateFitWeights() {};
 
   bool isValid() const;
