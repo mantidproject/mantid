@@ -16,6 +16,7 @@ MIN_TEMPERATURE = 1e-6
 K_IN_MEV = scipy.constants.value("electron volt-kelvin relationship") / 1e3
 EINSTEIN_CONSTANT = 2.0717
 DEBYE_CONSTANT = 4.18036
+H_BAR = 2.04434  # Reduced Planck constant in units sqrt(mev * amu) / A-1
 
 
 class VesuvioPeakPrediction(VesuvioBase):
@@ -117,11 +118,9 @@ class VesuvioPeakPrediction(VesuvioBase):
                         temp = MIN_TEMPERATURE
 
                     temp_mev = temp / K_IN_MEV
-                    # Reduced Planck constant in units sqrt(mev * amu) / A-1
-                    h_bar = 2.04434
 
-                    rms_momentum = math.sqrt(temp_mev * self._atomic_mass / h_bar**2)  # Units A-1
-                    kinetic_energy = 3 * h_bar**2 * rms_momentum**2 / (2 * self._atomic_mass)  # Units mev
+                    rms_momentum = math.sqrt(temp_mev * self._atomic_mass / H_BAR**2)  # Units A-1
+                    kinetic_energy = 3 * H_BAR**2 * rms_momentum**2 / (2 * self._atomic_mass)  # Units mev
 
                     vesuvio_params.addRow([temp, self._atomic_mass, rms_momentum, kinetic_energy])
 
