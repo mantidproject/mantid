@@ -99,6 +99,9 @@ public:
 
   bool verifyGroupClass(H5::Group const &, std::string const &) const;
 
+  bool hasGroup(std::string const &);
+  bool hasData(std::string const &);
+
   /**
    * Create a new group.
    *

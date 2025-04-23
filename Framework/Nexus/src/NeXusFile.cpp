@@ -325,6 +325,30 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
   return H5Util::keyHasValue(grp, group_class_spec, class_name);
 }
 
+bool File::hasGroup(std::string const &name) {
+  bool status = true;
+  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  return current->nameExists(name);
+  // try {
+  //   current->openGroup(name);
+  // } catch (H5::Exception const &) {
+  //   status = false;
+  // }
+  // return status;
+}
+
+bool File::hasData(std::string const &name) {
+  bool status = true;
+  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  return current->nameExists(name);
+  // try {
+  //   current->openDataSet(name);
+  // } catch (H5::Exception const &) {
+  //   status = false;
+  // }
+  // return status;
+}
+
 void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
   if (name.empty()) {
     throw Exception("NeXusFile::makeGroup -- Supplied empty name to makeGroup", m_filename);
@@ -359,6 +383,8 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 }
 
 void File::openPath(std::string const &pathname) {
+  printf("OPEN PATH %s\n", pathname.c_str());
+  fflush(stdout);
   if (pathname.empty()) {
     throw Exception("NeXusFile::openPath -- Supplied empty path to openPath", m_filename);
   }
@@ -368,7 +394,8 @@ void File::openPath(std::string const &pathname) {
   //   path = this->getPath() / path.relative_path();
   // }
   if (!path.is_absolute()) {
-    throw Exception("NeXusFile::openPath -- paths must be absolute, beginning with /", m_filename);
+    path = "/" / path;
+    // throw Exception("NeXusFile::openPath -- paths must be absolute, beginning with /", m_filename);
   }
   // create a new stack -- will replace old if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);

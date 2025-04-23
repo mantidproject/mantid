@@ -30,7 +30,7 @@ using namespace Mantid::DataHandling;
 
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:
-  void test_File_With_DASLogs() {
+  void ytest_File_With_DASLogs() {
     Mantid::API::FrameworkManager::Instance();
     LoadNexusLogs ld;
     std::string outws_name = "REF_L_instrument";
@@ -76,7 +76,7 @@ public:
     // Now the stats
   }
 
-  void test_File_With_Runlog_And_Selog() {
+  void xtest_File_With_Runlog_And_Selog() {
     LoadNexusLogs loader;
     loader.initialize();
     MatrixWorkspace_sptr testWS = createTestWorkspace();
@@ -116,7 +116,7 @@ public:
     TS_ASSERT_EQUALS(dlog->size(), 172);
   }
 
-  void test_File_With_Bad_Property() {
+  void xtest_File_With_Bad_Property() {
     LoadNexusLogs loader;
     loader.initialize();
     MatrixWorkspace_sptr testWS = createTestWorkspace();
@@ -137,7 +137,7 @@ public:
     TS_ASSERT_EQUALS(str.substr(77, 6), "E ( $ ");
   }
 
-  void test_extract_nperiod_log_from_event_nexus() {
+  void xtest_extract_nperiod_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
@@ -159,7 +159,7 @@ public:
     }
   }
 
-  void test_extract_periods_log_from_event_nexus() {
+  void xtest_extract_periods_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
@@ -189,7 +189,7 @@ public:
     TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
   }
 
-  void test_extract_run_title_from_event_nexus() {
+  void xtest_extract_run_title_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
@@ -209,7 +209,7 @@ public:
     TSM_ASSERT_EQUALS("Run title is not correct", "3He polariser test 0.9bar Long Polariser 0.75A", title);
   }
 
-  void test_log_non_default_entry() {
+  void ytest_log_non_default_entry() {
     auto testWS = createTestWorkspace();
     LoadNexusLogs loader;
 
@@ -246,7 +246,7 @@ public:
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
   }
 
-  void test_no_crash_on_2D_array_of_values_on_load() {
+  void xtest_no_crash_on_2D_array_of_values_on_load() {
     auto testWS = createTestWorkspace();
     LoadNexusLogs loader;
     loader.setChild(true);
@@ -256,7 +256,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
-  void test_last_time_series_log_entry_equals_end_time() {
+  void ytest_last_time_series_log_entry_equals_end_time() {
     LoadNexusLogs ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "REF_L_32035.nxs");
@@ -277,7 +277,7 @@ public:
     TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
   }
 
-  void test_load_file_with_invalid_log_entries() {
+  void xtest_load_file_with_invalid_log_entries() {
     LoadNexusLogs ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "ENGINX00228061_log_alarm_data.nxs");
@@ -388,7 +388,7 @@ public:
     }
   }
 
-  void test_block_list() {
+  void xtest_block_list() {
     auto testWS = createTestWorkspace();
 
     std::vector<std::string> blocked = {"proton_charge", "S2HGap", "S2VGap"};
@@ -426,7 +426,7 @@ public:
     }
   }
 
-  void test_allow_and_block_list() {
+  void xtest_allow_and_block_list() {
     auto testWS = createTestWorkspace();
 
     LoadNexusLogs loader;

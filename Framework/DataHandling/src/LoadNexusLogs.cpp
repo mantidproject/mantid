@@ -24,8 +24,8 @@
 #include <algorithm>
 #include <locale>
 
-#define LOG_ERROR(file) \
-  printf("LNL L%d %s\n", __LINE__, (file).getPath().c_str()); \
+#define LOG_ERROR(file)                                                                                                \
+  printf("LNL L%d %s\n", __LINE__, (file).getPath().c_str());                                                          \
   fflush(stdout);
 
 namespace Mantid::DataHandling {
@@ -146,22 +146,22 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
   //----- Start time is an ISO8601 string date and time. ------
   std::string start;
   if (file.)
-  try {
-    LOG_ERROR(file);
-    file.getAttr("start", start);
-    LOG_ERROR(file);
-  } catch (::NeXus::Exception &) {
-    // Some logs have "offset" instead of start
     try {
       LOG_ERROR(file);
-      file.getAttr("offset", start);
+      file.getAttr("start", start);
       LOG_ERROR(file);
     } catch (::NeXus::Exception &) {
-      log.warning() << "Log entry has no start time indicated.\n";
-      file.closeData();
-      throw;
+      // Some logs have "offset" instead of start
+      try {
+        LOG_ERROR(file);
+        file.getAttr("offset", start);
+        LOG_ERROR(file);
+      } catch (::NeXus::Exception &) {
+        log.warning() << "Log entry has no start time indicated.\n";
+        file.closeData();
+        throw;
+      }
     }
-  }
   if (start == "No Time") {
     start = freqStart;
   }
@@ -198,7 +198,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     LOG_ERROR(file);
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
                    std::bind(std::multiplies<double>(), _1, 60.0));
-                   LOG_ERROR(file);
+    LOG_ERROR(file);
   }
 
   // Now the values: Could be a string, int or double
@@ -479,7 +479,7 @@ void LoadNexusLogs::execLoader() {
     entry_name = LoadTOFRawNexus::getEntryName(filename);
   }
   ::NeXus::File file(filename);
-  
+
   // Find the root entry
   try {
     LOG_ERROR(file);
@@ -719,7 +719,7 @@ void LoadNexusLogs::execLoader() {
  * @param workspace :: workspace to add to.
  */
 void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
-  if(!file.hasGroup("Veto_pulse")) {
+  if (!file.hasGroup("Veto_pulse")) {
     return;
   }
   try {
