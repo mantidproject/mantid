@@ -303,7 +303,8 @@ def _make_filename(entry, ext, inst):
         filename = inst + _pad_zero(run_num, inst) + ext
     except ValueError:  # We don't have a run number, assume it's a valid filename
         filename = entry
-        dummy, ext = os.path.splitext(filename)
+        _, filename_ext = os.path.splitext(filename)
+        ext = filename_ext if filename_ext else ext
 
     return filename, ext
 
