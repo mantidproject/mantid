@@ -39,7 +39,7 @@ void tracebackToStream(std::ostream &msg, PyTracebackObject *traceback, bool roo
     msg << "caused by";
 
   msg << " line " << traceback->tb_lineno << " in \'"
-      << extract<const char *>(traceback->tb_frame->f_code->co_filename)() << "\'";
+      << extract<const char *>(PyFrame_GetCode(traceback->tb_frame)->co_filename)() << "\'";
   tracebackToStream(msg, traceback->tb_next, false);
 }
 
