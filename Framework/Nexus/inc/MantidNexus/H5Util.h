@@ -40,9 +40,6 @@ MANTID_NEXUS_DLL H5::FileAccPropList defaultFileAcc();
 /// Create a 1D data-space to hold data of length.
 MANTID_NEXUS_DLL H5::DataSpace getDataSpace(const size_t length);
 
-/// Create a 1D data-space that will hold the supplied vector.
-template <typename NumT> H5::DataSpace getDataSpace(const std::vector<NumT> &data);
-
 /// Convert a primitive type to the appropriate H5::DataType.
 template <typename NumT> H5::DataType getType();
 
