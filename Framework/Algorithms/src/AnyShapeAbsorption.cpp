@@ -54,8 +54,7 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   } else {
     try {
-      auto beamProfile =
-          Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
       integrationVolume = beamProfile->getIntersectionWithSample(*m_sampleObject);
     } catch (const std::invalid_argument &) {
       // If createBeamProfile fails, the beam parameters are not defined
