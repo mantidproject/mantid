@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from SANS import SANSadd2
+from SANS.sans.common.enums import SampleShape
 from mantid.simpleapi import Load
 
 
@@ -29,7 +30,7 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
 
     def test_isis_neuxs_files_get_correct_sample_info(self):
         SANSadd2.add_runs(["74014"], "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
-        ws = Load("74014-add.nxs")
+        ws = Load("LOQ74014-add.nxs")
         sample = ws.sample()
         self.assertEqual(3, sample.getGeometryFlag())
         self.assertEqual(10.0, sample.getHeight())
@@ -38,6 +39,6 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
 
     def test_isis_nexus_get_sample_info_using_file_information(self):
         with patch("SANS.SANSadd2.get_geometry_information_isis_nexus") as mocked_get_geo_info:
-            mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, 3)
-            SANSadd2.add_runs(["74014"], "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
+            mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, SampleShape.DISC)
+            SANSadd2.add_runs(("74014", "74014"), "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
             self.assertEqual(1, mocked_get_geo_info.call_count)
