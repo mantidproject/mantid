@@ -313,7 +313,7 @@ public:
   void test_links() {
     cout << "tests of linkature\n";
 
-    string const filename("NexusFIle_linktest.nxs");
+    string const filename("NexusFile_linktest.nxs");
     removeFile(filename);
     File fileid = do_prep_files(filename);
 
@@ -345,6 +345,7 @@ public:
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
     cout << "data link works\n";
+    fileid.closeData();
 
     fileid.openPath("/entry");
 
