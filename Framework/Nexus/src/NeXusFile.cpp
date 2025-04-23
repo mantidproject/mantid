@@ -1035,6 +1035,29 @@ template MANTID_NEXUS_DLL void File::writeData(const string &name, const vector<
 template MANTID_NEXUS_DLL void File::writeData(const string &name, const vector<uint64_t> &value,
                                                const DimVector &dims);
 
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<float> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<double> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int8_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint8_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int16_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint16_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int32_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint32_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<int64_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<uint64_t> const &value,
+                                               DimVector const &dims);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value,
+                                               DimVector const &dims);
+
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<float> &data);
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<double> &data);
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<int8_t> &data);
