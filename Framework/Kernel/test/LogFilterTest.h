@@ -57,6 +57,12 @@ public:
     TS_ASSERT_EQUALS(p->nthInterval(4).end_str(),
                      "2007-Nov-30 16:17:50"); // nth interval changed to use
                                               // previous interval now.
+
+    // test out of bounds check given filter applied
+    auto testFilter = createTestFilter(1);
+    LogFilter flt(p);
+    flt.addFilter(*testFilter);
+    TS_ASSERT_THROWS(flt.data()->nthInterval(5), const std::runtime_error &);
   }
 
   void testFilterWithTrueAtStart() {
