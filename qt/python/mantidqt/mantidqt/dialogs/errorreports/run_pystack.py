@@ -30,7 +30,7 @@ def retrieve_thread_traces_from_coredump_file(workbench_pid: str) -> bytes:
     try:
         core_dumps_path = _get_core_dumps_dir()
     except ValueError as e:
-        log.error(str(e))
+        log.warning(str(e))
         return b""
 
     # Get most recent dump file.

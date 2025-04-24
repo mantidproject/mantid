@@ -66,7 +66,7 @@ def start(options: argparse.ArgumentParser):
         # this is already the default on Windows/macOS.
         # This will mean the relevant 'atexit' code will execute in the child process, and therefore the
         # FrameworkManager and UsageService will be shutdown as expected.
-        launch_command = f"python {wp.__file__}"
+        launch_command = f"{sys.executable} {wp.__file__}"
         if options.script:
             launch_command += f" {options.script}"
         if options.execute:
