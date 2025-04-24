@@ -16,7 +16,6 @@ from mantid.kernel import (
 from mantid.api import (
     AlgorithmFactory,
     AlgorithmManager,
-    WorkspaceGroup,
     MultipleFileProperty,
     WorkspaceProperty,
     PythonAlgorithm,
@@ -204,16 +203,13 @@ class LoadAndMerge(PythonAlgorithm):
         if not self.getAlwaysStoreInADS():
             self.remove_output_from_ads(output)
 
-    def remove_output_from_ads(self, output_ws_name):
+    @staticmethod
+    def remove_output_from_ads(output_ws_name):
         remove_ws = [output_ws_name]
-        if self.is_group_ws(output_ws_name):
+        if mtd[output_ws_name].isGroup():
             remove_ws.extend(list(mtd[output_ws_name].getNames()))
         for ws in remove_ws:
             mtd.remove(ws)
-
-    @staticmethod
-    def is_group_ws(ws_name):
-        return issubclass(type(mtd[ws_name]), WorkspaceGroup)
 
 
 AlgorithmFactory.subscribe(LoadAndMerge)
