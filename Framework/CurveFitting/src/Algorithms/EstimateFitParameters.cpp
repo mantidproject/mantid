@@ -359,7 +359,7 @@ void EstimateFitParameters::execConcrete() {
       func->fix(i);
       continue;
     }
-    const auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
+    const auto *boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
     if (!boundary) {
       throw std::runtime_error("Parameter " + func->parameterName(i) + " must have a boundary constraint. ");
     }
@@ -386,7 +386,7 @@ void EstimateFitParameters::execConcrete() {
 
   if (getPropertyValue("Type") == "Monte Carlo") {
     int nOutput = getProperty("NOutputs");
-    const auto outputWorkspaceProp = getPointerToProperty("OutputWorkspace");
+    const auto *outputWorkspaceProp = getPointerToProperty("OutputWorkspace");
     if (outputWorkspaceProp->isDefault() || nOutput <= 0) {
       nOutput = 1;
     }

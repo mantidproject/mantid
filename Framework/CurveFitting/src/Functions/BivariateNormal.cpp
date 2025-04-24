@@ -87,7 +87,7 @@ void BivariateNormal::function1D(double *out, const double *xValues, const size_
       out[i] = 0.0;
     return;
   }
-  double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, Varxx, Varxy, Varyy;
+  double coefficientNorm, exponentialCoeffx2, exponentialCoeffy2, exponentialCoeffxy, Varxx, Varxy, Varyy;
   int numberOfCells;
   bool isNaNs;
 
@@ -103,8 +103,8 @@ void BivariateNormal::function1D(double *out, const double *xValues, const size_
 
   getConstraint(IBACK)->setPenaltyFactor(K * 3000);
 
-  double badParams =
-      initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, numberOfCells, Varxx, Varxy, Varyy);
+  double badParams = initCoeff(D, X, Y, coefficientNorm, exponentialCoeffx2, exponentialCoeffy2, exponentialCoeffxy,
+                               numberOfCells, Varxx, Varxy, Varyy);
 
   std::ostringstream inf;
   inf << "F Parameters=";
@@ -137,8 +137,9 @@ void BivariateNormal::function1D(double *out, const double *xValues, const size_
     else {
       double dx = X[i] - Xmean;
       double dy = Y[i] - Ymean;
-      out[x] =
-          Background + coefNorm * Intensity * exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
+      out[x] = Background +
+               coefficientNorm * Intensity *
+                   exp(exponentialCoeffx2 * dx * dx + exponentialCoeffxy * dx * dy + exponentialCoeffy2 * dy * dy);
       out[x] = out[x] + DDD;
 
       if (out[x] != out[x]) {
@@ -243,7 +244,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
     if (penaltyDeriv <= 0)
       SIVXX = coefExp * expVals[x] *
               (C +
-               -LastParams[IVYY] / uu *
+               -LastParams[IVYY] / paramUU *
                    (coefx2 * (c - LastParams[IXMEAN]) * (c - LastParams[IXMEAN]) +
                     coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) +
                     coefy2 * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])) -
@@ -617,7 +618,7 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X, cons
     penalty =
         std::max<double>(0, -Varxx + .01) + std::max<double>(0, -Varyy + .01) + std::max<double>(0, -paramUU + .01);
 
-  if (fabs(uu) < .01) {
+  if (fabs(paramUU) < .01) {
     if (paramUU < 0)
       paramUU = -.01;
     else
