@@ -167,7 +167,9 @@ static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
       }
     }
     if (iPtype == NXnumtype::BAD) {
-      throw Exception("ERROR: hdf5ToNXtype: invalid type");
+      std::stringstream msg;
+      msg << "cannot convert type=" << dt.getId();
+      throw Exception(msg.str(), "hdf5ToNXtype");
     }
   }
   return iPtype;
@@ -312,8 +314,8 @@ H5::H5Location *File::getCurrentLocation() {
 template <typename T> T *File::getCurrentLocationAs() {
   T *loc = dynamic_cast<T *>(this->getCurrentLocation());
   if (loc == nullptr) {
-    throw Exception("NeXusFile::getCurrentLocationAs -- Could not cast current location to needed H5Cpp type",
-                    m_filename);
+    std::stringstream msg;
+    throw Exception("Could not cast current location to needed H5Cpp type", "getCurrentLocationAs", m_filename);
   }
   return loc;
 }
@@ -337,10 +339,10 @@ bool File::hasData(std::string const &name) {
 
 void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
   if (name.empty()) {
-    throw Exception("NeXusFile::makeGroup -- Supplied empty name to makeGroup", m_filename);
+    throw Exception("Supplied empty name", "makeGroup", m_filename);
   }
   if (class_name.empty()) {
-    throw Exception("NeXusFile::makeGroup -- Supplied empty class name to makeGroup", m_filename);
+    throw Exception("Supplied empty class name", "makeGroup", m_filename);
   }
   // make the group
   H5::Group *current = this->getCurrentLocationAs<H5::Group>();
@@ -352,18 +354,18 @@ void File::makeGroup(std::string const &name, std::string const &class_name, boo
 
 void File::openGroup(std::string const &name, std::string const &class_name) {
   if (name.empty()) {
-    throw Exception("NeXusFile::openGroup -- Supplied empty name to openGroup", m_filename);
+    throw Exception("Supplied empty name", "openGroup", m_filename);
   }
   if (class_name.empty()) {
-    throw Exception("NeXusFile::openGroup -- Supplied empty class name to openGroup", m_filename);
+    throw Exception("Supplied empty class name", "openGroup", m_filename);
   }
   auto current = this->getCurrentLocationAs<H5::Group>();
   if (!H5Util::groupExists(*current, name)) {
-    throw Exception("NeXusFile::openGroup -- The supplied group name does not exist", m_filename);
+    throw Exception("The supplied group name=" + name + " does not exist", "openGroup", m_filename);
   }
   std::shared_ptr<H5::Group> grp = std::make_shared<H5::Group>(current->openGroup(name));
   if (!verifyGroupClass(*(grp.get()), class_name)) {
-    throw Exception("NeXusFile::openGroup -- Invalid group class name", m_filename);
+    throw Exception("Invalid group class=" + class_name + " name=" + name, "openGroup", m_filename);
   }
   this->m_stack.push_back(grp);
 }
@@ -372,7 +374,7 @@ void File::openPath(std::string const &pathname) {
   printf("OPEN PATH %s\n", pathname.c_str());
   fflush(stdout);
   if (pathname.empty()) {
-    throw Exception("NeXusFile::openPath -- Supplied empty path to openPath", m_filename);
+    throw Exception("Supplied empty path", "openPath", m_filename);
   }
   std::filesystem::path path(pathname);
   // if (path.is_relative()) {
@@ -381,7 +383,6 @@ void File::openPath(std::string const &pathname) {
   // }
   if (!path.is_absolute()) {
     path = "/" / path;
-    // throw Exception("NeXusFile::openPath -- paths must be absolute, beginning with /", m_filename);
   }
   // create a new stack -- will replace old if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
@@ -397,7 +398,7 @@ void File::openPath(std::string const &pathname) {
       current = this;
     }
     if (!current->nameExists(name)) {
-      throw Exception("NeXusFile::openPath -- invalid path element " + name + " in " + string(path) + ".", m_filename);
+      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openPath", m_filename);
     }
     H5O_type_t type = current->childObjType(name);
     if (type == H5O_TYPE_GROUP) {
@@ -419,11 +420,11 @@ void File::openPath(std::string const &pathname) {
 
 void File::openGroupPath(std::string const &pathname) {
   if (pathname.empty()) {
-    throw Exception("NeXusFile::openPath -- Supplied empty path to openPath", m_filename);
+    throw Exception("Supplied empty path to openPath", "openPath", m_filename);
   }
   std::filesystem::path path(pathname);
   if (!path.is_absolute()) {
-    throw Exception("NeXusFile::openPath -- paths must be absolute, beginning with /", m_filename);
+    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openPath", m_filename);
   }
   // create a new stack to replace old -- will only happen if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
@@ -439,7 +440,7 @@ void File::openGroupPath(std::string const &pathname) {
       current = this;
     }
     if (!current->nameExists(name)) {
-      throw Exception("NeXusFile::openPath -- invalid path element " + name + " in " + string(path) + ".", m_filename);
+      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openPath", m_filename);
     }
     H5O_type_t type = current->childObjType(name);
     if (type == H5O_TYPE_GROUP) {
@@ -477,16 +478,16 @@ void File::closeGroup() {
 void File::makeData(std::string const &name, NXnumtype datatype, DimVector const &dims, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("NeXusFile::makeData -- Supplied empty label to makeData", m_filename);
+    throw Exception("Supplied empty label", "makeData", m_filename);
   }
   if (dims.empty()) {
-    throw Exception("NeXusFile::makeData -- Supplied empty dimensions to makeData", m_filename);
+    throw Exception("Supplied empty dimensions", "makeData", m_filename);
   }
   // ensure we are in a group
   H5::Group *current = this->getCurrentLocationAs<H5::Group>();
   // ensure we are not at root -- NeXus should not allow datsets at root
   if (current == this->getRoot()) {
-    throw Exception("NeXusFile::makeData -- Cannot create dataset at root level in NeXus", m_filename);
+    throw Exception("Cannot create dataset at root level in NeXus", "makeData", m_filename);
   }
 
   // check if any dimension is unlimited
@@ -502,7 +503,7 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
         this->m_stack.push_back(std::make_shared<H5::DataSet>(data));
       }
     } catch (...) {
-      throw Exception("NeXusFile::makeData -- Datasets cannot be created at current location", m_filename);
+      throw Exception("Datasets cannot be created at current location", "makeData", m_filename);
     }
   } else {
     // farm out to makeCompData
@@ -514,7 +515,7 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
       }
       this->makeCompData(name, datatype, dims, NXcompression::NONE, chunk, open_data);
     } catch (...) {
-      throw Exception("NeXusFile::makeData -- Datasets cannot be created at current location", m_filename);
+      throw Exception("Datasets cannot be created at current location", "makeData", m_filename);
     }
   }
 }
@@ -602,19 +603,19 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
                         DimSizeVector const &chunk, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("NeXusFile::makeCompData -- Supplied empty name to makeCompData", m_filename);
+    throw Exception("Supplied empty name", "makeCompData", m_filename);
   }
   if (dims.empty()) {
-    throw Exception("NeXusFile::makeCompData -- Supplied empty dimensions to makeCompData", m_filename);
+    throw Exception("Supplied empty dimensions name=" + name, "makeCompData", m_filename);
   }
   if (chunk.empty()) {
-    throw Exception("NeXusFile::makeCompData -- Supplied empty bufsize to makeCompData", m_filename);
+    throw Exception("Supplied empty bufsize name=" + name, "makeCompData", m_filename);
   }
   if (dims.size() != chunk.size()) {
     stringstream msg;
-    msg << "NeXusFile::makeCompData -- Supplied dims rank=" << dims.size()
-        << " must match supplied bufsize rank=" << chunk.size() << "in makeCompData";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied dims rank=" << dims.size() << " must match supplied bufsize rank=" << chunk.size()
+        << " name=" << name;
+    throw Exception(msg.str(), "makeCompData", m_filename);
   }
   std::vector<NXcompression> const supported_comp{NXcompression::LZW, NXcompression::CHUNK, NXcompression::NONE};
   if (std::find(supported_comp.cbegin(), supported_comp.cend(), comp) == supported_comp.cend()) {
@@ -700,7 +701,7 @@ void File::writeCompData(std::string const &name, vector<NumT> const &value, Dim
 
 void File::openData(std::string const &name) {
   if (name.empty()) {
-    throw Exception("NeXusFile::openData -- Supplied empty name to openData", m_filename);
+    throw Exception("Supplied empty name", "openData", m_filename);
   }
   auto current = this->getCurrentLocationAs<H5::H5Object>();
   try {
@@ -708,9 +709,7 @@ void File::openData(std::string const &name) {
     std::shared_ptr<H5::DataSet> pdata = std::make_shared<H5::DataSet>(data);
     this->m_stack.push_back(pdata);
   } catch (...) {
-    // printf("OPEN DATA FAILURE: %s NOT IN %s | %d\n", name.c_str(), current->getObjName().c_str(),
-    // current->attrExists(name));
-    throw Exception("NeXusFile::openData -- The indicated dataset does not exist", m_filename);
+    throw Exception("The indicated dataset does not exist name=" + name, "openData", m_filename);
   }
 }
 
@@ -726,7 +725,7 @@ void File::closeData() {
     data->close();
     this->m_stack.pop_back();
   } catch (...) {
-    throw Exception("NeXusFile::closeData -- Object at current location is not a dataset", m_filename);
+    throw Exception("Object at current location is not a dataset", "closeData", m_filename);
   }
 }
 
@@ -764,14 +763,14 @@ template <typename NumT> void File::putData(NumT const *data) {
     try {
       dataset->write(data, H5Util::getType<NumT>());
     } catch (...) {
-      throw Exception("NeXusFile::putData -- Failed to write data\n", m_filename);
+      throw Exception("Failed to write data", "putData", m_filename);
     }
   }
 }
 
 template <typename NumT> void File::putData(vector<NumT> const &data) {
   if (data.empty()) {
-    throw Exception("NeXusFile::putData -- Supplied empty data to putData", m_filename);
+    throw Exception("Supplied empty data", "putData", m_filename);
   }
   this->putData<NumT>(data.data());
 }
@@ -783,7 +782,7 @@ template <> MANTID_NEXUS_DLL void File::putData<std::string>(std::string const *
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
   if (name.empty()) {
-    throw Exception("NeXusFile::putAttr -- Supplied empty name to putAttr", m_filename);
+    throw Exception("Supplied empty name to putAttr", "putAttr", m_filename);
   }
 
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
@@ -793,10 +792,10 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
 // in std::string case use H5::Attribute::write(const DataType &mem_type, const H5std_string &strg)
 template <> MANTID_NEXUS_DLL void File::putAttr<std::string>(std::string const &name, std::string const &value) {
   if (name.empty()) {
-    throw Exception("NeXusFile::putAttr -- Supplied empty name to putAttr", m_filename);
+    throw Exception("Supplied empty name", "putAttr", m_filename);
   }
   if (value == "") {
-    throw Exception("NeXusFile::putAttr -- Supplied empty std::string value to putAttr", m_filename);
+    throw Exception("Supplied empty std::string value", "putAttr", m_filename);
   }
 
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
@@ -816,22 +815,23 @@ void File::putAttr(std::string const &name, char const *const value) { putAttr(n
 template <typename NumT>
 void File::putSlab(NumT const *const data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("NeXusFile::putSlab -- Data specified as null in putSlab", m_filename);
+    throw Exception("Data specified as null", "putSlab", m_filename);
   }
   if (start.empty()) {
-    throw Exception("NeXusFile::putSlab -- Supplied empty start to putSlab", m_filename);
+    throw Exception("Supplied empty start", "putSlab", m_filename);
   }
   if (size.empty()) {
-    throw Exception("NeXusFile::putSlab -- Supplied empty size to putSlab", m_filename);
+    throw Exception("Supplied empty size", "putSlab", m_filename);
   }
   if (start.size() != size.size()) {
     stringstream msg;
-    msg << "NeXusFile::putSlab -- Supplied start rank=" << start.size()
-        << " must match supplied size rank=" << size.size() << "in putSlab";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
+    throw Exception(msg.str(), "putSlab", m_filename);
   }
   if (start.size() > NX_MAXRANK) {
-    throw Exception("NeXusFile::putSlab -- The supplied rank exceeds the max rank for Mantid", m_filename);
+    stringstream msg;
+    msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
+    throw Exception(msg.str(), "putSlab", m_filename);
   }
   // check if there is a dataset open
   auto *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
@@ -948,7 +948,7 @@ void File::makeLink(NXlink &link) {
 
 template <typename NumT> void File::getData(NumT *const data) {
   if (data == NULL) {
-    throw Exception("NeXusFile::getData -- Supplied null pointer to getData", m_filename);
+    throw Exception("Supplied null pointer to write data to", "getData", m_filename);
   }
 
   // make sure this is a data set
@@ -957,7 +957,10 @@ template <typename NumT> void File::getData(NumT *const data) {
 
   // make sure the data has the correct type
   if (hdf5ToNXType(iCurrentT) != getType<NumT>()) {
-    throw Exception("NeXusFile::getData() failed -- inconsistent NXnumtype", m_filename);
+    std::stringstream msg;
+    msg << "inconsistent NXnumtype file datatype=" << hdf5ToNXType(iCurrentT)
+        << " supplied datatype=" << getType<NumT>();
+    throw Exception(msg.str(), "getData", m_filename);
   }
   // // make sure this is not a string
   // if (iCurrentT.getClass() == H5T_STRING) {
@@ -976,7 +979,7 @@ template <typename NumT> void File::getData(NumT *const data) {
       iCurrentD->read(data, iCurrentT);
     }
   } catch (...) {
-    throw Exception("NeXusFile::getData() -- Failed to get data", m_filename);
+    throw Exception("Failed to get data", "getData", m_filename);
   }
 }
 
@@ -986,15 +989,15 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
   H5T_class_t typeclass = datatype.getClass();
   if (datatype != H5::PredType::NATIVE_CHAR && typeclass != H5T_STRING) {
     stringstream msg;
-    msg << "Cannot use File::getData<string>() on non-character data. Found type=" << typeclass;
-    throw Exception(msg.str(), m_filename);
+    msg << "Cannot use on-character data. Found type=" << typeclass;
+    throw Exception(msg.str(), "getData<string>", m_filename);
   }
   H5::DataSpace dataspace = dataset->getSpace();
   int rank = dataspace.getSimpleExtentNdims();
   if (rank > 1) {
     stringstream msg;
-    msg << "File::getData<string>() only understand rank=1 data. Found rank=" << rank;
-    throw Exception(msg.str(), m_filename);
+    msg << "Only understand rank=1 data. Found rank=" << rank;
+    throw Exception(msg.str(), "getData<string>", m_filename);
   }
   *data = H5Util::readString(*dataset);
   // H5::DataSet *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
@@ -1090,17 +1093,17 @@ template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
 
 template <typename NumT> void File::getSlab(NumT *const data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("NeXusFile::getSlab -- Supplied null pointer to getSlab", m_filename);
+    throw Exception("Supplied null pointer for data", "getSlab", m_filename);
   }
   if (start.size() == 0) {
     stringstream msg;
-    msg << "NeXusFile::getSlab -- Supplied empty start offset, rank = " << start.size() << " in getSlab";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied empty start offset, rank = " << start.size();
+    throw Exception(msg.str(), "getSlab", m_filename);
   }
   if (start.size() != size.size()) {
     stringstream msg;
-    msg << "NeXusFile::getSlab -- In getSlab start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str(), m_filename);
+    msg << "start rank=" << start.size() << " must match size rank=" << size.size();
+    throw Exception(msg.str(), "getSlab", m_filename);
   }
 
   // check if there is a dataset open
@@ -1134,17 +1137,17 @@ template <>
 MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *const data, const DimSizeVector &start,
                                                  const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("NeXusFile::getSlab -- Supplied null pointer to getSlab", m_filename);
+    throw Exception("Supplied null pointer for data", "getSlab", m_filename);
   }
   if (start.size() == 0) {
     stringstream msg;
-    msg << "NeXusFile::getSlab -- Supplied empty start offset, rank = " << start.size() << " in getSlab";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied empty start offset, rank = " << start.size();
+    throw Exception(msg.str(), "getSlab", m_filename);
   }
   if (start.size() != size.size()) {
     stringstream msg;
-    msg << "NeXusFile::getSlab -- In getSlab start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str(), m_filename);
+    msg << "start rank=" << start.size() << " must match size rank=" << size.size();
+    throw Exception(msg.str(), "getSlab", m_filename);
   }
 
   // check if there is a dataset open
@@ -1264,7 +1267,7 @@ std::string File::getTopLevelEntryName() {
   // go to root and verify
   H5::Group *root = this->getRoot();
   if (root == nullptr) {
-    throw Exception("NeXusFile: invalid file has no root", m_filename);
+    throw Exception("Invalid file has no root", "getTopLevelEntryName", m_filename);
   }
   // look for first group of class NXentry
   std::size_t firstGrp = 0;
@@ -1280,7 +1283,7 @@ std::string File::getTopLevelEntryName() {
     }
   }
   if (top.empty()) {
-    throw Exception("NeXusFile: unable to find top-level entry, no valid groups", m_filename);
+    throw Exception("unable to find top-level entry, no valid groups", "getTopLevelEntryName", m_filename);
   }
   return top;
 }
@@ -1289,7 +1292,7 @@ template <typename NumT> void File::getAttr(std::string const &name, NumT &value
   // verify the current location can hold an attribute, and has the attribute named
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw Exception("NeXusFile::getAttr -- This was not found.", m_filename);
+    throw Exception("did not find name=" + name, "getAttr", m_filename);
   }
 
   // now open the attribute, read it, and close
@@ -1304,7 +1307,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::st
   // verify the current location can hold an attribute, and has the attribute named
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw Exception("NeXusFile::getAttr -- This was not found", m_filename);
+    throw Exception("did not find name=" + name, "getAttr", m_filename);
   }
 
   // open the attribute, and read it
@@ -1313,7 +1316,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::st
   value = "";
   attr.read(dt, value);
   if (value == "") {
-    throw Exception("NeXusFile::getAttr -- Error reading string attribute", m_filename);
+    throw Exception("Error reading string attribute name=" + name, "getAttr", m_filename);
   }
   attr.close();
 }
@@ -1342,8 +1345,8 @@ std::vector<AttrInfo> File::getAttrInfos() {
     int rank = ds.getSimpleExtentNdims();
     // TODO - AttrInfo cannot handle more complex ranks/dimensions, we need to throw an error
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
-      std::cerr << "ERROR iterating through attributes found array attribute not understood by this api\n";
-      throw Exception("NeXusFile::getAttrInfos -- getNextAttr failed", m_filename);
+      throw Exception("ERROR iterating through attributes found array attribute not understood by this api",
+                      "getAttrInfos", m_filename);
     }
     DimArray dims;
     ds.getSimpleExtentDims(dims.data());
