@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 import argparse
+import os
 import subprocess
 import sys
 
@@ -66,7 +67,7 @@ def start(options: argparse.ArgumentParser):
         # this is already the default on Windows/macOS.
         # This will mean the relevant 'atexit' code will execute in the child process, and therefore the
         # FrameworkManager and UsageService will be shutdown as expected.
-        launch_command = f"python {wp.__file__}"
+        launch_command = f"./python {wp.__file__}"
         if options.script:
             launch_command += f" {options.script}"
         if options.execute:
@@ -74,11 +75,13 @@ def start(options: argparse.ArgumentParser):
         if options.quit:
             launch_command += " --quit"
 
+        launch_directory = os.environ["MANTIDPATH"]
+
         if not is_windows():
             # preexec_fn is not supported on Windows
-            workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+            workbench_process = subprocess.Popen(launch_command, shell=True, cwd=launch_directory, preexec_fn=setup_core_dump_files)
         else:
-            workbench_process = subprocess.Popen(launch_command, shell=True)
+            workbench_process = subprocess.Popen(launch_command, shell=True, cwd=launch_directory)
 
         workbench_pid = str(workbench_process.pid)
         workbench_process.wait()
