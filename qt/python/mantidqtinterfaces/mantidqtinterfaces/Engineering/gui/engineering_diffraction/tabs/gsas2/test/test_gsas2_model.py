@@ -66,14 +66,38 @@ class TestGSAS2Model(unittest.TestCase):
         mock_unit.caption.return_value = "Time-of-flight"
 
     def tearDown(self) -> None:
+        # Clear the refinement state of crystal structures
+        self.model.refinement_state.crystal_structures.clear()
+
         self.model.clear_input_components()
         mtd.clear()
+
+        # Remove temporary save directories created during the test
+        if hasattr(self.model.save_directories, "temporary_save_directory"):
+            temp_dir = self.model.save_directories.temporary_save_directory
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
 
     def _setup_model_log_workspaces(self):
         # grouped ws acts like a container/list of ws here
         self.model._sample_logs_workspace_group._log_workspaces = [MagicMock(), MagicMock()]
         self.model._sample_logs_workspace_group._log_workspaces[0].name.return_value = "run_info"
         self.model._sample_logs_workspace_group._log_workspaces[1].name.return_value = "LogName"
+
+    def _setup_crystal_structure_and_mocks(self, mock_load_cif):
+        """Helper method to set up a valid CrystalStructure and mock LoadCIF behavior."""
+        crystal_structure = CrystalStructure("3.6105 3.6105 3.6105", "F m -3 m", "Fe 0.0 0.0 0.0 1 0.025")
+
+        # Mock the LoadCIF behavior to populate the workspace with the valid CrystalStructure
+        mock_sample = MagicMock()
+        mock_sample.getCrystalStructure.return_value = crystal_structure
+        mock_workspace = MagicMock()
+        mock_workspace.sample.return_value = mock_sample
+        mock_load_cif.side_effect = lambda ws, filepath, StoreInADS: setattr(ws, "sample", lambda: mock_sample)
+
+        self.model.refinement_state.crystal_structures.append(crystal_structure)
+
+        return crystal_structure
 
     def test_initial_validation(self):
         success = self.model.initial_validation("project_name", ["inst", "phase", "data"])
@@ -82,6 +106,40 @@ class TestGSAS2Model(unittest.TestCase):
         self.assertFalse(no_project)
         no_load = self.model.initial_validation(None, ["inst", None, "data"])
         self.assertFalse(no_load)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
+    def test_run_model_with_user_x_limits_none(self, mock_validate_x_limits, mock_load_cif):
+        self._setup_crystal_structure_and_mocks(mock_load_cif)
+        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        refinement_parameters = ["Pawley", None, False, False, False]
+
+        self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=None)
+        mock_validate_x_limits.assert_called_once_with(None)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
+    def test_run_model_with_correctly_formatted_user_x_limits(self, mock_validate_x_limits, mock_load_cif):
+        self._setup_crystal_structure_and_mocks(mock_load_cif)
+
+        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        refinement_parameters = ["Pawley", None, False, False, False]
+        formatted_user_x_limits = [[10000.0, 20000.0], [30000.0, 40000.0]]
+
+        self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=formatted_user_x_limits)
+        mock_validate_x_limits.assert_called_once_with(formatted_user_x_limits)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
+    def test_run_model_with_unformatted_user_x_limits(self, mock_validate_x_limits, mock_load_cif):
+        self._setup_crystal_structure_and_mocks(mock_load_cif)
+
+        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        refinement_parameters = ["Pawley", None, False, False, False]
+        unformatted_user_x_limits = [17522.26, 42558.08]
+
+        self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=unformatted_user_x_limits)
+        mock_validate_x_limits.assert_called_once_with([[17522.26], [42558.08]])
 
     def test_further_validation(self):
         self.model.x_limits.limits = []
