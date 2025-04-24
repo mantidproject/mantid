@@ -232,6 +232,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.sig_change_line_collection_colour_triggered.connect(self.change_line_collection_colour)
             self.toolbar.sig_hide_plot_triggered.connect(self.hide_plot)
+            self.toolbar.sig_crosshair_toggle_triggered.connect(self.crosshair_toggle)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -602,6 +603,41 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for line in lines:
             line.remove()
             ax.add_line(line)
+
+    def crosshair_toggle(self, on):
+        cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
+        if not on:
+            self.canvas.mpl_disconnect(cid)
+
+    def crosshair(self, event):
+        axes = self.canvas.figure.gca()
+
+        # create a crosshair made from horizontal and verticle lines.
+        self.horizontal_line = axes.axhline(color="r", lw=1.0, ls="-")
+        self.vertical_line = axes.axvline(color="r", lw=1.0, ls="-")
+
+        def set_cross_hair_visible(visible):
+            need_redraw = self.horizontal_line.get_visible() != visible
+            self.horizontal_line.set_visible(visible)
+            self.vertical_line.set_visible(visible)
+            return need_redraw
+
+        # if event is out-of-bound we update
+        if not event.inaxes:
+            need_redraw = set_cross_hair_visible(False)
+            if need_redraw:
+                axes.figure.canvas.draw()
+
+        else:
+            set_cross_hair_visible(True)
+            x, y = event.xdata, event.ydata
+            self.horizontal_line.set_ydata([y])
+            self.vertical_line.set_xdata([x])
+            self.canvas.draw()
+
+        # after update we remove
+        self.horizontal_line.remove()
+        self.vertical_line.remove()
 
 
 # -----------------------------------------------------------------------------
