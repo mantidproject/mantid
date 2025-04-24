@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
@@ -290,6 +291,85 @@ public:
     // cleanup - ENV_WS should never have been created
     AnalysisDataService::Instance().remove(SAM_WS);
     AnalysisDataService::Instance().remove(CAN_WS);
+  }
+
+  void testGetVolumeWithBeamProfile() {
+    Mantid::Algorithms::AnyShapeAbsorption asaAlgo;
+    asaAlgo.initialize();
+
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    Mantid::Algorithms::CylinderAbsorption cyl;
+    cyl.initialize();
+    TS_ASSERT_THROWS_NOTHING(cyl.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));
+    std::string cylWS("cyl");
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("OutputWorkspace", cylWS));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("AttenuationXSection", "5.08"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("ScatteringXSection", "5.1"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("SampleNumberDensity", "0.07192"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("CylinderSampleHeight", "4"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("CylinderSampleRadius", "0.4"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("NumberOfSlices", "10"));
+    TS_ASSERT_THROWS_NOTHING(cyl.setPropertyValue("NumberOfAnnuli", "6"));
+    TS_ASSERT_THROWS_NOTHING(cyl.execute());
+    TS_ASSERT(cyl.isExecuted());
+
+    Mantid::API::MatrixWorkspace_sptr cylws;
+    TS_ASSERT_THROWS_NOTHING(cylws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 AnalysisDataService::Instance().retrieve(cylWS)));
+
+    // Create an instrument with a valid sample shape so that volume can be set with the BeamProfile
+    auto testInst = std::make_shared<Mantid::Geometry::Instrument>("testInst");
+    const double cylRadius(0.008 / 2);
+    const double cylHeight(0.0002);
+    // One object
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight,
+                                                                    Mantid::Kernel::V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                    Mantid::Kernel::V3D(0., 1.0, 0.), "pixel-shape");
+
+    // source and detector are at +/-100m so tracks approx parallel to beam
+    constexpr double distance = 100.0;
+    Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("det", 1, pixelShape, nullptr);
+    det->setPos(0, 0, distance);
+    testInst->add(det);
+    testInst->markAsDetector(det);
+
+    ComponentCreationHelper::addSourceToInstrument(testInst, Mantid::Kernel::V3D(0.0, 0.0, -distance));
+    ComponentCreationHelper::addSampleToInstrument(testInst, Mantid::Kernel::V3D(0.0, 0.0, 0.0));
+
+    auto space = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10);
+
+    cylws->getSpectrum(0).setDetectorID(det->getID());
+    cylws->setInstrument(testInst);
+
+    auto &paramMap = cylws->instrumentParameters();
+    auto parametrizedSource = cylws->getInstrument()->getSource();
+    paramMap.addString(parametrizedSource.get(), "beam-shape", "Slit");
+    paramMap.addDouble(parametrizedSource.get(), "beam-width", 10);
+    paramMap.addDouble(parametrizedSource.get(), "beam-height", 10);
+
+    // Make sure there is no "GaugeVolume" property, otherwise BeamProfile will not
+    // be used to determine the volume
+    TS_ASSERT_EQUALS(cylws->run().hasProperty("GaugeVolume"), false);
+
+    auto beamProfile =
+        Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*cylws->getInstrument(), Mantid::API::Sample());
+    // Verify getIntersectionWithSample() does not throw to confirm that algorithm will set volume with BeamProfile
+    TS_ASSERT_THROWS_NOTHING(beamProfile->getIntersectionWithSample(cylws->mutableSample().getShape());)
+
+    // Using the output of the CylinderAbsorption algorithm is convenient
+    // because it adds the sample object to the workspace
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.setPropertyValue("InputWorkspace", cylWS));
+    std::string outputWS("factors");
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.setPropertyValue("AttenuationXSection", "5.08"));
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.setPropertyValue("ScatteringXSection", "5.1"));
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.setPropertyValue("SampleNumberDensity", "0.07192"));
+    TS_ASSERT_THROWS_NOTHING(asaAlgo.execute());
+    TS_ASSERT(asaAlgo.isExecuted());
   }
 
 private:
