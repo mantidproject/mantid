@@ -4,6 +4,7 @@
 #include "MantidNexus/NeXusFile_fwd.h"
 #include <H5Cpp.h>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -492,6 +493,11 @@ public:
    * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();
+
+  /**
+   * \return A set containing names of all attributes at current level
+   */
+  std::set<std::string> getAttrNames();
 
   /**
    *  \return true if the current point in the file has the named attribute

@@ -611,8 +611,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
         << " name=" << name;
     throw Exception(msg.str(), "makeCompData", m_filename);
   }
-  std::vector<NXcompression> const supported_comp{NXcompression::LZW, NXcompression::CHUNK, NXcompression::NONE};
-  if (std::find(supported_comp.cbegin(), supported_comp.cend(), comp) == supported_comp.cend()) {
+  std::set<NXcompression> const supported_comp{NXcompression::LZW, NXcompression::CHUNK, NXcompression::NONE};
+  if (supported_comp.count(comp) == 0) {
     std::cerr << "HDF5 doesn't support selected compression method " << int(comp) << "!  Using NONE.\n";
     comp = NXcompression::NONE;
   }
@@ -624,7 +624,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // set the dimensions for use
   std::size_t rank = dims.size();
-  DimArray mydims, maxdims, chunkdims = toDimArray(chunk);
+  DimArray mydims{0}, maxdims{0};
+  DimArray chunkdims = toDimArray(chunk);
   mydims = maxdims = toDimArray(dims);
   // handle unlimited data
   if (unlimited) {
@@ -675,8 +676,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   // create the dataset with the compression parameters
   H5::DataSet dataset = current->createDataSet(name, datatype, dataspace, cparms);
 
-  // TODO pointer magic?
-  // pFile->iCurrentD = dataset;
   if (unlimited) {
     dataset.extend(mydims.data());
   }
@@ -697,22 +696,23 @@ void File::openData(std::string const &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name", "openData", m_filename);
   }
+  // napi used to allow opening datasets at same level without closing previous
+  // many client codes follow this (bad) usage, therefore it needs to be enabled
+  if (this->isDataSetOpen()) {
+    std::cerr << "Warning: Previous dataset unclosed before opening another. "
+              << "Current dataset will be closed and requested data found in parent group.\n";
+    this->closeData();
+  }
   auto current = this->getCurrentLocationAs<H5::H5Object>();
-  try {
+  if (current->nameExists(name)) {
     H5::DataSet data = current->openDataSet(name);
     std::shared_ptr<H5::DataSet> pdata = std::make_shared<H5::DataSet>(data);
     this->m_stack.push_back(pdata);
-  } catch (...) {
+  } else {
     throw Exception("The indicated dataset does not exist name=" + name, "openData", m_filename);
   }
 }
 
-// void File::closeData() {
-//   H5::DataSet *current;
-//   current = this->getCurrentLocationAs<H5::DataSet>();
-//   current->close();
-//   this->m_stack.pop_back();
-// }
 void File::closeData() {
   try {
     H5::DataSet *data = this->getCurrentLocationAs<H5::DataSet>();
@@ -729,7 +729,7 @@ template <typename NumT> void File::putData(NumT const *data) {
   }
 
   H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
-  DimArray dims, maxdims, start, size;
+  DimArray dims{0}, maxdims{0}, start{0}, size{0};
 
   auto ds = dataset->getSpace();
   auto rank = ds.getSimpleExtentNdims();
@@ -783,24 +783,16 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
   H5Util::writeNumAttribute<NumT>(*current, name, value);
 }
 
-// in std::string case use H5::Attribute::write(const DataType &mem_type, const H5std_string &strg)
-template <> MANTID_NEXUS_DLL void File::putAttr<std::string>(std::string const &name, std::string const &value) {
+void File::putAttr(std::string const &name, std::string const &value, bool const empty_add_space) {
   if (name.empty()) {
     throw Exception("Supplied empty name", "putAttr", m_filename);
   }
-  if (value == "") {
-    throw Exception("Supplied empty std::string value", "putAttr", m_filename);
-  }
-
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
-  H5Util::writeStrAttribute(*current, name, value);
-}
-
-void File::putAttr(std::string const &name, std::string const &value, bool const empty_add_space) {
   std::string my_value(value);
-  if (my_value.empty() && empty_add_space)
+  if (my_value.empty() && empty_add_space) {
     my_value = " "; // Make a default "space" to avoid errors.
-  this->putAttr<std::string>(name, my_value);
+  }
+  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  H5Util::writeStrAttribute(*current, name, my_value);
 }
 
 // this will handle string literals, which is the preferred way to pass string attributes
@@ -834,13 +826,13 @@ void File::putSlab(NumT const *const data, const DimSizeVector &start, const Dim
   auto iCurrentT = iCurrentD->getDataType();
   auto iCurrentS = iCurrentD->getSpace();
   auto rank = iCurrentS.getSimpleExtentNdims();
-  DimArray dims, maxdims;
+  DimArray dims{0}, maxdims{0};
   iCurrentS.getSimpleExtentDims(dims.data(), maxdims.data());
 
   // copy input dimension vectors into dimension arrays
   DimArray myStart = toDimArray(start);
   DimArray mySize = toDimArray(size);
-  DimArray mSize;
+  DimArray mSize{0};
   std::transform(start.cbegin(), start.cend(), size.cbegin(), mSize.begin(), std::plus<hsize_t>());
   bool unlimiteddim =
       std::any_of(maxdims.cbegin(), maxdims.cend(), [](hsize_t const x) -> bool { return x == H5S_UNLIMITED; });
@@ -994,48 +986,17 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
     throw Exception(msg.str(), "getData<string>", m_filename);
   }
   *data = H5Util::readString(*dataset);
-  // H5::DataSet *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
-  // H5::DataType iCurrentT = iCurrentD->getDataType();
-  // H5::DataSpace iCurrentS = iCurrentD->getSpace();
-  // int rank = iCurrentS.getSimpleExtentNdims();
-  // if (rank == 0) { /* SCALAR dataset*/
-  //   if (iCurrentT.isVariableStr()) {
-  //     iCurrentD->read(*data, iCurrentT);
-  //   } else {
-  //     H5::DataSpace memtype_id(H5S_SCALAR);
-  //     iCurrentS.selectAll();
-  //     iCurrentD->read(*data, iCurrentT, memtype_id, iCurrentS);
-  //   }
-  // } else {
-  //   if (iCurrentT.isVariableStr()) {
-  //     H5::DataType memtype_id(H5T_STRING, H5T_VARIABLE);
-  //     iCurrentD->read(*data, memtype_id);
-  //   } else {
-  //     iCurrentD->read(*data, iCurrentT);
-  //   }
-  // }
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
   H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5Util::readArray1DCoerce(*dataset, data);
-  // Info info = this->getInfo();
+}
 
-  // if (info.type != getType<NumT>()) {
-  //   throw Exception("NeXusFile::getData -- invalid vector type", m_filename);
-  // }
-  // // determine the number of elements
-  // size_t length =
-  //     std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-  //                     [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value);
-  //                     });
-
-  // // allocate memory to put the data into
-  // // need to use resize() rather than reserve() so vector length gets set
-  // data.resize(length);
-
-  // // fetch the data
-  // this->getData<NumT>(data.data());
+template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::string> &data) {
+  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::vector<std::string> res = H5Util::readStringVector(*dataset);
+  data.assign(res.cbegin(), res.cend());
 }
 
 std::string File::getStrData() {
@@ -1046,43 +1007,6 @@ std::string File::getStrData() {
 template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
   H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5Util::readArray1DCoerce(*dataset, data);
-  // H5::DataType dt = dataset->getDataType();
-  // NXnumtype type = hdfToNXType(dt);
-  // if (type == NXnumtype::INT8) {
-  //   vector<int8_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::UINT8) {
-  //   vector<uint8_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::INT16) {
-  //   vector<int16_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::UINT16) {
-  //   vector<uint16_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::INT32) {
-  //   vector<int32_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::UINT32) {
-  //   vector<uint32_t> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::FLOAT32) {
-  //   vector<float> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else if (type == NXnumtype::FLOAT64) {
-  //   vector<double> result;
-  //   this->getData(result);
-  //   data.assign(result.begin(), result.end());
-  // } else {
-  //   throw Exception("NexusFile::getDataCoerce(): Could not coerce data.", m_filename);
-  // }
 }
 
 template <typename NumT> void File::getSlab(NumT *const data, const DimSizeVector &start, const DimSizeVector &size) {
@@ -1306,13 +1230,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::st
 
   // open the attribute, and read it
   H5::Attribute attr = current->openAttribute(name);
-  auto dt = attr.getDataType();
-  value = "";
-  attr.read(dt, value);
-  if (value == "") {
-    throw Exception("Error reading string attribute name=" + name, "getAttr", m_filename);
-  }
-  attr.close();
+  attr.read(attr.getDataType(), value);
 }
 
 template <typename NumT> NumT File::getAttr(std::string const &name) {
@@ -1342,7 +1260,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
       throw Exception("ERROR iterating through attributes found array attribute not understood by this api",
                       "getAttrInfos", m_filename);
     }
-    DimArray dims;
+    DimArray dims{0};
     ds.getSimpleExtentDims(dims.data());
     std::size_t length = 1;
     for (int d = 0; d < rank; ++d) {
@@ -1350,6 +1268,23 @@ std::vector<AttrInfo> File::getAttrInfos() {
     }
     // now add attribute info to vector
     infos.emplace_back(type, length, name);
+    attr.close();
+  }
+  return infos;
+}
+
+std::set<std::string> File::getAttrNames() {
+  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  int num_attr = current->getNumAttrs();
+  std::set<std::string> infos;
+  for (int i = 0; i < num_attr; i++) {
+    H5::Attribute attr = current->openAttribute(i);
+    std::string name = attr.getName();
+    // do not include the group class spec, as that is for internal use only
+    if (name == group_class_spec) {
+      continue;
+    }
+    infos.insert(name);
     attr.close();
   }
   return infos;
