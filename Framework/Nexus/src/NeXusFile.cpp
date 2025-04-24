@@ -371,18 +371,12 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 }
 
 void File::openPath(std::string const &pathname) {
-  printf("OPEN PATH %s\n", pathname.c_str());
-  fflush(stdout);
   if (pathname.empty()) {
     throw Exception("Supplied empty path", "openPath", m_filename);
   }
   std::filesystem::path path(pathname);
-  // if (path.is_relative()) {
-  //   printf("PATH %s %s %s\n", path.c_str(), this->getPath().c_str(), path.relative_path().c_str()); fflush(stdout);
-  //   path = this->getPath() / path.relative_path();
-  // }
   if (!path.is_absolute()) {
-    path = "/" / path;
+    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openPath", m_filename);
   }
   // create a new stack -- will replace old if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
@@ -424,7 +418,7 @@ void File::openGroupPath(std::string const &pathname) {
   }
   std::filesystem::path path(pathname);
   if (!path.is_absolute()) {
-    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openPath", m_filename);
+    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openGroupPath", m_filename);
   }
   // create a new stack to replace old -- will only happen if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
@@ -440,7 +434,7 @@ void File::openGroupPath(std::string const &pathname) {
       current = this;
     }
     if (!current->nameExists(name)) {
-      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openPath", m_filename);
+      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openGroupPath", m_filename);
     }
     H5O_type_t type = current->childObjType(name);
     if (type == H5O_TYPE_GROUP) {
