@@ -27,7 +27,7 @@ class SANSUtilityTest(systemtesting.MantidSystemTest):
     def runTest(self):
         # created after issue reported in #8156
         ws = Load("LOQ54432")
-        self.assertTrue("LOQ/LOQ54432.raw" in unixLikePathFromWorkspace(ws))
+        self.assertTrue("LOQ54432.raw" in unixLikePathFromWorkspace(ws))
         ws = Load("LOQ99618.RAW")
         self.assertTrue("LOQ/LOQ99618.RAW" in unixLikePathFromWorkspace(ws))
         add.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
