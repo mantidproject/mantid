@@ -305,7 +305,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
         workspaceTypeGroupName = "workspace";
 
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, raggedSpectra, indices,
-                                           workspaceTypeGroupName.c_str(), true);
+                                           workspaceTypeGroupName, true);
     }
 
     if (saveLegacyInstrument()) {
