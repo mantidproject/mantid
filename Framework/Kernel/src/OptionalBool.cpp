@@ -37,17 +37,17 @@ std::ostream &operator<<(std::ostream &os, OptionalBool const &object) {
 std::istream &operator>>(std::istream &istream, OptionalBool &object) {
   std::string result;
   istream >> result;
-  object.m_arg = OptionalBool::strToEmumMap()[result];
+  object.m_arg = OptionalBool::strToEnumMap()[result];
   return istream;
 }
 
-std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
+std::map<std::string, OptionalBool::Value> OptionalBool::strToEnumMap() {
   return {{StrUnset, OptionalBool::Unset}, {StrFalse, OptionalBool::False}, {StrTrue, OptionalBool::True}};
 }
 
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
   std::map<Value, std::string> map;
-  auto opposite = strToEmumMap();
+  auto opposite = strToEnumMap();
   for (auto &oppositePair : opposite) {
     map.emplace(oppositePair.second, oppositePair.first);
   }

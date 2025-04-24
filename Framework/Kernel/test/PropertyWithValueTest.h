@@ -647,7 +647,7 @@ public:
     PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset, Direction::Input);
 
     auto values = property.allowedValues();
-    auto possibilities = OptionalBool::strToEmumMap();
+    auto possibilities = OptionalBool::strToEnumMap();
     TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
     for (auto &value : values) {
       TSM_ASSERT("value not a known state", possibilities.find(value) != possibilities.end());

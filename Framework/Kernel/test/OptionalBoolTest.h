@@ -114,7 +114,7 @@ public:
   }
 
   void test_str_map() {
-    auto map = OptionalBool::strToEmumMap();
+    auto map = OptionalBool::strToEnumMap();
     TS_ASSERT_EQUALS(3, map.size());
     TS_ASSERT_EQUALS(map[OptionalBool::StrUnset], OptionalBool::Unset);
     TS_ASSERT_EQUALS(map[OptionalBool::StrFalse], OptionalBool::False);

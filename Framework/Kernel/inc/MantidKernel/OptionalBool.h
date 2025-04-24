@@ -25,7 +25,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL OptionalBool {
 public:
   enum Value { Unset, True, False };
-  static std::map<std::string, Value> strToEmumMap();
+  static std::map<std::string, Value> strToEnumMap();
   static std::map<Value, std::string> enumToStrMap();
   const static std::string StrUnset;
   const static std::string StrFalse;

@@ -21,7 +21,8 @@ void Divide::init() {
                   "division by 0 occurs. Set this "
                   "value to false if one does not "
                   "want this message appearing ");
-  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>("IsDistribution", OptionalBool::Unset),
+  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>(
+                      "IsDistribution", OptionalBool::Unset, std::make_shared<MandatoryValidator<OptionalBool>>()),
                   "Set the IsDistribution property of the output workspace,"
                   "or leave empty for the default algorithm behavior.");
 }
