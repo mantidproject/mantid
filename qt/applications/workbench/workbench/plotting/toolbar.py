@@ -35,6 +35,7 @@ def _create_script_action(self, text, tooltip_text, mdi_icon, *args):
 class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal(bool)
+    sig_crosshair_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
@@ -84,6 +85,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool("Fill Area", "Fill area under curves", "mdi.format-color-fill", "waterfall_fill_area", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool("Help", "Open plotting help documentation", "mdi.help", "launch_plot_help", None),
+        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.plus", "toggle_crosshair", False),
         MantidNavigationTool("Hide", "Hide the plot", "mdi.eye", "hide_plot", None),
     )
 
@@ -93,6 +95,20 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
+
+    def toggle_crosshair(self, enable=None):
+        if enable is None:
+            enable = self._actions["toggle_crosshair"].isChecked()
+        else:
+            self._actions["toggle_crosshair"].setChecked(enable)
+        self.sig_crosshair_toggle_triggered.emit(enable)
+
+    def set_crosshair_enabled(self, on):
+        action = self._actions["toggle_crosshair"]
+        action.setEnabled(on)
+        action.setVisible(on)
+        # Show/hide the separator between this button and help button / waterfall options
+        self.toggle_separator_visibility(action, on)
 
     def hide_plot(self):
         self.sig_hide_plot_triggered.emit()
@@ -217,6 +233,11 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
             self.set_superplot_enabled(False)
+
+        # disable crosshair in tiled plots but keep it enabled in color contour plot
+        if len(fig.get_axes()) > 1 and figure_type(fig) not in [FigureType.Contour]:
+            self.set_crosshair_enabled(False)
+
         for ax in fig.get_axes():
             for artist in ax.get_lines():
                 try:
