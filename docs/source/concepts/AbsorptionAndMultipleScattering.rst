@@ -173,6 +173,27 @@ For elastic scattering, :math:`\lambda_1` = :math:`\lambda_2` = :math:`\lambda` 
 
     A_{elastic} = \frac{1}{V} \int_{V} exp \left[ -\mu (\lambda) \left( l_1 + l_2 \right) \right] dV
 
+Gauge Volume
+############
+
+The gauge volume refers to the region of the sample that is both illuminated by the incident neutron beam and visible to the detector. Only neutrons that are scattered within this volume and reach the detector contribute to the measured signal. Therefore, accurate absorption corrections must account for the size and shape of the gauge volume to avoid over- or under-estimating the absorption evaluation.
+
+In normal experimental setups, the neutron beam only partially covers the sample and therefore the gauge volume has to be defined to be smaller than the sample volume. To accommodate this, Mantid provides multiple methods for defining the gauge volume. These methods are prioritized in the following order:
+
+1. **Explicit Gauge Volume via DefineGaugeVolume:**
+   Users can explicitly define a custom gauge volume using the :ref:`algm-DefineGaugeVolume` algorithm. This is the highest-priority method and overrides other definitions. It allows complete flexibility in specifying the shape and position of the gauge volume.
+
+2. **Intersection of Beam and Sample via SetBeam:**
+   If no gauge volume is defined, the :ref:`algm-SetBeam` algorithm can define the beam shape and size, and automatically compute its intersection with the sample or container geometry to create the gauge volume. This approach reflects the partial illumination seen in real experiments and is useful for modeling realistic beam profiles.
+
+   Note that this method assumes the center of the beam—and therefore the gauge volume—is at the origin of the instrument coordinate system. The same assumption is made for the sample when only its dimensions are provided. While this may not exactly match real setups (where beam and sample positions may vary slightly), the impact on absorption calculations is typically minor.
+
+3. **Full Sample or Container Volume:**
+   If neither a gauge volume nor beam shape is provided, the full sample or container geometry is assumed to be the gauge volume. This default approach may overestimate the volume contributing to the signal in cases where the beam only partially illuminates the sample.
+
+In numerical and Monte Carlo integration-based absorption corrections, using an accurate gauge volume is critical for correct computation of the path lengths :math:`l_1` and :math:`l_2` in the absorption factor expressions (e.g., Eq. :eq:`absorption_factor`). It also plays a role when including detector and beam profiles in Eq. :eq:`absorption_factor_partial_illumination`.
+
+
 Partial Absorption Correction Factors: Paalman and Pings Formalism
 ###################################################################
 
