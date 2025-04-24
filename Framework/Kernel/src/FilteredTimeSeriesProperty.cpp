@@ -413,7 +413,7 @@ Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(cons
   auto roi = new TimeROI(*m_filter.get());
   if (other && (!other->useAll()))
     roi->update_or_replace_intersection(*other);
-  return std::move(roi);
+  return roi;
 }
 
 template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>::getTimeROI() const {
