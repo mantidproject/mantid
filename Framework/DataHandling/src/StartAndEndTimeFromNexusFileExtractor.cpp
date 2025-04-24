@@ -9,55 +9,28 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NexusClasses.h"
-
+#include "MantidNexus/NeXusFile.hpp"
 #include <vector>
-
-namespace {
-Mantid::Kernel::Logger g_log("StartAndEndTimeFromNexusFileExtractor");
-}
 
 namespace Mantid::DataHandling {
 
+namespace {
+Mantid::Kernel::Logger g_log("StartAndEndTimeFromNexusFileExtractor");
+
 enum class NexusType { Muon, Processed, ISIS, TofRaw };
-enum class TimeType : unsigned char { StartTime, EndTime };
+enum class TimeType { StartTime, EndTime };
 
-Mantid::Types::Core::DateAndTime handleMuonNexusFile(TimeType type, const std::string &filename) {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Types::Core::DateAndTime(root.getString("run/start_time"));
-  } else {
-    return Mantid::Types::Core::DateAndTime(root.getString("run/stop_time"));
-  }
+Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &abspath) {
+  ::NeXus::File nxfile(filename, NXACC_READ);
+  nxfile.openPath(abspath);
+  const auto valueStr = nxfile.getStrData();
+  g_log.debug(valueStr + " from " + abspath + " in " + filename);
+  return Mantid::Types::Core::DateAndTime(valueStr);
 }
 
-Mantid::Types::Core::DateAndTime handleProcessedNexusFile(TimeType type, const std::string &filename) {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Types::Core::DateAndTime(root.getString("mantid_workspace_1/logs/run_start/value"));
-  } else {
-    return Mantid::Types::Core::DateAndTime(root.getString("mantid_workspace_1/logs/run_end/value"));
-  }
-}
-
-Mantid::Types::Core::DateAndTime handleISISNexusFile(TimeType type, const std::string &filename) {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Types::Core::DateAndTime(root.getString("raw_data_1/start_time"));
-  } else {
-    return Mantid::Types::Core::DateAndTime(root.getString("raw_data_1/end_time"));
-  }
-}
-
-Mantid::Types::Core::DateAndTime handleTofRawNexusFile(TimeType type, const std::string &filename) {
-  Mantid::NeXus::NXRoot root(filename);
-  if (type == TimeType::StartTime) {
-    return Mantid::Types::Core::DateAndTime(root.getString("entry/start_time"));
-  } else {
-    return Mantid::Types::Core::DateAndTime(root.getString("entry/end_time"));
-  }
-}
-
+/**
+ * Opens the file up to twice to determine what nexus schema is being used.
+ */
 NexusType whichNexusType(const std::string &filename) {
   std::vector<std::string> entryName;
   std::vector<std::string> definition;
@@ -81,10 +54,11 @@ NexusType whichNexusType(const std::string &filename) {
   } else if (entryName[0] == "raw_data_1") {
     nexusType = NexusType::ISIS;
   } else {
-    Mantid::NeXus::NXRoot root(filename);
-    Mantid::NeXus::NXEntry entry = root.openEntry(root.groups().front().nxname);
+    ::NeXus::File nxfile(filename, NXACC_READ);
+    const auto entries = nxfile.getEntries();
+    const auto firstEntryName = entries.begin()->first;
     try {
-      Mantid::NeXus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+      nxfile.openPath("/" + firstEntryName + "/instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + filename + " is a currently unsupported type of NeXus file");
       throw Mantid::Kernel::Exception::FileError("Unable to read File:", filename);
@@ -95,32 +69,62 @@ NexusType whichNexusType(const std::string &filename) {
   return nexusType;
 }
 
-Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type, const std::string &filename) {
-  auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
-  // Figure out the type of the Nexus file. We need to handle them individually
-  // since they store the datetime differently
-  auto nexusType = whichNexusType(fullFileName);
-  Mantid::Types::Core::DateAndTime dateAndTime;
-
+/**
+ * This holds all of the logic for what field in the file contains the DateAndTime information requested.
+ */
+std::string getDataFieldPath(const NexusType nexusType, const TimeType type) {
+  std::string datafieldpath;
   switch (nexusType) {
   case NexusType::Muon:
-    dateAndTime = handleMuonNexusFile(type, fullFileName);
+    if (type == TimeType::StartTime) {
+      datafieldpath = "/run/start_time";
+    } else {
+      datafieldpath = "/run/stop_time";
+    }
     break;
   case NexusType::ISIS:
-    dateAndTime = handleISISNexusFile(type, fullFileName);
+    if (type == TimeType::StartTime) {
+      datafieldpath = "/raw_data_1/start_time";
+    } else {
+      datafieldpath = "/raw_data_1/end_time";
+    }
     break;
   case NexusType::Processed:
-    dateAndTime = handleProcessedNexusFile(type, fullFileName);
+    if (type == TimeType::StartTime) {
+      datafieldpath = "/mantid_workspace_1/logs/run_start/value";
+    } else {
+      datafieldpath = "/mantid_workspace_1/logs/run_end/value";
+    }
     break;
   case NexusType::TofRaw:
-    dateAndTime = handleTofRawNexusFile(type, fullFileName);
+    if (type == TimeType::StartTime) {
+      datafieldpath = "/entry/start_time";
+    } else {
+      datafieldpath = "/entry/end_time";
+    }
     break;
   default:
     throw std::runtime_error("Unkown Nexus format. Not able to extract a date and time.");
   };
 
-  return dateAndTime;
+  return datafieldpath;
 }
+
+/**
+ * Main function for converting a filename into a DateAndTime
+ */
+Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type, const std::string &filename) {
+  // convert relative to absolute path
+  auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
+  // Figure out the type of the Nexus file. We need to handle them individually since they store the datetime
+  // differently
+  auto nexusType = whichNexusType(fullFileName);
+  // convert the type information into a path within the nexus file
+  const auto datapath = getDataFieldPath(nexusType, type);
+  // return the result
+  return getValue(fullFileName, datapath);
+}
+} // namespace
 
 /**
  * Gets the start time from the nexus file
