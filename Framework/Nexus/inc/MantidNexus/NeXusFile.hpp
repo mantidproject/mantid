@@ -560,7 +560,7 @@ public:
   NXlink getGroupID();
 
   /**
-   * This function checksi if we are in an open dataset
+   * This function checks if we are in an open dataset
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
