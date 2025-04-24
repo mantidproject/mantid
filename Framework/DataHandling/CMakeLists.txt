@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/AlignAndFocusPowderSlim.cpp
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
@@ -116,7 +117,6 @@ set(SRC_FILES
     src/LoadRawSpectrum0.cpp
     src/LoadSESANS.cpp
     src/LoadSINQFocus.cpp
-    src/LoadSNSspec.cpp
     src/LoadSPE.cpp
     src/LoadSampleDetailsFromRaw.cpp
     src/LoadSampleEnvironment.cpp
@@ -212,6 +212,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidDataHandling/AlignAndFocusPowderSlim.h
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/BitStream.h
@@ -326,7 +327,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadRawSpectrum0.h
     inc/MantidDataHandling/LoadSESANS.h
     inc/MantidDataHandling/LoadSINQFocus.h
-    inc/MantidDataHandling/LoadSNSspec.h
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSampleEnvironment.h
@@ -429,6 +429,7 @@ set(INC_FILES
 )
 
 set(TEST_FILES
+    AlignAndFocusPowderSlimTest.h
     ApplyDiffCalTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
@@ -451,8 +452,8 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
-    GenerateGroupingPowderTest.h
     GenerateGroupingPowder2Test.h
+    GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
     ISISDataArchiveTest.h
@@ -531,7 +532,6 @@ set(TEST_FILES
     LoadRawSpectrum0Test.h
     LoadSESANSTest.h
     LoadSINQFocusTest.h
-    LoadSNSspecTest.h
     LoadSPETest.h
     LoadSampleDetailsFromRawTest.h
     LoadSampleEnvironmentTest.h

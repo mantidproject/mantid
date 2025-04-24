@@ -368,7 +368,7 @@ public:
                                           const double offset, const bool findExact = true);
 
 private:
-  static std::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
+  static size_t findExactBin(const MantidVec &X, const double tof, const size_t n_bin);
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 

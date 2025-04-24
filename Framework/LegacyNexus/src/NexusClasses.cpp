@@ -13,22 +13,6 @@
 
 namespace Mantid::LegacyNexus {
 
-std::vector<std::string> NXAttributes::names() const {
-  std::vector<std::string> out;
-  out.reserve(m_values.size());
-  std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.first; });
-  return out;
-}
-
-std::vector<std::string> NXAttributes::values() const {
-  std::vector<std::string> out;
-  out.reserve(m_values.size());
-  std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.second; });
-  return out;
-}
-
 /**  Returns the value of an attribute
  *   @param name :: The name of the attribute
  *   @return The value of the attribute if it exists or an empty string
@@ -46,16 +30,6 @@ std::string NXAttributes::operator()(const std::string &name) const {
  *   @param value :: The new value of the attribute
  */
 void NXAttributes::set(const std::string &name, const std::string &value) { m_values[name] = value; }
-
-/**  Sets the value of the attribute as a double.
- *   @param name :: The name of the attribute
- *   @param value :: The new value of the attribute
- */
-void NXAttributes::set(const std::string &name, double value) {
-  std::ostringstream ostr;
-  ostr << value;
-  m_values[name] = ostr.str();
-}
 
 //---------------------------------------------------------
 //          NXObject methods
@@ -173,14 +147,6 @@ void NXClass::readAllInfo() {
   reset();
 }
 
-bool NXClass::isValid(const std::string &path) const {
-  if (NXopengrouppath(m_fileID, path.c_str()) == NXstatus::NX_OK) {
-    NXclosegroup(m_fileID);
-    return true;
-  } else
-    return false;
-}
-
 void NXClass::open() {
   if (NXopengrouppath(m_fileID, m_path.c_str()) == NXstatus::NX_ERROR) {
 
@@ -190,40 +156,6 @@ void NXClass::open() {
   //}
   m_open = true;
   readAllInfo();
-}
-
-/** It is fast, but the parent of this class must be open at
- * the time of calling. openNXClass uses open() (the slow one). To open class
- * using openLocal() do:
- *    NXTheClass class(parent,name);
- *    class.openLocal();
- *    // work with class
- *    class.close();
- * @param nxclass :: The NX class name. If empty NX_class() will be used
- * @return true if OK
- */
-bool NXClass::openLocal(const std::string &nxclass) {
-  std::string className = nxclass.empty() ? NX_class() : nxclass;
-  if (NXopengroup(m_fileID, name().c_str(), className.c_str()) == NXstatus::NX_ERROR) {
-    // It would be nice if this worked
-    // if (NXstatus::NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str()))
-    //{
-    //  throw std::runtime_error("Cannot open group "+m_path+" of class
-    //  "+NX_class());
-    //}
-    return false;
-  }
-  m_open = true;
-  readAllInfo();
-  return true;
-}
-
-void NXClass::close() {
-  if (NXclosegroup(m_fileID) == NXstatus::NX_ERROR) {
-    throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close path " +
-                             m_path + ")");
-  }
-  m_open = false;
 }
 
 void NXClass::reset() { NXinitgroupdir(m_fileID); }
@@ -310,23 +242,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   readAllInfo();
 }
 
-/**  Constructor.
- *   Creates a new Nexus file. The first root entry will be also created.
- *   @param fname :: The file name to create
- *   @param entry :: The name of the first entry in the new file
- */
-NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
-  (void)entry;
-  // Open NeXus file
-  NXstatus stat = NXopen(m_filename.c_str(), NXACC_CREATE5, &m_fileID);
-  if (stat == NXstatus::NX_ERROR) {
-    throw Exception("Unable to open File: " + m_filename);
-  }
-}
-
 NXRoot::~NXRoot() { NXclose(&m_fileID); }
-
-bool NXRoot::isStandard() const { return true; }
 
 /**
  * Open the first NXentry in the file.
@@ -451,24 +367,6 @@ void NXDataSet::getData(void *data) {
   NXopendata(m_fileID, name().c_str());
   if (NXgetdata(m_fileID, data) != NXstatus::NX_OK)
     throw std::runtime_error("Cannot read data from NeXus file");
-  NXclosedata(m_fileID);
-}
-
-/**  Wrapper to the NXgetslab.
- *   @param data :: The pointer to the buffer accepting the data from the file.
- *   @param start :: The array of starting indeces to read in from the file. The
- * size of the array must be equal to
- *          the rank of the data.
- *   @param size :: The array of numbers of data elements to read along each
- * dimenstion.
- *          The number of dimensions (the size of the array) must be equal to
- * the rank of the data.
- *   @throw runtime_error if the operation fails.
- */
-void NXDataSet::getSlab(void *data, int start[], int size[]) {
-  NXopendata(m_fileID, name().c_str());
-  if (NXgetslab(m_fileID, data, start, size) != NXstatus::NX_OK)
-    throw std::runtime_error("Cannot read data slab from NeXus file");
   NXclosedata(m_fileID);
 }
 

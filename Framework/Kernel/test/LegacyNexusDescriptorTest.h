@@ -70,7 +70,7 @@ public:
 
   void test_File_Handle_Returned_By_Data_Is_Valid() {
     auto &file = m_testHDF5->data();
-    TS_ASSERT_EQUALS("", file.getPath())
+    TS_ASSERT_EQUALS("/", file.getPath())
   }
 
   void test_firstEntryNameType_Returns_Correct_Details() {

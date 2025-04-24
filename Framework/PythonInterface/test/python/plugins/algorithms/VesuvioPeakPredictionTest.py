@@ -17,10 +17,14 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         vesuvio_debye_params = VesuvioPeakPrediction(
             Model="Debye", Temperature=[100, 120, 240, 300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347
         )
-
         self.assertTrue(isinstance(vesuvio_debye_params, ITableWorkspace))
         self.assertEqual(vesuvio_debye_params.cell(1, 1), 63.5)
         self.assertEqual(round(vesuvio_debye_params.cell(2, 5), 7), 0.0694458)
+
+    def test_debye_zero_temperature(self):
+        vesuvio_debye_params = VesuvioPeakPrediction(Model="Debye", Temperature=[0], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+        self.assertEqual(round(vesuvio_debye_params.cell(0, 2), 4), 347)
+        self.assertEqual(round(vesuvio_debye_params.cell(0, 3), 4), 16.7528)
 
     def test_einstein(self):
         """
@@ -29,10 +33,30 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         vesuvio_einstein_params = VesuvioPeakPrediction(
             Model="Einstein", Temperature=[100, 120, 240, 300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347
         )
-
         self.assertTrue(isinstance(vesuvio_einstein_params, ITableWorkspace))
         self.assertEqual(vesuvio_einstein_params.cell(1, 1), 63.5)
         self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 5), 18.47381)
+
+    def test_einstein_zero_temperature(self):
+        vesuvio_einstein_params = VesuvioPeakPrediction(
+            Model="Einstein", Temperature=[0], AtomicMass=63.5, Frequency=20, DebyeTemperature=347
+        )
+        self.assertEqual(round(vesuvio_einstein_params.cell(0, 2), 4), 20)
+        self.assertEqual(round(vesuvio_einstein_params.cell(0, 3), 4), 5.0)
+
+    def test_classical(self):
+        """
+        Test of Classical model with multiple temperatures
+        """
+        vesuvio_classical_params = VesuvioPeakPrediction(Model="Classical", Temperature=[100, 120, 240, 300], AtomicMass=50.94)
+        self.assertTrue(isinstance(vesuvio_classical_params, ITableWorkspace))
+        self.assertEqual(round(vesuvio_classical_params.cell(3, 2), 4), 17.751)
+        self.assertEqual(round(vesuvio_classical_params.cell(3, 3), 4), 38.778)
+
+    def test_classical_zero_temperature(self):
+        vesuvio_classical_params = VesuvioPeakPrediction(Model="Classical", Temperature=[0], AtomicMass=50.94)
+        self.assertEqual(round(vesuvio_classical_params.cell(0, 2), 4), 0.001)
+        self.assertEqual(round(vesuvio_classical_params.cell(0, 3), 4), 0.0)
 
     # -------------------------Failure Cases-------------------------
 
