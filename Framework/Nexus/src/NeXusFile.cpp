@@ -326,27 +326,13 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
 }
 
 bool File::hasGroup(std::string const &name) {
-  bool status = true;
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
   return current->nameExists(name);
-  // try {
-  //   current->openGroup(name);
-  // } catch (H5::Exception const &) {
-  //   status = false;
-  // }
-  // return status;
 }
 
 bool File::hasData(std::string const &name) {
-  bool status = true;
   H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
   return current->nameExists(name);
-  // try {
-  //   current->openDataSet(name);
-  // } catch (H5::Exception const &) {
-  //   status = false;
-  // }
-  // return status;
 }
 
 void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
@@ -1228,12 +1214,12 @@ Info File::getInfo() {
   auto dt = dataset->getDataType();
   auto ds = dataset->getSpace();
   std::size_t rank = ds.getSimpleExtentNdims();
-  DimArray dims;
+  DimArray dims{0};
   ds.getSimpleExtentDims(dims.data());
 
   Info info;
   info.type = hdf5ToNXType(dt);
-  info.dims.push_back(dims[0]);
+  info.dims.push_back(dims.front());
   for (std::size_t i = 1; i < rank; i++) {
     // if (dt.getClass() == H5T_STRING && dims[i] == 1) {
     //   continue;

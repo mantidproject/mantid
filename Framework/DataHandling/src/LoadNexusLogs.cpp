@@ -51,7 +51,7 @@ namespace {
 bool loadAndApplyMeasurementInfo(::NeXus::File *const file, API::MatrixWorkspace &workspace) {
 
   bool successfullyApplied = false;
-  try {
+  if (file->hasGroup("measurement")) {
     file->openGroup("measurement", "NXcollection");
 
     // If we can open the measurement group. We assume that the following will
@@ -74,7 +74,7 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file, API::MatrixWorkspace
     file->closeData();
     file->closeGroup();
     successfullyApplied = true;
-  } catch (::NeXus::Exception &) {
+  } else {
     successfullyApplied = false;
   }
   return successfullyApplied;
@@ -145,23 +145,17 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
   file.openData("time");
   //----- Start time is an ISO8601 string date and time. ------
   std::string start;
-  if (file.)
-    try {
-      LOG_ERROR(file);
-      file.getAttr("start", start);
-      LOG_ERROR(file);
-    } catch (::NeXus::Exception &) {
-      // Some logs have "offset" instead of start
-      try {
-        LOG_ERROR(file);
-        file.getAttr("offset", start);
-        LOG_ERROR(file);
-      } catch (::NeXus::Exception &) {
-        log.warning() << "Log entry has no start time indicated.\n";
-        file.closeData();
-        throw;
-      }
-    }
+  if (file.hasAttr("start")) {
+    file.getAttr("start", start);
+  } else if (file.hasAttr("offset")) {
+    // Some logs have "offset" instead of start
+    file.getAttr("offset", start);
+  } else {
+    log.warning() << "Log entry has no start time indicated.\n";
+    file.closeData();
+    throw ::NeXus::Exception("Log entry has no start time indicated");
+  }
+
   if (start == "No Time") {
     start = freqStart;
   }
@@ -249,16 +243,9 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
   } else if (info.type == NXnumtype::CHAR) {
     LOG_ERROR(file);
     std::string values;
-    const int64_t item_length = info.dims.back();
     try {
       values = file.getStrData();
-      // file.getData<std::string>(&values);
-      // const int64_t nitems = info.dims[0];
-      // const std::size_t total_length = std::size_t(nitems * item_length);
-      // boost::scoped_array<char> val_array(new char[total_length]);
-      // file.getData(val_array.get());
-      // file.closeData();
-      // values = std::string(val_array.get(), total_length);
+      file.closeData();
     } catch (::NeXus::Exception &) {
       LOG_ERROR(file);
       file.closeData();
@@ -269,7 +256,8 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
-    const size_t ntimes = times.size();
+    const size_t ntimes = info.dims.front();
+    const size_t item_length = (values.size()) / ntimes;
     for (size_t i = 0; i < ntimes; ++i) {
       std::string value_i = std::string(values.data() + i * item_length, item_length);
       tsp->addValue(times[i], value_i);
@@ -324,29 +312,24 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
 
     // Now the validity data
     ::NeXus::Info info = file.getInfo();
-    // Check the size
-    if (size_t(info.dims[0]) != times.size()) {
-      throw ::NeXus::Exception("Invalid value entry for validity data");
-    }
-    if (file.isDataInt()) // Int type
-    {
-      try {
+    try {
+      // Check the size
+      if (size_t(info.dims.front()) != times.size()) {
+        throw ::NeXus::Exception("Invalid value entry for validity data");
+      }
+      if (file.isDataInt()) {
         file.getDataCoerce(values);
         file.closeData();
-      } catch (::NeXus::Exception &) {
-        throw;
+      } else {
+        throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
       }
-    } else {
-      throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
+    } catch (::NeXus::Exception &ex) {
+      std::string error_msg = ex.what();
+      log.warning() << error_msg << "\n";
+      file.closeData();
+      // no data found
+      return std::unique_ptr<Kernel::Property>(nullptr);
     }
-  } else {
-    // std::string error_msg = ex.what();
-    // if (error_msg != "NXopendata(value_valid) failed") {
-    //   log.warning() << error_msg << "\n";
-    //   file.closeData();
-    //   // no data found
-    //   return std::unique_ptr<Kernel::Property>(nullptr);
-    // }
   }
 
   bool invalidDataFound = false;
@@ -491,9 +474,7 @@ void LoadNexusLogs::execLoader() {
                                 "' is not a valid NXentry");
   }
 
-  /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
-  /// SNAP
-  LOG_ERROR(file);
+  /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for SNAP
   try {
     file.openPath("DASlogs");
     try {
@@ -722,12 +703,7 @@ void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<AP
   if (!file.hasGroup("Veto_pulse")) {
     return;
   }
-  try {
-    file.openGroup("Veto_pulse", "NXgroup");
-  } catch (::NeXus::Exception &) {
-    // No group. This is common in older files
-    return;
-  }
+  file.openGroup("Veto_pulse", "NXgroup");
   file.openData("veto_pulse_time");
 
   // Load the start date/time as ISO8601 string.
@@ -1099,6 +1075,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
         file.closeData();
         logValue = std::make_unique<Kernel::PropertyWithValue<double>>(propName, static_cast<double>(value[0]), true);
       } else {
+        file.closeData();
         file.closeGroup();
         return;
       }

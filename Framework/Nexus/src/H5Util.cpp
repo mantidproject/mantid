@@ -441,7 +441,7 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
   DataSpace filespace = dataset.getSpace();
   const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
-  if (offset >= length_actual) {
+  if (offset >= length_actual && offset !=0) {
     std::stringstream msg;
     msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
     throw std::runtime_error(msg.str());

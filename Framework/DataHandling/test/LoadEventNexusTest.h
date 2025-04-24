@@ -197,7 +197,7 @@ private:
   }
 
 public:
-  void ytest_load_event_nexus_v20_ess() {
+  void test_load_event_nexus_v20_ess() {
     const std::string file = "V20_ESS_example.nxs";
     LoadEventNexus alg;
     alg.setChild(true);
@@ -215,7 +215,7 @@ public:
                      (150 * 150) + 2) // Two monitors
   }
 
-  void ytest_load_event_nexus_v20_ess_log_filtered() {
+  void test_load_event_nexus_v20_ess_log_filtered() {
     const std::string file = "V20_ESS_example.nxs";
     std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
 
@@ -239,7 +239,7 @@ public:
     validate_pulse_time_sorting(eventWS);
   }
 
-  void ytest_load_event_nexus_v20_ess_integration_2018() {
+  void test_load_event_nexus_v20_ess_integration_2018() {
     // Only perform this test if the version of hdf5 supports vlen strings
     if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {
       const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
@@ -265,7 +265,7 @@ public:
     }
   }
 
-  void ytest_load_event_nexus_POLARIS() {
+  void test_load_event_nexus_POLARIS() {
     // POLARIS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
     // for this test
     const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
@@ -298,7 +298,7 @@ public:
       ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
-  void ytest_NumberOfBins() {
+  void test_NumberOfBins() {
     const std::string file = "SANS2D00022048.nxs";
     int nBins = 273;
     LoadEventNexus alg;
@@ -316,7 +316,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->blocksize(), nBins);
   }
 
-  void ytest_load_event_nexus_sans2d_ess() {
+  void test_load_event_nexus_sans2d_ess() {
     const std::string file = "SANS2D_ESS_example.nxs";
     LoadEventNexus alg;
     alg.setChild(true);
@@ -349,23 +349,23 @@ public:
 #else
   bool windows = false;
 #endif // _WIN32
-  void ytest_multiprocess_loader_precount() {
+  void test_multiprocess_loader_precount() {
     if (!windows) {
       run_multiprocess_load("SANS2D00022048.nxs", true);
       run_multiprocess_load("LARMOR00003368.nxs", true);
     }
   }
 
-  void ytest_multiprocess_loader_producer_consumer() {
+  void test_multiprocess_loader_producer_consumer() {
     if (!windows) {
       run_multiprocess_load("SANS2D00022048.nxs", false);
       run_multiprocess_load("LARMOR00003368.nxs", false);
     }
   }
 
-  void ytest_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
+  void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
-  void ytest_load_event_nexus_ornl_eqsans() {
+  void test_load_event_nexus_ornl_eqsans() {
     // This file has a 2D entry/sample/name
     const std::string file = "EQSANS_89157.nxs.h5";
     LoadEventNexus alg;
@@ -383,7 +383,7 @@ public:
     TS_ASSERT_DELTA(duration, 7200.012, 0.01);
   }
 
-  void ytest_wallclock_filtering() {
+  void test_wallclock_filtering() {
     const std::string wsName("test_wallclock_filtering");
     const std::string filename("EQSANS_89157.nxs.h5");
     constexpr double filterStart{200}; // seconds
@@ -471,7 +471,7 @@ public:
   }
 
   // FilteredLoadvsLoadThenFilter system test and algorithm usage example
-  void ytest_CNCS_7860_filtering() {
+  void test_CNCS_7860_filtering() {
     const std::string filename("CNCS_7860_event.nxs");
     const std::string wsName("CNCS_7860");
     constexpr double filterStart{60};
@@ -515,7 +515,7 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void ytest_Normal_vs_Precount() {
+  void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs_noprecount";
@@ -633,7 +633,7 @@ public:
     }
   }
 
-  void ytest_TOF_filtered_loading() {
+  void test_TOF_filtered_loading() {
     const std::string wsName = "test_filtering";
     const double filterStart = 45000;
     const double filterEnd = 59000;
@@ -667,7 +667,7 @@ public:
                min >= filterStart);
   }
 
-  void ytest_partial_spectra_loading() {
+  void test_partial_spectra_loading() {
     std::string wsName = "test_partial_spectra_loading_SpectrumList";
     std::vector<int32_t> specList;
     specList.emplace_back(13);
@@ -760,7 +760,7 @@ public:
     }
   }
 
-  void ytest_partial_spectra_loading_ISIS() {
+  void test_partial_spectra_loading_ISIS() {
     // This is to test a specific bug where if you selected any spectra and had
     // precount on you got double the number of events
     std::string wsName = "test_partial_spectra_loading_SpectrumListISIS";
@@ -811,7 +811,7 @@ public:
     AnalysisDataService::Instance().remove(wsName2);
   }
 
-  void ytest_CNCSMonitors() {
+  void test_CNCSMonitors() {
     // Re-uses the workspace loaded in test_partial_spectra_loading to save a
     // load execution
     // This is a very simple test for performance issues. There's no real event
@@ -831,7 +831,7 @@ public:
     TS_ASSERT_EQUALS(monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)->monitorWorkspace());
   }
 
-  void ytest_Load_And_CompressEvents() {
+  void test_Load_And_CompressEvents() {
     constexpr std::size_t NUM_HIST{51200};
     const std::string filename{"CNCS_7860_event.nxs"};
 
@@ -885,7 +885,7 @@ public:
     AnalysisDataService::Instance().remove(uncompressed_name);
   }
 
-  void ytest_Monitors() {
+  void test_Monitors() {
     // Uses the workspace loaded in the last test to save a load execution
     std::string mon_outws_name = "cncs_compressed_monitors";
     auto &ads = AnalysisDataService::Instance();
@@ -914,7 +914,7 @@ public:
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
-  void ytest_Load_And_Filter_Everything() {
+  void test_Load_And_Filter_Everything() {
     // This test set the FilterByTimeStart value so that everything should be filtered
     // So we should end up with 0 events
     const std::string filename{"ARCS_sim_event.nxs"};
@@ -935,7 +935,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
   }
 
-  void ytest_Load_And_CompressEvents_weighted() {
+  void test_Load_And_CompressEvents_weighted() {
     constexpr std::size_t NUM_HIST{117760};
     const std::string filename{"ARCS_sim_event.nxs"};
 
@@ -988,7 +988,7 @@ public:
     AnalysisDataService::Instance().remove(compressed_name);
   }
 
-  void ytest_Load_And_CompressEvents_with_nperiod_data() {
+  void test_Load_And_CompressEvents_with_nperiod_data() {
     constexpr std::size_t NUM_HIST{40960};
     const std::string filename{"LARMOR00003368.nxs"};
 
@@ -1039,7 +1039,7 @@ public:
     AnalysisDataService::Instance().remove(compressed_name);
   }
 
-  void ytest_Load_And_CompressEvents_tolerance_0() {
+  void test_Load_And_CompressEvents_tolerance_0() {
     // the is to verify that the compresssion works when the CompressTolerance=0
     // create compressed
     const std::string filename{"CNCS_7860_event.nxs"};
@@ -1069,7 +1069,7 @@ public:
     AnalysisDataService::Instance().remove(compressed_name);
   }
 
-  void ytest_Load_And_FilterBadPulses() {
+  void test_Load_And_FilterBadPulses() {
     // This will use ProcessBankData
     const std::string filename{"CNCS_7860_event.nxs"};
 
@@ -1119,7 +1119,7 @@ public:
     AnalysisDataService::Instance().remove(filtered_name);
   }
 
-  void ytest_Load_And_FilterBadPulses_with_start_time_filter() {
+  void test_Load_And_FilterBadPulses_with_start_time_filter() {
     // This will use ProcessBankData
     // make sure the combination of bad pulse filter and start time filter work together
     const std::string filename{"CNCS_7860_event.nxs"};
@@ -1174,7 +1174,7 @@ public:
     AnalysisDataService::Instance().remove(filtered_name);
   }
 
-  void ytest_Load_And_FilterBadPulses_and_compress() {
+  void test_Load_And_FilterBadPulses_and_compress() {
     // This will use ProcessBankCompressed
     const std::string filename{"CNCS_7860_event.nxs"};
 
@@ -1238,7 +1238,7 @@ public:
     AnalysisDataService::Instance().remove(filtered_name);
   }
 
-  void ytest_Load_And_FilterBadPulses_and_compress_and_start_time_filter() {
+  void test_Load_And_FilterBadPulses_and_compress_and_start_time_filter() {
     // This will use ProcessBankCompressed
     const std::string filename{"CNCS_7860_event.nxs"};
 
@@ -1335,13 +1335,13 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 7274);
   }
 
-  void ytest_SingleBank_AllPixels() { doTestSingleBank(false, false); }
+  void test_SingleBank_AllPixels() { doTestSingleBank(false, false); }
 
-  void ytest_SingleBank_AllPixels_Precount() { doTestSingleBank(false, true); }
+  void test_SingleBank_AllPixels_Precount() { doTestSingleBank(false, true); }
 
-  void ytest_SingleBank_PixelsOnlyInThatBank_Precount() { doTestSingleBank(true, true); }
+  void test_SingleBank_PixelsOnlyInThatBank_Precount() { doTestSingleBank(true, true); }
 
-  void ytest_SingleBank_ThatDoesntExist() { doTestSingleBank(false, false, "bankDoesNotExist", true); }
+  void test_SingleBank_ThatDoesntExist() { doTestSingleBank(false, false, "bankDoesNotExist", true); }
 
   void ytest_SingleBank_with_no_events() {
     LoadEventNexus load;
@@ -1359,7 +1359,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
   }
 
-  void ytest_instrument_inside_nexus_file() {
+  void test_instrument_inside_nexus_file() {
     LoadEventNexus load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
@@ -1387,7 +1387,7 @@ public:
     TS_ASSERT_EQUALS(params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
-  void ytest_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
+  void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
     LoadEventNexus load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
@@ -1414,7 +1414,7 @@ public:
    * meaning different-sized pulse ID files.
    * DISABLED AS THE FILE ISN'T IN THE REPOSITORY
    */
-  void ytest_MultiplePreprocessors() {
+  void test_MultiplePreprocessors() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "arcs";
@@ -1450,17 +1450,17 @@ public:
     }
   }
 
-  void ytest_start_and_end_time_filtered_loading_meta_data_only() {
+  void test_start_and_end_time_filtered_loading_meta_data_only() {
     const bool metadataonly = true;
     do_test_filtering_start_and_end_filtered_loading(metadataonly);
   }
 
-  void ytest_start_and_end_time_filtered_loading() {
+  void test_start_and_end_time_filtered_loading() {
     const bool metadataonly = false;
     do_test_filtering_start_and_end_filtered_loading(metadataonly);
   }
 
-  void ytestSimulatedFile() {
+  void testSimulatedFile() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string wsname = "ARCS_sim";
@@ -1550,7 +1550,7 @@ public:
     }
   }
 
-  void ytest_load_file_with_empty_periods() {
+  void test_load_file_with_empty_periods() {
     // The file LARMOR00062766.nxs has the number of periods specified as 2, but actually
     // only one period has any data in it. It should load, but only one workspace instead
     // of two.
@@ -1564,7 +1564,7 @@ public:
     TS_ASSERT(!ws->isGroup());
   }
 
-  void ytest_load_CG3_bad_event_id() {
+  void test_load_CG3_bad_event_id() {
     // The test file CG3_13118.nxs.h5 being loaded has:
     // bank1: all correct data, only events in this file should end up loaded (6052 events)
     // bank2: all event_id are out of range and should be ignored (91 events)
@@ -1584,7 +1584,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 6052);
   }
 
-  void ytest_load_fails_on_corrupted_run() {
+  void test_load_fails_on_corrupted_run() {
     // Some ISIS runs can be corrupted by instrument noise,
     // resulting in incorrect period numbers.
     // LoadEventNexus should fail in this case.
@@ -1597,7 +1597,7 @@ public:
     TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
   }
 
-  void ytest_load_ILL_no_triggers() {
+  void test_load_ILL_no_triggers() {
     // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
     // But some of these nexuses don't have any triggers either, so they are modified to be allowed to be loaded.
 
@@ -1626,7 +1626,7 @@ public:
     AnalysisDataService::Instance().remove("dummy");
   }
 
-  void ytest_load_ILL_triggers() {
+  void test_load_ILL_triggers() {
     // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
 
     LoadEventNexus loader;
@@ -1653,7 +1653,7 @@ public:
     AnalysisDataService::Instance().remove("dummy");
   }
 
-  void ytest_load_event_nexus_ISIS_exc_inst() {
+  void test_load_event_nexus_ISIS_exc_inst() {
     // Test new format ISIS event data files which have some instrument information
     // but does not follow Mantid's NexusGeometry specifications
     const std::string file = "MAR28482.nxs";
@@ -1671,7 +1671,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 921)
   }
 
-  void ytest_monotonically_increasing_tofs() {
+  void test_monotonically_increasing_tofs() {
     const std::string file = "CG2_monotonically_increasing_pulse_times.nxs.h5";
     const std::string wsName = "dummy_for_child";
     LoadEventNexus alg;
@@ -1696,7 +1696,7 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void xtest_no_events() {
+  void test_no_events() {
     // this test was created for the strange case of an event file having no events anywhere
     // originally it was only an empty monitor but the test file was expanded
 
@@ -1751,7 +1751,7 @@ public:
 #else
   bool windows = false;
 #endif // _WIN32
-  void ytestMultiprocessLoadPrecount() {
+  void testMultiprocessLoadPrecount() {
     if (!windows) {
       LoadEventNexus loader;
       loader.initialize();
@@ -1762,7 +1762,7 @@ public:
       TS_ASSERT(loader.execute());
     }
   }
-  void ytestMultiprocessLoadProducerConsumer() {
+  void testMultiprocessLoadProducerConsumer() {
     if (!windows) {
       LoadEventNexus loader;
       loader.initialize();
@@ -1773,21 +1773,21 @@ public:
       TS_ASSERT(loader.execute());
     }
   }
-  void ytestDefaultLoad() {
+  void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
     TS_ASSERT(loader.execute());
   }
-  void ytestDefaultLoadBankSplitting() {
+  void testDefaultLoadBankSplitting() {
     LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "OFFSPEC00036416.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
     TS_ASSERT(loader.execute());
   }
-  void ytestPartialLoad() {
+  void testPartialLoad() {
     LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
@@ -1796,7 +1796,7 @@ public:
     loader.setPropertyValue("OutputWorkspace", "ws");
     TS_ASSERT(loader.execute());
   }
-  void ytestPartialLoadBankSplitting() {
+  void testPartialLoadBankSplitting() {
     LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "OFFSPEC00036416.nxs");
