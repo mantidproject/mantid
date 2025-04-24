@@ -62,8 +62,8 @@ public:
   void closeGroup();
   /// write the workspace data
   int writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace, const bool &uniformSpectra,
-                                const bool &raggedSpectra, const std::vector<int> &indices, const char *group_name,
-                                bool write2Ddata) const;
+                                const bool &raggedSpectra, const std::vector<int> &indices,
+                                const std::string &group_name, bool write2Ddata) const;
 
   /// write table workspace
   int writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr &itableworkspace, const char *group_name) const;

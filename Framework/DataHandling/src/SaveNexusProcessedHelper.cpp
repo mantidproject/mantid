@@ -277,7 +277,7 @@ void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open gr
  */
 int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace,
                                            const bool &uniformSpectra, const bool &raggedSpectra,
-                                           const std::vector<int> &indices, const char *group_name,
+                                           const std::vector<int> &indices, const std::string &group_name,
                                            bool write2Ddata) const {
   // NXstatus status;
 
