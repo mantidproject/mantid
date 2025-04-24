@@ -796,7 +796,13 @@ void File::putAttr(std::string const &name, std::string const &value, bool const
 }
 
 // this will handle string literals, which is the preferred way to pass string attributes
-void File::putAttr(std::string const &name, char const *const value) { putAttr(name, std::string(value)); }
+void File::putAttr(std::string const &name, char const *const value) {
+  if (value == nullptr) {
+    throw Exception("cannot write null data to attribute " + name, "putAttr", m_filename);
+  } else {
+    putAttr(name, std::string(value), false);
+  }
+}
 
 template <typename NumT>
 void File::putSlab(NumT const *const data, const DimSizeVector &start, const DimSizeVector &size) {
