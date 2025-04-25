@@ -153,6 +153,13 @@ After the simulation has been run and the spatial interpolation done, the interp
 
 .. note:: If the input workspace contains varying bin widths then the output is always interpolated.
 
+Interaction Region
+##################
+
+Within the algorithm, the ``SimulateScatteringPointIn`` parameter can be used to control whether scattering points are simulate from within the sample, within the environment, or both. Additionally, the volume from which scattered points are generated can be controlled by altering the beam profile (:ref:`SetSample <algm-SetSample>`) or by defining a gauge volume (:ref:`algm-DefineGaugeVolume`).
+
+.. note:: If a gauge volume is set, any definition of ``SimulateScatteringPointIn`` will be overridden to ``SampleOnly``.
+
 Usage
 -----
 
