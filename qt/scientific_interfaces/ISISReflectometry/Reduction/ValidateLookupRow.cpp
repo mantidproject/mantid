@@ -73,12 +73,12 @@ std::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(Cel
 }
 
 std::optional<std::string> LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
-  auto [optionalInstructionsOrNoneIfError, isValid] =
+  auto [optionalInstructions, isValid] =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::TRANS_SPECTRA]);
   if (!isValid) {
     m_invalidColumns.insert(LookupRow::Column::TRANS_SPECTRA);
   }
-  return optionalInstructionsOrNoneIfError;
+  return optionalInstructions;
 }
 
 std::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
@@ -88,39 +88,38 @@ std::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText
 }
 
 std::optional<double> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
-  auto [optionalScaleFactorOrNoneIfError, isValid] =
-      ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
+  auto [optionalScaleFactor, isValid] = ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
   if (!isValid) {
     m_invalidColumns.insert(LookupRow::Column::SCALE);
   }
-  return optionalScaleFactorOrNoneIfError;
+  return optionalScaleFactor;
 }
 
 std::optional<std::string> LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
-  auto [optionalInstructionsOrNoneIfError, isValid] =
+  auto [optionalInstructions, isValid] =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::RUN_SPECTRA]);
   if (!isValid) {
     m_invalidColumns.insert(LookupRow::Column::RUN_SPECTRA);
   }
-  return optionalInstructionsOrNoneIfError;
+  return optionalInstructions;
 }
 
 std::optional<std::string> LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
-  auto [optionalInstructionsOrNoneIfError, isValid] =
+  auto [optionalInstructions, isValid] =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::BACKGROUND_SPECTRA]);
   if (!isValid) {
     m_invalidColumns.insert(LookupRow::Column::BACKGROUND_SPECTRA);
   }
-  return optionalInstructionsOrNoneIfError;
+  return optionalInstructions;
 }
 
 std::optional<std::string> LookupRowValidator::parseROIDetectorIDs(CellText const &cellText) {
-  auto [optionalROIDetectorsOrNoneIfError, isValid] =
+  auto [optionalROIDetectors, isValid] =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::ROI_DETECTOR_IDS]);
   if (!isValid) {
     m_invalidColumns.insert(LookupRow::Column::ROI_DETECTOR_IDS);
   }
-  return optionalROIDetectorsOrNoneIfError;
+  return optionalROIDetectors;
 }
 
 void LookupRowValidator::validateThetaAndRegex() {
@@ -138,25 +137,25 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
   m_titleMatcherOrInvalid = parseTitleMatcherOrWhitespace(cellText);
   validateThetaAndRegex();
 
-  auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
-  auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
-  auto maybeQRange = parseQRange(cellText);
-  auto maybeScaleFactor = parseScaleFactor(cellText);
-  auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
-  auto maybeBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
-  auto maybeROIDetectorIDs = parseROIDetectorIDs(cellText);
+  auto optionalTransmissionRuns = parseTransmissionRuns(cellText);
+  auto optionalTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
+  auto optionalQRange = parseQRange(cellText);
+  auto optionalScaleFactor = parseScaleFactor(cellText);
+  auto optionalProcessingInstructions = parseProcessingInstructions(cellText);
+  auto optionalBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
+  auto optionalROIDetectorIDs = parseROIDetectorIDs(cellText);
   if (!m_invalidColumns.empty()) {
     return ValidationResult<LookupRow, std::unordered_set<int>>(m_invalidColumns);
   }
 
   // if we reach this point, no column is invalid, but there may be empty columns.
   // We just need to pass on the values (Even though they are nullopt) of each column
-  auto lookupRow = std::make_optional(LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid,
-                                                maybeTransmissionRuns.value(), maybeTransmissionProcessingInstructions,
-                                                maybeQRange.value(), maybeScaleFactor, maybeProcessingInstructions,
-                                                maybeBackgroundProcessingInstructions, maybeROIDetectorIDs));
+  auto lookupRow =
+      LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
+                optionalTransmissionProcessingInstructions, optionalQRange.value(), optionalScaleFactor,
+                optionalProcessingInstructions, optionalBackgroundProcessingInstructions, optionalROIDetectorIDs);
 
-  return ValidationResult<LookupRow, std::unordered_set<int>>(lookupRow.value());
+  return ValidationResult<LookupRow, std::unordered_set<int>>(lookupRow);
 }
 
 ValidationResult<LookupRow, std::unordered_set<int>> validateLookupRow(CellText const &cells) {

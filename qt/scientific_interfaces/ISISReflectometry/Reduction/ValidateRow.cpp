@@ -99,24 +99,21 @@ std::optional<ReductionOptionsMap> RowValidator::parseOptions(std::vector<std::s
 }
 
 ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std::string> const &cellText) {
-  auto maybeRunNumbers = parseRunNumbers(cellText);
-  auto maybeTheta = parseTheta(cellText);
-  auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
-  auto maybeQRange = parseQRange(cellText);
-  auto maybeScaleFactor = parseScaleFactor(cellText);
-  auto maybeOptions = parseOptions(cellText);
+  auto optionalRunNumbers = parseRunNumbers(cellText);
+  auto optionalTheta = parseTheta(cellText);
+  auto optionalTransmissionRuns = parseTransmissionRuns(cellText);
+  auto optionalQRange = parseQRange(cellText);
+  auto optionalScaleFactor = parseScaleFactor(cellText);
+  auto optionalOptions = parseOptions(cellText);
 
   if (!m_invalidColumns.empty()) {
     return RowValidationResult(m_invalidColumns);
   }
-  auto wsNames = workspaceNames(maybeRunNumbers.value(), maybeTransmissionRuns.value());
-  auto maybeRow = std::make_optional(Row(maybeRunNumbers.value(), maybeTheta.value(), maybeTransmissionRuns.value(),
-                                         maybeQRange.value(), maybeScaleFactor, maybeOptions.value(),
-                                         ReductionWorkspaces(wsNames)));
-  if (maybeRow.has_value()) {
-    return RowValidationResult(maybeRow.value());
-  }
-  return RowValidationResult(m_invalidColumns);
+  auto wsNames = workspaceNames(optionalRunNumbers.value(), optionalTransmissionRuns.value());
+  auto optionalRow =
+      Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(), optionalQRange.value(),
+          optionalScaleFactor, optionalOptions.value(), ReductionWorkspaces(wsNames));
+  return RowValidationResult(optionalRow);
 }
 
 RowValidationResult validateRow(std::vector<std::string> const &cells) {
