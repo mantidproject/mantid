@@ -335,7 +335,8 @@ public:
    * \param info Description of the attribute to add.
    * \param data The attribute value.
    */
-  void putAttr(const AttrInfo &info, const void *data);
+  template<typename NumT>
+  void putAttr(AttrInfo const &info, NumT const *data);
   /**
    * Put the supplied data as an attribute into the currently open data.
    *

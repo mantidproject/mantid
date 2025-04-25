@@ -2259,7 +2259,7 @@ NXstatus NX5nativeisexternallink(NXhandle fileid, const char *name, char *url, c
 
 NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   NXI5assert(fileid);
-  if ((strcmp(pFirstID->targetPath, pSecondID->targetPath) == 0)) {
+  if ((strcmp(pFirstID->targetPath.c_str(), pSecondID->targetPath) == 0)) {
     return NXstatus::NX_OK;
   } else {
     return NXstatus::NX_ERROR;

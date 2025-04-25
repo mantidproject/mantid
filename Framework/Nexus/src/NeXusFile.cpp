@@ -255,13 +255,13 @@ template <typename NumT> void File::writeData(const string &name, const vector<N
   this->closeData();
 }
 
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> &value) {
+template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> const &value) {
   // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
   writeExtendibleData(name, value, 4096);
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> &value, const dimsize_t chunk) {
+void File::writeExtendibleData(const string &name, vector<NumT> const &value, const dimsize_t chunk) {
   DimVector dims(1, NX_UNLIMITED);
   DimSizeVector chunk_dims(1, chunk);
   // Use chunking without using compression
@@ -271,7 +271,7 @@ void File::writeExtendibleData(const string &name, vector<NumT> &value, const di
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> &value, DimVector &dims, std::vector<int64_t> &chunk) {
+void File::writeExtendibleData(const string &name, vector<NumT> const &value, DimVector const &dims, DimSizeVector const &chunk) {
   // Create the data with unlimited 0th dimensions
   DimVector unlim_dims(dims);
   unlim_dims[0] = NX_UNLIMITED;
@@ -283,14 +283,14 @@ void File::writeExtendibleData(const string &name, vector<NumT> &value, DimVecto
   this->closeData();
 }
 
-template <typename NumT> void File::writeUpdatedData(const std::string &name, std::vector<NumT> &value) {
+template <typename NumT> void File::writeUpdatedData(std::string const &name, std::vector<NumT> const &value) {
   this->openData(name);
   this->putSlab(value, dimsize_t(0), dimsize_t(value.size()));
   this->closeData();
 }
 
 template <typename NumT>
-void File::writeUpdatedData(const std::string &name, std::vector<NumT> &value, DimVector &dims) {
+void File::writeUpdatedData(const std::string &name, std::vector<NumT> const &value, DimVector const &dims) {
   this->openData(name);
   DimSizeVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
@@ -377,7 +377,7 @@ template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *da
                 ") failed");
 }
 
-template <typename NumT> void File::putAttr(const std::string &name, const NumT value) {
+template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
   AttrInfo info;
   info.name = name;
   info.length = 1;
@@ -715,8 +715,8 @@ AttrInfo File::getNextAttr() {
     if (rank == 2 && type == NXnumtype::CHAR) {
       info.length = 1;
       for (int d = 0; d < rank; ++d) {
-        info.dims.push_back(dim[d]);
-        info.length *= static_cast<unsigned int>(dim[d]);
+        // info.dims.push_back(dim[d]);
+        info.length *= static_cast<std::size_t>(dim[d]);
       }
       return info;
     }

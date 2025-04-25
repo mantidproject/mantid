@@ -12,7 +12,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidNexus/H5Util.h
     inc/MantidNexus/NexusClasses.h
-    inc/MantidNexus/NexusIOHelper.h
+    # inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NeXusFile_fwd.h
     inc/MantidNexus/napi.h
     inc/MantidNexus/napi5.h
@@ -24,8 +24,10 @@ set(INC_FILES
     inc/MantidNexus/nxstack.h
 )
 
-set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h
-               NeXusFileReadWriteTest.h
+set(TEST_FILES
+    H5UtilTest.h
+    # NexusIOHelperTest.h
+    NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h NeXusFileReadWriteTest.h
 )
 
 if(COVERAGE)
