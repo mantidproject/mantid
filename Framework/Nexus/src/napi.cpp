@@ -415,10 +415,10 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
   }
-  if (filename != NULL) {
+  if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
     free(filename);
   }
-  if (fHandle != NULL) {
+  if (fHandle != NULL) { // cppcheck-suppress knownConditionTrueFalse
     free(fHandle);
   }
   return retstat;
@@ -568,7 +568,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
       return NXstatus::NX_ERROR;
     }
     status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
+    if (status == NXstatus::NX_ERROR) { // cppcheck-suppress knownConditionTrueFalse
       return status;
     }
     status = NXopenpath(fid, expath);

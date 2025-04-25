@@ -36,24 +36,18 @@
 typedef struct {
   pNexusFunction pDriver;
   NXlink closeID;
-  char filename[1024];
+  std::string filename;
 } fileStackEntry;
 
 typedef struct __fileStack {
   int fileStackPointer;
-  fileStackEntry fileStack[MAXEXTERNALDEPTH];
+  std::vector<fileStackEntry> fileStack;
   int pathPointer;
-  char pathStack[NXMAXSTACK][NX_MAXNAMELEN];
+  std::vector<std::string> pathStack;
 } fileStack;
 /*---------------------------------------------------------------------*/
 pFileStack makeFileStack() {
-  pFileStack pNew = NULL;
-
-  pNew = static_cast<pFileStack>(malloc(sizeof(fileStack)));
-  if (pNew == NULL) {
-    return NULL;
-  }
-  memset(pNew, 0, sizeof(fileStack));
+  pFileStack pNew = new fileStack;
   pNew->fileStackPointer = -1;
   pNew->pathPointer = -1;
   return pNew;
@@ -64,20 +58,10 @@ void killFileStack(pFileStack self) {
     free(self);
   }
 }
-/*---------------------------------------------------------------------*/
-int getFileStackSize() { return sizeof(fileStack); }
 /*----------------------------------------------------------------------*/
 void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *file) {
-  size_t length;
-
   self->fileStackPointer++;
-  self->fileStack[self->fileStackPointer].pDriver = pDriv;
-  memset(&self->fileStack[self->fileStackPointer].closeID, 0, sizeof(NXlink));
-  length = strlen(file);
-  if (length >= 1024) {
-    length = 1023;
-  }
-  memcpy(&self->fileStack[self->fileStackPointer].filename, file, length);
+  self->fileStack.emplace_back(pDriv, NXlink{"", NXentrytype::group}, std::string(file));
 }
 /*----------------------------------------------------------------------*/
 void popFileStack(pFileStack self) {
@@ -85,25 +69,24 @@ void popFileStack(pFileStack self) {
   if (self->fileStackPointer < -1) {
     self->fileStackPointer = -1;
   }
+  if (!self->fileStack.empty()) {
+    self->fileStack.pop_back();
+  }
 }
 /*----------------------------------------------------------------------*/
 pNexusFunction peekFileOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
 /*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].filename; }
+char *peekFilenameOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].filename.data(); }
 /*----------------------------------------------------------------------*/
-void peekIDOnStack(pFileStack self, NXlink *id) {
-  memcpy(id, &self->fileStack[self->fileStackPointer].closeID, sizeof(NXlink));
-}
+void peekIDOnStack(pFileStack self, NXlink *id) { *id = self->fileStack[self->fileStackPointer].closeID; }
 /*---------------------------------------------------------------------*/
-void setCloseID(pFileStack self, const NXlink &id) {
-  memcpy(&self->fileStack[self->fileStackPointer].closeID, &id, sizeof(NXlink));
-}
+void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileStackPointer].closeID = id; }
 /*----------------------------------------------------------------------*/
 int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
 void pushPath(pFileStack self, const char *name) {
   self->pathPointer++;
-  strncpy(self->pathStack[self->pathPointer], name, NX_MAXNAMELEN - 1);
+  self->pathStack.emplace_back(name);
 }
 /*-----------------------------------------------------------------------*/
 void popPath(pFileStack self) {
@@ -111,27 +94,20 @@ void popPath(pFileStack self) {
   if (self->pathPointer < -1) {
     self->pathPointer = -1;
   }
+  if (!self->pathStack.empty()) {
+    self->pathStack.pop_back();
+  }
 }
 /*-----------------------------------------------------------------------*/
 int buildPath(pFileStack self, char *path, int pathlen) {
-  int i;
-  size_t totalPathLength;
-  char *totalPath;
+  std::string totalPath;
+  if (self->pathStack.empty()) {
+    totalPath = "/";
+  }
+  for (std::string subpath : self->pathStack) {
+    totalPath += "/" + subpath;
+  }
+  strncpy(path, totalPath.c_str(), pathlen - 1);
 
-  for (i = 0, totalPathLength = 5; i <= self->pathPointer; i++) {
-    totalPathLength += strlen(self->pathStack[i]) + 1;
-  }
-  totalPath = static_cast<char *>(malloc(totalPathLength * sizeof(char)));
-  if (totalPath == NULL) {
-    return 0;
-  }
-  memset(totalPath, 0, totalPathLength * sizeof(char));
-  for (i = 0; i <= self->pathPointer; i++) {
-    strcat(totalPath, "/");
-    strcat(totalPath, self->pathStack[i]);
-  }
-
-  strncpy(path, totalPath, pathlen - 1);
-  free(totalPath);
   return 1;
 }
