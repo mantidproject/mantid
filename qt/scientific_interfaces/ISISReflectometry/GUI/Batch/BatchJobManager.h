@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include "IBatchJobAlgorithm.h"
 #include "IBatchJobManager.h"
 #include "IReflAlgorithmFactory.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
