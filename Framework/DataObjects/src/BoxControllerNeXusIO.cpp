@@ -242,9 +242,9 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Make and open the data
     if (m_CoordSize == 4)
-      m_File->makeCompData("event_data", NXnumtype::FLOAT32, m_BlockSize, ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", NXnumtype::FLOAT32, m_BlockSize, NXcompression::NONE, chunk, true);
     else
-      m_File->makeCompData("event_data", NXnumtype::FLOAT64, m_BlockSize, ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", NXnumtype::FLOAT64, m_BlockSize, NXcompression::NONE, chunk, true);
 
     // A little bit of description for humans to read later
     m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);

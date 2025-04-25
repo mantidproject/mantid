@@ -53,10 +53,10 @@ public:
 
   void saveSpectraDetectorMapNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file,
                                    const std::vector<int> &wsIndices,
-                                   const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+                                   const NXcompression compression = NXcompression::LZW) const;
 
   void saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file, const std::vector<int> &wsIndices,
-                                const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+                                const NXcompression compression = NXcompression::LZW) const;
 
   virtual bool saveLegacyInstrument() { return true; }
 

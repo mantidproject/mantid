@@ -141,7 +141,7 @@ private:
       }
     }
     const DimVector cdims{20, 20};
-    file.writeCompData("comp_data", comp_array, array_dims, NeXus::LZW, cdims);
+    file.writeCompData("comp_data", comp_array, array_dims, NXcompression::LZW, cdims);
 
     // ---------- Test write Extendible Data --------------------------
     std::vector<int> data(10, 123);

@@ -160,21 +160,21 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   chunks[0] = 1; // Drop the largest stride for chunking, I don't know
                  // if this is the best but appears to work
 
-  file->makeCompData("signal", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("signal", NXnumtype::FLOAT64, size, NXcompression::LZW, chunks, true);
   file->putData(ws->getSignalArray());
   file->putAttr("signal", 1);
   file->putAttr("axes", axes_label);
   file->closeData();
 
-  file->makeCompData("errors_squared", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("errors_squared", NXnumtype::FLOAT64, size, NXcompression::LZW, chunks, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeCompData("num_events", NXnumtype::FLOAT64, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("num_events", NXnumtype::FLOAT64, size, NXcompression::LZW, chunks, true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeCompData("mask", NXnumtype::INT8, size, ::NeXus::LZW, chunks, true);
+  file->makeCompData("mask", NXnumtype::INT8, size, NXcompression::LZW, chunks, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

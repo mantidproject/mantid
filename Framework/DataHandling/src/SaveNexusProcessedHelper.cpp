@@ -45,11 +45,12 @@ Logger g_log("NexusFileIO");
 } // namespace
 
 /// Empty default constructor
-NexusFileIO::NexusFileIO() : m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(nullptr), m_filename() {}
+NexusFileIO::NexusFileIO()
+    : m_filehandle(), m_nexuscompression(NXcompression::LZW), m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)
-    : m_filehandle(), m_nexuscompression(::NeXus::LZW), m_progress(prog), m_filename() {}
+    : m_filehandle(), m_nexuscompression(NXcompression::LZW), m_progress(prog), m_filename() {}
 
 void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 
@@ -224,8 +225,8 @@ void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open gr
                        const std::string &name,
                        std::shared_ptr<const WS> src, // Do not pass std::shared_ptr<..> by reference!
                        const std::vector<int> &indices, _VAccessor<V, WS> vData, bool raggedSpectra = false,
-                       ::NeXus::NXcompression compressionType = ::NeXus::NXcompression::NONE,
-                       double fillValue = _DEFAULT_FILL_VALUE, bool closeData = true) {
+                       NXcompression compressionType = NXcompression::NONE, double fillValue = _DEFAULT_FILL_VALUE,
+                       bool closeData = true) {
 
   const size_t N_chunk = indices.size(); // number of spectra
 
@@ -379,8 +380,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   } else {
     _writeChunkedData<HistogramX, MatrixWorkspace>(
-        m_filehandle, "axis1", localworkspace, indices, &MatrixWorkspace::x, raggedSpectra,
-        ::NeXus::NXcompression::NONE, raggedSpectra ? std::numeric_limits<double>::quiet_NaN() : _DEFAULT_FILL_VALUE,
+        m_filehandle, "axis1", localworkspace, indices, &MatrixWorkspace::x, raggedSpectra, NXcompression::NONE,
+        raggedSpectra ? std::numeric_limits<double>::quiet_NaN() : _DEFAULT_FILL_VALUE,
         false // don't close the dataset
     );
   }
@@ -599,7 +600,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       const ::NeXus::DimVector dims_array = {nRows, static_cast<::NeXus::dimsize_t>(maxStr)};
       const ::NeXus::DimSizeVector asize = {1, dims_array[1]};
 
-      m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, ::NeXus::LZW, asize);
+      m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, NXcompression::LZW, asize);
 
       m_filehandle->openData(str);
       auto toNexus = new char[maxStr * nRows];

@@ -289,8 +289,8 @@ public:
    * \param bufsize The size of the compression buffer to use.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeCompData(const std::string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-                    const DimSizeVector &bufsize, bool open_data = false);
+  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
+                    DimSizeVector const &bufsize, bool open_data = false);
 
   /**
    * Create a compressed data, insert the data, and close it.
@@ -303,13 +303,13 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   template <typename NumT>
-  void writeCompData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims,
-                     const NXcompression comp, const DimSizeVector &bufsize);
+  void writeCompData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
+                     NXcompression const comp, DimSizeVector const &bufsize);
 
   /**
    * \param name The name of the data to open.
    */
-  void openData(const std::string &name);
+  void openData(std::string const &name);
 
   /**
    * Close the currently open data.
@@ -319,21 +319,13 @@ public:
   /**
    * \param data The data to put in the file.
    */
-  template <typename NumT> void putData(const NumT *data);
+  template <typename NumT> void putData(NumT const *data);
 
   /**
    * \param data The data to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putData(const std::vector<NumT> &data);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  void putAttr(const AttrInfo &info, const void *data);
+  template <typename NumT> void putData(std::vector<NumT> const &data);
 
   /**
    * Put the supplied data as an attribute into the currently open data.
