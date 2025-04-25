@@ -8,6 +8,7 @@
 
 import unittest
 from unittest.mock import patch
+import numpy as np
 
 import matplotlib
 
@@ -19,7 +20,7 @@ from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load
 
 
 @start_qapplication
@@ -116,6 +117,39 @@ class ToolBarTest(unittest.TestCase):
         axes.grid()
         # Grid button should be ON because we enabled the grid.
         self.assertTrue(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_checked_for_plot_with_no_crosshair(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        axes.plot([-10, 10], [1, 2])
+        # crosshair button should be OFF because we have not enabled the crosshair.
+        self.assertFalse(self._is_crosshair_button_checked(fig))
+        # crosshair button should be visible when there is only 1 axis
+        self.assertTrue(self._is_crosshair_button_visible(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_hiden_for_tiled_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(2)
+        axes[0].plot([-10, 10], [1, 2])
+        axes[1].plot([3, 2, 1], [1, 2, 3])
+        # crosshair button should be hidden because this is a tiled plot
+        self.assertFalse(self._is_crosshair_button_visible(fig))
+        self.assertFalse(self._is_crosshair_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_enabled_for_contour_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        data = Load("SANSLOQCan2D.nxs")
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        axes.imshow(data, origin="lower", cmap="viridis", aspect="auto")
+        axes.contour(data, levels=np.linspace(10, 60, 6), colors="yellow", alpha=0.5)
+        # crosshair button should be visible because this is a contour plot
+        self.assertTrue(self._is_crosshair_button_visible(fig))
+        self.assertFalse(self._is_crosshair_button_checked(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_checked_for_plot_with_grid_using_kwargs(self, mock_qappthread):
@@ -265,6 +299,32 @@ class ToolBarTest(unittest.TestCase):
         # This is only called when show() is called on the figure manager, so we have to manually call it here.
         fig_manager.toolbar.set_buttons_visibility(fig)
         return fig_manager.toolbar._actions[button].isEnabled()
+
+    @classmethod
+    def _is_crosshair_button_checked(cls, fig):
+        """
+        Create the figure manager and check whether its toolbar is toggled on or off for the given figure.
+        We have to explicitly call set_button_visibility() here, which would otherwise be called within the show()
+        function.
+        """
+        canvas = MantidFigureCanvas(fig)
+        fig_manager = FigureManagerWorkbench(canvas, 1)
+        # This is only called when show() is called on the figure manager, so we have to manually call it here.
+        fig_manager.toolbar.set_buttons_visibility(fig)
+        return fig_manager.toolbar._actions["toggle_crosshair"].isChecked()
+
+    @classmethod
+    def _is_crosshair_button_visible(cls, fig):
+        """
+        Create the figure manager and check whether its toolbar is visible for the given figure.
+        We have to explicitly call set_button_visibility() here, which would otherwise be called within the show()
+        function.
+        """
+        canvas = MantidFigureCanvas(fig)
+        fig_manager = FigureManagerWorkbench(canvas, 1)
+        # This is only called when show() is called on the figure manager, so we have to manually call it here.
+        fig_manager.toolbar.set_buttons_visibility(fig)
+        return fig_manager.toolbar._actions["toggle_crosshair"].isVisible()
 
 
 if __name__ == "__main__":
