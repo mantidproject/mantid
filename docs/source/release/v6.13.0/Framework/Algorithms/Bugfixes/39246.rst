@@ -1,1 +1,1 @@
-- Fix issue with :ref:`GroupDetectors <algm-GroupDetectors-v2>` where the algorithm would freeze on large datasets while adding EventList to the Output Workspace.
+- Fix issue with :ref:`GroupDetectors <algm-GroupDetectors-v2>` where the algorithm would freeze on large datasets while adding EventList to the Output Workspace. Testing with TOPAZ-50006 execution time was reduced from 2+ hours to ~30 seconds.
