@@ -222,25 +222,20 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     return tsp;
   } else if (info.type == NXnumtype::CHAR) {
     std::string values;
-    const int64_t item_length = info.dims[1];
     try {
-      const int64_t nitems = info.dims[0];
-      const std::size_t total_length = std::size_t(nitems * item_length);
-      boost::scoped_array<char> val_array(new char[total_length]);
-      file.getData(val_array.get());
+      values = file.getStrData();
       file.closeData();
-      values = std::string(val_array.get(), total_length);
     } catch (::NeXus::Exception &) {
       file.closeData();
       throw;
     }
-    // The string may contain non-printable (i.e. control) characters, replace
-    // these
+    // The string may contain non-printable (i.e. control) characters, replace these
     std::replace_if(values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
-    const size_t ntimes = times.size();
+    const size_t ntimes = info.dims.front();
+    const size_t item_length = (values.size()) / ntimes;
     for (size_t i = 0; i < ntimes; ++i) {
       std::string value_i = std::string(values.data() + i * item_length, item_length);
       tsp->addValue(times[i], value_i);
