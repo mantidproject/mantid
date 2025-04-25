@@ -595,7 +595,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Shape
-  std::vector<int64_t> dims;
+  ::NeXus::DimVector dims;
   dims.emplace_back(np);
   dims.emplace_back(static_cast<int>(maxShapeJSONLength));
   const std::string name = "column_14";

@@ -560,7 +560,7 @@ public:
   NXlink getGroupID();
 
   /**
-   * This function checksi if we are in an open dataset
+   * This function checks if we are in an open dataset
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
@@ -571,7 +571,5 @@ public:
  * \tparam NumT numeric data type of \a number to check
  */
 template <typename NumT> MANTID_NEXUS_DLL NXnumtype getType(NumT const number = NumT());
-
-MANTID_NEXUS_DLL NXstatus setCache(long newVal);
 
 }; // namespace NeXus

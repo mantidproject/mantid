@@ -107,11 +107,11 @@ private:
     file.putSlab(&(r8_array[0]), slab_start, slab_size);
 
     // add some attributes
-    cout << "writing attributes to r8_data" << std::endl;
+    cout << "writing attributes to r8_data...";
     file.putAttr("ch_attribute", "NeXus");
     file.putAttr("i4_attribute", 42);
     file.putAttr("r4_attribute", 3.14159265);
-    cout << "... done" << std::endl;
+    cout << "done" << std::endl;
 
     // set up for creating a link
     NXlink link = file.getDataID();
@@ -123,9 +123,7 @@ private:
 #else
     vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-    if (create_code != NXACC_CREATE4) {
-      file.writeData("grosszahl", grossezahl);
-    }
+    file.writeData("grosszahl", grossezahl);
 
     // create a new group inside this one
     file.makeGroup("data", "NXdata", true);
@@ -136,9 +134,9 @@ private:
     // compressed data
     array_dims[0] = 100;
     array_dims[1] = 20;
-    vector<int> comp_array;
-    for (int i = 0; i < array_dims[0]; i++) {
-      for (int j = 0; j < array_dims[1]; j++) {
+    vector<dimsize_t> comp_array;
+    for (dimsize_t i = 0; i < array_dims[0]; i++) {
+      for (dimsize_t j = 0; j < array_dims[1]; j++) {
         comp_array.push_back(i);
       }
     }
@@ -147,13 +145,10 @@ private:
 
     // ---------- Test write Extendible Data --------------------------
     std::vector<int> data(10, 123);
-    file.makeGroup("extendible_data", "NXdata", 1);
+    file.makeGroup("extendible_data", "NXdata", true);
     file.writeExtendibleData("mydata1", data);
     file.writeExtendibleData("mydata2", data, 1000);
-    std::vector<int64_t> dims(2);
-    dims[0] = 5;
-    dims[1] = 2;
-    std::vector<int64_t> chunk(2, 2);
+    DimVector dims{5, 2}, chunk{2, 2};
     file.writeExtendibleData("my2Ddata", data, dims, chunk);
     file.putAttr("string_attrib", "some short string");
 

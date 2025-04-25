@@ -97,8 +97,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
 
   else {
     if (fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size()) {
-      mode = NXACC_CREATEXML;
-      m_nexuscompression = ::NeXus::NONE;
+      throw Exception::FileError("Cannot save XML files", fileName);
     }
     mantidEntryName = "mantid_workspace_1";
   }
@@ -587,7 +586,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       writeTableColumn<bool, bool>(NXnumtype::UINT8, "", *col, str);
     } else if (col->isType<std::string>()) {
       // determine max string size
-      size_t maxStr = 0;
+      std::size_t maxStr = 0;
       for (int ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();

@@ -455,8 +455,7 @@ void LoadNexusLogs::execLoader() {
                                 "' is not a valid NXentry");
   }
 
-  /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
-  /// SNAP
+  /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for SNAP
   try {
     file.openPath("DASlogs");
     try {
@@ -995,6 +994,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
         file.closeData();
         logValue = std::make_unique<Kernel::PropertyWithValue<double>>(propName, static_cast<double>(value[0]), true);
       } else {
+        file.closeData();
         file.closeGroup();
         return;
       }

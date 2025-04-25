@@ -8,7 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
 #include "test_helper.h"
@@ -40,9 +39,6 @@ public:
   // // This means the constructor isn't called when running other tests
   static NeXusFileTest *createSuite() { return new NeXusFileTest(); }
   static void destroySuite(NeXusFileTest *suite) { delete suite; }
-
-  // void setUp() { mkdir( "playground" ); }
-  // void tearDown() { system( "rm -Rf playground"); }
 
   // #################################################################################################################
   // TEST CONSTRUCTORS
@@ -246,6 +242,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
   }
 
+  void test_make_data_layers_bad() {
+    cout << "\ntest makeData layers -- bad\n";
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    NXnumtype type(NXnumtype::CHAR);
+    string data1("layer1"), data2("layer2");
+
+    // create a file with data -- open data
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData(data1, type, 1, false);
+    file.openData(data1);
+
+    // try to create a dataset inside the dataset -- this throws an errpr
+    TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
+  }
+
   void test_closeData() {
     cout << "\ntest closeData\n";
     FileResource resource("test_nexus_file_dataclose.h5");
@@ -320,13 +334,13 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
-    // try to put data into a group -- should fail
+    // try to put data when not in a dataset -- should fail
     int data = 1;
     file.makeGroup("a_group", "NXshirt", true);
     TS_ASSERT_THROWS(file.putData(&data), NeXus::Exception &);
   }
 
-  void xtest_data_putget_string() {
+  void test_data_putget_string() {
     cout << "\ntest dataset read/write -- string\n";
 
     // open a file
@@ -411,11 +425,24 @@ public:
     TS_ASSERT_EQUALS(info.dims.size(), 2);
     TS_ASSERT_EQUALS(info.dims.front(), 3);
     TS_ASSERT_EQUALS(info.dims.back(), 2);
-    for (int i = 0; i < dims[0]; i++) {
-      for (int j = 0; j < dims[1]; j++) {
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      for (dimsize_t j = 0; j < dims[1]; j++) {
         TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
       }
     }
+
+    // put/get a char array
+    char word[] = "silicovolcaniosis";
+    char read[18];
+    file.makeData("data_char", NeXus::getType<char>(), 18, true);
+    file.putData(word);
+    info = file.getInfo();
+    file.getData(read);
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 18);
+    TS_ASSERT_EQUALS(string(word), string(read));
   }
 
   void test_data_putget_vector() {
@@ -455,6 +482,8 @@ public:
   // #################################################################################################################
   // TEST PATH METHODS
   // #################################################################################################################
+
+  /* NOTE for historical reasons, additional tests exist in NeXusFileReadWriteTest.h*/
 
   void test_getPath_groups() {
     cout << "\ntest get_path -- groups only\n";
@@ -505,25 +534,23 @@ public:
 
   void test_openPath() {
     cout << "\ntest openPath\n";
-    fflush(stdout);
-
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
     // setup a recursive group tree
-    Entries tree{Entry{"/entry1", "NXentry"},
-                 Entry{"/entry1/layer2a", "NXentry"},
-                 Entry{"/entry1/layer2a/layer3a", "NXentry"},
-                 Entry{"/entry1/layer2a/layer3b", "NXentry"},
-                 Entry{"/entry1/layer2a/data1", "SDS"},
-                 Entry{"/entry1/layer2b", "NXentry"},
-                 Entry{"/entry1/layer2b/layer3a", "NXentry"},
-                 Entry{"/entry1/layer2b/layer3b", "NXentry"},
-                 Entry{"/entry2", "NXentry"},
-                 Entry{"/entry2/layer2c", "NXentry"},
-                 Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
+                            Entry{"/entry1/layer2a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+                            Entry{"/entry1/layer2a/data1", "SDS"},
+                            Entry{"/entry1/layer2b", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
+                            Entry{"/entry2", "NXentry"},
+                            Entry{"/entry2/layer2c", "NXentry"},
+                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -547,14 +574,14 @@ public:
     file.closeGroup();
     file.closeGroup();
 
+    // make sure we are at root
+    file.openPath("/");
+
     // tests invalid cases
     TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
     // TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
     TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
     TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
-
-    // make sure we are at root
-    file.openPath("/");
 
     // open the root
     file.openGroup("entry1", "NXentry");
@@ -634,8 +661,8 @@ public:
   template <typename T> void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
     // test put/get by pointer to data
     T out;
-    file.putAttr<T>(name, data);
-    file.getAttr<T>(name, out);
+    file.putAttr(name, data);
+    file.getAttr(name, out);
     TS_ASSERT_EQUALS(data, out);
   }
 
@@ -647,11 +674,53 @@ public:
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
+
     // put/get an int attribute
-    do_test_putget_attr(file, "int_attr_", 12);
+    do_test_putget_attr(file, expected_names[0], 12);
 
     // put/get a double attribute
-    do_test_putget_attr(file, "dbl_attr_", 120.2e6);
+    do_test_putget_attr(file, expected_names[1], 120.2e6);
+
+    // put/get a single char attribute
+    do_test_putget_attr(file, expected_names[2], 'x');
+
+    // check attr infos
+    auto attrInfos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(attrInfos.size(), expected_names.size());
+    for (size_t i = 0; i < attrInfos.size(); i++) {
+      TS_ASSERT_EQUALS(attrInfos[i].name, expected_names[i]);
+      TS_ASSERT_EQUALS(attrInfos[i].length, 1);
+    }
+  }
+
+  void test_putget_attr_str() {
+    cout << "\ntest string attribute read/write\n";
+
+    // open a file
+    FileResource resource("test_nexus_attr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // put/get a string attribute
+    string data = "different string of text";
+    do_test_putget_attr(file, "str_attr_", data);
+
+    std::string actual;
+    // put/get a string from a string literal
+    file.putAttr("units", "kg * mol / parsec");
+    file.getAttr("units", actual);
+    TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
+
+    // check attr infos
+    auto attrInfos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(attrInfos.size(), 2);
+    TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
+    TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(attrInfos[0].length, 1);
+    TS_ASSERT_EQUALS(attrInfos[1].name, "units");
+    TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(attrInfos[1].length, 1);
   }
 
   void test_getEntries() {
@@ -663,17 +732,17 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
 
     // setup a recursive group tree
-    Entries tree{Entry{"/entry1", "NXentry"},
-                 Entry{"/entry1/layer2a", "NXentry"},
-                 Entry{"/entry1/layer2a/layer3a", "NXentry"},
-                 Entry{"/entry1/layer2a/layer3b", "NXentry"},
-                 Entry{"/entry1/layer2a/data1", "SDS"},
-                 Entry{"/entry1/layer2b", "NXentry"},
-                 Entry{"/entry1/layer2b/layer3a", "NXentry"},
-                 Entry{"/entry1/layer2b/layer3b", "NXentry"},
-                 Entry{"/entry2", "NXentry"},
-                 Entry{"/entry2/layer2c", "NXentry"},
-                 Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
+                            Entry{"/entry1/layer2a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+                            Entry{"/entry1/layer2a/data1", "SDS"},
+                            Entry{"/entry1/layer2b", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
+                            Entry{"/entry2", "NXentry"},
+                            Entry{"/entry2/layer2c", "NXentry"},
+                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -735,5 +804,11 @@ public:
   // TEST LINK METHODS
   // ################################################################################################################
 
-  /* NOTE these pre-exist, in NeXusFileReadWriteTest.h*/
+  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
+
+  // ##################################################################################################################
+  // TEST READ / WRITE SLAB METHODS
+  // ################################################################################################################
+
+  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
 };

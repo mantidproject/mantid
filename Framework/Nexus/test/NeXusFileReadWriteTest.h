@@ -111,6 +111,7 @@ private:
     T output[Ncheck];
     fileid.openData(dataname);
     fileid.getSlab(&(output[0]), start, size);
+    fileid.closeData();
 
     // compare
     for (int i = 0; i < Ncheck; i++) {
@@ -118,8 +119,8 @@ private:
     }
   }
 
-  template <size_t N, size_t M, typename T>
-  void do_rwslab_test(File &fileid, std::string const dataname, T const (&data)[N][M]) {
+  template <typename T, size_t N, size_t M>
+  void do_rwslab_test(File &fileid, char const *const dataname, T const (&data)[N][M]) {
     cout << "Testing slab " << dataname << "\n";
 
     // write
@@ -132,9 +133,9 @@ private:
 
     // prepare to read/compare
     T output[N][M];
-    fileid.openData(dataname);
 
     // read, compare, row-by-row
+    fileid.openData(dataname);
     for (size_t i = 1; i <= N; i++) {
       size = {(dimsize_t)i, (dimsize_t)M};
       fileid.getSlab(&(output[0][0]), start, size);
@@ -142,6 +143,7 @@ private:
         TS_ASSERT_EQUALS(data[0][j], output[0][j]);
       }
     }
+    fileid.closeData();
   }
 
 public:
@@ -223,13 +225,13 @@ public:
 
     // cleanup and return
     fileid.close();
-    cout << "napi slab test done\n";
+    cout << "napi vec test done\n";
     removeFile(nxFile);
   }
 
   void test_napi_slab() {
     cout << "Starting NAPI SLAB Test\n";
-    std::string const nxFile("NExusFile_test_vec.h5");
+    std::string const nxFile("NexusFile_test_slab.h5");
     File fileid = do_prep_files(nxFile);
 
     // test of slab read/write
@@ -272,7 +274,7 @@ public:
     // make path /entry/data2
     fileid.writeData("data2", '2');
 
-    // make path /entry/data1/more_data
+    // make path /entry/data/more_data
     fileid.makeGroup("data", "NXdata");
     fileid.openGroup("data", "NXdata");
     fileid.writeData("more_data", '3');
