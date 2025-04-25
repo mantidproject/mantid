@@ -13,19 +13,54 @@
 
 namespace Mantid::Kernel {
 
-const std::string OptionalBool::StrUnset = "Unset";
 const std::string OptionalBool::StrFalse = "False";
 const std::string OptionalBool::StrTrue = "True";
+const std::string OptionalBool::StrUnset = "Unset";
 
-OptionalBool::OptionalBool() : m_arg(Unset) {}
+OptionalBool::Value OptionalBool::Validate(const std::string &arg) {
+  printf("Validating OptionalBool: %s\n", arg.c_str());
+  if (arg == OptionalBool::StrFalse) {
+    printf("arg = %s, %s\n", arg.c_str(), OptionalBool::StrFalse.c_str());
+    return False;
+  } else if (arg == OptionalBool::StrTrue) {
+    printf("arg = %s, %s\n", arg.c_str(), OptionalBool::StrTrue.c_str());
+    return True;
+  } else if (arg == OptionalBool::StrUnset) {
+    printf("arg = %s, %s\n", arg.c_str(), OptionalBool::StrUnset.c_str());
+    return Unset;
+  } else {
+    throw std::invalid_argument("Invalid value for OptionalBool: " + arg);
+  }
+}
 
-OptionalBool::OptionalBool(bool arg) { m_arg = arg ? True : False; }
-
-OptionalBool::OptionalBool(Value arg) : m_arg(arg) {}
-
+OptionalBool::OptionalBool() : m_arg(Unset) { printf("\n\nDefault constructor called for OptionalBool\n\n"); }
+OptionalBool::OptionalBool(bool arg) : m_arg(OptionalBool::Value(arg)) {
+  printf("\n\nConstructor called for OptionalBool with bool - %d\n\n", arg);
+}
+OptionalBool::OptionalBool(OptionalBool::Value arg) : m_arg(arg) {
+  printf("\n\nConstructor called for OptionalBool with Value - %d\n\n", arg);
+}
+OptionalBool::OptionalBool(std::string arg) : m_arg(Validate(arg)) {
+  printf("\n\nConstructor called for OptionalBool with string - %s\n\n", arg.c_str());
+}
+OptionalBool::OptionalBool(char const *arg) : m_arg(Validate(std::string(arg))) {
+  printf("\n\nConstructor called for OptionalBool with char const * - %s\n\n", arg);
+}
 bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
 
 bool OptionalBool::operator!=(const OptionalBool &other) const { return m_arg != other.getValue(); }
+
+OptionalBool &OptionalBool::operator=(std::string const &arg) {
+  printf("\n\nAssigning OptionalBool to std::string - %s\n\n", arg.c_str());
+  m_arg = OptionalBool::Validate(arg);
+  return *this;
+}
+
+OptionalBool &OptionalBool::operator=(char const *arg) {
+  printf("\n\nAssigning OptionalBool to char const * - %s\n\n", arg);
+  m_arg = OptionalBool::Validate(std::string(arg));
+  return *this;
+}
 
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
@@ -46,7 +81,7 @@ std::map<std::string, OptionalBool::Value> OptionalBool::strToEnumMap() {
 }
 
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
-  std::map<Value, std::string> map;
+  std::map<OptionalBool::Value, std::string> map;
   auto opposite = strToEnumMap();
   for (auto &oppositePair : opposite) {
     map.emplace(oppositePair.second, oppositePair.first);

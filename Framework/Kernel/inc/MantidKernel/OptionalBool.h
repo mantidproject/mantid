@@ -24,7 +24,7 @@ namespace Kernel {
  */
 class MANTID_KERNEL_DLL OptionalBool {
 public:
-  enum Value { Unset, True, False };
+  enum Value : unsigned char { False, True, Unset };
   static std::map<std::string, Value> strToEnumMap();
   static std::map<Value, std::string> enumToStrMap();
   const static std::string StrUnset;
@@ -35,10 +35,17 @@ public:
   OptionalBool();
   OptionalBool(bool arg);
   OptionalBool(Value arg);
-  virtual ~OptionalBool() = default;
+  OptionalBool(std::string arg);
+  OptionalBool(const OptionalBool &other) = default;
+  OptionalBool(char const *arg);
+  OptionalBool &operator=(const OptionalBool &other) = default;
+  OptionalBool &operator=(std::string const &arg);
+  OptionalBool &operator=(char const *arg);
   bool operator==(const OptionalBool &other) const;
   bool operator!=(const OptionalBool &other) const;
   Value getValue() const;
+  Value Validate(const std::string &arg);
+  virtual ~OptionalBool() = default;
 
 private:
   friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
