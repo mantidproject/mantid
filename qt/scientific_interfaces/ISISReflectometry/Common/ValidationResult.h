@@ -12,11 +12,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-// Use TaggedOptional to avoid nested std::optionals in LookupRow validator classes.
-// The first pair holds the value of type T held by the optional, while the second pair tags whether the content is in
-// a valid state.
-template <typename T> using TaggedOptional = std::pair<std::optional<T>, bool>;
-
 template <typename Validated, typename Error = boost::blank> class ValidationResult {
 public:
   explicit ValidationResult(Validated validItem);
