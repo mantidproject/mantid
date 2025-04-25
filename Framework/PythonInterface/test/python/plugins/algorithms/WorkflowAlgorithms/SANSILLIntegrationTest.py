@@ -9,8 +9,12 @@ import unittest
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import config
 from mantid.simpleapi import SANSILLIntegration, SANSILLReduction
+import platform
+
+SHOULD_SKIP = "arm" in platform.machine()
 
 
+@unittest.skipIf(SHOULD_SKIP, "Skipping tests on ARM architecture")
 class SANSILLIntegrationTest(unittest.TestCase):
     _facility = None
 

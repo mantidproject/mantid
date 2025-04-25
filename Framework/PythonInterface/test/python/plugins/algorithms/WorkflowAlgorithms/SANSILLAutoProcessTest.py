@@ -8,8 +8,12 @@
 import unittest
 from mantid.simpleapi import SANSILLAutoProcess, config, mtd
 from mantid.api import WorkspaceGroup, MatrixWorkspace
+import platform
+
+SHOULD_SKIP = "arm" in platform.machine()
 
 
+@unittest.skipIf(SHOULD_SKIP, "Skipping tests on ARM architecture")
 class SANSILLAutoProcessTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
