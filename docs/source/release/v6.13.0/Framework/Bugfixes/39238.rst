@@ -1,1 +1,1 @@
-- Handled out of bounds error possible when using get ``nthTime`` and ``nthInterval`` methods of a ``FilteredTimeSeriesProperty``. This occurred when the argument ``n`` was specified to be greater than the maximum index of the time filter intervals present.
+- Handled out of bounds error possible when using ``nthTime`` and ``nthInterval`` methods of a ``FilteredTimeSeriesProperty``. This occurred when the argument ``n`` was specified as an invalid index of the time filter intervals vector.

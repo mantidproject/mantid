@@ -155,14 +155,13 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
   } else {
     this->applyFilter();
     // Throw exception if out of bounds
-    if (n >= static_cast<int>(this->m_filterIntervals.size())) {
+    if (n < 0 || n >= static_cast<int>(this->m_filterIntervals.size())) {
       const std::string error("nthInterval(): FilteredTimeSeriesProperty '" + this->name() + "' interval " +
                               std::to_string(n) + " does not exist");
       g_log.debug(error);
       throw std::runtime_error(error);
-    } else {
-      deltaT = this->m_filterIntervals[std::size_t(n)];
     }
+    deltaT = this->m_filterIntervals[std::size_t(n)];
   }
 
   return deltaT;

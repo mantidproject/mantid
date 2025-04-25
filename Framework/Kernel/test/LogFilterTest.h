@@ -62,7 +62,10 @@ public:
     auto testFilter = createTestFilter(1);
     LogFilter flt(p);
     flt.addFilter(*testFilter);
-    TS_ASSERT_THROWS(flt.data()->nthInterval(5), const std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(flt.data()->nthInterval(5), const std::runtime_error &e, std::string(e.what()),
+                            "nthInterval(): FilteredTimeSeriesProperty 'test' interval 5 does not exist");
+    TS_ASSERT_THROWS_EQUALS(flt.data()->nthInterval(-1), const std::runtime_error &e, std::string(e.what()),
+                            "nthInterval(): FilteredTimeSeriesProperty 'test' interval -1 does not exist");
   }
 
   void testFilterWithTrueAtStart() {
