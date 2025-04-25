@@ -62,6 +62,11 @@ typedef enum {
  */
 typedef int NXaccess;
 
+typedef struct {
+  char *iname;
+  int type;
+} info_type, *pinfo;
+
 /** \enum NXentrytype
  * Describes the type of entry in a NeXus file, either group or dataset
  * \li group the entry is a group

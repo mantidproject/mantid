@@ -271,7 +271,8 @@ void File::writeExtendibleData(const string &name, vector<NumT> const &value, co
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> const &value, DimVector const &dims, DimSizeVector const &chunk) {
+void File::writeExtendibleData(const string &name, vector<NumT> const &value, DimVector const &dims,
+                               DimSizeVector const &chunk) {
   // Create the data with unlimited 0th dimensions
   DimVector unlim_dims(dims);
   unlim_dims[0] = NX_UNLIMITED;
@@ -760,6 +761,12 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
 template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
   NumT value;
   this->getAttr(info, &value);
+  return value;
+}
+
+template <typename NumT> NumT File::getAttr(std::string const &name) {
+  NumT value;
+  this->getAttr<NumT>(name, value);
   return value;
 }
 

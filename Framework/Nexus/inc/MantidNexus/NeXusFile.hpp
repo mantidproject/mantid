@@ -537,6 +537,8 @@ public:
    */
   template <typename NumT> NumT getAttr(const AttrInfo &info);
 
+  template <typename NumT> NumT getAttr(std::string const &name);
+
   /**
    * Get the value of an attribute that is a scalar number.
    *
