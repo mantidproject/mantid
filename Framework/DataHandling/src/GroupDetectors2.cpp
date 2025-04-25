@@ -1011,7 +1011,7 @@ size_t GroupDetectors2::formGroupsEvent(const DataObjects::EventWorkspace_const_
     outEL.clearDetectorIDs();
 
     // Reserve space for the event list
-    std::size_t totalEvents = 0.0;
+    std::size_t totalEvents = 0;
     for (auto i : it->second) {
       totalEvents += inputWS->getSpectrum(i).getNumberEvents();
     }
