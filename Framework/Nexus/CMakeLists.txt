@@ -24,8 +24,7 @@ set(INC_FILES
     inc/MantidNexus/nxstack.h
 )
 
-set(TEST_FILES
-    # H5UtilTest.h
+set(TEST_FILES # H5UtilTest.h
     # NexusIOHelperTest.h
     NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h NeXusFileReadWriteTest.h
 )
