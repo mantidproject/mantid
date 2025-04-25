@@ -70,7 +70,7 @@ typedef int NXaccess;
 enum NXentrytype : int { group = 0, sds = 1 };
 
 typedef struct {
-  char targetPath[1024];  /* path to item to link */
+  std::string targetPath; /* path to item to link */
   NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
@@ -181,7 +181,13 @@ public:
  * \li HUF Huffmann encoding (only HDF-4)
  * \ingroup cpp_types
  */
-enum NXcompression : int { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, RLE = NX_COMP_RLE, HUF = NX_COMP_HUF };
+enum NXcompression : int {
+  CHUNK = NX_CHUNK,
+  NONE = NX_COMP_NONE,
+  LZW = NX_COMP_LZW,
+  RLE = NX_COMP_RLE,
+  HUF = NX_COMP_HUF
+};
 
 // forward declare
 namespace NeXus {
@@ -214,8 +220,6 @@ struct AttrInfo {
   std::size_t length;
   /** The name of the attribute. */
   std::string name;
-  /** The dimensions of the attribute. */
-  DimVector dims;
 };
 
 /** Forward declare of NeXus::File */

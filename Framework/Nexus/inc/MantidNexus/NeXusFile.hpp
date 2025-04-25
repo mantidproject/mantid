@@ -330,6 +330,13 @@ public:
   /**
    * Put the supplied data as an attribute into the currently open data.
    *
+   * \param info Description of the attribute to add.
+   * \param data The attribute value.
+   */
+  void putAttr(const AttrInfo &info, const void *data);
+  /**
+   * Put the supplied data as an attribute into the currently open data.
+   *
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value

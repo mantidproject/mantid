@@ -1242,7 +1242,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
   if (NX5getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
     buildCurrentPath(pFile, sRes->targetPath, 1024);
   }
-  sRes->linkType = 1;
+  sRes->linkType = NXentrytype::sds;
   return NXstatus::NX_OK;
 }
 
@@ -2158,7 +2158,7 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
     if (NX5getattr(fileid, "target", sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       buildCurrentPath(pFile, sRes->targetPath, datalen);
     }
-    sRes->linkType = 0;
+    sRes->linkType = NXentrytype::group;
     return NXstatus::NX_OK;
   }
   /* not reached */

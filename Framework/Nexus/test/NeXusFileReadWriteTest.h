@@ -345,7 +345,7 @@ public:
     // TS_ASSERT_EQUALS(somedata, output1);
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-    TS_ASSERT_EQUALS(string(datalink.targetPath), string(res1.targetPath));
+    TS_ASSERT_EQUALS(datalink.targetPath, res1.targetPath);
     cout << "data link works\n";
     fileid.closeData();
 

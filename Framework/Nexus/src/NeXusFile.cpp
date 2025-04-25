@@ -365,7 +365,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
-void File::putAttr(const AttrInfo &info, const void *data) {
+template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *data) {
   if (info.name == NULL_STR) {
     throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"", m_filename);
   }
