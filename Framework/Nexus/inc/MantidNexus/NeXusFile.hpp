@@ -126,7 +126,7 @@ public:
    * \param open_group Whether or not to automatically open the group after
    * creating it.
    */
-  void makeGroup(const std::string &name, const std::string &class_name, bool open_group = false);
+  void makeGroup(std::string const &name, std::string const &class_name, bool open_group = false);
 
   /**
    * Open an existing group.
@@ -134,7 +134,7 @@ public:
    * \param name The name of the group to create (i.e. "entry").
    * \param class_name The type of group to create (i.e. "NXentry").
    */
-  void openGroup(const std::string &name, const std::string &class_name);
+  void openGroup(std::string const &name, std::string const &class_name);
 
   /**
    * Open the NeXus object with the path specified.
@@ -143,7 +143,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  void openPath(const std::string &path);
+  void openPath(std::string const &path);
 
   /**
    * Open the group in which the NeXus object with the specified path exists.
@@ -152,7 +152,7 @@ public:
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  void openGroupPath(const std::string &path);
+  void openGroupPath(std::string const &path);
 
   /**
    * Get the path into the current file
@@ -174,7 +174,7 @@ public:
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(const std::string &name, NXnumtype type, const DimVector &dims, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype type, DimVector const &dims, bool open_data = false);
 
   /**
    * Create a 1D data field with the specified information.
@@ -184,7 +184,7 @@ public:
    * \param length The number of elements in the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(const std::string &name, const NXnumtype type, const dimsize_t length, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype const type, dimsize_t const length, bool open_data = false);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -192,7 +192,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  void writeData(const std::string &name, const std::string &value);
+  void writeData(std::string const &name, std::string const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -200,7 +200,7 @@ public:
    * \param name The name of the field to create.
    * \param value The string to put into the file.
    */
-  void writeData(const std::string &name, const char *value);
+  void writeData(std::string const &name, char const *value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -209,7 +209,7 @@ public:
    * \param name The name of the field to create.
    * \param value The vector to put into the file.
    */
-  template <typename NumT> void writeData(const std::string &name, const std::vector<NumT> &value);
+  template <typename NumT> void writeData(std::string const &name, std::vector<NumT> const &value);
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -218,7 +218,7 @@ public:
    * \param name The name of the field to create.
    * \param value The value to put into the file.
    */
-  template <typename NumT> void writeData(const std::string &name, const NumT &value);
+  template <typename NumT> void writeData(std::string const &name, NumT const &value);
 
   /**
    * Create a n-dimension data field, insert the data, and close the data.
@@ -229,7 +229,7 @@ public:
    * \tparam NumT numeric data type of \a value
    */
   template <typename NumT>
-  void writeData(const std::string &name, const std::vector<NumT> &value, const DimVector &dims);
+  void writeData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -237,7 +237,7 @@ public:
    * \param name :: The name of the field to create.
    * \param value :: The vector to put into the file.
    */
-  template <typename NumT> void writeExtendibleData(const std::string &name, std::vector<NumT> &value);
+  template <typename NumT> void writeExtendibleData(std::string const &name, std::vector<NumT> const &value);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -247,7 +247,7 @@ public:
    * \param chunkSize :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, const dimsize_t chunk);
+  void writeExtendibleData(std::string const &name, std::vector<NumT> const &value, dimsize_t const chunk);
 
   /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
    *
@@ -258,7 +258,8 @@ public:
    * \param chunk :: chunk size to use when writing
    */
   template <typename NumT>
-  void writeExtendibleData(const std::string &name, std::vector<NumT> &value, DimVector &dims, DimSizeVector &chunk);
+  void writeExtendibleData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
+                           DimSizeVector const &chunk);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -267,7 +268,7 @@ public:
    * \param name :: The name of the field to create.
    * \param value :: The vector to put into the file.
    */
-  template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value);
+  template <typename NumT> void writeUpdatedData(std::string const &name, std::vector<NumT> const &value);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -277,7 +278,8 @@ public:
    * \param value :: The vector to put into the file.
    * \param dims :: The dimensions of the data.
    */
-  template <typename NumT> void writeUpdatedData(const std::string &name, std::vector<NumT> &value, DimVector &dims);
+  template <typename NumT>
+  void writeUpdatedData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
 
   /**
    * Create a field with compression.
@@ -341,7 +343,7 @@ public:
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void putAttr(const std::string &name, const NumT value);
+  template <typename NumT> void putAttr(std::string const &name, NumT const &value);
 
   /**
    * Put a string as an attribute in the file.
@@ -349,7 +351,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(const char *name, const char *value);
+  void putAttr(char const *name, char const *value);
 
   /**
    * Put a string as an attribute in the file.
@@ -357,7 +359,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(const std::string &name, const std::string &value, const bool empty_add_space = true);
+  void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -366,7 +368,7 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  template <typename NumT> void putSlab(const NumT *data, const DimSizeVector &start, const DimSizeVector &size);
+  template <typename NumT> void putSlab(NumT const *const data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -377,7 +379,7 @@ public:
    * \tparam NumT numeric data type of \a data
    */
   template <typename NumT>
-  void putSlab(const std::vector<NumT> &data, const DimSizeVector &start, const DimSizeVector &size);
+  void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * Insert a number as part of a data in the final file.
@@ -387,7 +389,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void putSlab(const std::vector<NumT> &data, const dimsize_t start, const dimsize_t size);
+  template <typename NumT> void putSlab(std::vector<NumT> const &data, dimsize_t const start, dimsize_t const size);
 
   /**
    * \return The id of the data used for linking.
@@ -406,7 +408,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *data);
+  template <typename NumT> void getData(NumT *const data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
