@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-// #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
