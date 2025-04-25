@@ -64,9 +64,7 @@ void NXAttributes::set(const std::string &name, const std::string &value) { m_va
  *   @param value :: The new value of the attribute
  */
 template <typename T> void NXAttributes::set(const std::string &name, T value) {
-  std::ostringstream ostr;
-  ostr << value;
-  m_values[name] = ostr.str();
+  m_values[name] = std::to_string(value);
 }
 
 //---------------------------------------------------------
