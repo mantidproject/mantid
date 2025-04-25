@@ -392,6 +392,9 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value, const std::fa
   return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
 }
 
+/** Helper function for setting the value of an OptionalBool property */
+template <> MANTID_KERNEL_DLL void toValue(const std::string &strValue, OptionalBool &value) { value = strValue; }
+
 /** Return value for a given alias.
  * @param alias :: An alias for a value. If a value cannot be found throw an
  * invalid_argument exception.
