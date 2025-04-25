@@ -105,9 +105,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 #else
   vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-  if (create_code != NXACC_CREATE4) {
-    file.writeData("grosszahl", grossezahl);
-  }
+  file.writeData("grosszahl", grossezahl);
 
   // create a new group inside this one
   file.makeGroup("data", "NXdata", true);
@@ -399,8 +397,7 @@ int main(int argc, char **argv) {
     cout << "napi_test_cpp-xml is not supported" << endl;
     return TEST_FAILED;
   } else {
-    nx_creation_code = NXACC_CREATE4;
-    fileext = ".hdf";
+    return TEST_FAILED;
   }
   const string filename("napi_test_cpp" + fileext);
 

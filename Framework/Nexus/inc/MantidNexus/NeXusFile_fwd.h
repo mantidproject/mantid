@@ -86,7 +86,7 @@ constexpr int NX_COMP_LZW = 200;
 constexpr int NX_COMP_RLE = 300;
 constexpr int NX_COMP_HUF = 400;
 
-/** \enum NXstatus
+/**
  * Special codes for NeXus file status.
  * \li OKAY success +1.
  * \li ERROR error 0
