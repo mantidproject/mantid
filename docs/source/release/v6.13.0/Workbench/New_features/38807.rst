@@ -1,0 +1,1 @@
+- Users can now save multiple selected workspaces as ASCII.
