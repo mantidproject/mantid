@@ -80,8 +80,15 @@ Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::I
 
   try {
     intersectionBox = defineActiveRegion(sampleBB);
-  } catch (...) {
+  } catch (const std::invalid_argument &) {
+    // Exception means the beam missed the object and cannot create an intersection BoundingBox
     return nullptr;
+  }
+
+  // If the intersection volume is the same as the sample volume use the sample volume instead of creating a new shape
+  // V3D operator== comparison is done with a 1.0e-6 tolerance
+  if ((sampleBB.minPoint() == intersectionBox.minPoint()) && (sampleBB.maxPoint() == intersectionBox.maxPoint())) {
+    return std::shared_ptr<Geometry::IObject>(sample.clone());
   }
 
   double yExtent = intersectionBox.yMax() - intersectionBox.yMin();

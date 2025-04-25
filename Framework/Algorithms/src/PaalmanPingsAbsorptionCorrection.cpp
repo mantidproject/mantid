@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -35,6 +36,8 @@ using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Algorithms::BeamProfileFactory;
+using Mantid::Geometry::Raster;
 
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
@@ -278,37 +281,46 @@ void PaalmanPingsAbsorptionCorrection::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
+Raster PaalmanPingsAbsorptionCorrection::rasterize(const IObject *object) {
+  IObject_const_sptr integrationVolume;
+  if (m_inputWS->run().hasProperty("GaugeVolume")) {
+    integrationVolume = constructGaugeVolume();
+  } else {
+    try {
+      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      integrationVolume = beamProfile->getIntersectionWithSample(*object);
+    } catch (const std::invalid_argument &) {
+      // If createBeamProfile fails, the beam parameters are not defined
+      // If getIntersectionWithSample fails, the beam misses the object
+      // In either case we will just fall back to using the whole sample below.
+    }
+    if (integrationVolume == nullptr) {
+      // If the beam profile is not defined, use the sample object
+      integrationVolume = std::shared_ptr<const IObject>(object->clone());
+    }
+  }
+
+  return Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *object, m_cubeSideSample);
+}
+
 /// Calculate the distances for L1 (for both self-absorption and
 /// absorption by other object) and element size for each element in
 /// the sample and container
 void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
-  // First, check if a 'gauge volume' has been defined. If not, it's the same as
-  // the sample.
-  auto integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
-  if (m_inputWS->run().hasProperty("GaugeVolume")) {
-    integrationVolume = constructGaugeVolume();
-  }
-
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_sampleObject, m_cubeSideSample);
+  auto raster = rasterize(m_sampleObject);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
-    throw std::runtime_error("Failed to rasterize shape");
+    throw std::runtime_error("Failed to rasterize sample shape");
   // move over the information
   m_numSampleVolumeElements = raster.l1.size();
   m_sampleL1s = std::move(raster.l1);
   m_sampleElementPositions = std::move(raster.position);
   m_sampleElementVolumes = std::move(raster.volume);
-
   // now for the container
-  integrationVolume = std::shared_ptr<const IObject>(m_containerObject->clone());
-  if (m_inputWS->run().hasProperty("GaugeVolume")) {
-    integrationVolume = constructGaugeVolume();
-  }
-
-  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_containerObject, m_cubeSideContainer);
+  raster = rasterize(m_containerObject);
   m_containerVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
-    throw std::runtime_error("Failed to rasterize shape");
+    throw std::runtime_error("Failed to rasterize container shape");
   // move over the information
   m_numContainerVolumeElements = raster.l1.size();
   m_containerL1s = std::move(raster.l1);
