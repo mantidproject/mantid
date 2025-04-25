@@ -214,14 +214,9 @@ void NXClass::clear() {
 }
 
 std::string NXClass::getString(const std::string &name) const {
-  NXChar buff = openNXChar(name);
-  try {
-    buff.load();
-    return std::string(buff(), buff.dim0());
-  } catch (std::runtime_error &) {
-    // deals with reading uninitialized/empty data
-    return std::string();
-  }
+  std::string value;
+  m_fileID->readData(name, value);
+  return value;
 }
 
 double NXClass::getDouble(const std::string &name) const {

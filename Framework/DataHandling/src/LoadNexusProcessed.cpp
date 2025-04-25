@@ -2043,13 +2043,11 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
       axis->setValue(i, axisData[i]);
     }
   } else if (axis->isText()) {
-    NXChar axisData = data.openNXChar("axis2");
-    std::string axisLabels;
+    std::string axisLabels("");
     try {
-      axisData.load();
-      axisLabels = std::string(axisData(), axisData.dim0());
+      axisLabels = data.getString("axis2");
     } catch (std::runtime_error &) {
-      axisLabels = "";
+      // let it drop on the floor
     }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
