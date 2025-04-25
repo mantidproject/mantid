@@ -18,6 +18,13 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
+
+Clipboard initializeClipboard(const boost::optional<std::vector<MantidWidgets::Batch::Subtree>> &subTrees,
+                              const boost::optional<std::vector<MantidWidgets::Batch::RowLocation>> &subtreeRoots) {
+  return subTrees.is_initialized() && subtreeRoots.is_initialized() ? Clipboard(subTrees.get(), subtreeRoots.get())
+                                                                    : Clipboard();
+}
+
 void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
   cell.setBackgroundColor(Colour::DEFAULT);
   cell.setToolTip("");
@@ -591,7 +598,8 @@ void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
-  m_clipboard = Clipboard(*m_view->jobs().selectedSubtrees(), *m_view->jobs().selectedSubtreeRoots());
+
+  m_clipboard = initializeClipboard(m_view->jobs().selectedSubtrees(), m_view->jobs().selectedSubtreeRoots());
   if (m_clipboard.isInitialized())
     m_view->jobs().clearSelection();
   else
@@ -606,7 +614,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (selected.size() < 1)
     return;
 
-  m_clipboard = Clipboard(*m_view->jobs().selectedSubtrees(), *m_view->jobs().selectedSubtreeRoots());
+  m_clipboard = initializeClipboard(m_view->jobs().selectedSubtrees(), m_view->jobs().selectedSubtreeRoots());
   if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
     removeRowsAndGroupsFromModel(selected);
@@ -784,7 +792,6 @@ void RunsTablePresenter::notifyRowStateChanged(std::optional<std::reference_wrap
 void RunsTablePresenter::notifyRowModelChanged() {
   int groupIndex = 0;
   for (auto const &group : m_model.reductionJobs().groups()) {
-    // auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     int rowIndex = 0;
     for (auto const &row : group.rows()) {
       if (row) {
