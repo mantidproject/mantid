@@ -104,7 +104,7 @@ int buildPath(pFileStack self, char *path, int pathlen) {
   if (self->pathStack.empty()) {
     totalPath = "/";
   }
-  for (std::string subpath : self->pathStack) {
+  for (std::string const subpath : self->pathStack) {
     totalPath += "/" + subpath;
   }
   strncpy(path, totalPath.c_str(), pathlen - 1);

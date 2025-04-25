@@ -418,7 +418,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
     free(filename);
   }
-  if (fHandle != NULL) { // cppcheck-suppress knownConditionTrueFalse
+  if (fHandle != NULL) {
     free(fHandle);
   }
   return retstat;
@@ -568,7 +568,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
       return NXstatus::NX_ERROR;
     }
     status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) { // cppcheck-suppress knownConditionTrueFalse
+    if (status == NXstatus::NX_ERROR) {
       return status;
     }
     status = NXopenpath(fid, expath);
