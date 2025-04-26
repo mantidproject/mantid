@@ -926,6 +926,18 @@ template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, int64_t co
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, char const &value);
 
+template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
+template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
+
 template MANTID_NEXUS_DLL int16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL uint16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL int32_t File::getAttr(std::string const &name);
