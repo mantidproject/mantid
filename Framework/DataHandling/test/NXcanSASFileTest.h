@@ -69,10 +69,10 @@ protected:
   }
 
   void do_assert_detector(const H5::Group &instrument, const std::vector<std::string> &detectors) {
-    for (auto &detector : detectors) {
-      std::string detectorName = sasInstrumentDetectorGroupName + detector;
-      auto detectorNameSanitized = makeCanSASRelaxedName(detectorName);
-      auto detectorGroup = instrument.openGroup(detectorNameSanitized);
+    for (const auto &detector : detectors) {
+      const std::string detectorName = sasInstrumentDetectorGroupName + detector;
+      const auto detectorNameSanitized = makeCanSASRelaxedName(detectorName);
+      const auto detectorGroup = instrument.openGroup(detectorNameSanitized);
 
       assertNumberOfAttributes(detectorGroup, 2);
       assertStrAttribute(detectorGroup, sasCanSASclass, sasInstrumentDetectorClassAttr);
@@ -86,9 +86,9 @@ protected:
 
   void do_assert_no_detectors(H5::Group &instrument) {
     // iterate over all groups and confirm that no SASdetector is present
-    auto numObjects = instrument.getNumObjs();
+    const auto numObjects = instrument.getNumObjs();
     for (hsize_t index = 0; index < numObjects; ++index) {
-      auto objectType = instrument.getObjTypeByIdx(index);
+      const auto objectType = instrument.getObjTypeByIdx(index);
       if (objectType == H5G_GROUP) {
         auto subGroupName = instrument.getObjnameByIdx(index);
         auto subGroup = instrument.openGroup(subGroupName);
@@ -108,11 +108,11 @@ protected:
 
     assertStrDataSet(instrument, sasInstrumentName, parameters.instrumentName,
                      "Name of the instrument should have been stored");
-    auto const idfName = parameters.idf == "POLSANSTEST" ? "unknown" : parameters.idf;
+    const auto idfName = parameters.idf == "POLSANSTEST" ? "unknown" : parameters.idf;
     assertStrDataSet(instrument, sasInstrumentIDF, idfName, "The idf should have been stored");
 
     // Check source
-    auto source = instrument.openGroup(sasInstrumentSourceGroupName);
+    const auto source = instrument.openGroup(sasInstrumentSourceGroupName);
     do_assert_source(source, parameters.radiationSource);
 
     // Check aperture
@@ -128,7 +128,7 @@ protected:
     }
   }
 
-  void do_assert_sample(const H5::Group &sample, double thickness) {
+  void do_assert_sample(const H5::Group &sample, const double thickness) {
     assertNumberOfAttributes(sample, 2);
     assertNumArrDataSet(sample, sasInstrumentSampleThickness, thickness, "Sample thickness should match");
   }
@@ -141,7 +141,7 @@ protected:
     }
 
     if (!parameters.magneticFieldDirection.empty()) {
-      auto const dirVec =
+      const auto dirVec =
           Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(parameters.magneticFieldDirection);
       const std::vector<std::string> angles = {sasSampleEMFieldDirectionPolar, sasSampleEMFieldDirectionAzimuthal,
                                                sasSampleEMFieldDirectionRotation};
@@ -198,7 +198,7 @@ protected:
 
   void do_assert_data(const H5::Group &data, const NXcanSASTestParameters &parameters) {
 
-    auto expectedNumAttributes = parameters.hasDx ? 9 : 7;
+    const auto expectedNumAttributes = parameters.hasDx ? 9 : 7;
     assertNumberOfAttributes(data, expectedNumAttributes);
 
     std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasDataClassAttr},
@@ -215,7 +215,7 @@ protected:
       assertStrAttribute(data, attributeName, expectedValue);
     }
 
-    auto intensityDataSet = data.openDataSet(sasDataI);
+    const auto intensityDataSet = data.openDataSet(sasDataI);
     assertStrAttribute(intensityDataSet, sasUncertaintyAttr, sasDataIdev);
     assertStrAttribute(intensityDataSet, sasUncertaintiesAttr, sasDataIdev);
 
@@ -228,8 +228,8 @@ protected:
     assertNumArrEntries(data.openDataSet(sasDataIdev), parameters.size, parameters.error);
 
     // Q data set
-    auto const qDataSet = data.openDataSet(sasDataQ);
-    auto increment = (parameters.xmax - parameters.xmin) / static_cast<double>(parameters.size - 1);
+    const auto qDataSet = data.openDataSet(sasDataQ);
+    const auto increment = (parameters.xmax - parameters.xmin) / static_cast<double>(parameters.size - 1);
     assertNumArrEntries(qDataSet, parameters.size, parameters.xmin, increment);
 
     if (parameters.hasDx) {
@@ -244,18 +244,18 @@ protected:
   void do_assert_polarized_data_2D(const H5::Group &data, const NXcanSASTestParameters &parameters) {
     assertNumberOfAttributes(data, 9);
     auto IaxesAttr = sasDataPin + sasSeparator + sasDataPout + sasSeparator + sasDataQ + sasSeparator + sasDataQ;
-    std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasDataClassAttr},
-                                                  {sasNxclass, nxDataClassAttr},
-                                                  {sasDataIAxesAttr, IaxesAttr},
-                                                  {sasDataIUncertaintyAttr, sasDataIdev},
-                                                  {sasDataIUncertaintiesAttr, sasDataIdev},
-                                                  {sasSignal, sasDataI}};
+    const std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasDataClassAttr},
+                                                        {sasNxclass, nxDataClassAttr},
+                                                        {sasDataIAxesAttr, IaxesAttr},
+                                                        {sasDataIUncertaintyAttr, sasDataIdev},
+                                                        {sasDataIUncertaintiesAttr, sasDataIdev},
+                                                        {sasSignal, sasDataI}};
 
     for (auto const &[attributeName, expectedValue] : attrMap) {
       assertStrAttribute(data, attributeName, expectedValue);
     }
 
-    auto intensityDataSet = data.openDataSet(sasDataI);
+    const auto intensityDataSet = data.openDataSet(sasDataI);
 
     assertStrAttribute(intensityDataSet, sasUncertaintyAttr, sasDataIdev);
     assertStrAttribute(intensityDataSet, sasUncertaintiesAttr, sasDataIdev);
@@ -295,7 +295,7 @@ protected:
 
   void do_assert_polarized_data_1D(const H5::Group &data, const NXcanSASTestParameters &parameters) {
 
-    auto expectedNumAttributes = parameters.hasDx ? 11 : 9;
+    const auto expectedNumAttributes = parameters.hasDx ? 11 : 9;
     assertNumberOfAttributes(data, expectedNumAttributes);
 
     std::map<std::string, std::string> attrMap = {
@@ -313,7 +313,7 @@ protected:
       assertStrAttribute(data, attributeName, expectedValue);
     }
 
-    auto intensityDataSet = data.openDataSet(sasDataI);
+    const auto intensityDataSet = data.openDataSet(sasDataI);
 
     assertStrAttribute(intensityDataSet, sasUncertaintyAttr, sasDataIdev);
     assertStrAttribute(intensityDataSet, sasUncertaintiesAttr, sasDataIdev);
@@ -347,12 +347,12 @@ protected:
     // Actual Values are being tested in LoadNXcanSAS to avoid redundant testing
     assertNumberOfAttributes(data, 7);
 
-    std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasDataClassAttr},
-                                                  {sasNxclass, nxDataClassAttr},
-                                                  {sasDataIAxesAttr, sasDataQ + sasSeparator + sasDataQ},
-                                                  {sasDataIUncertaintyAttr, sasDataIdev},
-                                                  {sasDataIUncertaintiesAttr, sasDataIdev},
-                                                  {sasSignal, sasDataI}};
+    const std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasDataClassAttr},
+                                                        {sasNxclass, nxDataClassAttr},
+                                                        {sasDataIAxesAttr, sasDataQ + sasSeparator + sasDataQ},
+                                                        {sasDataIUncertaintyAttr, sasDataIdev},
+                                                        {sasDataIUncertaintiesAttr, sasDataIdev},
+                                                        {sasSignal, sasDataI}};
 
     for (auto const &[attributeName, expectedValue] : attrMap) {
       assertStrAttribute(data, attributeName, expectedValue);
@@ -373,17 +373,18 @@ protected:
 
   void do_assert_transmission(const H5::Group &entry, const TransmissionTestParameters &parameters) {
     // Map for attributes to assert with the expected values stored in NXcanSAS file.
-    std::map<std::string, std::string> attrMap = {{sasCanSASclass, sasTransmissionSpectrumClassAttr},
-                                                  {sasNxclass, nxTransmissionSpectrumClassAttr},
-                                                  {sasTransmissionSpectrumNameAttr, parameters.name},
-                                                  {sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT},
-                                                  {sasTransmissionSpectrumTUncertainty, sasTransmissionSpectrumTdev},
-                                                  {sasTransmissionSpectrumTUncertainties, sasTransmissionSpectrumTdev},
-                                                  {sasSignal, sasTransmissionSpectrumT}};
+    const std::map<std::string, std::string> attrMap = {
+        {sasCanSASclass, sasTransmissionSpectrumClassAttr},
+        {sasNxclass, nxTransmissionSpectrumClassAttr},
+        {sasTransmissionSpectrumNameAttr, parameters.name},
+        {sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT},
+        {sasTransmissionSpectrumTUncertainty, sasTransmissionSpectrumTdev},
+        {sasTransmissionSpectrumTUncertainties, sasTransmissionSpectrumTdev},
+        {sasSignal, sasTransmissionSpectrumT}};
 
-    auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName + "_" + parameters.name);
+    const auto transmission = entry.openGroup(sasTransmissionSpectrumGroupName + "_" + parameters.name);
 
-    for (auto const &[attributeName, expectedValue] : attrMap) {
+    for (const auto &[attributeName, expectedValue] : attrMap) {
       assertStrAttribute(transmission, attributeName, expectedValue);
     }
 
@@ -392,16 +393,16 @@ protected:
     TS_ASSERT_THROWS_NOTHING(
         H5Util::readStringAttribute(transmission, sasTransmissionSpectrumTimeStampAttr, transmissionAttribute));
     // T data set
-    auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
+    const auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
     assertNumArrEntries(tDataSet, parameters.size, parameters.value);
 
     // Tdev data set
-    auto tErrorDataSet = transmission.openDataSet(sasTransmissionSpectrumTdev);
+    const auto tErrorDataSet = transmission.openDataSet(sasTransmissionSpectrumTdev);
     assertNumArrEntries(tErrorDataSet, parameters.size, parameters.error);
 
     // Lambda data set
-    auto lambdaDataSet = transmission.openDataSet(sasTransmissionSpectrumLambda);
-    double increment = (parameters.xmax - parameters.xmin) / static_cast<double>(parameters.size - 1);
+    const auto lambdaDataSet = transmission.openDataSet(sasTransmissionSpectrumLambda);
+    const double increment = (parameters.xmax - parameters.xmin) / static_cast<double>(parameters.size - 1);
     assertNumArrEntries(lambdaDataSet, parameters.size, parameters.xmin, increment);
 
     // Size check for matching T/Tdev/lambda
@@ -411,11 +412,11 @@ protected:
   }
 
   void do_assert(const NXcanSASTestParameters &parameters) {
-    auto filename = parameters.filename;
+    const auto filename = parameters.filename;
     H5::H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     // Check sasentry
-    auto entry = file.openGroup(sasEntryGroupName + sasEntryDefaultSuffix);
+    const auto entry = file.openGroup(sasEntryGroupName + sasEntryDefaultSuffix);
     do_assert_sasentry(entry, parameters);
 
     // Check instrument
@@ -423,11 +424,11 @@ protected:
     do_assert_instrument(instrument, parameters);
 
     // Check Sample
-    auto sample = entry.openGroup(sasInstrumentSampleGroupAttr);
+    const auto sample = entry.openGroup(sasInstrumentSampleGroupAttr);
     do_assert_sample(sample, parameters.sampleThickness);
 
     // Check process
-    auto process = entry.openGroup(sasProcessGroupName);
+    const auto process = entry.openGroup(sasProcessGroupName);
     do_assert_process(process, parameters);
 
     // Check the transmission for sample and can if necessary
@@ -439,7 +440,7 @@ protected:
     }
 
     // Check data
-    auto data = entry.openGroup(sasDataGroupName);
+    const auto data = entry.openGroup(sasDataGroupName);
     if (!parameters.isPolarized) {
       parameters.is2dData ? do_assert_2D_data(data) : do_assert_data(data, parameters);
 
@@ -454,8 +455,8 @@ protected:
   }
 
 private:
-  void assertNumberOfAttributes(const H5::H5Object &object, int expectedNumberAttributes) {
-    auto numAttributes = object.getNumAttrs();
+  void assertNumberOfAttributes(const H5::H5Object &object, const int expectedNumberAttributes) {
+    const auto numAttributes = object.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have " + std::to_string(expectedNumberAttributes) + " attributes, but " +
                           std::to_string(numAttributes) + " were found",
                       expectedNumberAttributes, numAttributes);
@@ -470,8 +471,8 @@ private:
 
   void assertStrDataSet(const H5::Group &group, const std::string &dataSetName, const std::string &expectedValue,
                         const std::optional<std::string> &message = std::nullopt) {
-    auto dataSet = group.openDataSet(dataSetName);
-    auto value = H5Util::readString(dataSet);
+    const auto dataSet = group.openDataSet(dataSetName);
+    const auto value = H5Util::readString(dataSet);
     TSM_ASSERT_EQUALS(message.value_or("Should be " + expectedValue), value, expectedValue);
   }
 
@@ -480,7 +481,7 @@ private:
                            const std::optional<std::string> &message = std::nullopt) {
 
     std::vector<numT> values;
-    auto dataSet = group.openDataSet(dataSetName);
+    const auto dataSet = group.openDataSet(dataSetName);
     H5Util::readArray1DCoerce<numT>(dataSet, values);
     TSM_ASSERT_EQUALS(message.value_or("Should be " + std::to_string(expectedValue)), values[0], expectedValue);
   }
@@ -495,7 +496,7 @@ private:
   }
 
   template <typename numT>
-  void assertNumArrEntries(const H5::DataSet &dataSet, int size, numT referenceValue, numT increment = 0) {
+  void assertNumArrEntries(const H5::DataSet &dataSet, const int size, numT referenceValue, numT increment = 0) {
     std::vector<numT> data;
     H5Util::readArray1DCoerce<numT>(dataSet, data);
     TS_ASSERT_EQUALS(data.size(), static_cast<size_t>(size));
@@ -509,14 +510,15 @@ private:
     }
   }
 
-  void assertMDNumArrEntries(const H5::DataSet &dataSet, int size, const std::vector<double> &reference, int offset) {
+  void assertMDNumArrEntries(const H5::DataSet &dataSet, const int size, const std::vector<double> &reference,
+                             const int offset) {
     // Dump the MD dimensional array into a 1D array. The assertion tries to match a reference value every offset
     // to a point of the data vector. Used for testing multidimensional arrays, for example, with group workspaces.
     std::vector<double> data;
     H5Util::readArray1DCoerce<double>(dataSet, data);
     TS_ASSERT_EQUALS(data.size(), static_cast<size_t>(size));
     for (auto i = 0; i < static_cast<int>(reference.size()); i++) {
-      auto index = i * offset;
+      const auto index = i * offset;
       TS_ASSERT_DELTA(data[index], reference[i], DELTA);
     }
   }
@@ -526,7 +528,7 @@ private:
   }
 
   void assertDataSetDoesNotThrow(const H5::Group &group, const std::string &dataSetName) {
-    auto dataSet = group.openDataSet(dataSetName);
+    const auto dataSet = group.openDataSet(dataSetName);
     TS_ASSERT_THROWS_NOTHING(H5Util::readString(dataSet));
   }
 
@@ -550,10 +552,10 @@ private:
   }
 
   void assertPolarizedComponent(const H5::Group &group, const std::vector<std::string> &components,
-                                const std::string &componentType, double expectedCompDistance,
+                                const std::string &componentType, const double expectedCompDistance,
                                 const std::string &expectedValueType) {
     for (size_t i = 0; i < components.size(); i++) {
-      auto compName = components.at(i);
+      const auto &compName = components.at(i);
       auto groupName = "sas" + componentType;
       groupName.append(components.size() > 1 ? addDigit(i + 1) : "");
 
