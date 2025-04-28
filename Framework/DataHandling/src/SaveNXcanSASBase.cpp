@@ -43,10 +43,11 @@ void areAxesNumeric(const MatrixWorkspace_sptr &workspace, const int numberOfDim
   }
   std::vector<int> indices(numberOfDims);
   std::generate(indices.begin(), indices.end(), [i = 0]() mutable { return i++; });
-  for (const auto &index : indices) {
-    if (!workspace->getAxis(index)->isNumeric()) {
-      throw std::invalid_argument("Invalid workspace: Axis " + std::to_string(index) + " is not numeric");
-    }
+  const auto itIndex = std::find_if(indices.cbegin(), indices.cend(), [&workspace](const auto &index) {
+    return !workspace->getAxis(index)->isNumeric();
+  });
+  if (itIndex != indices.cend()) {
+    throw std::invalid_argument("Invalid workspace: Axis " + std::to_string(*itIndex) + " is not numeric");
   }
 }
 
