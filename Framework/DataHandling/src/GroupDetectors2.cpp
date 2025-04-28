@@ -1010,6 +1010,13 @@ size_t GroupDetectors2::formGroupsEvent(const DataObjects::EventWorkspace_const_
     // Start fresh with no detector IDs
     outEL.clearDetectorIDs();
 
+    // Reserve space for the event list
+    std::size_t totalEvents = 0;
+    for (auto i : it->second) {
+      totalEvents += inputWS->getSpectrum(i).getNumberEvents();
+    }
+    outEL.reserve(totalEvents);
+
     // the Y values and errors from spectra being grouped are combined in the
     // output spectrum
     // Keep track of number of detectors required for masking
