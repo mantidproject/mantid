@@ -717,9 +717,11 @@ void File::openData(std::string const &name) {
 void File::closeData() {
   try {
     H5::DataSet *data = this->getCurrentLocationAs<H5::DataSet>();
+
     data->close();
     this->m_stack.pop_back();
   } catch (...) {
+
     throw Exception("Object at current location is not a dataset", "closeData", m_filename);
   }
 }
@@ -1008,7 +1010,12 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::st
 
 std::string File::getStrData() {
   H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
-  return H5Util::readString(*dataset);
+  const std::string value = H5Util::readString(*dataset);
+  if (value == " ") {
+    return "";
+  } else {
+    return value;
+  }
 }
 
 template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
