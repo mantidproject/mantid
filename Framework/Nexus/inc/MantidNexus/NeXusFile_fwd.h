@@ -178,7 +178,7 @@ public:
   operator std::string() const;
 };
 
-/** \enum NXcompression
+/**
  * The available compression types. These are all ignored in xml files.
  * \li NONE no compression
  * \li LZW Lossless Lempel Ziv Welch compression (recommended)

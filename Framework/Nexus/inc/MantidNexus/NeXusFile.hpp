@@ -323,6 +323,8 @@ public:
    */
   template <typename NumT> void putData(NumT const *data);
 
+  void putData(std::string const &data);
+
   /**
    * \param data The data to put in the file.
    * \tparam NumT numeric data type of \a data

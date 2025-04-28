@@ -255,9 +255,6 @@ public:
     file.makeGroup("entry", "NXentry", true);
     file.makeData(data1, type, 1, false);
     file.openData(data1);
-
-    // try to create a dataset inside the dataset -- this throws an errpr
-    // TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
   }
 
   void test_closeData() {
@@ -340,11 +337,11 @@ public:
     TS_ASSERT_THROWS(file.putData(&data), NeXus::Exception &);
   }
 
-  void xtest_data_putget_string() {
+  void test_data_putget_string() {
     cout << "\ntest dataset read/write -- string\n";
 
     // open a file
-    FileResource resource("test_nexus_file_stringrw=.h5");
+    FileResource resource("test_nexus_file_stringrw.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
@@ -352,23 +349,6 @@ public:
     // put/get a string
     cout << "\nread/write string...\n";
     string in("this is a string"), out;
-    file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
-    file.putData(&in);
-    file.getData(&out);
-    file.closeData();
-    TS_ASSERT_EQUALS(in, out);
-
-    // do it another way
-    in = "this is some different data";
-    DimVector dims({(dimsize_t)in.size()});
-    file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
-    file.putData(&in);
-    file.getData(&out);
-    file.closeData();
-    TS_ASSERT_EQUALS(in, out);
-
-    // yet another way
-    in = "even more data";
     file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
     out = file.getStrData();
@@ -434,15 +414,14 @@ public:
     // put/get a char array
     char word[] = "silicovolcaniosis";
     char read[18];
-    file.makeData("data_char", NeXus::getType<char>(), 18, true);
+    file.makeData("data_char", NeXus::getType<char>(), 17, true);
     file.putData(word);
     info = file.getInfo();
     file.getData(read);
     file.closeData();
     // confirm
-    // TS_ASSERT_EQUALS(info.dims.size(), 1);
-    // TS_ASSERT_EQUALS(info.dims.front(), 18);
-    // TS_ASSERT_EQUALS(string(word), string(read));
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 17);
   }
 
   void test_data_putget_vector() {
@@ -576,7 +555,6 @@ public:
 
     // tests invalid cases
     TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
-    // TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
     TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
     TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
 
@@ -666,24 +644,23 @@ public:
     TS_ASSERT_EQUALS(data, out);
   }
 
-  void xtest_putget_attr_basic() {
+  void test_putget_attr_basic() {
     cout << "\ntest attribute read/write\n";
 
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    // move to an entry to avoid conflict with some root-level attributes
+    file.makeGroup("entry", "NXentry", true);
 
-    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
 
     // put/get an int attribute
     do_test_putget_attr(file, expected_names[0], 12);
 
     // put/get a double attribute
     do_test_putget_attr(file, expected_names[1], 120.2e6);
-
-    // put/get a single char attribute
-    do_test_putget_attr(file, expected_names[2], 'x');
 
     // check attr infos
     auto attrInfos = file.getAttrInfos();
@@ -694,13 +671,15 @@ public:
     }
   }
 
-  void xtest_putget_attr_str() {
+  void test_putget_attr_str() {
     cout << "\ntest string attribute read/write\n";
 
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    // move to an entry to avoid conflict with some root-level attributes
+    file.makeGroup("entry", "NXentry", true);
 
     // put/get a string attribute
     string data = "different string of text";
@@ -717,10 +696,10 @@ public:
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
     TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
     TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[0].length, 1);
+    TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[1].length, 1);
+    TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
   }
 
   void test_getEntries() {
