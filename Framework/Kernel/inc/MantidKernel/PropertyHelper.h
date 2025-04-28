@@ -209,6 +209,9 @@ template <typename T> void toValue(const std::string &strvalue, T &value) { valu
 
 template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) { throw boost::bad_lexical_cast(); }
 
+/** Helper function for setting the value of an OptionalBool property */
+template <> [[maybe_unused]] void toValue(const std::string &strValue, OptionalBool &value) { value = strValue; }
+
 namespace detail {
 // vector<int> specializations
 template <typename T> void toValue(const std::string &strvalue, std::vector<T> &value, std::true_type) {
