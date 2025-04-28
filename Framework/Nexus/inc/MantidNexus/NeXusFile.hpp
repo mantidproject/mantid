@@ -370,7 +370,7 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  template <typename NumT> void putSlab(NumT const *const data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size);
 
   /**
    * Insert an array as part of a data in the final file.
