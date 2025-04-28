@@ -60,6 +60,8 @@ static char const *const FilterByTofMaxStr = "FilterByTofMax";
 static char const *const FilterByTimeStartStr = "FilterByTimeStart";
 static char const *const FilterByTimeStopStr = "FilterByTimeStop";
 
+static int64_t constexpr NanoSecondsInSecond{1'000'000'000};
+
 using ANSTO::EventVector_pt;
 
 template <typename TYPE>
@@ -583,8 +585,14 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
         instrumentInfo.sample_name = tmp_str;
       if (loadNXString(entry, "sample/description", tmp_str))
         instrumentInfo.sample_description = tmp_str;
-      if (loadNXString(entry, "start_time", tmp_str))
-        instrumentInfo.start_time = tmp_str;
+      //      if (loadNXString(entry, "start_time", tmp_str))
+      //        instrumentInfo.start_time = tmp_str;
+      uint64_t epochStart{0};
+      if (loadNXDataSet(entry, "instrument/detector/start_time", epochStart)) {
+        auto gpsStart = epochStart - static_cast<uint64_t>(Types::Core::DateAndTime::EPOCH_DIFF);
+        Types::Core::DateAndTime startDateTime(gpsStart * NanoSecondsInSecond);
+        instrumentInfo.start_time = startDateTime.toISO8601String();
+      }
 
       if (loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int32))
         instrumentInfo.master1_chopper_id = tmp_int32;
