@@ -309,6 +309,14 @@ H5::H5Location *File::getCurrentLocation() {
   return ret;
 }
 
+namespace {
+// methods for better exception messages
+template <typename T> std::string H5TypeAsString() { return "unknown"; }
+template <> std::string H5TypeAsString<H5::H5Object>() { return "H5Object"; }
+template <> std::string H5TypeAsString<H5::Group>() { return "Group"; }
+template <> std::string H5TypeAsString<H5::DataSet>() { return "DataSet"; }
+} // namespace
+
 /** Return a pointer corresponding to current location in file stack,
  * cast to pointer of indicated type.
  */
@@ -316,7 +324,9 @@ template <typename T> T *File::getCurrentLocationAs() {
   T *loc = dynamic_cast<T *>(this->getCurrentLocation());
   if (loc == nullptr) {
     std::stringstream msg;
-    throw Exception("Could not cast current location to needed H5Cpp type", "getCurrentLocationAs", m_filename);
+    msg << "Could not cast current location to needed H5Cpp type (requested=" << H5TypeAsString<T>() << ") at "
+        << getPath();
+    throw Exception(msg.str(), "getCurrentLocationAs", m_filename);
   }
   return loc;
 }
