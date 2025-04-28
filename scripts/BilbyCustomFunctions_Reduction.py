@@ -1,18 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#   NScD Oak Ridge National Laboratory, European Spallation Source,
-#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +from mantid.simpleapi import *
+from __future__ import print_function
 import csv
 import math
 from itertools import product
 import sys
 from mantid.simpleapi import MoveInstrumentComponent, CropWorkspace
 
-# values for att_pos 2 and 4 shall not make sense; those attenuators have not been in use that time
-attenuation_correction_pre_2016 = {1.0: 0.007655, 2.0: -1.0, 3.0: 1.0, 4.0: -1.0, 5.0: 0.005886}
-attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
+# March 2023: attenuation_correction_post_2016_2023 added, attenuators re-callibrated
+# November 2024: def DetShift_after_october2024 added
 
 ##############################################################################
 
@@ -269,7 +269,22 @@ def read_csv(filename):
 ##############################################################################
 
 
-def attenuation_correction(att_pos, data_before_May_2016):
+# values for att_pos 2 and 4 shall not make sense; those attenuators have not been in use that time
+attenuation_correction_pre_2016 = {1.0: 0.007655, 2.0: -1.0, 3.0: 1.0, 4.0: -1.0, 5.0: 0.005886}
+# the following values are not applicable anymore
+attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
+
+# 2023: re-callibrated attenuators, discovering solid dependence of values on nguide for Att3, Att4 and Att5
+attenuation_correction_post_2016_2023 = {
+    1.0: 1.0,
+    2.0: 1.0 / 98.0,
+    3.0: [1.0 / 145.0, 1.0 / 155.5911, 1.0 / 162.0, 1.0 / 170.060, 1.0 / 162.710, 1.0 / 162.0, 1.0 / 170.948],  # ng0, ng1 etc to ng6
+    4.0: [1 / 332.0, 1 / 367.01123, 1 / 344.82358, 1 / 353.87057, 1 / 349.56213, 1 / 332.90527, 1.0 / 320.0],
+    5.0: [1 / 2567.179, 1 / 3119.415457, 1 / 2644.747066, 1 / 2524.356, 1 / 2650.7021, 1 / 2281.926072, 1 / 2122.0],
+}
+
+
+def attenuation_correction(att_pos, nguide_empty_beam, data_before_May_2016):  # Updated in June 2023, added dependence on nguide
     """Bilby has four attenuators; before May 2016 there were only two.
     Value of the attenuators are hard coded here and being used for the I(Q) scaling in Q1D"""
 
@@ -280,7 +295,12 @@ def attenuation_correction(att_pos, data_before_May_2016):
             sys.exit()
         scale = attenuation_correction_pre_2016[att_pos]
     else:
-        scale = attenuation_correction_post_2016[att_pos]
+        if att_pos == 1.0 or att_pos == 2.0:
+            print("I am new, att 2 ", attenuation_correction_post_2016_2023[att_pos])
+            scale = attenuation_correction_post_2016_2023[att_pos]
+        else:
+            print("I am new, att > 2 ", attenuation_correction_post_2016_2023[att_pos][int(nguide_empty_beam)])
+            scale = attenuation_correction_post_2016_2023[att_pos][int(nguide_empty_beam)]
     return scale
 
 
@@ -341,7 +361,6 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
     # [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
     pixelsize = get_pixel_size()
-
     correct_element_one_stripe("BackDetectorLeft", pixelsize, shifts[0], ws_to_correct)
     correct_element_one_stripe("BackDetectorRight", pixelsize, shifts[1], ws_to_correct)
     correct_element_one_stripe("CurtainLeft", pixelsize, shifts[2], ws_to_correct)
@@ -350,7 +369,31 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     correct_element_one_stripe("CurtainBottom", pixelsize, shifts[5], ws_to_correct)
     move_rear_panels(shifts[6][0], pixelsize, ws_to_correct)
 
-    correction_based_on_experiment(ws_to_correct)
+    # correction_based_on_experiment(ws_to_correct) #It is in here from 2016... not needed anymore - removed in Jan 2025
+
+    return
+
+
+##############################################################################
+
+
+# Using the same shift-table as in "correction_tubes_shift"
+def correction_curtains_shift_2024(ws_to_correct, path_to_shifts_file):
+    """This function moves each tube and then rear panels as a whole as per numbers recorded in the path_to_shifts_file csv file.
+    The values in the file are obtained from fitting of a few data sets collected using different masks.
+    It is a very good idea do not change the file."""
+
+    shifts = []
+    shifts = read_csv(path_to_shifts_file)
+    # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
+    # [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
+    pixelsize = get_pixel_size()  ## already in m
+    curtain_shift = float(shifts[6][0]) * pixelsize
+
+    MoveInstrumentComponent(ws_to_correct, "CurtainLeft", X=0.0, Y=(-1) * curtain_shift, Z=0)
+    MoveInstrumentComponent(ws_to_correct, "CurtainRight", X=0.0, Y=curtain_shift, Z=0)
+    MoveInstrumentComponent(ws_to_correct, "CurtainTop", X=curtain_shift, Y=0.0, Z=0)
+    MoveInstrumentComponent(ws_to_correct, "CurtainBottom", X=(-1) * curtain_shift, Y=0.0, Z=0)
 
     return
 
@@ -403,6 +446,7 @@ def move_rear_panels(shift, pixelsize, ws):
 ##############################################################################
 
 
+# Dec 2024: the call moved to the reducer, to split from the Cd shifts only
 def correction_based_on_experiment(ws_to_correct):
     """The function to move curtains, based on fits/analysis of a massive set of AgBeh and liquid crystals data
     collected on 6 Oct 2016. Previous Laser tracker data has not picked up these imperfections."""
@@ -418,7 +462,6 @@ def correction_based_on_experiment(ws_to_correct):
 
 
 ##############################################################################
-
 
 """ Final detectors' alignement has been done using laser tracker in January, 2016.
     To correct data collected before that, some extra shift hardcoded here, shall be applied """
@@ -437,3 +480,43 @@ def det_shift_before_2016(ws_to_correct):
 
     correction_based_on_experiment(ws_to_correct)
     return ws_to_correct
+
+
+##############################################################################
+""" Electronics changed to Mesytec, detector are re-installed and re-aligned """
+# Jan 2025: not in use, added to the Reducer: still cnahging too often
+
+
+def DetShift_after_october2024(ws):
+    # left: difference with SICS: shall be 2.05 closer to the beam (x)
+    # left: average off-center 3.185 (vertical, y)
+    shift_x_curtainl = -2.05 / 1000
+    shift_y_curtainl = -5.5 / 1000  # -3.185/1000
+
+    # right: difference with SICS: shall be 1.763 closer to the beam (x)
+    # right: average off-center 3.2529 (vertical, y)
+    shift_x_curtainr = 1.763 / 1000
+    shift_y_curtainr = -4.0 / 1000  # -3.2529/1000
+
+    # top: average off-center 2.456 (horizontal, x)
+    # top: difference with SICS: shall be 0.585677 closer to the beam (y)
+    shift_x_curtainu = 1.5 / 1000  # 2.456/1000
+    shift_y_curtainu = -0.585677 / 1000
+
+    # bottom: average off-center 2.048875 (horizontal, x)
+    # bottom: difference with SICS: shall be 9.5589 closer to the beam (y)
+    shift_x_curtaind = 1.0 / 1000  # 2.048875/1000
+    shift_y_curtaind = 9.5589 / 1000
+
+    # rear detector: average off-center -0.15063 (to move up in y)
+    shift_rear_left = -0.15063 / 1000
+    shift_rear_right = -0.15063 / 1000
+
+    MoveInstrumentComponent(ws, "CurtainLeft", X=shift_x_curtainl, Y=shift_y_curtainl, Z=0.0)
+    MoveInstrumentComponent(ws, "CurtainRight", X=shift_x_curtainr, Y=shift_y_curtainr, Z=0.0)
+
+    MoveInstrumentComponent(ws, "CurtainTop", X=shift_x_curtainu, Y=shift_y_curtainu, Z=0.0)
+    MoveInstrumentComponent(ws, "CurtainBottom", X=shift_x_curtaind, Y=shift_y_curtaind, Z=0.0)
+
+    MoveInstrumentComponent(ws, "BackDetectorLeft", X=0, Y=shift_rear_left, Z=0)
+    MoveInstrumentComponent(ws, "BackDetectorRight", X=0, Y=shift_rear_right, Z=0)

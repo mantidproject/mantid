@@ -72,9 +72,12 @@ private:
   void createInstrument(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
                         InstrumentInfo &instrumentInfo, std::map<std::string, double> &logParams,
                         std::map<std::string, std::string> &logStrings, std::map<std::string, std::string> &allParams);
-  void loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
+  void loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                std::map<std::string, double> &logParams,
                                 std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams);
+
+  bool useHMScanTime{false};
 };
 
 } // namespace DataHandling

@@ -332,6 +332,7 @@ set(TEST_FILES
     ConfigServiceTest.h
     CowPtrTest.h
     DataServiceTest.h
+    DateAndTimeTest.h
     DateAndTimeHelpersTest.h
     DateTimeValidatorTest.h
     DateValidatorTest.h

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "BILBY" valid-from = "1901-01-01T00:00:00">
 
   <component-link name = "BILBY">
@@ -91,10 +91,19 @@
       <value val="instrument/shutters/rough_100, na, in"/>
     </parameter>
 	
-	<!-- parameter to be added to log that is not in the hdf file -->
+    <parameter name="log_nguide" type="string">
+      <value val="instrument/nguide, 1.0, 0.0" />
+    </parameter>
+
+    <parameter name="log_detector_time" type="string">
+      <value val="instrument/detector/time, 1.0, 0.0" />
+    </parameter>
+
+    
+	<!-- parameter to be added to log that is not in the hdf file
 	<parameter name="log_curtain_rotation" type="string">
       <value val=",,10.0"/>
-    </parameter>
+    </parameter> -->
 	
 	<!-- dummy parameter to support unit testing,
 		the parameter is not present in the data file and does not

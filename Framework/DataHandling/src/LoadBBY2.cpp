@@ -4,8 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <sstream>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -62,8 +65,37 @@ static char const *const FilterByTofMaxStr = "FilterByTofMax";
 static char const *const FilterByTimeStartStr = "FilterByTimeStart";
 static char const *const FilterByTimeStopStr = "FilterByTimeStop";
 
+static char const *const UseHMScanTimeStr = "UseHMScanTime";
+
 using namespace ANSTO;
 using ANSTO::EventVector_pt;
+
+template <typename T>
+void traceStatistics(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                     Kernel::Logger &log) {
+
+  if (log.isDebug()) {
+
+    std::vector<uint64_t> times;
+    std::vector<T> values;
+    std::string units;
+    auto n = Anxs::extractTimedDataSet<T>(entry, path, startTime, endTime, times, values, units);
+
+    // log stats on the parameter variation
+    if (n > 0) {
+      auto meanX = std::accumulate(values.begin(), values.end(), 0.0) / n;
+      T accum{0};
+      std::for_each(values.begin(), values.end(), [&](const double d) { accum += (d - meanX) * (d - meanX); });
+      auto stdX = sqrt(accum / n);
+      auto result = std::minmax_element(values.begin(), values.end());
+      log.debug() << "Log parameter " << path << ": " << meanX << " +- " << stdX << ", " << *result.first << " ... "
+                  << *result.second << ", pts " << n << std::endl;
+    } else {
+      log.debug() << "Cannot find : " << path << std::endl;
+      return;
+    }
+  }
+}
 
 template <typename TYPE>
 void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::string &time, const std::string &name,
@@ -84,9 +116,12 @@ void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, Ne
 
   prog.doReport(progMsg);
 
+  // for progress notifications
+  ANSTO::ProgressTracker progTracker(prog, progMsg, Progress_LoadBinFile, Progress_LoadBinFile);
+
   // ReadEventFile(loader, eventProcessor, progTracker, 100, false);
   const std::string neutronPath{"instrument/detector_events"};
-  Anxs::ReadEventData(entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
+  Anxs::ReadEventData(progTracker, entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
 }
 
 /**
@@ -103,7 +138,6 @@ int LoadBBY2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
       descriptor.isEntry("/entry1/instrument/L1") && descriptor.isEntry("/entry1/instrument/L2_curtaind") &&
       descriptor.isEntry("/entry1/instrument/L2_curtainl") && descriptor.isEntry("/entry1/instrument/L2_curtainr") &&
       descriptor.isEntry("/entry1/instrument/L2_curtainu") && descriptor.isEntry("/entry1/instrument/nvs067/lambda") &&
-      descriptor.isEntry("/entry1/instrument/nvs067/actspeed") &&
       descriptor.isEntry("/entry1/instrument/shutters/fast_shutter") &&
       descriptor.isEntry("/entry1/scan_dataset/time") && descriptor.isEntry("/entry1/scan_dataset/value")) {
     return 95;
@@ -164,6 +198,8 @@ void LoadBBY2::init() {
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
+  declareProperty(UseHMScanTimeStr, false, "Use hmscan time rather than scan_dataset.");
+
   std::string grpOptional = "Filters";
   setPropertyGroup(FilterByTofMinStr, grpOptional);
   setPropertyGroup(FilterByTofMaxStr, grpOptional);
@@ -183,11 +219,16 @@ void LoadBBY2::exec() {
   // Get the name of the data file.
   std::string nxsFile = getPropertyValue(FilenameStr);
 
+  useHMScanTime = getProperty(UseHMScanTimeStr);
+
   // get the root entry and time period
   NeXus::NXRoot root(nxsFile);
   NeXus::NXEntry nxsEntry = root.openFirstEntry();
   uint64_t startTime, endTime;
-  std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, 0);
+  if (useHMScanTime)
+    std::tie(startTime, endTime) = Anxs::getHMScanLimits(nxsEntry, 0);
+  else
+    std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, 0);
 
   // region of intreset
   std::vector<bool> roi = createRoiVector(getPropertyValue(MaskStr));
@@ -423,7 +464,8 @@ std::vector<bool> LoadBBY2::createRoiVector(const std::string &maskfile) {
 }
 
 // loading instrument parameters
-void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
+void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                        std::map<std::string, double> &logParams,
                                         std::map<std::string, std::string> &logStrings,
                                         std::map<std::string, std::string> &allParams) {
   using namespace Poco::XML;
@@ -471,6 +513,7 @@ void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<st
 
     std::string tmpString;
     float tmpFloat = 0.0f;
+    uint64_t tmpTimestamp = 0;
     for (auto &x : allParams) {
       if (x.first.find("log_") == 0) {
         auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
@@ -490,11 +533,19 @@ void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<st
           auto updateOk = false;
           if (!hdfTag.empty()) {
             if (isNumeric(details[1])) {
-              if (Anxs::loadNXDataSet(entry, hdfTag, tmpFloat) ||
-                  Anxs::loadNXDataSet(entry, hdfTag + "/value", tmpFloat)) {
+              bool baseLoaded = Anxs::loadNXDataSet(entry, hdfTag, tmpFloat);
+              bool timeLoaded = false;
+              if (!baseLoaded) {
+                timeLoaded = Anxs::extractTimedDataSet(entry, hdfTag, startTime, endTime, Anxs::ScanLog::Mean,
+                                                       tmpTimestamp, tmpFloat, tmpString);
+              }
+              if (baseLoaded || timeLoaded) {
                 auto factor = std::stod(details[1]);
                 logParams[logTag] = factor * tmpFloat;
                 updateOk = true;
+                if (timeLoaded) {
+                  traceStatistics<float>(entry, hdfTag, startTime, endTime, g_log);
+                }
               }
             } else if (Anxs::loadNXString(entry, hdfTag, tmpString)) {
               logStrings[logTag] = tmpString;
@@ -567,7 +618,8 @@ void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime,
     instrumentInfo.sample_description = tmp_str;
 
   uint64_t epochStart{0};
-  if (Anxs::loadNXDataSet(entry, "scan_dataset/time", epochStart)) {
+  auto timeTag = (useHMScanTime ? "hmscan/time" : "scan_dataset/time");
+  if (Anxs::loadNXDataSet(entry, timeTag, epochStart)) {
     Types::Core::DateAndTime startDateTime(Anxs::epochRelDateTimeBase(epochStart));
     instrumentInfo.start_time = startDateTime.toISO8601String();
   }
@@ -580,25 +632,31 @@ void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime,
   if (Anxs::loadNXString(entry, "instrument/detector/frame_source", tmp_str))
     instrumentInfo.is_tof = tmp_str == "EXTERNAL";
 
-  if (Anxs::extractTimedDataSet(entry, "instrument/nvs067/lambda", startTime, endTime, Anxs::ScanLog::End,
+  if (Anxs::extractTimedDataSet(entry, "instrument/nvs067/lambda", startTime, endTime, Anxs::ScanLog::Mean,
                                 tmp_timestamp, tmp_float, tmp_str))
     instrumentInfo.wavelength = tmp_float;
 
-  if (Anxs::extractTimedDataSet(entry, "instrument/master_chopper_freq", startTime, endTime, Anxs::ScanLog::End,
+  if (Anxs::extractTimedDataSet(entry, "instrument/master_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
                                 tmp_timestamp, tmp_float, tmp_str) &&
       (tmp_float > 0.0f))
     instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
 
-  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_freq", startTime, endTime, Anxs::ScanLog::End,
+  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
                                 tmp_timestamp, tmp_float, tmp_str) &&
       (tmp_float > 0.0f))
     instrumentInfo.period_slave = 1.0 / tmp_float * 1.0e6;
 
-  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_phase", startTime, endTime, Anxs::ScanLog::End,
+  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_phase", startTime, endTime, Anxs::ScanLog::Mean,
                                 tmp_timestamp, tmp_float, tmp_str))
     instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
 
-  loadInstrumentParameters(entry, logParams, logStrings, allParams);
+  // addnl trace message if needed
+  traceStatistics<float>(entry, "instrument/nvs067/lambda", startTime, endTime, g_log);
+  traceStatistics<float>(entry, "instrument/master_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<float>(entry, "instrument/t0_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<float>(entry, "instrument/t0_chopper_phase", startTime, endTime, g_log);
+
+  loadInstrumentParameters(entry, startTime, endTime, logParams, logStrings, allParams);
 
   // Ltof_det_value is not present for monochromatic data so check
   // and replace with default
@@ -611,74 +669,5 @@ void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime,
                     << ", using default.\n";
   }
 }
-
-// patching - no patching with nxs files
-//   file_it = std::find(files.cbegin(), files.cend(), "History.log");
-//   if (file_it != files.cend()) {
-//     tarFile.select(file_it->c_str());
-//     std::string logContent;
-//     logContent.resize(tarFile.selected_size());
-//     tarFile.read(&logContent[0], logContent.size());
-//     std::istringstream data(logContent);
-//     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(new Poco::Util::PropertyFileConfiguration(data));
-
-//     if (conf->hasProperty("Bm1Counts"))
-//       instrumentInfo.bm_counts = conf->getInt("Bm1Counts");
-//     if (conf->hasProperty("AttPos"))
-//       instrumentInfo.att_pos = boost::math::iround(conf->getDouble("AttPos"));
-
-//     if (conf->hasProperty("SampleName"))
-//       instrumentInfo.sample_name = conf->getString("SampleName");
-
-//     if (conf->hasProperty("MasterChopperFreq")) {
-//       auto tmp = conf->getDouble("MasterChopperFreq");
-//       if (tmp > 0.0f)
-//         instrumentInfo.period_master = 1.0 / tmp * 1.0e6;
-//     }
-//     if (conf->hasProperty("T0ChopperFreq")) {
-//       auto tmp = conf->getDouble("T0ChopperFreq");
-//       if (tmp > 0.0f)
-//         instrumentInfo.period_slave = 1.0 / tmp * 1.0e6;
-//     }
-//     if (conf->hasProperty("T0ChopperPhase")) {
-//       auto tmp = conf->getDouble("T0ChopperPhase");
-//       instrumentInfo.phase_slave = tmp < 999.0 ? tmp : 0.0;
-//     }
-
-//     if (conf->hasProperty("FrameSource"))
-//       instrumentInfo.is_tof = conf->getString("FrameSource") == "EXTERNAL";
-//     if (conf->hasProperty("Wavelength"))
-//       instrumentInfo.wavelength = conf->getDouble("Wavelength");
-
-//     if (conf->hasProperty("SampleAperture"))
-//       logParams["sample_aperture"] = conf->getDouble("SampleAperture");
-//     if (conf->hasProperty("SourceAperture"))
-//       logParams["source_aperture"] = conf->getDouble("SourceAperture");
-//     if (conf->hasProperty("L1"))
-//       logParams["L1_source_value"] = conf->getDouble("L1") * toMeters;
-//     if (conf->hasProperty("LTofDet"))
-//       logParams["L1_chopper_value"] = conf->getDouble("LTofDet") * toMeters - logParams["L2_det_value"];
-//     if (conf->hasProperty("L2Det"))
-//       logParams["L2_det_value"] = conf->getDouble("L2Det") * toMeters;
-
-//     if (conf->hasProperty("L2CurtainL"))
-//       logParams["L2_curtainl_value"] = conf->getDouble("L2CurtainL") * toMeters;
-//     if (conf->hasProperty("L2CurtainR"))
-//       logParams["L2_curtainr_value"] = conf->getDouble("L2CurtainR") * toMeters;
-//     if (conf->hasProperty("L2CurtainU"))
-//       logParams["L2_curtainu_value"] = conf->getDouble("L2CurtainU") * toMeters;
-//     if (conf->hasProperty("L2CurtainD"))
-//       logParams["L2_curtaind_value"] = conf->getDouble("L2CurtainD") * toMeters;
-
-//     if (conf->hasProperty("CurtainL"))
-//       logParams["D_curtainl_value"] = conf->getDouble("CurtainL") * toMeters;
-//     if (conf->hasProperty("CurtainR"))
-//       logParams["D_curtainr_value"] = conf->getDouble("CurtainR") * toMeters;
-//     if (conf->hasProperty("CurtainU"))
-//       logParams["D_curtainu_value"] = conf->getDouble("CurtainU") * toMeters;
-//     if (conf->hasProperty("CurtainD"))
-//       logParams["D_curtaind_value"] = conf->getDouble("CurtainD") * toMeters;
-//   }
-//}
 
 } // namespace Mantid::DataHandling

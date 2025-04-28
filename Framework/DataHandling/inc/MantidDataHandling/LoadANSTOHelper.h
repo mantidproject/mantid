@@ -56,6 +56,7 @@ public:
   // methods
   void update(int64_t position);
   void complete();
+  void setTarget(int64_t target);
 };
 
 class EventProcessor {
@@ -260,6 +261,7 @@ bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::str
 
 bool isTimedDataSet(NeXus::NXEntry &entry, const std::string &path);
 std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int datasetIx);
+std::pair<uint64_t, uint64_t> getHMScanLimits(const NeXus::NXEntry &entry, int datasetIx);
 
 template <typename T>
 int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
@@ -292,8 +294,8 @@ void logScaledTimeSeriesData(const NeXus::NXEntry &entry, const std::string &pat
   addTimeSeriesProperty<LT>(logManager, name, logTimes, logValues, units);
 }
 
-void ReadEventData(const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec, uint64_t end_nsec,
-                   const std::string &neutron_path, int tube_resolution = 1024);
+void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+                   uint64_t end_nsec, const std::string &neutron_path, int tube_resolution = 1024);
 
 } // namespace Anxs
 

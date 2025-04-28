@@ -68,6 +68,11 @@ void ProgressTracker::complete() {
   }
 }
 
+void ProgressTracker::setTarget(int64_t target) {
+  m_step = target / m_count;
+  m_next = m_step;
+}
+
 // EventProcessor
 EventProcessor::EventProcessor(const std::vector<bool> &roi, const size_t stride, const double period,
                                const double phase, const int64_t startTime, const double tofMinBoundary,
@@ -166,9 +171,9 @@ EventAssignerFixedWavelength::EventAssignerFixedWavelength(const std::vector<boo
                     timeMaxBoundary, eventVectors),
       m_wavelength(wavelength) {}
 void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double tof) {
-  UNUSED_ARG(pulse);
+  // UNUSED_ARG(pulse);
   UNUSED_ARG(tof);
-  m_eventVectors[id]->emplace_back(m_wavelength);
+  m_eventVectors[id]->emplace_back(m_wavelength, Types::Core::DateAndTime(pulse));
 }
 
 // ISISRawOnlyFile
@@ -492,7 +497,7 @@ bool File::append(const std::string &path, const std::string &name, const void *
 namespace Anxs {
 
 int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
-  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF * 1e9);
+  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF) * 1e9;
   return retval;
 }
 
@@ -561,6 +566,26 @@ std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int
   }
 }
 
+// Extract the start and end time in nsecs from the nexus file
+// based on entry/scan_dataset/[time, value]
+//
+// The time is the start time value is duration in nsec for each dataset
+//
+std::pair<uint64_t, uint64_t> getHMScanLimits(const NeXus::NXEntry &entry, int datasetIx) {
+
+  auto timestamp = entry.openNXDataSet<uint64_t>("hmscan/time");
+  timestamp.load();
+  auto offset = entry.openNXDataSet<int64_t>("hmscan/value");
+  offset.load();
+  try {
+    auto start = timestamp[datasetIx];
+    auto end = start + offset[datasetIx];
+    return {start, end};
+  } catch (std::runtime_error &) {
+    return {0, 0};
+  }
+}
+
 // Extract the relevant timestamped data. Get the timestamp first to
 // determine the index limits (it assumed the timestamp is ordered).
 // Then extract the value from that range.
@@ -613,8 +638,8 @@ bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, u
   bool retn = true;
   switch (valueOption) {
   case ScanLog::Mean:
-    eventValue = std::accumulate(values.begin(), values.end(), 0) / n;
-    eventTime = std::accumulate(times.begin(), times.end(), 0) / n;
+    eventValue = std::accumulate(values.begin(), values.end(), T{0}) / n;
+    eventTime = std::accumulate(times.begin(), times.end(), T{0}) / n;
     break;
   case ScanLog::Start:
     eventValue = values[0];
@@ -630,8 +655,8 @@ bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, u
   return retn;
 }
 
-void ReadEventData(const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec, uint64_t end_nsec,
-                   const std::string &neutron_path, int tube_resolution) {
+void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+                   uint64_t end_nsec, const std::string &neutron_path, int tube_resolution) {
 
   // the detector event time zero is the actual chopper time and all the events are
   // relative to this base
@@ -649,6 +674,8 @@ void ReadEventData(const NeXus::NXEntry &entry, EventProcessor *handler, uint64_
   offsetValues.load();
   uint32_t numPulses = eventIndex.size();
   uint32_t totalEvents = offsetValues.size();
+
+  prog.setTarget(numPulses);
 
   // The chopper times are monotonically increasing but there may be duplicate
   // pulse times when a 'efu' buffer is full mid pulse. In this case the buffer
@@ -678,6 +705,7 @@ void ReadEventData(const NeXus::NXEntry &entry, EventProcessor *handler, uint64_
         handler->addEvent(x, y, tof);
       }
     }
+    prog.update(ix);
   }
 }
 

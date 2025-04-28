@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-# import debugpy
+import debugpy
 
 from mantid import mtd
 from mantid.kernel import (
@@ -149,8 +149,8 @@ class InelasticEMUauReduction(PythonAlgorithm):
 
     def PyExec(self):
         # add the following to where it should break
-        # debugpy.wait_for_client()
-        # debugpy.breakpoint()
+        debugpy.wait_for_client()
+        debugpy.breakpoint()
 
         # Set up the processing parameters
         self.setUp()
@@ -278,10 +278,22 @@ class InelasticEMUauReduction(PythonAlgorithm):
         else:
             GroupWorkspaces(InputWorkspaces=self._intermediate_ws, OutputWorkspace="intermediate")
 
+    def _set_default_doppler_setting(self):
+        # a quick fix to handle missing doppler control parameters
+        def_amplitude = self._cfg.get_param(float, "processing", "doppler_amplitude", 75.0)
+        def_velocity = self._cfg.get_param(float, "processing", "doppler_velocity", 4.7)
+        self.log().warning("Missing doppler amp, speed in hdf, using defaults, amp: {}, spd: {}".format(def_amplitude, def_velocity))
+        self._doppler._amplitude = def_amplitude * 0.001
+        self._doppler._speed = def_velocity
+        self._doppler._complete_doppler_params()
+
     def _complete_doppler_setup(self, sample_file, ds_index):
         # updates the amplitude and speed from the file to complete the doppler
         # settings and update the load options
-        self._doppler.set_amplitude_speed(sample_file, ds_index)
+        try:
+            self._doppler.set_amplitude_speed(sample_file, ds_index)
+        except RuntimeError:
+            self._set_default_doppler_setting()
         self._analyse_load_opts["OverrideDopplerPhase"] = self._doppler.phase
         self._refn_load_opts["OverrideDopplerPhase"] = self._doppler.phase
         self._analyse_load_opts["OverrideDopplerFrequency"] = self._doppler.frequency
