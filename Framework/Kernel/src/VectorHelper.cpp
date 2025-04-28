@@ -548,16 +548,18 @@ bool isConstantValue(const std::vector<double> &arra) {
 /** Take a string of comma or space-separated values, and splits it into
  * a vector of doubles.
  * @param listString :: a string like "0.0 1.2" or "2.4, 5.67, 88"
- * @param separator :: Specify the string in which to split into vector. Default space and comma: " ,"
+ * @param separators :: Specify the string in which to split into vector. This uses boost::is_any_of function,
+ * each character of the separators string will be used as a separator. Default space and comma: " ,"
  * @return a vector of numT
  * @throw an error if there was a string that could not convert to a double.
  */
-template <typename NumT> std::vector<NumT> splitStringIntoVector(std::string listString, const std::string &separator) {
+template <typename NumT>
+std::vector<NumT> splitStringIntoVector(std::string listString, const std::string &separators) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
   std::vector<std::string> strs;
 
-  boost::split(strs, listString, boost::is_any_of(separator));
+  boost::split(strs, listString, boost::is_any_of(separators));
   for (auto &str : strs) {
     if (!str.empty()) {
       // String not empty

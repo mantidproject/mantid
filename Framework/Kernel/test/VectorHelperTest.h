@@ -356,6 +356,16 @@ public:
     TS_ASSERT_EQUALS(vec[2], "String");
   }
 
+  void test_spliStringIntoVectorDoubleWithMultipleSeparators() {
+    std::vector<double> vec = VectorHelper::splitStringIntoVector<double>("1.1/2.0,3 6,7", "/ ,");
+    TS_ASSERT_EQUALS(vec.size(), 5);
+    TS_ASSERT_EQUALS(vec[0], 1.1);
+    TS_ASSERT_EQUALS(vec[1], 2);
+    TS_ASSERT_EQUALS(vec[2], 3);
+    TS_ASSERT_EQUALS(vec[3], 6);
+    TS_ASSERT_EQUALS(vec[4], 7);
+  }
+
   void test_normalizeVector_and_length() {
     std::vector<double> x;
     std::vector<double> y;
