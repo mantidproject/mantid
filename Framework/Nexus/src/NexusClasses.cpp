@@ -146,6 +146,11 @@ void NXDataSet::getAttributes() {
 
 NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(parent.m_fileID, &parent, name) { clear(); }
 
+NXClass::~NXClass() {
+  if (m_open)
+    m_fileID->closeGroup();
+}
+
 void NXClass::readAllInfo() {
   clear();
   for (auto const &entry : m_fileID->getEntries()) {

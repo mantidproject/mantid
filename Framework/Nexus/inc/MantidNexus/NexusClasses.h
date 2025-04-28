@@ -461,6 +461,7 @@ public:
    * @param name :: The name of the NXClass relative to its parent
    */
   NXClass(NXClass const &parent, std::string const &name);
+  virtual ~NXClass();
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
 
