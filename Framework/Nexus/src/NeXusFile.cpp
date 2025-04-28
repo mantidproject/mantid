@@ -239,7 +239,7 @@ void File::writeData(const string &name, const string &value) {
   const DimVector dims{static_cast<dimsize_t>(my_value.size())};
   this->makeData(name, NXnumtype::CHAR, dims, true);
 
-  this->putData(my_value.data());
+  this->putData(my_value);
 
   this->closeData();
 }
@@ -366,7 +366,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
-template <> MANTID_NEXUS_DL void File::putData(std::string const *data) { this->putData(*data); }
+template <> MANTID_NEXUS_DLL void File::putData(std::string const *data) { this->putData(*data); }
 
 void File::putData(std::string const &data) {
   if (data.empty()) {

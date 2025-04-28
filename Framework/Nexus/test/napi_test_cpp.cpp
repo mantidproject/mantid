@@ -39,7 +39,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // 2d array
   NeXus::DimVector array_dims{5, 4};
-  char c1_array[5][4] = {
+  char const c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
   file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
   file.putData(&(c1_array[0][0]));
