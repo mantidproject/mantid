@@ -28,6 +28,7 @@ using std::vector;
   if (tmp != NXstatus::NX_OK) {                                                                                        \
     throw NXEXCEPTION(msg);                                                                                            \
   }
+typedef std::array<hsize_t, NX_MAXRANK> DimArray;
 
 /**
  * \file NeXusFile.cpp
