@@ -37,13 +37,16 @@ bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &w
   return (unit && unit->unitID() == unitToCompareWith);
 }
 
-void areAxesNumeric(const MatrixWorkspace_sptr &workspace, int numberOfDims = 1) {
+void areAxesNumeric(const MatrixWorkspace_sptr &workspace, const int numberOfDims = 1) {
+  if (numberOfDims == 0) {
+    throw std::invalid_argument("Workspace can only have 1 or 2 dimensions");
+  }
   std::vector<int> indices(numberOfDims);
   std::generate(indices.begin(), indices.end(), [i = 0]() mutable { return i++; });
-  if (numberOfDims == 0 || !std::all_of(indices.cbegin(), indices.cend(), [workspace](const auto &index) {
-        return workspace->getAxis(index)->isNumeric();
-      })) {
-    throw std::invalid_argument("Incorrect number of numerical axis");
+  for (const auto &index : indices) {
+    if (!workspace->getAxis(index)->isNumeric()) {
+      throw std::invalid_argument("Invalid workspace: Axis " + std::to_string(index) + " is not numeric");
+    }
   }
 }
 
@@ -179,7 +182,7 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() co
     if (std::any_of(groupItems.cbegin(), groupItems.cend(),
                     [&](const auto &childWs) { return !valid2DWorkspace(childWs); })) {
       result.emplace("InputWorkspace",
-                     "All input workspaces in the input group must be a Workspace2D wit numeric axis.");
+                     "All input workspaces in the input group must be a Workspace2D with numeric axis.");
     }
   } else {
     if (!valid2DWorkspace(workspace)) {
@@ -212,31 +215,32 @@ SaveNXcanSASBase::validatePolarizedInputWorkspace(const std::vector<std::string>
   std::map<std::string, std::string> result;
   const Workspace_sptr workspace = getProperty(StandardProperties::INPUT_WORKSPACE);
 
-  if (!workspace->isGroup())
+  if (!workspace->isGroup()) {
     result.emplace(StandardProperties::INPUT_WORKSPACE,
                    "Input Workspaces for polarized data can only be workspace groups.");
-  else {
-    const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-    const auto &entries = wsGroup->getNumberOfEntries();
-    if (entries != 2 && entries != 4) {
-      result.emplace(StandardProperties::INPUT_WORKSPACE,
-                     "Input Group Workspace can only contain 2 or 4 workspace members.");
-    }
-
-    if (entries != static_cast<int>(spinVec.size())) {
-      result.emplace(PolProperties::INPUT_SPIN_STATES, "The number of spin states is different than the number of"
-                                                       " member workspaces on the InputWorkspace group");
-    }
-
-    const auto wsVec = wsGroup->getAllItems();
-    // The group has been validated in StandardInputs, so workspaces are safely downcasted to MatrixWorkspaces
-    auto dim0 = getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(wsVec.at(0)));
-    if (std::any_of(wsVec.cbegin(), wsVec.cend(), [&dim0](const Workspace_sptr &ws) {
-          return dim0 != getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(ws));
-        })) {
-      result.emplace(StandardProperties::INPUT_WORKSPACE, "All workspaces in group must have the same dimensionality");
-    }
+    return result;
   }
+  const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  const auto &entries = wsGroup->getNumberOfEntries();
+  if (entries != 2 && entries != 4) {
+    result.emplace(StandardProperties::INPUT_WORKSPACE,
+                   "Input Group Workspace can only contain 2 or 4 workspace members.");
+  }
+
+  if (entries != static_cast<int>(spinVec.size())) {
+    result.emplace(PolProperties::INPUT_SPIN_STATES, "The number of spin states is different than the number of"
+                                                     " member workspaces on the InputWorkspace group");
+  }
+
+  const auto wsVec = wsGroup->getAllItems();
+  // The group has been validated in StandardInputs, so workspaces are safely downcasted to MatrixWorkspaces
+  auto const dim0 = getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(wsVec.at(0)));
+  if (std::any_of(wsVec.cbegin(), wsVec.cend(), [&dim0](const Workspace_sptr &ws) {
+        return dim0 != getWorkspaceDimensionality(std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      })) {
+    result.emplace(StandardProperties::INPUT_WORKSPACE, "All workspaces in group must have the same dimensionality");
+  }
+
   return result;
 }
 std::map<std::string, std::string>
@@ -255,9 +259,9 @@ SaveNXcanSASBase::validateSpinStateStrings(const std::vector<std::string> &spinV
                     [](const std::string &state) { return state.find('1') == std::string::npos; })) {
       result.emplace(PolProperties::INPUT_SPIN_STATES, "There can't be 00 state");
     }
-    auto noPin =
+    const auto noPin =
         spinVec[0].starts_with(SpinStateNXcanSAS::SPIN_ZERO) && spinVec[1].starts_with(SpinStateNXcanSAS::SPIN_ZERO);
-    auto noPout =
+    const auto noPout =
         spinVec[0].ends_with(SpinStateNXcanSAS::SPIN_ZERO) && spinVec[1].ends_with(SpinStateNXcanSAS::SPIN_ZERO);
     if (noPin == noPout) {
       result.emplace(PolProperties::INPUT_SPIN_STATES,
@@ -271,7 +275,7 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedMetadata()
   std::map<std::string, std::string> result;
   const std::string magneticFieldDirection = getProperty(PolProperties::MAG_FIELD_DIR);
   if (!magneticFieldDirection.empty()) {
-    auto direction = VectorHelper::splitStringIntoVector<std::string>(magneticFieldDirection);
+    const auto direction = VectorHelper::splitStringIntoVector<std::string>(magneticFieldDirection);
     try {
       std::for_each(direction.cbegin(), direction.cend(), [](const std::string &val) { std::stod(val); });
     } catch (const std::invalid_argument &) {
@@ -300,13 +304,13 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedMetadata()
 void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace, H5::Group &sasEntry) const {
   const auto &radiationSource = getPropertyValue(StandardProperties::RADIATION_SOURCE);
   const std::string &geometry = getProperty(StandardProperties::GEOMETRY);
-  double beamHeight = getProperty(StandardProperties::SAMPLE_HEIGHT);
-  double beamWidth = getProperty(StandardProperties::SAMPLE_WIDTH);
-  double sampleThickness = getProperty(StandardProperties::SAMPLE_THICKNESS);
+  const double beamHeight = getProperty(StandardProperties::SAMPLE_HEIGHT);
+  const double beamWidth = getProperty(StandardProperties::SAMPLE_WIDTH);
+  const double sampleThickness = getProperty(StandardProperties::SAMPLE_THICKNESS);
   const auto &detectorNames = getPropertyValue(StandardProperties::DETECTOR_NAMES);
 
-  MatrixWorkspace_sptr transmissionSample = getProperty(StandardProperties::TRANSMISSION);
-  MatrixWorkspace_sptr transmissionCan = getProperty(StandardProperties::TRANSMISSION_CAN);
+  const MatrixWorkspace_sptr transmissionSample = getProperty(StandardProperties::TRANSMISSION);
+  const MatrixWorkspace_sptr transmissionCan = getProperty(StandardProperties::TRANSMISSION_CAN);
 
   // Add the instrument information
   const auto detectors = Kernel::VectorHelper::splitStringIntoVector<std::string>(detectorNames);
@@ -339,7 +343,7 @@ void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace
   }
 
   if (!scaledBgSubWorkspace.empty()) {
-    double scaledBgSubScaleFactor = getProperty(StandardProperties::BKG_SUB_SCALE);
+    const double scaledBgSubScaleFactor = getProperty(StandardProperties::BKG_SUB_SCALE);
     H5Util::write(process, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
     H5Util::writeScalarDataSetWithStrAttributes(process, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor,
                                                 {});
