@@ -63,7 +63,7 @@ template <typename NumT>
 void writeArray1DWithStrAttributes(H5::Group &group, const std::string &dataSetName, const std::vector<NumT> &values,
                                    const AttrMap &attributes) {
   H5Util::writeArray1D(group, dataSetName, values);
-  auto dataSet = group.openDataSet(dataSetName);
+  const auto dataSet = group.openDataSet(dataSetName);
   for (const auto &[attributeName, attributeValue] : attributes) {
     H5Util::writeStrAttribute(dataSet, attributeName, attributeValue);
   }
@@ -76,7 +76,7 @@ void writeDataSetAttributes(const H5::H5Object &dataSet, const AttrMap &attribut
   }
 }
 
-H5::DSetCreatPropList setCompression(size_t rank, const hsize_t *chunkDims, int deflateLevel = 6) {
+H5::DSetCreatPropList setCompression(const size_t rank, const hsize_t *chunkDims, const int deflateLevel = 6) {
   H5::DSetCreatPropList propList;
   propList.setChunk(static_cast<int>(rank), chunkDims);
   propList.setDeflate(deflateLevel);
@@ -108,12 +108,12 @@ public:
     m_dataType = H5::DataType(H5Util::getType<double>());
   }
 
-  const hsize_t &numberOfPoints() const { return m_numberOfPoints; }
-  const hsize_t &numberOfHistograms() const { return m_numberOfHistograms; }
-  const std::vector<hsize_t> &dataShape() const { return m_dataShape; }
-  const std::vector<hsize_t> &slabShape() const { return m_slabShape; }
-  const H5::DataSpace &dataSpace() const { return m_dataSpace; }
-  const H5::DataType &dataType() const { return m_dataType; }
+  const hsize_t &getNumberOfPoints() const { return m_numberOfPoints; }
+  const hsize_t &getNumberOfHistograms() const { return m_numberOfHistograms; }
+  const std::vector<hsize_t> &getDataShape() const { return m_dataShape; }
+  const std::vector<hsize_t> &getSlabShape() const { return m_slabShape; }
+  const H5::DataSpace &getDataSpace() const { return m_dataSpace; }
+  const H5::DataType &getDataType() const { return m_dataType; }
 
 private:
   hsize_t m_numberOfPoints;
@@ -153,13 +153,9 @@ public:
   }
 
   Mantid::MantidVec::value_type *operator()(const MatrixWorkspace_sptr & /*unused*/, size_t index) {
-    auto isPointData = m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
-    double value = 0;
-    if (isPointData) {
-      value = m_spectrumAxisValues[index];
-    } else {
-      value = (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
-    }
+    const auto isPointData = m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
+    const double value = isPointData ? m_spectrumAxisValues[index]
+                                     : (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
 
     Mantid::MantidVec tempVec(m_workspace->dataY(index).size(), value);
     m_currentAxisValues.swap(tempVec);
@@ -168,7 +164,7 @@ public:
 
 private:
   void setSpectrumAxisValues() {
-    auto sAxis = m_workspace->getAxis(1);
+    const auto sAxis = m_workspace->getAxis(1);
     for (size_t index = 0; index < sAxis->length(); ++index) {
       m_spectrumAxisValues.emplace_back((*sAxis)(index));
     }
@@ -208,8 +204,8 @@ bool isCanSASCompliant(bool isStrict, const std::string &input) {
 }
 
 void removeSpecialCharacters(std::string &input) {
-  std::regex const toReplace("[-\\.]");
-  std::string const replaceWith("_");
+  const std::regex toReplace("[-\\.]");
+  const std::string replaceWith("_");
   input = std::regex_replace(input, toReplace, replaceWith);
 }
 
@@ -275,21 +271,21 @@ struct SpinStateHelper {
     // when storing the polarized data set.
     const auto stateVector = std::vector<int>({-1, 1});
     if (spinStateStr.size() == 4) {
-      Pin = stateVector;
-      Pout = stateVector;
+      pIn = stateVector;
+      pOut = stateVector;
     } else if (spinStateStr.size() == 2) {
       if (spinStateStr.begin()->starts_with("0")) {
-        Pin = std::vector<int>(1, 0);
-        Pout = stateVector;
+        pIn = std::vector<int>(1, 0);
+        pOut = stateVector;
       } else {
-        Pin = stateVector;
-        Pout = std::vector<int>(1, 0);
+        pIn = stateVector;
+        pOut = std::vector<int>(1, 0);
       }
     }
   }
   std::vector<std::string> spinVec;
-  std::vector<int> Pin;
-  std::vector<int> Pout;
+  std::vector<int> pIn;
+  std::vector<int> pOut;
 };
 
 template <typename WorkspaceExtractorFunctor>
@@ -297,14 +293,14 @@ void writePolarizedDataToFile(H5::DataSet &dataSet, WorkspaceExtractorFunctor fu
                               const SpinStateHelper &spin) {
   auto stateConverter = [](int spin) -> std::string { return (spin == 1) ? "+1" : std::to_string(spin); };
 
-  auto rank = dimensions.dataShape().size();
-  H5::DataSpace memSpace(static_cast<int>(rank), dimensions.slabShape().data());
+  const auto rank = dimensions.getDataShape().size();
+  const H5::DataSpace memSpace(static_cast<int>(rank), dimensions.getSlabShape().data());
   // create index of position in hypermatrix
   auto pos = std::vector<hsize_t>(rank, 0);
-  const auto &fileSpace = dimensions.dataSpace();
-  for (size_t i = 0; i < spin.Pin.size(); i++) {
-    for (size_t j = 0; j < spin.Pout.size(); j++) {
-      auto state = stateConverter(spin.Pin.at(i)) + stateConverter(spin.Pout.at(j));
+  const auto &fileSpace = dimensions.getDataSpace();
+  for (size_t i = 0; i < spin.pIn.size(); i++) {
+    for (size_t j = 0; j < spin.pOut.size(); j++) {
+      auto state = stateConverter(spin.pIn.at(i)) + stateConverter(spin.pOut.at(j));
       auto index = findWorkspaceIndexForSpinState(spin.spinVec, state);
       if (!index.has_value()) {
         throw std::runtime_error("Couldn't find workspace for spin state " + state);
@@ -313,14 +309,14 @@ void writePolarizedDataToFile(H5::DataSet &dataSet, WorkspaceExtractorFunctor fu
       pos.at(0) = i;
       pos.at(1) = j;
 
-      if (dimensions.numberOfHistograms() == 1) {
-        fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.slabShape().data(), pos.data());
-        dataSet.write(func(*index), dimensions.dataType(), memSpace, fileSpace);
+      if (dimensions.getNumberOfHistograms() == 1) {
+        fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.getSlabShape().data(), pos.data());
+        dataSet.write(func(*index), dimensions.getDataType(), memSpace, fileSpace);
       } else {
-        for (size_t n = 0; n < dimensions.numberOfHistograms(); n++) {
+        for (size_t n = 0; n < dimensions.getNumberOfHistograms(); n++) {
           pos.at(2) = n;
-          fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.slabShape().data(), pos.data());
-          dataSet.write(func(*index, n), dimensions.dataType(), memSpace, fileSpace);
+          fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.getSlabShape().data(), pos.data());
+          dataSet.write(func(*index, n), dimensions.getDataType(), memSpace, fileSpace);
         }
       }
     }
@@ -331,18 +327,13 @@ template <typename WorkspaceExtractorFunctor>
 void savePolarizedDataSet(H5::Group &group, const WorkspaceGroup_sptr &workspaces, WorkspaceExtractorFunctor func,
                           const std::string &dataSetName, const SpinStateHelper &spin, const AttrMap &attributes = {}) {
 
-  // Check First Workspace of group for dimensionality
   const auto ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(workspaces->getItem(0));
-  // Data Shape and Size and File Space
-  auto dataDimensions = DataDimensions(ws0, std::make_pair(spin.Pin.size(), spin.Pout.size()));
-  // compression: 6 by default.
+  auto dataDimensions = DataDimensions(ws0, std::make_pair(spin.pIn.size(), spin.pOut.size()));
   const auto propList =
-      setCompression(static_cast<int>(dataDimensions.dataShape().size()), dataDimensions.slabShape().data());
-  // Create the data set
-  auto dataSet = group.createDataSet(dataSetName, dataDimensions.dataType(), dataDimensions.dataSpace(), propList);
-  // Write data
+      setCompression(static_cast<int>(dataDimensions.getDataShape().size()), dataDimensions.getSlabShape().data());
+  auto dataSet =
+      group.createDataSet(dataSetName, dataDimensions.getDataType(), dataDimensions.getDataSpace(), propList);
   writePolarizedDataToFile(dataSet, func, dataDimensions, spin);
-  // Write attributes
   writeDataSetAttributes(dataSet, attributes);
 }
 
@@ -353,8 +344,8 @@ void writeSpinDataAttributes(H5::Group &data, const SpinStateHelper &spinPairs) 
   H5Util::writeNumAttribute(data, sasDataPoutIndicesAttr, sasDataPoutIndicesValue);
   AttrMap polAttributes;
   polAttributes.emplace(sasUnitAttr, sasDataPolarizationUnitAttr);
-  writeArray1DWithStrAttributes(data, sasDataPin, spinPairs.Pin, polAttributes);
-  writeArray1DWithStrAttributes(data, sasDataPout, spinPairs.Pout, polAttributes);
+  writeArray1DWithStrAttributes(data, sasDataPin, spinPairs.pIn, polAttributes);
+  writeArray1DWithStrAttributes(data, sasDataPout, spinPairs.pOut, polAttributes);
 }
 
 //=== SASdata ===//
@@ -383,24 +374,25 @@ template <typename Functor>
 void write2DWorkspace(H5::Group &group, const MatrixWorkspace_sptr &workspace, const std::string &dataSetName,
                       Functor func, const AttrMap &attributes) {
   // Set the dimension
-  auto dimensions = DataDimensions(workspace);
+  const auto dimensions = DataDimensions(workspace);
   // Get the proplist with compression settings
-  const auto propList = setCompression(static_cast<int>(dimensions.dataShape().size()), dimensions.slabShape().data());
-  auto fileSpace = dimensions.dataSpace();
+  const auto propList =
+      setCompression(static_cast<int>(dimensions.getDataShape().size()), dimensions.getSlabShape().data());
+  const auto &fileSpace = dimensions.getDataSpace();
   // Create the data set
-  auto dataSet = group.createDataSet(dataSetName, dimensions.dataType(), fileSpace, propList);
+  auto dataSet = group.createDataSet(dataSetName, dimensions.getDataType(), fileSpace, propList);
 
   // Create Data Space for 1D entry for each row in memory
-  hsize_t memSpaceDimension[1] = {dimensions.numberOfPoints()};
-  H5::DataSpace memSpace(1, memSpaceDimension);
+  hsize_t memSpaceDimension[1] = {dimensions.getNumberOfPoints()};
+  const H5::DataSpace memSpace(1, memSpaceDimension);
   // Start position in the 2D data (indexed) data structure
   auto pos = std::vector<hsize_t>{0, 0};
   // Insert each row of the workspace as a slab
-  for (size_t index = 0; index < dimensions.numberOfHistograms(); ++index) {
+  for (size_t index = 0; index < dimensions.getNumberOfHistograms(); ++index) {
     // Need the data space
-    fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.slabShape().data(), pos.data());
+    fileSpace.selectHyperslab(H5S_SELECT_SET, dimensions.getSlabShape().data(), pos.data());
     // Write the correct data set to file
-    dataSet.write(func(workspace, index), dimensions.dataType(), memSpace, fileSpace);
+    dataSet.write(func(workspace, index), dimensions.getDataType(), memSpace, fileSpace);
     // Step up the write position
     ++pos[0];
   }
@@ -609,9 +601,9 @@ void addPolarizer(H5::Group &group, const MatrixWorkspace_sptr &workspace, const
 }
 
 /**
- * Adds the Field directon of either the magnetic or the electric field on the sample.
+ * Adds the Field direction of either the magnetic or the electric field on the sample.
  * @param group: The sas group to add the data to.
- * @param emFieldDir: Comma separated string representing spherical vector with directions polar,azimuthal androtation.
+ * @param emFieldDir: Comma separated string representing spherical vector with directions polar,azimuthal and rotation.
  */
 void addEMFieldDirection(H5::Group &group, const std::string &emFieldDir) {
   // Expect to receive a comma separated string with directions polar,azimuthal and rotation.
@@ -644,7 +636,7 @@ void addSampleEMFields(H5::Group &group, const MatrixWorkspace_sptr &workspace, 
 
   // Field Strength
   if (workspace->run().hasProperty(emFieldStrengthLog)) {
-    auto magFStrength = workspace->run().getLogAsSingleValue(emFieldStrengthLog);
+    const auto magFStrength = workspace->run().getLogAsSingleValue(emFieldStrengthLog);
     const auto magFStrengthUnits = workspace->run().getProperty(emFieldStrengthLog)->units();
 
     AttrMap magFieldAttrs;
@@ -668,7 +660,7 @@ void addSample(H5::Group &group, const double &sampleThickness) {
   if (sampleThickness == 0) {
     return;
   }
-  std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
+  const std::string sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
 
   auto sample = H5Util::createGroupCanSAS(group, sasSampleNameForGroup, nxInstrumentSampleClassAttr,
                                           sasInstrumentSampleClassAttr);
@@ -873,7 +865,7 @@ void addPolarizedData(H5::Group &data, const WorkspaceGroup_sptr &wsGroup, const
 
   writeStandardDataAttributes(data, sasDataIAxesAttrSpin, qIndices);
   const auto inputSpinOrder = StringTokenizer{inputSpinStates, ",", StringTokenizer::TOK_TRIM}.asVector();
-  const auto spinPairs = SpinStateHelper(inputSpinOrder);
+  const auto &spinPairs = SpinStateHelper(inputSpinOrder);
   writeSpinDataAttributes(data, spinPairs);
 
   // add Q
