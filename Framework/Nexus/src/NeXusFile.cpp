@@ -366,7 +366,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
-template <> void File::putData(std::string const *data) { this->putData(*data); }
+template <> MANTID_NEXUS_DL void File::putData(std::string const *data) { this->putData(*data); }
 
 void File::putData(std::string const &data) {
   if (data.empty()) {
