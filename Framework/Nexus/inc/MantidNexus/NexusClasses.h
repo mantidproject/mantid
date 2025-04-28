@@ -165,7 +165,7 @@ protected:
    */
   template <typename NumT> void getData(NumT *data) {
     m_fileID->openData(name());
-    m_fileID->getData<NumT>(data);
+    m_fileID->getData(data);
     m_fileID->closeData();
   }
 

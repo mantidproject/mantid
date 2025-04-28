@@ -410,7 +410,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *const data);
+  template <typename NumT> void getData(NumT *data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
