@@ -102,10 +102,6 @@ DataSpace getDataSpace(const size_t length) {
   return DataSpace(1, dims);
 }
 
-template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
-  return H5Util::getDataSpace(data.size());
-}
-
 namespace {
 
 template <typename NumT> H5::DataSet writeScalarDataSet(Group &group, const std::string &name, const NumT &value) {
@@ -193,7 +189,7 @@ void writeNumAttribute(const H5::H5Object &object, const std::string &name, cons
                 "The writeNumAttribute function only accepts integral of "
                 "floating point values.");
   auto attrType = getType<NumT>();
-  DataSpace attrSpace = getDataSpace(value);
+  DataSpace attrSpace = getDataSpace(value.size());
 
   auto attribute = object.createAttribute(name, attrType, attrSpace);
   attribute.write(attrType, value.data());
@@ -212,7 +208,7 @@ void writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &na
 
 template <typename NumT> void writeArray1D(Group &group, const std::string &name, const std::vector<NumT> &values) {
   DataType dataType(getType<NumT>());
-  DataSpace dataSpace = getDataSpace(values);
+  DataSpace dataSpace = getDataSpace(values.size());
 
   DSetCreatPropList propList = setCompressionAttributes(values.size());
 
@@ -612,16 +608,6 @@ writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, c
 template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const uint64_t &value,
                                     const std::map<std::string, std::string> &attributes);
-
-// -------------------------------------------------------------------
-// instantiations for getDataSpace
-// -------------------------------------------------------------------
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<float> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<double> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
 
 // -------------------------------------------------------------------
 // instantiations for readArray1DCoerce

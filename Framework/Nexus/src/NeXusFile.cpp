@@ -16,7 +16,7 @@ using std::vector;
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
   if (tmp != NXstatus::NX_OK) {                                                                                        \
-    throw NeXus::Exception(msg, m_filename);                                                                           \
+    throw NeXus::Exception(msg, __func__, m_filename);                                                                 \
   }
 
 /**
