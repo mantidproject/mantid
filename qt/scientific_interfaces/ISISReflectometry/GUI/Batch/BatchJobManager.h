@@ -15,8 +15,8 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,7 +43,8 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  boost::optional<Item &> getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) override;
+  std::optional<std::reference_wrapper<Item>>
+  getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) override;
 
   void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
@@ -52,8 +53,9 @@ public:
   std::vector<std::string> algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
                                                            bool includeGrpRows) const override;
 
-  boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) override;
-  boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName, std::string const &newName) override;
+  std::optional<std::reference_wrapper<Item const>> notifyWorkspaceDeleted(std::string const &wsName) override;
+  std::optional<std::reference_wrapper<Item const>> notifyWorkspaceRenamed(std::string const &oldName,
+                                                                           std::string const &newName) override;
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;

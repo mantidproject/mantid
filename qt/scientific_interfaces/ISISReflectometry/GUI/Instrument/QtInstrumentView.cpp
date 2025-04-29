@@ -178,9 +178,9 @@ void QtInstrumentView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void QtInstrumentView::setText(QLineEdit &lineEdit, boost::optional<double> value) {
+void QtInstrumentView::setText(QLineEdit &lineEdit, std::optional<double> value) {
   if (value)
-    setText(lineEdit, value.get());
+    setText(lineEdit, value.value());
 }
 
 void QtInstrumentView::setText(QLineEdit &lineEdit, std::optional<int> value) {
@@ -188,7 +188,7 @@ void QtInstrumentView::setText(QLineEdit &lineEdit, std::optional<int> value) {
     setText(lineEdit, value.value());
 }
 
-void QtInstrumentView::setText(QLineEdit &lineEdit, boost::optional<std::string> const &text) {
+void QtInstrumentView::setText(QLineEdit &lineEdit, std::optional<std::string> const &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }

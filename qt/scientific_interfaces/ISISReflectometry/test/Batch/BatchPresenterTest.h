@@ -315,7 +315,7 @@ public:
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmStarted(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
@@ -326,7 +326,7 @@ public:
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
@@ -336,7 +336,7 @@ public:
   void testNotifyAlgorithmStartedSkipsNonItems() {
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(std::nullopt));
     EXPECT_CALL(*m_jobManager, algorithmStarted(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmStarted(algorithm);
@@ -345,7 +345,7 @@ public:
   void testNotifyAlgorithmCompleteSkipsNonItems() {
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(std::nullopt));
     EXPECT_CALL(*m_jobManager, algorithmComplete(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmComplete(algorithm);
@@ -354,7 +354,7 @@ public:
   void testNotifyAlgorithmErrorSkipsNonItems() {
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(std::nullopt));
     EXPECT_CALL(*m_jobManager, algorithmError(_, _)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmError(algorithm, "");
@@ -367,7 +367,7 @@ public:
     EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(false));
     auto const workspaces = std::vector<std::string>{"test1", "test2"};
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, false)).Times(1).WillOnce(Return(workspaces));
@@ -382,7 +382,7 @@ public:
     EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(true));
     auto const workspaces = std::vector<std::string>{"test1", "test2"};
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
@@ -395,7 +395,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(false));
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(_, _)).Times(0);
@@ -410,7 +410,7 @@ public:
     EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(true));
     const std::vector<std::string> workspaces;
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
@@ -423,7 +423,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto const errorMessage = std::string("test error");
     auto row = makeRow();
-    auto optionalRow = boost::optional<Item &>(row);
+    auto optionalRow = std::make_optional(std::ref(row));
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(optionalRow));
     EXPECT_CALL(*m_jobManager, algorithmError(algorithm, errorMessage)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
@@ -549,8 +549,8 @@ public:
   }
 
   void testGetMatchingProcessingInstructionsForPreviewRow() {
-    auto const lookupRow = makeLookupRow(boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    auto const lookupRow = makeLookupRow(std::nullopt);
+    auto const maybeLookupRow = std::optional<LookupRow>(lookupRow);
     auto const previewRow = PreviewRow({"12345"});
     auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
     auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
@@ -561,11 +561,11 @@ public:
   }
 
   void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoInstructions() {
-    auto lookupRow = makeLookupRow(boost::none);
-    lookupRow.setProcessingInstructions(ROIType::Signal, boost::none);
-    lookupRow.setProcessingInstructions(ROIType::Background, boost::none);
-    lookupRow.setProcessingInstructions(ROIType::Transmission, boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    auto lookupRow = makeLookupRow(std::nullopt);
+    lookupRow.setProcessingInstructions(ROIType::Signal, std::nullopt);
+    lookupRow.setProcessingInstructions(ROIType::Background, std::nullopt);
+    lookupRow.setProcessingInstructions(ROIType::Transmission, std::nullopt);
+    auto const maybeLookupRow = std::optional<LookupRow>(lookupRow);
     auto const previewRow = PreviewRow({"12345"});
     auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
     auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
@@ -573,7 +573,7 @@ public:
   }
 
   void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoSignalInstructions() {
-    auto lookupRow = makeLookupRow(boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
     auto const result =
         runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Signal);
     TS_ASSERT_EQUALS(result.at(ROIType::Background), lookupRow.backgroundProcessingInstructions());
@@ -581,7 +581,7 @@ public:
   }
 
   void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoBackgroundInstructions() {
-    auto lookupRow = makeLookupRow(boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
     auto const result =
         runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Background);
     TS_ASSERT_EQUALS(result.at(ROIType::Signal), lookupRow.processingInstructions());
@@ -589,7 +589,7 @@ public:
   }
 
   void testGetMatchingProcessingInstructionsForPreviewRowLookupRowHasNoTransmissionInstructions() {
-    auto lookupRow = makeLookupRow(boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
     auto const result =
         runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(lookupRow, ROIType::Transmission);
     TS_ASSERT_EQUALS(result.at(ROIType::Signal), lookupRow.processingInstructions());
@@ -598,7 +598,7 @@ public:
 
   void testGetMatchingProcessingInstructionsForPreviewRowNoLookupRowFound() {
     auto const previewRow = PreviewRow({"12345"});
-    auto const presenter = makePresenterWithPreviewRowLookup(boost::none, previewRow);
+    auto const presenter = makePresenterWithPreviewRowLookup(std::nullopt, previewRow);
     auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
     TS_ASSERT(result.empty());
   }
@@ -614,20 +614,20 @@ public:
   }
 
   void testGetMatchingROIDetectorIDsForPreviewRow() {
-    auto const lookupRow = makeLookupRow(boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    auto const lookupRow = makeLookupRow(std::nullopt);
+    auto const maybeLookupRow = std::optional<LookupRow>(lookupRow);
     runGetMatchingROIDetectorIDsForPreviewRowTest(maybeLookupRow, lookupRow.roiDetectorIDs());
   }
 
   void testGetMatchingROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
-    auto lookupRow = makeLookupRow(boost::none);
-    lookupRow.setRoiDetectorIDs(boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
-    runGetMatchingROIDetectorIDsForPreviewRowTest(maybeLookupRow, boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
+    lookupRow.setRoiDetectorIDs(std::nullopt);
+    auto const maybeLookupRow = std::optional<LookupRow>(lookupRow);
+    runGetMatchingROIDetectorIDsForPreviewRowTest(maybeLookupRow, std::nullopt);
   }
 
   void testGetMatchingROIDetectorIDsForPreviewRowNoLookupRowFound() {
-    runGetMatchingROIDetectorIDsForPreviewRowTest(boost::none, boost::none);
+    runGetMatchingROIDetectorIDsForPreviewRowTest(std::nullopt, std::nullopt);
   }
 
   void testGetMatchingROIDetectorIDsForPreviewRowMultipleLookupRowsFound() {
@@ -636,7 +636,7 @@ public:
     EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).WillOnce(Throw(MultipleRowsFoundException("")));
     auto presenter = makePresenter(std::move(mockModel));
     EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
-    TS_ASSERT_EQUALS(presenter->getMatchingROIDetectorIDsForPreviewRow(), boost::none);
+    TS_ASSERT_EQUALS(presenter->getMatchingROIDetectorIDsForPreviewRow(), std::nullopt);
   }
 
 private:
@@ -662,8 +662,8 @@ private:
   std::map<ROIType, ProcessingInstructions>
   runGetMatchingProcessingInstructionsForPreviewRowWithMissingInstruction(LookupRow &lookupRow,
                                                                           ROIType instructionToOmit) {
-    lookupRow.setProcessingInstructions(instructionToOmit, boost::none);
-    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    lookupRow.setProcessingInstructions(instructionToOmit, std::nullopt);
+    auto const maybeLookupRow = std::optional<LookupRow>(lookupRow);
     auto const previewRow = PreviewRow({"12345"});
     auto const presenter = makePresenterWithPreviewRowLookup(maybeLookupRow, previewRow);
     auto const result = presenter->getMatchingProcessingInstructionsForPreviewRow();
@@ -671,8 +671,8 @@ private:
     return result;
   }
 
-  void runGetMatchingROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow,
-                                                     boost::optional<ProcessingInstructions> expectedResult) {
+  void runGetMatchingROIDetectorIDsForPreviewRowTest(std::optional<LookupRow> lookupRow,
+                                                     std::optional<ProcessingInstructions> expectedResult) {
     auto const previewRow = PreviewRow({"12345"});
     auto const presenter = makePresenterWithPreviewRowLookup(lookupRow, previewRow);
     TS_ASSERT_EQUALS(presenter->getMatchingROIDetectorIDsForPreviewRow(), expectedResult);
@@ -740,7 +740,7 @@ private:
     return presenter;
   }
 
-  std::unique_ptr<BatchPresenterFriend> makePresenterWithPreviewRowLookup(boost::optional<LookupRow> lookupRow,
+  std::unique_ptr<BatchPresenterFriend> makePresenterWithPreviewRowLookup(std::optional<LookupRow> lookupRow,
                                                                           PreviewRow const &previewRow) {
     auto mockModel = makeMockModel();
     EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).Times(1).WillOnce(Return(lookupRow));

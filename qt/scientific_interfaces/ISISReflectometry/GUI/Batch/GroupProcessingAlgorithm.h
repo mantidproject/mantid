@@ -11,11 +11,6 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 
-#include <boost/optional.hpp>
-#include <map>
-#include <string>
-#include <vector>
-
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Batch;
 class Group;

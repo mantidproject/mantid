@@ -40,12 +40,12 @@ public:
 
   Row rowWithNameAndAngle(std::string const &name, double angle) {
     auto wsNames = ReductionWorkspaces({"TOF_" + name}, TransmissionRunPair{});
-    return Row({name}, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
+    return Row({name}, angle, {"", ""}, RangeInQ(), std::nullopt, {}, wsNames);
   }
 
   Row rowWithNamesAndAngle(std::vector<std::string> const &names, double angle) {
     auto wsNames = ReductionWorkspaces(names, TransmissionRunPair{});
-    return Row(names, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
+    return Row(names, angle, {"", ""}, RangeInQ(), std::nullopt, {}, wsNames);
   }
 
   void testMergeEmptyModels() {
@@ -149,7 +149,7 @@ public:
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].get().runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].value().runNumbers());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
@@ -165,7 +165,7 @@ public:
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].get().runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].value().runNumbers());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
@@ -175,10 +175,10 @@ public:
         for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(), boost::get<1>(groupPair).rows())) {
           auto const &lhsRow = boost::get<0>(rowPair);
           auto const &rhsRow = boost::get<1>(rowPair);
-          if (lhsRow.is_initialized() != rhsRow.is_initialized())
+          if (lhsRow.has_value() != rhsRow.has_value())
             return false;
-          else if (lhsRow.is_initialized())
-            if (lhsRow.get().runNumbers() != rhsRow.get().runNumbers())
+          else if (lhsRow.has_value())
+            if (lhsRow.value().runNumbers() != rhsRow.value().runNumbers())
               return false;
         }
       }

@@ -13,10 +13,10 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupTableValidationError::LookupTableValidationError(
 
-    std::vector<InvalidLookupRowCells> validationErrors, boost::optional<LookupCriteriaError> fullTableError)
+    std::vector<InvalidLookupRowCells> validationErrors, std::optional<LookupCriteriaError> fullTableError)
     : m_validationErrors(std::move(validationErrors)), m_fullTableError(std::move(fullTableError)) {}
 
 std::vector<InvalidLookupRowCells> const &LookupTableValidationError::errors() const { return m_validationErrors; }
 
-boost::optional<LookupCriteriaError> LookupTableValidationError::fullTableError() const { return m_fullTableError; }
+std::optional<LookupCriteriaError> LookupTableValidationError::fullTableError() const { return m_fullTableError; }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

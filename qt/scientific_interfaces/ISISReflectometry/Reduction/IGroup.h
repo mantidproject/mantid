@@ -8,7 +8,6 @@
 
 #include "Item.h"
 #include "Row.h"
-#include <boost/optional.hpp>
 #include <optional>
 #include <string>
 #include <vector>
@@ -16,7 +15,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IGroup : public Item {
 public:
-  virtual ~IGroup() = default;
+  ~IGroup() override = default;
 
   virtual std::string const &name() const = 0;
   virtual void setName(std::string const &name) = 0;
@@ -25,21 +24,21 @@ public:
   virtual std::string postprocessedWorkspaceName() const = 0;
 
   virtual void appendEmptyRow() = 0;
-  virtual void appendRow(boost::optional<Row> const &row) = 0;
-  virtual void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) = 0;
-  virtual int insertRowSortedByAngle(boost::optional<Row> const &row) = 0;
+  virtual void appendRow(std::optional<Row> const &row) = 0;
+  virtual void insertRow(std::optional<Row> const &row, int beforeRowAtIndex) = 0;
+  virtual int insertRowSortedByAngle(std::optional<Row> const &row) = 0;
   virtual void removeRow(int rowIndex) = 0;
-  virtual void updateRow(int rowIndex, boost::optional<Row> const &row) = 0;
+  virtual void updateRow(int rowIndex, std::optional<Row> const &row) = 0;
 
   virtual void resetSkipped() = 0;
 
   virtual std::optional<int> indexOfRowWithTheta(double angle, double tolerance) const = 0;
 
-  virtual boost::optional<Row> const &operator[](int rowIndex) const = 0;
-  virtual std::vector<boost::optional<Row>> const &rows() const = 0;
-  virtual std::vector<boost::optional<Row>> &mutableRows() = 0;
+  virtual std::optional<Row> const &operator[](int rowIndex) const = 0;
+  virtual std::vector<std::optional<Row>> const &rows() const = 0;
+  virtual std::vector<std::optional<Row>> &mutableRows() = 0;
 
-  virtual boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
+  virtual std::optional<std::reference_wrapper<Item>> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
 
   virtual void setAllRowParents() = 0;
 

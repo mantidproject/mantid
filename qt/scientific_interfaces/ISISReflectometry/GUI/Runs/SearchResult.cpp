@@ -24,10 +24,11 @@ SearchResult::SearchResult(std::string runNumber, std::string title, std::string
 
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
-  if (maybeRunNumber.is_initialized())
-    m_runNumber = maybeRunNumber.get();
-  else
+  if (maybeRunNumber.has_value()) {
+    m_runNumber = maybeRunNumber.value();
+  } else {
     addError("Run number is not specified");
+  }
 }
 
 /** Extract the group name and angle from the run title.
@@ -36,18 +37,18 @@ void SearchResult::parseRun(std::string const &runNumber) {
  */
 void SearchResult::parseMetadataFromTitle() {
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(m_title);
-  if (!titleAndTheta.is_initialized()) {
+  if (!titleAndTheta.has_value()) {
     m_groupName = m_title;
     addError("Theta was not specified in the run title.");
     return;
   }
 
-  m_theta = titleAndTheta.get()[1];
-  m_groupName = titleAndTheta.get()[0];
+  m_theta = titleAndTheta.value()[1];
+  m_groupName = titleAndTheta.value()[0];
 
   // Validate that the angle parses correctly
   auto const maybeTheta = parseTheta(m_theta);
-  if (!maybeTheta.is_initialized())
+  if (!maybeTheta.has_value())
     addError(std::string("Invalid theta value in run title: ").append(m_theta));
 }
 

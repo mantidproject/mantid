@@ -984,7 +984,7 @@ private:
     // Construct the corresponding model expected in the main table
     auto jobs = ReductionJobs();
     auto group = Group(groupName);
-    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
     jobs.appendGroup(std::move(group));
     return jobs;
