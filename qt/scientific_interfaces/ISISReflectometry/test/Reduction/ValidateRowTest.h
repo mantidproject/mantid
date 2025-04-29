@@ -172,6 +172,7 @@ public:
   void testParseScaleFactor() {
     TS_ASSERT(!parseScaleFactor("ABSC").second);
     TS_ASSERT(parseScaleFactor("").second);
+    TS_ASSERT_EQUALS(std::nullopt, parseScaleFactor("").first);
     TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").first.value());
   }
 
