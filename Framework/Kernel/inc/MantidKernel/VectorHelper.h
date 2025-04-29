@@ -76,7 +76,8 @@ template <typename T> std::vector<T> flattenVector(const std::vector<std::vector
   return flattened;
 }
 
-template <typename NumT> MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString);
+template <typename NumT>
+MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString, const std::string &separators = ", ");
 
 MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins, const double value);
 

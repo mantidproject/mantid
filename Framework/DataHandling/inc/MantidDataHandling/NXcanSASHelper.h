@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <H5Cpp.h>
 #include <filesystem>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -18,9 +19,11 @@ namespace NXcanSAS {
 // Helper functions for algorithms saving in NXcanSAS format.
 enum class WorkspaceDimensionality;
 
-std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
-std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename, int index,
-                                                              bool isGroup = false);
+// DATA
+void MANTID_DATAHANDLING_DLL addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
+void MANTID_DATAHANDLING_DLL addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
+
+// STANDARD METADATA
 void MANTID_DATAHANDLING_DLL addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
                                           const std::vector<std::string> &detectorNames);
 void MANTID_DATAHANDLING_DLL addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
@@ -36,12 +39,27 @@ void MANTID_DATAHANDLING_DLL addProcessEntry(H5::Group &group, const std::string
 void MANTID_DATAHANDLING_DLL addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                                              const std::string &transmissionName);
 
-void MANTID_DATAHANDLING_DLL addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
-void MANTID_DATAHANDLING_DLL addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
+// POLARIZED DATA
+void MANTID_DATAHANDLING_DLL addPolarizedData(H5::Group &data, const Mantid::API::WorkspaceGroup_sptr &wsGroup,
+                                              const std::string &inputSpinStates);
+void MANTID_DATAHANDLING_DLL addPolarizer(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                          const std::string &componentName, const std::string &componentType,
+                                          const std::string &groupSuffix);
 
+// POLARIZED METADATA
+void MANTID_DATAHANDLING_DLL addSampleEMFields(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                               const std::string &emFieldStrengthLog, const std::string &emFieldDir);
+void MANTID_DATAHANDLING_DLL addEMFieldDirection(H5::Group &group, const std::string &emFieldDir);
+
+// UTILITY
+std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
+H5::H5File MANTID_DATAHANDLING_DLL prepareFile(const std::filesystem::path &path);
+std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename,
+                                                              bool addDigitSuffix = false, size_t index = 0);
+
+std::string MANTID_DATAHANDLING_DLL addDigit(size_t index);
 WorkspaceDimensionality MANTID_DATAHANDLING_DLL
 getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace);
-std::vector<std::string> MANTID_DATAHANDLING_DLL splitDetectorNames(std::string detectorNames);
 
 } // namespace NXcanSAS
 } // namespace DataHandling
