@@ -1,33 +1,12 @@
-# cmake-format: off
-set(SRC_FILES
-    src/H5Util.cpp
-    src/NexusClasses.cpp
-    src/NexusDescriptor.cpp
-    src/NeXusException.cpp
-    src/NeXusFile.cpp
-    src/stptok.cpp
+set(SRC_FILES src/H5Util.cpp src/NexusClasses.cpp src/NeXusException.cpp src/NeXusFile.cpp src/stptok.cpp)
+
+set(INC_FILES inc/MantidNexus/H5Util.h inc/MantidNexus/NexusClasses.h inc/MantidNexus/NexusIOHelper.h
+              inc/MantidNexus/NeXusFile_fwd.h inc/MantidNexus/NeXusException.hpp inc/MantidNexus/NeXusFile.hpp
 )
 
-set(INC_FILES
-    inc/MantidNexus/H5Util.h
-    inc/MantidNexus/NexusClasses.h
-    inc/MantidNexus/NexusIOHelper.h
-    inc/MantidNexus/NeXusFile_fwd.h
-    inc/MantidNexus/NexusDescriptor.h
-    inc/MantidNexus/NeXusException.hpp
-    inc/MantidNexus/NeXusFile.hpp
+set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h NeXusFileTest.h NeXusFileLeakTest.h NeXusFileNapiTest.h
+               NeXusFileReadWriteTest.h
 )
-
-set(TEST_FILES
-    H5UtilTest.h
-    NexusIOHelperTest.h
-    NexusDescriptorTest.h
-    NeXusFileTest.h
-    NeXusFileLeakTest.h
-    NeXusFileNapiTest.h
-    NeXusFileReadWriteTest.h
-)
-# cmake-format: on
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
