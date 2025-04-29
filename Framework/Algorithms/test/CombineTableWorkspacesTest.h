@@ -26,9 +26,9 @@ using Mantid::DataObjects::TableWorkspace_sptr;
 using Mantid::Kernel::V3D;
 
 /** Create a table workspace
- * @param types A vector of strings of the data types of the columns (either int or string for the purpose of tesing)
+ * @param dataType A vector of strings of the data types of the columns (either int or string for the purpose of tesing)
  * @param rowCount The number of detectors required
- * @param types A vector of strings of the names of the columns
+ * @param names A vector of strings of the names of the columns
  * @return A pointer to the table workspace
  */
 template <typename T>
@@ -382,7 +382,10 @@ public:
     std::string outWSName("CombineTableWorkspacesTest_OutputWS");
 
     Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n"
+                            " LHSWorkspace: Both Table Workspaces must have the same number of columns\n"
+                            " RHSWorkspace: Both Table Workspaces must have the same number of columns");
   }
 
   void test_different_column_names_throw_error() {
@@ -396,7 +399,10 @@ public:
     std::string outWSName("CombineTableWorkspacesTest_OutputWS");
 
     Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n"
+                            " LHSWorkspace: Both Table Workspaces must have the same column titles\n"
+                            " RHSWorkspace: Both Table Workspaces must have the same column titles");
   }
 
   void test_different_types_throw_error() {
@@ -410,6 +416,10 @@ public:
     std::string outWSName("CombineTableWorkspacesTest_OutputWS");
 
     Mantid::API::IAlgorithm_sptr alg = setupAlg(table1, table2, outWSName);
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: \n"
+        " LHSWorkspace: Both Table Workspaces must have the same data types for corresponding columns\n"
+        " RHSWorkspace: Both Table Workspaces must have the same data types for corresponding columns");
   }
 };
