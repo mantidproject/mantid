@@ -243,8 +243,6 @@ ISISJournal::ISISJournal(std::string const &instrument, std::string const &cycle
     : m_internetHelper(std::move(internetHelper)), m_runsFileURL(constructURL(instrument, cycle)),
       m_indexFileURL(constructURL(instrument, INDEX_FILE_NAME)) {}
 
-ISISJournal::~ISISJournal() = default;
-
 ISISJournal::ISISJournal(ISISJournal &&rhs) = default;
 
 ISISJournal &ISISJournal::operator=(ISISJournal &&rhs) = default;

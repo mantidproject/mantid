@@ -23,8 +23,6 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL DownloadInstrument : public API::Algorithm {
 public:
   DownloadInstrument();
-  virtual ~DownloadInstrument() = default;
-
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"LoadInstrument", "UpdateScriptRepository"}; }

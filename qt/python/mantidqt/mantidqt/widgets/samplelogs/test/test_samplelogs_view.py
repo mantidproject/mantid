@@ -48,3 +48,11 @@ class SampleLogsViewTest(unittest.TestCase, QtWidgetFinder):
         assert pres.view.isVisible()
         DeleteWorkspace("new_name")
         assert not pres.view.isVisible()
+
+    def test_minimum_canvas_size(self):
+        ws = CreateSampleWorkspace()
+        pres = SampleLogs(ws)
+        pres.view.show_plot_and_stats(True)
+        pres.view.canvas.resize(-1, -1)
+        self.assertEqual(0, pres.view.canvas.width())
+        self.assertEqual(0, pres.view.canvas.height())

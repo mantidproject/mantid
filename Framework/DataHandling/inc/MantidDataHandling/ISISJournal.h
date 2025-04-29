@@ -11,6 +11,7 @@
 #include "MantidKernel/InternetHelper.h"
 
 #include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -32,8 +33,6 @@ class MANTID_DATAHANDLING_DLL ISISJournal : public API::IJournal {
 public:
   ISISJournal(std::string const &instrument, std::string const &cycle,
               std::unique_ptr<Kernel::InternetHelper> internetHelper = std::make_unique<Kernel::InternetHelper>());
-  virtual ~ISISJournal();
-
   ISISJournal(ISISJournal const &rhs) = delete;
   ISISJournal(ISISJournal &&rhs);
   ISISJournal const &operator=(ISISJournal const &rhs) = delete;

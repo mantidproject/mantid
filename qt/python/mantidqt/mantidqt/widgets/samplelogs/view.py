@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (
     QFrame,
     QSpacerItem,
 )
-from qtpy.QtCore import QItemSelectionModel, Qt, Signal
+from qtpy.QtCore import QItemSelectionModel, Qt, Signal, QSize
 from mantidqt.widgets.observers.observing_view import ObservingView
 from mantidqt.MPLwidgets import FigureCanvas
 from mantid.api import Workspace
@@ -123,6 +123,7 @@ class SampleLogsView(QSplitter, ObservingView):
         self.fig = Figure()
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.canvas.setMinimumSize(QSize(0, 0))
         self.canvas.mpl_connect("button_press_event", self.presenter.plot_clicked)
         self.ax = self.fig.add_subplot(111, projection="mantid")
         layout_right.addWidget(self.canvas)
@@ -169,7 +170,7 @@ class SampleLogsView(QSplitter, ObservingView):
         self.table.selectionModel().selectionChanged.connect(self.presenter.update)
 
     def show_plot_and_stats(self, show_plot_and_stats):
-        """sets wether the plot and stats section should be visible"""
+        """sets whether the plot and stats section should be visible"""
         if self.frame_right.isVisible() != show_plot_and_stats:
             # the desired state is nor the current state
             self.setUpdatesEnabled(False)

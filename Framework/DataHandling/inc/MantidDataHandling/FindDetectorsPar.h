@@ -121,7 +121,6 @@ class DetParameters;
 
 class MANTID_DATAHANDLING_DLL FindDetectorsPar : public API::Algorithm {
 public:
-  virtual ~FindDetectorsPar() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose

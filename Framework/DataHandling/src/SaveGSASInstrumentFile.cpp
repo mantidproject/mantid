@@ -36,7 +36,7 @@ public:
                        const std::string &mndspstr, const std::string &mxdspstr, const std::string &maxtofstr);
 
   /// Get bank IDs in configuration
-  std::vector<unsigned int> getBankIDs() const;
+  const std::vector<unsigned int> &getBankIDs() const;
   /// Check wehther a bank is defined
   bool hasBank(unsigned int bankid) const;
   /// Get a parameter from a bank
@@ -63,9 +63,6 @@ private:
   std::vector<double> m_mindsps;
   std::vector<double> m_maxdsps;
   std::vector<double> m_maxtofs;
-
-  std::vector<double> m_splitds;
-  std::vector<int> m_vruns;
 };
 
 using ChopperConfiguration_sptr = std::shared_ptr<ChopperConfiguration>;
@@ -126,7 +123,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string &ba
 //----------------------------------------------------------------------------------------------
 /** Get bank IDs in the chopper configuration
  */
-vector<unsigned int> ChopperConfiguration::getBankIDs() const { return m_bankIDs; }
+const vector<unsigned int> &ChopperConfiguration::getBankIDs() const { return m_bankIDs; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -219,7 +216,7 @@ vector<double> ChopperConfiguration::parseStringDbl(const string &instring) cons
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<double> vecdouble;
-  for (auto &str : strs) {
+  for (const auto &str : strs) {
     if (!str.empty()) {
       double item = std::stod(str.c_str());
       vecdouble.emplace_back(item);
@@ -241,7 +238,7 @@ vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(const string &
   boost::split(strs, instring, boost::is_any_of(", "));
 
   vector<unsigned int> vecinteger;
-  for (auto &str : strs) {
+  for (const auto &str : strs) {
     if (!str.empty()) {
       int item = std::stoi(str);
       if (item < 0) {
@@ -325,7 +322,7 @@ void SaveGSASInstrumentFile::exec() {
   // Deal with a default
   if (m_vecBankID2File.empty()) {
     // Default is to export all banks
-    for (auto &miter : bankprofileparammap) {
+    for (const auto &miter : bankprofileparammap) {
       unsigned int bankid = miter.first;
       m_vecBankID2File.emplace_back(bankid);
     }
