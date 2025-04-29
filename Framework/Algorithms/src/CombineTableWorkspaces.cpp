@@ -129,8 +129,8 @@ void CombineTableWorkspaces::exec() {
   // Copy the first workspace to our output workspace
   DataObjects::TableWorkspace_sptr outputWS = LHSWorkspace->clone();
   // Get hold of the peaks in the second workspace
-  const int nRows = static_cast<int>(RHSWorkspace->rowCount());
-  const int nCols = static_cast<int>(RHSWorkspace->columnCount());
+  const auto nRows = RHSWorkspace->rowCount();
+  const auto nCols = RHSWorkspace->columnCount();
 
   std::vector<std::string> colTypes = {};
   for (auto i = 0; i < nCols; i++) {
@@ -139,10 +139,10 @@ void CombineTableWorkspaces::exec() {
 
   Progress progress(this, 0.0, 1.0, nRows);
 
-  for (int r = 0; r < nRows; r++) {
+  for (auto r = 0; r < nRows; r++) {
     TableRow newRow = outputWS->appendRow();
     TableRow currentRow = RHSWorkspace->getRow(r);
-    for (int c = 0; c < nCols; c++) {
+    for (auto c = 0; c < nCols; c++) {
       const auto dType = colTypes[c];
       const int dTypeVal = allowedColumnTypes.at(dType);
       switch (dTypeVal) {
