@@ -350,21 +350,6 @@ public:
     TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
   }
 
-  void test_make_data_layers_bad() {
-    cout << "\ntest makeData layers -- bad\n";
-    FileResource resource("test_nexus_file_rdwr.h5");
-    std::string filename = resource.fullPath();
-    NeXus::File file(filename, NXACC_CREATE5);
-
-    NXnumtype type(NXnumtype::CHAR);
-    string data1("layer1"), data2("layer2");
-
-    // create a file with data -- open data
-    file.makeGroup("entry", "NXentry", true);
-    file.makeData(data1, type, 1, false);
-    file.openData(data1);
-  }
-
   void test_closeData() {
     cout << "\ntest closeData\n";
     FileResource resource("test_nexus_file_dataclose.h5");
@@ -785,8 +770,6 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
-
-    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
 
     std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
 

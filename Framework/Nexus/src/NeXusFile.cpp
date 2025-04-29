@@ -782,10 +782,9 @@ template <typename NumT> void File::putData(vector<NumT> const &data) {
   this->putData<NumT>(data.data());
 }
 
-template <> MANTID_NEXUS_DLL void File::putData<std::string>(std::string const *data) {
-  char const *chardata = data->c_str();
-  this->putData(chardata);
-}
+void File::putData(std::string const &data) { this->putData(data.c_str()); }
+
+template <> MANTID_NEXUS_DLL void File::putData<std::string>(std::string const *data) { this->putData(data->c_str()); }
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
   if (name.empty()) {
@@ -809,7 +808,7 @@ void File::putAttr(std::string const &name, std::string const &value, bool const
 }
 
 // this will handle string literals, which is the preferred way to pass string attributes
-void File::putAttr(std::string const &name, char const *const value) {
+void File::putAttr(std::string const &name, char const *value) {
   if (value == nullptr) {
     throw Exception("cannot write null data to attribute " + name, "putAttr", m_filename);
   } else {
