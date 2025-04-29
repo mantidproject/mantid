@@ -331,7 +331,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(char const *name, char const *value);
+  void putAttr(std::string const &name, char const *value);
 
   /**
    * Put the supplied string literal as an attribute into the currently open data.
@@ -504,8 +504,6 @@ public:
    *  \param name the name of the attribute to look for.
    */
   bool hasAttr(std::string const &name);
-
-  template <typename NumT> NumT getAttr(std::string const &name);
 
   /**
    * Get the value of an attribute that is a scalar number.
