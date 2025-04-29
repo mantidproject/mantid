@@ -1551,7 +1551,7 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '" << entry_name << vms_str << "'.\n";
-    m_file->openPath(entry_name + vms_str);
+    m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
     return nullptr; // Doesn't exist
   }
