@@ -8,7 +8,7 @@
 
 #include <json/value.h>
 
-#include <bits/stdc++.h>
+#include <algorithm>
 #include <ostream>
 #include <utility>
 
