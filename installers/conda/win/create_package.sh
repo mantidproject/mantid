@@ -105,6 +105,12 @@ mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
 echo "Copy all DLLs from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
+# DLLs required for quasielasticbayes
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libgfortran*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libquadmath*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libwinpthread*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libgcc_s_seh*.dll $COPY_DIR/bin/
+
 
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
