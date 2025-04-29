@@ -405,7 +405,7 @@ std::map<std::string, std::string> ReflectometryWorkflowBase2::validateDirectBea
   std::map<std::string, std::string> results;
 
   // Validate direct beam if given
-  Property *directBeamProperty = getProperty("RegionOfDirectBeam");
+  const Property *directBeamProperty = getProperty("RegionOfDirectBeam");
   if (!directBeamProperty->isDefault()) {
 
     const std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
@@ -629,12 +629,12 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorks
   integrationAlg->initialize();
   integrationAlg->setProperty("InputWorkspace", monitorWS);
 
-  Property *integrationMinProperty = getProperty("MonitorIntegrationWavelengthMin");
+  const Property *integrationMinProperty = getProperty("MonitorIntegrationWavelengthMin");
   if (!integrationMinProperty->isDefault()) {
     integrationAlg->setProperty("RangeLower", integrationMinProperty->value());
   }
 
-  Property *integrationMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
+  const Property *integrationMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
   if (!integrationMaxProperty->isDefault()) {
     integrationAlg->setProperty("RangeUpper", integrationMaxProperty->value());
   }
