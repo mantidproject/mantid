@@ -13,6 +13,8 @@
 
 /** \enum NXaccess
  * NeXus file access codes.
+ * these codes are taken directly from values used in hdf5 package
+ * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.

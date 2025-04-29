@@ -2047,7 +2047,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
     try {
       axisLabels = data.getString("axis2");
     } catch (std::runtime_error &) {
-      // let it drop on the floor
+      axisLabels = "";
     }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
