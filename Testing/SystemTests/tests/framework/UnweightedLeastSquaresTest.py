@@ -16,7 +16,7 @@ import numpy as np
 
 
 def runFit(x, y, fn):
-    e = 0.1 * np.ones(len(x))
+    e = np.sqrt(np.abs(np.random.normal(y, 1)))
     ws = CreateWorkspace(x, y, e)
     Fit(fn, ws, Output="ws", Minimizer="Levenberg-Marquardt", CostFunction="Unweighted least squares")
 
