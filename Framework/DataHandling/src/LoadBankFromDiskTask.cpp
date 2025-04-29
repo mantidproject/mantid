@@ -231,7 +231,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
 
   // Check that the required space is there in the file.
   ::NeXus::Info tof_info = file.getInfo();
-  int64_t tof_dim0 = recalculateDataSize(tof_info[0]);
+  int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
                                         << "'s event_time_offset field is too small "
