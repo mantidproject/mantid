@@ -56,9 +56,7 @@ std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(API::FunctionV
 /// Update the fit weights of m_values so that correct fit weights are used by the minimizer and GSLFunctions
 void CostFuncUnweightedLeastSquares::updateFitWeights() {
   for (size_t i = 0; i < m_values->size(); i++) {
-    if (m_values->getFitWeight(i) != 0.0) {
-      m_values->setFitWeight(i, 1.0);
-    }
+    m_values->setFitWeight(i, 1.0);
   }
 }
 
