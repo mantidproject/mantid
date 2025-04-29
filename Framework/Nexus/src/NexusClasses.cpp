@@ -126,15 +126,15 @@ void NXObject::getAttributes() {
       break;
     }
     case NXnumtype::INT16: {
-      attributes.set(ainfo.name, m_fileID->getAttr<short int>(ainfo));
-      break;
-    }
-    case NXnumtype::INT32: {
-      attributes.set(ainfo.name, m_fileID->getAttr<int>(ainfo));
+      attributes.set(ainfo.name, m_fileID->getAttr<int16_t>(ainfo.name));
       break;
     }
     case NXnumtype::UINT16: {
-      attributes.set(ainfo.name, m_fileID->getAttr<short unsigned int>(ainfo));
+      attributes.set(ainfo.name, m_fileID->getAttr<uint16_t>(ainfo.name));
+      break;
+    }
+    case NXnumtype::INT32: {
+      attributes.set(ainfo.name, m_fileID->getAttr<int32_t>(ainfo.name));
       break;
     }
     default:

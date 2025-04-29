@@ -90,7 +90,7 @@ private:
   /// C++ API file handle
   std::shared_ptr<::NeXus::File> m_filehandle;
   /// Nexus compression method
-  ::NeXus::NXcompression m_nexuscompression;
+  NXcompression m_nexuscompression;
   /// Allow an externally supplied progress object to be used
   API::Progress *m_progress;
   /// Write a simple value plus possible attributes

@@ -34,7 +34,6 @@ typedef struct __fileStack *pFileStack;
 
 pFileStack makeFileStack();
 void killFileStack(pFileStack self);
-int getFileStackSize();
 
 void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *filename);
 void popFileStack(pFileStack self);
