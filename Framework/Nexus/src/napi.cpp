@@ -343,12 +343,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if (my_am == NXACC_CREATE4) {
-    /* HDF4 will be used ! */
-    backend_type = NXACC_CREATE4;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5)) {
+  if (my_am == NXACC_CREATE5) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
@@ -390,11 +385,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
 
   NXstatus retstat = NXstatus::NX_ERROR;
-  if (backend_type == NXACC_CREATE4) {
-    /* HDF4 type */
-    NXReportError("ERROR: Attempt to create HDF4 file when not linked with HDF4");
-    retstat = NXstatus::NX_ERROR;
-  } else if (backend_type == NXACC_CREATE5) {
+  if (backend_type == NXACC_CREATE5) {
     /* HDF5 type */
 #ifdef WITH_HDF5
     NXhandle hdf5_handle = NULL;
@@ -424,7 +415,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
   }
-  if (filename != NULL) {
+  if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
     free(filename);
   }
   if (fHandle != NULL) {

@@ -39,7 +39,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // 2d array
   NeXus::DimVector array_dims{5, 4};
-  char c1_array[5][4] = {
+  char const c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
   file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
   file.putData(&(c1_array[0][0]));
@@ -105,9 +105,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 #else
   vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
-  if (create_code != NXACC_CREATE4) {
-    file.writeData("grosszahl", grossezahl);
-  }
+  file.writeData("grosszahl", grossezahl);
 
   // create a new group inside this one
   file.makeGroup("data", "NXdata", true);
@@ -125,7 +123,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
     }
   }
   const NeXus::DimVector cdims{20, 20};
-  file.writeCompData("comp_data", comp_array, array_dims, NeXus::LZW, cdims);
+  file.writeCompData("comp_data", comp_array, array_dims, NXcompression::LZW, cdims);
 
   // ---------- Test write Extendible Data --------------------------
   std::vector<int> data(10, 123);
@@ -399,8 +397,7 @@ int main(int argc, char **argv) {
     cout << "napi_test_cpp-xml is not supported" << endl;
     return TEST_FAILED;
   } else {
-    nx_creation_code = NXACC_CREATE4;
-    fileext = ".hdf";
+    return TEST_FAILED;
   }
   const string filename("napi_test_cpp" + fileext);
 
