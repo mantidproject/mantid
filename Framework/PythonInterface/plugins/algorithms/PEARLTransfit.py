@@ -83,6 +83,8 @@ class PEARLTransfit(PythonAlgorithm):
         "Iro9_startE": 8.7,
         "Iro9_endE": 9.85,
     }
+    DEFAULT_PEAK_AMP = 1.6
+    eV_TO_meV = 1000.0
 
     def version(self):
         return 1
@@ -196,14 +198,13 @@ class PEARLTransfit(PythonAlgorithm):
             # this means that Rebin is effectively performing a mean rather than sum
             ws.setDistribution(True)
             self.exec_child_alg("ConvertFromDistribution", Workspace=ws)
-            bin_width = 1000 * float(self.getProperty("Ediv").value)  # meV
+            bin_width = self.eV_TO_meV * float(self.getProperty("Ediv").value)  # meV
             ws = self.exec_child_alg("Rebin", InputWorkspace=ws, Params=f"{bin_width}", FullBinsOnly=True)
 
         # Define the gaussian width at the reference temperature
-        # Factor of 1e3 converting to meV for Mantid
         energy = self.res_params_dict[foil_type + "_En"]
         mass = self.res_params_dict[foil_type + "_Mass"]
-        gauss_fwhm_ref_temp = 1000.0 * np.sqrt(4 * energy * constants.k * ref_temp * mass / (constants.e * (1 + mass) ** 2))
+        gauss_fwhm_ref_temp = self.eV_TO_meV * np.sqrt(4 * energy * constants.k * ref_temp * mass / (constants.e * (1 + mass) ** 2))
 
         # make initial function with constraints
         func = FunctionWrapper("PEARLTransVoigt")
@@ -214,12 +215,12 @@ class PEARLTransfit(PythonAlgorithm):
         if is_calib:
             # use tabulated values (note energies are in eV)
             out_ws_name = "S_fit"
-            func["Amplitude"] = 1.6
+            func["Amplitude"] = self.DEFAULT_PEAK_AMP
             two_gGamma = self.res_params_dict[foil_type + "_TwogG"]
             gamma_g = self.res_params_dict[foil_type + "_Gg"]
-            func["LorentzianFWHM"] = 1000.0 * (0.5 * two_gGamma + gamma_g)
+            func["LorentzianFWHM"] = self.eV_TO_meV * (0.5 * two_gGamma + gamma_g)
             func["GaussianFWHM"] = gauss_fwhm_ref_temp
-            func["Position"] = energy * 1000  # take peak position starting guess from tabulated value
+            func["Position"] = energy * self.eV_TO_meV  # take peak position starting guess from tabulated value
             bg_pars = np.zeros(3)
             if estimate_background:
                 bg_pars[:2] = self.estimate_linear_background(ws.readX(0), ws.readY(0))
@@ -332,7 +333,7 @@ class PEARLTransfit(PythonAlgorithm):
     def calc_effective_temp_and_error(
         self, fwhm: float, fwhm_err: float, energy: float, energy_err: float, correlation: float, mass: float
     ) -> (float, float):
-        const = ((1e-3) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
+        const = ((1 / self.eV_TO_meV) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
         temp = const * (fwhm**2) / energy
         # propagate errors
         dtemp_by_dfwhm = 2 * fwhm / energy
@@ -373,8 +374,8 @@ class PEARLTransfit(PythonAlgorithm):
         if len(filepaths) > 1:
             ws = ws / len(filepaths)
         # crop
-        xstart = 1000 * self.res_params_dict[foil_type + "_startE"]
-        xend = 1000 * self.res_params_dict[foil_type + "_endE"]
+        xstart = self.eV_TO_meV * self.res_params_dict[foil_type + "_startE"]
+        xend = self.eV_TO_meV * self.res_params_dict[foil_type + "_endE"]
         ws = self.exec_child_alg("CropWorkspaceRagged", InputWorkspace=ws, XMin=xstart, XMax=xend)
         return ws
 
