@@ -528,7 +528,7 @@ public:
     // put/get a char array
     char word[] = "silicovolcaniosis";
     char read[18];
-    file.makeData("data_char", NeXus::getType<char>(), 17, true);
+    file.makeData("data_char", NeXus::getType<char>(), 18, true);
     file.putData(word);
     info = file.getInfo();
     file.getData(read);
@@ -815,10 +815,10 @@ public:
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
     TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
     TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
+    TS_ASSERT_EQUALS(attrInfos[0].length, 1);
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
+    TS_ASSERT_EQUALS(attrInfos[1].length, 1);
   }
 
   void test_getEntries() {
