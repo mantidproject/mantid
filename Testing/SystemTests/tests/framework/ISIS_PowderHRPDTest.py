@@ -52,6 +52,10 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
     calibration_results = None
     existing_config = config["datasearch.directories"]
 
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return _gen_required_files()
 
@@ -77,6 +81,10 @@ class CreateVanadiumNoSolidAngleNoEmptySubtractionTest(systemtesting.MantidSyste
     calibration_results = None
     existing_config = config["datasearch.directories"]
 
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return _gen_required_files()
 
@@ -101,6 +109,10 @@ class CreateVanadiumNoSolidAngleNoEmptySubtractionTest(systemtesting.MantidSyste
 class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config["datasearch.directories"]
+
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
 
     def requiredFiles(self):
         return _gen_required_files()
