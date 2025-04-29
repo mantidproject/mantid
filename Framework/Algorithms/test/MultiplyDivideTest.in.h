@@ -76,6 +76,21 @@ public:
     TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), const std::invalid_argument &);
     TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
+
+    if (DO_DIVIDE)
+    {
+      // Test OptionalBool
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(OptionalBool::True));
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(OptionalBool::False));
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(true));
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(false));
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool("True"));
+      TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool("False"));
+      // TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(0));
+      // TS_ASSERT_THROWS_NOTHING( OptionalBool myOptionalBool = OptionalBool(1));
+      TS_ASSERT_THROWS( alg->setProperty("IsDistribution", "jimmy"), const std::invalid_argument &);
+    }
+
     delete alg;
   }
 
