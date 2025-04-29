@@ -89,13 +89,15 @@ public:
    */
   H5::Group *getRoot();
 
-  /// @brief  Get the current location in the stack
-  /// @return A pointer to the location, as an H5Location object
+  /** @brief  Get the current location in the stack
+   * @return A pointer to the location, as an H5Location object
+   */
   H5::H5Location *getCurrentLocation();
 
-  /// @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
-  /// @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
-  /// @return A pointer to the current location, treated as a T*
+  /** @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
+   * @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
+   * @return A pointer to the current location, treated as a T*
+   */
   template <typename T> T *getCurrentLocationAs();
 
   bool verifyGroupClass(H5::Group const &, std::string const &) const;

@@ -789,7 +789,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
   // Test if IDF exists in file, move on quickly if not
   try {
     ::NeXus::File nxsfile(nexusfilename);
-    nxsfile.openPath("/" + top_entry_name + "/instrument/instrument_xml");
+    nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
   } catch (::NeXus::Exception &) {
     alg->getLogger().information("No instrument XML definition found in " + nexusfilename + " at " + top_entry_name +
                                  "/instrument");

@@ -182,8 +182,7 @@ private:
       slab_array[0] = i;
       file.putSlab(slab_array, i, 1);
       file.flush();
-      // NOTE: trying to open an already-opened dataset apparently did nothing
-      // file.openData("flush_data");
+      file.openData("flush_data");
     }
     file.closeData();
     file.closeGroup();
