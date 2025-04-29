@@ -14,11 +14,11 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Row::Row(std::vector<std::string> runNumbers, double theta,
 
-         TransmissionRunPair transmissionRuns, RangeInQ qRange, boost::optional<double> scaleFactor,
+         TransmissionRunPair transmissionRuns, RangeInQ qRange, std::optional<double> scaleFactor,
          ReductionOptionsMap reductionOptions,
 
          ReductionWorkspaces reducedWorkspaceNames)
-    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
+    : m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
       m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
       m_lookupIndex(std::nullopt), m_parent(nullptr) {
@@ -39,7 +39,7 @@ RangeInQ const &Row::qRange() const { return m_qRange; }
 
 RangeInQ const &Row::qRangeOutput() const { return m_qRangeOutput; }
 
-boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
+std::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 
 ReductionOptionsMap const &Row::reductionOptions() const { return m_reductionOptions; }
 

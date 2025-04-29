@@ -24,13 +24,14 @@ namespace { // unnamed
 int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLocation const &location,
                           std::vector<MantidWidgets::Batch::RowLocation> const &locations,
                           Item::ItemCountFunction countFunction) {
-  if (!jobs.validItemAtPath(location))
+  if (!jobs.validItemAtPath(location)) {
     return 0;
-
+  }
   // Rows have a single processing step but we want to ignore them if their
   // parent group is also in the selection or they will be counted twice.
-  if (isRowLocation(location) && containsPath(locations, MantidWidgets::Batch::RowLocation({groupOf(location)})))
+  if (isRowLocation(location) && containsPath(locations, MantidWidgets::Batch::RowLocation({groupOf(location)}))) {
     return 0;
+  }
 
   auto const &item = jobs.getItemFromPath(location);
   return (item.*countFunction)();
@@ -150,7 +151,7 @@ bool BatchJobManager::hasSelectedRowsRequiringProcessing(Group const &group) {
   auto processAllRowsInGroup = (m_processAll || isSelected(group));
 
   return std::any_of((group.rows()).cbegin(), (group.rows()).cend(), [this, &processAllRowsInGroup](const auto &row) {
-    return (row && (processAllRowsInGroup || isSelected(row.get())) && row->requiresProcessing(m_reprocessFailed));
+    return (row && (processAllRowsInGroup || isSelected(row.value())) && row->requiresProcessing(m_reprocessFailed));
   });
 }
 
@@ -202,8 +203,8 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (row && row->requiresProcessing(m_reprocessFailed) && (processAll || isSelected(row.get())))
-      addAlgorithmForProcessingRow(row.get(), algorithms);
+    if (row && row->requiresProcessing(m_reprocessFailed) && (processAll || isSelected(row.value())))
+      addAlgorithmForProcessingRow(row.value(), algorithms);
   }
   return algorithms;
 }
@@ -238,33 +239,37 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcess
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);
   assert(item);
-  item->resetOutputs();
-  item->setRunning();
+  Item &itemRef = item->get();
+  itemRef.resetOutputs();
+  itemRef.setRunning();
 }
 
 void BatchJobManager::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);
   assert(item);
+  Item &itemRef = item->get();
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->updateItem();
-  item->setSuccess();
+  itemRef.setSuccess();
 }
 
 void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
   auto item = getRunsTableItem(algorithm);
   assert(item);
-  item->resetOutputs();
-  item->setError(message);
+  Item &itemRef = item->get();
+  itemRef.resetOutputs();
+  itemRef.setError(message);
   // Mark the item as skipped so we don't reprocess it in the current round of
   // reductions.
-  item->setSkipped(true);
+  itemRef.setSkipped(true);
 }
 
-boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
+std::optional<std::reference_wrapper<Item>>
+BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto *item = jobAlgorithm->item();
   if (!item || item->isPreview()) {
-    return boost::none;
+    return std::nullopt;
   }
   return *item;
 }
@@ -274,12 +279,10 @@ std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfi
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
 
-  if (item->isGroup())
+  if (item->isGroup()) {
     return getWorkspacesToSave(dynamic_cast<Group &>(*item), includeGrpRows);
-  else
-    return getWorkspacesToSave(dynamic_cast<Row &>(*item));
-
-  return std::vector<std::string>();
+  }
+  return getWorkspacesToSave(dynamic_cast<Row &>(*item));
 }
 
 std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group, bool includeRows) const {
@@ -289,7 +292,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group
     auto const &rows = group.rows();
     for (auto &row : rows) {
       if (row) {
-        workspaces.emplace_back(row.get().reducedWorkspaceNames().iVsQBinned());
+        workspaces.emplace_back(row.value().reducedWorkspaceNames().iVsQBinned());
       }
     }
   }
@@ -314,35 +317,35 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
 size_t BatchJobManager::getNumberOfInitialisedRowsInGroup(const int groupIndex) const {
   auto const &group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
   return static_cast<int>(std::count_if(group.rows().cbegin(), group.rows().cend(),
-                                        [](const boost::optional<Row> &row) { return row.is_initialized(); }));
+                                        [](const std::optional<Row> &row) { return row.has_value(); }));
 }
 
-boost::optional<Item const &> BatchJobManager::notifyWorkspaceDeleted(std::string const &wsName) {
+std::optional<std::reference_wrapper<Item const>> BatchJobManager::notifyWorkspaceDeleted(std::string const &wsName) {
   // Reset the state for the relevant row if the workspace was one of our
   // outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
-  if (item.is_initialized()) {
-    item->resetState(false);
-    return boost::optional<Item const &>(item.get());
+  if (item.has_value()) {
+    item->get().resetState(false);
+    return item;
   }
-  return boost::none;
+  return std::nullopt;
 }
 
-boost::optional<Item const &> BatchJobManager::notifyWorkspaceRenamed(std::string const &oldName,
-                                                                      std::string const &newName) {
+std::optional<std::reference_wrapper<Item const>> BatchJobManager::notifyWorkspaceRenamed(std::string const &oldName,
+                                                                                          std::string const &newName) {
   // Update the workspace name in the model, if it is one of our outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
-  if (item.is_initialized()) {
-    item->renameOutputWorkspace(oldName, newName);
-    return boost::optional<Item const &>(item.get());
+  if (item.has_value()) {
+    item->get().renameOutputWorkspace(oldName, newName);
+    return item;
   }
   auto newItem = m_batch.getItemWithOutputWorkspaceOrNone(newName);
-  if (newItem.is_initialized()) {
-    newItem->resetState();
-    return boost::optional<Item const &>(newItem.get());
+  if (newItem.has_value()) {
+    newItem->get().resetState();
+    return item;
   }
 
-  return boost::none;
+  return std::nullopt;
 }
 
 void BatchJobManager::notifyAllWorkspacesDeleted() {

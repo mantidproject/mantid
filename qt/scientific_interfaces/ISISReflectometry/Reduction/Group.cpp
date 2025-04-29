@@ -13,7 +13,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
+Group::Group(std::string name, std::vector<std::optional<Row>> rows)
     : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {
   setAllRowParents();
 }
@@ -57,8 +57,8 @@ std::string const &Group::name() const { return m_name; }
  * has multiple valid rows whose outputs will be stitched
  */
 bool Group::hasPostprocessing() const {
-  auto numberOfValidRows = std::count_if(m_rows.cbegin(), m_rows.cend(),
-                                         [](boost::optional<Row> const &row) { return row.is_initialized(); });
+  auto numberOfValidRows =
+      std::count_if(m_rows.cbegin(), m_rows.cend(), [](std::optional<Row> const &row) { return row.has_value(); });
   return numberOfValidRows > 1;
 }
 
@@ -67,7 +67,7 @@ bool Group::hasPostprocessing() const {
  * postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
-  return std::any_of(m_rows.cbegin(), m_rows.cend(), [&reprocessFailed](boost::optional<Row> const &row) {
+  return std::any_of(m_rows.cbegin(), m_rows.cend(), [&reprocessFailed](std::optional<Row> const &row) {
     return row && row->requiresProcessing(reprocessFailed);
   });
 }
@@ -92,8 +92,8 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
 std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
 
 std::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
-  return indexOf(m_rows, [theta, tolerance](boost::optional<Row> const &row) -> bool {
-    return row.is_initialized() && std::abs(row.get().theta() - theta) < tolerance;
+  return indexOf(m_rows, [theta, tolerance](std::optional<Row> const &row) -> bool {
+    return row.has_value() && std::abs(row.value().theta() - theta) < tolerance;
   });
 }
 
@@ -116,11 +116,11 @@ void Group::resetSkipped() {
       row->setSkipped(false);
 }
 
-std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
+std::vector<std::optional<Row>> const &Group::rows() const { return m_rows; }
 
-std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
+std::vector<std::optional<Row>> &Group::mutableRows() { return m_rows; }
 
-void Group::appendRow(boost::optional<Row> const &row) {
+void Group::appendRow(std::optional<Row> const &row) {
   Item::resetState();
   if (row) {
     row->setParent(this);
@@ -140,11 +140,11 @@ void Group::resetOutputs() { m_postprocessedWorkspaceName = ""; }
 
 void Group::appendEmptyRow() {
   Item::resetState();
-  m_rows.emplace_back(boost::none);
+  m_rows.emplace_back(std::nullopt);
   notifyChildStateChanged();
 }
 
-void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
+void Group::insertRow(std::optional<Row> const &row, int beforeRowAtIndex) {
   Item::resetState();
   if (row) {
     row->setParent(this);
@@ -159,11 +159,11 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
  * @param row : the row to insert
  * @returns : the index of the inserted row in the group's list of rows
  */
-int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
+int Group::insertRowSortedByAngle(std::optional<Row> const &row) {
   Item::resetState();
 
   // If the row is not sortable, or there is nothing in the list yet, append it
-  if (!row.is_initialized() || m_rows.size() == 0) {
+  if (!row.has_value() || m_rows.size() == 0) {
     appendRow(row);
     notifyChildStateChanged();
     return static_cast<int>(m_rows.size() - 1);
@@ -171,8 +171,8 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
 
   // Find the first row with theta greater than the row we're inserting (or
   // end, if not found)
-  auto valueLessThanRowTheta = [](double lhs, boost::optional<Row> const &rhs) {
-    if (!rhs.is_initialized())
+  auto valueLessThanRowTheta = [](double lhs, std::optional<Row> const &rhs) {
+    if (!rhs.has_value())
       return false;
     return lhs < rhs->theta();
   };
@@ -192,7 +192,7 @@ void Group::removeRow(int rowIndex) {
   notifyChildStateChanged();
 }
 
-void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
+void Group::updateRow(int rowIndex, std::optional<Row> const &row) {
   if (row == m_rows[rowIndex])
     return;
 
@@ -204,17 +204,17 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
   notifyChildStateChanged();
 }
 
-boost::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
+std::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
 
-boost::optional<Item &> Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+std::optional<std::reference_wrapper<Item>> Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   // Check if any of the child rows have this workspace output
   for (auto &row : m_rows) {
     if (row && row->hasOutputWorkspace(wsName)) {
       Item &item = *row;
-      return boost::optional<Item &>(item);
+      return std::make_optional(std::ref(item));
     }
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 void Group::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
@@ -227,7 +227,7 @@ int Group::totalItems() const {
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
   return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
-    if (row.is_initialized())
+    if (row.has_value())
       return count + 1;
     return count;
   });
@@ -238,14 +238,14 @@ int Group::completedItems() const {
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
   return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
-    if (row.is_initialized() && row->complete())
+    if (row.has_value() && row->complete())
       return count + 1;
     return count;
   });
 }
 
 void Group::setAllRowParents() {
-  std::for_each(m_rows.cbegin(), m_rows.cend(), [this](boost::optional<Row> const &row) {
+  std::for_each(m_rows.cbegin(), m_rows.cend(), [this](std::optional<Row> const &row) {
     if (row)
       row->setParent(this);
   });

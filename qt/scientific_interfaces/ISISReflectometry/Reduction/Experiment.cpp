@@ -19,8 +19,8 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(),
-                                           boost::none, ProcessingInstructions(), boost::none, boost::none)})) {}
+      m_lookupTable(LookupTable({LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(),
+                                           std::nullopt, ProcessingInstructions(), std::nullopt, std::nullopt)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
@@ -59,15 +59,15 @@ std::vector<LookupRow> const &Experiment::lookupTableRows() const { return m_loo
 
 std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const { return m_lookupTable.toValueArray(); }
 
-boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
+std::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
   return m_lookupTable.findLookupRow(row, tolerance);
 }
 
-boost::optional<LookupRow> Experiment::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
+std::optional<LookupRow> Experiment::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
   return m_lookupTable.findLookupRow(previewRow, tolerance);
 }
 
-boost::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
+std::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
 
 void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
   m_lookupTable.updateLookupRow(std::move(lookupRow), tolerance);
@@ -75,7 +75,7 @@ void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
 
 std::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
   if (auto const lookupRow = m_lookupTable.findLookupRow(row, tolerance)) {
-    return m_lookupTable.getIndex(lookupRow.get());
+    return m_lookupTable.getIndex(lookupRow.value());
   }
   return std::nullopt;
 }

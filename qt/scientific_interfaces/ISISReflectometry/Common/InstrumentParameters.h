@@ -8,7 +8,7 @@
 #include "Common/First.h"
 #include "Common/ValueOr.h"
 #include "GetInstrumentParameter.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
@@ -16,14 +16,14 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 template <typename T>
-boost::optional<T> firstFromParameterFile(Mantid::Geometry::Instrument_const_sptr instrument,
-                                          std::string const &parameterName) {
+std::optional<T> firstFromParameterFile(Mantid::Geometry::Instrument_const_sptr instrument,
+                                        std::string const &parameterName) {
   return first(getInstrumentParameter<T>(instrument, parameterName));
 }
 
 template <typename... Ts>
-boost::optional<boost::variant<Ts...>> firstFromParameterFileVariant(Mantid::Geometry::Instrument_const_sptr instrument,
-                                                                     std::string const &parameterName) {
+std::optional<boost::variant<Ts...>> firstFromParameterFileVariant(Mantid::Geometry::Instrument_const_sptr instrument,
+                                                                   std::string const &parameterName) {
   auto values = getInstrumentParameter<boost::variant<Ts...>>(instrument, parameterName);
   return boost::apply_visitor(FirstVisitor<Ts...>(), values);
 }
@@ -52,18 +52,17 @@ public:
     return fromFileOrDefaultConstruct<T>(parameterName);
   }
 
-  template <typename T> boost::optional<T> optional(std::string const &parameterName) {
+  template <typename T> std::optional<T> optional(std::string const &parameterName) {
     return fromFile<T>(parameterName);
   }
 
   template <typename Default, typename T>
-  T handleMandatoryIfMissing(boost::optional<T> const &value, std::string const &parameterName) {
-    if (value)
-      return value.get();
-    else {
-      m_missingValueErrors.emplace_back(parameterName);
-      return Default();
+  T handleMandatoryIfMissing(std::optional<T> const &value, std::string const &parameterName) {
+    if (value) {
+      return value.value();
     }
+    m_missingValueErrors.emplace_back(parameterName);
+    return Default();
   }
 
   template <typename T> T mandatory(std::string const &parameterName) {
@@ -107,12 +106,12 @@ private:
     return value_or(fromFile<T>(parameterName), T());
   }
 
-  template <typename T> boost::optional<T> fromFile(std::string const &parameterName) {
+  template <typename T> std::optional<T> fromFile(std::string const &parameterName) {
     try {
       return firstFromParameterFile<T>(m_instrument, parameterName);
     } catch (InstrumentParameterTypeMissmatch const &ex) {
       m_typeErrors.emplace_back(ex);
-      return boost::none;
+      return std::nullopt;
     }
   }
 

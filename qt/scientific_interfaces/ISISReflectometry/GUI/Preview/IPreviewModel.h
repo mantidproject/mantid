@@ -12,8 +12,6 @@
 #include "Reduction/PreviewRow.h"
 #include "Reduction/ProcessingInstructions.h"
 
-#include <boost/optional.hpp>
-
 #include <optional>
 #include <string>
 #include <vector>
@@ -33,10 +31,10 @@ public:
   virtual void reduceAsync(IJobManager &jobManager) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
-  virtual boost::optional<ProcessingInstructions> getSelectedBanks() const = 0;
+  virtual std::optional<ProcessingInstructions> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
-  virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
+  virtual std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
   virtual PreviewRow const &getPreviewRow() const = 0;
   virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
@@ -45,7 +43,7 @@ public:
 
   virtual void setTheta(double theta) = 0;
 
-  virtual void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) = 0;
+  virtual void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) = 0;
   virtual void setSelectedRegion(ROIType regionType, Selection const &selection) = 0;
 
   virtual void exportSummedWsToAds() const = 0;

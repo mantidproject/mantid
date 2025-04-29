@@ -187,7 +187,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
   // Get the masked workspace indices
-  boost::optional<ProcessingInstructions> detIDs = boost::none;
+  std::optional<ProcessingInstructions> detIDs = std::nullopt;
   auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
   if (indices.size() > 0) {
     auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");

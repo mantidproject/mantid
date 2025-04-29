@@ -14,7 +14,7 @@
 #include "RunsTable.h"
 #include "Slicing.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
@@ -43,12 +43,12 @@ public:
                      const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
   bool isInSelection(const Group &item,
                      const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
-  boost::optional<LookupRow> findLookupRow(Row const &row) const override;
-  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const override;
-  boost::optional<LookupRow> findWildcardLookupRow() const override;
+  std::optional<LookupRow> findLookupRow(Row const &row) const override;
+  std::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const override;
+  std::optional<LookupRow> findWildcardLookupRow() const override;
   void resetState() override;
   void resetSkippedItems() override;
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
+  std::optional<std::reference_wrapper<Item>> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
 
   void updateLookupIndex(Row &row) override;
   void updateLookupIndexesOfGroup(Group &group) override;
