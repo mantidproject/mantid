@@ -12,8 +12,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "Reduction/ProcessingInstructions.h"
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -46,14 +45,14 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
-  boost::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
-  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
+  std::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
+  std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) noexcept;
-  void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
+  void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) noexcept;
+  void setProcessingInstructions(ROIType regionType, std::optional<ProcessingInstructions> processingInstructions);
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -64,10 +63,10 @@ public:
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
-  boost::optional<ProcessingInstructions> m_selectedBanks{boost::none};
-  boost::optional<ProcessingInstructions> m_processingInstructions{boost::none};
-  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions{boost::none};
-  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions{boost::none};
+  std::optional<ProcessingInstructions> m_selectedBanks{std::nullopt};
+  std::optional<ProcessingInstructions> m_processingInstructions{std::nullopt};
+  std::optional<ProcessingInstructions> m_backgroundProcessingInstructions{std::nullopt};
+  std::optional<ProcessingInstructions> m_transmissionProcessingInstructions{std::nullopt};
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
   Mantid::API::MatrixWorkspace_sptr m_reducedWs;

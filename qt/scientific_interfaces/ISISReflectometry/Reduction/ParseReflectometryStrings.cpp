@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ParseReflectometryStrings.h"
-#include "AllInitialized.h"
 #include "Common/Parse.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
@@ -14,54 +13,51 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
-boost::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
+std::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
   auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
       runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto const maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
-    if (maybeRunNumber.is_initialized()) {
-      runNumbers.emplace_back(maybeRunNumber.get());
-    } else {
-      return boost::none;
+    if (!maybeRunNumber.has_value()) {
+      return std::nullopt;
     }
+    runNumbers.emplace_back(maybeRunNumber.value());
   }
-
   return runNumbers;
 }
 } // unnamed namespace
 
-boost::optional<std::string> parseRunNumber(std::string const &runNumberString) {
+std::optional<std::string> parseRunNumber(std::string const &runNumberString) {
   // We support any workspace name, as well as run numbers, so for just return
   // the input string, but trimmed of whitespace (or none if the result is
   // empty)
   auto result = std::string(runNumberString);
   boost::trim(result);
-
-  if (result.empty())
-    return boost::none;
-
+  if (result.empty()) {
+    return std::nullopt;
+  }
   return result;
 }
 
-boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNumberString) {
+std::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNumberString) {
   if (isEntirelyWhitespace(runNumberString)) {
     return std::string();
-  } else {
-    auto maybeRunNumber = parseRunNumber(runNumberString);
-    if (maybeRunNumber.is_initialized())
-      return maybeRunNumber;
   }
-  return boost::none;
+  auto maybeRunNumber = parseRunNumber(runNumberString);
+  if (maybeRunNumber.has_value()) {
+    return maybeRunNumber;
+  }
+  return std::nullopt;
 }
 
-boost::optional<double> parseTheta(std::string const &theta) {
+std::optional<double> parseTheta(std::string const &theta) {
   auto maybeTheta = parseNonNegativeDouble(theta);
-  if (maybeTheta.has_value() && maybeTheta.value() > 0.0)
+  if (maybeTheta.has_value() && maybeTheta.value() > 0.0) {
     return maybeTheta.value();
-  else
-    return boost::none;
+  }
+  return std::nullopt;
 }
 
 std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher) {
@@ -91,37 +87,35 @@ std::map<std::string, std::string> replaceBoolTextWithBoolValue(std::map<std::st
 }
 } // namespace
 
-boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
+std::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
   try {
     return replaceBoolTextWithBoolValue(MantidQt::MantidWidgets::parseKeyValueString(options));
   } catch (std::runtime_error &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
-boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions) {
+TaggedOptional<std::string> parseProcessingInstructions(std::string const &instructions) {
   if (isEntirelyWhitespace(instructions)) {
-    return boost::optional<std::string>(boost::none);
-  } else {
-    try {
-      auto const groups = Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
-      return boost::optional<std::string>(instructions);
-    } catch (std::runtime_error &) {
-      return boost::none;
-    }
+    return std::make_pair(std::optional<std::string>(), true);
   }
-  return boost::none;
+  try {
+    auto const groups = Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
+    return std::make_pair(std::optional(instructions), true);
+  } catch (std::runtime_error &) {
+    return std::make_pair(std::nullopt, false);
+  }
 }
 
-boost::optional<boost::optional<double>> parseScaleFactor(std::string const &scaleFactor) {
+TaggedOptional<double> parseScaleFactor(std::string const &scaleFactor) {
   if (isEntirelyWhitespace(scaleFactor)) {
-    return boost::optional<double>(boost::none);
+    return std::make_pair(std::optional<double>(), true);
   }
-
-  auto value = parseDouble(scaleFactor);
-  if (value.has_value() && value != 0.0)
-    return boost::optional<double>(value.value());
-  return boost::none;
+  auto scaleFactorNum = parseDouble(scaleFactor);
+  if (scaleFactorNum.has_value() && scaleFactorNum != 0.0) {
+    return std::make_pair(std::optional<double>(scaleFactorNum.value()), true);
+  }
+  return std::make_pair(std::nullopt, false);
 }
 
 boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
@@ -157,30 +151,30 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
   }
 
   // Return errors, valid range, or unset if nothing was specified
-  if (!invalidParams.empty())
+  if (!invalidParams.empty()) {
     return invalidParams;
-  else
-    return RangeInQ(minimum, stepValue, maximum);
+  }
+  return RangeInQ(minimum, stepValue, maximum);
 }
 
-boost::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumberString) {
+std::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
   auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
       runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto maybeRunNumber = parseRunNumber(runNumberCandidate);
-    if (maybeRunNumber.is_initialized()) {
-      runNumbers.emplace_back(maybeRunNumber.get());
+    if (maybeRunNumber.has_value()) {
+      runNumbers.emplace_back(maybeRunNumber.value());
     } else {
-      return boost::none;
+      return std::nullopt;
     }
   }
 
-  if (runNumbers.empty())
-    return boost::none;
-  else
-    return runNumbers;
+  if (runNumbers.empty()) {
+    return std::nullopt;
+  }
+  return runNumbers;
 }
 
 boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
@@ -189,33 +183,32 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
   auto first = parseRunNumbersOrWhitespace(firstTransmissionRun);
   auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);
 
-  if (allInitialized(first, second)) {
-    if (first.get().empty() && !second.get().empty()) {
+  if (first.has_value() && second.has_value()) {
+    if (first.value().empty() && !second.value().empty()) {
       errorColumns.emplace_back(0);
       return errorColumns;
-    } else {
-      return TransmissionRunPair(first.get(), second.get());
     }
-  } else {
-    if (!first.is_initialized())
-      errorColumns.emplace_back(0);
-    if (!second.is_initialized())
-      errorColumns.emplace_back(1);
-    return errorColumns;
+    return TransmissionRunPair(first.value(), second.value());
   }
+
+  if (!first.has_value())
+    errorColumns.emplace_back(0);
+  if (!second.has_value())
+    errorColumns.emplace_back(1);
+  return errorColumns;
 }
 
 /** Extract the group name and angle from the run title. Expects the title to
  * be in the format: "group_name th=angle".
- * If it is not in this format then boost::none is returned.
+ * If it is not in this format then std::nullopt is returned.
  * If the format matches then the first element of the vector is the title and the second is theta.
  */
-boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle) {
+std::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle) {
   boost::smatch matches;
   static const boost::regex runTitleFormatRegex("(.*)(th[:=]\\s*([0-9.\\-]+))(.*)");
 
   if (!boost::regex_search(runTitle, matches, runTitleFormatRegex)) {
-    return boost::none;
+    return std::nullopt;
   }
 
   std::vector<std::string> parsedResult;

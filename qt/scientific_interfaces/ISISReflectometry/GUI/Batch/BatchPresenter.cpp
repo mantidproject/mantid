@@ -389,16 +389,38 @@ void BatchPresenter::notifyPreviewApplyRequested() {
   m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
 }
 
-bool BatchPresenter::hasROIDetectorIDsForPreviewRow() const {
+std::map<ROIType, ProcessingInstructions> BatchPresenter::getMatchingProcessingInstructionsForPreviewRow() const {
+  std::map<ROIType, ProcessingInstructions> roiMap;
+
   auto const &previewRow = m_previewPresenter->getPreviewRow();
   try {
-    auto const lookupRow = m_model->findLookupRow(previewRow);
-    if (!lookupRow || !lookupRow->roiDetectorIDs().has_value()) {
-      return false;
+    if (auto const lookupRow = m_model->findLookupRow(previewRow)) {
+      if (auto const signalROI = lookupRow->processingInstructions()) {
+        roiMap[ROIType::Signal] = signalROI.value();
+      }
+      if (auto const backgroundROI = lookupRow->backgroundProcessingInstructions()) {
+        roiMap[ROIType::Background] = backgroundROI.value();
+      }
+      if (auto const transmissionROI = lookupRow->transmissionProcessingInstructions()) {
+        roiMap[ROIType::Transmission] = transmissionROI.value();
+      }
     }
   } catch (MultipleRowsFoundException const &) {
-    return false;
+    // Do nothing, we will just return an empty map
   }
-  return true;
+
+  return roiMap;
+}
+
+std::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsForPreviewRow() const {
+  auto const &previewRow = m_previewPresenter->getPreviewRow();
+  try {
+    if (auto const lookupRow = m_model->findLookupRow(previewRow)) {
+      return lookupRow->roiDetectorIDs();
+    }
+  } catch (MultipleRowsFoundException const &) {
+    // Do nothing
+  }
+  return std::nullopt;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

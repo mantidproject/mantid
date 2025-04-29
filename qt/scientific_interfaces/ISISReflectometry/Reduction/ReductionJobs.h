@@ -7,7 +7,7 @@
 #pragma once
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "Group.h"
 
@@ -43,11 +43,11 @@ public:
   MantidWidgets::Batch::RowLocation getLocation(Item const &item) const;
   MantidWidgets::Batch::RowLocation getLocation(Group const &group) const;
   MantidWidgets::Batch::RowLocation getLocation(Row const &row) const;
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  std::optional<std::reference_wrapper<Item>> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   bool validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;
   Group const &getGroupFromPath(const MantidWidgets::Batch::RowLocation &path) const;
-  boost::optional<Row> const &getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
+  std::optional<Row> const &getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
   Item const &getItemFromPath(const MantidWidgets::Batch::RowLocation &path) const;
 
 private:
@@ -63,7 +63,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionJobs const &lhs, Reducti
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex);
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow);
 void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex);
-void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex, boost::optional<Row> const &newValue);
+void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex, std::optional<Row> const &newValue);
 
 void appendEmptyGroup(ReductionJobs &jobs);
 void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup);

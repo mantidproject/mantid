@@ -94,7 +94,7 @@ std::optional<double> PreviewModel::getDefaultTheta() const {
 
 PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
 
-boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
+std::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
@@ -103,18 +103,18 @@ void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_
 void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
 
 void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
-void PreviewModel::setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) {
+void PreviewModel::setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
-boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(ROIType regionType) const {
+std::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(ROIType regionType) const {
   return m_runDetails->getProcessingInstructions(regionType);
 }
 
 void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
   if (selection.size() == 0) {
     setSelectedRegionMembers(regionType, selection);
-    m_runDetails->setProcessingInstructions(regionType, boost::none);
+    m_runDetails->setProcessingInstructions(regionType, std::nullopt);
     return;
   }
   // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices per
