@@ -658,8 +658,9 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInView() {
-    auto lookupRow = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
-                               0.7, std::string("390-415"), std::string("370-389,416-430"), boost::none);
+    auto lookupRow =
+        LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                  std::string("390-415"), std::string("370-389,416-430"), std::nullopt);
     auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
@@ -670,14 +671,15 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInModel() {
-    auto model = makeModelWithLookupRow(LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none,
+    auto model = makeModelWithLookupRow(LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt,
                                                   RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
-                                                  std::string("370-389,416-430"), boost::none));
+                                                  std::string("370-389,416-430"), std::nullopt));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
-                              0.7, std::string("390-415"), std::string("370-389,416-430"), boost::none);
+    auto expected =
+        LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2), 0.7,
+                  std::string("390-415"), std::string("370-389,416-430"), std::nullopt);
     auto lookupRows = presenter.experiment().lookupTableRows();
     TS_ASSERT_EQUALS(lookupRows.size(), 1);
     if (lookupRows.size() == 1) {
@@ -774,10 +776,10 @@ public:
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
-    TS_ASSERT_EQUALS(row.roiDetectorIDs().get(), "9");
-    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
-    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
-    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+    TS_ASSERT_EQUALS(row.roiDetectorIDs().value(), "9");
+    TS_ASSERT_EQUALS(row.processingInstructions().value(), "10");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().value(), "11");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().value(), "12");
   }
 
   void testNotifyPreviewApplyRequestedClearsProcessingInstructionsWhenMissing() {
@@ -812,10 +814,10 @@ public:
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
-    TS_ASSERT_EQUALS(row.roiDetectorIDs().get(), "3-22");
-    TS_ASSERT_EQUALS(row.processingInstructions().get(), "4-6");
-    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "2-3,7-8");
-    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "4");
+    TS_ASSERT_EQUALS(row.roiDetectorIDs().value(), "3-22");
+    TS_ASSERT_EQUALS(row.processingInstructions().value(), "4-6");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().value(), "2-3,7-8");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().value(), "4");
   }
 
   void testNotifyPreviewApplyRequestedResetsRowStateIfOnlyDetROIChanged() {
@@ -870,7 +872,7 @@ public:
     previewRow.setSelectedBanks("3-22"s);
     previewRow.setProcessingInstructions(ROIType::Signal, "4-6"s);
     previewRow.setProcessingInstructions(ROIType::Background, "2-3,7-8"s);
-    previewRow.setProcessingInstructions(ROIType::Transmission, boost::none);
+    previewRow.setProcessingInstructions(ROIType::Transmission, std::nullopt);
     previewRow.setTheta(2.3);
 
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
@@ -1150,14 +1152,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
-    return LookupRow(0.5, std::nullopt, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
-                     boost::none, boost::none, boost::none);
+    return LookupRow(0.5, std::nullopt, TransmissionRunPair("13463", ""), std::nullopt, RangeInQ(), std::nullopt,
+                     std::nullopt, std::nullopt, std::nullopt);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
-    return LookupRow(2.3, std::nullopt, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
-                     boost::none, boost::none, boost::none);
+    return LookupRow(2.3, std::nullopt, TransmissionRunPair("13463", "13464"), std::nullopt, RangeInQ(), std::nullopt,
+                     std::nullopt, std::nullopt, std::nullopt);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "", "13463"}; }

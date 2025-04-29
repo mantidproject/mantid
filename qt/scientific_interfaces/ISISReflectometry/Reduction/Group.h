@@ -9,7 +9,7 @@
 #include "IGroup.h"
 #include "Item.h"
 #include "Row.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -26,7 +26,7 @@ class Row;
 class MANTIDQT_ISISREFLECTOMETRY_DLL Group final : public IGroup {
 public:
   explicit Group(std::string name);
-  Group(std::string name, std::vector<boost::optional<Row>> rows);
+  Group(std::string name, std::vector<std::optional<Row>> rows);
 
   ~Group() = default;
 
@@ -64,21 +64,21 @@ public:
   std::string postprocessedWorkspaceName() const override;
 
   void appendEmptyRow() override;
-  void appendRow(boost::optional<Row> const &row) override;
-  void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) override;
-  int insertRowSortedByAngle(boost::optional<Row> const &row) override;
+  void appendRow(std::optional<Row> const &row) override;
+  void insertRow(std::optional<Row> const &row, int beforeRowAtIndex) override;
+  int insertRowSortedByAngle(std::optional<Row> const &row) override;
   void removeRow(int rowIndex) override;
-  void updateRow(int rowIndex, boost::optional<Row> const &row) override;
+  void updateRow(int rowIndex, std::optional<Row> const &row) override;
 
   void resetSkipped() override;
 
   std::optional<int> indexOfRowWithTheta(double angle, double tolerance) const override;
 
-  boost::optional<Row> const &operator[](int rowIndex) const override;
-  std::vector<boost::optional<Row>> const &rows() const override;
-  std::vector<boost::optional<Row>> &mutableRows() override;
+  std::optional<Row> const &operator[](int rowIndex) const override;
+  std::vector<std::optional<Row>> const &rows() const override;
+  std::vector<std::optional<Row>> &mutableRows() override;
 
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
+  std::optional<std::reference_wrapper<Item>> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
 
   void setAllRowParents() override;
 
@@ -87,7 +87,7 @@ public:
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
-  std::vector<boost::optional<Row>> m_rows;
+  std::vector<std::optional<Row>> m_rows;
   friend class Encoder;
 
   friend class Decoder;
@@ -100,12 +100,12 @@ template <typename ModificationListener>
 void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex, double thetaTolerance,
                    ModificationListener &listener) {
   for (auto const &maybeRow : fromHere.rows()) {
-    if (maybeRow.is_initialized()) {
-      auto const &fromRow = maybeRow.get();
+    if (maybeRow.has_value()) {
+      auto const &fromRow = maybeRow.value();
       auto index = intoHere.indexOfRowWithTheta(fromRow.theta(), thetaTolerance);
       if (index.has_value()) {
         auto const updateAtIndex = index.value();
-        auto const &intoRow = intoHere[updateAtIndex].get();
+        auto const &intoRow = intoHere[updateAtIndex].value();
         auto updatedRow = mergedRow(intoRow, fromRow);
         intoHere.updateRow(updateAtIndex, updatedRow);
         listener.rowModified(groupIndex, updateAtIndex, updatedRow);

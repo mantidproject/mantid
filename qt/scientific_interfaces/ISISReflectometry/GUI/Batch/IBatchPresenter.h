@@ -76,7 +76,7 @@ public:
   virtual std::string instrumentName() const = 0;
 
   virtual std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const = 0;
-  virtual boost::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const = 0;
+  virtual std::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

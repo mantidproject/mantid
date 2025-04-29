@@ -63,18 +63,18 @@ public:
     group.appendRow(std::move(rowB));
     group.appendRow(std::move(rowW));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex(), std::nullopt);
-    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex(), std::nullopt);
-    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex(), std::nullopt);
+    TS_ASSERT_EQUALS(group.mutableRows()[0].value().lookupIndex(), std::nullopt);
+    TS_ASSERT_EQUALS(group.mutableRows()[1].value().lookupIndex(), std::nullopt);
+    TS_ASSERT_EQUALS(group.mutableRows()[2].value().lookupIndex(), std::nullopt);
 
     model.updateLookupIndexesOfGroup(group);
 
-    TS_ASSERT(group.mutableRows()[0].get().lookupIndex().has_value());
-    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex().value(), size_t(1));
-    TS_ASSERT(group.mutableRows()[1].get().lookupIndex().has_value());
-    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex().value(), size_t(2));
-    TS_ASSERT(group.mutableRows()[2].get().lookupIndex().has_value());
-    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex().value(), size_t(0));
+    TS_ASSERT(group.mutableRows()[0].value().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[0].value().lookupIndex().value(), size_t(1));
+    TS_ASSERT(group.mutableRows()[1].value().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[1].value().lookupIndex().value(), size_t(2));
+    TS_ASSERT(group.mutableRows()[2].value().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[2].value().lookupIndex().value(), size_t(0));
   }
 
   void test_update_lookup_index_table_updates_all_groups() {
@@ -82,7 +82,7 @@ public:
 
     for (auto const &group : m_runsTable.reductionJobs().groups()) {
       for (auto const &row : group.rows()) {
-        TS_ASSERT_EQUALS(row.get().lookupIndex(), std::nullopt);
+        TS_ASSERT_EQUALS(row.value().lookupIndex(), std::nullopt);
       }
     }
 
@@ -91,10 +91,10 @@ public:
     for (auto const &group : m_runsTable.reductionJobs().groups()) {
       for (auto const &row : group.rows()) {
         TS_ASSERT(row.has_value());
-        if (row.get().theta() == 0.5) {
-          TS_ASSERT_EQUALS(row.get().lookupIndex(), size_t(1));
+        if (row.value().theta() == 0.5) {
+          TS_ASSERT_EQUALS(row.value().lookupIndex(), size_t(1));
         } else {
-          TS_ASSERT_EQUALS(row.get().lookupIndex(), size_t(0));
+          TS_ASSERT_EQUALS(row.value().lookupIndex(), size_t(0));
         }
       }
     }
@@ -110,11 +110,11 @@ public:
 
     auto model = Batch(exp, m_instrument, m_runsTable, m_slicing);
 
-    TS_ASSERT_EQUALS(group.rows()[0].get().lookupIndex(), std::nullopt);
-    model.updateLookupIndex(group.mutableRows()[0].get());
-    TS_ASSERT(!group.rows()[0].get().lookupIndex().has_value());
-    TS_ASSERT_EQUALS(group.rows()[0].get().state(), State::ITEM_ERROR);
-    TS_ASSERT_EQUALS(group.rows()[0].get().message(), "Multiple matching Experiment Setting rows")
+    TS_ASSERT_EQUALS(group.rows()[0].value().lookupIndex(), std::nullopt);
+    model.updateLookupIndex(group.mutableRows()[0].value());
+    TS_ASSERT(!group.rows()[0].value().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.rows()[0].value().state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(group.rows()[0].value().message(), "Multiple matching Experiment Setting rows")
   }
 
 private:

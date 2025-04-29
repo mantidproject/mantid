@@ -29,15 +29,15 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getReducedWs, (), (const, override));
-  MOCK_METHOD(boost::optional<ProcessingInstructions>, getSelectedBanks, (), (const, override));
-  MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
+  MOCK_METHOD(std::optional<ProcessingInstructions>, getSelectedBanks, (), (const, override));
+  MOCK_METHOD(std::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
   MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
   MOCK_METHOD(std::optional<Selection> const, getSelectedRegion, (ROIType), (override));
 
   MOCK_METHOD(void, setSummedWs, (MatrixWorkspace_sptr), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
-  MOCK_METHOD(void, setSelectedBanks, (boost::optional<ProcessingInstructions>), (override));
+  MOCK_METHOD(void, setSelectedBanks, (std::optional<ProcessingInstructions>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));
 
   MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
