@@ -32,7 +32,8 @@ const std::string CombineTableWorkspaces::category() const { return "Utility\\Wo
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CombineTableWorkspaces::summary() const {
-  return "Combine a pair of table workspaces into a single table workspace";
+  return "Algorithm takes two table workspaces and, if they have the same column titles and data types, combines them "
+         "into a single table. Currently supports data types of double, int, float, string, bool, size_t and V3D.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -41,17 +42,19 @@ const std::string CombineTableWorkspaces::summary() const {
 void CombineTableWorkspaces::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("LHSWorkspace", "", Direction::Input),
-      "The first set of peaks.");
+      "The first table workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("RHSWorkspace", "", Direction::Input),
-      "The second set of peaks.");
+      "The second table workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("OutputWorkspace", "", Direction::Output),
-      "The combined peaks list.");
+      "The combined table workspace.");
 }
 
-const std::map<std::string, int> CombineTableWorkspaces::allowedTypes() {
-  return {{"double", 0}, {"int", 1}, {"str", 2}, {"bool", 3}, {"size_t", 4}, {"float", 5}, {"V3D", 6}};
+const std::map<std::string, int> &CombineTableWorkspaces::allowedTypes() {
+  static const std::map<std::string, int> types = {{"double", 0}, {"int", 1},   {"str", 2}, {"bool", 3},
+                                                   {"size_t", 4}, {"float", 5}, {"V3D", 6}};
+  return types;
 }
 
 std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
@@ -73,7 +76,7 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   const auto lColNames = LHSWorkspace->getColumnNames();
   const auto rColNames = RHSWorkspace->getColumnNames();
 
-  const std::map<std::string, int> allowedColumnTypes = allowedTypes();
+  const std::map<std::string, int> &allowedColumnTypes = allowedTypes();
 
   bool matchingColumnNames = true;
   bool matchingColumnTypes = true;
@@ -99,19 +102,16 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   if (!matchingColumnNames) {
     results.emplace("LHSWorkspace", "Both Table Workspaces must have the same column titles");
     results.emplace("RHSWorkspace", "Both Table Workspaces must have the same column titles");
-    return results;
   }
 
   if (!matchingColumnTypes) {
     results.emplace("LHSWorkspace", "Both Table Workspaces must have the same data types for corresponding columns");
     results.emplace("RHSWorkspace", "Both Table Workspaces must have the same data types for corresponding columns");
-    return results;
   }
 
   if (!allColumnTypesAllowed) {
     results.emplace("LHSWorkspace", "Only supported data types are: double, int, string, bool, size_t, float, and V3D");
     results.emplace("RHSWorkspace", "Only supported data types are: double, int, string, bool, size_t, float, and V3D");
-    return results;
   }
 
   return results;
@@ -124,7 +124,7 @@ void CombineTableWorkspaces::exec() {
   const DataObjects::TableWorkspace_sptr LHSWorkspace = getProperty("LHSWorkspace");
   const DataObjects::TableWorkspace_sptr RHSWorkspace = getProperty("RHSWorkspace");
 
-  const std::map<std::string, int> allowedColumnTypes = allowedTypes();
+  const std::map<std::string, int> &allowedColumnTypes = allowedTypes();
 
   // Copy the first workspace to our output workspace
   DataObjects::TableWorkspace_sptr outputWS = LHSWorkspace->clone();
@@ -143,26 +143,33 @@ void CombineTableWorkspaces::exec() {
     TableRow newRow = outputWS->appendRow();
     TableRow currentRow = RHSWorkspace->getRow(r);
     for (int c = 0; c < nCols; c++) {
-      auto dType = colTypes[c];
-      if (allowedColumnTypes.at(dType) == 0) {
+      const auto dType = colTypes[c];
+      const int dTypeVal = allowedColumnTypes.at(dType);
+      switch (dTypeVal) {
+      case 0:
         newRow << currentRow.Double(c);
-      } else if (allowedColumnTypes.at(dType) == 1) {
+        break;
+      case 1:
         newRow << currentRow.Int(c);
-      } else if (allowedColumnTypes.at(dType) == 2) {
-        std::string val = currentRow.cell<std::string>(c);
-        newRow << val;
-      } else if (allowedColumnTypes.at(dType) == 3) {
-        Mantid::API::Boolean val = currentRow.cell<Mantid::API::Boolean>(c);
-        newRow << val;
-      } else if (allowedColumnTypes.at(dType) == 4) {
-        std::size_t val = currentRow.cell<std::size_t>(c);
-        newRow << val;
-      } else if (allowedColumnTypes.at(dType) == 5) {
-        float val = currentRow.cell<float>(c);
-        newRow << val;
-      } else if (allowedColumnTypes.at(dType) == 6) {
-        V3D val = currentRow.cell<V3D>(c);
-        newRow << val;
+        break;
+      case 2:
+        newRow << currentRow.cell<std::string>(c);
+        break;
+      case 3:
+        newRow << currentRow.cell<Mantid::API::Boolean>(c);
+        break;
+      case 4:
+        newRow << currentRow.cell<std::size_t>(c);
+        break;
+      case 5:
+        newRow << currentRow.cell<float>(c);
+        break;
+      case 6:
+        newRow << currentRow.cell<V3D>(c);
+        break;
+      default:
+        // this should be caught by the input validation anyway
+        throw std::runtime_error("Unsupported Data Type");
       }
     }
     progress.report();
