@@ -85,8 +85,9 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(true)));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(false)));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("True")));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("true")));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("False")));
-      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(true)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("false")));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(0)));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(1)));
       TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "True"));

@@ -8,6 +8,7 @@
 
 #include <json/value.h>
 
+#include <bits/stdc++.h>
 #include <ostream>
 #include <utility>
 
@@ -18,11 +19,14 @@ const std::string OptionalBool::StrTrue = "True";
 const std::string OptionalBool::StrUnset = "Unset";
 
 OptionalBool::Value OptionalBool::Validate(const std::string &arg) {
-  if (arg == OptionalBool::StrFalse) {
+  auto l_toLower = [](char c) -> char { return (c >= 'A' && c <= 'Z' ? c + 0x20 : c); };
+  std::string argLower = arg;
+  std::transform(arg.begin(), arg.end(), argLower.begin(), l_toLower);
+  if (argLower == "false") {
     return False;
-  } else if (arg == OptionalBool::StrTrue) {
+  } else if (argLower == "true") {
     return True;
-  } else if (arg == OptionalBool::StrUnset) {
+  } else if (argLower == "unset") {
     return Unset;
   } else {
     throw std::invalid_argument("Invalid value for OptionalBool: " + arg);
