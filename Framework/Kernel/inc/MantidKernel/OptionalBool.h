@@ -36,11 +36,13 @@ public:
   OptionalBool(bool arg);
   OptionalBool(Value arg);
   OptionalBool(std::string arg);
-  OptionalBool(const OptionalBool &other) = default;
   OptionalBool(char const *arg);
+  OptionalBool(const int arg);
+  OptionalBool(const OptionalBool &other) = default;
   OptionalBool &operator=(const OptionalBool &other) = default;
   OptionalBool &operator=(std::string const &arg);
   OptionalBool &operator=(char const *arg);
+  OptionalBool &operator=(const int arg);
   bool operator==(const OptionalBool &other) const;
   bool operator!=(const OptionalBool &other) const;
   Value getValue() const;

@@ -34,19 +34,30 @@ OptionalBool::OptionalBool(bool arg) : m_arg(OptionalBool::Value(arg)) {}
 OptionalBool::OptionalBool(OptionalBool::Value arg) : m_arg(arg) {}
 OptionalBool::OptionalBool(std::string arg) : m_arg(Validate(arg)) {}
 OptionalBool::OptionalBool(char const *arg) : m_arg(Validate(std::string(arg))) {}
-bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
-
-bool OptionalBool::operator!=(const OptionalBool &other) const { return m_arg != other.getValue(); }
-
+OptionalBool::OptionalBool(const int arg)
+    : m_arg(arg == 0   ? OptionalBool::False
+            : arg == 1 ? OptionalBool::True
+                       : throw std::invalid_argument("Invalid value for OptionalBool: " + std::to_string(arg) +
+                                                     "\nAccepted values are 0 or 1")) {}
 OptionalBool &OptionalBool::operator=(std::string const &arg) {
   m_arg = OptionalBool::Validate(arg);
   return *this;
 }
-
 OptionalBool &OptionalBool::operator=(char const *arg) {
   m_arg = OptionalBool::Validate(std::string(arg));
   return *this;
 }
+OptionalBool &OptionalBool::operator=(const int arg) {
+  m_arg = arg == 0   ? OptionalBool::False
+          : arg == 1 ? OptionalBool::True
+                     : throw std::invalid_argument("Invalid value for OptionalBool: " + std::to_string(arg) +
+                                                   "\nAccepted values are 0 or 1");
+  return *this;
+}
+
+bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
+
+bool OptionalBool::operator!=(const OptionalBool &other) const { return m_arg != other.getValue(); }
 
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
