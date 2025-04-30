@@ -29,7 +29,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
     block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
     data_lists = (frequencies, ir_intensities, raman_intensities)
-    with open(file_name, "rU") as f_handle:
+    with open(file_name, "r") as f_handle:
         file_data.update(_parse_phonon_file_header(f_handle))
 
         while True:
