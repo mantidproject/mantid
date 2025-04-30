@@ -63,7 +63,7 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   const DataObjects::TableWorkspace_sptr LHSWorkspace = getProperty("LHSWorkspace");
   const DataObjects::TableWorkspace_sptr RHSWorkspace = getProperty("RHSWorkspace");
 
-  const auto expectedCols = LHSWorkspace->columnCount();
+  const std::size_t expectedCols = LHSWorkspace->columnCount();
 
   // check correct number of columns
   if (RHSWorkspace->columnCount() != expectedCols) {
@@ -82,7 +82,7 @@ std::map<std::string, std::string> CombineTableWorkspaces::validateInputs() {
   bool matchingColumnTypes = true;
   bool allColumnTypesAllowed = true;
 
-  for (int i = 0; i < static_cast<int>(expectedCols); i++) {
+  for (std::size_t i = 0; i < expectedCols; i++) {
     if (lColNames[i] != rColNames[i]) {
       matchingColumnNames = false;
       break;
@@ -133,16 +133,16 @@ void CombineTableWorkspaces::exec() {
   const auto nCols = RHSWorkspace->columnCount();
 
   std::vector<std::string> colTypes = {};
-  for (auto i = 0; i < nCols; i++) {
+  for (std::size_t i = 0; i < nCols; i++) {
     colTypes.emplace_back(RHSWorkspace->getColumn(i)->type());
   }
 
   Progress progress(this, 0.0, 1.0, nRows);
 
-  for (auto r = 0; r < nRows; r++) {
+  for (std::size_t r = 0; r < nRows; r++) {
     TableRow newRow = outputWS->appendRow();
     TableRow currentRow = RHSWorkspace->getRow(r);
-    for (auto c = 0; c < nCols; c++) {
+    for (std::size_t c = 0; c < nCols; c++) {
       const auto dType = colTypes[c];
       const int dTypeVal = allowedColumnTypes.at(dType);
       switch (dTypeVal) {
