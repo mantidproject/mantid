@@ -271,6 +271,13 @@ class SANSSave(DataProcessorAlgorithm):
             self._validate_workspace(errors, input_workspace.getItem(i))
         if self.getProperty("PolarizedNXcanSAS").value:
             self._validate_pol_props(errors)
+        if (
+            self.getProperty("CanSAS").value
+            or self.getProperty("NistQxy").value
+            or self.getProperty("RKH").value
+            or self.getProperty("CSV").value
+        ):
+            errors.update({"InputWorkspace": "Cannot be a workspace group when saving using CanSAS, NistQxy, RKH, or CSV"})
         return errors
 
     def _validate_workspace(self, errors, input_workspace):
