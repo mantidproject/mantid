@@ -29,7 +29,7 @@ def parse_castep_file(file_name, ir_or_raman):
     block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, bonds = [], [], [], [], [], []
     data_lists = (frequencies, ir_intensities, raman_intensities)
-    with open(file_name, "rU") as f_handle:
+    with open(file_name, "r") as f_handle:
         file_data.update(_parse_castep_file_header(f_handle))
 
         while True:
