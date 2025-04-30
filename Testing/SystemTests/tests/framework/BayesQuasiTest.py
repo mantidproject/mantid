@@ -65,9 +65,9 @@ class BayesQuasiTest(MantidSystemTest):
         # fit, which is overparameterised, and therefore unstable between different Linux OS.
         max_spectrum_index = 10
 
-        # Beyond q = 1.7, the statistics become low enough so that the fit becomes too unstable
+        # Beyond q = 1.6, the statistics become low enough so that the fit becomes too unstable
         # for a meaningful system test.
-        max_q = 1.7
+        max_q = 1.6
 
         Load(Filename="irs26176_graphite002_QLr_Result.nxs", OutputWorkspace="bayesquasi_reference")
         CropWorkspace(
