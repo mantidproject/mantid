@@ -211,9 +211,10 @@ template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) { 
 
 /** Helper functions for setting the value of an OptionalBool property */
 template <> [[maybe_unused]] void toValue(const std::string &strValue, OptionalBool &value) {
-  if (strValue == "0" || strValue == "false") {
+  const auto normalizedStr = Mantid::Kernel::Strings::toLower(strValue);
+  if (normalizedStr == "0" || normalizedStr == "false") {
     value = OptionalBool::False;
-  } else if (strValue == "1" || strValue == "true") {
+  } else if (normalizedStr == "1" || normalizedStr == "true") {
     value = OptionalBool::True;
   } else {
     value = strValue;
