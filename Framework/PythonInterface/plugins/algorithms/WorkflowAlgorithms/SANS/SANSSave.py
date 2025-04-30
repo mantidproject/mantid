@@ -313,7 +313,7 @@ class SANSSave(DataProcessorAlgorithm):
         polarization_props = self.getProperty("PolarizationProps").value
         if not polarization_props:
             errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXCanSAS."})
-            return errors
+            return
         mandatory_props = [
             "InputSpinStates",
             "PolarizerComponentName",
