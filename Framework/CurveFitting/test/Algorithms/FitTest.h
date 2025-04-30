@@ -2074,6 +2074,28 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_exclude_ranges_with_unweighted_least_squares_ignore_invalid_data() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(1, HistogramData::Histogram(points, counts)).release());
+    Fit fit;
+    fit.initialize();
+    fit.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("IgnoreInvalidData", true))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Output", "fit_test_output"))
+    TS_ASSERT_THROWS_NOTHING(fit.execute())
+    const std::string status = fit.getProperty("OutputStatus");
+    TS_ASSERT_EQUALS(status, "success")
+    API::IFunction_sptr function = fit.getProperty("Function");
+    TS_ASSERT_DELTA(function->getParameter(0), 2.0, 1e-12)
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   /// build test input workspaces for the Pawley function Fit tests
   MatrixWorkspace_sptr getWorkspacePawley(const std::string &functionString, double xMin, double xMax, size_t n) {

@@ -25,7 +25,7 @@ namespace Mantid::CurveFitting::CostFunctions {
  */
 CostFuncFitting::CostFuncFitting()
     : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true), m_includePenalty(true), m_value(0), m_pushed(false),
-      m_pushedValue(false) {}
+      m_pushedValue(false), m_ignoreInvalidData(false) {}
 
 /**
  * Set all dirty flags.
