@@ -80,6 +80,9 @@ public:
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
   void reset() const;
 
+  /// Set to ignore invalid data
+  void setIgnoreInvalidData(bool ignoreInvalidData) { m_ignoreInvalidData = ignoreInvalidData; }
+
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
   virtual void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);
@@ -128,6 +131,8 @@ protected:
   mutable bool m_pushed;
   mutable double m_pushedValue;
   mutable EigenVector m_pushedParams;
+
+  bool m_ignoreInvalidData;
 
   friend class CurveFitting::SeqDomain;
   friend class CurveFitting::ParDomain;
