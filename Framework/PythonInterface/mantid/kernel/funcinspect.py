@@ -125,7 +125,7 @@ class LazyMethodSignature(LazyFunctionSignature):
 # -------------------------------------------------------------------------------
 
 
-def decompile(code_object):
+def decompile(code_object, show_caches=False):
     """
     Taken from
     http://thermalnoise.wordpress.com/2007/12/30/exploring-python-bytecode/
@@ -156,7 +156,7 @@ def decompile(code_object):
     ins = decompile(f.f_code)
     """
     instructions = []
-    for ins in dis.get_instructions(code_object):
+    for ins in dis.get_instructions(code_object, show_caches=show_caches):
         instructions.append((ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval))
     return instructions
 
@@ -164,9 +164,8 @@ def decompile(code_object):
 # We must list all of the operators that behave like a function calls in byte-code
 # This is for the lhs functionality
 OPERATOR_NAMES = {
-    "CALL_FUNCTION",
+    "CALL",
     "CALL_FUNCTION_VAR",
-    "CALL_FUNCTION_KW",
     "CALL_FUNCTION_VAR_KW",
     "UNARY_POSITIVE",
     "UNARY_NEGATIVE",
@@ -174,37 +173,10 @@ OPERATOR_NAMES = {
     "UNARY_CONVERT",
     "UNARY_INVERT",
     "GET_ITER",
-    "BINARY_POWER",
-    "BINARY_MULTIPLY",
-    "BINARY_DIVIDE",
-    "BINARY_FLOOR_DIVIDE",
-    "BINARY_TRUE_DIVIDE",
-    "BINARY_MODULO",
-    "BINARY_ADD",
-    "BINARY_SUBTRACT",
-    "BINARY_SUBSCR",
-    "BINARY_LSHIFT",
-    "BINARY_RSHIFT",
-    "BINARY_AND",
-    "BINARY_XOR",
-    "BINARY_OR",
-    "INPLACE_POWER",
-    "INPLACE_MULTIPLY",
-    "INPLACE_DIVIDE",
-    "INPLACE_TRUE_DIVIDE",
-    "INPLACE_FLOOR_DIVIDE",
-    "INPLACE_MODULO",
-    "INPLACE_ADD",
-    "INPLACE_SUBTRACT",
-    "INPLACE_LSHIFT",
-    "INPLACE_RSHIFT",
-    "INPLACE_AND",
-    "INPLACE_XOR",
-    "INPLACE_OR",
+    "BINARY_OP",
     "COMPARE_OP",
     "CALL_FUNCTION_EX",
     "LOAD_METHOD",
-    "CALL_METHOD",
     "DICT_MERGE",
     "DICT_UPDATE",
     "LIST_EXTEND",
@@ -229,6 +201,7 @@ def process_frame(frame):
     """
     # Index of the last attempted instruction in byte code
     last_i = frame.f_lasti
+    ins_stack_with_caches = decompile(frame.f_code, show_caches=True)
     ins_stack = decompile(frame.f_code)
 
     call_function_locs = {}
@@ -244,6 +217,15 @@ def process_frame(frame):
 
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack) - 1)
+
+    # Since 3.11, some bytcode instructions have several CACHE instructions after them.
+    # last_i will be pointing at the last of those CACHE instructions after the call function.
+    # We want it pointing at the call fuction, as assign it to the largets offset in call_function_locs
+    # which is < last_i
+    # https://docs.python.org/3/whatsnew/3.11.html#cpython-bytecode-changes
+    current_instruction = [name for offset, _, name, _, _ in ins_stack_with_caches if offset == last_i][0]
+    if current_instruction == "CACHE":
+        last_i = [offset for offset in call_function_locs.keys() if offset < last_i][-1]
 
     output_var_names = []
     last_func_offset = call_function_locs[last_i][0]
@@ -267,7 +249,7 @@ def process_frame(frame):
             _, _, _, _, sequence_argvalue = ins_stack[last_func_offset + 2 + index]
             output_var_names.append(sequence_argvalue)
     max_returns = len(output_var_names)
-    if name == "DUP_TOP":  # Many Return Values, Many equal signs
+    if name == "COPY":  # Many Return Values, Many equal signs
         # The output here should be a multi-dim list which mimics the variable unpacking sequence.
         # For instance a,b=c,d=f() => [ ['a','b'] , ['c','d'] ]
         #              a,b=c=d=f() => [ ['a','b'] , 'c','d' ]  So on and so forth.
