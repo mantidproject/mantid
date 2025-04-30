@@ -32,15 +32,15 @@ using Mantid::Kernel::V3D;
  * @return A pointer to the table workspace
  */
 template <typename T>
-TableWorkspace_sptr createSingleTypeTableWorkspace(std::string &dataType, const int rowCount,
+TableWorkspace_sptr createSingleTypeTableWorkspace(std::string &dataType, const size_t rowCount,
                                                    const std::vector<std::string> &names, const T &defaultVal) {
   auto table = std::make_shared<TableWorkspace>();
   for (auto &name : names) {
     table->addColumn(dataType, name);
   }
-  for (int row = 0; row < rowCount; ++row) {
+  for (size_t row = 0; row < rowCount; ++row) {
     TableRow newRow = table->appendRow();
-    for (int col = 0; col < static_cast<int>(names.size()); col++) {
+    for (size_t col = 0; col < names.size(); col++) {
       newRow << defaultVal;
     }
   }
@@ -81,7 +81,7 @@ TableWorkspace_sptr getOutput(std::string outputWS) {
 }
 
 template <typename T>
-void test_identical_single_type_combine(std::string &dataType, const int rowCount,
+void test_identical_single_type_combine(std::string &dataType, const size_t rowCount,
                                         const std::vector<std::string> &names, const T &defaultVal) {
   TableWorkspace_sptr table1 = createSingleTypeTableWorkspace<T>(dataType, rowCount, names, defaultVal);
   TableWorkspace_sptr table2 = table1->clone();
