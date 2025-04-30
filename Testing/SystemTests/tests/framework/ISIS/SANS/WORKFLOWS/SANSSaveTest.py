@@ -309,7 +309,25 @@ class SANSSaveTest(unittest.TestCase):
         file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
 
         # Act
-        SANSSave(workspace, file_name, NXcanSAS=True)
+        SANSSave(workspace, file_name, Nexus=True, NXcanSAS=True)
+
+    def test_group_workspaces_throw_for_incompatible_alg(self):
+        # Arrange
+        workspace_0 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_1 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
+        workspace = ConvertSpectrumAxis(InputWorkspace=workspace, Target="ElasticQ", EFixed=1)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+
+        algs = ["CanSAS", "NistQxy", "RKH", "CSV"]
+        # Act
+        for alg in algs:
+            with self.assertRaisesRegex(
+                RuntimeError, ".*InputWorkspace: Cannot be a workspace group when saving using CanSAS, NistQxy, RKH, or CSV"
+            ):
+                SANSSave(workspace, file_name, **{alg: True})
 
 
 class SANSSaveRunnerTest(systemtesting.MantidSystemTest):
