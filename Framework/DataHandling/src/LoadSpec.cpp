@@ -8,8 +8,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpec.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
@@ -22,13 +24,65 @@
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadSpec)
+DECLARE_FILELOADER_ALGORITHM(LoadSpec)
 
 using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
 LoadSpec::LoadSpec() = default;
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
+int LoadSpec::confidence(Kernel::FileDescriptor &descriptor) const {
+  if (!descriptor.isAscii())
+    return 0;
+
+  auto &file = descriptor.data();
+
+  int confidence(0);
+  size_t axiscols(0), datacols(0);
+  std::string str;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
+  const std::string sep = " ";
+  bool snsspec(false);
+
+  while (std::getline(file, str)) {
+    // File is opened in binary mode so getline will leave a \r at the end of an
+    // empty line if it exists
+    if (str.empty() || str == "\r")
+      continue;
+
+    try {
+      // if it's comment line
+      tokenizer tok(str, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      if (str.at(0) == '#') {
+        if (str.at(1) == 'L') {
+          axiscols = tok.count();
+          // if the file contains a comment line starting with "#L" followed
+          // by three columns this could be loadsnsspec file
+          if (axiscols > 2) {
+            snsspec = true;
+          }
+        }
+      } else {
+        // check first data line is a 3 column line
+        datacols = tok.count();
+        break;
+      }
+    } catch (std::out_of_range &) {
+    }
+  }
+  if (snsspec && datacols == 3) // three column data
+  {
+    confidence = 80;
+  }
+  return confidence;
+}
 
 /// Initialisation method.
 void LoadSpec::init() {
