@@ -131,7 +131,7 @@ public:
       for (size_t j = 0; j < m_data[i].size(); j++) {
         double const left = static_cast<double>(m_data[i][j]);
         double const right = static_cast<double>(otherData[i][j]);
-        if (nanEqual && std::isnan(left) && isnan(right)) {
+        if (nanEqual && std::isnan(left) && std::isnan(right)) {
           continue;
         } else if (!Kernel::withinAbsoluteDifference(left, right, tolerance)) {
           return false;
@@ -154,7 +154,7 @@ public:
       for (size_t j = 0; j < m_data[i].size(); j++) {
         double const left = static_cast<double>(m_data[i][j]);
         double const right = static_cast<double>(otherData[i][j]);
-        if (nanEqual && std::isnan(left) && isnan(right)) {
+        if (nanEqual && std::isnan(left) && std::isnan(right)) {
           continue;
         } else if (!Kernel::withinRelativeDifference(left, right, tolerance)) {
           return false;

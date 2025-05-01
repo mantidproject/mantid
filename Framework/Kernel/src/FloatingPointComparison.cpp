@@ -214,7 +214,7 @@ inline bool withinRelativeDifference(T const x, T const y, S const tolerance, MA
   // handles the case of infinities
   if (std::isinf(x) && std::isinf(y))
     // if both are +inf, return true; if both -inf, return true; else false
-    return isnan(static_cast<S>(x - y));
+    return std::isnan(static_cast<S>(x - y));
   S const num = static_cast<S>(absoluteDifference<T>(x, y));
   if (num <= std::numeric_limits<S>::epsilon()) {
     // if |x-y| == 0.0 (within machine tolerance), this test passes
