@@ -76,6 +76,29 @@ public:
     TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), const std::invalid_argument &);
     TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
+
+    if (DO_DIVIDE)
+    {
+      // Test OptionalBool
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(OptionalBool::True)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(OptionalBool::False)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(true)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(false)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("True")));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("true")));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("False")));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool("false")));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(0)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", OptionalBool(1)));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "True"));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "False"));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "true"));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "false"));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "0"));
+      TS_ASSERT_THROWS_NOTHING( alg->setProperty("IsDistribution", "1"));
+      TS_ASSERT_THROWS( alg->setProperty("IsDistribution", "jimmy"), const std::invalid_argument &);
+    }
+
     delete alg;
   }
 

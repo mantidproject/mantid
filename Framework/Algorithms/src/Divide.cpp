@@ -103,9 +103,10 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
   }
 
   // override `isDistribution` if user provided
-  if (this->getPropertyValue("IsDistribution") == OptionalBool::StrTrue)
+  OptionalBool isDistribution = this->getProperty("IsDistribution");
+  if (isDistribution == OptionalBool::Value::True)
     out->setDistribution(true);
-  else if (this->getPropertyValue("IsDistribution") == OptionalBool::StrFalse)
+  else if (isDistribution == OptionalBool::Value::False)
     out->setDistribution(false);
 }
 
