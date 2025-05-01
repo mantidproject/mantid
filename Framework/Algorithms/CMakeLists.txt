@@ -46,6 +46,7 @@ set(SRC_FILES
     src/ClearMaskFlag.cpp
     src/CloneWorkspace.cpp
     src/CombineDiffCal.cpp
+    src/CombineTableWorkspaces.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
     src/CompareWorkspaces.cpp
@@ -396,6 +397,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearMaskFlag.h
     inc/MantidAlgorithms/CloneWorkspace.h
     inc/MantidAlgorithms/CombineDiffCal.h
+    inc/MantidAlgorithms/CombineTableWorkspaces.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
     inc/MantidAlgorithms/CompareWorkspaces.h
@@ -753,6 +755,7 @@ set(TEST_FILES
     ClearMaskFlagTest.h
     CloneWorkspaceTest.h
     CombineDiffCalTest.h
+    CombineTableWorkspacesTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
     CompareWorkspacesTest.h
