@@ -41,7 +41,6 @@ BANNED_FILES = [
     "batch_input.csv",
     "mar11015.msk",
     "LET_hard.msk",  # It seems loade does not understand it?
-    "LoadSNSspec.txt",  # LoadSpec is not registered as a file loader
     "MASK.094AA",
     "MASKSANS2D_094i_RKH.txt",
     "MASKSANS2D.091A",

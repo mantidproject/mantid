@@ -44,6 +44,22 @@ Removed
 .. amalgamate:: Framework/Fit_Functions/Removed
 
 
+Data Handling
+-------------
+
+New features
+############
+.. amalgamate:: Framework/Data_Handling/New_features
+
+Deprecated
+############
+.. amalgamate:: Framework/Data_Handling/Deprecated
+
+Removed
+############
+.. amalgamate:: Framework/Data_Handling/Removed
+
+
 Data Objects
 ------------
 
