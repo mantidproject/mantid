@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="LOQ" valid-from   ="2015-10-16 00:00:00"
-                       valid-to     ="2025-02-26 13:50:00"
-		       last-modified="2001-10-16 11:40:00">
+ name="LOQ" valid-from   ="2025-02-26 13:50:00"
+                       valid-to     ="2100-10-17 09:29:59"
+		       last-modified="2025-02-25 10:00:00">
 
   <defaults>
     <length unit="meter"/>
@@ -22,13 +22,17 @@
   </defaults>
 
   
-  <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
+  <!-- BRIEF DESCRIPTION OF LOQ INSTRUMENT: 
   
       Data provided by Richard Heenan.
       
       17th Oct 2012: Stephen King noted change to the wiring of
       the HAB's detector bank. New wiring valid from run 73780 (2012-10-16T11:44:00)
       (note date for run 73779 is 2012-10-16T11:31:29)
+	  
+	  25/2/25 RMD
+	  Detector spectra rearranged to have all monitors at the start of the spectrum numbers.
+	  This is needed to prevent problems with adding event mode data
   -->
   
   
@@ -124,7 +128,26 @@
     <algebra val="shape" />
   </type> 
   
-  <component type="main-detector-bank" idstart="3" idfillbyfirst="x" idstepbyrow="128">
+        <!-- Putting in monitors, which are defined in raw/neuxs
+         files, and have detector IDs, but currently not physically present 
+         on the instrument. Defined with no geometric shape, as they do not 
+         physically exist, and with a dummy position -->
+    <component type="no shape monitor" idlist="monitor5">
+      <location z="0"/>
+    </component>  
+    <component type="no shape monitor" idlist="monitor6">
+      <location z="0"/>
+    </component>  
+    <component type="no shape monitor" idlist="monitor7">
+      <location z="0"/>
+    </component>  
+    <component type="no shape monitor" idlist="monitor8">
+      <location z="0"/>
+    </component>  
+
+  <type name="no shape monitor" is="monitor" />   
+
+  <component type="main-detector-bank" idstart="100000" idfillbyfirst="x" idstepbyrow="128">
     <location z="15.15" name="main-detector-bank"/>
   </component>
  
@@ -534,18 +557,41 @@
   </idlist>
   
   <idlist idname="monitor3">
-    <id val="17787" />  
+    <id val="3" />  
   </idlist>
 
   <idlist idname="monitor4">
-    <id val="17788" />  
+    <id val="4" />  
+  </idlist>
+
+<!-- Dummy monitors -->
+  <idlist idname="monitor5">
+    <id val="5" />  
+  </idlist>
+  <idlist idname="monitor6">
+    <id val="6" />  
+  </idlist>
+  <idlist idname="monitor7">
+    <id val="7" />  
+  </idlist>
+  <idlist idname="monitor8">
+    <id val="8" />  
   </idlist>
   
+<!-- Initial modification with 350 spectra per bank 
   <idlist idname="HAB">
-    <id start="16387" end="16734" />
-    <id start="17087" end="17434" />    
-    <id start="16737" end="17084" />
-    <id start="17437" end="17784" />
+    <id start="200000" end="200347" />
+    <id start="200700" end="201047" />    
+    <id start="200350" end="200697" />
+    <id start="201050" end="201397" />
+  </idlist>  
+-->
+  
+  <idlist idname="HAB">
+    <id start="200000" end="200347" />
+    <id start="220000" end="220347" />    
+    <id start="210000" end="210347" />
+    <id start="230000" end="230347" />
   </idlist>  
 
 
