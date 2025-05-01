@@ -310,7 +310,7 @@ std::array<double, 4> SparseWorkspace::inverseDistanceWeights(const std::array<d
  *  @param distanceStep The distance between detector indices
  *  @return An interpolated histogram.
  */
-HistogramData::HistogramY SparseWorkspace::secondDerivative(const std::array<size_t, 3> indices,
+HistogramData::HistogramY SparseWorkspace::secondDerivative(const std::array<size_t, 3> &indices,
                                                             const double distanceStep) const {
   HistogramData::HistogramY avgSecondDeriv(blocksize());
 

@@ -267,6 +267,63 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
     TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(1, 0, 0));
     TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 1.5, 1e-6);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().X(), 0.52, 1e-2); // ~2pi/12
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().Y(), 0.0, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().Z(), 0.0, 1e-2);
+    std::vector<double> angles = Quat(ws->getPeak(0).getGoniometerMatrix()).getEulerAngles("YZY");
+    TS_ASSERT_DELTA(angles[0], 3.58, 1e-2); // omega
+    TS_ASSERT_DELTA(angles[1], 0, 1e-2);    // chi
+    TS_ASSERT_DELTA(angles[2], 0, 1e-2);    // phi
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().X(), 0.52, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().Y(), 0.00, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().Z(), -0.03, 1e-2);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+
+    // now set the goniometer to YXZ convention
+    // This should have the same q_sample for the hkl=100 peak but different q_lab
+    WorkspaceCreationHelper::addTSPEntry(inWS->mutableRun(), "axis0", 10.);
+    WorkspaceCreationHelper::addTSPEntry(inWS->mutableRun(), "axis1", 20.);
+    WorkspaceCreationHelper::addTSPEntry(inWS->mutableRun(), "axis2", 30.);
+
+    Mantid::Geometry::Goniometer gm;
+    gm.pushAxis("axis0", 0, 1, 0, 0, 1); // Y
+    gm.pushAxis("axis1", 1, 0, 0, 0, 1); // X
+    gm.pushAxis("axis2", 0, 0, 1, 0, 1); // Z
+
+    inWS->mutableRun().setGoniometer(gm, true);
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "14"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "16"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(1, 0, 0));
+    TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 1.5, 1e-6);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().X(), 0.52, 1e-2); // ~2pi/12
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().Y(), 0.0, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame().Z(), 0.0, 1e-2);
+    angles = Quat(ws->getPeak(0).getGoniometerMatrix()).getEulerAngles("YXZ");
+    TS_ASSERT_DELTA(angles[0], 15.23, 1e-2); // axis0
+    TS_ASSERT_DELTA(angles[1], 20.0, 1e-2);  // axis1
+    TS_ASSERT_DELTA(angles[2], 30.0, 1e-2);  // axis2
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().X(), 0.46, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().Y(), 0.25, 1e-2);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQLabFrame().Z(), -0.03, 1e-2);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

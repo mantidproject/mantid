@@ -1239,6 +1239,7 @@ void MDHistoWorkspace::clearMDMasking() {
 
 uint64_t MDHistoWorkspace::getNEvents() const {
   volatile uint64_t cach = this->m_nEventsContributed;
+  // cppcheck-suppress knownConditionTrueFalse
   if (cach != this->m_nEventsContributed) {
     if (m_numEvents.empty())
       m_nEventsContributed = std::numeric_limits<uint64_t>::quiet_NaN();

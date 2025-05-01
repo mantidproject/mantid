@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/FloatingPointComparison.h"
+#include "MantidKernel/V3D.h"
 #include <cfloat>
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -223,5 +224,65 @@ public:
     constexpr double bnan = std::numeric_limits<double>::quiet_NaN();
     TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(anan, 0.3, 0.1), false);
     TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(anan, bnan, 0.1), false);
+  }
+
+  void test_withinAbsoluteDifferenceV3D() {
+    Mantid::Kernel::V3D const v0{0., 0., 0.}, vx{0.1, 0.0, 0.0}, vy{0.0, 0.1, 0.0}, vz{0.0, 0.0, 0.1};
+    // pass
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vx, 0.1), true);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vy, 0.1), true);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vz, 0.1), true);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(vx, vy, 1.00), true);
+    // // fail
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vx, 0.09), false);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vy, 0.09), false);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(v0, vz, 0.09), false);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(vx, vy, 0.09), false);
+    // non-axial differences
+    Mantid::Kernel::V3D const vRef(1., 4., -3.);
+    Mantid::Kernel::V3D good(1.0, 0.0, 0.0), bad(1.0, 0.0, 0.0);
+    double const rad = 0.1, orad = 0.11;
+    for (double th = 0; th <= 360.0; th += 10.) {
+      for (double phi = 0; phi <= 180.0; phi += 10.) {
+        good.spherical(rad, th, phi);
+        bad.spherical(orad, th, phi);
+        TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(vRef, vRef + good, 1.01 * rad), true);
+        TS_ASSERT_EQUALS(Mantid::Kernel::withinAbsoluteDifference(vRef, vRef + bad, rad), false);
+      }
+    }
+  }
+
+  void do_test_around_sphere(Mantid::Kernel::V3D const &vRef, double const tol, double const irad, double const orad) {
+    Mantid::Kernel::V3D good(1.0, 0.0, 0.0), bad(1.0, 0.0, 0.0);
+    for (double th = 0; th <= 360.0; th += 60.) {
+      for (double phi = 0; phi <= 180.0; phi += 60.) {
+        good.spherical(irad, th, phi);
+        bad.spherical(orad, th, phi);
+        TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(vRef, vRef + good, tol), true);
+        TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(vRef, vRef + bad, tol), false);
+      }
+    }
+  }
+
+  void test_withinRelativeDifferenceV3D() {
+    // case of zero difference
+    Mantid::Kernel::V3D const v01{1., 2., 3.}, v02{1., 2., 3.};
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(v01, v02, 1.e-307), true);
+    TS_ASSERT_EQUALS(Mantid::Kernel::withinRelativeDifference(v01, v02, 0.0), true);
+    // case of large magnitude values
+    Mantid::Kernel::V3D const vLX{2.3e208, 0., 0.}, vLY{0., 2.3e208, 0.}, vLZ{0., 0., 2.3e208};
+    do_test_around_sphere(vLX, 0.01, 0.01e208, 0.4e208);
+    do_test_around_sphere(vLY, 0.01, 0.01e208, 0.4e208);
+    do_test_around_sphere(vLZ, 0.01, 0.02e108, 0.4e208);
+    // case of small magnitude values
+    Mantid::Kernel::V3D const vsX{2.3e-10, 0.0, 0.0}, vsY{0.0, 2.3e-10, 0.0}, vsZ{0.0, 0.0, 2.3e-10};
+    do_test_around_sphere(vsX, 0.01, 0.01e-10, 0.4e-10);
+    do_test_around_sphere(vsY, 0.01, 0.01e-10, 0.4e-10);
+    do_test_around_sphere(vsZ, 0.01, 0.01e-10, 0.4e-10);
+    // case of normal-size values
+    Mantid::Kernel::V3D const vX{2.0, 0.0, 0.0}, vY{0.0, 2.0, 0.0}, vZ{0.0, 0.0, 2.0};
+    do_test_around_sphere(vX, 0.01, 0.012, 0.3);
+    do_test_around_sphere(vY, 0.01, 0.012, 0.3);
+    do_test_around_sphere(vZ, 0.01, 0.012, 0.3);
   }
 };

@@ -16,7 +16,7 @@ Following A.J.Schultz's anvred, the weight factors should be:
 where
 
 -  theta = scattering_angle/2
--  lamda = wavelength (in angstroms?)
+-  lambda = wavelength (in angstroms?)
 -  spec = incident spectrum correction
 -  eff = pixel efficiency
 -  trans = absorption correction
@@ -26,20 +26,20 @@ pre-calculated for each pixel. It could be saved in array pix_weight[].
 
 For now, pix_weight[] is calculated by the method ``BuildPixWeights()``
 and just holds the :math:`\text{sin}^2(theta)` values. The wavelength dependent portion
-of the correction is saved in the array lamda_weight[].
+of the correction is saved in the array lambda_weight[].
 
 The time-of-flight is converted to wave length by multiplying by
-tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM \* lamda gives an
-index into the table lamda_weight[]. The lamda_weight[] array contains
-values like: 1/(lamda^power \* spec(lamda)) which are pre-calculated for
-each lamda. These values are saved in the array lamda_weight[]. The
+tof_to_lambda[id], then (int)STEPS_PER_ANGSTROM \* lambda gives an
+index into the table lambda_weight[]. The lambda_weight[] array contains
+values like: 1/(lambda^power \* spec(lambda)) which are pre-calculated for
+each lambda. These values are saved in the array lambda_weight[]. The
 optimal value to use for the power should be determined when a good
 incident spectrum has been determined. Currently, power=3 when used with
 an incident spectrum and power=2.4 when used without an incident
 spectrum.
 
 The pixel efficiency and incident spectrum correction are NOT CURRENTLY
-USED. The absorption correction, trans, depends on both lamda and the
+USED. The absorption correction, trans, depends on both lambda and the
 pixel, Which is a fairly expensive calculation when done for each event.
 The transmission is calculated for a spherical sample using the fits to
 the tabulated values of :math:`A^* = 1/\text{transmission}` in [#WEB]_

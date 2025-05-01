@@ -89,6 +89,7 @@ public:
     TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
     TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
     TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
+    TS_ASSERT_EQUALS(G.getConventionFromMotorAxes(), "YZY");
   }
 
   void test_copy() {
@@ -229,6 +230,18 @@ public:
     TS_ASSERT_DELTA(R[2][0], -0.5, 0.01);
     TS_ASSERT_DELTA(R[2][1], 0.0, 0.001);
     TS_ASSERT_DELTA(R[2][2], 0.866, 0.001);
+  }
+
+  void test_getConventionFromMotorAxes() {
+    Goniometer G;
+    TS_ASSERT_EQUALS(G.getConventionFromMotorAxes(), "");
+    TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis0", 0., 0., 1., 0));
+    TS_ASSERT_EQUALS(G.getConventionFromMotorAxes(), "");
+    TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis1", 0., 1., 0., 0));
+    TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis2", 1., 0., 0., 0));
+    TS_ASSERT_EQUALS(G.getConventionFromMotorAxes(), "ZYX");
+    TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis3", 1., 0., 0., 0));
+    TS_ASSERT_EQUALS(G.getConventionFromMotorAxes(), "");
   }
 
   /** Save and load to NXS file */

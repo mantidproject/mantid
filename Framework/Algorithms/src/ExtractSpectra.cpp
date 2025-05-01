@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
 
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/WorkspaceCreation.h"

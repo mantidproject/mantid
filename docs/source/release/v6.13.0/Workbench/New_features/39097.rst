@@ -1,0 +1,2 @@
+- Deprecated parameter ``Unwrap Ref`` has been removed from the Powder
+  Diffraction Reduction Interface.

@@ -25,8 +25,8 @@ requirements:
     - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
+    - lz4  # [linux]
     - matplotlib {{ matplotlib }}
-    - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
     - ninja {{ ninja }}
     - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
@@ -35,9 +35,10 @@ requirements:
     - poco {{ poco }}
     - psutil {{ psutil }}
     - pycifrw
-    - pydantic
+    - pydantic {{ pydantic }}
     - pyqt {{ pyqt }}
     - pyqtwebengine
+    - pystack # [linux]
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
@@ -47,7 +48,8 @@ requirements:
     - qtconsole {{ qtconsole }}
     - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
-    - quasielasticbayes
+    - quasielasticbayes {{ quasielasticbayes }}
+    - quickbayes {{ quickbayes }}
     - requests>=2.25.1
     - scipy {{ scipy }}
     - setuptools

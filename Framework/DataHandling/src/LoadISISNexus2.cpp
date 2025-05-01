@@ -718,7 +718,7 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
       hist_index++;
     } else if (m_have_detector) {
       NXData nxdata = entry.openNXData("detector_1");
-      NXDataSetTyped<int> data = nxdata.openIntData();
+      NXInt data = nxdata.openIntData();
       data.open();
       // Start with the list members that are lower than the required spectrum
       const int *const spec_begin = m_spec.data();
@@ -784,10 +784,9 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
  * @param spec_num :: The spectrum number that matches the hist variable
  * @param local_workspace :: The workspace to fill the data with
  */
-void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t period, int64_t start,
-                               int64_t &hist, int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace) {
-  data.load(static_cast<int>(blocksize), static_cast<int>(period),
-            static_cast<int>(start)); // TODO this is just wrong
+void LoadISISNexus2::loadBlock(NXInt &data, int64_t blocksize, int64_t period, int64_t start, int64_t &hist,
+                               int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace) {
+  data.load(blocksize, period, start); // TODO this is just wrong
   int *data_start = data();
   int *data_end = data_start + m_loadBlockInfo.getNumberOfChannels();
   int64_t final(hist + blocksize);

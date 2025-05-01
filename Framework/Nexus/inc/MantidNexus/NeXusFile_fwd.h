@@ -43,8 +43,6 @@ typedef char NXname[128];
  * NeXus file access codes.
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
- * \li NXACC_CREATE create a NeXus HDF-4 file
- * \li NXACC_CREATE4 create a NeXus HDF-4 file -- this is discouraged, and will no loger be supported
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.
  * \li NXACC_CREATEXML create a NeXus XML file -- this is no longer be supported, exists for legacy reasons
  * \li NXACC_CHECKNAMESYNTAX Check names conform to NeXus allowed characters.
@@ -52,8 +50,6 @@ typedef char NXname[128];
 typedef enum {
   NXACC_READ = 1,
   NXACC_RDWR = 2,
-  NXACC_CREATE = 3,
-  NXACC_CREATE4 = 4,
   NXACC_CREATE5 = 5,
   NXACC_CREATEXML = 6,
   NXACC_TABLE = 8,
@@ -71,11 +67,16 @@ typedef struct {
   int type;
 } info_type, *pinfo;
 
+/** \enum NXentrytype
+ * Describes the type of entry in a NeXus file, either group or dataset
+ * \li group the entry is a group
+ * \li sds the entry is a dataset (class SDS)
+ */
+enum NXentrytype : int { group = 0, sds = 1 };
+
 typedef struct {
-  long iTag;             /* HDF4 variable */
-  long iRef;             /* HDF4 variable */
-  char targetPath[1024]; /* path to item to link */
-  int linkType;          /* HDF5: 0 for group link, 1 for SDS link */
+  std::string targetPath; /* path to item to link */
+  NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
 /* Map NeXus compression methods to HDF compression methods */
@@ -134,7 +135,7 @@ constexpr int NX_UINT64{27};
 constexpr int NX_CHAR{4};
 constexpr int NX_BINARY{21};
 
-/**
+/** \class NXnumtype
  * The primitive types published by this API.
  * \li FLOAT32 float.
  * \li FLOAT64 double
@@ -148,25 +149,50 @@ constexpr int NX_BINARY{21};
  * \li UINT64 uint8_t if available on the machine
  * \ingroup cpp_types
  */
-enum class NXnumtype : const int {
-  FLOAT32 = NX_FLOAT32,
-  FLOAT64 = NX_FLOAT64,
-  INT8 = NX_INT8,
-  UINT8 = NX_UINT8,
-  BOOLEAN = NX_BOOLEAN,
-  INT16 = NX_INT16,
-  UINT16 = NX_UINT16,
-  INT32 = NX_INT32,
-  UINT32 = NX_UINT32,
-  INT64 = NX_INT64,
-  UINT64 = NX_UINT64,
-  CHAR = NX_CHAR,
-  BINARY = NX_BINARY,
-  BAD = -1
+class MANTID_NEXUS_DLL NXnumtype {
+public:
+  static int const FLOAT32 = NX_FLOAT32;
+  static int const FLOAT64 = NX_FLOAT64;
+  static int const INT8 = NX_INT8;
+  static int const UINT8 = NX_UINT8;
+  static int const BOOLEAN = NX_BOOLEAN;
+  static int const INT16 = NX_INT16;
+  static int const UINT16 = NX_UINT16;
+  static int const INT32 = NX_INT32;
+  static int const UINT32 = NX_UINT32;
+  static int const INT64 = NX_INT64;
+  static int const UINT64 = NX_UINT64;
+  static int const CHAR = NX_CHAR;
+  static int const BINARY = NX_BINARY;
+  static int const BAD = -1;
+
+private:
+  int m_val;
+  static int validate_val(int const x);
+
+public:
+  NXnumtype();
+  NXnumtype(int const val);
+  NXnumtype &operator=(int const);
+  operator int() const;
+  operator std::string() const;
 };
 
-MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXstatus status);
-MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &stm, const NXnumtype type);
+/**
+ * The available compression types. These are all ignored in xml files.
+ * \li NONE no compression
+ * \li LZW Lossless Lempel Ziv Welch compression (recommended)
+ * \li RLE Run length encoding (only HDF-4)
+ * \li HUF Huffmann encoding (only HDF-4)
+ * \ingroup cpp_types
+ */
+enum NXcompression : int {
+  CHUNK = NX_CHUNK,
+  NONE = NX_COMP_NONE,
+  LZW = NX_COMP_LZW,
+  RLE = NX_COMP_RLE,
+  HUF = NX_COMP_HUF
+};
 
 // forward declare
 namespace NeXus {
@@ -178,23 +204,8 @@ typedef std::vector<dimsize_t> DimVector; ///< use specifically for the dims arr
 //  TODO this is probably the same as DimVector
 typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
 
-/**
- * The available compression types. These are all ignored in xml files.
- * \li NONE no compression
- * \li LZW Lossless Lempel Ziv Welch compression (recommended)
- * \li RLE Run length encoding (only HDF-4)
- * \li HUF Huffmann encoding (only HDF-4)
- * \ingroup cpp_types
- */
-enum NXcompression { CHUNK = NX_CHUNK, NONE = NX_COMP_NONE, LZW = NX_COMP_LZW, RLE = NX_COMP_RLE, HUF = NX_COMP_HUF };
-
 typedef std::pair<std::string, std::string> Entry;
 typedef std::map<std::string, std::string> Entries;
-
-/**
- * Type definition for a type-keyed multimap
- */
-typedef std::multimap<std::string, std::string> TypeMap;
 
 /**
  * This structure holds the type and dimensions of a primative field/array.
@@ -208,14 +219,12 @@ struct Info {
 
 /** Information about an attribute. */
 struct AttrInfo {
-  /** The primative type for the attribute. */
+  /** The primitive type for the attribute. */
   NXnumtype type;
-  /** The length of the attribute. */
-  unsigned length;
+  /** The length of the attribute */
+  std::size_t length;
   /** The name of the attribute. */
   std::string name;
-  /** The dimensions of the attribute. */
-  DimVector dims;
 };
 
 /** Forward declare of NeXus::File */

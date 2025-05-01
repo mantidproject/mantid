@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from functools import lru_cache
 from mantid.api import AlgorithmFactory, FileFinder, PythonAlgorithm
 from mantid.kernel import ConfigService, Direction, IntBoundedValidator, StringListValidator
 
@@ -28,7 +29,13 @@ class GetIPTS(PythonAlgorithm):
 
         return instruments
 
-    def findFile(self, instrument, runnumber):
+    @lru_cache
+    @staticmethod
+    def findFile(instrument, runnumber):
+        """Static method to get the path for an instrument/runnumber.
+        This assumes that within the runtime of mantid the mapping will be consistent.
+
+        The lru_cache will allow for skipping this function if the same run number is supplied"""
         # start with run and check the five before it
         runIds = list(range(runnumber, runnumber - 6, -1))
         # check for one after as well
@@ -42,7 +49,7 @@ class GetIPTS(PythonAlgorithm):
 
         # look for a file
         for runId in runIds:
-            self.log().information("Looking for '%s'" % runId)
+            # use filefinder to look
             try:
                 return FileFinder.findRuns(runId)[0]
             except RuntimeError:
@@ -52,7 +59,12 @@ class GetIPTS(PythonAlgorithm):
         raise RuntimeError("Cannot find IPTS directory for '%s'" % runnumber)
 
     def getIPTSLocal(self, instrument, runnumber):
-        filename = self.findFile(instrument, runnumber)
+        # prepend non-empty instrument name for FileFinder
+        if len(instrument) == 0:
+            instrument_default = ConfigService.getInstrument().name()
+            self.log().information(f"Using default instrument: {instrument_default}")
+
+        filename = __class__.findFile(instrument, runnumber)
 
         # convert to the path to the proposal
         location = filename.find("IPTS")
@@ -73,12 +85,17 @@ class GetIPTS(PythonAlgorithm):
 
         instruments = self.getValidInstruments()
         self.declareProperty("Instrument", "", StringListValidator(instruments), "Empty uses default instrument")
+        self.declareProperty("ClearCache", False, "Remove internal cache of run descriptions to file paths")
 
         self.declareProperty("Directory", "", direction=Direction.Output)
 
     def PyExec(self):
         instrument = self.getProperty("Instrument").value
         runnumber = self.getProperty("RunNumber").value
+
+        if self.getProperty("ClearCache").value:
+            # drop the local cache of file information
+            self.findFile.cache_clear()
 
         direc = self.getIPTSLocal(instrument, runnumber)
         self.setPropertyValue("Directory", direc)

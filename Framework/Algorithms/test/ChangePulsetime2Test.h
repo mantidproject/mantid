@@ -9,7 +9,7 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.hxx"
 #include "MantidAlgorithms/ChangePulsetime2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"

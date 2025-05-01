@@ -31,8 +31,6 @@ class MANTID_ALGORITHMS_DLL DetectorDiagnostic : public API::Algorithm {
 public:
   /// Default constructor
   DetectorDiagnostic();
-  /// Default destructor
-  virtual ~DetectorDiagnostic() = default;
   /// Algorithm's category for identification
   const std::string category() const override;
   /// Algorithm's name for identification overriding a virtual method

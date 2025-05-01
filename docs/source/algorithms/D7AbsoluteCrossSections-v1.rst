@@ -39,7 +39,7 @@ as a function of spectrum number versus energy exchange (equivalent to `Input` i
 For the TOF-mode, it is possible to provide user-defined binning for the momentum-exchange axis, used by :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm. If this
 property is not defined, the algorithm will automatically provide non-equidistant binning that is suitable for the data distribution.
 
-This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to an appropriate scale.
+This algorithm is intended to be invoked on sample data that is fully corrected and needs to be normalised to an appropriate scale.
 
 SampleAndEnvironmentProperties
 ##############################

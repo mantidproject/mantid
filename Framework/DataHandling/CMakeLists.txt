@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/AlignAndFocusPowderSlim.cpp
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
@@ -48,7 +49,6 @@ set(SRC_FILES
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
-    src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
     src/LoadErrorEventsNexus.cpp
@@ -94,7 +94,6 @@ set(SRC_FILES
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
     src/LoadNexusLogs.cpp
-    src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
     src/LoadNexusProcessed2.cpp
@@ -118,7 +117,6 @@ set(SRC_FILES
     src/LoadRawSpectrum0.cpp
     src/LoadSESANS.cpp
     src/LoadSINQFocus.cpp
-    src/LoadSNSspec.cpp
     src/LoadSPE.cpp
     src/LoadSampleDetailsFromRaw.cpp
     src/LoadSampleEnvironment.cpp
@@ -141,7 +139,6 @@ set(SRC_FILES
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
     src/NXcanSASHelper.cpp
-    src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
@@ -169,7 +166,6 @@ set(SRC_FILES
     src/SaveDaveGrp.cpp
     src/SaveDetectorsGrouping.cpp
     src/SaveDiffCal.cpp
-    src/SaveDspacemap.cpp
     src/SaveFITS.cpp
     src/SaveFocusedXYE.cpp
     src/SaveFullprofResolution.cpp
@@ -193,6 +189,7 @@ set(SRC_FILES
     src/SavePDFGui.cpp
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
+    src/SavePolarizedNXcanSAS.cpp
     src/SaveRKH.cpp
     src/SaveRMCProfile.cpp
     src/SaveReflectometryAscii.cpp
@@ -216,6 +213,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidDataHandling/AlignAndFocusPowderSlim.h
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/BitStream.h
@@ -267,7 +265,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
-    inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadErrorEventsNexus.h
@@ -313,7 +310,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
     inc/MantidDataHandling/LoadNexusLogs.h
-    inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
     inc/MantidDataHandling/LoadNexusProcessed2.h
@@ -332,7 +328,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadRawSpectrum0.h
     inc/MantidDataHandling/LoadSESANS.h
     inc/MantidDataHandling/LoadSINQFocus.h
-    inc/MantidDataHandling/LoadSNSspec.h
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSampleEnvironment.h
@@ -357,7 +352,6 @@ set(INC_FILES
     inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
     inc/MantidDataHandling/NXcanSASHelper.h
-    inc/MantidDataHandling/NexusTester.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
     inc/MantidDataHandling/ParallelEventLoader.h
@@ -385,7 +379,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveDaveGrp.h
     inc/MantidDataHandling/SaveDetectorsGrouping.h
     inc/MantidDataHandling/SaveDiffCal.h
-    inc/MantidDataHandling/SaveDspacemap.h
     inc/MantidDataHandling/SaveFITS.h
     inc/MantidDataHandling/SaveFocusedXYE.h
     inc/MantidDataHandling/SaveFullprofResolution.h
@@ -409,6 +402,7 @@ set(INC_FILES
     inc/MantidDataHandling/SavePDFGui.h
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
+    inc/MantidDataHandling/SavePolarizedNXcanSAS.h
     inc/MantidDataHandling/SaveRKH.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
@@ -437,6 +431,7 @@ set(INC_FILES
 )
 
 set(TEST_FILES
+    AlignAndFocusPowderSlimTest.h
     ApplyDiffCalTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
@@ -459,8 +454,8 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
-    GenerateGroupingPowderTest.h
     GenerateGroupingPowder2Test.h
+    GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
     ISISDataArchiveTest.h
@@ -481,7 +476,6 @@ set(TEST_FILES
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
-    LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
     LoadErrorEventsNexusTest.h
@@ -540,7 +534,6 @@ set(TEST_FILES
     LoadRawSpectrum0Test.h
     LoadSESANSTest.h
     LoadSINQFocusTest.h
-    LoadSNSspecTest.h
     LoadSPETest.h
     LoadSampleDetailsFromRawTest.h
     LoadSampleEnvironmentTest.h
@@ -562,7 +555,6 @@ set(TEST_FILES
     MeshFileIOTest.h
     ModifyDetectorDotDatFileTest.h
     MoveInstrumentComponentTest.h
-    NexusTesterTest.h
     ORNLDataArchiveTest.h
     PDLoadCharacterizationsTest.h
     PulseIndexerTest.h
@@ -587,7 +579,6 @@ set(TEST_FILES
     SaveDaveGrpTest.h
     SaveDetectorsGroupingTest.h
     SaveDiffCalTest.h
-    SaveDspacemapTest.h
     SaveFITSTest.h
     SaveFocusedXYETest.h
     SaveFullprofResolutionTest.h
@@ -609,6 +600,7 @@ set(TEST_FILES
     SavePDFGuiTest.h
     SavePHXTest.h
     SaveParameterFileTest.h
+    SavePolarizedNXcanSASTest.h
     SaveRKHTest.h
     SaveRMCProfileTest.h
     SaveReflectometryAsciiTest.h

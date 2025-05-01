@@ -55,7 +55,7 @@ Usage
    # Run the algorithm on an EnginX file
    data_ws = Load('ENGINX00213855.nxs')
 
-   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 

@@ -17,14 +17,14 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTableValidationError {
 public:
   LookupTableValidationError(std::vector<InvalidLookupRowCells> validationErrors,
-                             boost::optional<LookupCriteriaError> fullTableError);
+                             std::optional<LookupCriteriaError> fullTableError);
 
   std::vector<InvalidLookupRowCells> const &errors() const;
-  boost::optional<LookupCriteriaError> fullTableError() const;
+  std::optional<LookupCriteriaError> fullTableError() const;
 
 private:
   std::vector<InvalidLookupRowCells> m_validationErrors;
-  boost::optional<LookupCriteriaError> m_fullTableError;
+  std::optional<LookupCriteriaError> m_fullTableError;
 };
 
 } // namespace ISISReflectometry

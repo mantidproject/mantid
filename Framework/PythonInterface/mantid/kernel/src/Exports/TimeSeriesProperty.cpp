@@ -91,19 +91,19 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
       .add_property("times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,                   \
                                            return_value_policy<VectorToNumpy>()))                                      \
       .add_property("filtered_value",                                                                                  \
-                    make_function((std::vector<TYPE>(TimeSeriesProperty<TYPE>::*)() const) &                           \
+                    make_function((std::vector<TYPE> (TimeSeriesProperty<TYPE>::*)() const) &                          \
                                       Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredValuesAsVector,                \
                                   return_value_policy<VectorToNumpy>()))                                               \
       .add_property("filtered_times",                                                                                  \
-                    make_function((std::vector<DateAndTime>(TimeSeriesProperty<TYPE>::*)() const) &                    \
+                    make_function((std::vector<DateAndTime> (TimeSeriesProperty<TYPE>::*)() const) &                   \
                                       Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,                 \
                                   return_value_policy<VectorToNumpy>()))                                               \
       .def("addValue",                                                                                                 \
-           (void(TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE &)) &                                    \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE &)) &                                   \
                TimeSeriesProperty<TYPE>::addValue,                                                                     \
            (arg("self"), arg("time"), arg("value")))                                                                   \
       .def("addValue",                                                                                                 \
-           (void(TimeSeriesProperty<TYPE>::*)(const std::string &, const TYPE &)) &                                    \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &, const TYPE &)) &                                   \
                TimeSeriesProperty<TYPE>::addValue,                                                                     \
            (arg("self"), arg("time"), arg("value")))                                                                   \
       .def("addValue", &addPyTimeValue<TYPE>, (arg("self"), arg("time"), arg("value")))                                \
@@ -112,10 +112,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
       .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))                                                       \
       .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),                                             \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
-      .def("firstValue", (TYPE(TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::firstValue,           \
+      .def("firstValue", (TYPE (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::firstValue,          \
            arg("self"))                                                                                                \
       .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"), "returns :class:`mantid.kernel.DateAndTime`") \
-      .def("lastValue", (TYPE(TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::lastValue,             \
+      .def("lastValue", (TYPE (TimeSeriesProperty<TYPE>::*)() const) & TimeSeriesProperty<TYPE>::lastValue,            \
            arg("self"))                                                                                                \
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue, (arg("self"), arg("index")))                               \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime, (arg("self"), arg("index")),                                 \

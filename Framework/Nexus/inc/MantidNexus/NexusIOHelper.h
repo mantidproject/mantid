@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidIndexing/DllConfig.h"
 #include "MantidNexus/NeXusFile.hpp"
 
 #include <algorithm>
@@ -52,7 +51,7 @@ namespace {
     throw std::runtime_error(msg);                                                                                     \
   }
 
-int64_t vectorVolume(const std::vector<int64_t> &size) {
+int64_t vectorVolume(const ::NeXus::DimSizeVector &size) {
   return std::accumulate(size.cbegin(), size.cend(), int64_t{1}, std::multiplies<>());
 }
 
@@ -112,8 +111,8 @@ void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t s
  * another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U, Narrowing narrow>
-void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vector<int64_t> &start,
-                        const std::vector<int64_t> &size, const int64_t volume, const bool close_data) {
+void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus::DimSizeVector &start,
+                        const ::NeXus::DimSizeVector &size, const int64_t volume, const bool close_data) {
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
@@ -136,8 +135,8 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vec
 
 /// Read any type of slab and return it as a new vector.
 template <typename T, typename U, Narrowing narrow>
-std::vector<T> readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
-                                const std::vector<int64_t> &size, const bool close_data) {
+std::vector<T> readNexusAnySlab(::NeXus::File &file, const ::NeXus::DimSizeVector &start,
+                                const ::NeXus::DimSizeVector &size, const bool close_data) {
   const auto volume = vectorVolume(size);
   std::vector<T> vec(volume);
   doReadNexusAnySlab<T, U, narrow>(vec, file, start, size, volume, close_data);
@@ -146,8 +145,8 @@ std::vector<T> readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> 
 
 /// Read any type of slab and store it into the provided buffer vector.
 template <typename T, typename U, Narrowing narrow>
-void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vector<int64_t> &start,
-                      const std::vector<int64_t> &size, const bool close_data) {
+void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus::DimSizeVector &start,
+                      const ::NeXus::DimSizeVector &size, const bool close_data) {
   const auto volume = vectorVolume(size);
   if (out.size() < static_cast<size_t>(volume))
     throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnySlab");

@@ -36,7 +36,6 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace LegacyNexus;
 using namespace HistogramData;
 
 DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
@@ -46,9 +45,9 @@ namespace LegacyLoadHelper { // these methods are copied from LoadHelper
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
-std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
+std::string findInstrumentNexusPath(const LegacyNexus::NXEntry &firstEntry) {
   std::string result("");
-  std::vector<NXClassInfo> v = firstEntry.groups();
+  std::vector<LegacyNexus::NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
   if (it != v.cend())
     result = it->nxname;
@@ -62,7 +61,7 @@ std::string findInstrumentNexusPath(const NXEntry &firstEntry) {
  * @param groupName Full name of the data group
  * @return NXInt data object
  */
-NXInt getIntDataset(const NXEntry &entry, const std::string &groupName) {
+LegacyNexus::NXInt getIntDataset(const LegacyNexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openIntData();
 }
@@ -73,7 +72,7 @@ NXInt getIntDataset(const NXEntry &entry, const std::string &groupName) {
  * @param groupName Full name of the data group
  * @return NXDouble data object
  */
-NXDouble getDoubleDataset(const NXEntry &entry, const std::string &groupName) {
+LegacyNexus::NXDouble getDoubleDataset(const LegacyNexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openDoubleData();
 }
@@ -92,8 +91,8 @@ NXDouble getDoubleDataset(const NXEntry &entry, const std::string &groupName) {
  * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
  * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
  */
-void fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const NXInt &data, const std::vector<double> &xAxis,
-                         int64_t initialSpectrum = 0, bool pointData = false,
+void fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const LegacyNexus::NXInt &data,
+                         const std::vector<double> &xAxis, int64_t initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &acceptedDetectorIDs = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2)) {
@@ -209,16 +208,16 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
         // Note, we choose to only build properties on small float arrays filter logic is below
         bool read_property = (rank == 1);
         switch (nxinfo.type) {
-        case (NXnumtype::CHAR):
+        case (LegacyNexus::NXnumtype::CHAR):
           break; // everything is fine
-        case (NXnumtype::FLOAT32):
-        case (NXnumtype::FLOAT64):
+        case (LegacyNexus::NXnumtype::FLOAT32):
+        case (LegacyNexus::NXnumtype::FLOAT64):
           // some 1d float arrays may be loaded
           read_property = (nxinfo.dims[0] <= 9);
           break;
-        case (NXnumtype::INT16):
-        case (NXnumtype::INT32):
-        case (NXnumtype::UINT16):
+        case (LegacyNexus::NXnumtype::INT16):
+        case (LegacyNexus::NXnumtype::INT32):
+        case (LegacyNexus::NXnumtype::UINT16):
           // only read scalar values for everything else - e.g. integers
           read_property = (nxinfo.dims.front() == 1);
           break;
@@ -231,7 +230,7 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
           const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
 
           switch (nxinfo.type) {
-          case (NXnumtype::CHAR): {
+          case (LegacyNexus::NXnumtype::CHAR): {
             std::string property_value = filehandle.getStrData();
             if (property_name.ends_with("_time")) {
               // That's a time value! Convert to Mantid standard
@@ -250,13 +249,13 @@ void recurseAndAddNexusFieldsToWsRun(LegacyNexus::File &filehandle, API::Run &ru
             }
             break;
           }
-          case (NXnumtype::FLOAT32):
-          case (NXnumtype::FLOAT64):
+          case (LegacyNexus::NXnumtype::FLOAT32):
+          case (LegacyNexus::NXnumtype::FLOAT64):
             addNumericProperty<double>(filehandle, nxinfo, property_name, runDetails);
             break;
-          case (NXnumtype::INT16):
-          case (NXnumtype::INT32):
-          case (NXnumtype::UINT16):
+          case (LegacyNexus::NXnumtype::INT16):
+          case (LegacyNexus::NXnumtype::INT32):
+          case (LegacyNexus::NXnumtype::UINT16):
             addNumericProperty<int>(filehandle, nxinfo, property_name, runDetails);
             break;
           default:
@@ -361,7 +360,7 @@ void LoadILLTOF2::exec() {
 
   // open the root node
   LegacyNexus::NXRoot dataRoot(filenameData);
-  NXEntry dataFirstEntry = dataRoot.openFirstEntry();
+  LegacyNexus::NXEntry dataFirstEntry = dataRoot.openFirstEntry();
   m_isScan = dataFirstEntry.containsGroup("data_scan");
 
   loadInstrumentDetails(dataFirstEntry);
@@ -402,8 +401,8 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const LegacyNexus::NXEntry 
     // may be required in the "data_scan/scanned_variables/variables_names"
     monitorList.push_back("data_scan/scanned_variables/data");
   } else {
-    for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
-         ++it) {
+    for (std::vector<LegacyNexus::NXClassInfo>::const_iterator it = firstEntry.groups().begin();
+         it != firstEntry.groups().end(); ++it) {
       if (it->nxclass == "NXmonitor" || it->nxname.starts_with("monitor")) {
         monitorList.push_back(it->nxname + "/data");
       }
@@ -490,7 +489,7 @@ void LoadILLTOF2::initWorkspace(const LegacyNexus::NXEntry &entry) {
   if (m_isScan) {
     m_localWorkspace->setYUnitLabel("Counts");
   } else {
-    NXClass monitor = entry.openNXGroup(m_monitorName);
+    LegacyNexus::NXClass monitor = entry.openNXGroup(m_monitorName);
     if (monitor.containsDataSet("time_of_flight")) {
       m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       m_localWorkspace->setYUnitLabel("Counts");
@@ -515,7 +514,7 @@ void LoadILLTOF2::loadTimeDetails(const LegacyNexus::NXEntry &entry) {
 
   if (monitorEntry.containsDataSet("time_of_flight")) {
 
-    NXFloat time_of_flight_data = entry.openNXFloat(m_monitorName + "/time_of_flight");
+    LegacyNexus::NXFloat time_of_flight_data = entry.openNXFloat(m_monitorName + "/time_of_flight");
     time_of_flight_data.load();
 
     // The entry "monitor/time_of_flight", has 3 fields:
@@ -543,7 +542,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   // Open NeXus file
   try {
-    LegacyNexus::File nxfileID(filename, NXACC_READ);
+    LegacyNexus::File nxfileID(filename, LegacyNexus::NXACC_READ);
     LegacyLoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const LegacyNexus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
@@ -615,7 +614,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const LegacyNexus::NXEntry &entry, 
   std::vector<double> xAxis(m_localWorkspace->readX(0).size());
   if (m_isScan) {
     // read which variable is going to be the axis
-    NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");
+    LegacyNexus::NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");
     scannedAxis.load();
     int scannedVarId = 0;
     for (int index = 0; index < scannedAxis.dim0(); index++) {
@@ -630,7 +629,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const LegacyNexus::NXEntry &entry, 
       xAxis[index] = axis(scannedVarId, index);
     }
   } else {
-    NXClass moni = entry.openNXGroup(m_monitorName);
+    LegacyNexus::NXClass moni = entry.openNXGroup(m_monitorName);
     if (moni.containsDataSet("time_of_flight")) {
       if (convertToTOF) {
         for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {

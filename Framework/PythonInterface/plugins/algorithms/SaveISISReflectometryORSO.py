@@ -413,7 +413,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
-            is_polarized_dataset=refl_dataset.is_polarized,
+            enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
         )
 
     def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:

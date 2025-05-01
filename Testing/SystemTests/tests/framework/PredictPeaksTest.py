@@ -19,6 +19,7 @@ from mantid.simpleapi import (
     PredictPeaks,
     SetGoniometer,
     SetUB,
+    LoadWANDSCD,
 )
 from mantid.geometry import CrystalStructure, Goniometer
 
@@ -209,3 +210,23 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         self.assertDelta(YZY[1], 0.0003, 1e-7)
         self.assertDelta(YZY[2], 0.5340761720854811, 1e-7)
         self.assertDelta(peak0.getWavelength(), 1.008, 1e-9)
+
+
+class PredictPeaksTestWAND(systemtesting.MantidSystemTest):
+    def runTest(self):
+        ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5")
+
+        # should only return one peak with omega = 29.736 when correctly using YXZ
+        peaks = PredictPeaks(ws, CalculateGoniometerForCW=True, Wavelength=1, MinAngle=29, MaxAngle=30)
+        self.assertEqual(peaks.getNumberPeaks(), 1)
+        peak = peaks.getPeak(0)
+        self.assertEqual(peak.getH(), 0)
+        self.assertEqual(peak.getK(), -1)
+        self.assertEqual(peak.getL(), 0)
+
+        g = Goniometer()
+        g.setR(peak.getGoniometerMatrix())
+        YXZ = g.getEulerAngles("YXZ")
+        self.assertDelta(YXZ[0], 29.736, 1e-3)  # omega
+        self.assertDelta(YXZ[1], 4.6995, 1e-3)  # sgl
+        self.assertDelta(YXZ[2], -4.4, 1e-3)  # sgu

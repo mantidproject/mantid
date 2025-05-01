@@ -349,12 +349,13 @@ void GetAllEi::exec() {
   auto result_ws = create<Workspace2D>(1, Points(nPeaks));
 
   HistogramX peaks_positions(peaks.size());
-  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(), [](peakKeeper peak) { return peak.position; });
+  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
+                 [](const peakKeeper &peak) { return peak.position; });
   auto &Signal = result_ws->mutableY(0);
-  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(), [](peakKeeper peak) { return peak.height; });
+  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(), [](const peakKeeper &peak) { return peak.height; });
 
   auto &Error = result_ws->mutableE(0);
-  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(), [](peakKeeper peak) { return peak.sigma; });
+  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(), [](const peakKeeper &peak) { return peak.sigma; });
 
   result_ws->setPoints(0, peaks_positions);
 
@@ -902,7 +903,7 @@ Kernel::Property *GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &
  *                        experiment start/end times.
  */
 double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
-                                 Kernel::TimeROI &timeroi) {
+                                 const Kernel::TimeROI &timeroi) {
 
   auto pIProperty = getPLogForProperty(inputWS, propertyName);
 

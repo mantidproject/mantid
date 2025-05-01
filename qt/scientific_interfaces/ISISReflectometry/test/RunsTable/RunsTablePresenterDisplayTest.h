@@ -215,7 +215,7 @@ public:
     TS_ASSERT_EQUALS(getRow(presenter, 0, 2)->theta(), srcValue);
     TS_ASSERT_EQUALS(getRow(presenter, 1, 1)->theta(), srcValue);
     // Check that the uninitialized row is still uninitialized
-    TS_ASSERT_EQUALS(presenter.runsTable().reductionJobs()[0][1].is_initialized(), false);
+    TS_ASSERT_EQUALS(presenter.runsTable().reductionJobs()[0][1].has_value(), false);
 
     verifyAndClearExpectations();
   }
@@ -261,7 +261,7 @@ public:
                                                              .mutableReductionJobs()
                                                              .mutableGroups()[groupIndex]
                                                              .mutableRows()[rowIndex]
-                                                             .get()))
+                                                             .value()))
         .Times(1);
     presenter.notifyCellTextChanged(rowLocation, cellIndex, "", "");
     verifyAndClearExpectations();

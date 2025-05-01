@@ -46,6 +46,11 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         self._fg_color = fg_color
         self._bg_color = bg_color
         self._representations: List[Painted] = []
+        self._orientedLattice = None
+        self._calcHKL = False
+
+        if peaks_ws.sample().hasOrientedLattice():
+            self._orientedLattice = peaks_ws.sample().getOrientedLattice()
 
     @property
     def bg_color(self):
@@ -58,6 +63,16 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     @property
     def peaks_workspace(self):
         return self.ws
+
+    @property
+    def orientedLattice(self):
+        return self._orientedLattice
+
+    def can_calculate_hkl(self, frame):
+        return frame == SpecialCoordinateSystem.HKL and self.ws.sample().hasOrientedLattice()
+
+    def set_calculate_hkl(self, calc_hkl):
+        self._calcHKL = calc_hkl
 
     def get_peaks_workspace_name(self):
         return self._peaks_ws_name
@@ -82,7 +97,10 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         if slice_info.can_support_peak_overlay():
             frame_to_slice_fn = self._frame_to_slice_fn(frame)
             for peak in self.ws:
-                peak_origin = getattr(peak, frame_to_slice_fn)()
+                if self._calcHKL and frame == SpecialCoordinateSystem.HKL:
+                    peak_origin = self.orientedLattice.hklFromQ(peak.getQSampleFrame())
+                else:
+                    peak_origin = getattr(peak, frame_to_slice_fn)()
                 peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info, painter, self.fg_color, self.bg_color)
                 representations.append(peak_repr)
         self._representations = representations
@@ -117,8 +135,12 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         """
         frame_to_slice_fn = self._frame_to_slice_fn(frame)
         peak = self.ws.getPeak(selected_index)
+        if self._calcHKL and frame == SpecialCoordinateSystem.HKL:
+            xyz = self.orientedLattice.hklFromQ(peak.getQSampleFrame())
+        else:
+            xyz = getattr(peak, frame_to_slice_fn)()
         slicepoint = slice_info.slicepoint
-        slicepoint[slice_info.z_index] = slice_info.transform(getattr(peak, frame_to_slice_fn)())[2]
+        slicepoint[slice_info.z_index] = slice_info.transform(xyz)[2]
 
         return slicepoint
 

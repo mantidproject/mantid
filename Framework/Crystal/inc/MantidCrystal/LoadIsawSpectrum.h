@@ -38,8 +38,8 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  double spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
-                      std::vector<std::vector<double>> spectra, size_t id);
+  double spectrumCalc(double TOF, int iSpec, const std::vector<std::vector<double>> &time,
+                      const std::vector<std::vector<double>> &spectra, size_t id);
   void getInstrument3WaysInit(Algorithm *alg);
   Geometry::Instrument_const_sptr getInstrument3Ways(Algorithm *alg);
 };

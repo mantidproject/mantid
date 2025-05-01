@@ -9,8 +9,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 
-#include <boost/optional.hpp>
-
 #include <string>
 #include <vector>
 
@@ -42,13 +40,13 @@ void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_
 void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
 void PreviewRow::setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
 
-boost::optional<ProcessingInstructions> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
+std::optional<ProcessingInstructions> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
 
-void PreviewRow::setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) noexcept {
+void PreviewRow::setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) noexcept {
   m_selectedBanks = std::move(selectedBanks);
 }
 
-boost::optional<ProcessingInstructions> PreviewRow::getProcessingInstructions(ROIType regionType) const {
+std::optional<ProcessingInstructions> PreviewRow::getProcessingInstructions(ROIType regionType) const {
   switch (regionType) {
   case ROIType::Signal:
     return m_processingInstructions;
@@ -61,7 +59,7 @@ boost::optional<ProcessingInstructions> PreviewRow::getProcessingInstructions(RO
 }
 
 void PreviewRow::setProcessingInstructions(ROIType regionType,
-                                           boost::optional<ProcessingInstructions> processingInstructions) {
+                                           std::optional<ProcessingInstructions> processingInstructions) {
   switch (regionType) {
   case ROIType::Signal:
     m_processingInstructions = std::move(processingInstructions);

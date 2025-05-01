@@ -13,7 +13,6 @@ digraph AlignAndFocusPowder {
     MaskBinTable
     CalibrationWorkspace
     GroupingWorkspace
-    UnwrapRef
     LowResRef
     params1 [label="Params"]
     params2 [label="Params"]
@@ -25,7 +24,6 @@ digraph AlignAndFocusPowder {
     clearDiffCal      [label="ApplyDiffCal v1\nClear parameters"]
     compressEvents    [label="CompressEvents v1"]
     compressEvents2   [label="CompressEvents v1"]
-    convertUnitsTof1     [label="ConvertUnits v1\nTime-of-Flight"]
     convertUnitsTof2     [label="ConvertUnits v1\nTime-of-Flight"]
     convertUnitsD1     [label="ConvertUnits v1\nd-spacing"]
     convertUnitsD2     [label="ConvertUnits v1\nd-spacing"]
@@ -46,7 +44,6 @@ digraph AlignAndFocusPowder {
     rebinRagged       [label="RebinRagged v1"]
     removeLowResTOF   [label="RemoveLowResTOF v1"]
     removePromptPulse [label="RemovePromptPulse v1"]
-    unwrapSNS         [label="UnwrapSNS v1"]
   }
 
   subgraph decisions {
@@ -58,7 +55,6 @@ digraph AlignAndFocusPowder {
     isDspace1         [label="Is d-space binning?"]
     isDspace2         [label="Is d-space binning?"]
     isDspace3         [label="Is d-space binning?"]
-    ifLref          [label="LRef specified?"]
     ifDIFCref          [label="DIFCref specified?"]
     ifRaggedTof       [label="ragged rebin\nand tof binning"]
   }
@@ -98,25 +94,18 @@ digraph AlignAndFocusPowder {
   maskBins               -> convertUnitsD3
   convertUnitsD3          -> lorentz
 
-  lorentz                -> ifLref
+  lorentz                -> ifDIFCref
 
-  ifLref               -> convertUnitsWL2            [label="No"]
-  cropWorkspaceWL        -> convertUnitsD1
-
-  convertUnitsD1          -> isDspace2
-
-  ifLref               -> convertUnitsTof1        [label="Yes"]
-  convertUnitsTof1          -> unwrapSNS
-  UnwrapRef              -> unwrapSNS
-  unwrapSNS              -> convertUnitsWL2
-  convertUnitsWL2 -> ifDIFCref
-
-
-  ifDIFCref -> cropWorkspaceWL  [label="No"]
+  ifDIFCref -> convertUnitsWL2  [label="No"]
   ifDIFCref -> removeLowResTOF  [label="Yes"]
 
   LowResRef              -> removeLowResTOF
   removeLowResTOF        -> convertUnitsD1
+
+  convertUnitsWL2        -> cropWorkspaceWL
+  cropWorkspaceWL        -> convertUnitsD1
+
+  convertUnitsD1          -> isDspace2
 
   isDspace2              -> diffFocus            [label="No"]
   isDspace2              -> rebin2               [label="Yes"]

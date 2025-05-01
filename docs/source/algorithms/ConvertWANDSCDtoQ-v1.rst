@@ -32,7 +32,7 @@ InputWorkspace. Uproj, Vproj and Wproj are only used when converting
 to HKL Frame.
 
 If the KeepTemporaryWorkspaces option is True the data and the
-normalization in addition to the nomalized data will be
+normalization in addition to the normalized data will be
 outputted. This allows you to run separate instances of
 ConvertWANDSCDtoQ and combine the results. They will have names
 "ws_data" and "ws_normalization" respectively. If a background workspace

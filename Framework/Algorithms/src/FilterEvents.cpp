@@ -617,8 +617,7 @@ void FilterEvents::createOutputWorkspaces() {
   int delta_wsindex{0}; // an index shift
   if (getProperty("OutputWorkspaceIndexedFrom1")) {
     // Determine the minimum valid target index. Note that the set is sorted and guaranteed to start with -1.
-    const int min_wsindex = m_targetWorkspaceIndexSet.size() == 1 ? *m_targetWorkspaceIndexSet.begin()
-                                                                  : *std::next(m_targetWorkspaceIndexSet.begin(), 1);
+    const int min_wsindex = *std::next(m_targetWorkspaceIndexSet.begin(), 1);
     g_log.debug() << "Minimum target workspace index = " << min_wsindex << "\n";
     delta_wsindex = 1 - min_wsindex;
   }

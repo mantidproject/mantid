@@ -27,7 +27,7 @@ if(CXXTEST_FOUND)
 
   add_dependencies(FrameworkTests APITest)
   # Test data
-  add_dependencies(APITest StandardTestData)
+  add_dependencies(APITest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET APITest PROPERTY FOLDER "UnitTests")

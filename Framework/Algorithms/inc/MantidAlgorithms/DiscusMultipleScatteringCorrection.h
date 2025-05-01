@@ -89,7 +89,6 @@ class MANTID_ALGORITHMS_DLL DiscusMultipleScatteringCorrection : public API::Alg
 public:
   // use small_vector to avoid performance hit from heap allocation of std::vector. Use size 5 in line with Track.h
   using ComponentWorkspaceMappings = boost::container::small_vector<ComponentWorkspaceMapping, 5>;
-  virtual ~DiscusMultipleScatteringCorrection() = default;
   /// Algorithm's name
   const std::string name() const override { return "DiscusMultipleScatteringCorrection"; }
   /// Algorithm's version

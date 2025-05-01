@@ -32,7 +32,6 @@ namespace Algorithms {
  */
 class MANTID_ALGORITHMS_DLL FFT : public API::Algorithm {
 public:
-  virtual ~FFT() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFT"; }
   /// Summary of algorithms purpose

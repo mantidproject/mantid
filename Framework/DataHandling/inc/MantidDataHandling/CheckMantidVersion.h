@@ -17,7 +17,6 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL CheckMantidVersion : public API::Algorithm {
 public:
-  virtual ~CheckMantidVersion() = default;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

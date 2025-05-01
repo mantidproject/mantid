@@ -1,0 +1,1 @@
+- Enable user defined sample and container geometry together with the definition of gauge volume to account for the beam size. Implementation made in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and ``mantid.utils.absorptioncorrutils``.

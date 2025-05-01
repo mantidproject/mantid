@@ -94,10 +94,6 @@ echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
 
-# Pip install quickBayes until there's a conda package
-$CONDA_ENV_PATH/python.exe -m pip install quickBayes==1.0.0b15
-
-
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
 mkdir $COPY_DIR/bin
 mv $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/
@@ -109,6 +105,12 @@ mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
 echo "Copy all DLLs from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
+# DLLs required for quasielasticbayes
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libgfortran*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libquadmath*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libwinpthread*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libgcc_s_seh*.dll $COPY_DIR/bin/
+
 
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/

@@ -10,7 +10,7 @@ if(CXXTEST_FOUND)
   add_dependencies(CurveFittingTest Algorithms)
   add_dependencies(FrameworkTests CurveFittingTest)
   # Test data
-  add_dependencies(CurveFittingTest StandardTestData)
+  add_dependencies(CurveFittingTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET CurveFittingTest PROPERTY FOLDER "UnitTests")

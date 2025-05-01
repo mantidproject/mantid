@@ -15,7 +15,7 @@ if(CXXTEST_FOUND)
   add_dependencies(CrystalTest Algorithms CurveFitting)
   add_dependencies(FrameworkTests CrystalTest)
   # Test data
-  add_dependencies(CrystalTest StandardTestData)
+  add_dependencies(CrystalTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET CrystalTest PROPERTY FOLDER "UnitTests")

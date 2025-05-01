@@ -30,7 +30,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.app_name = "ErrorReportPresenterTest"
-        self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code, application=self.app_name)
+        self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code, application=self.app_name, workbench_pid=None)
         self.view.CONTACT_INFO = "ContactInfo"
         self.view.NAME = "John Smith"
         self.view.EMAIL = "john.smith@example.com"
@@ -62,7 +62,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock_instance.sendErrorReport.return_value = 201
         self.error_report_presenter._send_report_to_server(False, name=name, email=email, uptime=uptime, text_box=text_box)
 
-        self.errorreport_mock.assert_called_once_with(self.app_name, uptime, self.exit_code, False, name, email, text_box, "")
+        self.errorreport_mock.assert_called_once_with(self.app_name, uptime, self.exit_code, False, name, email, text_box, "", b"")
         self.errorreport_mock_instance.sendErrorReport.assert_called_once_with()
 
     def test_send_error_report_to_server_calls_ErrorReport_correctly_and_triggers_view_upon_failure(self):
@@ -74,7 +74,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock_instance.sendErrorReport.return_value = 500
         self.error_report_presenter._send_report_to_server(True, name=name, email=email, uptime=uptime, text_box=text_box)
 
-        self.errorreport_mock.assert_called_once_with(self.app_name, uptime, self.exit_code, True, name, email, text_box, "")
+        self.errorreport_mock.assert_called_once_with(self.app_name, uptime, self.exit_code, True, name, email, text_box, "", b"")
         self.errorreport_mock_instance.sendErrorReport.assert_called_once_with()
         self.view.display_message_box.assert_called_once_with(
             "Error contacting server", ErrorReporterPresenter.SENDING_ERROR_MESSAGE, "http request returned with status 500"

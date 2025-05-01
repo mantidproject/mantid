@@ -6,26 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import subprocess
-import sys
 import systemtesting
 
-from mantid.kernel import ConfigService
 from tempfile import NamedTemporaryFile
 
 TEST_MESSAGE = "Hello Mantid!"
-EXECUTABLE_SWITCHER = {
-    "linux": ["launch_mantidworkbench.sh", "workbench"],
-    "darwin": ["workbench"],
-    "win32": ["workbench"],
-}
 SUBPROCESS_TIMEOUT_SECS = 300
-
-
-def get_mantid_executables_for_platform(platform):
-    workbench_executables = EXECUTABLE_SWITCHER.get(platform, None)
-    if workbench_executables is None:
-        raise RuntimeError(f"Unknown platform {platform}.")
-    return workbench_executables
 
 
 def start_and_wait_for_completion(args_list):
@@ -58,28 +44,21 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
 
         self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace("\\", "/")
         self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace("\\", "/")
-        self._executables = get_mantid_executables_for_platform(sys.platform)
         write_test_script(self._test_script, self._test_file)
 
     def runTest(self):
-        directory = ConfigService.getPropertiesDir().replace("\\", "/")
-        for executable in self._executables:
-            file_path = os.path.join(directory, executable)
-            executable, module = (file_path, False) if os.path.exists(file_path) else (executable, True)
-            arg_list = [executable, "--execute", self._test_script, "--quit"]
-            if module:
-                arg_list = ["python", "-m"] + arg_list
+        arg_list = ["python", "-m", "workbench", "--execute", self._test_script, "--quit"]
 
-            exitcode, stderr = start_and_wait_for_completion(arg_list)
-            # Was the process successful
-            self.assertEqual(0, exitcode)
-            # Check for no warnings or errors on startup
-            error_warning_lines = [line for line in stderr.split("\n") if "[Error]" in line or "[Warning]" in line]
-            self.assertEqual([], error_warning_lines, f"stderr was warning / error output: {error_warning_lines}")
-            # Assert that the test script runs successfully by writing to a .txt file
-            with open(self._test_file, "r") as file:
-                self.assertEqual(TEST_MESSAGE, file.readline())
-            remove_file(self._test_file)
+        exitcode, stderr = start_and_wait_for_completion(arg_list)
+        # Check for no warnings or errors on startup
+        error_warning_lines = [line for line in stderr.split("\n") if "[Error]" in line or "[Warning]" in line]
+        self.assertEqual([], error_warning_lines, f"stderr was warning / error output: {error_warning_lines}")
+        # Assert that the test script runs successfully by writing to a .txt file
+        with open(self._test_file, "r") as file:
+            self.assertEqual(TEST_MESSAGE, file.readline())
+        remove_file(self._test_file)
+        # Was the process successful
+        self.assertEqual(0, exitcode)
 
     def cleanup(self):
         remove_file(self._test_script)

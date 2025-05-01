@@ -1,0 +1,1 @@
+- Handle the special case where runs to merge do not share common columns in :ref:`HB2AReduce <algm-HB2AReduce>`.

@@ -249,6 +249,9 @@ DECLARE_ALGORITHM(UnwrapMonitorsInTOF)
 
 //----------------------------------------------------------------------------------------------
 
+/// Default Constructor
+UnwrapMonitorsInTOF::UnwrapMonitorsInTOF() { deprecatedDate("2025-04-01"); }
+
 /// Algorithms name for identification. @see Algorithm::name
 const std::string UnwrapMonitorsInTOF::name() const { return "UnwrapMonitorsInTOF"; }
 

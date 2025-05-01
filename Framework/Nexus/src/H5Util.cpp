@@ -38,6 +38,14 @@ template <> MANTID_NEXUS_DLL DataType getType<float>() { return PredType::NATIVE
 
 template <> MANTID_NEXUS_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
 
+template <> MANTID_NEXUS_DLL DataType getType<int8_t>() { return PredType::NATIVE_INT8; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint8_t>() { return PredType::NATIVE_UINT8; }
+
+template <> MANTID_NEXUS_DLL DataType getType<int16_t>() { return PredType::NATIVE_INT16; }
+
+template <> MANTID_NEXUS_DLL DataType getType<uint16_t>() { return PredType::NATIVE_UINT16; }
+
 template <> MANTID_NEXUS_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
@@ -45,6 +53,12 @@ template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NAT
 template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
+
+template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::NATIVE_CHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::NATIVE_CHAR; }
+
+template <> MANTID_NEXUS_DLL DataType getType<bool>() { return PredType::NATIVE_HBOOL; }
 
 /** Operations for help with narrowing casts */
 namespace {
@@ -77,6 +91,14 @@ template <typename InT, typename OutT, Narrowing narrow> inline void throwIfUnal
     func_name<float, OutT, narrow>(__VA_ARGS__);                                                                       \
   } else if (dataType == PredType::NATIVE_DOUBLE) {                                                                    \
     func_name<double, OutT, narrow>(__VA_ARGS__);                                                                      \
+  } else if (dataType == PredType::NATIVE_INT8) {                                                                      \
+    func_name<int8_t, OutT, narrow>(__VA_ARGS__);                                                                      \
+  } else if (dataType == PredType::NATIVE_UINT8) {                                                                     \
+    func_name<uint8_t, OutT, narrow>(__VA_ARGS__);                                                                     \
+  } else if (dataType == PredType::NATIVE_INT16) {                                                                     \
+    func_name<int16_t, OutT, narrow>(__VA_ARGS__);                                                                     \
+  } else if (dataType == PredType::NATIVE_UINT16) {                                                                    \
+    func_name<uint16_t, OutT, narrow>(__VA_ARGS__);                                                                    \
   } else if (dataType == PredType::NATIVE_INT32) {                                                                     \
     func_name<int32_t, OutT, narrow>(__VA_ARGS__);                                                                     \
   } else if (dataType == PredType::NATIVE_UINT32) {                                                                    \
@@ -100,10 +122,6 @@ H5::FileAccPropList defaultFileAcc() {
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
   return DataSpace(1, dims);
-}
-
-template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
-  return H5Util::getDataSpace(data.size());
 }
 
 namespace {
@@ -193,7 +211,7 @@ void writeNumAttribute(const H5::H5Object &object, const std::string &name, cons
                 "The writeNumAttribute function only accepts integral of "
                 "floating point values.");
   auto attrType = getType<NumT>();
-  DataSpace attrSpace = getDataSpace(value);
+  DataSpace attrSpace = getDataSpace(value.size());
 
   auto attribute = object.createAttribute(name, attrType, attrSpace);
   attribute.write(attrType, value.data());
@@ -212,7 +230,7 @@ void writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &na
 
 template <typename NumT> void writeArray1D(Group &group, const std::string &name, const std::vector<NumT> &values) {
   DataType dataType(getType<NumT>());
-  DataSpace dataSpace = getDataSpace(values);
+  DataSpace dataSpace = getDataSpace(values.size());
 
   DSetCreatPropList propList = setCompressionAttributes(values.size());
 
@@ -268,15 +286,19 @@ std::string readString(const H5::DataSet &dataset) {
  * @return :: vector of strings
  */
 std::vector<std::string> readStringVector(Group &group, const std::string &name) {
+  DataSet dataset = group.openDataSet(name);
+  return readStringVector(dataset);
+}
+
+std::vector<std::string> readStringVector(DataSet &dataset) {
   hsize_t dims[1];
   char **rdata;
   std::vector<std::string> result;
-
-  DataSet dataset = group.openDataSet(name);
   DataSpace dataspace = dataset.getSpace();
   DataType datatype = dataset.getDataType();
 
   dataspace.getSimpleExtentDims(dims, nullptr);
+  result.reserve(dims[0]);
 
   rdata = new char *[dims[0]];
   dataset.read(rdata, datatype);
@@ -442,20 +464,19 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
 }
 
 /// Test if a group exists in an HDF5 file or parent group.
-bool groupExists(H5::H5Object &h5, const std::string &groupPath) {
+bool groupExists(H5::H5Object const &h5, const std::string &groupPath) {
   bool status = true;
   // Unfortunately, this is actually the approach recommended by the HDF Group.
   try {
     h5.openGroup(groupPath);
-  } catch (const H5::Exception &e) {
-    UNUSED_ARG(e);
+  } catch (const H5::Exception &) {
     status = false;
   }
   return status;
 }
 
 /// Test if an attribute is present on an HDF5 group or dataset and has a specific string value.
-bool keyHasValue(H5::H5Object &h5, const std::string &key, const std::string &value) {
+bool keyHasValue(H5::H5Object const &h5, const std::string &key, const std::string &value) {
   bool status = true;
   try {
     Attribute attr = h5.openAttribute(key);
@@ -463,8 +484,7 @@ bool keyHasValue(H5::H5Object &h5, const std::string &key, const std::string &va
     attr.read(attr.getDataType(), value_);
     if (value_ != value)
       status = false;
-  } catch (const H5::Exception &e) {
-    UNUSED_ARG(e);
+  } catch (const H5::Exception &) {
     status = false;
   }
   return status;
@@ -510,6 +530,14 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const double &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const int8_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const uint8_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const int16_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const uint16_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const int32_t &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const uint32_t &value);
@@ -517,11 +545,21 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
                                                  const int64_t &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const uint64_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const char &value);
 
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const std::vector<float> &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const std::vector<double> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<int8_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<uint8_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<int16_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<uint16_t> &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const std::vector<int32_t> &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
@@ -530,6 +568,8 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
                                                  const std::vector<int64_t> &value);
 template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                  const std::vector<uint64_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<char> &value);
 
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
@@ -614,16 +654,6 @@ writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, c
                                     const std::map<std::string, std::string> &attributes);
 
 // -------------------------------------------------------------------
-// instantiations for getDataSpace
-// -------------------------------------------------------------------
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<float> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<double> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
-template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
-
-// -------------------------------------------------------------------
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
 template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
@@ -650,6 +680,14 @@ template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::ve
                                                  const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output,
                                                  const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int8_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint8_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int16_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint16_t> &output,
+                                                 const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output,
                                                  const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output,
@@ -658,4 +696,6 @@ template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::ve
                                                  const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output,
                                                  const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<char> &output, const size_t length,
+                                                 const size_t offset);
 } // namespace Mantid::NeXus::H5Util

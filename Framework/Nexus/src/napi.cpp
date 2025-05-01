@@ -343,12 +343,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if (my_am == NXACC_CREATE4) {
-    /* HDF4 will be used ! */
-    backend_type = NXACC_CREATE4;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5)) {
+  if (my_am == NXACC_CREATE5) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
@@ -390,11 +385,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
 
   NXstatus retstat = NXstatus::NX_ERROR;
-  if (backend_type == NXACC_CREATE4) {
-    /* HDF4 type */
-    NXReportError("ERROR: Attempt to create HDF4 file when not linked with HDF4");
-    retstat = NXstatus::NX_ERROR;
-  } else if (backend_type == NXACC_CREATE5) {
+  if (backend_type == NXACC_CREATE5) {
     /* HDF5 type */
 #ifdef WITH_HDF5
     NXhandle hdf5_handle = NULL;
@@ -424,7 +415,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
   }
-  if (filename != NULL) {
+  if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
     free(filename);
   }
   if (fHandle != NULL) {
@@ -1551,22 +1542,9 @@ NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
   return NXstatus::NX_OK;
 }
 
-NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                    const NXnumtype iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxputattra(pFunc->pNexusData, name, data, rank, dim, iType));
-}
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   pNexusFunction pFunc = handleToNexusFunc(handle);
   return LOCKED_CALL(pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType));
-}
-NXstatus NXgetattra(NXhandle handle, const char *name, void *data) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetattra(pFunc->pNexusData, name, data));
-}
-NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetattrainfo(pFunc->pNexusData, pName, rank, dim, iType));
 }
 
 /*--------------------------------------------------------------------

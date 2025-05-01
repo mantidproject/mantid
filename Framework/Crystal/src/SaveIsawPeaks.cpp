@@ -505,7 +505,7 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROW
     ysize = first->getDistance(*last);
   }
 }
-void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, std::vector<double> offset) {
+void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, const std::vector<double> &offset) {
   for (size_t i = 0; i < 3; i++) {
     out << std::setw(12) << std::fixed << std::setprecision(6) << qSign * offset[i] << " ";
   }

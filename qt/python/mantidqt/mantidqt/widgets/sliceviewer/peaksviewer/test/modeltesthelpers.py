@@ -13,15 +13,16 @@ from unittest.mock import MagicMock, create_autospec
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.dataobjects import PeaksWorkspace
 from mantid.kernel import V3D
+from mantid.geometry import OrientedLattice
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.model import PeaksViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplPainter
 
 
-def draw_peaks(centers, fg_color, slice_value, slice_width, frame=SpecialCoordinateSystem.QLab):
-    model = create_peaks_viewer_model(centers, fg_color)
-    slice_info = create_slice_info(centers, slice_value, slice_width)
+def draw_peaks(centers, fg_color, slice_value, slice_width, frame=SpecialCoordinateSystem.QLab, calcHKL=False):
+    model = create_peaks_viewer_model(centers, fg_color, calcHKL=calcHKL)
+    slice_info = create_slice_info(lambda pos: pos, slice_value, slice_width)
     mock_painter = MagicMock(spec=MplPainter)
     mock_axes = MagicMock()
     mock_axes.get_xlim.return_value = (-1, 1)
@@ -32,7 +33,7 @@ def draw_peaks(centers, fg_color, slice_value, slice_width, frame=SpecialCoordin
     return model, mock_painter
 
 
-def create_peaks_viewer_model(centers, fg_color, name=None):
+def create_peaks_viewer_model(centers, fg_color, name=None, calcHKL=False):
     peaks = [create_mock_peak(center) for center in centers]
 
     def get_peak(index):
@@ -52,6 +53,8 @@ def create_peaks_viewer_model(centers, fg_color, name=None):
     model.ws.getPeak.side_effect = get_peak
     model.ws.column.side_effect = column
     model.ws.removePeak.side_effect = remove_peak
+    model._orientedLattice = OrientedLattice(3, 4, 5, 90, 90, 120)
+    model.set_calculate_hkl(calcHKL)
 
     return model
 

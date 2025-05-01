@@ -26,15 +26,14 @@ bool isValidGeneratorString(const std::string &generatorString) {
   std::vector<std::string> generatorStrings;
   boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
 
-  for (auto &identifier : generatorStrings) {
+  return std::all_of(generatorStrings.cbegin(), generatorStrings.cend(), [&](const auto &identifier) {
     try {
       SymmetryOperationSymbolParser::parseIdentifier(identifier);
     } catch (const Kernel::Exception::ParseError &) {
       return false;
     }
-  }
-
-  return true;
+    return true;
+  });
 }
 
 /**

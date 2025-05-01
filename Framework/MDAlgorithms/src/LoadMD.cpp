@@ -250,26 +250,28 @@ void LoadMD::execLoader() {
  * @param ws
  * @param dataType
  */
-void LoadMD::loadSlab(const std::string &name, void *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
+template <typename NumT>
+void LoadMD::loadSlab(const std::string &name, NumT *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
   m_file->openData(name);
   if (m_file->getInfo().type != dataType)
     throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
 
-  int nPoints = 1;
-  size_t numDims = m_file->getInfo().dims.size();
-  std::vector<int> size(numDims);
+  // verify that the number of points is correct
+  const auto dataDims = m_file->getInfo().dims;
+  uint64_t nPoints = 1;
+  const size_t numDims = dataDims.size();
   for (size_t d = 0; d < numDims; d++) {
-    nPoints *= static_cast<int>(m_file->getInfo().dims[d]);
-    size[d] = static_cast<int>(m_file->getInfo().dims[d]);
+    nPoints *= static_cast<uint64_t>(dataDims[d]);
   }
-  if (nPoints != static_cast<int>(ws->getNPoints()))
+  if (nPoints != ws->getNPoints())
     throw std::runtime_error("Inconsistency between the number of points in '" + name +
                              "' and the number of bins defined by the dimensions.");
-  std::vector<int> start(numDims, 0);
+
+  // read the data
   try {
-    m_file->getSlab(data, start, size);
+    m_file->getData(data);
   } catch (...) {
-    g_log.debug() << " start: " << start[0] << " size: " << size[0] << '\n';
+    g_log.debug() << " failed to read data size: " << dataDims[0] << '\n';
   }
   m_file->closeData();
 }

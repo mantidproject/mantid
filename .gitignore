@@ -16,6 +16,8 @@ compile_commands.json
 # Ignore CMakeUserPresets
 CMakeUserPresets.json
 
+# prefer hxx for template definition files
+*.tcc
 
 # Compiled Object files
 *.slo

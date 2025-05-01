@@ -23,7 +23,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 // PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 namespace Mantid {
 namespace DataObjects {

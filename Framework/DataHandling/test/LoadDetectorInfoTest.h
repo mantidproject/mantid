@@ -128,9 +128,7 @@ void writeDetNXSfile(const std::string &filename, const int nDets) {
       ic = 0;
   }
 
-  std::vector<int> array_dims(2);
-  array_dims[0] = nDets;
-  array_dims[1] = 2;
+  ::NeXus::DimVector array_dims{nDets, 2};
 
   nxsfile.makeData("detID", NXnumtype::INT32, array_dims, true);
   nxsfile.putAttr("description", "DetectorID, DetectorType");

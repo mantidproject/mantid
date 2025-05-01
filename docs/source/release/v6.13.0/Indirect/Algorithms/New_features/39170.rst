@@ -1,0 +1,6 @@
+- The "Atoms" field of Abins and Abins2D algorithms has been enhanced
+  to support more kinds of input.  Individual atoms may still be
+  selected with e.g. "atom1" or "atom_1", but "1" is now also a valid
+  input to select the first atom. In addition, ranges can be specified
+  as e.g. "2-4" or "2..4". This makes the user input more concise, but
+  will still create individual workspaces for atoms 2, 3, and 4.

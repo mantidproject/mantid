@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -22,7 +22,7 @@ public:
   bool isError() const;
   Validated const &assertValid() const;
   Error const &assertError() const;
-  boost::optional<Validated> validElseNone() const;
+  std::optional<Validated> validElseNone() const;
 
 private:
   boost::variant<Validated, Error> m_innerResult;
@@ -55,11 +55,11 @@ template <typename Validated, typename Error> Error const &ValidationResult<Vali
 }
 
 template <typename Validated, typename Error>
-boost::optional<Validated> ValidationResult<Validated, Error>::validElseNone() const {
-  if (isValid())
+std::optional<Validated> ValidationResult<Validated, Error>::validElseNone() const {
+  if (isValid()) {
     return assertValid();
-  else
-    return boost::none;
+  }
+  return std::nullopt;
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

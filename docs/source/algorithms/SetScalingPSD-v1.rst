@@ -56,7 +56,7 @@ and how they are numbered.
 
 If the tube detector performance enhancement is used the results of the
 algorithm will not be visible in the instrument viewer, however
-all subsequent calclations on the workspace will be performed correctly.
+all subsequent calculations on the workspace will be performed correctly.
 
 Optional properties
 ###################

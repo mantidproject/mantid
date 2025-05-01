@@ -18,8 +18,8 @@ using Mantid::PythonInterface::PythonException;
 
 namespace {
 
-Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
-                         std::optional<QHash<QString, QVariant>> const &otherKwargs) {
+Python::Object newMarker(const FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm,
+                         double background, std::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
@@ -39,8 +39,8 @@ namespace MantidQt::Widgets::MplCpp {
 /**
  * @brief Create a PeakMarker instance
  */
-PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
-                       QHash<QString, QVariant> const &otherKwargs)
+PeakMarker::PeakMarker(const FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm,
+                       double background, QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(newMarker(canvas, peakID, x, height, fwhm, background, otherKwargs)) {}
 
 /**

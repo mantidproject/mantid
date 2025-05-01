@@ -45,6 +45,7 @@ void JobTreeView::commitData(QWidget *editor) {
   auto cellTextBefore = m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
   QTreeView::commitData(editor);
   auto cellText = m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
+  // cppcheck-suppress knownConditionTrueFalse
   if (cellText != cellTextBefore) {
     resizeColumnToContents(m_lastEdited.column());
     m_hasEditorOpen = false;

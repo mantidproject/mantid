@@ -16,7 +16,7 @@ if(CXXTEST_FOUND)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests LiveDataTest)
   # Test data
-  add_dependencies(LiveDataTest StandardTestData)
+  add_dependencies(LiveDataTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET LiveDataTest PROPERTY FOLDER "UnitTests")

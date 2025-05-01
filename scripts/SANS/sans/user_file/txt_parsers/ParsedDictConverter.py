@@ -17,6 +17,7 @@ from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
@@ -1062,6 +1063,10 @@ class ParsedDictConverter(IStateParser):
 
         _set_wavelength_limits(state, self._input_dict)
         return state
+
+    def get_state_polarization(self) -> StatePolarization:
+        # The polarization settings are not supported for the legacy txt user file format. Return a blank object.
+        return StatePolarization()
 
     def _set_single_entry(self, state_obj, attr_name, tag, apply_to_value=None):
         """

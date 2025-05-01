@@ -41,7 +41,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
 
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
-  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](boost::optional<Row> const &row) -> void {
+  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](std::optional<Row> const &row) -> void {
     if (row)
       workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ());
   });
@@ -72,7 +72,7 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties, std::optional
   AlgorithmProperties::update("Params", -(resolution.value()), properties);
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, std::optional<LookupRow> lookupRow) {
   if (!lookupRow)
     return;
 
@@ -83,7 +83,7 @@ void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group
   std::optional<double> resolution = std::nullopt;
 
   for (auto const &row : group.rows()) {
-    if (!row.is_initialized())
+    if (!row.has_value())
       continue;
 
     // Use the input Q step if provided, or the output Q step otherwise, if set

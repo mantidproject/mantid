@@ -76,7 +76,7 @@ Usage
    # Load HRP dataset
    ws = Load("HRP39180.RAW")
 
-   # specify groupping file, here using CalFile format
+   # specify grouping file, here using CalFile format
    cal_file = "hrpd_new_072_01_corr.cal"
 
    # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
@@ -100,7 +100,7 @@ Output:
    # create event workspace with one bank of 4 detectors
    ws = CreateSampleWorkspace(WorkspaceType="Event", XUnit="dSpacing", NumBanks=1, BankPixelWidth=2)
 
-   # focus data in 4 spectra to 2 spectra according to .cal file and don't perserve events
+   # focus data in 4 spectra to 2 spectra according to .cal file and don't preserve events
    ws = DiffractionFocussing(InputWorkspace='ws', GroupingFileName="4detector_cal_example_file.cal" \
         , PreserveEvents=False)
 
@@ -121,7 +121,7 @@ Output:
    # Load HRP dataset
    ws = Load("HRP39180.RAW")
 
-   # specify groupping file, here using CalFile format
+   # specify grouping file, here using CalFile format
    cal_file = "hrpd_new_072_01_corr.cal"
 
    # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets

@@ -38,6 +38,19 @@ class RunTest(unittest.TestCase):
         self.assertEqual(type(charge), float)
         self.assertAlmostEqual(charge, 10.05)
 
+    def test_proton_charge_accounts_for_period_filtering(self):
+        run = self._run
+        run.addProperty("gd_prtn_chrg_unfiltered", True, True)
+        run.addProperty("proton_charge_by_period", [6.0, 4.05], True)
+        run.addProperty("current_period", 1, True)
+        charge = run.getProtonCharge()
+        self.assertAlmostEqual(charge, 6.0)
+
+        run.addProperty("gd_prtn_chrg_unfiltered", True, True)
+        run.addProperty("current_period", 2, True)
+        charge = run.getProtonCharge()
+        self.assertAlmostEqual(charge, 4.05)
+
     def test_get_time_roi(self):
         # there is intentionally no way create a TimeROI from python
         run = Run()

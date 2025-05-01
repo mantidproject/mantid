@@ -1238,11 +1238,11 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
      the path to the current node
    */
   datalen = 1024;
-  memset(&sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
-  if (NX5getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
-    buildCurrentPath(pFile, sRes->targetPath, 1024);
+  sRes->targetPath.resize(datalen, 0);
+  if (NX5getattr(fid, "target", sRes->targetPath.data(), &datalen, &type) != NXstatus::NX_OK) {
+    buildCurrentPath(pFile, sRes->targetPath.data(), 1024);
   }
-  sRes->linkType = 1;
+  sRes->linkType = NXentrytype::sds;
   return NXstatus::NX_OK;
 }
 
@@ -1250,7 +1250,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
 NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
   NXI5assert(fid);
-  printf("HDF5 link: targetPath = \"%s\", linkType = \"%d\"\n", sLink->targetPath, sLink->linkType);
+  printf("HDF5 link: targetPath = \"%s\", linkType = \"%d\"\n", sLink->targetPath.c_str(), sLink->linkType);
   return NXstatus::NX_OK;
 }
 
@@ -1263,9 +1263,9 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
      set the target attribute
    */
   if (sLink->linkType > 0) {
-    dataID = H5Dopen(pFile->iFID, sLink->targetPath, H5P_DEFAULT);
+    dataID = H5Dopen(pFile->iFID, sLink->targetPath.c_str(), H5P_DEFAULT);
   } else {
-    dataID = H5Gopen(pFile->iFID, sLink->targetPath, H5P_DEFAULT);
+    dataID = H5Gopen(pFile->iFID, sLink->targetPath.c_str(), H5P_DEFAULT);
   }
   if (dataID < 0) {
     NXReportError("Internal error, path to link does not exist");
@@ -1281,12 +1281,12 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   }
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, strlen(sLink->targetPath));
+  H5Tset_size(aid1, sLink->targetPath.size());
   attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attID < 0) {
     return NXstatus::NX_OK;
   }
-  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetPath));
+  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetPath.c_str()));
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
@@ -1323,7 +1323,7 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
     return NXstatus::NX_ERROR;
   }
 
-  H5Lcreate_hard(pFile->iFID, sLink->targetPath, H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(pFile->iFID, sLink->targetPath.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
 
   return NX5settargetattribute(pFile, sLink);
 }
@@ -1343,7 +1343,7 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
   /*
      locate name of the element to link
    */
-  itemName = strrchr(sLink->targetPath, '/');
+  itemName = strrchr(sLink->targetPath.data(), '/');
   if (itemName == NULL) {
     NXReportError("ERROR: bad link structure");
     return NXstatus::NX_ERROR;
@@ -1364,7 +1364,7 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
     return NXstatus::NX_ERROR;
   }
 
-  H5Lcreate_hard(pFile->iFID, sLink->targetPath, H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(pFile->iFID, sLink->targetPath.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
 
   return NX5settargetattribute(pFile, sLink);
 }
@@ -2055,6 +2055,7 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 
 /*-------------------------------------------------------------------------*/
 
+// cppcheck-suppress constParameterCallback
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFile5 pFile;
   hid_t vid, iNew;
@@ -2153,11 +2154,11 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
        the path to the current node
      */
     int datalen = 1024;
-    memset(sRes->targetPath, 0, static_cast<size_t>(datalen) * sizeof(char));
-    if (NX5getattr(fileid, "target", sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
-      buildCurrentPath(pFile, sRes->targetPath, datalen);
+    sRes->targetPath.resize(datalen, 0);
+    if (NX5getattr(fileid, "target", sRes->targetPath.data(), &datalen, &type) != NXstatus::NX_OK) {
+      buildCurrentPath(pFile, sRes->targetPath.data(), datalen);
     }
-    sRes->linkType = 0;
+    sRes->linkType = NXentrytype::group;
     return NXstatus::NX_OK;
   }
   /* not reached */
@@ -2258,7 +2259,7 @@ NXstatus NX5nativeisexternallink(NXhandle fileid, const char *name, char *url, c
 
 NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   NXI5assert(fileid);
-  if ((strcmp(pFirstID->targetPath, pSecondID->targetPath) == 0)) {
+  if (pFirstID->targetPath == pSecondID->targetPath) {
     return NXstatus::NX_OK;
   } else {
     return NXstatus::NX_ERROR;
@@ -2282,81 +2283,6 @@ NXstatus NX5initgroupdir(NXhandle fid) {
 
   pFile = NXI5assert(fid);
   NXI5KillDir(pFile);
-  return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                     const NXnumtype iType) {
-  hid_t datatype1, dataspace;
-  hid_t type;
-  pNexusFile5 pFile;
-  int i;
-  hid_t vid, iATT;
-  herr_t iRet;
-  hsize_t mydim[H5S_MAX_RANK];
-
-  pFile = NXI5assert(handle);
-
-  for (i = 0; i < rank; i++) {
-    mydim[i] = static_cast<hsize_t>(dim[i]);
-  }
-
-  /* determine vid */
-  vid = getAttVID(pFile);
-  iATT = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
-  if (iATT > 0) {
-    H5Aclose(iATT);
-    iRet = H5Adelete(vid, name);
-    if (iRet < 0) {
-      NXReportError("ERROR: old attribute cannot be removed! ");
-      killAttVID(pFile, vid);
-      return NXstatus::NX_ERROR;
-    }
-  }
-
-  if (rank < 0) {
-    char pBuffer[256];
-    sprintf(pBuffer, "ERROR: invalid rank specified %s", name);
-    NXReportError(pBuffer);
-    return NXstatus::NX_ERROR;
-  }
-
-  type = nxToHDF5Type(iType);
-
-  datatype1 = H5Tcopy(type);
-  if (iType == NXnumtype::CHAR) {
-    H5Tset_size(datatype1, static_cast<size_t>(dim[rank - 1]));
-    dataspace = H5Screate_simple(rank - 1, mydim, NULL);
-  } else {
-    dataspace = H5Screate_simple(rank, mydim, NULL);
-  }
-
-  iATT = H5Acreate(vid, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT);
-
-  if (iATT < 0) {
-    NXReportError("ERROR: creating attribute failed");
-    return NXstatus::NX_ERROR;
-  } else {
-    pFile->iCurrentA = iATT;
-  }
-
-  iRet = H5Awrite(pFile->iCurrentA, datatype1, data);
-  if (iRet < 0) {
-    NXReportError("ERROR: failure to write attribute");
-    return NXstatus::NX_ERROR;
-  }
-
-  // less than zero is an error so just accumulate them
-  iRet += H5Sclose(dataspace);
-  iRet += H5Tclose(datatype1);
-  iRet += H5Aclose(pFile->iCurrentA);
-  pFile->iCurrentA = 0;
-  if (iRet < 0) {
-    NXReportError("ERROR: HDF cannot close attribute");
-    return NXstatus::NX_ERROR;
-  }
-
   return NXstatus::NX_OK;
 }
 
@@ -2416,95 +2342,6 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
 
   killAttVID(pFile, vid);
   return NX5getattrainfo(handle, pName, rank, dim, iType);
-}
-/*------------------------------------------------------------------------*/
-NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
-  pNexusFile5 pFile;
-  int iStart[H5S_MAX_RANK], status;
-  hid_t vid;
-  hid_t memtype_id, filespace, datatype;
-  H5T_class_t tclass;
-  hsize_t dims[H5S_MAX_RANK];
-  htri_t is_vlen_str = 0; /* false */
-  char **vstrdata = NULL;
-
-  pFile = NXI5assert(handle);
-
-  vid = getAttVID(pFile);
-  pFile->iCurrentA = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
-  if (pFile->iCurrentA < 0) {
-    pFile->iCurrentA = 0;
-    NXReportError("ERROR: unable to open attribute");
-    return NXstatus::NX_ERROR;
-  }
-  filespace = H5Aget_space(pFile->iCurrentA);
-  datatype = H5Aget_type(pFile->iCurrentA);
-  auto ndims = H5Sget_simple_extent_dims(filespace, dims, NULL);
-
-  is_vlen_str = H5Tis_variable_str(datatype);
-  if (ndims == 0 && is_vlen_str) {
-    /* this assumes a fixed size - is this dangerous? */
-    char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
-    status = H5Aread(pFile->iCurrentA, H5S_ALL, &strdata);
-    if (status >= 0) {
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
-      std::strncpy(static_cast<char *>(data), strdata, strlen(strdata));
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic pop
-#endif
-    }
-    free(strdata);
-
-    H5Sclose(filespace);
-    H5Tclose(datatype);
-    if (status < 0)
-      return NXstatus::NX_ERROR;
-    return NXstatus::NX_OK;
-  }
-  tclass = H5Tget_class(datatype);
-  /* stop gap kludge for fixed length strings */
-  if (tclass == H5T_STRING && !is_vlen_str) {
-    char *datatmp = NULL;
-    status = readStringAttribute(pFile->iCurrentA, &datatmp);
-    if (status < 0)
-      return NXstatus::NX_ERROR;
-    strcpy(static_cast<char *>(data), datatmp);
-    free(datatmp);
-    return NXstatus::NX_OK;
-  }
-
-  memset(iStart, 0, H5S_MAX_RANK * sizeof(int));
-  /* map datatypes of other plateforms */
-  if (is_vlen_str) {
-    vstrdata = static_cast<char **>(malloc((size_t)dims[0] * sizeof(char *)));
-    memtype_id = H5Tcopy(H5T_C_S1);
-    H5Tset_size(memtype_id, H5T_VARIABLE);
-    status = H5Aread(pFile->iCurrentA, memtype_id, vstrdata);
-    (static_cast<char *>(data))[0] = '\0';
-    if (status >= 0) {
-      for (hsize_t i = 0; i < dims[0]; ++i) {
-        if (vstrdata[i] != NULL) {
-          strcat(static_cast<char *>(data), vstrdata[i]);
-        }
-      }
-    }
-    H5Dvlen_reclaim(memtype_id, pFile->iCurrentS, H5P_DEFAULT, vstrdata);
-    free(vstrdata);
-    H5Tclose(memtype_id);
-  } else if (tclass == H5T_STRING) {
-    status = H5Aread(pFile->iCurrentA, datatype, data);
-  } else {
-    memtype_id = h5MemType(datatype);
-    status = H5Aread(pFile->iCurrentA, memtype_id, data);
-  }
-  if (status < 0) {
-    NXReportError("ERROR: failed to read attribute");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
 }
 /*------------------------------------------------------------------------*/
 NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
@@ -2605,10 +2442,7 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxnativeexternallink = NX5nativeexternallink;
   fHandle->nxnativeinquirefile = NX5nativeinquirefile;
   fHandle->nxnativeisexternallink = NX5nativeisexternallink;
-  fHandle->nxputattra = NX5putattra;
   fHandle->nxgetnextattra = NX5getnextattra;
-  fHandle->nxgetattra = NX5getattra;
-  fHandle->nxgetattrainfo = NX5getattrainfo;
 }
 
 #endif /* HDF5 */

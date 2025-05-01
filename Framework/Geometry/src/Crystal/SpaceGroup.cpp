@@ -51,21 +51,16 @@ const std::string &SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * @return :: true if the reflection is allowed, false otherwise.
  */
 bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
-  for (const auto &operation : m_allOperations) {
-    if (operation.hasTranslation()) {
-      /* Floating point precision problem:
-       *    (H . v) % 1.0 is not always exactly 0, so instead:
-       *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
-       * The transformation is only performed if necessary.
-       */
-      if ((fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15, 1.0)) > 1e-14) &&
-          (operation.transformHKL(hkl) == hkl)) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return std::none_of(m_allOperations.cbegin(), m_allOperations.cend(), [&](const auto &operation) {
+    /* Floating point precision problem:
+     *    (H . v) % 1.0 is not always exactly 0, so instead:
+     *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
+     * The transformation is only performed if necessary.
+     */
+    return (operation.hasTranslation()) &&
+           (fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15, 1.0)) > 1e-14) &&
+           (operation.transformHKL(hkl) == hkl);
+  });
 }
 
 /// Convenience function for checking compatibility of a cell metric with the

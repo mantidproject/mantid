@@ -36,7 +36,7 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
 
-    correlated_6904 = PoldiAutoCorrelation(raw_6904)
+    correlated_6904 = PoldiAutoCorrelation(raw_6904, Version=5)
     peaks_6904 = PoldiPeakSearch(correlated_6904)
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,

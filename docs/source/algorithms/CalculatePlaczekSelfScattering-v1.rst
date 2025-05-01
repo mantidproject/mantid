@@ -43,7 +43,7 @@ Usage
 
     # Spectrum function given in Milder et al. Eq (5)
     def incident_spectrum(wavelengths, phi_max, phi_epi, alpha, lambda_1, lambda_2,
-                         lamda_t):
+                         lambda_t):
         delta_term = 1. / (1. + np.exp((wavelengths - lambda_1) / lambda_2))
         term_1 = phi_max * (
             lambda_t**4. / wavelengths**5.) * np.exp(-(lambda_t / wavelengths)**2.)

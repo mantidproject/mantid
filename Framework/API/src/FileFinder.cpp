@@ -145,7 +145,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
     string instrName(hint);
     Poco::Path path(instrName);
     instrName = path.getFileName();
-    if ((instrName.find("PG3") == 0) || (instrName.find("pg3") == 0)) {
+    if (instrName.starts_with("PG3") || instrName.starts_with("pg3")) {
       instrName = "PG3";
     }
     // We're extending this nasty hack to accomodate data archive searching for
@@ -157,7 +157,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
     // code gets an overhaul as part of that ticket.  Please think twice before
     // adding
     // any more instruments to this list.
-    else if ((instrName.find("SANS2D") == 0) || (instrName.find("sans2d") == 0)) {
+    else if (instrName.starts_with("SANS2D") || instrName.starts_with("sans2d")) {
       instrName = "SANS2D";
     } else {
       // go forwards looking for the run number to start

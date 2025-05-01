@@ -7,7 +7,8 @@
 import unittest
 
 from unittest import mock
-from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator, TomlValidationError
+from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator
+from sans.user_file.toml_parsers.toml_base_schema import TomlValidationError
 
 
 class SchemaV1ValidatorTest(unittest.TestCase):

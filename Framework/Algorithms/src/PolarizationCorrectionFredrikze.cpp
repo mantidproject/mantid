@@ -11,10 +11,11 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 
 #include <memory>
 
@@ -296,7 +297,7 @@ void PolarizationCorrectionFredrikze::init() {
       "An output workspace.");
 
   const auto spinStateValidator =
-      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, 'p', 'a', true);
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, "p", "a", true);
 
   declareProperty(Prop::INPUT_SPIN_STATES, "", spinStateValidator,
                   "The order of spin states in the input workspace group. The possible values are 'pp,pa,ap,aa' or "

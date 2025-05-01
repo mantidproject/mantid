@@ -9,7 +9,7 @@
 Description
 -----------
 
-Clears the :ref:`OrientedLattice <Lattice>` of each ExperimentInfo attached to the intput
+Clears the :ref:`OrientedLattice <Lattice>` of each ExperimentInfo attached to the input
 :ref:`Workspace <Workspace>`. Works with both single ExperimentInfos and
 MultipleExperimentInfo instances.
 

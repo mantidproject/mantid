@@ -1,0 +1,1 @@
+- Fixed issue with :ref:`PredictPeaks <algm-PredictPeaks>` and the ``CalculateGoniometerForCW`` option where the angle range was filtered incorrectly when not using the default goniometer convention.

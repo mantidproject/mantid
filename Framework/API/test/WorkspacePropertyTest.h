@@ -15,8 +15,8 @@
 #include <memory>
 
 // Property implementations
-#include "MantidAPI/WorkspaceProperty.tcc"
-#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidAPI/WorkspaceProperty.hxx"
+#include "MantidKernel/PropertyWithValue.hxx"
 
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;

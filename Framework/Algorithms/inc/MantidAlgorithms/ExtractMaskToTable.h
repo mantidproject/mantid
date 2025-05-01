@@ -35,7 +35,7 @@ public:
   const std::string category() const override { return "Transforms\\Masking"; }
 
   /// Remove the items appeared in a vector from another
-  std::vector<detid_t> subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend);
+  std::vector<detid_t> subtractVector(const std::vector<detid_t> &minuend, std::vector<detid_t> subtrahend);
 
 private:
   /// Initialisation code

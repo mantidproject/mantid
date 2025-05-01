@@ -78,7 +78,7 @@ private:
                    std::vector<std::vector<size_t>> indexmap);
   /// Do the tests and mask those that fail
   int doDetectorTests(const API::MatrixWorkspace_sptr &countsWS, const std::vector<double> &medianvec,
-                      std::vector<std::vector<size_t>> indexmap, const API::MatrixWorkspace_sptr &maskWS);
+                      const std::vector<std::vector<size_t>> &indexmap, const API::MatrixWorkspace_sptr &maskWS);
 
   API::MatrixWorkspace_sptr m_inputWS;
   /// The proportion of the median value below which a detector is considered

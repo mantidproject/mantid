@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -31,7 +32,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 */
-class MANTID_ALGORITHMS_DLL UnwrapSNS final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapSNS final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   UnwrapSNS();
   ~UnwrapSNS() override = default;

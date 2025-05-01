@@ -168,7 +168,7 @@ class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SHOEBOX)
 
     def validate(self):
-        intens_over_sigma = [0.0, 9.638, 10.265, 136.535, 0.0]
+        intens_over_sigma = [0.0, 12.749, 11.941, 136.535, 0.0]
         self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
 
 

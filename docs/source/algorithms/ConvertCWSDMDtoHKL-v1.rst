@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithms is to convert an MDEventWorkspace in Q-sample coordinate
-to HKL coordindate for a reactor-based four-circle single crystal diffractometer.
+to HKL coordinate for a reactor-based four-circle single crystal diffractometer.
 Meanwhile, the algorithm is able to export the MDEvents to file.
 
 Outline of algorithm

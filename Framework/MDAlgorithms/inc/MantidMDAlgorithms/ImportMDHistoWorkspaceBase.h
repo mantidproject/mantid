@@ -24,9 +24,6 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  ~ImportMDHistoWorkspaceBase() = default;
-  /// Vector containing the number of bins in each dimension.
-  std::vector<int> nbins;
   /// Creates an empty md histo workspace (with dimensions)
   DataObjects::MDHistoWorkspace_sptr createEmptyOutputWorkspace();
   /// Initialise the properties associated with the generic import (those to do

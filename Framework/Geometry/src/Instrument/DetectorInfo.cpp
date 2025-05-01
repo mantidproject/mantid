@@ -414,6 +414,8 @@ std::size_t DetectorInfo::indexOf(const detid_t id) const {
   }
 }
 
+detid_t DetectorInfo::detid(const size_t index) const { return getDetector(index).getID(); }
+
 /// Returns the scan count of the detector with given detector index.
 size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
 

@@ -41,7 +41,7 @@ private:
                                          const std::vector<std::string> &titles);
 
   /// Create run information workspace
-  API::MatrixWorkspace_sptr createRunInfoWS(std::map<std::string, std::string> runinfodict,
+  API::MatrixWorkspace_sptr createRunInfoWS(const std::map<std::string, std::string> &runinfodict,
                                             std::vector<std::string> &floatlognamelist,
                                             std::vector<std::string> &intlognamelist,
                                             std::vector<std::string> &strlognamelist, bool ignoreunlisted);

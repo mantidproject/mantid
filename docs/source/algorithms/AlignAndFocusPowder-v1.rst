@@ -29,10 +29,9 @@ The way that algorithms are connected together is better described in the workfl
 - :ref:`algm-Rebin`
 - :ref:`algm-ResampleX`
 - :ref:`algm-RebinRagged`
-- :ref:`algm-RemoveLowResTOF` ``CropWavelengthMin`` and ``CropWavelengthMax`` are prefered
+- :ref:`algm-RemoveLowResTOF` ``CropWavelengthMin`` and ``CropWavelengthMax`` are preferred
 - :ref:`algm-RemovePromptPulse`
 - :ref:`algm-SortEvents` (event workspace only)
-- :ref:`algm-UnwrapSNS`
 
 
 

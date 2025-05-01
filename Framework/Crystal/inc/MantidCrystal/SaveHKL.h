@@ -39,8 +39,8 @@ private:
   void exec() override;
 
   double absorbSphere(double radius, double twoth, double wl, double &tbar);
-  double spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
-                      std::vector<std::vector<double>> spectra, size_t id);
+  double spectrumCalc(double TOF, int iSpec, const std::vector<std::vector<double>> &time,
+                      const std::vector<std::vector<double>> &spectra, size_t id);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   DataObjects::PeaksWorkspace_sptr m_ws;

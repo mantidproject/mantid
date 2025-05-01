@@ -104,7 +104,7 @@ Usage examples
    # Simulates Load of the workspace above #################
    redWS = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-10,1,10],UnitX='DeltaE',OutputWorkspace='MAR11001')
    AddSampleLog(redWS,LogName='Ei',LogText='12.',LogType='Number');
-   # Do fine rebinning, which accounts for poligon intersections
+   # Do fine rebinning, which accounts for polygon intersections
    SofQW3(InputWorkspace='MAR11001',OutputWorkspace='MAR11001Qe2',QAxisBinning='0,0.1,7',EMode='Direct')
    AddSampleLog(Workspace='MAR11001Qe2',LogName='T',LogText='100.0',LogType='Number Series')
    # copy to new MD workspace

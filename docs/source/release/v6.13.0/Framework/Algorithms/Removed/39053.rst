@@ -1,0 +1,1 @@
+- Removed obsolete `LoadDSpacemap` and `SaveDSpacemap` algorithms.

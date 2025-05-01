@@ -1,5 +1,6 @@
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include <ostream>
 
 /**
  * \file NeXusException.cpp
@@ -8,13 +9,22 @@
 
 namespace NeXus {
 
-Exception::Exception(const std::string &msg, const NXstatus status)
-    : std::runtime_error(msg), m_what(msg), m_status(status) {}
+Exception::Exception(const std::string &msg, const std::string &functionname, const std::string &filename)
+    : std::runtime_error(msg), m_functionname(functionname), m_filename(filename) {}
 
-const char *Exception::what() const throw() { return this->m_what.c_str(); }
+const std::string Exception::functionname() const throw() { return this->m_functionname; }
 
-NXstatus Exception::status() const throw() { return this->m_status; }
+const std::string Exception::filename() const throw() { return this->m_filename; }
 
-Exception::~Exception() throw() {}
+std::ostream &operator<<(std::ostream &os, const Exception &err) {
+  if (!err.functionname().empty()) {
+    os << "in function " << err.functionname() << " ";
+  }
+  os << err.what();
+  if (!err.filename().empty()) {
+    os << " in file " << err.filename();
+  }
+  return os;
+}
 
 } // namespace NeXus

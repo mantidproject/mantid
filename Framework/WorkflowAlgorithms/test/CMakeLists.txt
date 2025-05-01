@@ -24,7 +24,7 @@ if(CXXTEST_FOUND)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data
-  add_dependencies(WorkflowAlgorithmsTest StandardTestData)
+  add_dependencies(WorkflowAlgorithmsTest UnitTestData)
   add_framework_test_helpers(WorkflowAlgorithmsTest)
 
   # Add to the 'FrameworkTests' group in VS

@@ -24,8 +24,6 @@ class MANTID_MUON_DLL ApplyMuonDetectorGroupPairing final : public API::Algorith
 public:
   /// (Empty) Constructor
   ApplyMuonDetectorGroupPairing() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~ApplyMuonDetectorGroupPairing() = default;
   /// Algorithm's name
   const std::string name() const override { return "ApplyMuonDetectorGroupPairing"; }
   /// Algorithm's version

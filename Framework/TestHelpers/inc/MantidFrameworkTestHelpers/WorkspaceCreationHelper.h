@@ -253,6 +253,7 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels, int numBins,
                                            const std::string &instrumentName = "basic_rect");
+
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(int numHist, int numBins,
                                                                         int maskedWorkspaceIndex, int maskedBinIndex);
 

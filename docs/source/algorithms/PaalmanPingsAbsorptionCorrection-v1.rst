@@ -37,11 +37,21 @@ Assumptions
 ###########
 
 This algorithm assumes that the (parallel) beam illuminates the entire
-sample **unless** a 'gauge volume' has been defined using the
-:ref:`algm-DefineGaugeVolume` algorithm (or by otherwise
-adding a valid XML string :ref:`defining a
-shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
-"GaugeVolume"). In this latter case only scattering within this volume
+sample **unless** a 'gauge volume' has been defined. A 'gauge volume' can
+be defined one of two ways.
+
+1. Using the :ref:`algm-DefineGaugeVolume` algorithm (or by otherwise
+   adding a valid XML string :ref:`defining a
+   shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
+   "GaugeVolume").
+
+2. Using the :ref:`algm-SetBeam` algorithm to set the shape and size of the
+   beam. This will create an intersection shape with the beam and the sample.
+   The intersection will assume the beam extends infinitely along the beam direction
+   (default is the Z axis) with the defined Height/Width or Radius.
+
+If a workspace has both ``GaugeVolume`` and ``SetBeam`` parameters, priority will be
+given to ``GaugeVolume``. When using a 'gauge volume', only scattering within this volume
 (and the sample) is integrated, because this is all the detector can
 'see'. The full sample is still used for the neutron paths.
 

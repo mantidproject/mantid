@@ -8,15 +8,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
-
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
-#include "napi_test_util.h"
-#include <cstdarg>
+#include "test_helper.h"
+#include <H5Cpp.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -24,8 +24,7 @@
 #include <vector>
 
 using namespace NeXus;
-using NexusNapiTest::write_dmc01;
-using NexusNapiTest::write_dmc02;
+using namespace NexusTest;
 using std::cout;
 using std::endl;
 using std::map;
@@ -33,438 +32,762 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-namespace {
-const std::string DMC01("dmc01cpp");
-const std::string DMC02("dmc02cpp");
-
-/**
- * Let's face it, std::string is poorly designed,
- * and this is the constructor that it needed to have.
- * Initialize a string from a c-style formatting string.
- */
-std::string strmakef(const char *fmt, ...) {
-  char buf[256];
-
-  va_list args;
-  va_start(args, fmt);
-  const auto r = std::vsnprintf(buf, sizeof buf, fmt, args);
-  va_end(args);
-
-  if (r < 0)
-    // conversion failed
-    return {};
-
-  const size_t len = r;
-  if (len < sizeof buf)
-    // we fit in the buffer
-    return {buf, len};
-
-  std::string s(len, '\0');
-  va_start(args, fmt);
-  std::vsnprintf(&(*s.begin()), len + 1, fmt, args);
-  va_end(args);
-  return s;
-}
-
-void removeFile(const std::string &filename) {
-  if (std::filesystem::exists(filename)) {
-    std::filesystem::remove(filename);
-  }
-}
-
-} // namespace
-
 class NeXusFileTest : public CxxTest::TestSuite {
+
 public:
-  void do_test_write(const string &filename, NXaccess create_code) {
-    std::cout << "writeTest(" << filename << ") started\n";
-    NeXus::File file(filename, create_code);
-    // create group
-    file.makeGroup("entry", "NXentry", true);
-    // group attributes
-    file.putAttr("hugo", "namenlos");
-    file.putAttr("cucumber", "passion");
-    // put string
-    file.writeData("ch_data", "NeXus_data");
+  // // This pair of boilerplate methods prevent the suite being created statically
+  // // This means the constructor isn't called when running other tests
+  static NeXusFileTest *createSuite() { return new NeXusFileTest(); }
+  static void destroySuite(NeXusFileTest *suite) { delete suite; }
 
-    // 2d array
-    vector<int> array_dims;
-    array_dims.push_back(5);
-    array_dims.push_back(4);
-    char c1_array[5][4] = {
-        {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
-    file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
-    file.putData(&c1_array);
-    file.closeData();
+  // #################################################################################################################
+  // TEST CONSTRUCTORS
+  // #################################################################################################################
 
-    // 1d uint8 array
-    vector<uint8_t> i1_array;
-    for (uint8_t i = 0; i < 4; i++) {
-      i1_array.push_back(static_cast<uint8_t>(i + 1));
+  void test_remove() {
+    // create a simple file, and make sure removeFile works as intended
+    cout << "\nremoving\n";
+    FileResource resource("not_a_real_file.txt");
+    std::string filename = resource.fullPath();
+
+    // ensure file doesn't already exist
+    if (std::filesystem::exists(filename)) {
+      std::filesystem::remove(filename);
     }
-    file.writeData("i1_data", i1_array);
+    TS_ASSERT(!std::filesystem::exists(filename));
 
-    // 1d int16 array
-    vector<int16_t> i2_array;
-    for (int16_t i = 0; i < 4; i++) {
-      i2_array.push_back(static_cast<int16_t>(1000 * (i + 1)));
-    }
-    file.writeData("i2_data", i2_array);
+    // removeFile works fine if file doesn't exist
+    TS_ASSERT_THROWS_NOTHING(removeFile(filename));
 
-    // 1d int32 data
-    vector<int32_t> i4_array;
-    for (int32_t i = 0; i < 4; i++) {
-      i4_array.push_back(1000000 * (i + 1));
-    }
-    file.writeData("i4_data", i4_array);
+    // create the file
+    std::ofstream outfile{filename};
+    outfile.close();
+    TS_ASSERT(std::filesystem::exists(filename));
 
-    // 2d float data
-    vector<float> r4_array;
-    for (size_t i = 0; i < 5 * 4; i++) {
-      r4_array.push_back(static_cast<float>(i));
-    }
-    file.writeData("r4_data", r4_array, array_dims);
+    // remove it, make sure removed
+    removeFile(filename);
+    TS_ASSERT(!std::filesystem::exists(filename));
+  }
 
-    // 2d double data - slab test
-    vector<double> r8_array;
-    for (size_t i = 0; i < 5 * 4; i++) {
-      r8_array.push_back(static_cast<double>(i + 20));
-    }
-    file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
-    vector<int> slab_start;
-    slab_start.push_back(4);
-    slab_start.push_back(0);
-    vector<int> slab_size;
-    slab_size.push_back(1);
-    slab_size.push_back(4);
-    file.putSlab(&(r8_array[16]), slab_start, slab_size);
-    slab_start[0] = 0;
-    slab_start[1] = 0;
-    slab_size[0] = 4;
-    slab_size[1] = 4;
-    file.putSlab(&(r8_array[0]), slab_start, slab_size);
+  void test_can_create() {
+    cout << "\ntest creation\n";
 
-    // add some attributes
-    std::cout << "writing attributes to r8_data" << std::endl;
-    file.putAttr("ch_attribute", "NeXus");
-    file.putAttr("i4_attribute", 42);
-    file.putAttr("r4_attribute", 3.14159265);
-    std::cout << "... done" << std::endl;
+    FileResource resource("test_nexus_file_init.h5");
+    std::string filename = resource.fullPath();
 
-    // set up for creating a link
-    NXlink link = file.getDataID();
-    file.closeData();
+    // create the file and ensure it exists
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+  }
 
-    // int64 tests
-#if HAVE_LONG_LONG_INT
-    vector<int64_t> grossezahl{12, 555555555555LL, 23, 777777777777LL};
-#else
-    vector<int64_t> grossezahl{12, 555555, 23, 77777};
-#endif
-    if (create_code != NXACC_CREATE4) {
-      file.writeData("grosszahl", grossezahl);
-    }
-
-    // create a new group inside this one
-    file.makeGroup("data", "NXdata", true);
-
-    // create a link
-    file.makeLink(link);
-
-    // compressed data
-    array_dims[0] = 100;
-    array_dims[1] = 20;
-    vector<int> comp_array;
-    for (int i = 0; i < array_dims[0]; i++) {
-      for (int j = 0; j < array_dims[1]; j++) {
-        comp_array.push_back(i);
-      }
-    }
-    vector<int> cdims;
-    cdims.push_back(20);
-    cdims.push_back(20);
-    file.writeCompData("comp_data", comp_array, array_dims, NeXus::LZW, cdims);
-
-    // ---------- Test write Extendible Data --------------------------
-    std::vector<int> data(10, 123);
-    file.makeGroup("extendible_data", "NXdata", 1);
-    file.writeExtendibleData("mydata1", data);
-    file.writeExtendibleData("mydata2", data, 1000);
-    std::vector<int64_t> dims(2);
-    dims[0] = 5;
-    dims[1] = 2;
-    std::vector<int64_t> chunk(2, 2);
-    file.writeExtendibleData("my2Ddata", data, dims, chunk);
-    file.putAttr("string_attrib", "some short string");
-
-    // Data vector can grow
-    for (size_t i = 0; i < 6; i++)
-      data.push_back(456);
-    data[0] = 789;
-    file.writeUpdatedData("mydata1", data);
-
-    dims[0] = 8;
-    dims[1] = 2;
-    file.writeUpdatedData("my2Ddata", data, dims);
-
-    // Data vector can also shrink!
-    data.clear();
-    data.resize(5, 234);
-    file.writeUpdatedData("mydata2", data);
-
-    // Exit the group
-    file.closeGroup();
-    // ---------- End Test write Extendible Data --------------------------
-
-    // simple flush test
+  void test_flush() {
+    cout << "\ntest flush\n";
+    // make sure flush works
+    // TODO actually test the buffers
+    FileResource resource("test_nexus_file_flush.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
     file.flush();
+  }
 
-    // real flush test
-    file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
-    vector<int> slab_array;
-    slab_array.push_back(0);
-    for (int i = 0; i < 7; i++) {
-      slab_array[0] = i;
-      file.putSlab(slab_array, i, 1);
-      file.flush();
-      file.openData("flush_data");
-    }
-    file.closeData();
+  // #################################################################################################################
+  // TEST MAKE / OPEN / CLOSE GROUP
+  // #################################################################################################################
+
+  void test_make_group() {
+    cout << "\ntest makeGroup\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    string grp("test_group"), cls("NXsample");
+
+    // check error conditions
+    TS_ASSERT_THROWS(file.makeGroup(grp, ""), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.makeGroup("", cls), NeXus::Exception &);
+    // check works when correct
+    TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
+  }
+
+  void test_open_group() {
+    cout << "\ntest openGroup\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // create a group, to be opened
+    string grp("test_group"), cls("NXsample");
+    file.makeGroup(grp, cls, false);
+
+    // check error conditions
+    TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup(grp, string()), NeXus::Exception &);
+
+    // now open it, check we are at a different location
+    TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
+  }
+
+  void test_open_group_bad() {
+    cout << "\ntest openGroup bad\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // create a group, to be opened
+    string grp("test_group"), cls("NXpants");
+    file.makeGroup(grp, cls, false);
+
+    // try to open it with wrong class name
+    string notcls("NXshorts");
+    TS_ASSERT_THROWS(file.openGroup(grp, notcls), NeXus::Exception &);
+  }
+
+  void test_open_group_layers() {
+    cout << "\ntest openGroup layers\n";
+    FileResource resource("test_nexus_file_grp_layers.h5");
+    std::string filename = resource.fullPath();
+    string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
+
+    // create a file with group -- open it
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup(grp1, cls1, false);
+    file.openGroup(grp1, cls1);
+
+    // create a group inside the group -- open it
+    file.makeGroup(grp2, cls2, false);
+    file.openGroup(grp2, cls2);
+  }
+
+  void test_closeGroup() {
+    cout << "\ntest closeGroup\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // check error at root
+    TS_ASSERT_THROWS_NOTHING(file.closeGroup());
+
+    // now make group, close it, and check we are back at root
+    string grp("test_group"), cls("NXsample");
+    file.makeGroup(grp, cls, true);
     file.closeGroup();
 
-    // create a sample
-    file.makeGroup("sample", "NXsample", true);
-    file.writeData("ch_data", "NeXus sample");
+    TS_ASSERT_THROWS_NOTHING(file.closeGroup());
+  }
 
-    // make more links
-    NXlink glink = file.getGroupID();
+  // #################################################################################################################
+  // TEST MAKE / OPEN / PUT / CLOSE DATASET
+  // #################################################################################################################
+
+  void test_makeData() {
+    cout << "\ntest make data\n";
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
+
+    string name("some_data");
+    DimVector dims({1});
+    NXnumtype type(NXnumtype::CHAR);
+
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // if there is not a top-level NXentry, should throw error
+    TS_ASSERT_THROWS(file.makeData(name, type, dims), NeXus::Exception &);
+
+    // now make a NXentry group and try
+    file.makeGroup("entry", "NXentry", true);
+
+    // check some failing cases
+    TS_ASSERT_THROWS(file.makeData("", type, dims), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.makeData(name, type, DimVector()), NeXus::Exception &);
+
+    // check it works when it works
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
+  }
+
+  void test_makeData_length() {
+    cout << "\ntest make data -- using length\n";
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
+
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    NXnumtype type(NXnumtype::CHAR);
+
+    // check it works when it works -- int
+    string name("some_data_int");
+    dimsize_t len(3);
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, len));
+  }
+
+  void test_open_dataset() {
+    cout << "\ntest openData\n";
+    FileResource resource("test_nexus_file_data.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // create a dataset, to be opened
+    string data("test_group");
+    NXnumtype type(NXnumtype::CHAR);
+    file.makeData(data, type, 3, false);
+
+    // check error conditions
+    TS_ASSERT_THROWS(file.openData(string()), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openData("tacos1"), NeXus::Exception &);
+
+    // now open it, check we are at a different location
+    TS_ASSERT_THROWS_NOTHING(file.openData(data));
+  }
+
+  void test_make_data_layers_bad() {
+    cout << "\ntest makeData layers -- bad\n";
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    NXnumtype type(NXnumtype::CHAR);
+    string data1("layer1"), data2("layer2");
+
+    // create a file with data -- open data
+    file.makeGroup("entry", "NXentry", true);
+    file.makeData(data1, type, 1, false);
+    file.openData(data1);
+  }
+
+  void test_closeData() {
+    cout << "\ntest closeData\n";
+    FileResource resource("test_nexus_file_dataclose.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // check error at root
+    TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
+
+    // now make data, close it, and check we are back at root
+    file.makeData("test_data:", NXnumtype::CHAR, 1, true);
+    TS_ASSERT_THROWS_NOTHING(file.closeData());
+
+    TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
+  }
+
+  template <typename T> void do_test_data_putget(NeXus::File &file, string name, T in) {
+    T out;
+    file.makeData(name, NeXus::getType<T>(), 1, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+  }
+
+  void test_data_putget_basic() {
+    cout << "\ntest dataset read/write\n";
+
+    // open a file
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put/get an int
+    cout << "\tread/write int...";
+    do_test_data_putget<int32_t>(file, "data_int", 12);
+    cout << "done\n";
+
+    // put/get an int64_t
+    cout << "\tread/write int64_t...";
+    do_test_data_putget<int64_t>(file, "data_int64", 12);
+    cout << "done\n";
+
+    // put/get a size_t
+    cout << "\tread/write size_T...";
+    do_test_data_putget<uint64_t>(file, "data_sizet", 12);
+    cout << "done\n";
+
+    // put/get a float
+    cout << "\tread/write float...";
+    do_test_data_putget<float>(file, "data_float", 1.2f);
+    cout << "done\n";
+
+    // put/get double
+    cout << "\tread/write double...";
+    do_test_data_putget<double>(file, "data_double", 1.4);
+    cout << "done\n";
+
+    // put/get a single char
+    cout << "\tread/write char...";
+    do_test_data_putget<char>(file, "data_char", 'x');
+    cout << "done\n";
+  }
+
+  void test_putData_bad() {
+    cout << "\ntest putData -- bad\n";
+    // open a file
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // try to put data when not in a dataset -- should fail
+    int data = 1;
+    file.makeGroup("a_group", "NXshirt", true);
+    TS_ASSERT_THROWS(file.putData(&data), NeXus::Exception &);
+  }
+
+  void test_data_putget_string() {
+    cout << "\ntest dataset read/write -- string\n";
+
+    // open a file
+    FileResource resource("test_nexus_file_stringrw.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put/get a string
+    cout << "\nread/write string...\n";
+    string in("this is a string"), out;
+    file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    out = file.getStrData();
+    TS_ASSERT_EQUALS(in, out);
+  }
+
+  void test_data_putget_array() {
+    cout << "\ntest dataset read/write -- arrays\n";
+
+    // open a file
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put/get an int
+    file.makeData("data_int", NeXus::getType<int32_t>(), 4, true);
+    int in[] = {12, 7, 2, 3}, out[4];
+    file.putData(&(in[0]));
+    Info info = file.getInfo();
+    file.getData(&(out[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(in[i], out[i]);
+    }
+
+    // put/get double array
+    file.makeData("data_double", NeXus::getType<double>(), 4, true);
+    double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
+    file.putData(&(ind[0]));
+    info = file.getInfo();
+    file.getData(&(outd[0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(ind[i], outd[i]);
+    }
+
+    // put/get double 2D array
+    DimVector dims{3, 2};
+    double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
+    double outdd[3][2];
+    file.makeData("data_double_2d", NeXus::getType<double>(), dims, true);
+    file.putData(&(indd[0][0]));
+    info = file.getInfo();
+    file.getData(&(outdd[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 2);
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      for (dimsize_t j = 0; j < dims[1]; j++) {
+        TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
+      }
+    }
+
+    // put/get a char array
+    char word[] = "silicovolcaniosis";
+    char read[18];
+    file.makeData("data_char", NeXus::getType<char>(), 17, true);
+    file.putData(word);
+    info = file.getInfo();
+    file.getData(read);
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 17);
+  }
+
+  void test_data_putget_vector() {
+    cout << "\ntest dataset read/write -- vector\n";
+
+    // open a file
+    FileResource resource("test_nexus_file_dataRW_vec.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put/get an int vector
+    vector<int32_t> in{11, 8, 9, 12}, out;
+    file.makeData("data_int", NeXus::getType<int32_t>(), in.size(), true);
+    file.putData(in);
+    file.getData(out);
+    Info info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), in.size());
+    TS_ASSERT_EQUALS(in, out);
+
+    // put/get a double vector
+    vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
+    file.makeData("data_dbl", NeXus::getType<double>(), ind.size(), true);
+    file.putData(ind);
+    file.getData(outd);
+    info = file.getInfo();
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), ind.size());
+    TS_ASSERT_EQUALS(ind, outd);
+  }
+
+  // #################################################################################################################
+  // TEST PATH METHODS
+  // #################################################################################################################
+
+  /* NOTE for historical reasons, additional tests exist in NeXusFileReadWriteTest.h*/
+
+  void test_getPath_groups() {
+    cout << "\ntest get_path -- groups only\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // at root, path should be "/"
+    TS_ASSERT_EQUALS("/", file.getPath());
+
+    // make and open a group -- now at "/abc"
+    file.makeGroup("abc", "NXclass", true);
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.makeGroup("def", "NXentry", true);
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+
+    // go down a step -- back to "/abc"
+    file.closeGroup();
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // go up a different step -- at "/abc/ghi"
+    file.makeGroup("ghi", "NXfunsicle", true);
+    TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
+  }
+
+  void test_getPath_data() {
+    cout << "\ntest get_path -- groups and data!\n";
+    FileResource resource("test_nexus_file_grpdata.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // at root, path should be "/"
+    TS_ASSERT_EQUALS("/", file.getPath());
+
+    // make and open a group -- now at "/abc"
+    file.makeGroup("abc", "NXentry", true);
+    TS_ASSERT_EQUALS("/abc", file.getPath());
+
+    // make another layer -- at "/acb/def"
+    file.makeData("def", NeXus::getType<int32_t>(), 1, true);
+    int in = 17;
+    file.putData(&in);
+    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    file.closeData();
+  }
+
+  void test_openPath() {
+    cout << "\ntest openPath\n";
+    // open a file
+    FileResource resource("test_nexus_entries.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    // setup a recursive group tree
+    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
+                            Entry{"/entry1/layer2a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+                            Entry{"/entry1/layer2a/data1", "SDS"},
+                            Entry{"/entry1/layer2b", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
+                            Entry{"/entry2", "NXentry"},
+                            Entry{"/entry2/layer2c", "NXentry"},
+                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+
+    string current;
+    for (auto it = tree.begin(); it != tree.end(); it++) {
+      current = file.getPath();
+      string path = it->first;
+      while (path.find(current) == path.npos) {
+        file.closeGroup();
+        current = file.getPath();
+      }
+      string name = path.substr(path.find_last_of("/") + 1, path.npos);
+      if (it->second == "NXentry") {
+        file.makeGroup(name, it->second, true);
+      } else if (it->second == "SDS") {
+        string data = "Data";
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
+        file.putData(data.data());
+        file.closeData();
+      }
+    }
+    file.closeGroup();
+    file.closeGroup();
+    file.closeGroup();
+
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+
+    // make sure we are at root
     file.openPath("/");
-    file.makeGroup("link", "NXentry", true);
-    file.makeLink(glink);
-    std::cout << "writeTest(" << filename << ") successful\n";
 
-    TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
+    // open the root
+    file.openGroup("entry1", "NXentry");
+    std::string actual, expected = "/";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2b/layer3a";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
+
+    expected = "/entry1/layer2a/data1";
+    file.openPath(expected);
+    actual = file.getPath();
+    TS_ASSERT_EQUALS(actual, expected);
   }
 
-  void do_test_read(const string &filename) {
-    std::cout << "readTest(" << filename << ") started\n";
-    const string SDS("SDS");
-    // top level file information
-    NeXus::File file(filename);
-    file.openGroup("entry", "NXentry");
+  void test_getInfo() {
+    cout << "\ntest getInfo -- good\n";
 
-    // Test getDataCoerce() -------------------
-    std::vector<int> ints;
-    std::vector<double> doubles;
+    // open a file
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
 
-    ints.clear();
-    file.openData("i1_data");
-    file.getDataCoerce(ints);
-    TS_ASSERT_EQUALS(ints.size(), 4);
-    TS_ASSERT_EQUALS(ints[0], 1);
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int32_t>(), 1, true);
+    file.putData(&in);
+
+    // get the info and check
+    Info info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<int32_t>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
+
     file.closeData();
 
-    ints.clear();
-    file.openData("i2_data");
-    file.getDataCoerce(ints);
-    TS_ASSERT_EQUALS(ints.size(), 4);
-    TS_ASSERT_EQUALS(ints[0], 1000);
-    file.closeData();
+    // put a double
+    double ind = 107.2345;
+    file.makeData("double_data", NeXus::getType<double>(), 1, true);
+    file.putData(&ind);
 
-    ints.clear();
-    file.openData("i4_data");
-    file.getDataCoerce(ints);
-    TS_ASSERT_EQUALS(ints.size(), 4);
-    TS_ASSERT_EQUALS(ints[0], 1000000)
-    file.closeData();
-
-    doubles.clear();
-    file.openData("r4_data");
-    file.getDataCoerce(doubles);
-    TS_ASSERT_EQUALS(doubles.size(), 20);
-    TS_ASSERT_EQUALS(doubles[1], 1.0)
-    file.closeData();
-
-    doubles.clear();
-    file.openData("r8_data");
-    file.getDataCoerce(doubles);
-    TS_ASSERT_EQUALS(doubles.size(), 20);
-    TS_ASSERT_EQUALS(doubles[1], 21.0)
-    file.closeData();
-
-    // Throws when you coerce to int from a real/double source
-    ints.clear();
-    file.openData("r8_data");
-    TS_ASSERT_THROWS_ANYTHING(file.getDataCoerce(ints));
-    file.closeData();
-
-    // Close the "entry" group
-    file.closeGroup();
-
-    // openpath checks
-    file.openPath("/entry/data/comp_data");
-    file.openPath("/entry/data/comp_data");
-    file.openPath("../r8_data");
-    cout << "NXopenpath checks OK\n";
-
-    // everything went fine
-    std::cout << "readTest(" << filename << ") successful\n";
+    // get the info and check
+    info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
+    TS_ASSERT_EQUALS(info.dims.size(), 1);
+    TS_ASSERT_EQUALS(info.dims.front(), 1);
   }
 
-  void do_test_loadPath(const string &filename) {
-    if (getenv("NX_LOAD_PATH") != NULL) {
-      TS_ASSERT_THROWS_NOTHING(NeXus::File file(filename));
-      cout << "Success loading NeXus file from path" << endl;
-    } else {
-      cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
+  void test_getInfo_bad() {
+    cout << "\ntest getInfo -- bad\n";
+    // open a file
+    FileResource resource("test_nexus_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // put an integer
+    int in = 17;
+    file.makeData("int_data", NeXus::getType<int32_t>(), 1, true);
+    file.putData(&in);
+    file.closeData();
+
+    // open a group and try to get info
+    file.makeGroup("a_group", "NXshorts", true);
+    TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
+  }
+
+  // ##################################################################################################################
+  // TEST ATTRIBUTE METHODS
+  // ################################################################################################################
+
+  template <typename T> void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
+    // test put/get by pointer to data
+    T out;
+    file.putAttr(name, data);
+    file.getAttr(name, out);
+    TS_ASSERT_EQUALS(data, out);
+  }
+
+  void test_putget_attr_basic() {
+    cout << "\ntest attribute read/write\n";
+
+    // open a file
+    FileResource resource("test_nexus_attr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    // move to an entry to avoid conflict with some root-level attributes
+    file.makeGroup("entry", "NXentry", true);
+
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
+
+    // put/get an int attribute
+    do_test_putget_attr(file, expected_names[0], 12);
+
+    // put/get a double attribute
+    do_test_putget_attr(file, expected_names[1], 120.2e6);
+
+    // check attr infos
+    auto attrInfos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(attrInfos.size(), expected_names.size());
+    for (size_t i = 0; i < attrInfos.size(); i++) {
+      TS_ASSERT_EQUALS(attrInfos[i].name, expected_names[i]);
+      TS_ASSERT_EQUALS(attrInfos[i].length, 1);
     }
   }
 
-  void test_readwrite_hdf5() {
-    NXaccess const nx_creation_code = NXACC_CREATE5;
-    string const fileext = ".h5";
-    string const filename("napi_test_cpp" + fileext);
+  void test_putget_attr_str() {
+    cout << "\ntest string attribute read/write\n";
 
-    removeFile(filename); // in case last round failed
+    // open a file
+    FileResource resource("test_nexus_attr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    // move to an entry to avoid conflict with some root-level attributes
+    file.makeGroup("entry", "NXentry", true);
 
-    // try writing a file
-    do_test_write(filename, nx_creation_code);
+    // put/get a string attribute
+    string data = "different string of text";
+    do_test_putget_attr(file, "str_attr_", data);
 
-    // try reading a file
-    do_test_read(filename);
+    std::string actual;
+    // put/get a string from a string literal
+    file.putAttr("units", "kg * mol / parsec");
+    file.getAttr("units", actual);
+    TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
 
-    removeFile(filename); // cleanup
-
-    // try using the load path
-    do_test_loadPath(DMC01 + fileext);
-    do_test_loadPath(DMC02 + fileext);
-
-    removeFile(DMC01 + fileext);
-    removeFile(DMC02 + fileext);
+    // check attr infos
+    auto attrInfos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(attrInfos.size(), 2);
+    TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
+    TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
+    TS_ASSERT_EQUALS(attrInfos[1].name, "units");
+    TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
   }
-};
 
-/**
- * These correspond to former napi tests
- * - leak_test1
- * - leak_test2
- * - leak_test3
- */
-class NeXusFileLeakTest : public CxxTest::TestSuite {
-public:
-  static NeXusFileLeakTest *createSuite() { return new NeXusFileLeakTest(); }
-  static void destroySuite(NeXusFileLeakTest *suite) { delete suite; }
+  void test_getEntries() {
+    cout << "\ntest getEntries\n";
 
-  NeXusFileLeakTest() : CxxTest::TestSuite() { Mantid::API::FrameworkManager::Instance(); }
+    // open a file
+    FileResource resource("test_nexus_entries.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
 
-  void test_leak1() {
-    int const nReOpen = 1000;
-    cout << "Running for " << nReOpen << " iterations\n";
-    std::string const szFile("leak_test1.nxs");
+    // setup a recursive group tree
+    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
+                            Entry{"/entry1/layer2a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+                            Entry{"/entry1/layer2a/data1", "SDS"},
+                            Entry{"/entry1/layer2b", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
+                            Entry{"/entry2", "NXentry"},
+                            Entry{"/entry2/layer2c", "NXentry"},
+                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
 
-    removeFile(szFile); // in case it was left over from previous run
-
-    File file_obj(szFile, NXACC_CREATE5);
-    file_obj.close();
-
-    for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
-      if (0 == iReOpen % 100) {
-        cout << "loop count " << iReOpen << "\n";
+    string current;
+    for (auto it = tree.begin(); it != tree.end(); it++) {
+      current = file.getPath();
+      string path = it->first;
+      while (path.find(current) == path.npos) {
+        file.closeGroup();
+        current = file.getPath();
       }
-
-      file_obj = File(szFile, NXACC_RDWR);
-      file_obj.close();
-    }
-
-    removeFile(szFile); // cleanup
-  }
-
-  void test_leak2() {
-    int const nFiles = 10;
-    int const nEntry = 10;
-    int const nData = 10;
-    vector<short int> const i2_array{1000, 2000, 3000, 4000};
-
-    cout << strmakef("Running for %d iterations", nFiles);
-    NXaccess access_mode = NXACC_CREATE5;
-    std::string strFile;
-
-    for (int iFile = 0; iFile < nFiles; iFile++) {
-      strFile = strmakef("leak_test2_%03d.nxs", iFile);
-      removeFile(strFile);
-      cout << "file " << strFile << "\n";
-
-      File fileid(strFile, access_mode);
-
-      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
-        std::string oss(strmakef("entry_%d", iEntry));
-        fileid.makeGroup(oss, "NXentry");
-        fileid.openGroup(oss, "NXentry");
-        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
-          std::string oss2(strmakef("data_%d", iNXdata));
-          fileid.makeGroup(oss2, "NXdata");
-          fileid.openGroup(oss2, "NXdata");
-          for (int iData = 0; iData < nData; iData++) {
-            std::string oss3(strmakef("i2_data_%d", iData));
-            DimVector dims({(int64_t)i2_array.size()});
-            fileid.makeData(oss3, NXnumtype::INT16, dims);
-            fileid.openData(oss3);
-            fileid.putData(&i2_array);
-            fileid.closeData();
-          }
-          fileid.closeGroup();
-        }
-        fileid.closeGroup();
+      string name = path.substr(path.find_last_of("/") + 1, path.npos);
+      if (it->second == "NXentry") {
+        file.makeGroup(name, it->second, true);
+      } else if (it->second == "SDS") {
+        string data = "Data";
+        file.makeData(name, NXnumtype::CHAR, data.size(), true);
+        file.putData(data.data());
+        file.closeData();
       }
-      fileid.close();
-      removeFile(strFile);
+    }
+
+    // at root level, should be entry1, entry2
+    file.openPath("/");
+    Entries actual = file.getEntries();
+    Entries expected = {Entry{"entry1", "NXentry"}, Entry{"entry2", "NXentry"}};
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1, should be layer2a, layer2b
+    file.openPath("/entry1");
+    actual = file.getEntries();
+    expected = Entries({Entry{"layer2a", "NXentry"}, Entry{"layer2b", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry1/layer2a");
+    actual = file.getEntries();
+    expected = Entries({Entry{"layer3a", "NXentry"}, Entry{"layer3b", "NXentry"}, Entry{"data1", "SDS"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry2/layer2a, should be layer3a, layer3b, data1
+    file.openPath("/entry2/layer2c");
+    actual = file.getEntries();
+    expected = Entries({Entry{"layer3c", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
     }
   }
 
-  void test_leak3() {
-    const int nFiles = 10;
-    const int nEntry = 2;
-    const int nData = 2;
-    DimVector array_dims({512, 512});
-    std::string const szFile("leak_test.nxs");
-    const int iBinarySize = 512 * 512;
-    int aiBinaryData[iBinarySize];
+  // ##################################################################################################################
+  // TEST LINK METHODS
+  // ################################################################################################################
 
-    for (int i = 0; i < iBinarySize; i++) {
-      aiBinaryData[i] = rand();
-    }
+  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
 
-    for (int iFile = 0; iFile < nFiles; iFile++) {
-      cout << "file " << iFile << "\n";
+  // ##################################################################################################################
+  // TEST READ / WRITE SLAB METHODS
+  // ################################################################################################################
 
-      File fileid(szFile, NXACC_CREATE5);
-
-      for (int iEntry = 0; iEntry < nEntry; iEntry++) {
-        std::string oss(strmakef("entry_%d", iEntry));
-
-        fileid.makeGroup(oss, "NXentry");
-        fileid.openGroup(oss, "NXentry");
-        for (int iNXdata = 0; iNXdata < nData; iNXdata++) {
-          std::string oss2(strmakef("data_%d", iNXdata));
-          fileid.makeGroup(oss2, "NXdata");
-          fileid.openGroup(oss2, "NXdata");
-          fileid.getGroupID();
-          for (int iData = 0; iData < nData; iData++) {
-            std::string oss3(strmakef("i2_data_%d", iData));
-            fileid.makeCompData(oss3, NXnumtype::INT16, array_dims, NXcompression::LZW, array_dims);
-            fileid.openData(oss3);
-            fileid.putData(&aiBinaryData);
-            fileid.closeData();
-          }
-          fileid.closeGroup();
-        }
-        fileid.closeGroup();
-      }
-
-      fileid.close();
-
-      // Delete file
-      removeFile(szFile);
-    }
-  }
+  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
 };

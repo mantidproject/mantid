@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "FakeAlgorithms.h"
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FrameworkManager.h"

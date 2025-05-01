@@ -208,7 +208,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
         }
 
         size_t colData = this->splitIntoColumns(data, line);
-        if (colNames > 0 && colNames == colTypes && colTypes == colData) {
+        if (colNames > 0 && colTypes == colData) {
           // we seem to have a table workspace
           // if we have not already created a workspace
           if (!ws) {

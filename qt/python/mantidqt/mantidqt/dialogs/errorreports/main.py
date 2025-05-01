@@ -47,7 +47,7 @@ def main(argv: Sequence[str] = None) -> int:
     app.setApplicationName(command_line_args.application)
     QSettings.setDefaultFormat(QSettings.IniFormat)
     form = CrashReportPage(show_continue_terminate=False)
-    presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application)
+    presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application, command_line_args.workbench_pid)
     presenter.show_view()
     app.exec_()
 
@@ -64,6 +64,7 @@ def parse_commandline(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--orgname", dest="org_name", default="unknown")
     parser.add_argument("--orgdomain", dest="org_domain", default="unknown")
     parser.add_argument("--application", dest="application", default="unknown")
+    parser.add_argument("--workbench_pid", dest="workbench_pid", default="")
     return parser.parse_args(argv)
 
 

@@ -59,9 +59,10 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, s
 void JobsViewUpdater::groupAppended(int groupIndex, Group const &group) {
   m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation(), cellsFromGroup(group, m_view.deadCell()));
   for (auto const &row : group.rows())
-    if (row.is_initialized())
+    if (row.has_value()) {
       m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
-                              cellsFromRow(row.get(), m_precision));
+                              cellsFromRow(row.value(), m_precision));
+    }
 }
 
 void JobsViewUpdater::groupRemoved(int groupIndex) {

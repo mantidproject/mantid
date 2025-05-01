@@ -30,7 +30,7 @@ if(CXXTEST_FOUND)
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests DataHandlingTest)
   # Test data
-  add_dependencies(DataHandlingTest StandardTestData)
+  add_dependencies(DataHandlingTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET DataHandlingTest PROPERTY FOLDER "UnitTests")

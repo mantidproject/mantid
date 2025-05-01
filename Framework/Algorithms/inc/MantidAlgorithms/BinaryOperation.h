@@ -56,8 +56,6 @@ public:
                                                              const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
-  ~BinaryOperation() = default;
-
   // Overridden Algorithm methods
   void exec() override;
   void init() override;

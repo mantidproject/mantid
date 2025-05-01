@@ -8,7 +8,7 @@
 
 # 3rd party imports
 from qtpy.QtCore import QSortFilterProxyModel, Qt
-from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget, QCheckBox
+from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QHBoxLayout, QWidget, QCheckBox
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 # local imports
@@ -105,6 +105,7 @@ class PeaksViewerView(QWidget):
         self._presenter: Optional[PeaksViewerPresenter] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._concise_check_box: Optional[QCheckBox] = None
+        self._calc_hkl: Optional[QCheckBox] = None
         self._setup_ui()
 
     @property
@@ -174,6 +175,13 @@ class PeaksViewerView(QWidget):
         self._presenter = presenter
         self._table_view.subscribe(presenter)
 
+    def enable_calculate_hkl(self, enable: bool):
+        """
+        Enable or disable the calculate HKL checkbox
+        :param enable: bool to enable or disable the checkbox
+        """
+        self._calc_hkl.setEnabled(enable)
+
     # private api
     def _setup_ui(self):
         """
@@ -190,8 +198,20 @@ class PeaksViewerView(QWidget):
         self._concise_check_box.setChecked(False)
         self._concise_check_box.stateChanged.connect(self._check_box_clicked)
 
+        self._calc_hkl = QCheckBox(text="Plot HKL position from Q", parent=self)
+        self._calc_hkl.setChecked(False)
+        self._calc_hkl.stateChanged.connect(self._calc_hkl_clicked)
+        self._calc_hkl.setToolTip(
+            "Plotted HKL peak positions calculated from Q instead of peak index. HKL=UB<sup>-1</sup>⋅Q<sub>sample</sub>/2π"
+        )
+
+        checkbox_layout = QHBoxLayout()
+        checkbox_layout.addWidget(self._concise_check_box)
+        checkbox_layout.addWidget(self._calc_hkl)
+        checkbox_layout.setAlignment(Qt.AlignLeft)
+
         group_box_layout = QVBoxLayout()
-        group_box_layout.addWidget(self._concise_check_box)
+        group_box_layout.addLayout(checkbox_layout)
         group_box_layout.addWidget(self._table_view)
         self._group_box.setLayout(group_box_layout)
         widget_layout = QVBoxLayout()
@@ -227,6 +247,18 @@ class PeaksViewerView(QWidget):
         Call presenter method on concise view checkbox state change
         """
         self.presenter.concise_checkbox_changes(self._concise_check_box.isChecked())
+
+    def _calc_hkl_clicked(self):
+        """
+        Call presenter method on calculate HKL checkbox state change
+        """
+        self.presenter.calc_hkl_checkbox_changes(self._calc_hkl.isChecked())
+
+    def call_canvas_draw(self):
+        """
+        Call the canvas draw method to update the view
+        """
+        self._sliceinfo_provider.view.data_view.canvas.draw_idle()
 
 
 class PeaksViewerCollectionView(QWidget):

@@ -23,7 +23,6 @@ namespace Algorithms {
 */
 class MANTID_MUON_DLL CalMuonDetectorPhases : public API::Algorithm {
 public:
-  virtual ~CalMuonDetectorPhases() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalMuonDetectorPhases"; }
   /// Summary of algorithms purpose

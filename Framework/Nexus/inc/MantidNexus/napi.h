@@ -342,23 +342,6 @@ MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle handle, const void *data);
 MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
 
 /**
- * Write an attribute of any rank. The kind of attribute written depends on the
- * position in the file: at root level, a global attribute is written, if
- * agroup is open but no dataset, a group attribute is written, if a dataset is
- * open, a dataset attribute is written.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the attribute.
- * \param data A pointer to the data to write for the attribute.
- * \param rank Rank of the attribute data
- * \param dim Dimension array for the attribute data
- * \param iType The NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXputattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank,
-                                     const int dim[], const NXnumtype iType);
-
-/**
  * Write  a subset of a multi dimensional dataset.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param data A pointer to a memory area holding the data to write.
@@ -514,27 +497,6 @@ MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
  * \ingroup c_readwrite
  */
 MANTID_NEXUS_DLL NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
-
-/**
- * Read an arbitrarily shaped attribute.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the atrribute to read.
- * \param data A pointer to a memory area large enough to hold the attributes value.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXgetattra(NXhandle handle, const char *name, void *data);
-
-/**
- * Get the information about the storage of the named attribute.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param rank Rank of the attribute data.
- * \param dim Dimension array for the attribute content.
- * \param iType A pointer to an integer which be set to the NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 
 /**
  * Retrieve link data for the currently open group. This link data can later on be used to link this

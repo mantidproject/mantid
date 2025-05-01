@@ -71,5 +71,6 @@ void export_Goniometer() {
       .def("getNumberAxes", &Goniometer::getNumberAxes, arg("self"))
       .def("getAxis", &getAxis, (arg("self"), arg("axisnumber")))
       .def("calcFromQSampleAndWavelength", &calcFromQSampleAndWavelength,
-           (arg("self"), arg("positions"), arg("wavelength"), arg("flip_x") = false, arg("inner") = false));
+           (arg("self"), arg("positions"), arg("wavelength"), arg("flip_x") = false, arg("inner") = false))
+      .def("getConventionFromMotorAxes", &Goniometer::getConventionFromMotorAxes, arg("self"));
 }

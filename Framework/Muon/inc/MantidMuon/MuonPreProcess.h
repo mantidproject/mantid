@@ -20,7 +20,6 @@ namespace Muon {
 class MANTID_MUON_DLL MuonPreProcess final : public API::Algorithm {
 public:
   MuonPreProcess() : API::Algorithm() {}
-  virtual ~MuonPreProcess() = default;
 
   const std::string name() const override { return "MuonPreProcess"; }
   int version() const override { return (1); }

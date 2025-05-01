@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
@@ -73,6 +74,7 @@ private:
   void defineProperties();
   void retrieveProperties();
   void initialiseCachedDistances();
+  Geometry::Raster rasterize(const Geometry::IObject *object);
 
   API::MatrixWorkspace_sptr m_inputWS;                  ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject;              ///< Local cache of sample object.

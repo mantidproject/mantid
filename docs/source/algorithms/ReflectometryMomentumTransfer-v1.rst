@@ -103,14 +103,14 @@ Usage
 
    qs = outws.readX(0)
    dqs = outws.readDx(0)
-   print('First refectivity point Qz = {:.4f} +- {:.4f} A-1'.format(qs[0], dqs[0]))
+   print('First reflectivity point Qz = {:.4f} +- {:.4f} A-1'.format(qs[0], dqs[0]))
    print('and last Qz = {:.4f} +- {:.4f} A-1'.format(qs[-1], dqs[-1]))
 
 Output:
 
 .. testoutput:: ReflectometryMomentumTransferExample
 
-   First refectivity point Qz = 0.0006 +- 0.0001 A-1
+   First reflectivity point Qz = 0.0006 +- 0.0001 A-1
    and last Qz = 0.0018 +- 0.0003 A-1
 
 References

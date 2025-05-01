@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/MaskSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"

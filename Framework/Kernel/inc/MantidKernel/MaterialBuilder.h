@@ -44,8 +44,8 @@ public:
   MaterialBuilder &setCoherentXSection(double xsec);
   MaterialBuilder &setIncoherentXSection(double xsec);
   MaterialBuilder &setAbsorptionXSection(double xsec);
-  MaterialBuilder &setAttenuationProfileFilename(std::string filename);
-  MaterialBuilder &setXRayAttenuationProfileFilename(std::string filename);
+  MaterialBuilder &setAttenuationProfileFilename(const std::string &filename);
+  MaterialBuilder &setXRayAttenuationProfileFilename(const std::string &filename);
 
   void setAttenuationSearchPath(std::string path);
 

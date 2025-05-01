@@ -576,8 +576,8 @@ double SaveHKL::absorbSphere(double radius, double twoth, double wl, double &tba
   return transmission;
 }
 
-double SaveHKL::spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
-                             std::vector<std::vector<double>> spectra, size_t id) {
+double SaveHKL::spectrumCalc(double TOF, int iSpec, const std::vector<std::vector<double>> &time,
+                             const std::vector<std::vector<double>> &spectra, size_t id) {
   double spect = 0;
   if (iSpec == 1) {
     //"Calculate the spectrum using spectral coefficients for the GSAS Type 2

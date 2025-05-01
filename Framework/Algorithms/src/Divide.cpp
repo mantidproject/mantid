@@ -90,7 +90,7 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
 
   // If the Y units match, then the output will be a distribution and will be
   // dimensionless
-  else if (lhs->YUnit() == rhs->YUnit() && m_rhsBlocksize > 1) {
+  else if (lhs->YUnit() == rhs->YUnit() && m_rhsBlocksize != 1) {
     out->setYUnit("");
     out->setDistribution(true);
   }

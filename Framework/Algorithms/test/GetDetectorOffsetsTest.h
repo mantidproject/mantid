@@ -16,7 +16,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.tcc"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.hxx"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/UnitFactory.h"

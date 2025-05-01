@@ -55,7 +55,7 @@ Besides the data, it also has the sample logs' copied from the input workspace.
 Sample Logs
 ###########
 
-The sample logs of the reduced HFIR powder diffraction data are aggregrated from all measurements points
+The sample logs of the reduced HFIR powder diffraction data are aggregated from all measurements points
 in the experiment run.
 
 They are copied from the last ExperimentInfo object of the input MDWorkspace {\it InputWorkspace}.

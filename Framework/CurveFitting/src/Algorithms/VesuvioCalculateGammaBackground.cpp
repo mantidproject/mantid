@@ -414,10 +414,8 @@ void VesuvioCalculateGammaBackground::retrieveInputs() {
 
   // Spectrum numbers whose calculation of background from foils is reversed
   m_reversed.clear();
-  for (specnum_t i = 143; i < 199; ++i) {
-    if ((i >= 143 && i <= 150) || (i >= 159 && i <= 166) || (i >= 175 && i <= 182) || (i >= 191 && i <= 198))
-      m_reversed.insert(i);
-  }
+  m_reversed = {143, 144, 145, 146, 147, 148, 149, 150, 159, 160, 161, 162, 163, 164, 165, 166,
+                175, 176, 177, 178, 179, 180, 181, 182, 191, 192, 193, 194, 195, 196, 197, 198};
 
   // Workspace indices mapping input->output
   m_indices.clear();

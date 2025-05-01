@@ -100,7 +100,7 @@ void export_ExperimentInfo() {
       .def("mutableRun", &ExperimentInfo::mutableRun, return_value_policy<reference_existing_object>(), args("self"),
            "Return a modifiable :class:`~mantid.api.Run` object.")
       .def("getRunNumber", &ExperimentInfo::getRunNumber, args("self"), "Returns the run identifier for this run.")
-      .def("getEFixed", (double(ExperimentInfo::*)(const Mantid::detid_t) const) & ExperimentInfo::getEFixed,
+      .def("getEFixed", (double (ExperimentInfo::*)(const Mantid::detid_t) const) & ExperimentInfo::getEFixed,
            args("self", "detId"))
       .def("setEFixed", &ExperimentInfo::setEFixed, args("self", "detId", "value"))
       .def("getEMode", &ExperimentInfo::getEMode, args("self"), "Returns the energy mode.")
@@ -119,5 +119,7 @@ void export_ExperimentInfo() {
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
       .def("setSample", setSample, args("self", "sample"))
-      .def("setRun", setRun, args("self", "run"));
+      .def("setRun", setRun, args("self", "run"))
+      .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),
+           "Update parameters in the instrument-parameter map. Logs must be loaded before calling this method");
 }

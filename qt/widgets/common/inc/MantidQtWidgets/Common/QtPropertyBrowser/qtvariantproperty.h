@@ -252,8 +252,8 @@ public:
   void slotValueChanged(QtProperty *property, const QKeySequence &val);
   void slotValueChanged(QtProperty *property, const QChar &val);
   void slotValueChanged(QtProperty *property, const QLocale &val);
-  void slotValueChanged(QtProperty *property, const QPoint &val);
   void slotValueChanged(QtProperty *property, const QPointF &val);
+  void slotValueChanged(QtProperty *property, const QPoint &val);
   void slotValueChanged(QtProperty *property, const QSize &val);
   void slotRangeChanged(QtProperty *property, const QSize &min, const QSize &max);
   void slotValueChanged(QtProperty *property, const QSizeF &val);
@@ -276,7 +276,7 @@ public:
 
   void valueChanged(QtProperty *property, const QVariant &val);
 
-  int internalPropertyToType(QtProperty *property) const;
+  int internalPropertyToType(const QtProperty *property) const;
   QtVariantProperty *createSubProperty(QtVariantProperty *parent, QtVariantProperty *after, QtProperty *internal);
   void removeSubProperty(QtVariantProperty *property);
 

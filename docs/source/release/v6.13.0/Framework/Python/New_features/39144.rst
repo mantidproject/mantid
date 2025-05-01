@@ -1,0 +1,6 @@
+- Adds a clear indicator in the Help Window’s toolbar showing whether Mantid is displaying **Local Docs** or **Online Docs** documentation.
+- Improvements:
+    - Makes it obvious if you are using locally installed documentation or viewing updated online docs (default).
+    - Helps diagnose connection or installation issues if pages are not loading as expected.
+- Key benefits:
+    - Immediate clarity on where help content is being retrieved from, removing guesswork.

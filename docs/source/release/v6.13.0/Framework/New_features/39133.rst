@@ -1,0 +1,1 @@
+- Added file ``.git-blame-ignore-revs`` to ignore particular revisions (e.g. by bots) in ``git blame`` listings. See :ref:`GitWorkflow` page for more details.

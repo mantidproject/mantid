@@ -29,9 +29,9 @@ Usage
 
 .. testcode:: ExCopyInstrumentParametersSimple
 
-   # We load two workspaces with same instument
-   # the first of which has had come detectors moved by calibration.
-   # The run CopyInstrumentParameters and show that the same detectors have been moved.
+   # We load two workspaces with the same instrument
+   # the first of which has had some detectors moved by calibration.
+   # Then run CopyInstrumentParameters and show that the same detectors have been moved.
    #
    # We use HRPD workspaces, which have detectors that are not rectangular.
    ws1 = Load("HRP38094Calib.nxs")

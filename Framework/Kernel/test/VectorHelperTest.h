@@ -330,6 +330,42 @@ public:
     TS_ASSERT_EQUALS(vec[1], "Jude");
   }
 
+  void test_splitStringIntoVectorWithSeparator() {
+    std::vector<int> vec = VectorHelper::splitStringIntoVector<int>("1,2,-5,23", ",");
+    TS_ASSERT_EQUALS(vec.size(), 4);
+    TS_ASSERT_EQUALS(vec[0], 1);
+    TS_ASSERT_EQUALS(vec[1], 2);
+    TS_ASSERT_EQUALS(vec[2], -5);
+    TS_ASSERT_EQUALS(vec[3], 23);
+  }
+
+  void test_splitStringIntoVectorDoubleWithSeparator() {
+    std::vector<double> vec = VectorHelper::splitStringIntoVector<double>("1.2 /2.2/-5.,1", "/");
+    TS_ASSERT_EQUALS(vec.size(), 3);
+    TS_ASSERT_EQUALS(vec[0], 1.2);
+    TS_ASSERT_EQUALS(vec[1], 2.2);
+    // This behaviour is intended as sstringstream will fail to convert the comma
+    TS_ASSERT_EQUALS(vec[2], -5.0);
+  }
+
+  void test_splitStringIntoVectorStringWithSeparator() {
+    std::vector<std::string> vec = VectorHelper::splitStringIntoVector<std::string>("Test 1.1 String ", " ");
+    TS_ASSERT_EQUALS(vec.size(), 3);
+    TS_ASSERT_EQUALS(vec[0], "Test");
+    TS_ASSERT_EQUALS(vec[1], "1.1");
+    TS_ASSERT_EQUALS(vec[2], "String");
+  }
+
+  void test_spliStringIntoVectorDoubleWithMultipleSeparators() {
+    std::vector<double> vec = VectorHelper::splitStringIntoVector<double>("1.1/2.0,3 6,7", "/ ,");
+    TS_ASSERT_EQUALS(vec.size(), 5);
+    TS_ASSERT_EQUALS(vec[0], 1.1);
+    TS_ASSERT_EQUALS(vec[1], 2);
+    TS_ASSERT_EQUALS(vec[2], 3);
+    TS_ASSERT_EQUALS(vec[3], 6);
+    TS_ASSERT_EQUALS(vec[4], 7);
+  }
+
   void test_normalizeVector_and_length() {
     std::vector<double> x;
     std::vector<double> y;

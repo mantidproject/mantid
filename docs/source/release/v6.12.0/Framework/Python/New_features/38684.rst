@@ -1,0 +1,1 @@
+- Exposed `ExperimentInfo.populateInstrumentParameters` to the Python api.  This will facilitate the update of parameterized instruments from Python, allowing parameters to be directly transferred as properties without converting to and from `string`.

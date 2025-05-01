@@ -264,9 +264,7 @@ FunctionFactoryImpl::createComposite(const Expression &expr,
     }
   }
 
-  if (cfun) {
-    cfun->applyTies();
-  }
+  cfun->applyTies();
   return cfun;
 }
 

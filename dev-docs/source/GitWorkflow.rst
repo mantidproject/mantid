@@ -68,6 +68,27 @@ pushed to GitHub, please follow the convention of
 what the branch is for (issue number) and quickly know what is being
 done there (short description).
 
+Git Blame
+---------
+
+The refspecs listed in this file are ignored by ``git blame`` when git is configured correctly.
+This is mostly used to hide commits that are created by bots (e.g. formatting)
+The refspecs must be listed in commit order from oldest to newest.
+Github does this automatically in the `blame view of a file <https://docs.github.com/en/repositories/working-with-files/using-files/viewing-and-understanding-files#ignore-commits-in-the-blame-view>`_
+
+To configure it locally (examples assume you are in the root of your local clone), add it as an option to git blame
+
+.. code-block:: sh
+
+   git blame --ignore-revs-file .git-blame-ignore-revs
+
+or configure your local git instance
+
+.. code-block:: sh
+
+   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+
 .. _GitWorkflowPullRequests:
 
 Pull Requests
@@ -143,8 +164,7 @@ The reasons a pull request may be flagged up currently are:
 - The developer has yet to act on comments left in a review
 
 
-(code for the bot is currently `here
-<https://github.com/DanNixon/mantid_pr_bot>`__)
+(code for the bot is currently `here <https://github.com/DanNixon/mantid_pr_bot>`__)
 
 Code Freeze
 -----------

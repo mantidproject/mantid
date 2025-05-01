@@ -24,7 +24,11 @@ function(_create_data_target _targetname _content_link_patterns)
   set_target_properties(${_targetname} PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endfunction()
 
-# We'll create two targets: - StandardTestData: data required by the unit tests and documentation tests -
-# SystemTestData: data required for the system tests
-_create_data_target(StandardTestData "Testing/Data/DocTest/*.md5;Testing/Data/UnitTest/*.md5")
+# We'll create three targets: - StandardTestData: includes both data required by the unit tests and documentation tests
+# - broken down into UnitTestData and DocTestData SystemTestData: data required for the system tests
+_create_data_target(UnitTestData "Testing/Data/UnitTest/*.md5")
+_create_data_target(DocTestData "Testing/Data/DocTest/*.md5")
 _create_data_target(SystemTestData "Testing/Data/SystemTest/*.md5;Testing/SystemTests/tests/framework/reference/*.md5")
+# Combine individual targets
+add_custom_target(StandardTestData DEPENDS UnitTestData DocTestData)
+set_target_properties(StandardTestData PROPERTIES EXCLUDE_FROM_ALL TRUE)

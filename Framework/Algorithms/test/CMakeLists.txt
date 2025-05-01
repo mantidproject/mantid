@@ -51,7 +51,7 @@ if(CXXTEST_FOUND)
   add_dependencies(AlgorithmsTest Crystal CurveFitting)
   add_dependencies(FrameworkTests AlgorithmsTest)
   # Test data
-  add_dependencies(AlgorithmsTest StandardTestData)
+  add_dependencies(AlgorithmsTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests")

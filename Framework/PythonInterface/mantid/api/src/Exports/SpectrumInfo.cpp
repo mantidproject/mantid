@@ -84,6 +84,6 @@ void export_SpectrumInfo() {
       .def("difcUncalibrated", &SpectrumInfo::difcUncalibrated, (arg("self"), arg("index")),
            "Return the uncalibrated difc diffractometer constant")
       .def("diffractometerConstants",
-           (UnitParametersMap(SpectrumInfo::*)(const size_t) const)&SpectrumInfo::diffractometerConstants,
+           (UnitParametersMap (SpectrumInfo::*)(const size_t) const) & SpectrumInfo::diffractometerConstants,
            (arg("self"), arg("index")), "Return the diffractometer constants");
 }

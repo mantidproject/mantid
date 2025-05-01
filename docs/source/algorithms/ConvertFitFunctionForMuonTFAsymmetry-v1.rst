@@ -58,7 +58,7 @@ This example is for converting a function.
 
    returnFunc =    ConvertFitFunctionForMuonTFAsymmetry(InputFunction=str(fittedFunc),NormalizationTable=tab,
                                                         WorkspaceList=["Run; Group; a; Asym; #1"], Mode="Extract")
-   # 0 iteration fit to get param table -> wont change function values
+   # 0 iteration fit to get param table -> won't change function values
    fit_output =    Fit(Function=str(returnFunc),InputWorkspace=ws,MaxIterations=0,Output="return_params")
 
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
@@ -71,7 +71,7 @@ This example is for converting a function.
    if paramTable.column(1)[1] == 3.0:
       print("Fix has been preserved")
    else:
-      print("Fix has not been presreved")
+      print("Fix has not been preserved")
 
 Output:
 

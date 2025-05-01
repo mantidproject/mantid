@@ -659,7 +659,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
 //----------------------------------------------------------------------------------------------
 /** Create a Workspace2D (MatrixWorkspace) with given spectra and bin parameters
  */
-MatrixWorkspace_sptr GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
+MatrixWorkspace_sptr GeneratePeaks::createDataWorkspace(const std::vector<double> &binparameters) const {
   // Check validity
   if (m_spectraSet.empty())
     throw std::invalid_argument("Input spectra list is empty. Unable to generate a new workspace.");

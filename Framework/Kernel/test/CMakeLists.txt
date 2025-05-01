@@ -9,7 +9,7 @@ if(CXXTEST_FOUND)
   add_framework_test_helpers(KernelTest)
   add_dependencies(FrameworkTests KernelTest)
   # Test data
-  add_dependencies(KernelTest StandardTestData)
+  add_dependencies(KernelTest UnitTestData)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET KernelTest PROPERTY FOLDER "UnitTests")

@@ -27,6 +27,7 @@ from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.state.StateObjects.StateBackgroundSubtraction import StateBackgroundSubtraction
+from sans.state.StateObjects.StatePolarization import StatePolarization
 from sans.state.automatic_setters import automatic_setters
 
 
@@ -51,6 +52,7 @@ class AllStates(metaclass=JsonSerializable):
         self.convert_to_q: StateConvertToQ = StateConvertToQ()
         self.compatibility: StateCompatibility = StateCompatibility()
         self.background_subtraction: StateBackgroundSubtraction = StateBackgroundSubtraction()
+        self.polarization: StatePolarization = StatePolarization()
 
     def validate(self):
         is_invalid = dict()
@@ -78,6 +80,8 @@ class AllStates(metaclass=JsonSerializable):
             is_invalid.update("State: The state object needs to include a StateConvertToQ object.")
         if not self.background_subtraction:
             is_invalid.update("State: The state object needs to include a StateBackgroundSubtraction object.")
+        if not self.polarization:
+            is_invalid.update("State: The state object needs to include a StatePolarization object.")
 
         # We don't enforce a compatibility mode, we just create one if it does not exist
         if not self.compatibility:

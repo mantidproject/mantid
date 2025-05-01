@@ -11,7 +11,7 @@
 #include "Reduction/ReductionJobs.h"
 #include "Row.h"
 #include "TransmissionRunPair.h"
-#include <boost/optional.hpp>
+#include <optional>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -26,12 +26,12 @@ public:
   ValidationResult<Row, std::vector<int>> operator()(std::vector<std::string> const &cellText);
 
 private:
-  boost::optional<std::vector<std::string>> parseRunNumbers(std::vector<std::string> const &cellText);
-  boost::optional<double> parseTheta(std::vector<std::string> const &cellText);
-  boost::optional<TransmissionRunPair> parseTransmissionRuns(std::vector<std::string> const &cellText);
-  boost::optional<RangeInQ> parseQRange(std::vector<std::string> const &cellText);
-  boost::optional<boost::optional<double>> parseScaleFactor(std::vector<std::string> const &cellText);
-  boost::optional<std::map<std::string, std::string>> parseOptions(std::vector<std::string> const &cellText);
+  std::optional<std::vector<std::string>> parseRunNumbers(std::vector<std::string> const &cellText);
+  std::optional<double> parseTheta(std::vector<std::string> const &cellText);
+  std::optional<TransmissionRunPair> parseTransmissionRuns(std::vector<std::string> const &cellText);
+  std::optional<RangeInQ> parseQRange(std::vector<std::string> const &cellText);
+  std::optional<double> parseScaleFactor(std::vector<std::string> const &cellText);
+  std::optional<ReductionOptionsMap> parseOptions(std::vector<std::string> const &cellText);
 
   std::vector<int> m_invalidColumns;
 };
@@ -40,7 +40,7 @@ using RowValidationResult = ValidationResult<Row, std::vector<int>>;
 
 RowValidationResult validateRow(std::vector<std::string> const &cellText);
 
-boost::optional<Row> validateRowFromRunAndTheta(std::string const &run, std::string const &theta);
+std::optional<Row> validateRowFromRunAndTheta(std::string const &run, std::string const &theta);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

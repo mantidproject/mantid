@@ -14,7 +14,7 @@ This high level algorithm steers the reduction for each sample type and performs
 measured at one initial energy and one or more temperatures (for powder) and one or more sample angles (for single crystal).
 
 The sample measurement will be corrected for all the effects the user selects and the input is provided for, such as flat background, empty container subtraction, and vanadium normalisation.
-The output is transformated to :math:`S(q,\omega)` space, and :math:`S(2\theta,\omega)`, and can be stored as .nxs and .nxspe files, if requested.
+The output is transformed to :math:`S(q,\omega)` space, and :math:`S(2\theta,\omega)`, and can be stored as .nxs and .nxspe files, if requested.
 
 The algorithm is intended to be run multiple times, for each of the available processes (`Cadmium`, `Empty`, `Vanadium`, `Sample`) and each change of initial energy,
 and sample geometry and material. Multiple temperatures can be reduced together.

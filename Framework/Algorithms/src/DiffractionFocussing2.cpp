@@ -94,7 +94,7 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
   if (unitid == "TOF") {
     g_log.error(
         "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
-  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
+  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer") {
     std::stringstream msg;
     msg << "UnitID " << unitid << " is not a supported spacing";
     issues["InputWorkspace"] = msg.str();

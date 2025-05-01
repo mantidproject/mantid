@@ -36,6 +36,7 @@ set(PYTHON_PLUGINS
     algorithms/CorrectTOF.py
     algorithms/CreateCacheFilename.py
     algorithms/CreateEmptyTableWorkspace.py
+    algorithms/CreatePoleFigureTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
     algorithms/CylinderPaalmanPingsCorrection2.py
@@ -155,9 +156,11 @@ set(PYTHON_PLUGINS
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
     algorithms/PelicanCrystalProcessing.py
+    algorithms/PoldiAutoCorrelation6.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/poldi_utils.py
     algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
@@ -289,11 +292,12 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryILLPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py
     algorithms/WorkflowAlgorithms/ReflectometryILL_common.py
-    algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
-    algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
-    algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISCalculatePolEff.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCalibration.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCreateTransmission.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderCore.py
@@ -394,6 +398,8 @@ set(PYTHON_PLUGINS
     functions/TFMuonium.py
     functions/TeixeiraWater.py
     functions/TeixeiraWaterIqt.py
+    functions/TeixeiraWaterIqtFT.py
+    functions/TeixeiraWaterIqtHelper.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py

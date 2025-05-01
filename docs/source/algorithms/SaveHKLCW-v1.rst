@@ -35,8 +35,8 @@ The corresponding format without direction cosines is.
 +----+----+----+------+------------+----+
 
 The output file contains a short header containing the default title,
-format string and wavelength. See the docmentation for :ref:`algm-SaveHKL`
-for additional information about convetions in direction cosines.
+format string and wavelength. See the documentation for :ref:`algm-SaveHKL`
+for additional information about conventions in direction cosines.
 
 Usage
 -----

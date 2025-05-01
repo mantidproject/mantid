@@ -88,8 +88,9 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     36); // 34 logs in file + 1 synthetic nperiods log
+                     37); // 34 logs in file + 1 synthetic nperiods log
                           // + 1 proton_charge_by_period log
+                          // + 1 gd_prtn_chrg_unfiltered log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
@@ -359,6 +360,7 @@ public:
     allowed.push_back("gd_prtn_chrg");
     allowed.push_back("proton_charge_by_period");
     allowed.push_back("nperiods");
+    allowed.push_back("gd_prtn_chrg_unfiltered");
 
     // The default logs that are always present:
     allowed.push_back("start_time");
@@ -406,7 +408,7 @@ public:
     auto properties = run.getProperties();
 
     // add 2 to account for selog_ versions of properties
-    TS_ASSERT_EQUALS(properties.size(), 94 - blocked.size() - 2);
+    TS_ASSERT_EQUALS(properties.size(), 95 - blocked.size() - 2);
 
     // Lookup each name in the workspace property list
     for (const auto &name : blocked) {
@@ -440,7 +442,7 @@ public:
     auto run = testWS->run();
     auto properties = run.getProperties();
 
-    TS_ASSERT_EQUALS(properties.size(), 94);
+    TS_ASSERT_EQUALS(properties.size(), 95);
   }
 
 private:

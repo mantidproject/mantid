@@ -1,0 +1,1 @@
+- - The algorithm `CentroidPeaksMD v1` was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed. Use :ref:`CentroidPeaksMD v2 <algm-CentroidPeaksMD-v2>` instead.

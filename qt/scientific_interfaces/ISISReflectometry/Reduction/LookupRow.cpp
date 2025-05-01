@@ -13,13 +13,12 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRow::LookupRow(boost::optional<double> theta, std::optional<boost::regex> titleMatcher,
+LookupRow::LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher,
                      TransmissionRunPair transmissionRuns,
-                     boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-                     boost::optional<double> scaleFactor,
-                     boost::optional<ProcessingInstructions> processingInstructions,
-                     boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
-                     boost::optional<ProcessingInstructions> roiDetectorIDs)
+                     std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+                     std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
+                     std::optional<ProcessingInstructions> backgroundProcessingInstructions,
+                     std::optional<ProcessingInstructions> roiDetectorIDs)
     : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
       m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)),
@@ -30,34 +29,34 @@ LookupRow::LookupRow(boost::optional<double> theta, std::optional<boost::regex> 
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.has_value(); }
+bool LookupRow::isWildcard() const { return !m_theta.has_value() && !m_titleMatcher.has_value(); }
 
-boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
+std::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 
 std::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
 
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 
-boost::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
+std::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
 
-boost::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
+std::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
 
-boost::optional<ProcessingInstructions> LookupRow::transmissionProcessingInstructions() const {
+std::optional<ProcessingInstructions> LookupRow::transmissionProcessingInstructions() const {
   return m_transmissionProcessingInstructions;
 }
 
-boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructions() const {
+std::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructions() const {
   return m_backgroundProcessingInstructions;
 }
 
-boost::optional<ProcessingInstructions> LookupRow::roiDetectorIDs() const { return m_roiDetectorIDs; }
+std::optional<ProcessingInstructions> LookupRow::roiDetectorIDs() const { return m_roiDetectorIDs; }
 
-void LookupRow::setRoiDetectorIDs(boost::optional<ProcessingInstructions> selectedBanks) {
+void LookupRow::setRoiDetectorIDs(std::optional<ProcessingInstructions> selectedBanks) {
   m_roiDetectorIDs = std::move(selectedBanks);
 }
 
 void LookupRow::setProcessingInstructions(ROIType regionType,
-                                          boost::optional<ProcessingInstructions> processingInstructions) {
+                                          std::optional<ProcessingInstructions> processingInstructions) {
   switch (regionType) {
   case ROIType::Signal:
     m_processingInstructions = std::move(processingInstructions);
@@ -73,10 +72,10 @@ void LookupRow::setProcessingInstructions(ROIType regionType,
 }
 
 bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const {
-  if (!m_theta.is_initialized() && !lookupRow.m_theta.is_initialized()) {
+  if (!m_theta.has_value() && !lookupRow.m_theta.has_value()) {
     return m_titleMatcher == lookupRow.m_titleMatcher;
   }
-  if (m_theta.is_initialized() && lookupRow.m_theta.is_initialized()) {
+  if (m_theta.has_value() && lookupRow.m_theta.has_value()) {
     return std::abs(*m_theta - *lookupRow.m_theta) <= (tolerance + 2.0 * EPSILON) &&
            m_titleMatcher == lookupRow.m_titleMatcher;
   }

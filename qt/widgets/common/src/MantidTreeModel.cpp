@@ -32,9 +32,8 @@ void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {
       alg->setLogging(false);
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
-      foreach (auto wsName, wsNames) {
-        vecWsNames.emplace_back(wsName.toStdString());
-      }
+      std::transform(wsNames.cbegin(), wsNames.cend(), std::back_inserter(vecWsNames),
+                     [](const auto &wsName) { return wsName.toStdString(); });
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
     }

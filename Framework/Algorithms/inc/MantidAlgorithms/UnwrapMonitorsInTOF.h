@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -18,8 +19,9 @@ namespace Algorithms {
  *  This can occur when dealing with different time regimes for detectors
  *  and monitors.
  */
-class MANTID_ALGORITHMS_DLL UnwrapMonitorsInTOF final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapMonitorsInTOF final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
+  UnwrapMonitorsInTOF();
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"UnwrapMonitor", "UnwrapSNS"}; }

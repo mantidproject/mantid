@@ -1,0 +1,1 @@
+- New algorithm :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` (VULCAN only) which is meant to replicate the functionality of :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, but performs all the work on the events directly from file.

@@ -327,7 +327,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(const std::vector<std::ve
  * @param ignoreunlisted
  * @return
  */
-API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
+API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(const std::map<std::string, std::string> &runinfodict,
                                                           std::vector<std::string> &floatlognamelist,
                                                           std::vector<std::string> &intlognamelist,
                                                           std::vector<std::string> &strlognamelist,
@@ -341,10 +341,9 @@ API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(std::map<std::string, 
   std::sort(strlognamelist.begin(), strlognamelist.end());
 
   // Create sample log properties
-  std::map<std::string, std::string>::iterator miter;
-  for (miter = runinfodict.begin(); miter != runinfodict.end(); ++miter) {
-    const std::string title = miter->first;
-    const std::string strvalue = miter->second;
+  for (const auto &miter : runinfodict) {
+    const std::string title = miter.first;
+    const std::string strvalue = miter.second;
 
     g_log.debug() << "Trying to add property " << title << " with value " << strvalue << "\n";
 

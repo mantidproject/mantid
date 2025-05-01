@@ -88,6 +88,8 @@ class PeaksViewerPresenter:
         view.subscribe(self)
         view.set_title(model.peaks_workspace.name())
         view.set_peak_color(model.fg_color)
+        self.view.enable_calculate_hkl(self.model.can_calculate_hkl(view.frame))
+
         self.notify(PeaksViewerPresenter.Event.PeaksListChanged)
 
     @property
@@ -137,6 +139,7 @@ class PeaksViewerPresenter:
         """
         self._clear_peaks()
         self.model.draw_peaks(self._view.sliceinfo, self._view.painter, self._view.frame)
+        self.view.call_canvas_draw()
 
     def _peak_selected(self):
         """
@@ -165,6 +168,14 @@ class PeaksViewerPresenter:
         :param concise: bool to set concise or expanded view
         """
         self.view.table_view.filter_columns(concise, PeaksWorkspaceDataPresenter.HIDDEN_COLUMNS)
+
+    def calc_hkl_checkbox_changes(self, calc_hkl):
+        """
+        Respond to a change in the calc_hkl check box state
+        :param calc_hkl: bool to set calc_hkl or not
+        """
+        self.model.set_calculate_hkl(calc_hkl)
+        self.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
     # private api
     @staticmethod

@@ -17,8 +17,9 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double position, double minimum, double maximum,
-                         QString const &markerType, std::optional<QHash<QString, QVariant>> const &otherKwargs) {
+Python::Object newMarker(const FigureCanvasQt *canvas, QString const &colour, double position, double minimum,
+                         double maximum, QString const &markerType,
+                         std::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
@@ -45,7 +46,7 @@ namespace MantidQt::Widgets::MplCpp {
  * @param markerType Whether the marker is vertical or horizontal
  * @param otherKwargs Other optional kwargs
  */
-SingleMarker::SingleMarker(FigureCanvasQt *canvas, QString const &color, double position, double minimum,
+SingleMarker::SingleMarker(const FigureCanvasQt *canvas, QString const &color, double position, double minimum,
                            double maximum, QString const &markerType, QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(newMarker(canvas, color, position, minimum, maximum, markerType, otherKwargs)) {}
 

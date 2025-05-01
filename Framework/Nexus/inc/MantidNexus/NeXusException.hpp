@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include <iosfwd>
 #include <stdexcept>
 #include <string>
 
@@ -20,30 +21,18 @@ namespace NeXus {
 
 class MANTID_NEXUS_DLL Exception : public std::runtime_error {
 public:
-  /**
-   * Create a new NeXus::Exception
-   *
-   * \param msg the string to pass a the error message
-   * \param status
-   */
-  Exception(const std::string &msg = "GENERIC ERROR", const NXstatus status = static_cast<NXstatus>(0));
-  /**
-   * Get the message associated with the exception
-   *
-   * \return the message associated with the exception
-   */
-  virtual const char *what() const throw() override;
-  /**
-   * Get the status associated with the exception
-   *
-   * \return the status value associated with the exception
-   */
-  NXstatus status() const throw();
-  /** Destructor for exception */
-  virtual ~Exception() throw();
+  /// Create a new NeXus::Exception
+  Exception(const std::string &msg = "GENERIC ERROR", const std::string &functionname = "",
+            const std::string &filename = "");
+  /// \return the message with functionname
+  const std::string functionname() const throw();
+  /// \return the message with filename
+  const std::string filename() const throw();
 
 private:
-  std::string m_what; ///< Error message for the exception
-  NXstatus m_status;  ///< Status value for the exception
+  std::string m_functionname; ///< Function this exception is associted with
+  std::string m_filename;     ///< File this exception is associated with
 };
+
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const Exception &err);
 }; // namespace NeXus
