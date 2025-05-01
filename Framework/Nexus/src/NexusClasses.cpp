@@ -97,6 +97,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
+    m_path_parent = parent->path();
     m_path = parent->path() + "/" + name;
   }
 }
@@ -147,8 +148,8 @@ void NXDataSet::getAttributes() {
 NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(parent.m_fileID, &parent, name) { clear(); }
 
 NXClass::~NXClass() {
-  if (m_open)
-    m_fileID->closeGroup();
+  if (m_open && (!m_path_parent.empty()))
+    m_fileID->openPath(m_path_parent);
 }
 
 void NXClass::readAllInfo() {
@@ -218,9 +219,57 @@ void NXClass::clear() {
   m_datasets.reset(new std::vector<NXInfo>);
 }
 
+namespace {
+/**
+ * This assumes that the last "element" of the current path can overlap with the first "element" of the requested path
+ * and removes duplication.
+ */
+std::pair<std::string, std::string> splitPath(const std::string &current, const std::string &requested) {
+  // return early if it is already split
+  if (requested.find("/") == std::string::npos)
+    return std::pair<std::string, std::string>{current, requested};
+
+  // decompose the two components to see if the inner element overlaps
+  const auto currentLastPos = current.rfind("/");
+  const auto currentLast = (currentLastPos == std::string::npos) ? std::string("") : current.substr(currentLastPos + 1);
+
+  const auto requestedFirstPos = requested.find("/");
+  const auto requestedFirst =
+      (requestedFirstPos == std::string::npos) ? std::string("") : requested.substr(0, requestedFirstPos);
+
+  // construct the effective path
+  std::string fullPath;
+  if (currentLast == requestedFirst) {
+    fullPath = current + requested.substr(requestedFirstPos);
+  } else {
+    fullPath = current + "/" + requested;
+  }
+
+  // last / is the division between path and data
+  const auto last = fullPath.rfind("/");
+  return std::pair<std::string, std::string>{fullPath.substr(0, last), fullPath.substr(last + 1)};
+}
+} // namespace
+
 std::string NXClass::getString(const std::string &name) const {
+  const std::string oldPath = m_fileID->getPath();
+  // split the input into group and name
+  auto pathParts = splitPath(oldPath, name);
+
   std::string value;
-  m_fileID->readData(name, value);
+
+  // open the containing group
+  m_fileID->openPath(pathParts.first);
+
+  // read the value
+  try {
+    m_fileID->readData(name, value);
+  } catch (const ::NeXus::Exception &) {
+    m_fileID->openPath(oldPath); // go back to original location
+    throw;                       // rethrow the exception
+  }
+  m_fileID->openPath(oldPath); // go back to original location
+
   return value;
 }
 
@@ -344,12 +393,16 @@ void NXDataSet::open() {
   size_t i = m_path.find_last_of('/');
   if (i == std::string::npos || i == 0)
     return; // we are in the root group, assume it is open
+  std::string path_before = m_fileID->getPath();
   std::string group_path = m_path.substr(0, i);
   m_fileID->openPath(group_path);
   m_fileID->openData(name());
   m_info = NXInfo(m_fileID->getInfo(), name());
   getAttributes();
+  // go back to where the file was before
   m_fileID->closeData();
+  if (!path_before.empty())
+    m_fileID->openPath(path_before);
 }
 
 void NXDataSet::openLocal() {

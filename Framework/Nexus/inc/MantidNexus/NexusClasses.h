@@ -107,8 +107,9 @@ public:
   std::shared_ptr<::NeXus::File> m_fileID;
 
 protected:
-  std::string m_path; ///< Keeps the absolute path to the object
-  bool m_open;        ///< Set to true if the object has been open
+  std::string m_path;        ///< Keeps the absolute path to the object
+  std::string m_path_parent; ///< Absolute path of the parent this object should reset to
+  bool m_open;               ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
 };
@@ -461,7 +462,7 @@ public:
    * @param name :: The name of the NXClass relative to its parent
    */
   NXClass(NXClass const &parent, std::string const &name);
-  virtual ~NXClass();
+  virtual ~NXClass() override;
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
 
