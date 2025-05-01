@@ -474,8 +474,7 @@ void File::openGroupPath(std::string const &pathname) {
 string File::getPath() { return this->getCurrentLocationAs<H5::H5Object>()->getObjName(); }
 
 void File::closeGroup() {
-  auto loc = this->getCurrentLocation();
-  if (loc == this) {
+  if (this->getCurrentLocation() == this) {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else {
