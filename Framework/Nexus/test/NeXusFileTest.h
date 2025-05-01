@@ -632,19 +632,20 @@ public:
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    const std::string NXENTRY("NXentry");
 
     // setup a recursive group tree
-    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
-                            Entry{"/entry1/layer2a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+    std::vector<Entry> tree{Entry{"/entry1", NXENTRY},
+                            Entry{"/entry1/layer2a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3b", NXENTRY},
                             Entry{"/entry1/layer2a/data1", "SDS"},
-                            Entry{"/entry1/layer2b", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
-                            Entry{"/entry2", "NXentry"},
-                            Entry{"/entry2/layer2c", "NXentry"},
-                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+                            Entry{"/entry1/layer2b", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3b", NXENTRY},
+                            Entry{"/entry2", NXENTRY},
+                            Entry{"/entry2/layer2c", NXENTRY},
+                            Entry{"/entry2/layer2c/layer3c", NXENTRY}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -655,7 +656,7 @@ public:
         current = file.getPath();
       }
       string name = path.substr(path.find_last_of("/") + 1, path.npos);
-      if (it->second == "NXentry") {
+      if (it->second == NXENTRY) {
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
         string data = "Data";
@@ -673,26 +674,39 @@ public:
 
     // tests invalid cases
     TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
     TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
     TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
     TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
+
+    // move to inside the entry
+    file.openGroup("entry1", "NXentry");
 
     // open the root
-    file.openGroup("entry1", "NXentry");
-    std::string actual, expected = "/";
+    std::string expected = "/";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
 
     expected = "/entry1/layer2b/layer3a";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
 
     expected = "/entry1/layer2a/data1";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
+
+    // failling should leave path alone
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
+
+    // intermingle working and failing opens
+    file.openPath("/entry1/layer2a/");
+    TS_ASSERT_THROWS(file.openGroup("pants", NXENTRY), NeXus::Exception &);
+    file.openGroup("layer3a", NXENTRY);
+    TS_ASSERT_EQUALS(file.getPath(), "/entry1/layer2a/layer3a");
   }
 
   void test_getInfo() {
