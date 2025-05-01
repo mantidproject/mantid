@@ -6,11 +6,7 @@ build_prefix=$1
 prefix=$2
 package_name=$3
 
-# This gets the subdir from conda in the form e.g. subdir: linux-64, then extracts
-# the platform
-platform_dir=$(conda config --show subdir | grep 'subdir' | awk '{print $2}')
-
-log_directory=../../$platform_dir/env_logs
+log_directory=../../$target_platform/env_logs
 
 mkdir -p $log_directory
 source ../../../mambaforge/etc/profile.d/conda.sh

@@ -131,6 +131,8 @@ elif [[ $PLATFORM == "osx-64" ]]; then
     EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
+export CONDA_SUBDIR=$PLATFORM
+
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
     conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
