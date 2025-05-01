@@ -389,6 +389,11 @@ void File::openPath(std::string const &pathname) {
   if (!path.is_absolute()) {
     throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openPath", m_filename);
   }
+
+  // verify that this is a different path than where it is current at
+  if (pathname == this->getPath())
+    return; // early
+
   // create a new stack -- will replace old if opening succeeds
   std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
 
