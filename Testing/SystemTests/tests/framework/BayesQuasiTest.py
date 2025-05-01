@@ -8,12 +8,13 @@
 
 from sys import platform
 from systemtesting import MantidSystemTest
-from mantid.simpleapi import BayesQuasi, Load
+from mantid.simpleapi import BayesQuasi, CropWorkspace, Load
 
 
 class BayesQuasiTest(MantidSystemTest):
     _sample_name = "irs26176_graphite002_red"
     _resolution_name = "irs26173_graphite002_res"
+    _reference_result_file_name = "irs26176_graphite002_QLr_Result.nxs"
 
     def skipTests(self):
         return platform == "darwin"
@@ -35,10 +36,51 @@ class BayesQuasiTest(MantidSystemTest):
         )
 
     def validate(self):
+        if platform == "linux":
+            return self._validate_linux()
+
         self.tolerance = 1e-10
+
         return (
             "irs26176_graphite002_QLr_Result",
-            "irs26176_graphite002_QLr_Result.nxs",
+            self._reference_result_file_name,
             "irs26176_graphite002_QLr_Prob",
             "irs26176_graphite002_QLr_Prob.nxs",
         )
+
+    def validateMethod(self):
+        if platform == "linux":
+            return "ValidateWorkspaceToWorkspace"
+
+        return "WorkspaceToNeXus"
+
+    def _validate_linux(self):
+        # With the crop below applied, this is the smallest relative tolerance that can be consistently applied
+        # on all three of CentOS7, Rocky8, Alma9.
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+
+        # The first 11 spectra in the result workspace correspond to fit parameters used
+        # when fitting with one or two peaks. Anything beyond that comes from the three peak
+        # fit, which is overparameterised, and therefore unstable between different Linux OS.
+        max_spectrum_index = 10
+
+        # Beyond q = 1.6, the statistics become low enough so that the fit becomes too unstable
+        # for a meaningful system test.
+        max_q = 1.6
+
+        Load(Filename="irs26176_graphite002_QLr_Result.nxs", OutputWorkspace="bayesquasi_reference")
+        CropWorkspace(
+            InputWorkspace="bayesquasi_reference",
+            OutputWorkspace="bayesquasi_reference_cropped",
+            XMax=max_q,
+            EndWorkspaceIndex=max_spectrum_index,
+        )
+        CropWorkspace(
+            InputWorkspace="irs26176_graphite002_QLr_Result",
+            OutputWorkspace="bayesquasi_result_cropped",
+            XMax=max_q,
+            EndWorkspaceIndex=max_spectrum_index,
+        )
+
+        return "bayesquasi_result_cropped", "bayesquasi_reference_cropped"
