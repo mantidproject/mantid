@@ -23,8 +23,12 @@ public:
   static OptionalBoolTest *createSuite() { return new OptionalBoolTest(); }
   static void destroySuite(OptionalBoolTest *suite) { delete suite; }
 
-  void test_construction_by_bool() {
+  void test_defaults_to_unset() {
+    OptionalBool arg;
+    TS_ASSERT_EQUALS(OptionalBool::Unset, arg.getValue());
+  }
 
+  void test_construction_by_bool() {
     OptionalBool arg1(true);
     TS_ASSERT_EQUALS(OptionalBool::True, arg1.getValue());
 
@@ -32,15 +36,35 @@ public:
     TS_ASSERT_EQUALS(OptionalBool::False, arg2.getValue());
   }
 
-  void test_defaults_to_unset() {
-    OptionalBool arg;
-    TS_ASSERT_EQUALS(OptionalBool::Unset, arg.getValue());
-  }
-
   void test_construction_by_value() {
     auto value = OptionalBool::True;
     OptionalBool arg(value);
     TS_ASSERT_EQUALS(value, arg.getValue());
+  }
+
+  void test_construction_by_string() {
+    OptionalBool arg1("True");
+    TS_ASSERT_EQUALS(OptionalBool::True, arg1.getValue());
+
+    OptionalBool arg2("False");
+    TS_ASSERT_EQUALS(OptionalBool::False, arg2.getValue());
+
+    OptionalBool arg3("Unset");
+    TS_ASSERT_EQUALS(OptionalBool::Unset, arg3.getValue());
+
+    // Test case-insensitive
+    OptionalBool arg4("tRuE");
+    TS_ASSERT_EQUALS(OptionalBool::True, arg4.getValue());
+  }
+
+  void test_construction_by_int() {
+    OptionalBool arg2(0);
+    TS_ASSERT_EQUALS(OptionalBool::False, arg2.getValue());
+
+    OptionalBool arg1(1);
+    TS_ASSERT_EQUALS(OptionalBool::True, arg1.getValue());
+
+    TS_ASSERT_THROWS(OptionalBool arg3(2), const std::invalid_argument &);
   }
 
   void test_comparison_overload() {
@@ -114,7 +138,7 @@ public:
   }
 
   void test_str_map() {
-    auto map = OptionalBool::strToEmumMap();
+    auto map = OptionalBool::strToEnumMap();
     TS_ASSERT_EQUALS(3, map.size());
     TS_ASSERT_EQUALS(map[OptionalBool::StrUnset], OptionalBool::Unset);
     TS_ASSERT_EQUALS(map[OptionalBool::StrFalse], OptionalBool::False);

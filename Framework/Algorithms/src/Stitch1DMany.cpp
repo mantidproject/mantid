@@ -45,6 +45,7 @@ void Stitch1DMany::init() {
                   "End overlaps for stitched workspaces "
                   "(number of input workspaces minus one).");
 
+  // This property is allowed to be Unset, as it no longer has an effect
   declareProperty(
       std::make_unique<PropertyWithValue<OptionalBool>>("ScaleRHSWorkspace", OptionalBool::Unset, Direction::Input),
       "Scaling either with respect to first (first hand side, LHS) "
