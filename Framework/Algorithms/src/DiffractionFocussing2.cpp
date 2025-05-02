@@ -69,6 +69,7 @@ void DiffractionFocussing2::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("Delta"),
                   "Step parameters for rebin, positive values are constant step-size, negative are logorithmic. One "
                   "value for each output specta or single value which is common to all");
+  declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
 }
 
 std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
@@ -737,6 +738,8 @@ void DiffractionFocussing2::determineRebinParametersFromParameters(const std::ve
 
   nGroups = groups.size(); // Number of unique groups
 
+  const bool fullBinsOnly = getProperty("FullBinsOnly");
+
   // only now can we check that the length of rebin parameters are correct
   std::vector<double> xmins = getProperty("DMin");
   std::vector<double> xmaxs = getProperty("DMax");
@@ -763,11 +766,12 @@ void DiffractionFocussing2::determineRebinParametersFromParameters(const std::ve
   if (numDelta == 1)
     deltas.resize(nGroups, deltas[0]);
 
-  // Iterator over all groups to create the new X vectors
+  // Iterate over all groups to create the new X vectors
   size_t i = 0;
   for (auto group : groups) {
     HistogramData::BinEdges xnew(0);
-    static_cast<void>(VectorHelper::createAxisFromRebinParams({xmins[i], deltas[i], xmaxs[i]}, xnew.mutableRawData()));
+    static_cast<void>(VectorHelper::createAxisFromRebinParams({xmins[i], deltas[i], xmaxs[i]}, xnew.mutableRawData(),
+                                                              true, fullBinsOnly));
     group2xvector[group] = xnew; // Register this vector in the map
     group2xstep[group] = deltas[i];
     i++;
