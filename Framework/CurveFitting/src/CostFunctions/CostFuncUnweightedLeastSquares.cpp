@@ -57,7 +57,9 @@ std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(API::FunctionV
 void CostFuncUnweightedLeastSquares::updateFitWeights() {
   for (size_t i = 0; i < m_values->size(); i++) {
     if (!m_ignoreInvalidData) {
-      if (m_values->getFitWeight(i) != 0.0) {
+      auto currentWeight = m_values->getFitWeight(i);
+      // Checking whether currentWeight != 0.0
+      if (std::abs(currentWeight) > std::max(1.0, std::abs(currentWeight)) * std::numeric_limits<double>::epsilon()) {
         m_values->setFitWeight(i, 1.0);
       }
     } else {
