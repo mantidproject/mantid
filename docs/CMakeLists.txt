@@ -120,19 +120,21 @@ if(DOCS_QTHELP)
     REQUIRED
   )
   add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
-  add_custom_target(
-    docs-qthelp
-    COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
-    COMMENT "Compiling Qt help documentation"
-  )
-  set_target_properties(
-    docs-qthelp
-    PROPERTIES FOLDER "Documentation"
-               EXCLUDE_FROM_DEFAULT_BUILD 1
-               EXCLUDE_FROM_ALL 1
-  )
-  # add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
-  add_dependencies(docs-qthelp docs-qtassistant)
+  if(ENABLE_QTASSISTANT)
+    add_custom_target(
+      docs-qthelp
+      COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
+      COMMENT "Compiling Qt help documentation"
+    )
+    set_target_properties(
+      docs-qthelp
+      PROPERTIES FOLDER "Documentation"
+                 EXCLUDE_FROM_DEFAULT_BUILD 1
+                 EXCLUDE_FROM_ALL 1
+    )
+    # add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
+    add_dependencies(docs-qthelp docs-qtassistant)
+  endif() # ENABLE_QTASSISTANT
 endif()
 
 # add target for checking external links
@@ -143,7 +145,7 @@ option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the packag
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
-    if(TARGET Qt5::qcollectiongenerator)
+    if(ENABLE_QTASSISTANT AND TARGET Qt5::qcollectiongenerator)
       # must "make docs-qthelp" before "make package" otherwise there will be a build failure
       install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
               DESTINATION ${_bundle}${HTML_DOCS_DEST}
@@ -157,7 +159,7 @@ if(PACKAGE_DOCS)
       install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/ ${SPHINX_BUILD_DIR}/qthelp/_static/
               DESTINATION ${_bundle}${HTML_DOCS_DEST}
       )
-    else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    else()
       install(DIRECTORY ${SPHINX_BUILD_DIR}/html/ DESTINATION ${_bundle}${HTML_DOCS_DEST})
     endif()
   endforeach()
