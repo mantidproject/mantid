@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
@@ -47,8 +48,6 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
   m_cubeSide = getProperty("ElementSize"); // in mm
   m_cubeSide *= 0.001;                     // now in m
-  // Get a reference to the parameter map (used for indirect instruments)
-  const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
 
   // Construct Sample
   constructSample(m_inputWS->mutableSample());
