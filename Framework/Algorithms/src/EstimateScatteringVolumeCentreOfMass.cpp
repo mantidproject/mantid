@@ -22,6 +22,9 @@ using namespace API;
 using namespace Geometry;
 using namespace Kernel;
 
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(EstimateScatteringVolumeCentreOfMass)
+
 EstimateScatteringVolumeCentreOfMass::EstimateScatteringVolumeCentreOfMass()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_elementPositions(), m_averagePos(), m_cubeSide(0.0) {}
 
