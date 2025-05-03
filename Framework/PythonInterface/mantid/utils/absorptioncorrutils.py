@@ -12,6 +12,7 @@ from mantid.simpleapi import (
     DeleteWorkspace,
     Divide,
     Load,
+    LoadEventNexus,
     Multiply,
     MultipleScatteringCorrection,
     PaalmanPingsAbsorptionCorrection,
@@ -628,7 +629,7 @@ def create_absorption_input(
     if metaws is None:
         absName = "__{}_abs".format(_getBasename(filename))
         allowed_log = ",".join(["SampleFormula", "SampleDensity", "BL11A:CS:ITEMS:HeightInContainerUnits", "SampleContainer", "SampleMass"])
-        Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
+        LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
     # attempt to get the wavelength from the function parameters
     if opt_wl_min > 0.0:
