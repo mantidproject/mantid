@@ -1,0 +1,1 @@
+- Replace `Load` with `LoadEventNexus` in ``mantid.utils.absorptioncorrutils`` to avoid complication.
