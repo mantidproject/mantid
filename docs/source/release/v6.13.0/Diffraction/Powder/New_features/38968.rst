@@ -1,0 +1,1 @@
+- A new method named ``getFittingParameter`` has been added to Mantid::Geometry::Component class and exposed to python to access fitting parameters from components in instrument definition file

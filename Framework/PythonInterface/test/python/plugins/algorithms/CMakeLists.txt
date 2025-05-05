@@ -29,6 +29,7 @@ set(TEST_PY_FILES
     CreateLeBailFitInputTest.py
     CorrectTOFTest.py
     CreateCacheFilenameTest.py
+    CreatePoleFigureTableWorkspaceTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
     CylinderPaalmanPingsCorrection2Test.py
@@ -111,6 +112,7 @@ set(TEST_PY_FILES
     PeakMatchingTest.py
     RebinRaggedTest.py
     RefineSingleCrystalGoniometerTest.py
+    PoldiAutoCorrelation6Test.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py
@@ -157,6 +159,7 @@ set(TEST_PY_FILES
     LoadCIFTest.py
     SaveYDATest.py
     SaveP2DTest.py
+    peakdata_utilsTest.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

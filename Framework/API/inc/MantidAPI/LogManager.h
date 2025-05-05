@@ -206,6 +206,9 @@ public:
   bool operator==(const LogManager &other) const;
   bool operator!=(const LogManager &other) const;
 
+  const std::string &getProtonChargeLogName() const { return PROTON_CHARGE_LOG_NAME; }
+  const std::string &getProtonChargeUnfilteredName() const { return PROTON_CHARGE_UNFILTERED_LOG_NAME; }
+
 protected:
   bool hasStartTime() const;
   bool hasEndTime() const;
@@ -219,7 +222,9 @@ protected:
   std::unique_ptr<Kernel::TimeROI> m_timeroi;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
-  static const char *PROTON_CHARGE_LOG_NAME;
+  static const std::string PROTON_CHARGE_LOG_NAME;
+  /// Flag to signify if a filter has been applied to the proton charge log
+  static const std::string PROTON_CHARGE_UNFILTERED_LOG_NAME;
 
 private:
   /// Cache for the retrieved single values

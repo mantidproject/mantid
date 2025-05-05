@@ -1,0 +1,1 @@
+- New algorithm :ref:`algm-ReflectometryISISCalculatePolEff` added. This algorithm provides a convenient wrapper for the :ref:`algm-ReflectometryISISCreateTransmission`, :ref:`algm-PolarizationEfficienciesWildes` and :ref:`algm-JoinISISPolarizationEfficiencies` algorithms.

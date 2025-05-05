@@ -76,6 +76,7 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes {{ quasielasticbayes }}
+    - quickbayes {{ quickbayes }}
     - zlib
 
   run_constrained:

@@ -39,6 +39,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + "._save_output_files")
     @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._check_ws_foc_and_ws_van_foc")
     @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
     @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
     @patch(enggutils_path + "._plot_focused_workspaces")
@@ -51,6 +52,7 @@ class FocusModelTest(unittest.TestCase):
         mock_plot,
         mock_load_run,
         mock_foc_run,
+        mock_check_foc_and_van_foc,
         mock_apply_van,
         mock_save_out,
         mock_conv_units,
@@ -126,12 +128,22 @@ class FocusModelTest(unittest.TestCase):
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + "._save_output_files")
     @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._check_ws_foc_and_ws_van_foc")
     @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
     @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
     @patch(enggutils_path + ".process_vanadium")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_save_directories_both_banks_with_RBnum(
-        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+        self,
+        mock_load_inst_cal,
+        mock_proc_van,
+        mock_load_run,
+        mock_foc_run,
+        mock_check_foc_and_van_foc,
+        mock_apply_van,
+        mock_save_out,
+        mock_conv_units,
+        mock_del_ws,
     ):
         rb_num = "1"
         van_run = "123456"
@@ -157,12 +169,22 @@ class FocusModelTest(unittest.TestCase):
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + "._save_output_files")
     @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._check_ws_foc_and_ws_van_foc")
     @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
     @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
     @patch(enggutils_path + ".process_vanadium")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_save_directories_texture_with_RBnum(
-        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+        self,
+        mock_load_inst_cal,
+        mock_proc_van,
+        mock_load_run,
+        mock_foc_run,
+        mock_check_foc_and_van_foc,
+        mock_apply_van,
+        mock_save_out,
+        mock_conv_units,
+        mock_del_ws,
     ):
         rb_num = "1"
         van_run = "123456"
@@ -186,12 +208,22 @@ class FocusModelTest(unittest.TestCase):
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + "._save_output_files")
     @patch(enggutils_path + "._apply_vanadium_norm")
+    @patch(enggutils_path + "._check_ws_foc_and_ws_van_foc")
     @patch(enggutils_path + "._focus_run_and_apply_roi_calibration")
     @patch(enggutils_path + "._load_run_and_convert_to_dSpacing")
     @patch(enggutils_path + ".process_vanadium")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_save_directories_texture30_with_RBnum(
-        self, mock_load_inst_cal, mock_proc_van, mock_load_run, mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units, mock_del_ws
+        self,
+        mock_load_inst_cal,
+        mock_proc_van,
+        mock_load_run,
+        mock_foc_run,
+        mock_check_foc_and_van_foc,
+        mock_apply_van,
+        mock_save_out,
+        mock_conv_units,
+        mock_del_ws,
     ):
         rb_num = "1"
         van_run = "123456"

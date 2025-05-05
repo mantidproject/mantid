@@ -10,10 +10,14 @@ import unittest
 import uuid
 
 from unittest import mock
-from sans.command_interface.ISISCommandInterface import MaskFile
+from sans.command_interface.ISISCommandInterface import Clean, MaskFile, set_save
+from sans.common.enums import OutputMode
 
 
 class ISISCommandInterfaceTest(unittest.TestCase):
+    def tearDown(self):
+        Clean()
+
     def test_mask_file_raises_for_empty_file_name(self):
         with self.assertRaises(ValueError):
             MaskFile(file_name="")
@@ -50,6 +54,25 @@ class ISISCommandInterfaceTest(unittest.TestCase):
         with mock.patch("sans.command_interface.ISISCommandInterface.find_full_file_path") as mocked_finder:
             mocked_finder.return_value = tmp_file.name
             self.assertIsNone(MaskFile(file_name))
+
+    def test_set_save_raises_an_error_with_wrong_save_algorithms(self):
+        save_algs = [{"SaveBad": "txt"}, {"SaveRKH": "txt", "SaveBad": "txt"}]
+
+        for alg in save_algs:
+            with self.subTest(test_case=alg), self.assertRaises(RuntimeError):
+                set_save(alg)
+
+    def test_output_mode_defaults_to_publish_to_ads_if_save_algs_is_none(self):
+        output_modes = [OutputMode.BOTH, OutputMode.SAVE_TO_FILE]
+
+        for mode in output_modes:
+            with self.subTest(test_case=mode):
+                output_mode = set_save(None, mode)
+                self.assertEqual(output_mode, OutputMode.PUBLISH_TO_ADS)
+
+    def test_output_mode_defaults_to_BOTH_if_there_is_a_save_alg(self):
+        output_mode = set_save({"SaveRKH": "txt"})
+        self.assertEqual(output_mode, OutputMode.BOTH)
 
 
 if __name__ == "__main__":

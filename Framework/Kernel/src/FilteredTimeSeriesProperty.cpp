@@ -154,6 +154,13 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
     deltaT = TimeSeriesProperty<TYPE>::nthInterval(n);
   } else {
     this->applyFilter();
+    // Throw exception if out of bounds
+    if (n < 0 || n >= static_cast<int>(this->m_filterIntervals.size())) {
+      const std::string error("nthInterval(): FilteredTimeSeriesProperty '" + this->name() + "' interval " +
+                              std::to_string(n) + " does not exist");
+      g_log.debug(error);
+      throw std::runtime_error(error);
+    }
     deltaT = this->m_filterIntervals[std::size_t(n)];
   }
 
@@ -405,7 +412,7 @@ Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(cons
   auto roi = new TimeROI(*m_filter.get());
   if (other && (!other->useAll()))
     roi->update_or_replace_intersection(*other);
-  return std::move(roi);
+  return roi;
 }
 
 template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>::getTimeROI() const {

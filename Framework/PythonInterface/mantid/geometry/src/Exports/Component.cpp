@@ -77,6 +77,9 @@ void export_Component() {
       // untill rows below do not work
       .def("getParameterType", &Component::getParameterType,
            Component_getParameterType((arg("self"), arg("pname"), arg("recursive") = true)))
+      .def("getFittingParameter", &Component::getFittingParameter, (arg("self"), arg("pname"), arg("xvalue")),
+           "Get fit parameter from the parameter map."
+           " The value of the parameter is determined from a look up table or a formula")
       //// this does not work for some obvious or not obvious reasons
       //.def("getParameter", &Component::getNumberParameter,
       // Component_getNumberParameter())
@@ -88,6 +91,5 @@ void export_Component() {
       // Component_getPositionParameter())
       //.def("getParameter", &Component::getRotationParameter,
       // Component_getRotationParameter())
-
       ;
 }

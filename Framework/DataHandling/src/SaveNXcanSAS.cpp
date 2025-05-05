@@ -24,6 +24,13 @@ void SaveNXcanSAS::init() { initStandardProperties(); }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() { return validateStandardInputs(); }
 
+bool SaveNXcanSAS::checkGroups() {
+  const Mantid::API::Workspace_sptr &workspace = getProperty("InputWorkspace");
+  if (workspace && workspace->isGroup())
+    return true;
+  return false;
+}
+
 bool SaveNXcanSAS::processGroups() {
   Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
   auto const &group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
@@ -38,9 +45,9 @@ bool SaveNXcanSAS::processGroups() {
 void SaveNXcanSAS::processAllWorkspaces() {
   m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3 * m_workspaces.size());
   auto baseFilename = getPropertyValue("Filename");
-  for (auto wksIndex = 0; wksIndex < static_cast<int>(m_workspaces.size()); wksIndex++) {
+  for (size_t wksIndex = 0; wksIndex < m_workspaces.size(); wksIndex++) {
     saveSingleWorkspaceFile(m_workspaces.at(wksIndex),
-                            NXcanSAS::prepareFilename(baseFilename, wksIndex, m_workspaces.size() > 1));
+                            NXcanSAS::prepareFilename(baseFilename, m_workspaces.size() > 1, wksIndex));
   }
 }
 

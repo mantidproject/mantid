@@ -120,7 +120,7 @@ This test covers the Cropping functionality in the ``Calibration`` tab.
 
 1. Change the ``RB Number`` to ``North``, this is purely to separate the cropped output files into their own space.
 
-2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and tick the ``Crop Calibration`` option. In the drop down ``Region of Interest`` select ``1 (North)``.
+2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and tick the ``Set Calibration Region of Interest`` option. In the drop down ``Region of Interest`` select ``1 (North)``.
 
 3. Check the ``Plot Calibrated Workspace`` checkbox and click ``Calibrate``.
 
@@ -146,7 +146,7 @@ This test covers the loading and plotting focused data in the fitting tab.
 .. note:: Sometimes it will be tricky to load ENGINX files from the archive and the red ``*`` next to the ``Browse`` button won't disappear. Proceeding with the red ``*`` will raise an error saying ``Check run numbers/path is valid.`` or ``Mantid is searching for data files. Please wait``. In such cases, please try re-entering the text and wait till the red ``*`` is cleared before proceeding. If the log level is set to Information, found path = 1 will be visible in the message log when the runs are found from the archive.
 
 1. Ensure you can access the ISIS data archive. In the ``Calibration`` tab, select ``Create New Calibration`` and enter ``Calibration sample`` # ``305738``. Before proceeding, make sure the red ``*`` next to the ``Browse`` button is disappeared when clicked somewhere outside that text box.
-   Untick ``Crop Calibration`` option and click on ``Calibrate`` button.
+   Untick ``Set Calibration Region of Interest`` option and click on ``Calibrate`` button.
 
 2.  On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521``. These sample runs have different stress and strain log values. Make sure the red ``*`` s next to the two ``Browse`` buttons are cleared when clicked outside the text boxes or wait otherwise. Then click ``Focus``.
 
@@ -288,7 +288,7 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 1. Close and re-open the Engineering Diffraction interface.
 
-2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and un-tick the ``Crop Calibration`` option.
+2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
 
 3. For the ``Calibration Sample #`` enter ``305738`` and click the ``Calibrate`` button.
 

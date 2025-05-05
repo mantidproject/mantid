@@ -78,7 +78,6 @@ set(SRC_FILES
     src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
     src/LoadInstrument.cpp
-    src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
     src/LoadIsawDetCal.cpp
     src/LoadLog.cpp
@@ -87,7 +86,6 @@ set(SRC_FILES
     src/LoadMask.cpp
     src/LoadMcStas.cpp
     src/LoadMcStasNexus.cpp
-    src/LoadMuonLog.cpp
     src/LoadMuonNexusV2.cpp
     src/LoadMuonNexusV2NexusHelper.cpp
     src/LoadMuonStrategy.cpp
@@ -96,7 +94,6 @@ set(SRC_FILES
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
     src/LoadNexusLogs.cpp
-    src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
     src/LoadNexusProcessed2.cpp
@@ -192,6 +189,7 @@ set(SRC_FILES
     src/SavePDFGui.cpp
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
+    src/SavePolarizedNXcanSAS.cpp
     src/SaveRKH.cpp
     src/SaveRMCProfile.cpp
     src/SaveReflectometryAscii.cpp
@@ -296,7 +294,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
     inc/MantidDataHandling/LoadInstrument.h
-    inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
     inc/MantidDataHandling/LoadIsawDetCal.h
     inc/MantidDataHandling/LoadLog.h
@@ -305,7 +302,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMask.h
     inc/MantidDataHandling/LoadMcStas.h
     inc/MantidDataHandling/LoadMcStasNexus.h
-    inc/MantidDataHandling/LoadMuonLog.h
     inc/MantidDataHandling/LoadMuonNexusV2.h
     inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
     inc/MantidDataHandling/LoadMuonStrategy.h
@@ -314,7 +310,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
     inc/MantidDataHandling/LoadNexusLogs.h
-    inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
     inc/MantidDataHandling/LoadNexusProcessed2.h
@@ -407,6 +402,7 @@ set(INC_FILES
     inc/MantidDataHandling/SavePDFGui.h
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
+    inc/MantidDataHandling/SavePolarizedNXcanSAS.h
     inc/MantidDataHandling/SaveRKH.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
@@ -506,7 +502,6 @@ set(TEST_FILES
     LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
-    LoadInstrumentFromNexusTest.h
     LoadInstrumentFromRawTest.h
     LoadInstrumentTest.h
     LoadIsawDetCalTest.h
@@ -516,7 +511,6 @@ set(TEST_FILES
     LoadMaskTest.h
     LoadMcStasNexusTest.h
     LoadMcStasTest.h
-    LoadMuonLogTest.h
     LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h
@@ -606,6 +600,7 @@ set(TEST_FILES
     SavePDFGuiTest.h
     SavePHXTest.h
     SaveParameterFileTest.h
+    SavePolarizedNXcanSASTest.h
     SaveRKHTest.h
     SaveRMCProfileTest.h
     SaveReflectometryAsciiTest.h
@@ -678,7 +673,6 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
-         Mantid::Muon
   PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry Mantid::LegacyNexus
 )
 

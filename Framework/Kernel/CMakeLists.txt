@@ -97,6 +97,7 @@ set(SRC_FILES
     src/SetValueWhenProperty.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
+    src/SpinStateValidator.cpp
     src/SplittingInterval.cpp
     src/StartsWithValidator.cpp
     src/Statistics.cpp
@@ -262,6 +263,7 @@ set(INC_FILES
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
+    inc/MantidKernel/SpinStateValidator.h
     inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
     inc/MantidKernel/Statistics.h
@@ -412,6 +414,7 @@ set(TEST_FILES
     ShrinkToFitTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
+    SpinStateValidatorTest.h
     SplittingIntervalTest.h
     StartsWithValidatorTest.h
     StatisticsTest.h

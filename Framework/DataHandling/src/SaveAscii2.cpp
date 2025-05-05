@@ -169,7 +169,7 @@ void SaveAscii2::exec() {
   }
 
   if (!m_ws) {
-    throw std::runtime_error("SaveAscii does not now how to save this workspace type, " + ws->getName());
+    throw std::runtime_error("SaveAscii does not know how to save this workspace type, " + ws->getName());
   }
 
   // Get the properties valid for matrix workspaces
