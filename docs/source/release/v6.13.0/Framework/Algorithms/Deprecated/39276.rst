@@ -1,0 +1,1 @@
+- :ref:`algm-IntegratePeaksMD-v1` has been deprecated, use :ref:`algm-IntegratePeaksMD-v2` instead.

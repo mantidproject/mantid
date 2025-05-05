@@ -44,6 +44,12 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 
+/// Default constructor
+IntegratePeaksMD::IntegratePeaksMD() {
+  useAlgorithm("IntegratePeaksMD", 2);
+  deprecatedDate("2025-05-05");
+}
+
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD::init() {
