@@ -261,7 +261,7 @@ private:
     // openpath checks
     file.openPath("/entry/data/comp_data");
     file.openPath("/entry/data/comp_data");
-    // file.openPath("../r8_data");
+    file.openPath("../r8_data");
     cout << "NXopenpath checks OK\n";
 
     // everything went fine

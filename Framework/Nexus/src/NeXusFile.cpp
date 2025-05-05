@@ -5,15 +5,12 @@
 #include <array>
 #include <cassert>
 #include <cstring>
-#include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sstream>
 #include <typeinfo>
 
-#define LOG_ERROR(func)                                                                                                \
-  printf("NeXusFile %s L%d %s\n", func, __LINE__, this->getPath().c_str());                                            \
-  fflush(stdout);
+#define NXEXCEPTION(message) Exception(message, __func__, m_filename);
 
 using namespace NeXus;
 using namespace Mantid::NeXus;
@@ -39,6 +36,7 @@ namespace { // anonymous namespace to keep it in the file
 
 constexpr std::string group_class_spec("NX_class");
 constexpr std::string target_attr_name("target");
+constexpr std::string scientific_data_set("SDS");
 constexpr int default_deflate_level(6);
 
 template <typename NumT> static std::string toString(vector<NumT> const &data) {
@@ -176,13 +174,13 @@ static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
   return iPtype;
 }
 
-void recursivePopulateEntries(H5::Group *grp, Entries &entries) {
+void recursivePopulateEntries(H5::Group const &grp, Entries &entries) {
   // get the path and class of this group
-  std::string const groupNameStr = grp->getObjName();
+  std::string const groupNameStr = grp.getObjName();
   std::string nxClass = "";
   if (groupNameStr != "/") {
-    if (grp->attrExists(group_class_spec)) {
-      H5::Attribute const attr = grp->openAttribute(group_class_spec);
+    if (grp.attrExists(group_class_spec)) {
+      H5::Attribute const attr = grp.openAttribute(group_class_spec);
       attr.read(attr.getDataType(), nxClass);
     }
   }
@@ -192,16 +190,15 @@ void recursivePopulateEntries(H5::Group *grp, Entries &entries) {
   }
 
   // recursively grab all entries within this group
-  for (hsize_t i = 0; i < grp->getNumObjs(); i++) {
-    H5G_obj_t type = grp->getObjTypeByIdx(i);
-    H5std_string memberName = grp->getObjnameByIdx(i);
+  for (hsize_t i = 0; i < grp.getNumObjs(); i++) {
+    H5G_obj_t type = grp.getObjTypeByIdx(i);
+    H5std_string memberName = grp.getObjnameByIdx(i);
 
     if (type == H5G_GROUP) {
-      H5::Group subgrp = grp->openGroup(memberName);
-      recursivePopulateEntries(&subgrp, entries);
+      recursivePopulateEntries(grp.openGroup(memberName), entries);
     } else if (type == H5G_DATASET) {
       std::string absoluteEntryName = groupNameStr + "/" + memberName;
-      entries[absoluteEntryName] = "SDS";
+      entries[absoluteEntryName] = scientific_data_set;
     }
   }
 }
@@ -249,33 +246,40 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(bool const) { return NXnumtype::B
 namespace NeXus {
 
 File::File(std::string const &filename, NXaccess const access)
-    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_close_handle(true) {
-  this->m_stack.push_back(nullptr);
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
+      m_current(nullptr), m_close_handle(true) {
+  recursivePopulateEntries(getRoot(), m_fileTree);
 };
 
 File::File(char const *filename, NXaccess const access)
-    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_close_handle(true) {
-  this->m_stack.push_back(nullptr);
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
+      m_current(nullptr), m_close_handle(true) {
+  recursivePopulateEntries(getRoot(), m_fileTree);
 };
 
 // copy constructors
 
 File::File(File const &f)
-    : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_stack(f.m_stack), m_close_handle(false) {}
+    : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_path(f.m_path), m_current(f.m_current),
+      m_close_handle(false), m_fileTree(f.m_fileTree) {}
 
 File::File(File const *const pf)
-    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_stack(pf->m_stack), m_close_handle(false) {}
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
+      m_close_handle(false), m_fileTree(pf->m_fileTree) {}
 
 File::File(std::shared_ptr<File> pf)
-    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_stack(pf->m_stack), m_close_handle(false) {}
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
+      m_close_handle(false), m_fileTree(pf->m_fileTree) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
-    this->m_stack = f.m_stack;
+    this->m_path = f.m_path;
+    this->m_current = f.m_current;
     this->m_close_handle = f.m_close_handle;
+    this->m_fileTree = f.m_fileTree;
   }
   return *this;
 }
@@ -288,23 +292,26 @@ File::~File() {
   if (this->m_close_handle) {
     H5::H5File::close();
   }
-  m_stack.clear();
 }
 
-void File::close() {
-  H5::H5File::close();
-  m_stack.clear();
-}
+void File::close() { H5::H5File::close(); }
 
 void File::flush(H5F_scope_t scope) const { H5::H5File::flush(scope); }
 
-H5::Group *File::getRoot() { return dynamic_cast<H5::Group *>(this); }
+H5::H5File File::getRoot() {
+  // return std::dynamic_pointer_cast<H5::Group>(std::make_shared<::NeXus::File>(this));
+  // H5::H5File *cpy = dynamic_cast<H5::H5File *>(this);
+  // return *cpy;
+  return *this;
+}
 
 /** Return a pointer corresponding to current location in file stack. */
-H5::H5Location *File::getCurrentLocation() {
-  H5::H5Location *ret = m_stack.back().get();
-  if (m_stack.back() == nullptr) {
-    ret = this->getRoot();
+std::shared_ptr<H5::H5Location> File::getCurrentLocation() {
+  std::shared_ptr<H5::H5Location> ret;
+  if (m_current == nullptr) {
+    ret = std::make_shared<H5::H5File>(getRoot());
+  } else {
+    ret = m_current;
   }
   return ret;
 }
@@ -315,18 +322,25 @@ template <typename T> std::string H5TypeAsString() { return "unknown"; }
 template <> std::string H5TypeAsString<H5::H5Object>() { return "H5Object"; }
 template <> std::string H5TypeAsString<H5::Group>() { return "Group"; }
 template <> std::string H5TypeAsString<H5::DataSet>() { return "DataSet"; }
+template <> std::string H5TypeAsString<H5::H5File>() { return "H5File"; }
 } // namespace
 
 /** Return a pointer corresponding to current location in file stack,
  * cast to pointer of indicated type.
  */
-template <typename T> T *File::getCurrentLocationAs() {
-  T *loc = dynamic_cast<T *>(this->getCurrentLocation());
-  if (loc == nullptr) {
+template <typename T> std::shared_ptr<T> File::getCurrentLocationAs() {
+  std::shared_ptr<T> loc;
+  if (m_current == nullptr) {
+    std::shared_ptr<H5::H5File> proot = std::make_shared<H5::H5File>(getRoot().getId());
+    loc = std::dynamic_pointer_cast<T>(proot);
+  } else {
+    loc = std::dynamic_pointer_cast<T>(m_current);
+  }
+  if (loc.get() == nullptr) {
     std::stringstream msg;
     msg << "Could not cast current location to needed H5Cpp type (requested=" << H5TypeAsString<T>() << ") at "
         << getPath();
-    throw Exception(msg.str(), "getCurrentLocationAs", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   return loc;
 }
@@ -339,165 +353,191 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
 }
 
 bool File::hasGroup(std::string const &name) {
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
-  return current->nameExists(name);
+  return (m_fileTree.count(name) && m_fileTree[name] != scientific_data_set);
 }
 
 bool File::hasData(std::string const &name) {
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
-  return current->nameExists(name);
+  return (m_fileTree.count(name) && m_fileTree[name] == scientific_data_set);
+}
+
+std::filesystem::path File::formAbsolutePath(std::string const &new_name) {
+  // try forming path relative to current location
+  std::filesystem::path new_path(new_name);
+  if (!new_path.is_absolute()) {
+    new_path = (m_path / new_name).lexically_normal();
+    if (!m_fileTree.count(new_path)) {
+      // else, try making path relative to parent
+      new_path = (m_path.parent_path() / new_name).lexically_normal();
+      if (!m_fileTree.count(new_path)) {
+        // else, try making relative to root
+        new_path = std::filesystem::path("/" + new_name).lexically_normal();
+        if (!m_fileTree.count(new_path)) {
+          // else, the name does not exist: throw an error
+          throw NXEXCEPTION("Path error: " + new_name + " can not be opened from " + m_path.string());
+        }
+      }
+    }
+  }
+  return new_path;
+}
+
+void File::registerEntry(std::string const &path, std::string const &name) {
+  if (!std::filesystem::path(path).is_absolute()) {
+    throw NXEXCEPTION("Paths must be absolute: " + path);
+  } else if (!this->nameExists(path)) {
+    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
+  } else {
+    m_fileTree[path] = name;
+  }
 }
 
 void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
   if (name.empty()) {
-    throw Exception("Supplied empty name", "makeGroup", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   if (class_name.empty()) {
-    throw Exception("Supplied empty class name", "makeGroup", m_filename);
+    throw NXEXCEPTION("Supplied empty class name");
   }
   // make the group
-  H5::Group *current = this->getCurrentLocationAs<H5::Group>();
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
   H5::Group newGrp = H5Util::createGroupNXS(*current, name, class_name);
+  registerEntry(m_path / name, class_name);
   if (open_group) {
-    this->m_stack.push_back(std::make_shared<H5::Group>(newGrp));
+    m_path /= name;
+    m_current = std::make_shared<H5::Group>(newGrp);
   }
 }
 
 void File::openGroup(std::string const &name, std::string const &class_name) {
   if (name.empty()) {
-    throw Exception("Supplied empty name", "openGroup", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   if (class_name.empty()) {
-    throw Exception("Supplied empty class name", "openGroup", m_filename);
+    throw NXEXCEPTION("Supplied empty class name");
   }
-  auto current = this->getCurrentLocationAs<H5::Group>();
-  if (!H5Util::groupExists(*current, name)) {
-    throw Exception("The supplied group name=" + name + " does not exist", "openGroup", m_filename);
+  std::filesystem::path new_path = formAbsolutePath(name);
+  if (new_path == m_path) {
+    return;
   }
-  std::shared_ptr<H5::Group> grp = std::make_shared<H5::Group>(current->openGroup(name));
-  if (!verifyGroupClass(*(grp.get()), class_name)) {
-    throw Exception("Invalid group class=" + class_name + " name=" + name, "openGroup", m_filename);
+  if (m_fileTree.count(new_path)) {
+    H5::Group grp = H5::H5File::openGroup(new_path);
+    if (!verifyGroupClass(grp, class_name)) {
+      throw NXEXCEPTION("Invalid group class=" + class_name + " name=" + name);
+    } else {
+      m_path = new_path;
+      m_current = std::make_shared<H5::Group>(grp);
+    }
+  } else {
+    throw NXEXCEPTION("The supplied group name=" + name + " does not exist");
   }
-  this->m_stack.push_back(grp);
 }
 
 void File::openPath(std::string const &pathname) {
   if (pathname.empty()) {
-    throw Exception("Supplied empty path", "openPath", m_filename);
+    throw NXEXCEPTION("Supplied empty path");
   }
-  std::filesystem::path path(pathname);
-  if (!path.is_absolute()) {
-    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openPath", m_filename);
+  std::filesystem::path new_path = formAbsolutePath(pathname);
+  if (new_path == m_path) {
+    return;
   }
-
-  // verify that this is a different path than where it is current at
-  if (pathname == this->getPath())
-    return; // early
-
-  // create a new stack -- will replace old if opening succeeds
-  std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
-
-  H5::H5Object *current;
-
-  // open all entries in path iteratively
-  for (auto isubpath = ++path.begin(); isubpath != path.end(); isubpath++) {
-    std::string name = (*isubpath);
-    // get most recent pointer on new stack
-    current = dynamic_cast<H5::H5Object *>(new_stack.back().get());
-    if (current == nullptr) {
-      current = this;
+  if (new_path.string() == "/") {
+    m_path = new_path;
+    m_current = nullptr;
+  } else if (this->nameExists(new_path)) {
+    // if the path exists:
+    // -- open the enclosing group,
+    // -- check the type of the entry, Group or DataSet
+    // -- open with appropriate method
+    std::string name;
+    if (new_path.has_stem()) {
+      name = new_path.stem();
+    } else {
+      name = new_path.parent_path();
     }
-    if (!current->nameExists(name)) {
-      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openPath", m_filename);
+    H5::Group parent = H5::H5File::openGroup(new_path.parent_path());
+    if (!parent.nameExists(name)) {
+      throw NXEXCEPTION("Unable to open the entry named " + name + " inside " + new_path.parent_path().string());
     }
-    H5O_type_t type = current->childObjType(name);
+    H5O_type_t type = parent.childObjType(name);
     if (type == H5O_TYPE_GROUP) {
-      if (current == this) {
-        // open the top-level entry -- has to use H5::H5File openGroup
-        new_stack.push_back(std::make_shared<H5::Group>(H5::H5File::openGroup(name)));
-      } else {
-        new_stack.push_back(std::make_shared<H5::Group>(current->openGroup(name)));
-      }
+      m_current = std::make_shared<H5::Group>(parent.openGroup(name));
     } else if (type == H5O_TYPE_DATASET) {
-      new_stack.push_back(std::make_shared<H5::DataSet>(current->openDataSet(name)));
+      m_current = std::make_shared<H5::DataSet>(parent.openDataSet(name));
+    } else {
+      throw NXEXCEPTION("Found unknown entry type ");
     }
+    m_path = new_path;
+  } else {
+    throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
   }
-  // copy the new stack onto the old stack
-  this->m_stack.clear();
-  this->m_stack.resize(new_stack.size());
-  std::copy(new_stack.cbegin(), new_stack.cend(), this->m_stack.begin());
 }
 
 void File::openGroupPath(std::string const &pathname) {
   if (pathname.empty()) {
-    throw Exception("Supplied empty path to openPath", "openPath", m_filename);
+    throw NXEXCEPTION("Supplied empty path");
   }
-  std::filesystem::path path(pathname);
-  if (!path.is_absolute()) {
-    throw Exception("paths must be absolute, beginning with /, supplied " + pathname, "openGroupPath", m_filename);
+  std::filesystem::path new_path = formAbsolutePath(pathname);
+  if (new_path == m_path) {
+    return;
   }
-  // create a new stack to replace old -- will only happen if opening succeeds
-  std::vector<std::shared_ptr<H5::H5Location>> new_stack(1, nullptr);
-
-  H5::H5Object *current;
-
-  // open all entries in path iteratively
-  for (auto isubpath = ++path.begin(); isubpath != path.end(); isubpath++) {
-    std::string name = (*isubpath);
-    // get most recent pointer on new stack
-    current = dynamic_cast<H5::H5Object *>(new_stack.back().get());
-    if (current == nullptr) {
-      current = this;
-    }
-    if (!current->nameExists(name)) {
-      throw Exception("invalid path element " + name + " in " + string(path) + ".", "openGroupPath", m_filename);
-    }
-    H5O_type_t type = current->childObjType(name);
+  if (new_path == "/") {
+    m_path = new_path;
+    m_current = nullptr;
+  }
+  if (m_fileTree.count(new_path)) {
+    // if the path exists:
+    // -- open the enclosing group,
+    // -- check the type of the entry, Group or DataSet
+    // -- if group, open it; if dataset, use the parent
+    std::string name = new_path.stem();
+    H5::Group parent = H5::H5File::openGroup(new_path.parent_path());
+    H5O_type_t type = parent.childObjType(name);
     if (type == H5O_TYPE_GROUP) {
-      if (current == this) {
-        // open the top-level entry -- has to use H5::H5File openGroup
-        new_stack.push_back(std::make_shared<H5::Group>(H5::H5File::openGroup(name)));
-      } else {
-        new_stack.push_back(std::make_shared<H5::Group>(current->openGroup(name)));
-      }
+      m_current = std::make_shared<H5::Group>(parent.openGroup(name));
+    } else if (type == H5O_TYPE_DATASET) {
+      m_current = std::make_shared<H5::Group>(parent);
     } else {
-      // only want to get groups
-      break;
+      throw NXEXCEPTION("Found unknown entry type at " + new_path);
     }
+    m_path = new_path;
+  } else {
+    throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
   }
-  // copy the new stack onto the old stack
-  this->m_stack.clear();
-  this->m_stack.resize(new_stack.size());
-  std::copy(new_stack.cbegin(), new_stack.cend(), this->m_stack.begin());
 }
 
-string File::getPath() { return this->getCurrentLocationAs<H5::H5Object>()->getObjName(); }
+string File::getPath() { return m_path; }
 
 void File::closeGroup() {
-  if (this->getCurrentLocation() == this) {
+  if (m_path == "/") {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else {
-    H5::Group *grp = this->getCurrentLocationAs<H5::Group>();
+    std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
     grp->close();
-    this->m_stack.pop_back();
+    m_path = m_path.parent_path();
+    if (m_path == "/") {
+      m_current = nullptr;
+    } else {
+      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+    }
   }
 }
 
 void File::makeData(std::string const &name, NXnumtype datatype, DimVector const &dims, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("Supplied empty label", "makeData", m_filename);
+    throw NXEXCEPTION("Supplied empty label");
   }
   if (dims.empty()) {
-    throw Exception("Supplied empty dimensions", "makeData", m_filename);
+    throw NXEXCEPTION("Supplied empty dimensions");
   }
-  // ensure we are in a group
-  H5::Group *current = this->getCurrentLocationAs<H5::Group>();
   // ensure we are not at root -- NeXus should not allow datsets at root
-  if (current == this->getRoot()) {
-    throw Exception("Cannot create dataset at root level in NeXus", "makeData", m_filename);
+  if (m_path == "/") {
+    throw NXEXCEPTION("Cannot create dataset at root level in NeXus");
   }
+
+  // ensure we are in a group -- we cannot make data inside a dataset
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
 
   // check if any dimension is unlimited
   bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](dimsize_t const x) -> bool { return x == NX_UNLIMITED; });
@@ -508,11 +548,13 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
     H5::DataSpace ds((int)dims.size(), toDimArray(dims).data());
     try {
       H5::DataSet data = current->createDataSet(name, nxToHDF5Type(datatype), ds);
+      registerEntry(m_path / name, scientific_data_set);
       if (open_data) {
-        this->m_stack.push_back(std::make_shared<H5::DataSet>(data));
+        m_path /= name;
+        m_current = std::make_shared<H5::DataSet>(data);
       }
     } catch (...) {
-      throw Exception("Datasets cannot be created at current location", "makeData", m_filename);
+      throw NXEXCEPTION("Datasets cannot be created at current location: " + getPath());
     }
   } else {
     // farm out to makeCompData
@@ -524,7 +566,7 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
       }
       this->makeCompData(name, datatype, dims, NXcompression::NONE, chunk, open_data);
     } catch (...) {
-      throw Exception("Datasets cannot be created at current location", "makeData", m_filename);
+      throw NXEXCEPTION("Datasets cannot be created at current location");
     }
   }
 }
@@ -612,19 +654,19 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
                         DimSizeVector const &chunk, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("Supplied empty name", "makeCompData", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   if (dims.empty()) {
-    throw Exception("Supplied empty dimensions name=" + name, "makeCompData", m_filename);
+    throw NXEXCEPTION("Supplied empty dimensions name=" + name);
   }
   if (chunk.empty()) {
-    throw Exception("Supplied empty bufsize name=" + name, "makeCompData", m_filename);
+    throw NXEXCEPTION("Supplied empty bufsize name=" + name);
   }
   if (dims.size() != chunk.size()) {
     stringstream msg;
     msg << "Supplied dims rank=" << dims.size() << " must match supplied bufsize rank=" << chunk.size()
         << " name=" << name;
-    throw Exception(msg.str(), "makeCompData", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   std::set<NXcompression> const supported_comp{NXcompression::LZW, NXcompression::CHUNK, NXcompression::NONE};
   if (supported_comp.count(comp) == 0) {
@@ -632,7 +674,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     comp = NXcompression::NONE;
   }
   // ensure current location is a group
-  H5::Group *current = this->getCurrentLocationAs<H5::Group>();
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
 
   // check if any data is unlimited
   bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](auto x) -> bool { return x == NX_UNLIMITED; });
@@ -690,6 +732,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the dataset with the compression parameters
   H5::DataSet dataset = current->createDataSet(name, datatype, dataspace, cparms);
+  registerEntry(m_path / name, scientific_data_set);
 
   if (unlimited) {
     dataset.extend(mydims.data());
@@ -709,34 +752,37 @@ void File::writeCompData(std::string const &name, vector<NumT> const &value, Dim
 
 void File::openData(std::string const &name) {
   if (name.empty()) {
-    throw Exception("Supplied empty name", "openData", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   // napi used to allow opening datasets at same level without closing previous
   // many client codes follow this (bad) usage, therefore it needs to be enabled
-  if (this->isDataSetOpen()) {
-    std::cerr << "Warning: Previous dataset unclosed before opening another. "
-              << "Current dataset will be closed and requested data found in parent group.\n";
-    this->closeData();
-  }
-  auto current = this->getCurrentLocationAs<H5::H5Object>();
-  if (current->nameExists(name)) {
-    H5::DataSet data = current->openDataSet(name);
-    std::shared_ptr<H5::DataSet> pdata = std::make_shared<H5::DataSet>(data);
-    this->m_stack.push_back(pdata);
+  std::filesystem::path new_path = formAbsolutePath(name);
+  if (m_fileTree.count(new_path)) {
+    m_path = new_path;
+    m_current = std::make_shared<H5::DataSet>(this->openDataSet(m_path));
   } else {
-    throw Exception("The indicated dataset does not exist name=" + name, "openData", m_filename);
+    throw NXEXCEPTION("The indicated dataset does not exist name=" + name);
   }
+  // if (this->isDataSetOpen()) {
+  //   std::cerr << "Warning: Previous dataset unclosed before opening another. "
+  //             << "Current dataset will be closed and requested data found in parent group.\n";
+  //   this->closeData();
+  // }
 }
 
 void File::closeData() {
-  try {
-    H5::DataSet *data = this->getCurrentLocationAs<H5::DataSet>();
-
-    data->close();
-    this->m_stack.pop_back();
-  } catch (...) {
-
-    throw Exception("Object at current location is not a dataset", "closeData", m_filename);
+  if (m_current == nullptr) {
+    // do nothing in the root -- this preserves behavior from napi
+    return;
+  } else {
+    std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+    dataset->close();
+    m_path = m_path.parent_path();
+    if (m_path == "/") {
+      m_current = nullptr;
+    } else {
+      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+    }
   }
 }
 
@@ -745,7 +791,7 @@ template <typename NumT> void File::putData(NumT const *data) {
     throw NXEXCEPTION("Data specified as null");
   }
 
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   DimArray dims{0}, maxdims{0}, start{0}, size{0};
 
   auto ds = dataset->getSpace();
@@ -774,14 +820,14 @@ template <typename NumT> void File::putData(NumT const *data) {
     try {
       dataset->write(data, H5Util::getType<NumT>());
     } catch (...) {
-      throw Exception("Failed to write data", "putData", m_filename);
+      throw NXEXCEPTION("Failed to write data");
     }
   }
 }
 
 template <typename NumT> void File::putData(vector<NumT> const &data) {
   if (data.empty()) {
-    throw Exception("Supplied empty data", "putData", m_filename);
+    throw NXEXCEPTION("Supplied empty data");
   }
   this->putData<NumT>(data.data());
 }
@@ -792,29 +838,29 @@ template <> MANTID_NEXUS_DLL void File::putData<std::string>(std::string const *
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
   if (name.empty()) {
-    throw Exception("Supplied empty name to putAttr", "putAttr", m_filename);
+    throw NXEXCEPTION("Supplied empty name to putAttr");
   }
 
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   H5Util::writeNumAttribute<NumT>(*current, name, value);
 }
 
 void File::putAttr(std::string const &name, std::string const &value, bool const empty_add_space) {
   if (name.empty()) {
-    throw Exception("Supplied empty name", "putAttr", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   std::string my_value(value);
   if (my_value.empty() && empty_add_space) {
     my_value = " "; // Make a default "space" to avoid errors.
   }
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   H5Util::writeStrAttribute(*current, name, my_value);
 }
 
 // this will handle string literals, which is the preferred way to pass string attributes
 void File::putAttr(std::string const &name, char const *value) {
   if (value == nullptr) {
-    throw Exception("cannot write null data to attribute " + name, "putAttr", m_filename);
+    throw NXEXCEPTION("cannot write null data to attribute " + name);
   } else {
     putAttr(name, std::string(value), false);
   }
@@ -823,26 +869,26 @@ void File::putAttr(std::string const &name, char const *value) {
 template <typename NumT>
 void File::putSlab(NumT const *const data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("Data specified as null", "putSlab", m_filename);
+    throw NXEXCEPTION("Data specified as null");
   }
   if (start.empty()) {
-    throw Exception("Supplied empty start", "putSlab", m_filename);
+    throw NXEXCEPTION("Supplied empty start");
   }
   if (size.empty()) {
-    throw Exception("Supplied empty size", "putSlab", m_filename);
+    throw NXEXCEPTION("Supplied empty size");
   }
   if (start.size() != size.size()) {
     stringstream msg;
     msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
-    throw Exception(msg.str(), "putSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   if (start.size() > NX_MAXRANK) {
     stringstream msg;
     msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
-    throw Exception(msg.str(), "putSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   // check if there is a dataset open
-  auto *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
 
   // get the datatype, dataspace, and dimensions
   auto iCurrentT = iCurrentD->getDataType();
@@ -916,7 +962,7 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 
 NXlink File::getDataID() {
   // make sure current location is a dataset
-  auto *current = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> current = this->getCurrentLocationAs<H5::DataSet>();
 
   /*
     this means: if the item is already linked: use the target attribute;
@@ -933,14 +979,14 @@ NXlink File::getDataID() {
 }
 
 bool File::isDataSetOpen() {
-  H5::DataSet const *current = dynamic_cast<H5::DataSet const *>(getCurrentLocation());
+  H5::DataSet const *current = dynamic_cast<H5::DataSet const *>(getCurrentLocation().get());
   return current != nullptr;
 }
 /*----------------------------------------------------------------------*/
 
 void File::makeLink(NXlink &link) {
   // construct a path to the target
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   std::filesystem::path linkTarget = std::string(current->getObjName());
   linkTarget /= std::filesystem::path(link.targetPath).stem();
 
@@ -956,11 +1002,11 @@ void File::makeLink(NXlink &link) {
 
 template <typename NumT> void File::getData(NumT *const data) {
   if (data == NULL) {
-    throw Exception("Supplied null pointer to write data to", "getData", m_filename);
+    throw NXEXCEPTION("Supplied null pointer to write data to");
   }
 
   // make sure this is a data set
-  H5::DataSet *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
   H5::DataType iCurrentT = iCurrentD->getDataType();
 
   // make sure the data has the correct type
@@ -968,7 +1014,7 @@ template <typename NumT> void File::getData(NumT *const data) {
     std::stringstream msg;
     msg << "inconsistent NXnumtype file datatype=" << hdf5ToNXType(iCurrentT)
         << " supplied datatype=" << getType<NumT>();
-    throw Exception(msg.str(), "getData", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   // // make sure this is not a string
   // if (iCurrentT.getClass() == H5T_STRING) {
@@ -987,42 +1033,42 @@ template <typename NumT> void File::getData(NumT *const data) {
       iCurrentD->read(data, iCurrentT);
     }
   } catch (...) {
-    throw Exception("Failed to get data", "getData", m_filename);
+    throw NXEXCEPTION("Failed to get data");
   }
 }
 
 template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const data) {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5::DataType datatype = dataset->getDataType();
   H5T_class_t typeclass = datatype.getClass();
   if (datatype != H5::PredType::NATIVE_CHAR && typeclass != H5T_STRING) {
     stringstream msg;
     msg << "Cannot use on-character data. Found type=" << typeclass;
-    throw Exception(msg.str(), "getData<string>", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   H5::DataSpace dataspace = dataset->getSpace();
   int rank = dataspace.getSimpleExtentNdims();
   if (rank > 1) {
     stringstream msg;
     msg << "Only understand rank=1 data. Found rank=" << rank;
-    throw Exception(msg.str(), "getData<string>", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   *data = H5Util::readString(*dataset);
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5Util::readArray1DCoerce(*dataset, data);
 }
 
 template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::string> &data) {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   std::vector<std::string> res = H5Util::readStringVector(*dataset);
   data.assign(res.cbegin(), res.cend());
 }
 
 std::string File::getStrData() {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   const std::string value = H5Util::readString(*dataset);
   if (value == " ") {
     return "";
@@ -1032,27 +1078,27 @@ std::string File::getStrData() {
 }
 
 template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5Util::readArray1DCoerce(*dataset, data);
 }
 
 template <typename NumT> void File::getSlab(NumT *const data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("Supplied null pointer for data", "getSlab", m_filename);
+    throw NXEXCEPTION("Supplied null pointer for data");
   }
   if (start.size() == 0) {
     stringstream msg;
     msg << "Supplied empty start offset, rank = " << start.size();
-    throw Exception(msg.str(), "getSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   if (start.size() != size.size()) {
     stringstream msg;
     msg << "start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str(), "getSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
 
   // check if there is a dataset open
-  auto *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
 
   // get the datatype, dataspace, and dimensions
   auto iCurrentT = iCurrentD->getDataType();
@@ -1082,21 +1128,21 @@ template <>
 MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *const data, const DimSizeVector &start,
                                                  const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("Supplied null pointer for data", "getSlab", m_filename);
+    throw NXEXCEPTION("Supplied null pointer for data");
   }
   if (start.size() == 0) {
     stringstream msg;
     msg << "Supplied empty start offset, rank = " << start.size();
-    throw Exception(msg.str(), "getSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
   if (start.size() != size.size()) {
     stringstream msg;
     msg << "start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str(), "getSlab", m_filename);
+    throw NXEXCEPTION(msg.str());
   }
 
   // check if there is a dataset open
-  auto *iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
 
   // get the datatype, dataspace, and dimensions
   auto iCurrentT = iCurrentD->getDataType();
@@ -1149,14 +1195,14 @@ void File::readData(std::string const &dataName, std::string &data) {
 }
 
 bool File::isDataInt() {
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5::DataType datatype = dataset->getDataType();
   return datatype.getClass() == H5T_INTEGER;
 }
 
 Info File::getInfo() {
   // ensure current location is a dataset
-  H5::DataSet *dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
 
   // get the datatype
   auto dt = dataset->getDataType();
@@ -1203,23 +1249,18 @@ void File::getEntries(Entries &result) {
 
 void File::getEntryDirectory(Entries &result) {
   result.clear();
-  recursivePopulateEntries(this->getRoot(), result);
+  recursivePopulateEntries(getRoot(), result);
 }
 
 std::string File::getTopLevelEntryName() {
   std::string top("");
 
-  // go to root and verify
-  H5::Group *root = this->getRoot();
-  if (root == nullptr) {
-    throw Exception("Invalid file has no root", "getTopLevelEntryName", m_filename);
-  }
-  // look for first group of class NXentry
+  // look for first group off of root of class NXentry
   std::size_t firstGrp = 0;
-  for (; firstGrp < root->getNumObjs(); firstGrp++) {
-    if (root->getObjTypeByIdx(firstGrp) == H5G_GROUP) {
-      top = root->getObjnameByIdx(firstGrp);
-      H5::Group grp = root->openGroup(top);
+  for (; firstGrp < this->getNumObjs(); firstGrp++) {
+    if (this->getObjTypeByIdx(firstGrp) == H5G_GROUP) {
+      top = this->getObjnameByIdx(firstGrp);
+      H5::Group grp = H5::H5File::openGroup(top);
       if (this->verifyGroupClass(grp, "NXentry")) {
         break;
       } else {
@@ -1228,16 +1269,16 @@ std::string File::getTopLevelEntryName() {
     }
   }
   if (top.empty()) {
-    throw Exception("unable to find top-level entry, no valid groups", "getTopLevelEntryName", m_filename);
+    throw NXEXCEPTION("unable to find top-level entry, no valid groups");
   }
   return top;
 }
 
 template <typename NumT> void File::getAttr(std::string const &name, NumT &value) {
   // verify the current location can hold an attribute, and has the attribute named
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object const> const current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw Exception("did not find name=" + name, "getAttr", m_filename);
+    throw NXEXCEPTION("did not find name=" + name);
   }
 
   // now open the attribute, read it, and close
@@ -1250,9 +1291,9 @@ template <typename NumT> void File::getAttr(std::string const &name, NumT &value
 // for string case, use H5::Attribute::read(const DataType &mem_type, H5std_string &strg)
 template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::string &value) {
   // verify the current location can hold an attribute, and has the attribute named
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw Exception("did not find name=" + name, "getAttr", m_filename);
+    throw NXEXCEPTION("did not find name=" + name);
   }
 
   // open the attribute, and read it
@@ -1267,7 +1308,7 @@ template <typename NumT> NumT File::getAttr(std::string const &name) {
 }
 
 std::vector<AttrInfo> File::getAttrInfos() {
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   int num_attr = current->getNumAttrs();
   std::vector<AttrInfo> infos;
   infos.reserve(num_attr);
@@ -1301,7 +1342,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
 }
 
 std::set<std::string> File::getAttrNames() {
-  H5::H5Object *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   int num_attr = current->getNumAttrs();
   std::set<std::string> infos;
   for (int i = 0; i < num_attr; i++) {
@@ -1318,13 +1359,13 @@ std::set<std::string> File::getAttrNames() {
 }
 
 bool File::hasAttr(std::string const &name) {
-  auto *current = this->getCurrentLocationAs<H5::H5Object>();
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   return current->attrExists(name);
 }
 
 NXlink File::getGroupID() {
   // make sure current location is a group
-  auto *current = this->getCurrentLocationAs<H5::Group>();
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
 
   /*
     this means: if the item is already linked: use the target attribute;
@@ -1406,6 +1447,8 @@ std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
 /* ---------------------------------------------------------------- */
+
+template MANTID_NEXUS_DLL std::shared_ptr<H5::H5File> File::getCurrentLocationAs();
 
 // PUT / GET ATTR
 
