@@ -628,7 +628,16 @@ def create_absorption_input(
     absName = metaws
     if metaws is None:
         absName = "__{}_abs".format(_getBasename(filename))
-        allowed_log = ",".join(["SampleFormula", "SampleDensity", "BL11A:CS:ITEMS:HeightInContainerUnits", "SampleContainer", "SampleMass"])
+        allowed_log = ",".join(
+            [
+                "SampleFormula",
+                "SampleDensity",
+                "BL11A:CS:ITEMS:HeightInContainer",
+                "BL11A:CS:ITEMS:HeightInContainerUnits",
+                "SampleContainer",
+                "SampleMass",
+            ]
+        )
         LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
     # attempt to get the wavelength from the function parameters
