@@ -71,7 +71,7 @@ const std::string LoadILLSANS::summary() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLSANS::confidence(Nexus::NexusDescriptor &descriptor) const {
   // fields existent only at the ILL for SANS machines
   if (descriptor.isEntry("/entry0/mode") &&
       ((descriptor.isEntry("/entry0/reactor_power") && descriptor.isEntry("/entry0/instrument_name")) ||

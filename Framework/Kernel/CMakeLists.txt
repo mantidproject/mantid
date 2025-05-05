@@ -75,7 +75,6 @@ set(SRC_FILES
     src/NDRandomNumberGenerator.cpp
     src/NeutronAtom.cpp
     src/LegacyNexusDescriptor.cpp
-    src/NexusDescriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/ProgressBase.cpp
@@ -233,7 +232,6 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/LegacyNexusDescriptor.h
-    inc/MantidKernel/NexusDescriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/PhysicalConstants.h
@@ -390,7 +388,6 @@ set(TEST_FILES
     NearestNeighboursTest.h
     NeutronAtomTest.h
     LegacyNexusDescriptorTest.h
-    NexusDescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h

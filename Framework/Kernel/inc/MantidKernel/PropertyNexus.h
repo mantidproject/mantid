@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/NexusDescriptor.h"
 #include <memory>
 #include <string>
 
@@ -40,8 +40,7 @@ namespace PropertyNexus {
  * @return std::unique_ptr<Property>
  */
 DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
-                                                 const Mantid::Kernel::NexusDescriptor &fileInfo,
-                                                 const std::string &prefix);
+                                                 const Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
 
 DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
 

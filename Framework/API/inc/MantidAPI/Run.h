@@ -113,7 +113,7 @@ public:
 
   /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster metadata
   /// lookup
-  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusDescriptor &fileInfo,
+  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
                  const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) override;

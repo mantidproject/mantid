@@ -171,7 +171,7 @@ void LoadEventAsWorkspace2D::exec() {
     throw std::runtime_error(errmsg);
   }
 
-  const Kernel::NexusDescriptor descriptor(filename);
+  const Nexus::NexusDescriptor descriptor(filename);
 
   // Load the instrument
   prog->doReport("Loading instrument");

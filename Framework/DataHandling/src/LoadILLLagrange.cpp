@@ -34,7 +34,7 @@ using Types::Core::DateAndTime;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLLagrange::confidence(NexusDescriptor &descriptor) const {
+int LoadILLLagrange::confidence(Nexus::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   if (descriptor.isEntry("/entry0/IN1")) {
@@ -59,7 +59,7 @@ const std::string LoadILLLagrange::summary() const { return "Loads ILL Lagrange 
 /**
  * Constructor
  */
-LoadILLLagrange::LoadILLLagrange() : IFileLoader<NexusDescriptor>() {}
+LoadILLLagrange::LoadILLLagrange() : IFileLoader<Nexus::NexusDescriptor>() {}
 
 /**
  * Initialize the algorithm's properties.

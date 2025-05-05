@@ -60,7 +60,7 @@ void LoadErrorEventsNexus::exec() {
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
 
-  const Kernel::NexusDescriptor descriptor(filename);
+  const Nexus::NexusDescriptor descriptor(filename);
 
   if (!descriptor.isEntry("/entry/bank_error_events"))
     throw std::runtime_error("entry bank_error_events does not exist");

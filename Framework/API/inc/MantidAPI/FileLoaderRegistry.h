@@ -10,8 +10,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/LegacyNexusDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #ifndef Q_MOC_RUN
 #include <type_traits>
@@ -97,7 +97,7 @@ private:
         }
         break;
       case Nexus:
-        if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
+        if (!std::is_base_of<IFileLoader<Nexus::NexusDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
               "' registered as Nexus loader but it does not inherit from API::IFileLoader<Kernel::NexusDescriptor>");

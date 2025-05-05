@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <H5Cpp.h>
 #include <boost/multi_index/detail/index_matcher.hpp>
@@ -18,7 +18,7 @@
 
 using boost::multi_index::detail::index_matcher::entry;
 
-namespace Mantid::Kernel {
+namespace Mantid::Nexus {
 
 /// hdf5 specific functions, stay in anonymous namespace to make hdf5 linking
 /// PRIVATE
@@ -146,4 +146,4 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
 
 bool NexusDescriptor::classTypeExists(const std::string &classType) const { return m_allEntries.contains(classType); }
 
-} // namespace Mantid::Kernel
+} // namespace Mantid::Nexus

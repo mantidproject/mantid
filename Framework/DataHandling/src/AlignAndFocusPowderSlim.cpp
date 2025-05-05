@@ -556,7 +556,7 @@ void AlignAndFocusPowderSlim::exec() {
       throw std::runtime_error("File does not appear to be for VULCAN");
     }
   }
-  const Kernel::NexusDescriptor descriptor(filename);
+  const Nexus::NexusDescriptor descriptor(filename);
 
   // instrument is needed for lots of things
   const std::string ENTRY_TOP_LEVEL("entry");

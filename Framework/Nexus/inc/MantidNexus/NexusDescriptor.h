@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidNexus/DllConfig.h"
 
 #include <map>
 #include <set>
@@ -15,9 +15,9 @@
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
+namespace Nexus {
 
-class MANTID_KERNEL_DLL NexusDescriptor {
+class MANTID_NEXUS_DLL NexusDescriptor {
 
 public:
   /**
@@ -117,5 +117,5 @@ private:
   const std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
-} // namespace Kernel
+} // namespace Nexus
 } // namespace Mantid

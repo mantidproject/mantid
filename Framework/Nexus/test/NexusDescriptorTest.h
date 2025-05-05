@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <filesystem>
 
@@ -15,7 +15,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-using Mantid::Kernel::NexusDescriptor;
+using Mantid::Nexus::NexusDescriptor;
 
 namespace {
 std::string getFullPath(const std::string &filename) {
@@ -39,7 +39,7 @@ public:
 
     const std::string filename = getFullPath("EQSANS_89157.nxs.h5");
 
-    Mantid::Kernel::NexusDescriptor nexusHDF5Descriptor(filename);
+    Mantid::Nexus::NexusDescriptor nexusHDF5Descriptor(filename);
 
     TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.filename());
     TS_ASSERT_EQUALS(".h5", nexusHDF5Descriptor.extension());
