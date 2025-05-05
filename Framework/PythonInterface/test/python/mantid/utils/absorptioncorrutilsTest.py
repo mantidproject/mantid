@@ -7,7 +7,7 @@
 import unittest
 import tempfile
 from mantid.kernel import PropertyManagerDataService
-from mantid.simpleapi import Load, PDLoadCharacterizations, PDDetermineCharacterizations, DeleteWorkspaces, mtd
+from mantid.simpleapi import LoadEventNexus, PDLoadCharacterizations, PDDetermineCharacterizations, DeleteWorkspaces, mtd
 from mantid.utils import absorptioncorrutils
 
 
@@ -15,7 +15,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Load common data used in several tests
-        Load(Filename="PG3_46577.nxs.h5", MetaDataOnly=True, OutputWorkspace="data")
+        LoadEventNexus(Filename="PG3_46577.nxs.h5", MetaDataOnly=True, OutputWorkspace="data")
 
         charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
         charTable = PDLoadCharacterizations(Filename=charfile)
