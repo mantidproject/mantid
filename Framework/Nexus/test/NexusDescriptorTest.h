@@ -93,4 +93,28 @@ public:
     TS_ASSERT(nexusHDF5Descriptor.hasRootAttr("file_name"));
     TS_ASSERT(!nexusHDF5Descriptor.hasRootAttr("not_attr"));
   }
+
+  void test_AddEntry() {
+    // create a descriptor with the correct values
+    const std::string filename = getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptor nexusHDF5Descriptor(filename);
+
+    // verify that existing groups are there
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs", "NXcollection"), true);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs/LambdaRequest", "NXlog"), true);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs/OmikronRequest", "NXlog"), false);
+
+    // can't add a value with relative path
+    TS_ASSERT_THROWS(nexusHDF5Descriptor.addEntry("entry/DASlogs/OmikronRequest", "NXlog"), const std::runtime_error &);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs/OmikronRequest", "NXlog"), false);
+
+    // make sure you can't add a group with invalid parent
+    TS_ASSERT_THROWS(nexusHDF5Descriptor.addEntry("/entry/DASlogginator/OmikronRequest", "NXlog"),
+                     const std::runtime_error &);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogginator/OmikronRequest", "NXlog"), false);
+
+    // add a field correctly
+    TS_ASSERT_THROWS_NOTHING(nexusHDF5Descriptor.addEntry("/entry/DASlogs/OmikronRequest", "NXlog"));
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs/OmikronRequest", "NXlog"), true);
+  }
 };

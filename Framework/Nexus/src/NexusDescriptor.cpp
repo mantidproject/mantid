@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NeXusException.hpp"
 
 #include <H5Cpp.h>
 #include <boost/multi_index/detail/index_matcher.hpp>
@@ -68,7 +69,8 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 } // namespace
 
 NexusDescriptor::NexusDescriptor(std::string filename)
-    : m_filename(std::move(filename)), m_extension(), m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
+    : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
+      m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
 const std::string &NexusDescriptor::filename() const noexcept { return m_filename; }
@@ -78,10 +80,31 @@ bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_roo
 const std::map<std::string, std::set<std::string>> &NexusDescriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
+void NexusDescriptor::addEntry(const std::string &entryName, const std::string &groupClass) {
+  // simple checks
+  if (entryName.empty())
+    throw ::NeXus::Exception("Cannot add empty path", "", m_filename);
+  if (groupClass.empty())
+    throw ::NeXus::Exception("Cannot add empty class", "", m_filename);
+  if (!entryName.starts_with("/"))
+    throw ::NeXus::Exception("Paths must be absolute: " + entryName, "", m_filename);
+
+  // do not add path twice
+  if (this->isEntry(entryName))
+    throw ::NeXus::Exception("Cannot add an entry twice: " + entryName, "", m_filename);
+
+  // verify the parent exists
+  const auto lastPos = entryName.rfind("/");
+  const auto parentPath = entryName.substr(0, lastPos);
+  if (!this->isEntry(parentPath))
+    throw ::NeXus::Exception("Parent path " + parentPath + " does not exist", "", m_filename);
+
+  // add the path
+  m_allEntries[groupClass].insert(entryName);
+}
 
 // PRIVATE
 std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
-  m_extension = std::filesystem::path(m_filename).extension().string();
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
 
