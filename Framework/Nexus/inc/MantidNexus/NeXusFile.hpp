@@ -3,6 +3,7 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
 #include <H5Cpp.h>
+#include <filesystem>
 #include <memory>
 #include <set>
 #include <string>
@@ -26,9 +27,11 @@ class MANTID_NEXUS_DLL File : public H5::H5File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  std::vector<std::shared_ptr<H5::H5Location>> m_stack;
+  std::filesystem::path m_path;
+  std::shared_ptr<H5::H5Location> m_current;
   /** should be close handle on exit */
   bool m_close_handle;
+  Entries m_fileTree;
 
 public:
   /**
@@ -87,18 +90,18 @@ public:
   /**
    * Return the root of the file as a group
    */
-  H5::Group *getRoot();
+  H5::H5File getRoot();
 
   /** @brief  Get the current location in the stack
    * @return A pointer to the location, as an H5Location object
    */
-  H5::H5Location *getCurrentLocation();
+  std::shared_ptr<H5::H5Location> getCurrentLocation();
 
   /** @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
    * @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
    * @return A pointer to the current location, treated as a T*
    */
-  template <typename T> T *getCurrentLocationAs();
+  template <typename T> std::shared_ptr<T> getCurrentLocationAs();
 
   bool verifyGroupClass(H5::Group const &, std::string const &) const;
 
@@ -535,6 +538,10 @@ public:
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
+
+private:
+  std::filesystem::path formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
 };
 
 /**

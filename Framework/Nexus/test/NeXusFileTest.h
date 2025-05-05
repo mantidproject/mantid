@@ -217,17 +217,17 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
-    auto layer1 = file.getCurrentLocation();
+    auto layer1 = file.getCurrentLocationAs<H5::Group>();
     TS_ASSERT_EQUALS(file.getNumObjs(), 1);
     TS_ASSERT_EQUALS(layer1->getNumObjs(), 0);
 
     // create a group inside the group -- open it
     file.makeGroup(grp2, cls2, false);
     file.openGroup(grp2, cls2);
-    auto layer2 = file.getCurrentLocation();
+    auto layer2 = file.getCurrentLocationAs<H5::Group>();
     TS_ASSERT_EQUALS(file.getNumObjs(), 1);
     TS_ASSERT_EQUALS(layer1->getNumObjs(), 1);
-    TS_ASSERT_DIFFERS(layer1, layer2);
+    TS_ASSERT_DIFFERS(layer1->getObjName(), layer2->getObjName());
   }
 
   void test_closeGroup() {
@@ -235,19 +235,17 @@ public:
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
-    auto begin = file.getCurrentLocation();
-
     // check error at root
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
 
     // now make group, close it, and check we are back at root
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, true);
-    auto ingrp = file.getCurrentLocation();
+    auto ingrp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_DIFFERS(ingrp->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
-    auto outgrp = file.getCurrentLocation();
-    TS_ASSERT_DIFFERS(outgrp, ingrp);
-    TS_ASSERT_EQUALS(outgrp, begin);
+    // if the group is closed, then its ID will be set to -1
+    TS_ASSERT_EQUALS(ingrp->getId(), -1);
   }
 
   // #################################################################################################################
@@ -270,7 +268,7 @@ public:
 
     // now make a NXentry group and try
     file.makeGroup("entry", "NXentry", true);
-    H5::Group *grp = file.getCurrentLocationAs<H5::Group>();
+    auto grp = file.getCurrentLocationAs<H5::Group>();
     TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     // check some failing cases
@@ -281,7 +279,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims, true));
     TS_ASSERT_EQUALS(grp->getNumObjs(), 1);
 
-    H5::DataSet *data = file.getCurrentLocationAs<H5::DataSet>();
+    auto data = file.getCurrentLocationAs<H5::DataSet>();
     TS_ASSERT_EQUALS(data->getObjName(), "/entry/some_data");
   }
 
@@ -292,7 +290,7 @@ public:
 
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
-    H5::Group *grp = file.getCurrentLocationAs<H5::Group>();
+    auto grp = file.getCurrentLocationAs<H5::Group>();
     TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     NXnumtype type(NXnumtype::CHAR);
@@ -347,6 +345,11 @@ public:
 
     // try to create a dataset inside the dataset -- this throws an errpr
     TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
+    // make the dataset one layer up, open data 1, then try opening data2 from within
+    file.closeData();
+    file.makeData(data2, type, 2, false);
+    file.openData(data1);
+    TS_ASSERT_THROWS_NOTHING(file.openData(data2));
   }
 
   void test_closeData() {
@@ -355,19 +358,17 @@ public:
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
-    auto begin = file.getCurrentLocation();
 
     // check error at root
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
 
-    // now make data, close it, and check we are back at root
+    // now make data, close it, and check we are back at beginning
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
-    auto indata = file.getCurrentLocation();
+    auto indata = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_DIFFERS(indata->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeData());
-    auto outdata = file.getCurrentLocation();
-
-    TS_ASSERT_DIFFERS(outdata, indata);
-    TS_ASSERT_EQUALS(outdata, begin);
+    // if the dataset is closed, then its ID will be set to -1
+    TS_ASSERT_EQUALS(indata->getId(), -1);
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
   }
 
@@ -675,7 +676,9 @@ public:
     // tests invalid cases
     TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
     TS_ASSERT_EQUALS(file.getPath(), "/");
-    TS_ASSERT_THROWS(file.openPath("entry1"), NeXus::Exception &);
+    TS_ASSERT_THROWS_NOTHING(file.openPath("entry1"));
+    TS_ASSERT_EQUALS(file.getPath(), "/entry1");
+    file.closeGroup();
     TS_ASSERT_EQUALS(file.getPath(), "/");
     TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
     TS_ASSERT_EQUALS(file.getPath(), "/");
