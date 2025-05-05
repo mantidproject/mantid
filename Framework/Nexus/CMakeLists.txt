@@ -29,6 +29,7 @@ set(INC_FILES
 set(TEST_FILES
     H5UtilTest.h
     NexusIOHelperTest.h
+    NexusClassesTest.h
     NexusDescriptorTest.h
     NeXusFileTest.h
     NeXusFileLeakTest.h
