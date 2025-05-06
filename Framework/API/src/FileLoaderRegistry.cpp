@@ -120,18 +120,23 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   IAlgorithm_sptr bestLoader;
 
   if (H5::H5File::isHdf5(filename)) {
-    std::pair<IAlgorithm_sptr, int> HDF5result =
+    std::pair<IAlgorithm_sptr, int> NexusResult =
         searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
 
-    // must also try NexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
-    std::pair<IAlgorithm_sptr, int> HDF4result =
-        searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[LegacyNexus],
-                                                                                   m_log);
+    if (NexusResult.second < 80) {
+      // must also try LegacyNexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
+      // but only need to do this if confidence is less than 80, i.e. not loaded by LoadEventNexus, LoadNexusProcessed,
+      // LoadMuonNexusV2 or LoadMD
+      std::pair<IAlgorithm_sptr, int> LegacyNexusResult =
+          searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[LegacyNexus],
+                                                                                     m_log);
 
-    if (HDF5result.second > HDF4result.second)
-      bestLoader = HDF5result.first;
-    else
-      bestLoader = HDF4result.first;
+      if (NexusResult.second > LegacyNexusResult.second)
+        bestLoader = NexusResult.first;
+      else
+        bestLoader = LegacyNexusResult.first;
+    } else
+      bestLoader = NexusResult.first;
   } else {
     try {
       bestLoader = searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(
