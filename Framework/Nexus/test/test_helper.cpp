@@ -8,6 +8,18 @@ void NexusTest::removeFile(const std::string &filename) {
   }
 }
 
+std::string NexusTest::getFullPath(const std::string &filename) {
+  using Mantid::Kernel::ConfigService;
+  auto dataPaths = ConfigService::Instance().getDataSearchDirs();
+  for (auto &dataPath : dataPaths) {
+    const auto hdf5Path = std::filesystem::path(dataPath) / filename;
+    if (std::filesystem::exists(hdf5Path)) {
+      return hdf5Path.string();
+    }
+  }
+  return std::string();
+}
+
 /**
  * Let's face it, std::string is poorly designed,
  * and this is the constructor that it needed to have.
