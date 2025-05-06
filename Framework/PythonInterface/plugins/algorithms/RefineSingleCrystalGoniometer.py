@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, PythonAlgorithm
+from mantid.api import AlgorithmFactory, PythonAlgorithm, OrientedLatticeValidator
 from mantid.dataobjects import PeaksWorkspaceProperty
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, StringListValidator
 
@@ -36,15 +36,15 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         # Declare properties
 
         self.declareProperty(
-            PeaksWorkspaceProperty(name="Peaks", defaultValue="", direction=Direction.Input),
+            PeaksWorkspaceProperty(name="Peaks", defaultValue="", validator=OrientedLatticeValidator(), direction=Direction.Input),
             doc="The PeaksWorkspace to be refined.",
         )
 
-        self.declareProperty("tol", 0.12, validator=FloatBoundedValidator(lower=0.0), doc="The tolerance used in IndexPeaks.")
+        self.declareProperty("Tolerance", 0.12, validator=FloatBoundedValidator(lower=0.0), doc="The tolerance used in IndexPeaks.")
 
         self.declareProperty(
-            "cell",
-            "Monoclinic",
+            "Cell",
+            "Triclinic",
             validator=StringListValidator(
                 ["Fixed", "Cubic", "Rhombohedral", "Tetragonal", "Hexagonal", "Orthorhombic", "Monoclinic", "Triclinic"]
             ),
@@ -52,12 +52,12 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
             + "Hexagonal, Orthorhombic, Monoclinic, Triclinic}.",
         )
 
-        self.declareProperty("n_iter", 1, validator=IntBoundedValidator(lower=1), doc="The number of IndexPeaks iterations.")
+        self.declareProperty("NumIterations", 1, validator=IntBoundedValidator(lower=1), doc="The number of IndexPeaks iterations.")
 
     def PyExec(self):
         # Save the workspace to file in ascii format
 
-        for n in range(self.getProperty("n_iter").value):
+        for n in range(self.getProperty("NumIterations").value):
             peaks = self.getProperty("Peaks").value
 
             self.table = peaks.name() + "_#{}".format(n)
@@ -88,7 +88,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
             runs = np.unique(peaks.column("RunNumber")).tolist()
 
-            IndexPeaks(PeaksWorkspace=peaks, Tolerance=self.getProperty("tol").value, CommonUBForAll=False)
+            IndexPeaks(PeaksWorkspace=peaks, Tolerance=self.getProperty("Tolerance").value, CommonUBForAll=False)
 
             for i, run in enumerate(runs):
                 FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace="_tmp")
@@ -106,7 +106,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
                 DeleteWorkspace(Workspace="_tmp")
 
-            self._optimize_lattice(self.getProperty("cell").value)
+            self._optimize_lattice(self.getProperty("Cell").value)
 
     def _calculate_goniometer(self, omega, chi, phi):
         return Rotation.from_euler("YZY", [omega, chi, phi], degrees=True).as_matrix()
