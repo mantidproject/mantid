@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="instrumentview",
-    install_requires=["mantidqt"],
+    install_requires=["mantidqt", "joblib"],
     version=os.environ["MANTID_VERSION_STR"],
     entry_points={"gui_scripts": ["instrumentview = InstrumentView:main"]},
     packages=find_packages(exclude=["*.test"]),

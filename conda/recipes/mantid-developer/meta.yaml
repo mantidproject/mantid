@@ -19,6 +19,7 @@ requirements:
     - hdf4 {{ hdf4 }}
     - hdf5 {{ hdf5 }}
     - jemalloc {{ jemalloc }} # [linux]
+    - joblib
     - jsoncpp {{ jsoncpp }}
     - lib3mf # [win]
     - libboost-devel {{ libboost_devel }}
