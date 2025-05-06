@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -22,8 +23,10 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-04-13 18:11:53.496539
  */
-class MANTID_MDALGORITHMS_DLL IntegratePeaksMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegratePeaksMD final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  IntegratePeaksMD();
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose
