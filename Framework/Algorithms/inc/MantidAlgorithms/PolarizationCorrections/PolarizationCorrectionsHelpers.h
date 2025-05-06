@@ -10,7 +10,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include <Eigen/Dense>
 #include <optional>
+#include <unsupported/Eigen/AutoDiff>
 
 namespace Mantid::Algorithms {
 namespace PolarizationCorrectionsHelpers {
@@ -66,4 +68,50 @@ MANTID_ALGORITHMS_DLL const std::string &getORSONotationForSpinState(const std::
 MANTID_ALGORITHMS_DLL void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws,
                                                   const std::string &spinState);
 } // namespace SpinStatesORSO
+
+namespace Arithmetic {
+
+template <size_t N> class ErrorTypeHelper {
+public:
+  using DerType = Eigen::Matrix<double, N, 1>;
+  using InputArray = DerType;
+  using ADScalar = Eigen::AutoDiffScalar<DerType>;
+};
+
+template <size_t N, typename Func> class ErrorPropagation {
+public:
+  using Types = ErrorTypeHelper<N>;
+  using DerType = Types::DerType;
+  using ADScalar = Types::ADScalar;
+  using InputArray = Types::InputArray;
+  ErrorPropagation(Func func) : compute_func(std::move(func)) {}
+
+  struct AutoDevResult {
+    double value;
+    double error;
+    Eigen::Array<double, N, 1> derivatives;
+  };
+
+  AutoDevResult evaluate(const InputArray &values, const InputArray &errors) const {
+    std::array<ADScalar, N> x;
+
+    for (size_t i = 0; i < N; ++i) {
+      x[i].value() = values[i];
+      x[i].derivatives().setZero();
+      x[i].derivatives()[i] = 1.0;
+    }
+    ADScalar y = compute_func(x);
+    const auto &derivatives = y.derivatives();
+    return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
+  }
+
+private:
+  Func compute_func;
+};
+
+template <size_t N, typename Func> auto make_error_propagation(Func &&func) {
+  return ErrorPropagation<N, std::decay_t<Func>>(std::forward<Func>(func));
+}
+
+} // namespace Arithmetic
 } // namespace Mantid::Algorithms
