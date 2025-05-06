@@ -497,7 +497,7 @@ void File::openGroupPath(std::string const &pathname) {
     } else if (type == H5O_TYPE_DATASET) {
       m_current = std::make_shared<H5::Group>(parent);
     } else {
-      throw NXEXCEPTION("Found unknown entry type at " + new_path);
+      throw NXEXCEPTION("Found unknown entry type at " + new_path.string());
     }
     m_path = new_path;
   } else {
