@@ -113,6 +113,52 @@ public:
     runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, " 10 ", 2);
   }
 
+  void testErrorPropagation_linear() {
+    constexpr size_t vars = 1;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+
+    const double m = 5.0;
+    const double c = 3.0;
+    auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
+    Types::InputArray a{{20.0}};
+    const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
+
+    const double error = result.error;
+    TS_ASSERT_EQUALS(error, 2.5);
+    const double value = result.value;
+    TS_ASSERT_EQUALS(value, 103);
+  }
+
+  void testErrorPropagation_quad() {
+    const size_t vars = 1;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+    const double a = 5.0;
+    const double b = 3.0;
+    const double c = 10.0;
+    auto errorProp = Arithmetic::make_error_propagation<vars>(
+        [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
+    const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
+
+    const double error = result.error;
+    TS_ASSERT_DELTA(error, 101.5, 0.001);
+    const double value = result.value;
+    TS_ASSERT_EQUALS(value, 2070);
+  }
+
+  void testErrorPropagation_mult_vars() {
+    const size_t vars = 2;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+
+    auto errorProp =
+        Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
+    const auto result = errorProp.evaluate(Types::InputArray{{3.141, 1.0}}, Types::InputArray{{0.01, 0.05}});
+
+    const double error = result.error;
+    TS_ASSERT_DELTA(error, 0.139495, 0.001);
+    const double value = result.value;
+    TS_ASSERT_DELTA(value, 2.72014, 0.00001);
+  }
+
 private:
   const std::vector<std::string> WILDES_SPIN_STATES{
       SpinStateConfigurationsWildes::PLUS_PLUS,  SpinStateConfigurationsWildes::PLUS_MINUS,
