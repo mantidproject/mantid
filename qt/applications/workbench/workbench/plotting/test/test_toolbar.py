@@ -20,7 +20,8 @@ from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load
+from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load, mtd
+import mantid.simpleapi as msa
 
 
 @start_qapplication
@@ -149,6 +150,28 @@ class ToolBarTest(unittest.TestCase):
         axes.contour(data, levels=np.linspace(10, 60, 6), colors="yellow", alpha=0.5)
         # crosshair button should be visible because this is a contour plot
         self.assertTrue(self._is_crosshair_button_visible(fig))
+        self.assertFalse(self._is_crosshair_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_hidden_for_3d_surface_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        data = Load("MUSR00015189.nxs")
+        data = mtd["data_1"]  # Extract individual workspace from group
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+        ax.plot_surface(data, cmap="viridis")
+        # crosshair button should be hidden
+        self.assertFalse(self._is_crosshair_button_visible(fig))
+        self.assertFalse(self._is_crosshair_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_hidden_for_3d_wireframe_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        msa.config.setFacility("SNS")
+        data = Load("MAR11060.nxs")
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+        ax.plot_wireframe(data)
+        # crosshair button should be hidden
+        self.assertFalse(self._is_crosshair_button_visible(fig))
         self.assertFalse(self._is_crosshair_button_checked(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
