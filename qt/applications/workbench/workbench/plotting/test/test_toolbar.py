@@ -20,7 +20,8 @@ from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load, mtd
+from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load, mtd, LoadSampleShape
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import mantid.simpleapi as msa
 
 
@@ -170,6 +171,23 @@ class ToolBarTest(unittest.TestCase):
         data = Load("MAR11060.nxs")
         fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
         ax.plot_wireframe(data)
+        # crosshair button should be hidden
+        self.assertFalse(self._is_crosshair_button_visible(fig))
+        self.assertFalse(self._is_crosshair_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_hidden_for_3d_mesh_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        ws = LoadSampleShape(ws, "tube.stl")
+        sample = ws.sample()
+        shape = sample.getShape()
+        mesh = shape.getMesh()
+        mesh_polygon = Poly3DCollection(mesh, facecolors=["g"], edgecolors=["b"], alpha=0.5, linewidths=0.1)
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid3d"})
+        axes.add_collection3d(mesh_polygon)
+        axes.set_mesh_axes_equal(mesh)
+
         # crosshair button should be hidden
         self.assertFalse(self._is_crosshair_button_visible(fig))
         self.assertFalse(self._is_crosshair_button_checked(fig))
