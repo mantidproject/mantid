@@ -11,6 +11,7 @@ import numpy as np
 import math
 import pyvista as pv
 from scipy.spatial.transform import Rotation
+from joblib import Parallel, delayed
 
 
 class DetectorPosition(np.ndarray):
@@ -47,8 +48,9 @@ class FullInstrumentViewModel:
         self._detector_indices = []
         self._monitor_positions = []
         self._monitor_indices = []
-        component_meshes = []
-        component_mesh_colours = []
+        if draw_detector_geometry:
+            component_meshes = []
+            component_mesh_colours = []
 
         self._detector_index_to_workspace_index = np.full(len(self._component_info), self._invalid_index, dtype=int)
         spectrum_info = workspace.spectrumInfo()
@@ -71,25 +73,28 @@ class FullInstrumentViewModel:
                 case "Grid":
                     continue
                 case "Rectangular":
-                    rectangular_bank_mesh = self.drawRectangularBank(self._component_info, component_index)
-                    component_meshes.append(rectangular_bank_mesh)
-                    component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
+                    if draw_detector_geometry:
+                        rectangular_bank_mesh = self.drawRectangularBank(self._component_info, component_index)
+                        component_meshes.append(rectangular_bank_mesh)
+                        component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
                     continue
                 case "OutlineComposite":
-                    outline_composite_mesh = self.drawSingleDetector(self._component_info, component_index)
-                    component_meshes.append(outline_composite_mesh)
-                    component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
+                    if draw_detector_geometry:
+                        outline_composite_mesh = self.drawSingleDetector(self._component_info, component_index)
+                        component_meshes.append(outline_composite_mesh)
+                        component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
                     continue
                 case "Structured":
-                    structured_mesh = self.drawStructuredBank(self._component_info, component_index)
-                    component_meshes.append(structured_mesh)
-                    component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
+                    if draw_detector_geometry:
+                        structured_mesh = self.drawStructuredBank(self._component_info, component_index)
+                        component_meshes.append(structured_mesh)
+                        component_mesh_colours.append((0.1, 0.1, 0.1, 0.2))
                     continue
                 case _:
                     if not self._component_info.isDetector(component_index):
                         continue
                     if self._detector_info.isMonitor(component_index):
-                        self._monitor_positions.append(self._detector_info.position(component_index))
+                        self._monitor_positions.append(np.array(self._detector_info.position(component_index), dtype=np.float32))
                         self._monitor_indices.append(component_index)
                     elif self._component_info.hasValidShape(component_index):
                         self._detector_indices.append(component_index)
@@ -98,7 +103,6 @@ class FullInstrumentViewModel:
                     else:
                         continue
 
-        self._detector_counts = []
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
         self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
 
@@ -113,14 +117,19 @@ class FullInstrumentViewModel:
     def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
         """Calculate integrated counts for the specified TOF range"""
         integrated_spectra = self._workspace.getIntegratedSpectra(tof_min, tof_max, entire_range)
-        self._detector_counts.clear()
-        for det_index in self._detector_indices:
+
+        new_detector_counts = np.zeros(len(self._detector_indices), dtype=int)
+
+        def set_detector_count(index: int) -> None:
+            det_index = self._detector_indices[index]
             workspace_index = int(self._detector_index_to_workspace_index[det_index])
-            if workspace_index == self._invalid_index or det_index in self._monitor_indices:
-                continue
-            self._detector_counts.append(integrated_spectra[workspace_index])
-            self._data_max = max(self._data_max, integrated_spectra[workspace_index])
-            self._data_min = min(self._data_min, integrated_spectra[workspace_index])
+            new_detector_counts[index] = 0 if workspace_index == self._invalid_index else integrated_spectra[workspace_index]
+
+        Parallel(n_jobs=-1, prefer="threads")(delayed(set_detector_count)(index) for index in range(len(self._detector_indices)))
+
+        self._detector_counts = new_detector_counts
+        self._data_max = max(self._detector_counts)
+        self._data_min = min(self._detector_counts)
 
     def workspace(self):
         return self._workspace
