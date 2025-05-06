@@ -278,7 +278,7 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:144
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:989
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:909
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:911
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:254
