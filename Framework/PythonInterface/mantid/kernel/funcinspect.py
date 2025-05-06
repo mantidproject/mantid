@@ -218,14 +218,20 @@ def process_frame(frame):
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack) - 1)
 
-    # Since 3.11, some bytcode instructions have several CACHE instructions after them.
-    # last_i will be pointing at the last of those CACHE instructions after the call function.
-    # We want it pointing at the call fuction, as assign it to the largets offset in call_function_locs
-    # which is < last_i
-    # https://docs.python.org/3/whatsnew/3.11.html#cpython-bytecode-changes
     current_instruction = [name for offset, _, name, _, _ in ins_stack_with_caches if offset == last_i][0]
     if current_instruction == "CACHE":
+        # Since 3.11, some bytcode instructions have several CACHE instructions after them.
+        # last_i will be pointing at the last of those CACHE instructions after the call function.
+        # We want it pointing at the call fuction, as assign it to the largets offset in call_function_locs
+        # which is < last_i
+        # https://docs.python.org/3/whatsnew/3.11.html#cpython-bytecode-changes
         last_i = [offset for offset in call_function_locs.keys() if offset < last_i][-1]
+    elif current_instruction == "PRECALL":
+        # Handle the PRECALL instruction added in 3.11. Sometimes (can't find a pattern) f_lasti points at the
+        # PRECALL instruction before CALL. In this case point it to the next call function after it's offset
+        # (which will be CALL)
+        # https://docs.python.org/3.11/library/dis.html#opcode-PRECALL
+        last_i = [offset for offset in call_function_locs.keys() if offset > last_i][0]
 
     output_var_names = []
     last_func_offset = call_function_locs[last_i][0]
