@@ -1,1 +1,1 @@
- :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
+- :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
