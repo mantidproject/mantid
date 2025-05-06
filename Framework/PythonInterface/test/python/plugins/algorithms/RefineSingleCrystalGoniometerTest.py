@@ -17,7 +17,7 @@ class RefineSingleCrystalGoniometerTest(unittest.TestCase):
         return
 
     def testExample(self):
-        filename = "TOPAZ_3007.peaks.nxs"
+        filename = "TOPAZ_2479.peaks"
 
         LoadIsawPeaks(Filename=filename, OutputWorkspace="peaks")
 
