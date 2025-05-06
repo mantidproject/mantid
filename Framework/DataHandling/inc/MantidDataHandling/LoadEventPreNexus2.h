@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -74,7 +75,8 @@ struct Pulse {
 };
 #pragma pack(pop)
 
-class MANTID_DATAHANDLING_DLL LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor>,
+                                                   public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadEventPreNexus2();
