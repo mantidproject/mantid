@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABC, abstractmethod
 import numpy as np
+from joblib import Parallel, delayed
 
 
 class projection(ABC):
@@ -54,14 +55,22 @@ class projection(ABC):
 
     def _calculate_detector_coordinates(self):
         """Calculate 2D projection coordinates and store data"""
-        x_values = []
-        y_values = []
-        for det_id in self._detector_indices:
+        x_values = np.zeros(len(self._detector_indices), dtype=np.float32)
+        y_values = np.zeros(len(self._detector_indices), dtype=np.float32)
+
+        def store_2d_coordinates(index: int, det_id: int) -> None:
             x, y = self._calculate_2d_coordinates(det_id)
-            x_values.append(x)
-            y_values.append(y)
-        self._detector_x_coordinates = np.array(x_values)
-        self._detector_y_coordinates = np.array(y_values)
+            x_values[index] = x
+            y_values[index] = y
+
+        detector_loop_indices = range(len(self._detector_indices))
+        Parallel(n_jobs=-1, prefer="threads")(
+            delayed(store_2d_coordinates)(detector_index, self._detector_indices[detector_index])
+            for detector_index in detector_loop_indices
+        )
+
+        self._detector_x_coordinates = x_values
+        self._detector_y_coordinates = y_values
         self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
