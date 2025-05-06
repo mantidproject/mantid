@@ -1211,15 +1211,17 @@ Info File::getInfo() {
   DimArray dims{0};
   ds.getSimpleExtentDims(dims.data());
 
+  // strings need the length of the string hiding in there too
+  // this doesn't work for variable length strings
+  if (hdf5ToNXType(dt) == NXnumtype::CHAR) {
+    dims[rank - 1] = dataset->getStorageSize();
+  }
+
   Info info;
   info.type = hdf5ToNXType(dt);
   info.dims.push_back(dims.front());
   for (std::size_t i = 1; i < rank; i++) {
-    // if (dt.getClass() == H5T_STRING && dims[i] == 1) {
-    //   continue;
-    // } else {
     info.dims.push_back(dims[i]);
-    // }
   }
   return info;
 }
