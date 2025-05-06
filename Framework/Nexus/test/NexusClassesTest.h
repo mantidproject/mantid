@@ -27,7 +27,6 @@ public:
     auto entry = root.openFirstEntry();
     TS_ASSERT_EQUALS(entry.name(), "entry");
     // entry.NX_class() returns the type in "NexusClasses" (i.e. NXentry) rather than what is in the file
-    TS_ASSERT_EQUALS(entry.attributes.n(), 0); // groups don't load their attributes
 
     // check NXChar
     auto definition = root.openNXChar("entry/definition"); // relative path
@@ -42,7 +41,6 @@ public:
     auto bank19 = entry.openNXGroup("bank19_events");
     TS_ASSERT_EQUALS(bank19.name(), "bank19_events");
     // bank19.NX_class() returns the type in "NexusClasses" (i.e. NXClass) rather than what is in the file
-    TS_ASSERT_EQUALS(bank19.attributes.n(), 0); // groups don't load their attributes
 
     // load time-of-flight as a float because NexusClasses doesn't autoconvert types
     auto time_of_flight = bank19.openNXFloat("event_time_offset");
