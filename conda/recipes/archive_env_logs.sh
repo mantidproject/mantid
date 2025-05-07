@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 build_prefix=$1
 prefix=$2
 package_name=$3
