@@ -243,13 +243,13 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
       for (size_t i = n; i > 0;) {
         --i;
         auto parName = t[i].name();
-        auto tie = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
+        auto parTie = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
 
-        if (!isDefault && tie->isConstant()) {
-          setParameter(parName, tie->eval());
-          fix(getParameterIndex(*tie));
+        if (!isDefault && parTie->isConstant()) {
+          setParameter(parName, parTie->eval());
+          fix(getParameterIndex(*parTie));
         } else {
-          auto iPar = getParameterIndex(*tie);
+          auto iPar = getParameterIndex(*parTie);
           tiedParams.push_back(iPar);
 
           auto it = std::find_if(m_ties.begin(), m_ties.end(),
@@ -263,9 +263,9 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
           }
 
           if (it != m_ties.end()) {
-            *it = std::move(tie);
+            *it = std::move(parTie);
           } else {
-            m_ties.emplace_back(std::move(tie));
+            m_ties.emplace_back(std::move(parTie));
             setParameterStatus(iPar, Tied);
           }
         }
