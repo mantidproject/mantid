@@ -308,7 +308,7 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
-    // get location of to-level
+    // get location of top-level
     auto top = file.getCurrentLocationAs<H5::Group>();
     cout << strmakef("Located at %p\n", top);
 
@@ -324,9 +324,9 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
-    auto layer1 = file.getCurrentLocationAs<H5::Group>();
+    auto layer1 = file.getCurrentLocationAs<H5::DataSet>();
     cout << strmakef("Located at %p\n", layer1);
-    TS_ASSERT_DIFFERS(top, layer1);
+    TS_ASSERT_DIFFERS(top->getId(), layer1->getId());
   }
 
   void test_make_data_layers_bad() {
@@ -359,7 +359,7 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
-    // check error at root
+    // check error at top-level
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
 
     // now make data, close it, and check we are back at beginning
