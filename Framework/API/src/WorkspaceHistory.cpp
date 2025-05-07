@@ -260,9 +260,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
   try {
     file->openGroup("process", "NXprocess");
   } catch (std::exception &) {
-    g_log.warning() << "Error opening the algorithm history field 'process'. "
-                       "Workspace will have no history."
-                    << "\n";
+    g_log.warning() << "Error opening the algorithm history field 'process'. Workspace will have no history.\n";
     return;
   }
 
@@ -350,6 +348,9 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
   // split on lines
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
+
+  // remove empty lines
+  info.erase(std::remove_if(info.begin(), info.end(), [](const auto &value) { return value.empty(); }), info.end());
 
   const size_t nlines = info.size();
   if (nlines < 4) { // ignore badly formed history entries still at 4 so that
