@@ -171,7 +171,7 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
 
     // get location of root file
-    auto loc = file.getCurrentLocation();
+    auto loc = file.getCurrentLocationAs<H5::Group>();
     cout << strmakef("Located at %p\n", loc);
 
     // create a group, to be opened
@@ -186,7 +186,7 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
-    auto new_loc = file.getCurrentLocation();
+    auto new_loc = file.getCurrentLocationAs<H5::Group>();
     cout << strmakef("Located at %p\n", new_loc);
     TS_ASSERT_DIFFERS(loc, new_loc);
   }
@@ -309,7 +309,7 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // get location of to-level
-    auto top = file.getCurrentLocation();
+    auto top = file.getCurrentLocationAs<H5::Group>();
     cout << strmakef("Located at %p\n", top);
 
     // create a dataset, to be opened
@@ -324,7 +324,7 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
-    auto layer1 = file.getCurrentLocation();
+    auto layer1 = file.getCurrentLocationAs<H5::Group>();
     cout << strmakef("Located at %p\n", layer1);
     TS_ASSERT_DIFFERS(top, layer1);
   }
