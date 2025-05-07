@@ -14,14 +14,11 @@
 
    tutorials/index
    algorithms/index
-   algorithms/*
    concepts/index
    interfaces/index
    fitting/index
    fitting/fitcostfunctions/index
-   fitting/fitcostfunctions/*
    fitting/fitfunctions/index
-   fitting/fitfunctions/*
    fitting/fitminimizers/index
    techniques/index
    api/index
