@@ -82,7 +82,7 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, API::Func
   m_function = std::move(function);
   m_domain = std::move(domain);
   m_values = std::move(values);
-  updateFitWeights();
+  updateValidateFitWeights();
   reset();
 }
 
