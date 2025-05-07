@@ -54,6 +54,7 @@ public:
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_load_bby_algorithm() {
     LoadBBY algToBeTested;
 

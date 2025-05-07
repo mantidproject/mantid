@@ -247,13 +247,13 @@ namespace NeXus {
 
 File::File(std::string const &filename, NXaccess const access)
     : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
-      m_current(nullptr), m_close_handle(true) {
+      m_current(nullptr), m_close_handle(true), m_fileTree({{"/", "root"}}) {
   recursivePopulateEntries(getRoot(), m_fileTree);
 };
 
 File::File(char const *filename, NXaccess const access)
     : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
-      m_current(nullptr), m_close_handle(true) {
+      m_current(nullptr), m_close_handle(true), m_fileTree({{"/", "root"}}) {
   recursivePopulateEntries(getRoot(), m_fileTree);
 };
 
@@ -305,17 +305,6 @@ H5::H5File File::getRoot() {
   return *this;
 }
 
-/** Return a pointer corresponding to current location in file stack. */
-std::shared_ptr<H5::H5Location> File::getCurrentLocation() {
-  std::shared_ptr<H5::H5Location> ret;
-  if (m_current == nullptr) {
-    ret = std::make_shared<H5::H5File>(getRoot());
-  } else {
-    ret = m_current;
-  }
-  return ret;
-}
-
 namespace {
 // methods for better exception messages
 template <typename T> std::string H5TypeAsString() { return "unknown"; }
@@ -352,18 +341,21 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
   return H5Util::keyHasValue(grp, group_class_spec, class_name);
 }
 
-bool File::hasGroup(std::string const &name) {
-  return (m_fileTree.count(name) && m_fileTree[name] != scientific_data_set);
+bool File::hasGroup(std::string const &name, std::string const &class_type) {
+  std::string path = formAbsolutePath(name);
+  return (m_fileTree.count(path) && m_fileTree[path] == class_type);
 }
 
 bool File::hasData(std::string const &name) {
-  return (m_fileTree.count(name) && m_fileTree[name] == scientific_data_set);
+  std::string path = formAbsolutePath(name);
+  return (m_fileTree.count(path) && m_fileTree[path] == scientific_data_set);
 }
 
 std::filesystem::path File::formAbsolutePath(std::string const &new_name) {
   // try forming path relative to current location
   std::filesystem::path new_path(new_name);
-  if (!new_path.is_absolute()) {
+  if (*new_path.begin() != "/") { 
+    // if not already absolute path, make relative to current location
     new_path = (m_path / new_name).lexically_normal();
     if (!m_fileTree.count(new_path)) {
       // else, try making path relative to parent
@@ -382,10 +374,10 @@ std::filesystem::path File::formAbsolutePath(std::string const &new_name) {
 }
 
 void File::registerEntry(std::string const &path, std::string const &name) {
-  if (!std::filesystem::path(path).is_absolute()) {
+  if (path.front() != '/') {
     throw NXEXCEPTION("Paths must be absolute: " + path);
-  } else if (!this->nameExists(path)) {
-    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
+//  } else if (!this->nameExists(path)) {
+//    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
   } else {
     m_fileTree[path] = name;
   }
@@ -443,28 +435,14 @@ void File::openPath(std::string const &pathname) {
   if (new_path.string() == "/") {
     m_path = new_path;
     m_current = nullptr;
-  } else if (this->nameExists(new_path)) {
+  } else if (m_fileTree.count(new_path)) {
     // if the path exists:
-    // -- open the enclosing group,
     // -- check the type of the entry, Group or DataSet
     // -- open with appropriate method
-    std::string name;
-    if (new_path.has_stem()) {
-      name = new_path.stem();
+    if (m_fileTree[new_path] == scientific_data_set) {
+      m_current = std::make_shared<H5::DataSet>(H5::H5File::openDataSet(new_path));
     } else {
-      name = new_path.parent_path();
-    }
-    H5::Group parent = H5::H5File::openGroup(new_path.parent_path());
-    if (!parent.nameExists(name)) {
-      throw NXEXCEPTION("Unable to open the entry named " + name + " inside " + new_path.parent_path().string());
-    }
-    H5O_type_t type = parent.childObjType(name);
-    if (type == H5O_TYPE_GROUP) {
-      m_current = std::make_shared<H5::Group>(parent.openGroup(name));
-    } else if (type == H5O_TYPE_DATASET) {
-      m_current = std::make_shared<H5::DataSet>(parent.openDataSet(name));
-    } else {
-      throw NXEXCEPTION("Found unknown entry type ");
+      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
     }
     m_path = new_path;
   } else {
@@ -485,20 +463,12 @@ void File::openGroupPath(std::string const &pathname) {
     m_current = nullptr;
   }
   if (m_fileTree.count(new_path)) {
-    // if the path exists:
-    // -- open the enclosing group,
-    // -- check the type of the entry, Group or DataSet
-    // -- if group, open it; if dataset, use the parent
-    std::string name = new_path.stem();
-    H5::Group parent = H5::H5File::openGroup(new_path.parent_path());
-    H5O_type_t type = parent.childObjType(name);
-    if (type == H5O_TYPE_GROUP) {
-      m_current = std::make_shared<H5::Group>(parent.openGroup(name));
-    } else if (type == H5O_TYPE_DATASET) {
-      m_current = std::make_shared<H5::Group>(parent);
-    } else {
-      throw NXEXCEPTION("Found unknown entry type at " + new_path.string());
+    // if this refers to an SDS, open the parent group
+    // otherwise, this is a group: open it
+    if (m_fileTree[new_path] == scientific_data_set) {
+      new_path = new_path.parent_path();
     }
+    m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
     m_path = new_path;
   } else {
     throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
@@ -508,17 +478,20 @@ void File::openGroupPath(std::string const &pathname) {
 string File::getPath() { return m_path; }
 
 void File::closeGroup() {
-  if (m_path == "/") {
+  if (m_current == nullptr) {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else {
-    std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
-    grp->close();
-    m_path = m_path.parent_path();
-    if (m_path == "/") {
-      m_current = nullptr;
-    } else {
-      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+    try {
+      std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
+      grp->close();    
+      m_path = m_path.parent_path();
+      if (m_path == "/") {
+        m_current = nullptr;
+      } else {
+        m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+      }
+    } catch (...) {
     }
   }
 }
@@ -775,13 +748,16 @@ void File::closeData() {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else {
-    std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
-    dataset->close();
-    m_path = m_path.parent_path();
-    if (m_path == "/") {
-      m_current = nullptr;
-    } else {
-      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+    try {
+      std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+      dataset->close();
+      m_path = m_path.parent_path();
+      if (m_path == "/") {
+        m_current = nullptr;
+      } else {
+        m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+      }
+    } catch (...) {
     }
   }
 }
@@ -979,8 +955,7 @@ NXlink File::getDataID() {
 }
 
 bool File::isDataSetOpen() {
-  H5::DataSet const *current = dynamic_cast<H5::DataSet const *>(getCurrentLocation().get());
-  return current != nullptr;
+  return (m_fileTree.count(m_path) && m_fileTree[m_path] == scientific_data_set);
 }
 /*----------------------------------------------------------------------*/
 
@@ -1280,7 +1255,7 @@ template <typename NumT> void File::getAttr(std::string const &name, NumT &value
   // verify the current location can hold an attribute, and has the attribute named
   std::shared_ptr<H5::H5Object const> const current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw NXEXCEPTION("did not find name=" + name);
+    throw NXEXCEPTION("Could not find attribute " + name + " at " + m_path.string());
   }
 
   // now open the attribute, read it, and close
@@ -1295,12 +1270,13 @@ template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::st
   // verify the current location can hold an attribute, and has the attribute named
   std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw NXEXCEPTION("did not find name=" + name);
+    throw NXEXCEPTION("Could not find string attribute " + name + " at " + m_path.string());
   }
 
   // open the attribute, and read it
   H5::Attribute attr = current->openAttribute(name);
   attr.read(attr.getDataType(), value);
+  attr.close();
 }
 
 template <typename NumT> NumT File::getAttr(std::string const &name) {

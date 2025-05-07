@@ -37,6 +37,7 @@ public:
     TS_ASSERT_EQUALS(saver->version(), 1);
   }
 
+  // NEXUS REFACTOR FAILURE
   void testWriteGroupCreating() {
     // Test creating a new file from a WS Group
     // Create small test workspaces
@@ -70,6 +71,7 @@ public:
 
   // using image workspaces with one spectrum per row (as opposed to
   // one spectrum per pixel)
+  // NEXUS REFACTOR FAILURE
   void testWriteGroupCreatingFromRectImage() {
     std::vector<Workspace2D_sptr> wspaces(2);
     const std::string wsgName = "dummy_test_rect_images";
@@ -100,6 +102,7 @@ public:
       file.remove();
   }
 
+  // NEXUS REFACTOR FAILURE
   void testWriteGroupAppending() {
     // this needs to be called, cxxtest won't run it when it has an argument
     checkWriteSingleCreating(true);

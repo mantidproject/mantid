@@ -75,6 +75,7 @@ public:
     ADS.remove("group");
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_savedDataIsCorrect() {
     auto load = API::AlgorithmManager::Instance().create("Load");
     load->setProperty("Filename", "ENGINX_277208_focused_bank_2.nxs");
