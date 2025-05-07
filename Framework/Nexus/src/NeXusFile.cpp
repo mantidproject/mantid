@@ -345,7 +345,7 @@ bool File::hasData(std::string const &name) {
 std::filesystem::path File::formAbsolutePath(std::string const &new_name) {
   // try forming path relative to current location
   std::filesystem::path new_path(new_name);
-  if (*new_path.begin() != "/") { 
+  if (*new_path.begin() != "/") {
     // if not already absolute path, make relative to current location
     new_path = (m_path / new_name).lexically_normal();
     if (!m_fileTree.count(new_path)) {
@@ -367,8 +367,8 @@ std::filesystem::path File::formAbsolutePath(std::string const &new_name) {
 void File::registerEntry(std::string const &path, std::string const &name) {
   if (path.front() != '/') {
     throw NXEXCEPTION("Paths must be absolute: " + path);
-//  } else if (!this->nameExists(path)) {
-//    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
+    //  } else if (!this->nameExists(path)) {
+    //    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
   } else {
     m_fileTree[path] = name;
   }
@@ -475,7 +475,7 @@ void File::closeGroup() {
   } else {
     try {
       std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
-      grp->close();    
+      grp->close();
       m_path = m_path.parent_path();
       if (m_path == "/") {
         m_current = nullptr;
@@ -945,9 +945,7 @@ NXlink File::getDataID() {
   return link;
 }
 
-bool File::isDataSetOpen() {
-  return (m_fileTree.count(m_path) && m_fileTree[m_path] == scientific_data_set);
-}
+bool File::isDataSetOpen() { return (m_fileTree.count(m_path) && m_fileTree[m_path] == scientific_data_set); }
 /*----------------------------------------------------------------------*/
 
 void File::makeLink(NXlink &link) {
