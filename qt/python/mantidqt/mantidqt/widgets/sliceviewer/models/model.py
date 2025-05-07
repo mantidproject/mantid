@@ -484,19 +484,19 @@ class SliceViewerModel(SliceViewerBaseModel):
         elif ws_type == WS_TYPE.MDH:
             export_cut_fun = self.export_cuts_to_workspace_mdhisto
 
-        xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
         workspace = self._get_ws()
         xdim = workspace.getDimension(xindex)
         ydim = workspace.getDimension(yindex)
         deltax, deltay = xdim.getBinWidth(), ydim.getBinWidth()
 
+        if ws_type is WS_TYPE.MDE:
+            deltax, deltay = deltax / bin_params[xindex], deltay / bin_params[yindex]
+
         xpos, ypos = pos
 
         limits_x = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
         limits_y = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
-
-        if transpose:
-            limits_x, limits_y = limits_y, limits_x
 
         if axis == "c":
             export_cut_fun(slicepoint, bin_params, limits_x, transpose, dimension_indices, "x")
