@@ -234,8 +234,10 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             self.set_fit_enabled(False)
             self.set_superplot_enabled(False)
 
-        # disable crosshair in tiled plots but keep it enabled in color contour plot
-        if len(fig.get_axes()) > 1 and figure_type(fig) not in [FigureType.Contour]:
+        # disable crosshair in tiled plots, 3D plots but keep it enabled in color contour plot
+        if (len(fig.get_axes()) > 1 and figure_type(fig) not in [FigureType.Contour]) or (
+            figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]
+        ):
             self.set_crosshair_enabled(False)
 
         for ax in fig.get_axes():
