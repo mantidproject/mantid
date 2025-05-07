@@ -8,7 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <iostream>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -86,10 +85,6 @@ public:
 
     // check that all required log values are there
     auto run = output->run();
-
-    // test start and end time
-    std::cout << "!!!" << run.getProperty("start_time")->value() << "\n"
-              << "!!!" << run.getProperty("end_time")->value() << "\n";
 
     TS_ASSERT(run.getProperty("start_time")->value().compare("2014-06-17T09:59:31") == 0)
     TS_ASSERT(run.getProperty("end_time")->value().find("2014-06-17T09:59:31.08") == 0)
