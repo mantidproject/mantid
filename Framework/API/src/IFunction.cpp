@@ -230,20 +230,68 @@ void IFunction::tie(const std::string &parName, const std::string &expr, bool is
  *
  */
 void IFunction::addTies(const std::string &ties, bool isDefault) {
+  std::vector<std::string> oldTies;
+  std::vector<size_t> tiedParams;
+
   Expression list;
   list.parse(ties);
   list.toList();
   for (const auto &t : list) {
     if (t.name() == "=" && t.size() >= 2) {
       size_t n = t.size() - 1;
-      const std::string value = t[n].str();
-      for (size_t i = n; i != 0;) {
+      const std::string expr = t[n].str();
+      for (size_t i = n; i > 0;) {
         --i;
-        this->tie(t[i].name(), value, isDefault);
+        auto parName = t[i].name();
+        auto tie = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
+
+        if (!isDefault && tie->isConstant()) {
+          setParameter(parName, tie->eval());
+          fix(getParameterIndex(*tie));
+        } else {
+          auto iPar = getParameterIndex(*tie);
+          tiedParams.push_back(iPar);
+
+          auto it = std::find_if(m_ties.begin(), m_ties.end(),
+                                 [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+
+          const auto oldTie = getTie(iPar);
+          if (oldTie) {
+            oldTies.push_back(oldTie->asString());
+          } else {
+            oldTies.push_back("");
+          }
+
+          if (it != m_ties.end()) {
+            *it = std::move(tie);
+          } else {
+            m_ties.emplace_back(std::move(tie));
+            setParameterStatus(iPar, Tied);
+          }
+        }
       }
     }
   }
-  applyTies();
+
+  try {
+    sortTies(true);
+  } catch (std::runtime_error &e) {
+    for (size_t i = 0; i < tiedParams.size(); ++i) {
+      auto iPar = tiedParams[i];
+      auto it = std::find_if(m_ties.begin(), m_ties.end(),
+                             [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+
+      if (!oldTies[i].empty()) {
+        const auto oldExp = oldTies[i].substr(oldTies[i].find("=") + 1);
+        *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
+      } else {
+        removeTie(iPar);
+      }
+    }
+    throw;
+  }
+
+  sortTies(false);
 }
 
 /** Removes the tie off a parameter. The parameter becomes active
