@@ -229,7 +229,9 @@ LoadEventPreNexus2::LoadEventPreNexus2()
       num_events(0), num_pulses(0), numpixel(0), num_good_events(0), num_error_events(0), num_bad_events(0),
       num_wrongdetid_events(0), num_ignored_events(0), first_event(0), max_events(0), using_mapping_file(false),
       loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0), shortest_tof(0), parallelProcessing(false),
-      pulsetimesincreasing(false), m_dbOutput(false), m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {}
+      pulsetimesincreasing(false), m_dbOutput(false), m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {
+  deprecatedDate("2025-05-06");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
