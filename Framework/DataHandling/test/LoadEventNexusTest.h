@@ -817,8 +817,7 @@ public:
     // This is a very simple test for performance issues. There's no real event
     // data, so this just check that the algorithm creates a consistent output
     // (monitors). Real/intensive testing happens in `LoadNexusMonitors` and
-    // system
-    // tests.
+    // system tests.
     const std::string mon_outws_name = wsSpecFilterAndEventMonitors + "_monitors";
     auto &ads = AnalysisDataService::Instance();
 

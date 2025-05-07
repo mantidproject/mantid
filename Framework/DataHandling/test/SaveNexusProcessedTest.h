@@ -509,6 +509,7 @@ public:
     Poco::File(outputFileName).remove();
   }
 
+  // NEXUS REFACTOR FAILURE
   void testSaveTableColumn() {
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
 
@@ -775,6 +776,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
@@ -814,6 +816,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_ragged_x_bins_saves_correct_x_values_when_spectrum_indices_passed() {
     // stop regression related to bug in github issue #33152
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 2, 2);
@@ -848,6 +851,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_ragged_x_bins_input_data_bounds() {
     // Fix SEGFAULT when writing ragged data: respect input vector bounds at `putSlab`.
 
@@ -919,6 +923,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  // NEXUS REFACTOR FAILURE
   void test_ragged_XY_readback() {
     // Reading and writing ragged-workspace data: verify that spectra match on readback
 
