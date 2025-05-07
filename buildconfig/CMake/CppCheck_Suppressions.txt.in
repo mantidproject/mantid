@@ -106,12 +106,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:579
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:313
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:325
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1159
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1607
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1650
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:92
