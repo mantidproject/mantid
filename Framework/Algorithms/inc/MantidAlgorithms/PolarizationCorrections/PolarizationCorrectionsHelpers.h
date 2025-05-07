@@ -100,7 +100,7 @@ public:
       x[i].derivatives().setZero();
       x[i].derivatives()[i] = 1.0;
     }
-    ADScalar y = compute_func(x);
+    const ADScalar y = compute_func(x);
     const auto &derivatives = y.derivatives();
     return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
   }
