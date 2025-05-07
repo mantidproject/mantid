@@ -1200,6 +1200,9 @@ Info File::getInfo() {
   // strings need the length of the string hiding in there too
   // this doesn't work for variable length strings
   if (hdf5ToNXType(dt) == NXnumtype::CHAR) {
+    if (dt.isVariableStr()) {
+      throw Exception("Do not have implementation for variable length strings", "getInfo", m_filename);
+    }
     dims[rank - 1] = dataset->getStorageSize();
   }
 
