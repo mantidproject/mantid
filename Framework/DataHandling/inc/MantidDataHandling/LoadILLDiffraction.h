@@ -11,9 +11,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,14 +22,14 @@ namespace DataHandling {
 
   @date 15/05/17
 */
-class MANTID_DATAHANDLING_DLL LoadILLDiffraction : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLDiffraction : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   const std::string summary() const override;
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
   LoadILLDiffraction();
 
 private:

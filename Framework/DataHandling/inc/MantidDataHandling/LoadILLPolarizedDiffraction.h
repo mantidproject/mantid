@@ -10,8 +10,8 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <utility>
 
@@ -23,14 +23,14 @@ namespace DataHandling {
 
   @date 15/05/20
 */
-class MANTID_DATAHANDLING_DLL LoadILLPolarizedDiffraction : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLPolarizedDiffraction : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   const std::string summary() const override;
-  int confidence(Kernel::NexusDescriptor &) const override;
+  int confidence(Nexus::NexusDescriptor &) const override;
   LoadILLPolarizedDiffraction();
 
 private:

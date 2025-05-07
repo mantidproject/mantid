@@ -21,8 +21,8 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -92,7 +92,7 @@ public:
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
@@ -111,12 +111,12 @@ public:
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                const Kernel::NexusDescriptor &descriptor);
+                                const Nexus::NexusDescriptor &descriptor);
 
   /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
   template <typename T>
   static bool loadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
-                             Algorithm *alg, const Kernel::NexusDescriptor *descriptor = nullptr);
+                             Algorithm *alg, const Nexus::NexusDescriptor *descriptor = nullptr);
 
   /// Load instrument for Nexus file
   template <typename T>
@@ -126,7 +126,7 @@ public:
   /// Load instrument from IDF file specified by Nexus file
   template <typename T>
   static bool runLoadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
-                                Algorithm *alg, const Kernel::NexusDescriptor *descriptor = nullptr);
+                                Algorithm *alg, const Nexus::NexusDescriptor *descriptor = nullptr);
 
   static void loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS);
 
@@ -361,7 +361,7 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std:
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const std::string &entry_name,
-                                  const std::string &classType, const Kernel::NexusDescriptor *descriptor = nullptr) {
+                                  const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
@@ -474,7 +474,7 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
 template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
                                        const std::string &top_entry_name, Algorithm *alg,
-                                       const Kernel::NexusDescriptor *descriptor) {
+                                       const Nexus::NexusDescriptor *descriptor) {
   std::string instrument;
   std::string instFilename;
 
@@ -603,7 +603,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
 /** Load the run number and other meta data from the given bank */
 template <typename T>
 void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                       const Kernel::NexusDescriptor &descriptor) {
+                                       const Nexus::NexusDescriptor &descriptor) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
@@ -736,7 +736,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
 template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, T localWorkspace,
                                     const std::string &top_entry_name, Algorithm *alg,
-                                    const Kernel::NexusDescriptor *descriptor) {
+                                    const Nexus::NexusDescriptor *descriptor) {
 
   bool loadNexusInstrumentXML = true;
   if (alg->existsProperty("LoadNexusInstrumentXML"))

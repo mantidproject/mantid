@@ -192,7 +192,7 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadNexusProcessed::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else

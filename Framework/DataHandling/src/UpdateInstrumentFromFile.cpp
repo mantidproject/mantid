@@ -15,10 +15,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <H5Cpp.h>
 #include <algorithm>
@@ -94,7 +94,7 @@ void UpdateInstrumentFromFile::exec() {
     LoadEventNexus eventNexus;
 
     // we open and close the HDF5 file.
-    boost::scoped_ptr<Kernel::NexusDescriptor> descriptorNexusHDF5(new Kernel::NexusDescriptor(filename));
+    boost::scoped_ptr<Nexus::NexusDescriptor> descriptorNexusHDF5(new Nexus::NexusDescriptor(filename));
 
     if (isisNexus.confidence(*descriptorNexusHDF5) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       const auto &rootEntry = descriptorNexusHDF5->firstEntryNameType();
