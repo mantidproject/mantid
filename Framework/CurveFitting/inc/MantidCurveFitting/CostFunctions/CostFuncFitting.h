@@ -95,8 +95,8 @@ protected:
                                   API::FunctionValues_sptr values, bool evalDeriv = true,
                                   bool evalHessian = true) const = 0;
 
-  /// Update the fit weights in m_values when necessary
-  virtual void updateFitWeights() {};
+  /// Update or validate the fit weights in m_values when necessary
+  virtual void updateValidateFitWeights() {};
 
   bool isValid() const;
   void checkValidity() const;

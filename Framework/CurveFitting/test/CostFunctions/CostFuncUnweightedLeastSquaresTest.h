@@ -97,7 +97,7 @@ public:
     FunctionDomain1DVector d1d(std::vector<double>(10, 1.0));
     FunctionValues_sptr values = std::make_shared<FunctionValues>(d1d);
     for (size_t i = 0; i < 10; ++i) {
-      values->setFitWeights(0.0); // These weights would NOT be reset
+      values->setFitWeights(0.0); // These weights would be reset
     }
 
     IFunction_sptr fn = FunctionFactory::Instance().createFunction("FlatBackground");
@@ -108,7 +108,7 @@ public:
     uwls.setIgnoreInvalidData(true);
     auto updated_values = uwls.getValues();
     for (size_t i = 0; i < updated_values->size(); i++) {
-      TS_ASSERT_EQUALS(updated_values->getFitWeight(i), 0.0);
+      TS_ASSERT_EQUALS(updated_values->getFitWeight(i), 1.0);
     }
   }
 

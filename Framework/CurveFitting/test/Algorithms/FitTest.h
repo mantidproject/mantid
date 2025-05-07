@@ -2070,7 +2070,7 @@ public:
     const std::string status = fit.getProperty("OutputStatus");
     TS_ASSERT_EQUALS(status, "success")
     API::IFunction_sptr function = fit.getProperty("Function");
-    TS_ASSERT_DELTA(function->getParameter(0), 0.0, 1e-12)
+    TS_ASSERT_DELTA(function->getParameter(0), 2.0, 1e-12)
     AnalysisDataService::Instance().clear();
   }
 
@@ -2092,7 +2092,7 @@ public:
     const std::string status = fit.getProperty("OutputStatus");
     TS_ASSERT_EQUALS(status, "success")
     API::IFunction_sptr function = fit.getProperty("Function");
-    TS_ASSERT_DELTA(function->getParameter(0), 2.0, 1e-12)
+    TS_ASSERT_DELTA(function->getParameter(0), 10.0, 1e-8)
     AnalysisDataService::Instance().clear();
   }
 
