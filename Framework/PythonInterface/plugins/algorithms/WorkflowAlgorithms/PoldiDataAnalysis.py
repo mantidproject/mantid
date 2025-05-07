@@ -231,7 +231,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
     def runCorrelation(self):
         correlationName = self.baseName + "_correlation"
-        PoldiAutoCorrelation(self.inputWorkspace, OutputWorkspace=correlationName)
+        PoldiAutoCorrelation(self.inputWorkspace, OutputWorkspace=correlationName, Version=5)
 
         return AnalysisDataService.retrieve(correlationName)
 
