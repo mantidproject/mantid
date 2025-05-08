@@ -103,7 +103,8 @@ public:
     return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
   }
 
-  template <std::same_as<API::MatrixWorkspace_sptr>... Ts> API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) {
+  template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
+  API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) const {
     const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
     auto outWs = firstWs->clone();
     const size_t numSpec = outWs->getNumberHistograms();

@@ -276,20 +276,23 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
   const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
-  const auto numerator = ws00 - ws01 - ws10 + ws11;
-
-  const auto ws00Minus01 = ws00 - ws01;
-  const auto ws00Minus10 = ws00 - ws10;
-
-  m_wsFp = numerator / (2 * ws00Minus01);
-  m_wsFa = numerator / (2 * ws00Minus10);
-
-  // Calculate phi
   constexpr int var_num = 4;
   using Types = Arithmetic::ErrorTypeHelper<var_num>;
-  auto errorProp = Arithmetic::make_error_propagation<var_num>(
+
+  // Calculate fp
+  const auto errorPropFp = Arithmetic::make_error_propagation<var_num>(
+      [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1])); });
+  m_wsFp = errorPropFp.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+
+  // Calculate fa
+  const auto errorPropFa = Arithmetic::make_error_propagation<var_num>(
+      [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2])); });
+  m_wsFa = errorPropFa.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+
+  // Calculate phi
+  const auto errorPropPhi = Arithmetic::make_error_propagation<var_num>(
       [](const auto &x) { return ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]); });
-  m_wsPhi = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+  m_wsPhi = errorPropPhi.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 }
 
 MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp) {
