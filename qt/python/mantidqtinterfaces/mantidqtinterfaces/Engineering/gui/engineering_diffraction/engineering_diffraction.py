@@ -87,6 +87,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         presenter = EngineeringDiffractionPresenter()
         presenter.setup_settings(self)  # init before fitting otherwise default peak not populated on first time opened
         presenter.setup_calibration(self)
+        presenter.setup_correction(self)
         presenter.setup_focus(self)
         presenter.setup_fitting(self)
         presenter.setup_gsas2(self)
