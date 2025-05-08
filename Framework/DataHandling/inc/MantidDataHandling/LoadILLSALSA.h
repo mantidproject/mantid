@@ -9,7 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 #include <H5Cpp.h>
 
@@ -22,7 +22,7 @@ namespace DataHandling {
 /**
  Loads an ILL SALSA NeXus file into a Mantid workspace.
  */
-class MANTID_DATAHANDLING_DLL LoadILLSALSA : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSALSA : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadILLSALSA"; }
@@ -34,7 +34,7 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus;ILL\\Strain"; }
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
 
 private:
   // Number of pixel on the detector in the vertical dimension

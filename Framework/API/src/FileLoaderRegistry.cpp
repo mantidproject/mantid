@@ -30,8 +30,8 @@ template <typename T> struct DescriptorSetter {
   // general one does nothing
   void apply(std::shared_ptr<NexusFileLoader> & /*unused*/, std::shared_ptr<T> & /*unused*/) {}
 };
-template <> struct DescriptorSetter<Kernel::NexusDescriptor> {
-  void apply(std::shared_ptr<NexusFileLoader> &loader, const std::shared_ptr<Kernel::NexusDescriptor> &descriptor) {
+template <> struct DescriptorSetter<Nexus::NexusDescriptor> {
+  void apply(std::shared_ptr<NexusFileLoader> &loader, const std::shared_ptr<Nexus::NexusDescriptor> &descriptor) {
     loader->setFileInfo(descriptor);
   }
 };
@@ -114,7 +114,7 @@ void FileLoaderRegistryImpl::unsubscribe(const std::string &name, const int vers
 const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::LegacyNexusDescriptor;
-  using Kernel::NexusDescriptor;
+  using Nexus::NexusDescriptor;
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
@@ -167,7 +167,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
 bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::LegacyNexusDescriptor;
-  using Kernel::NexusDescriptor;
+  using Nexus::NexusDescriptor;
 
   // Check if it is in one of our lists
   const bool legacynexus = (m_names[LegacyNexus].find(algorithmName) != m_names[LegacyNexus].end());

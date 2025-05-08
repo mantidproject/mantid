@@ -8,8 +8,8 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,11 +17,11 @@ namespace DataHandling {
 /**
   Loads an ILL IN16B nexus file into a Mantid workspace.
 */
-class MANTID_DATAHANDLING_DLL LoadILLIndirect2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLIndirect2 : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   LoadILLIndirect2();
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 2; }

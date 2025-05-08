@@ -9,7 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,7 +26,7 @@ namespace DataHandling {
   @author Andrei Savici, ORNL
   @date 2011-08-14
 */
-class MANTID_DATAHANDLING_DLL LoadNXSPE : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXSPE : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNXSPE"; };
@@ -42,7 +42,7 @@ public:
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
 
   /// Confidence in identifier.
   static int identiferConfidence(const std::string &value);

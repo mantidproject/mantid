@@ -1171,7 +1171,7 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
 
 // Instantiate base class for LoadEMU's
 template class LoadEMU<Kernel::FileDescriptor>;
-template class LoadEMU<Kernel::NexusDescriptor>;
+template class LoadEMU<Nexus::NexusDescriptor>;
 
 // -------- EMU Hdf loader -----------------------
 
@@ -1191,7 +1191,7 @@ const std::string LoadEMUHdf::summary() const { return "Loads an EMU Hdf and lin
 
 /// Return the confidence as an integer value that this algorithm can
 /// load the file \p descriptor.
-int LoadEMUHdf::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadEMUHdf::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (descriptor.extension() != ".hdf")
     return 0;
 
@@ -1209,7 +1209,7 @@ int LoadEMUHdf::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 /// Initialise the algorithm and declare the properties for the
 /// nexus descriptor.
-void LoadEMUHdf::init() { LoadEMU<Kernel::NexusDescriptor>::init(true); }
+void LoadEMUHdf::init() { LoadEMU<Nexus::NexusDescriptor>::init(true); }
 
 /// Execute the algorithm. Establishes the filepath to the event file
 /// from the HDF link and the path provided and invokes the common
@@ -1262,7 +1262,7 @@ void LoadEMUHdf::exec() {
     throw std::runtime_error(msg);
   }
 
-  LoadEMU<Kernel::NexusDescriptor>::exec(hdfFile, evtPath);
+  LoadEMU<Nexus::NexusDescriptor>::exec(hdfFile, evtPath);
 }
 
 // -------- EMU Tar loader -----------------------

@@ -105,7 +105,7 @@ LoadEventNexus::LoadEventNexus()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadEventNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
 
   int confidence = 0;
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -527,7 +527,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
  * @return The number of events.
  */
 std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
-                      const NexusDescriptor &descriptor) {
+                      const Nexus::NexusDescriptor &descriptor) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
     hasTotalCounts = false;
@@ -961,7 +961,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
   }
   // set more properties on the workspace
-  const std::shared_ptr<NexusDescriptor> descriptor = getFileInfo();
+  const std::shared_ptr<Nexus::NexusDescriptor> descriptor = getFileInfo();
 
   try {
     // this is a static method that is why it is passing the
@@ -1360,7 +1360,7 @@ template <>
 bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(const std::string &nexusfilename,
                                                                       EventWorkspaceCollection_sptr localWorkspace,
                                                                       const std::string &top_entry_name, Algorithm *alg,
-                                                                      const Kernel::NexusDescriptor *descriptor) {
+                                                                      const Nexus::NexusDescriptor *descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg, descriptor);
   localWorkspace->setInstrument(ws->getInstrument());

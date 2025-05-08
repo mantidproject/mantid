@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidNexus/DllConfig.h"
 
 #include <map>
 #include <set>
@@ -15,9 +15,9 @@
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
+namespace Nexus {
 
-class MANTID_KERNEL_DLL NexusDescriptor {
+class MANTID_NEXUS_DLL NexusDescriptor {
 
 public:
   /**
@@ -90,6 +90,15 @@ public:
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(const std::string &classType) const;
 
+  /**
+   * Add an entry to the mapping for the file. Since there is no handle to the file after creation, it is up to the
+   * caller to only add entries that exist. This should not be used for files that are read-only.
+   *
+   * @param entryName full path to the node in the file
+   * @param groupClass NXclass (for group) or SDS (for dataset)
+   */
+  void addEntry(const std::string &entryName, const std::string &groupClass);
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
@@ -98,9 +107,9 @@ private:
   std::map<std::string, std::set<std::string>> initAllEntries();
 
   /** NeXus HDF5 file name */
-  std::string m_filename;
+  const std::string m_filename;
   /// Extension
-  std::string m_extension;
+  const std::string m_extension;
   /// First entry name/type
   std::pair<std::string, std::string> m_firstEntryNameType;
   /// Root attributes
@@ -114,8 +123,8 @@ private:
    *          (e.g. /entry/log)
    * </pre>
    */
-  const std::map<std::string, std::set<std::string>> m_allEntries;
+  std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
-} // namespace Kernel
+} // namespace Nexus
 } // namespace Mantid
