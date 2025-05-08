@@ -82,8 +82,10 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
+    m_path_parent = parent->path();
+
     m_path = parent->path() + "/" + name;
   }
 }
@@ -95,7 +97,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
     m_path_parent = parent->path();
     m_path = parent->path() + "/" + name;
