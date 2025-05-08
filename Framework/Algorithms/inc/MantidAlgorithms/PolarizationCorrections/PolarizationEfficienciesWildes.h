@@ -45,8 +45,8 @@ private:
   /// Calculate Fp, Fa and Phi
   void calculateFlipperEfficienciesAndPhi();
 
-  /// Calculate (2p-1) from Phi, Fp, Fa and the magnetic workspace intensities
-  MatrixWorkspace_sptr calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp);
+  /// Calculate (2p-1) from intensities
+  MatrixWorkspace_sptr calculateTPMO(const WorkspaceGroup_sptr &magWsGrp);
 
   /// Calculate the polarizer and/or analyser efficiencies, as requested
   void calculatePolarizerAndAnalyserEfficiencies(const bool solveForP, const bool solveForA);
