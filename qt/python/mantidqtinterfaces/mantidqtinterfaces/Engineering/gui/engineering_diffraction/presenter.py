@@ -20,6 +20,9 @@ from .tabs.fitting.presenter import FittingPresenter
 from .tabs.gsas2.model import GSAS2Model
 from .tabs.gsas2.presenter import GSAS2Presenter
 from .tabs.gsas2.view import GSAS2View
+from .tabs.texture.model import TextureProjection
+from .tabs.texture.view import TextureView
+from .tabs.texture.presenter import TexturePresenter
 from .settings.settings_model import SettingsModel
 from .settings.settings_view import SettingsView
 from .settings.settings_presenter import SettingsPresenter
@@ -35,6 +38,7 @@ class EngineeringDiffractionPresenter(object):
         self.correction_presenter = None
         self.focus_presenter = None
         self.fitting_presenter = None
+        self.texture_presenter = None
         self.settings_presenter = None
         self.gsas2_presenter = None
 
@@ -87,6 +91,12 @@ class EngineeringDiffractionPresenter(object):
         self.focus_presenter.add_focus_gsas2_subscriber(self.gsas2_presenter.focus_run_observer_gsas2)
         self.calibration_presenter.add_prm_gsas2_subscriber(self.gsas2_presenter.prm_filepath_observer_gsas2)
         view.tabs.addTab(gsas2_view, "GSAS II")
+
+    def setup_texture(self, view):
+        texture_model = TextureProjection()
+        texture_view = TextureView()
+        self.texture_presenter = TexturePresenter(texture_model, texture_view)
+        view.tabs.addTab(texture_view, "Texture")
 
     def setup_settings(self, view):
         settings_model = SettingsModel()
