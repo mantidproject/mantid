@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include <unordered_map>
 
 namespace Mantid::Algorithms {
 
@@ -46,7 +47,7 @@ private:
   void calculateFlipperEfficienciesAndPhi();
 
   /// Calculate (2p-1) from intensities
-  MatrixWorkspace_sptr calculateTPMO(const WorkspaceGroup_sptr &magWsGrp);
+  MatrixWorkspace_sptr calculateTPMO();
 
   /// Calculate the polarizer and/or analyser efficiencies, as requested
   void calculatePolarizerAndAnalyserEfficiencies(const bool solveForP, const bool solveForA);
@@ -61,10 +62,29 @@ private:
   /// held by the property
   void resetPropertyValue(const std::string &propertyName);
 
+  /// Populates the spin state workspaces map from ws group given key prefix.
+  void populateSpinStateWorkspaces(const WorkspaceGroup_sptr &wsGrp, const std::string &keyPrefix = "");
+
+  /// Populates the spin state workspaces map
+  void mapSpinStateWorkspaces();
+
+  // Convenience struct for handling of flipper workspaces
+  struct FlipperWorkspaces {
+    const MatrixWorkspace_sptr &ws00;
+    const MatrixWorkspace_sptr &ws01;
+    const MatrixWorkspace_sptr &ws10;
+    const MatrixWorkspace_sptr &ws11;
+  };
+
+  /// Access flipper workspaces in the spin state workspaces map
+  FlipperWorkspaces getFlipperWorkspaces(const bool mag = false);
+
   MatrixWorkspace_sptr m_wsFp = nullptr;
   MatrixWorkspace_sptr m_wsFa = nullptr;
   MatrixWorkspace_sptr m_wsPhi = nullptr;
   MatrixWorkspace_sptr m_wsP = nullptr;
   MatrixWorkspace_sptr m_wsA = nullptr;
+  std::unordered_map<std::string, MatrixWorkspace_sptr> m_spinStateWorkspaces;
+  bool m_magWsProvided = false;
 };
 } // namespace Mantid::Algorithms

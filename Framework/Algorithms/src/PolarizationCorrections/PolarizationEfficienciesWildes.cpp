@@ -41,8 +41,18 @@ auto constexpr OUTPUT_DIAGNOSTIC_GROUP{"Diagnostic Outputs"};
 
 auto constexpr INPUT_EFF_WS_ERROR{
     "If a magnetic workspace group has been provided then input efficiency workspaces should not be provided."};
-
 auto constexpr INITIAL_CONFIG{"00,01,10,11"};
+auto constexpr MAG_KEY_PREFIX = "mag_";
+
+constexpr auto fnPhi = [](const auto &x) { return ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]); };
+constexpr auto fnFp = [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1])); };
+constexpr auto fnFa = [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2])); };
+constexpr auto fnNumerator = [](const auto &x, const auto &fa) {
+  return (1 - 2 * fa) * x[4] + (2 * fa - 1) * x[6] - x[5] + x[7];
+};
+constexpr auto fnDenominator = [](const auto &x, const auto &fp) {
+  return (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
+};
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -244,13 +254,17 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 
 void PolarizationEfficienciesWildes::exec() {
   Progress progress(this, 0.0, 1.0, 10);
-  progress.report(0, "Calculating flipper efficiencies");
+
+  progress.report(0, "Extracting spin state workspaces");
+  mapSpinStateWorkspaces();
+
+  progress.report(1, "Calculating flipper efficiencies");
   calculateFlipperEfficienciesAndPhi();
 
   const bool solveForP = !isDefault(PropNames::OUTPUT_P_EFF_WS);
   const bool solveForA = !isDefault(PropNames::OUTPUT_A_EFF_WS);
   if (solveForP || solveForA) {
-    progress.report(3, "Finding polarizer and analyser efficiencies");
+    progress.report(4, "Finding polarizer and analyser efficiencies");
     calculatePolarizerAndAnalyserEfficiencies(solveForP, solveForA);
   }
 
@@ -270,51 +284,33 @@ void setUnitAndDistributionToMatch(const MatrixWorkspace_sptr &wsToUpdate, const
 
 void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   // Calculate the polarizing and analysing flipper efficiencies
-  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
-  const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
+  const auto &[ws00, ws01, ws10, ws11] = getFlipperWorkspaces();
 
   constexpr int var_num = 4;
   // Calculate fp
-  const auto errorPropFp = Arithmetic::make_error_propagation<var_num>(
-      [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1])); });
+  const auto errorPropFp = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFp(x); });
   m_wsFp = errorPropFp.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 
   // Calculate fa
-  const auto errorPropFa = Arithmetic::make_error_propagation<var_num>(
-      [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2])); });
+  const auto errorPropFa = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFa(x); });
   m_wsFa = errorPropFa.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 
   // Calculate phi
-  const auto errorPropPhi = Arithmetic::make_error_propagation<var_num>(
-      [](const auto &x) { return ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]); });
+  const auto errorPropPhi = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnPhi(x); });
   m_wsPhi = errorPropPhi.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 }
 
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO(const WorkspaceGroup_sptr &magWsGrp) {
-  const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
-  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
-
-  const auto &ws00Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-  const auto &ws01Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-  const auto &ws10Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-  const auto &ws11Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
+MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO() {
+  const auto &[ws00, ws01, ws10, ws11] = getFlipperWorkspaces();
+  const auto &[ws00Mag, ws01Mag, ws10Mag, ws11Mag] = getFlipperWorkspaces(true);
 
   constexpr int var_num = 8;
   const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
-    auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
-    auto fp = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1]));
-    auto fa = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2]));
-    auto numerator = (1 - 2 * fa) * x[4] + (2 * fa - 1) * x[6] - x[5] + x[7];
-    auto denominator = (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
-    return sqrt(phi * (numerator / denominator));
+    const auto fp = fnFp(x);
+    const auto fa = fnFa(x);
+    const auto numerator = fnNumerator(x, fa);
+    const auto denominator = fnDenominator(x, fp);
+    return sqrt(fnPhi(x) * (numerator / denominator));
   });
   const auto outWs = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
   return outWs;
@@ -322,23 +318,11 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO(const Workspa
 
 void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(const bool solveForP,
                                                                                const bool solveForA) {
-  const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
-  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
-
-  const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
-
-  if (magWsGrp != nullptr) {
-    const auto &ws00Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-    const auto &ws01Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-    const auto &ws10Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-    const auto &ws11Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
-
+  const auto &[ws00, ws01, ws10, ws11] = getFlipperWorkspaces();
+  if (m_magWsProvided) {
+    const auto &[ws00Mag, ws01Mag, ws10Mag, ws11Mag] = getFlipperWorkspaces(true);
     constexpr int var_num = 8;
-    const MatrixWorkspace_sptr wsTPMO = calculateTPMO(magWsGrp);
+    const MatrixWorkspace_sptr wsTPMO = calculateTPMO();
 
     if (solveForP) {
       m_wsP = (wsTPMO + 1) / 2;
@@ -346,12 +330,12 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
 
     if (solveForA) {
       const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
-        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
-        auto fp = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1]));
-        auto fa = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2]));
-        auto numerator = (1 - 2 * fa) * x[4] + (2 * fa - 1) * x[6] - x[5] + x[7];
-        auto denominator = (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
-        auto TPMO = sqrt(phi * (numerator / denominator));
+        const auto phi = fnPhi(x);
+        const auto fp = fnFp(x);
+        const auto fa = fnFa(x);
+        const auto numerator = fnNumerator(x, fa);
+        const auto denominator = fnDenominator(x, fp);
+        const auto TPMO = sqrt(phi * (numerator / denominator));
         return (phi / (2 * TPMO)) + 0.5;
       });
       m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
@@ -367,9 +351,8 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
       constexpr int var_num = 5;
       const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
-        auto TXMO = (2 * x[4]) - 1;
-        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
-        return (phi / (2 * TXMO)) + 0.5;
+        const auto TXMO = (2 * x[4]) - 1;
+        return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
       m_wsP = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsA);
     }
@@ -382,9 +365,8 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
       constexpr int var_num = 5;
       const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
-        auto TXMO = (2 * x[4]) - 1;
-        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
-        return (phi / (2 * TXMO)) + 0.5;
+        const auto TXMO = (2 * x[4]) - 1;
+        return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
       m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsP);
     }
@@ -443,9 +425,46 @@ void PolarizationEfficienciesWildes::resetMemberVariables() {
   m_wsPhi = nullptr;
   m_wsP = nullptr;
   m_wsA = nullptr;
+  m_magWsProvided = false;
+  m_spinStateWorkspaces.clear();
 }
 
 void PolarizationEfficienciesWildes::resetPropertyValue(const std::string &propertyName) {
   setPropertyValue(propertyName, getPropertyValue(propertyName));
 }
+
+void PolarizationEfficienciesWildes::populateSpinStateWorkspaces(const WorkspaceGroup_sptr &wsGrp,
+                                                                 const std::string &keyPrefix) {
+  const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
+  m_spinStateWorkspaces.emplace(keyPrefix + FlipperConfigurations::OFF_OFF,
+                                workspaceForSpinState(wsGrp, flipperConfig, FlipperConfigurations::OFF_OFF));
+  m_spinStateWorkspaces.emplace(keyPrefix + FlipperConfigurations::OFF_ON,
+                                workspaceForSpinState(wsGrp, flipperConfig, FlipperConfigurations::OFF_ON));
+  m_spinStateWorkspaces.emplace(keyPrefix + FlipperConfigurations::ON_OFF,
+                                workspaceForSpinState(wsGrp, flipperConfig, FlipperConfigurations::ON_OFF));
+  m_spinStateWorkspaces.emplace(keyPrefix + FlipperConfigurations::ON_ON,
+                                workspaceForSpinState(wsGrp, flipperConfig, FlipperConfigurations::ON_ON));
+}
+
+void PolarizationEfficienciesWildes::mapSpinStateWorkspaces() {
+  const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
+  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
+  if (magWsGrp != nullptr) {
+    m_magWsProvided = true;
+    populateSpinStateWorkspaces(magWsGrp, MAG_KEY_PREFIX);
+  }
+  populateSpinStateWorkspaces(nonMagWsGrp);
+}
+
+PolarizationEfficienciesWildes::FlipperWorkspaces PolarizationEfficienciesWildes::getFlipperWorkspaces(const bool mag) {
+  if (mag) {
+    return {m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::OFF_OFF],
+            m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::OFF_ON],
+            m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::ON_OFF],
+            m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::ON_ON]};
+  }
+  return {m_spinStateWorkspaces[FlipperConfigurations::OFF_OFF], m_spinStateWorkspaces[FlipperConfigurations::OFF_ON],
+          m_spinStateWorkspaces[FlipperConfigurations::ON_OFF], m_spinStateWorkspaces[FlipperConfigurations::ON_ON]};
+}
+
 } // namespace Mantid::Algorithms
