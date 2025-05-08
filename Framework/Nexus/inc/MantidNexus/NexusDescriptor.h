@@ -28,6 +28,10 @@ public:
 
   NexusDescriptor() = delete;
 
+  NexusDescriptor &operator=(NexusDescriptor const &nd) = default;
+
+  NexusDescriptor(NexusDescriptor const &nd) = default;
+
   /**
    * Using RAII components, no need to deallocate explicitly
    */
@@ -91,6 +95,12 @@ public:
   bool classTypeExists(const std::string &classType) const;
 
   /**
+   * @param name A path within a NeXus file to an entry
+   * @return The class type associated with that path
+   */
+  std::string classTypeForName(std::string const &name) const;
+
+  /**
    * Add an entry to the mapping for the file. Since there is no handle to the file after creation, it is up to the
    * caller to only add entries that exist. This should not be used for files that are read-only.
    *
@@ -107,9 +117,9 @@ private:
   std::map<std::string, std::set<std::string>> initAllEntries();
 
   /** NeXus HDF5 file name */
-  const std::string m_filename;
+  std::string m_filename;
   /// Extension
-  const std::string m_extension;
+  std::string m_extension;
   /// First entry name/type
   std::pair<std::string, std::string> m_firstEntryNameType;
   /// Root attributes
