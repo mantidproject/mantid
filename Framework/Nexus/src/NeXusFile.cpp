@@ -338,36 +338,18 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
 }
 
 bool File::hasPath(std::string const &name) {
-  bool ret = false;
-  try {
-    std::string path = formAbsolutePath(name);
-    ret = m_descriptor.isEntry(path);
-  } catch (...) {
-    ret = false;
-  }
-  return ret;
+  const std::string path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path);
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) {
-  bool ret = false;
-  try {
-    std::string path = formAbsolutePath(name);
-    ret = m_descriptor.isEntry(path, class_type);
-  } catch (...) {
-    ret = false;
-  }
-  return ret;
+  const std::string path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, class_type);
 }
 
 bool File::hasData(std::string const &name) {
-  bool ret = false;
-  try {
-    std::string path = formAbsolutePath(name);
-    ret = m_descriptor.isEntry(path, scientific_data_set);
-  } catch (...) {
-    ret = false;
-  }
-  return ret;
+  const std::string path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, scientific_data_set);
 }
 
 std::filesystem::path File::formAbsolutePath(std::string const &name) {
@@ -388,10 +370,7 @@ std::filesystem::path File::formAbsolutePath(std::string const &name) {
       if (!m_descriptor.isEntry(new_path)) {
         // else, try making relative to root
         new_path = std::filesystem::path("/" + new_name).lexically_normal();
-        if (!m_descriptor.isEntry(new_path)) {
-          // else, the name does not exist: throw an error
-          throw NXEXCEPTION("Path error: " + new_name + " cannot be opened from " + m_path.string());
-        }
+        // the caller is responsible for checking that it exists
       }
     }
   }
