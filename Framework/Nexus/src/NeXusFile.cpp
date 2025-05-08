@@ -247,29 +247,25 @@ namespace NeXus {
 
 File::File(std::string const &filename, NXaccess const access)
     : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
-      m_current(nullptr), m_close_handle(true), m_fileTree({{"/", "root"}}) {
-  recursivePopulateEntries(getRoot(), m_fileTree);
-};
+      m_current(nullptr), m_close_handle(true), m_descriptor(filename) {};
 
 File::File(char const *filename, NXaccess const access)
     : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
-      m_current(nullptr), m_close_handle(true), m_fileTree({{"/", "root"}}) {
-  recursivePopulateEntries(getRoot(), m_fileTree);
-};
+      m_current(nullptr), m_close_handle(true), m_descriptor(std::string(filename)) {};
 
 // copy constructors
 
 File::File(File const &f)
     : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_path(f.m_path), m_current(f.m_current),
-      m_close_handle(false), m_fileTree(f.m_fileTree) {}
+      m_close_handle(false), m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
     : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
-      m_close_handle(false), m_fileTree(pf->m_fileTree) {}
+      m_close_handle(false), m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
     : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
-      m_close_handle(false), m_fileTree(pf->m_fileTree) {}
+      m_close_handle(false), m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
@@ -279,7 +275,7 @@ File &File::operator=(File const &f) {
     this->m_path = f.m_path;
     this->m_current = f.m_current;
     this->m_close_handle = f.m_close_handle;
-    this->m_fileTree = f.m_fileTree;
+    this->m_descriptor = f.m_descriptor;
   }
   return *this;
 }
@@ -342,13 +338,25 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) {
-  std::string path = formAbsolutePath(name);
-  return (m_fileTree.count(path) && m_fileTree[path] == class_type);
+  bool ret = false;
+  try {
+    std::string path = formAbsolutePath(name);
+    ret = m_descriptor.isEntry(path, class_type);
+  } catch (...) {
+    ret = false;
+  }
+  return ret;
 }
 
 bool File::hasData(std::string const &name) {
-  std::string path = formAbsolutePath(name);
-  return (m_fileTree.count(path) && m_fileTree[path] == scientific_data_set);
+  bool ret = false;
+  try {
+    std::string path = formAbsolutePath(name);
+    ret = m_descriptor.isEntry(path, scientific_data_set);
+  } catch (...) {
+    ret = false;
+  }
+  return ret;
 }
 
 std::filesystem::path File::formAbsolutePath(std::string const &name) {
@@ -363,13 +371,13 @@ std::filesystem::path File::formAbsolutePath(std::string const &name) {
   } else {
     // if not already absolute path, make relative to current location
     new_path = (m_path / new_name).lexically_normal();
-    if (!m_fileTree.count(new_path)) {
+    if (!m_descriptor.isEntry(new_path)) {
       // else, try making path relative to parent
       new_path = (m_path.parent_path() / new_name).lexically_normal();
-      if (!m_fileTree.count(new_path)) {
+      if (!m_descriptor.isEntry(new_path)) {
         // else, try making relative to root
         new_path = std::filesystem::path("/" + new_name).lexically_normal();
-        if (!m_fileTree.count(new_path)) {
+        if (!m_descriptor.isEntry(new_path)) {
           // else, the name does not exist: throw an error
           throw NXEXCEPTION("Path error: " + new_name + " cannot be opened from " + m_path.string());
         }
@@ -382,10 +390,10 @@ std::filesystem::path File::formAbsolutePath(std::string const &name) {
 void File::registerEntry(std::string const &path, std::string const &name) {
   if (path.front() != '/') {
     throw NXEXCEPTION("Paths must be absolute: " + path);
-    //  } else if (!this->nameExists(path)) {
-    //    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
+  } else if (!this->nameExists(path)) {
+    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
   } else {
-    m_fileTree[path] = name;
+    m_descriptor.addEntry(path, name);
   }
 }
 
@@ -417,7 +425,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   if (new_path == m_path) {
     return;
   }
-  if (m_fileTree.count(new_path)) {
+  if (m_descriptor.isEntry(new_path, class_name)) {
     H5::Group grp = H5::H5File::openGroup(new_path);
     if (!verifyGroupClass(grp, class_name)) {
       throw NXEXCEPTION("Invalid group class=" + class_name + " name=" + name);
@@ -440,11 +448,11 @@ void File::openPath(std::string const &pathname) {
     m_current = nullptr;
   } else {
     std::filesystem::path new_path = formAbsolutePath(pathname);
-    if (m_fileTree.count(new_path)) {
+    if (m_descriptor.isEntry(new_path)) {
       // if the path exists:
       // -- check the type of the entry, Group or DataSet
       // -- open with appropriate method
-      if (m_fileTree[new_path] == scientific_data_set) {
+      if (m_descriptor.isEntry(new_path, scientific_data_set)) {
         m_current = std::make_shared<H5::DataSet>(H5::H5File::openDataSet(new_path));
       } else {
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
@@ -468,10 +476,10 @@ void File::openGroupPath(std::string const &pathname) {
     m_path = new_path;
     m_current = nullptr;
   }
-  if (m_fileTree.count(new_path)) {
+  if (m_descriptor.isEntry(new_path)) {
     // if this refers to an SDS, open the parent group
     // otherwise, this is a group: open it
-    if (m_fileTree[new_path] == scientific_data_set) {
+    if (m_descriptor.isEntry(new_path, scientific_data_set)) {
       new_path = new_path.parent_path();
     }
     m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
@@ -736,7 +744,7 @@ void File::openData(std::string const &name) {
   // napi used to allow opening datasets at same level without closing previous
   // many client codes follow this (bad) usage, therefore it needs to be enabled
   std::filesystem::path new_path = formAbsolutePath(name);
-  if (m_fileTree.count(new_path)) {
+  if (m_descriptor.isEntry(new_path, scientific_data_set)) {
     m_path = new_path;
     m_current = std::make_shared<H5::DataSet>(this->openDataSet(m_path));
   } else {
@@ -754,7 +762,8 @@ void File::closeData() {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else if (!isDataSetOpen()) {
-    throw NXEXCEPTION("Attempting to close a data set while within group at " + getPath());
+    throw NXEXCEPTION("Attempting to close a data set while within group at " + getPath() + " of class " +
+                      m_descriptor.classTypeForName(m_path));
   } else {
     try {
       std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
@@ -962,7 +971,7 @@ NXlink File::getDataID() {
   return link;
 }
 
-bool File::isDataSetOpen() { return (m_fileTree.count(m_path) && m_fileTree[m_path] == scientific_data_set); }
+bool File::isDataSetOpen() { return m_descriptor.isEntry(m_path, scientific_data_set); }
 /*----------------------------------------------------------------------*/
 
 void File::makeLink(NXlink &link) {
@@ -973,7 +982,7 @@ void File::makeLink(NXlink &link) {
 
   // create link
   current->link(link.targetPath, H5L_SAME_LOC, linkTarget);
-  registerEntry(linkTarget, m_fileTree[link.targetPath]);
+  registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetPath));
   // set a target attribute on the target
   std::string here = this->getPath();
   this->openPath(linkTarget);
