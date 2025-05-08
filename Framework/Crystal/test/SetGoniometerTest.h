@@ -70,7 +70,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", gonMat))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
