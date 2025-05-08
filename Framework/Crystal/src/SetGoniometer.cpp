@@ -103,11 +103,11 @@ void SetGoniometer::exec() {
     ei = infos->getExperimentInfo(0);
   }
 
-  std::string gonioDefined = getPropertyValue("Goniometers");
   // Create the goniometer
   Goniometer gon;
 
   if (isDefault("GoniometerMatrix")) {
+    std::string gonioDefined = getPropertyValue("Goniometers");
     if (gonioDefined == "Universal")
       gon.makeUniversalGoniometer();
     else
