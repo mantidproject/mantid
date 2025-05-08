@@ -82,8 +82,10 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
+    m_path_parent = parent->path();
+
     m_path = parent->path() + "/" + name;
   }
 }
@@ -95,7 +97,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
     m_path_parent = parent->path();
     m_path = parent->path() + "/" + name;
@@ -393,8 +395,7 @@ NXDataSet::NXDataSet(const NXClass &parent, const std::string &name) : NXObject(
     m_info.nxname = name.substr(i + 1);
 }
 
-// Opens the data set. Does not read in any data. Call load(...) to load the
-// data
+// Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open() {
   size_t i = m_path.find_last_of('/');
   if (i == std::string::npos || i == 0)
