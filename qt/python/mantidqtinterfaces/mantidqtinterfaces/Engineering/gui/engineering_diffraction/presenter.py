@@ -12,6 +12,9 @@ from .tabs.calibration.presenter import CalibrationPresenter
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
+from .tabs.correction.model import TextureCorrectionModel
+from .tabs.correction.view import TextureCorrectionView
+from .tabs.correction.presenter import TextureCorrectionPresenter
 from .tabs.fitting.view import FittingView
 from .tabs.fitting.presenter import FittingPresenter
 from .tabs.gsas2.model import GSAS2Model
@@ -29,6 +32,7 @@ from mantidqt.utils.observer_pattern import GenericObservable
 class EngineeringDiffractionPresenter(object):
     def __init__(self):
         self.calibration_presenter = None
+        self.correction_presenter = None
         self.focus_presenter = None
         self.fitting_presenter = None
         self.settings_presenter = None
@@ -63,6 +67,12 @@ class EngineeringDiffractionPresenter(object):
         focus_view = FocusView()
         self.focus_presenter = FocusPresenter(focus_model, focus_view)
         view.tabs.addTab(focus_view, "Focus")
+
+    def setup_correction(self, view):
+        correction_model = TextureCorrectionModel()
+        correction_view = TextureCorrectionView()
+        self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
+        view.tabs.addTab(correction_view, "Absorption Correction")
 
     def setup_fitting(self, view):
         fitting_view = FittingView()
