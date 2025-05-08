@@ -90,7 +90,7 @@ class TextureCorrectionPresenter:
 
             if self.view.include_absorption():
                 self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
-                self.model.calc_absorption(ws, {"OutputWorkspace": "_abs_corr"})
+                self.model.calc_absorption(ws)
                 abs_corr = "_abs_corr"
 
             if self.view.include_divergence():
