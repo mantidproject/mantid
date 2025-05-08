@@ -254,7 +254,6 @@ std::map<std::string, std::string> PolarizationEfficienciesWildes::validateInput
 
 void PolarizationEfficienciesWildes::exec() {
   Progress progress(this, 0.0, 1.0, 10);
-
   progress.report(0, "Extracting spin state workspaces");
   mapSpinStateWorkspaces();
 
@@ -274,13 +273,6 @@ void PolarizationEfficienciesWildes::exec() {
   // Ensure that we don't carry over values from a previous run if an instance of this algorithm is run twice
   resetMemberVariables();
 }
-
-namespace {
-void setUnitAndDistributionToMatch(const MatrixWorkspace_sptr &wsToUpdate, const MatrixWorkspace_sptr &matchWs) {
-  wsToUpdate->setYUnit(matchWs->YUnit());
-  wsToUpdate->setDistribution(matchWs->isDistribution());
-}
-} // unnamed namespace
 
 void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   // Calculate the polarizing and analysing flipper efficiencies

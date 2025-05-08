@@ -110,7 +110,9 @@ public:
     const size_t numSpec = outWs->getNumberHistograms();
     const size_t specSize = outWs->blocksize();
 
+    // cppcheck-suppress unreadVariable
     const bool condition = Kernel::threadSafe((*args)..., *outWs);
+    // cppcheck-suppress unreadVariable
     const bool specOverBins = numSpec > specSize;
 
     PARALLEL_FOR_IF(condition && specOverBins)
