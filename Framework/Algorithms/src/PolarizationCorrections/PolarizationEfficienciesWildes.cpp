@@ -14,6 +14,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/Unit.h"
+#include <cmath>
 
 namespace {
 /// Property Names
@@ -295,42 +296,32 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   m_wsPhi = errorPropPhi.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 }
 
-MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp) {
+MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO(const WorkspaceGroup_sptr &magWsGrp) {
   const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
-  const auto &ws00 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
-  const auto &ws01 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
-  const auto &ws10 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
-  const auto &ws11 = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
+  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
+  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
-  // We use the flipper efficiency to multiply the mag ws counts, but the resulting workspace will have lost the Y unit
-  // and distribution information. We need to put these back otherwise the rest of the calculation fails when it tries
-  // to add and subtract workspaces with different Y units.
-  const auto twoFp = 2 * m_wsFp;
-  const auto twoFa = 2 * m_wsFa;
+  const auto &ws00Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+  const auto &ws01Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+  const auto &ws10Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+  const auto &ws11Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
-  const auto twoFa00 = (1 - twoFa) * ws00;
-  setUnitAndDistributionToMatch(twoFa00, ws00);
+  constexpr int var_num = 8;
+  using Types = Arithmetic::ErrorTypeHelper<var_num>;
 
-  const auto twoFa10 = (twoFa - 1) * ws10;
-  setUnitAndDistributionToMatch(twoFa10, ws10);
-
-  const auto twoFp00 = (1 - twoFp) * ws00;
-  setUnitAndDistributionToMatch(twoFp00, ws00);
-
-  const auto twoFp01 = (twoFp - 1) * ws01;
-  setUnitAndDistributionToMatch(twoFp01, ws01);
-
-  const auto numerator = twoFa00 + twoFa10 - ws01 + ws11;
-  const auto denominator = twoFp00 + twoFp01 - ws10 + ws11;
-  const auto tpmoSquared = m_wsPhi * (numerator / denominator);
-
-  auto alg = createChildAlgorithm("Power");
-  alg->initialize();
-  alg->setProperty("InputWorkspace", tpmoSquared);
-  alg->setProperty("Exponent", 0.5);
-  alg->execute();
-
-  return alg->getProperty("OutputWorkspace");
+  const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+    auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
+    auto fp = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1]));
+    auto fa = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2]));
+    auto numerator = (1 - 2 * fa) * x[4] + (2 * fa - 1) * x[6] - x[5] + x[7];
+    auto denominator = (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
+    return sqrt(phi * (numerator / denominator));
+  });
+  const auto outWs = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
+  return outWs;
 }
 
 void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(const bool solveForP,
@@ -338,7 +329,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
   const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
 
   if (magWsGrp != nullptr) {
-    const MatrixWorkspace_sptr wsTPMO = calculateTPMOFromPhi(magWsGrp);
+    const MatrixWorkspace_sptr wsTPMO = calculateTPMO(magWsGrp);
 
     if (solveForP) {
       m_wsP = (wsTPMO + 1) / 2;
