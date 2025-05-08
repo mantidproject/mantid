@@ -445,15 +445,10 @@ void File::openPath(std::string const &pathname) {
       // -- check the type of the entry, Group or DataSet
       // -- open with appropriate method
       if (m_fileTree[new_path] == scientific_data_set) {
-        printf("data %s %s\n", new_path.c_str(), m_fileTree[new_path].c_str());
-        LOG_LINE();
         m_current = std::make_shared<H5::DataSet>(H5::H5File::openDataSet(new_path));
       } else {
-        printf("group %s %s\n", new_path.c_str(), m_fileTree[new_path].c_str());
-        LOG_LINE()
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
       }
-      LOG_LINE()
       m_path = new_path;
     } else {
       throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string() + " from " + m_path.string());
