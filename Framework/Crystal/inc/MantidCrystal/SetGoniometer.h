@@ -40,7 +40,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  Kernel::DblMatrix parseMatrixString(std::string gonMat);
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Crystal

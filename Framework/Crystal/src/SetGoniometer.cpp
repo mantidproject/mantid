@@ -9,6 +9,8 @@
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
@@ -34,6 +36,10 @@ const size_t NUM_AXES = 6;
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
+
+  auto threeVthree = std::make_shared<ArrayLengthValidator<double>>(9);
+  std::vector<double> zeroes(9, 0.);
+
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                   "An workspace that will be modified with the new goniometer created.");
 
@@ -54,38 +60,28 @@ void SetGoniometer::init() {
   declareProperty("Average", true,
                   "Use the average value of the log, if false a separate "
                   "goniometer will be created for each value in the logs");
-  declareProperty("GoniometerMatrix", "",
+  declareProperty(std::make_unique<ArrayProperty<double>>("GoniometerMatrix", std::move(zeroes), threeVthree),
                   "Directly set the goniometer rotation matrix. Input should be in the form of a flattened 3x3 matrix");
 }
 
-Kernel::DblMatrix SetGoniometer::parseMatrixString(std::string gonMat) {
-  Kernel::DblMatrix rotMat(3, 3, true);
-  // validate input before assigning it to rotMat
-  std::vector<double> matVals;
-  std::stringstream ss(gonMat);
-  std::string val;
-  double dblVal;
+std::map<std::string, std::string> SetGoniometer::validateInputs() {
+  std::vector<double> Gvec = getProperty("GoniometerMatrix");
+  std::map<std::string, std::string> issues;
+  const Kernel::DblMatrix GMatrix(Gvec);
 
-  while (std::getline(ss, val, ',')) {
+  // if a Goniometer Matrix is supplied, check it is a valid rotation
+  if (not isDefault("GoniometerMatrix")) {
     try {
-      dblVal = std::stod(val);
-    } catch (const std::invalid_argument &) {
-      throw std::invalid_argument(
-          "Goniometer Matrix values must be interpretable as decimal numbers separated by commas");
-    }
-    matVals.push_back(dblVal);
-  }
-  if (matVals.size() != 9) {
-    throw std::invalid_argument("Goniometer Matrix must contain 9 comma separated values");
-  }
-  int x = 0;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      rotMat[i][j] = matVals[x];
-      x++;
+      bool isRot = GMatrix.isRotation();
+      if (not isRot) {
+        issues["GoniometerMatrix"] = "Supplied Goniometer Matrix is not a proper rotation";
+      }
+    } catch (std::invalid_argument &) {
+      // this should not be thrown because of the input validator
+      issues["GoniometerMatrix"] = "Supplied Goniometer Matrix is not a proper rotation: Matrix is not Square";
     }
   }
-  return rotMat;
+  return issues;
 }
 
 /** Execute the algorithm.
@@ -111,9 +107,7 @@ void SetGoniometer::exec() {
   // Create the goniometer
   Goniometer gon;
 
-  std::string gonMat = getPropertyValue("GoniometerMatrix");
-
-  if (gonMat == "") {
+  if (isDefault("GoniometerMatrix")) {
     if (gonioDefined == "Universal")
       gon.makeUniversalGoniometer();
     else
@@ -189,7 +183,9 @@ void SetGoniometer::exec() {
       g_log.error("No log values for goniometers");
     }
   } else {
-    ei->mutableRun().setGoniometer(Goniometer(parseMatrixString(gonMat)), false);
+    const std::vector<double> gonVec = getProperty("GoniometerMatrix");
+    const Kernel::DblMatrix gonMat(gonVec);
+    ei->mutableRun().setGoniometer(Goniometer(gonMat), false);
   }
 }
 
