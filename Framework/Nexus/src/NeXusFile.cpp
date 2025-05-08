@@ -823,8 +823,12 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to putAttr");
   }
-
   std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
+  }
   H5Util::writeNumAttribute<NumT>(*current, name, value);
 }
 
@@ -837,6 +841,11 @@ void File::putAttr(std::string const &name, std::string const &value, bool const
     my_value = " "; // Make a default "space" to avoid errors.
   }
   std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
+  }
   H5Util::writeStrAttribute(*current, name, my_value);
 }
 
