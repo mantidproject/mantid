@@ -56,22 +56,36 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
     // set only 8 values for the matrix
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+    std::string err_string =
+        "Invalid value for property GoniometerMatrix (dbl list) from string \"-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, "
+        "1.0\": When setting value of property \"GoniometerMatrix\": Incorrect size";
+    TS_ASSERT_THROWS_EQUALS(alg.setPropertyValue("GoniometerMatrix", "-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0"),
+                            const std::invalid_argument &e, std::string(e.what()), err_string);
   }
 
-  void test_goniometer_string_fails_on_formatting() {
+  void setup_goniometer_matrix_failure_cases(const std::string gonMat, const std::string err_msg) {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     SetGoniometer alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
-    // space separated rather than comma separated
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GoniometerMatrix", "-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
+  }
+
+  void test_goniometer_string_fails_if_not_rotation_matrix_det_greater_than_one() {
+    std::string gonMatBigDet = "-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0";
+    std::string err_string =
+        "Some invalid Properties found: \n GoniometerMatrix: Supplied Goniometer Matrix is not a proper rotation";
+    setup_goniometer_matrix_failure_cases(gonMatBigDet, err_string);
+  }
+
+  void test_goniometer_string_fails_if_not_rotation_matrix_transpose_not_inverse() {
+    std::string gonMatNotInv = "1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.5";
+    std::string err_string =
+        "Some invalid Properties found: \n GoniometerMatrix: Supplied Goniometer Matrix is not a proper rotation";
+    setup_goniometer_matrix_failure_cases(gonMatNotInv, err_string);
   }
 
   /** Create an "empty" goniometer by NOT giving any axes. */
