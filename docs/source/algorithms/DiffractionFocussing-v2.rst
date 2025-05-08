@@ -63,6 +63,9 @@ one value overall, it is used for all of the spectra. The ``Delta``
 parameter is required and can either be a single number which is
 common to all, or one number per spectra. Positive values are
 interpreted as constant step-size. Negative are logarithmic.
+An optional boolean parameter ``FullBinsOnly`` may be set to indicate
+that final bins with width smaller than the step-size should be omitted
+from the output spectra.
 
 Usage
 -----

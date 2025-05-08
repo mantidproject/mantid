@@ -365,31 +365,86 @@ public:
       TS_ASSERT_EQUALS(X1.back(), 600.);
     }
 
+    {
+      // Test `FullBinsOnly=true` case.
+      // (Previous test cases check `FullBinsOnly=false`, which is the default setting.)
+
+      std::vector<double> dmins = {300, 200};
+      std::vector<double> dmaxs = {550, 600};
+      std::vector<double> delta = {100, 200};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents, true);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+
+      // First spectrum should not have its final bin.
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 3.);
+      TS_ASSERT_EQUALS(X0.front(), 300.);
+      TS_ASSERT_EQUALS(X0.back(), 500.);
+
+      // Second spectrum should be as before.
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 3.);
+      TS_ASSERT_EQUALS(X1.front(), 200.);
+      TS_ASSERT_EQUALS(X1.back(), 600.);
+    }
+
+    {
+      // Test `FullBinsOnly` case: negative test.
+
+      std::vector<double> dmins = {300, 200};
+      std::vector<double> dmaxs = {550, 600};
+      std::vector<double> delta = {100, 200};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+
+      // First spectrum should retain its final, partial bin.
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 4.);
+      TS_ASSERT_EQUALS(X0.front(), 300.);
+      TS_ASSERT_EQUALS(X0.back(), 550.);
+
+      // Second spectrum should be as before.
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 3.);
+      TS_ASSERT_EQUALS(X1.front(), 200.);
+      TS_ASSERT_EQUALS(X1.back(), 600.);
+    }
+
     // failure cases
 
     // NaN or delta=0
     run_DiffractionFocussing2(inputWS, groupWS, {std::numeric_limits<double>::quiet_NaN()}, {400}, {100},
-                              preserveEvents, true);
+                              preserveEvents, false, true);
     run_DiffractionFocussing2(inputWS, groupWS, {200}, {std::numeric_limits<double>::quiet_NaN()}, {100},
-                              preserveEvents, true);
+                              preserveEvents, false, true);
     run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {std::numeric_limits<double>::quiet_NaN()},
-                              preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {0}, preserveEvents, true);
+                              preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {0}, preserveEvents, false, true);
 
     // must define all or none binning params
-    run_DiffractionFocussing2(inputWS, groupWS, {}, {400}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {}, {400}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {}, preserveEvents, false, true);
 
     // dmax is not larger than dmin
-    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {400}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {200, 400}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {300, 400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {400}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {200, 400}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {300, 400}, {100}, preserveEvents, false, true);
 
     // too many parameters
-    run_DiffractionFocussing2(inputWS, groupWS, {200, 200, 200}, {400}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400, 400, 400}, {100}, preserveEvents, true);
-    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {100, 100, 100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 200, 200}, {400}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400, 400, 400}, {100}, preserveEvents, false, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {100, 100, 100}, preserveEvents, false, true);
 
     // cleanup workspaces
     AnalysisDataService::Instance().remove(inputWS);
@@ -399,7 +454,7 @@ public:
   MatrixWorkspace_const_sptr run_DiffractionFocussing2(std::string inputWS, std::string groupWS,
                                                        const std::vector<double> dmins, const std::vector<double> dmaxs,
                                                        const std::vector<double> delta, bool preserveEvents,
-                                                       bool expectFailure = false) {
+                                                       bool fullBinsOnly = false, bool expectFailure = false) {
     std::string outputWS = inputWS + "_focussed";
     MatrixWorkspace_const_sptr output;
 
@@ -412,6 +467,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(focus.setProperty("DMin", dmins));
     TS_ASSERT_THROWS_NOTHING(focus.setProperty("DMax", dmaxs));
     TS_ASSERT_THROWS_NOTHING(focus.setProperty("Delta", delta));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("FullBinsOnly", fullBinsOnly));
 
     if (expectFailure) {
       try {
