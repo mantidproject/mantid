@@ -169,4 +169,18 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
 
 bool NexusDescriptor::classTypeExists(const std::string &classType) const { return m_allEntries.contains(classType); }
 
+std::string NexusDescriptor::classTypeForName(std::string const &entryName) const {
+  std::string groupClass;
+  for (auto it = m_allEntries.cbegin(); it != m_allEntries.cend(); it++) {
+    if (it->second.count(entryName) == 1) {
+      groupClass = it->first;
+      break;
+    }
+  }
+  if (it == m_allEntries.cend()) {
+    throw ::NeXus::Exception("Cannot find entry " + entryName, "classTypeForName", m_filename);
+  }
+  return groupClass;
+}
+
 } // namespace Mantid::Nexus
