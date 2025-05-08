@@ -644,9 +644,23 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot &root, const std::strin
  */
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                                              const double &progressStart, const double &progressRange) {
-  NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
-  indices_data.load();
-  size_t numspec = indices_data.dim0() - 1;
+  // indices of events
+  std::vector<int64_t> indices;
+  size_t numspec;
+  std::string units;
+  std::string unitLabel;
+  { // scope the variable so the node gets closed
+    NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
+    indices_data.load();
+    numspec = indices_data.dim0() - 1;
+    indices = indices_data.vecBuffer();
+
+    // Set the YUnit label
+    units = indices_data.attributes("units");
+    unitLabel = indices_data.attributes("unit_label");
+    if (unitLabel.empty())
+      unitLabel = units;
+  }
 
   // process optional spectrum parameters, if set
   checkOptionalProperties(numspec);
@@ -664,10 +678,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
       WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins, num_xbins - 1));
 
   // Set the YUnit label
-  ws->setYUnit(indices_data.attributes("units"));
-  std::string unitLabel = indices_data.attributes("unit_label");
-  if (unitLabel.empty())
-    unitLabel = indices_data.attributes("units");
+  ws->setYUnit(units);
   ws->setYUnitLabel(unitLabel);
 
   // Handle optional fields.
@@ -711,8 +722,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
   else
     throw std::runtime_error("Could not figure out the type of event list!");
 
-  // indices of events
-  std::vector<int64_t> indices = indices_data.vecBuffer();
   // Create all the event lists
   auto max = static_cast<int64_t>(m_filtered_spec_idxs.size());
   Progress progress(this, progressStart, progressStart + progressRange, max);
