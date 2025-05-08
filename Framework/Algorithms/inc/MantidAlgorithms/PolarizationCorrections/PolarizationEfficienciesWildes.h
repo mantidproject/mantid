@@ -51,13 +51,6 @@ private:
   /// Calculate the polarizer and/or analyser efficiencies, as requested
   void calculatePolarizerAndAnalyserEfficiencies(const bool solveForP, const bool solveForA);
 
-  /// If either the polarizer or the analyser efficiency is known, use the relationship Phi = (2p-1)(2a-1) to solve for
-  /// the other efficiency
-  MatrixWorkspace_sptr solveForUnknownEfficiency(const MatrixWorkspace_sptr &knownEfficiency);
-
-  /// Solve for the unknown efficiency from either (2p-1) or (2a-1) using the relationship Phi = (2p-1)(2a-1)
-  MatrixWorkspace_sptr solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsTXMO);
-
   /// Set the algorithm outputs
   void setOutputs();
 

@@ -278,8 +278,6 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
   constexpr int var_num = 4;
-  using Types = Arithmetic::ErrorTypeHelper<var_num>;
-
   // Calculate fp
   const auto errorPropFp = Arithmetic::make_error_propagation<var_num>(
       [](const auto &x) { return (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1])); });
@@ -310,8 +308,6 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO(const Workspa
   const auto &ws11Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
   constexpr int var_num = 8;
-  using Types = Arithmetic::ErrorTypeHelper<var_num>;
-
   const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
     auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
     auto fp = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1]));
@@ -327,8 +323,21 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO(const Workspa
 void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(const bool solveForP,
                                                                                const bool solveForA) {
   const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
+  const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
+
+  const auto &flipperConfig = getPropertyValue(PropNames::FLIPPERS);
+  const auto &ws00 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+  const auto &ws01 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+  const auto &ws10 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+  const auto &ws11 = workspaceForSpinState(nonMagWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
 
   if (magWsGrp != nullptr) {
+    const auto &ws00Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_OFF);
+    const auto &ws01Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::OFF_ON);
+    const auto &ws10Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_OFF);
+    const auto &ws11Mag = workspaceForSpinState(magWsGrp, flipperConfig, FlipperConfigurations::ON_ON);
+
+    constexpr int var_num = 8;
     const MatrixWorkspace_sptr wsTPMO = calculateTPMO(magWsGrp);
 
     if (solveForP) {
@@ -336,7 +345,16 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     }
 
     if (solveForA) {
-      m_wsA = solveUnknownEfficiencyFromTXMO(wsTPMO);
+      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
+        auto fp = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[1]));
+        auto fa = (x[0] - x[1] - x[2] + x[3]) / (2 * (x[0] - x[2]));
+        auto numerator = (1 - 2 * fa) * x[4] + (2 * fa - 1) * x[6] - x[5] + x[7];
+        auto denominator = (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
+        auto TPMO = sqrt(phi * (numerator / denominator));
+        return (phi / (2 * TPMO)) + 0.5;
+      });
+      m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
     }
 
     return;
@@ -347,7 +365,13 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
       m_wsP = inWsP->clone();
     } else {
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
-      m_wsP = solveForUnknownEfficiency(inWsA);
+      constexpr int var_num = 5;
+      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+        auto TXMO = (2 * x[4]) - 1;
+        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
+        return (phi / (2 * TXMO)) + 0.5;
+      });
+      m_wsP = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsA);
     }
   }
 
@@ -356,20 +380,15 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
       m_wsA = inWsA->clone();
     } else {
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
-      m_wsA = solveForUnknownEfficiency(inWsP);
+      constexpr int var_num = 5;
+      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+        auto TXMO = (2 * x[4]) - 1;
+        auto phi = ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]);
+        return (phi / (2 * TXMO)) + 0.5;
+      });
+      m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsP);
     }
   }
-}
-
-MatrixWorkspace_sptr
-PolarizationEfficienciesWildes::solveForUnknownEfficiency(const MatrixWorkspace_sptr &knownEfficiency) {
-  const auto wsTXMO = (2 * knownEfficiency) - 1;
-  return solveUnknownEfficiencyFromTXMO(wsTXMO);
-}
-
-MatrixWorkspace_sptr
-PolarizationEfficienciesWildes::solveUnknownEfficiencyFromTXMO(const MatrixWorkspace_sptr &wsTXMO) {
-  return (m_wsPhi / (2 * wsTXMO)) + 0.5;
 }
 
 void PolarizationEfficienciesWildes::setOutputs() {
