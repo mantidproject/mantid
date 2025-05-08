@@ -70,7 +70,7 @@ double CostFuncRwp::calSqrtW(const API::FunctionValues_sptr &values) const {
  */
 void CostFuncRwp::updateValidateFitWeights() {
   for (size_t i = 0; i < m_values->size(); i++) {
-    if ((m_values->getFitWeight(i) < 0) && !m_ignoreInvalidData) {
+    if (!m_ignoreInvalidData && (m_values->getFitWeight(i) < 0)) {
       throw std::runtime_error("Invalid data found at bin=" + std::to_string(i) + " in input error.");
     }
   }

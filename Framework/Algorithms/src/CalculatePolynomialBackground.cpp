@@ -28,6 +28,7 @@ const static std::string OUTPUT_WS = "OutputWorkspace";
 const static std::string POLY_DEGREE = "Degree";
 const static std::string XRANGES = "XRanges";
 const static std::string MINIMIZER = "Minimizer";
+const static std::string IGNORE_INVALID_DATA = "IgnoreInvalidData";
 } // namespace Prop
 
 /// String constants for cost function options.
@@ -173,7 +174,7 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
 std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &function,
                                const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
                                const std::vector<double> &ranges, const std::string &costFunction,
-                               const std::string &minimizer) {
+                               const std::string &minimizer, const bool &ignoreInvalidData) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -184,6 +185,7 @@ std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &f
   fit.setProperty("Exclude", excludedRanges);
   fit.setProperty("Minimizer", minimizer);
   fit.setProperty(Prop::COST_FUNCTION, costFunction);
+  fit.setProperty(Prop::IGNORE_INVALID_DATA, ignoreInvalidData);
   fit.setProperty("CreateOutput", true);
   fit.executeAsChildAlg();
   Mantid::API::ITableWorkspace_sptr fitResult = fit.getProperty("OutputParameters");
@@ -306,6 +308,7 @@ void CalculatePolynomialBackground::init() {
   declareProperty(Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
                   std::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
                   "The minimizer to be passed to the Fit algorithm.");
+  declareProperty(Prop::IGNORE_INVALID_DATA, true, "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -317,6 +320,7 @@ void CalculatePolynomialBackground::exec() {
   API::MatrixWorkspace_sptr outWS{DataObjects::create<DataObjects::Workspace2D>(*inWS)};
   const std::vector<double> inputRanges = getProperty(Prop::XRANGES);
   const std::string costFunction = getProperty(Prop::COST_FUNCTION);
+  const bool ignoreInvalidData = getProperty(Prop::IGNORE_INVALID_DATA);
   const std::string minimizer = getProperty(Prop::MINIMIZER);
   const auto polyDegree = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
@@ -329,7 +333,8 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERRUPT_REGION
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
-    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction, minimizer);
+    const auto parameters =
+        executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction, minimizer, ignoreInvalidData);
     evaluateInPlace(polyDegreeStr, parameters, *outWS, i);
     progress.report();
     PARALLEL_END_INTERRUPT_REGION

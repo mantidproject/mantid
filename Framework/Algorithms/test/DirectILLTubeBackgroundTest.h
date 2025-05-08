@@ -198,6 +198,7 @@ public:
     Algorithms::DirectILLTubeBackground alg;
     alg.setChild(true);
     alg.setRethrows(true);
+
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
