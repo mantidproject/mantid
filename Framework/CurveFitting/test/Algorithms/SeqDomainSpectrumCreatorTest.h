@@ -291,7 +291,7 @@ public:
     fit->setProperty("InputWorkspace", matrixWs);
     fit->setProperty("CreateOutput", true);
     fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
-
+    fit->setProperty("IgnoreInvalidData", true);
     fit->execute();
 
     TS_ASSERT(fit->isExecuted());
@@ -334,7 +334,7 @@ public:
     fit->setProperty("InputWorkspace", matrixWs);
     fit->setProperty("CreateOutput", true);
     fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
-
+    fit->setProperty("IgnoreInvalidData", true);
     fit->execute();
 
     TS_ASSERT(fit->isExecuted());
