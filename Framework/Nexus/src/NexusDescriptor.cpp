@@ -96,7 +96,7 @@ void NexusDescriptor::addEntry(const std::string &entryName, const std::string &
   // verify the parent exists
   const auto lastPos = entryName.rfind("/");
   const auto parentPath = entryName.substr(0, lastPos);
-  if (!this->isEntry(parentPath))
+  if (parentPath != "" && !this->isEntry(parentPath))
     throw ::NeXus::Exception("Parent path " + parentPath + " does not exist", "", m_filename);
 
   // add the path

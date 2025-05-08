@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 #include <H5Cpp.h>
 #include <filesystem>
 #include <memory>
@@ -31,7 +32,8 @@ private:
   std::shared_ptr<H5::H5Location> m_current;
   /** should be close handle on exit */
   bool m_close_handle;
-  Entries m_fileTree;
+  /** nexus descriptor to track the file tree */
+  Mantid::Nexus::NexusDescriptor m_descriptor;
 
 public:
   /**
