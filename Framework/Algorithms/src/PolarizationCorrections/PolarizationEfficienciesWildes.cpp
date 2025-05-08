@@ -12,7 +12,6 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/Unit.h"
 
@@ -290,40 +289,7 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   using Types = Arithmetic::ErrorTypeHelper<var_num>;
   auto errorProp = Arithmetic::make_error_propagation<var_num>(
       [](const auto &x) { return ((x[0] - x[1]) * (x[0] - x[2])) / (x[0] * x[3] - x[1] * x[2]); });
-
-  // Parallel Loop here over workspaces.
-  const size_t numSpec = ws00->getNumberHistograms();
-  const size_t specSize = ws00->blocksize();
-  m_wsPhi = ws00->clone();
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws00, *ws01, *ws10, *ws11, *m_wsPhi))
-  for (int64_t i = 0; i < static_cast<int64_t>(numSpec); i++) {
-    PARALLEL_START_INTERRUPT_REGION
-    auto &yOut = m_wsPhi->mutableY(i);
-    auto &eOut = m_wsPhi->mutableE(i);
-
-    const auto &yIn00 = ws00->y(i);
-    const auto &eIn00 = ws00->e(i);
-
-    const auto &yIn01 = ws01->y(i);
-    const auto &eIn01 = ws01->e(i);
-
-    const auto &yIn10 = ws10->y(i);
-    const auto &eIn10 = ws10->e(i);
-
-    const auto &yIn11 = ws11->y(i);
-    const auto &eIn11 = ws11->e(i);
-
-    PARALLEL_FOR_IF(true)
-    for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
-      const auto result = errorProp.evaluate(Types::InputArray{{yIn00[j], yIn01[j], yIn10[j], yIn11[j]}},
-                                             Types::InputArray{{eIn00[j], eIn01[j], eIn10[j], eIn11[j]}});
-      yOut[j] = result.value;
-      eOut[j] = result.error;
-    }
-    PARALLEL_END_INTERRUPT_REGION
-  }
-  PARALLEL_CHECK_INTERRUPT_REGION
+  m_wsPhi = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11);
 }
 
 MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMOFromPhi(const WorkspaceGroup_sptr &magWsGrp) {
