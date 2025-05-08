@@ -401,14 +401,17 @@ void NXDataSet::open() {
     return; // we are in the root group, assume it is open
   std::string path_before = m_fileID->getPath();
   std::string group_path = m_path.substr(0, i);
-  m_fileID->openPath(group_path);
-  m_fileID->openData(name());
-  m_info = NXInfo(m_fileID->getInfo(), name());
-  getAttributes();
-  // go back to where the file was before
-  m_fileID->closeData();
-  if (!path_before.empty())
-    m_fileID->openPath(path_before);
+  try {
+    m_fileID->openPath(group_path);
+    m_fileID->openData(name());
+    m_info = NXInfo(m_fileID->getInfo(), name());
+    getAttributes();
+  } catch (const ::NeXus::Exception &) {
+    // go back to where the file was before
+    if (!path_before.empty())
+      m_fileID->openPath(path_before);
+    throw;
+  }
 }
 
 void NXDataSet::openLocal() {
