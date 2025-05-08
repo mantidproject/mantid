@@ -53,6 +53,16 @@ public:
     TS_ASSERT_DELTA(time_of_flight[255], 958.1, .01);
     TS_ASSERT_THROWS_ANYTHING(time_of_flight[256]); // out of bounds
 
+    // load detector ids without letting previous data go out of scope
+    auto detid = bank19.openNXDataSet<uint32_t>("event_id"); // type does not have a convenience function
+    TS_ASSERT_EQUALS(detid.dim0(), 256);                     // same as number of time-of-flight
+    TS_ASSERT_EQUALS(detid.attributes.n(), 1);
+    TS_ASSERT_EQUALS(detid.attributes("target"), "/entry/instrument/bank19/event_id");
+    detid.load();
+    TS_ASSERT_EQUALS(detid[0], 37252);
+    TS_ASSERT_EQUALS(detid[255], 37272);
+    TS_ASSERT_THROWS_ANYTHING(detid[256]); // out of bounds
+
     auto duration = root.openNXFloat("/entry/duration"); // absolute path
     TS_ASSERT_EQUALS(duration.attributes.n(), 1);
     TS_ASSERT_EQUALS(duration.attributes("units"), "second");
