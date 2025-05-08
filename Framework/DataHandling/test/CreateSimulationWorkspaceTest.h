@@ -112,7 +112,7 @@ public:
     compareSimulationWorkspaceIDFWithFileIDF(outputWS, filename, "LoadRaw");
   }
 
-  // NEXUS REFACTOR FAILURE
+  // NEXUS REFACTOR FAILURE -- LoadNexus failure
   void test_Spectra_Detector_Mapping_Is_Pulled_From_Given_ISIS_NeXus_File() {
     using namespace Mantid::API;
     std::string filename("LOQ49886.nxs");
