@@ -167,13 +167,17 @@ void NXClass::readAllInfo() {
 }
 
 bool NXClass::isValid(const std::string &path) const {
+  const auto previousPath = m_fileID->getPath();
+  bool result = false;
   try {
     m_fileID->openGroupPath(path);
-    m_fileID->closeGroup();
-    return true;
+    result = true;
   } catch (::NeXus::Exception const &) {
-    return false;
+    // assume the path didn't exist
+    result = false;
   }
+  m_fileID->openPath(previousPath);
+  return result;
 }
 
 void NXClass::open() {
