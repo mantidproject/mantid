@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <Eigen/Dense>
 #include <optional>
 #include <unsupported/Eigen/AutoDiff>
@@ -94,15 +95,36 @@ public:
 
   AutoDevResult evaluate(const InputArray &values, const InputArray &errors) const {
     std::array<ADScalar, N> x;
-
     for (size_t i = 0; i < N; ++i) {
-      x[i].value() = values[i];
-      x[i].derivatives().setZero();
-      x[i].derivatives()[i] = 1.0;
+      x[i] = ADScalar(values[i], DerType::Unit(N, i));
     }
     const ADScalar y = compute_func(x);
     const auto &derivatives = y.derivatives();
     return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
+  }
+
+  template <std::same_as<API::MatrixWorkspace_sptr>... Ts> API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) {
+    const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
+    auto outWs = firstWs->clone();
+    const size_t numSpec = outWs->getNumberHistograms();
+    const size_t specSize = outWs->blocksize();
+
+    const bool condition = Kernel::threadSafe((*args)..., *outWs);
+    const bool specOverBins = numSpec > specSize;
+
+    PARALLEL_FOR_IF(condition && specOverBins)
+    for (int64_t i = 0; i < static_cast<int64_t>(numSpec); i++) {
+      auto &yOut = outWs->mutableY(i);
+      auto &eOut = outWs->mutableE(i);
+
+      PARALLEL_FOR_IF(condition && !specOverBins)
+      for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
+        const auto result = evaluate(InputArray{args->y(i)[j]...}, InputArray(args->e(i)[j]...));
+        yOut[j] = result.value;
+        eOut[j] = result.error;
+      }
+    }
+    return outWs;
   }
 
 private:
