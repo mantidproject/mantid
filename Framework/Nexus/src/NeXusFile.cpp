@@ -337,6 +337,17 @@ bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name)
   return H5Util::keyHasValue(grp, group_class_spec, class_name);
 }
 
+bool File::hasPath(std::string const &name) {
+  bool ret = false;
+  try {
+    std::string path = formAbsolutePath(name);
+    ret = m_descriptor.isEntry(path);
+  } catch (...) {
+    ret = false;
+  }
+  return ret;
+}
+
 bool File::hasGroup(std::string const &name, std::string const &class_type) {
   bool ret = false;
   try {
