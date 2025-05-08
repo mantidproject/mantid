@@ -171,7 +171,8 @@ bool NexusDescriptor::classTypeExists(const std::string &classType) const { retu
 
 std::string NexusDescriptor::classTypeForName(std::string const &entryName) const {
   std::string groupClass;
-  for (auto it = m_allEntries.cbegin(); it != m_allEntries.cend(); it++) {
+  auto it = m_allEntries.cbegin();
+  for (; it != m_allEntries.cend(); it++) {
     if (it->second.count(entryName) == 1) {
       groupClass = it->first;
       break;

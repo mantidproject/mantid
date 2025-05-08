@@ -1,7 +1,15 @@
-set(SRC_FILES src/H5Util.cpp src/NexusClasses.cpp src/NeXusException.cpp src/NeXusFile.cpp src/stptok.cpp)
+set(SRC_FILES src/H5Util.cpp src/NexusClasses.cpp src/NeXusException.cpp src/NeXusFile.cpp src/stptok.cpp
+              src/NexusDescriptor.cpp
+)
 
-set(INC_FILES inc/MantidNexus/H5Util.h inc/MantidNexus/NexusClasses.h inc/MantidNexus/NexusIOHelper.h
-              inc/MantidNexus/NeXusFile_fwd.h inc/MantidNexus/NeXusException.hpp inc/MantidNexus/NeXusFile.hpp
+set(INC_FILES
+    inc/MantidNexus/H5Util.h
+    inc/MantidNexus/NexusClasses.h
+    inc/MantidNexus/NexusIOHelper.h
+    inc/MantidNexus/NeXusFile_fwd.h
+    inc/MantidNexus/NeXusException.hpp
+    inc/MantidNexus/NeXusFile.hpp
+    inc/MantidNexus/NexusDescriptor.h
 )
 
 set(TEST_FILES
