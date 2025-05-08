@@ -21,6 +21,7 @@ SETTINGS_DICT = {
     "path_to_gsas2": str,
     "timeout": str,
     "dSpacing_min": str,
+    "monte_carlo_params": str,
 }
 
 DEFAULT_SETTINGS = {
@@ -33,6 +34,7 @@ DEFAULT_SETTINGS = {
     "path_to_gsas2": GSAS2_PATH_ON_IDAAAS if path.exists(GSAS2_PATH_ON_IDAAAS) else "",
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
+    "monte_carlo_params": "SparseInstrument:True",
 }
 
 ALL_LOGS = ",".join(
@@ -178,6 +180,7 @@ class SettingsPresenter(object):
         self.settings["path_to_gsas2"] = self.view.get_path_to_gsas2()
         self.settings["timeout"] = self.view.get_timeout()
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
+        self.settings["monte_carlo_params"] = self.view.get_monte_carlo_params()
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
@@ -190,6 +193,7 @@ class SettingsPresenter(object):
         self.view.set_path_to_gsas2(self.settings["path_to_gsas2"])
         self.view.set_timeout(self.settings["timeout"])
         self.view.set_dSpacing_min(self.settings["dSpacing_min"])
+        self.view.set_monte_carlo_params(self.settings["monte_carlo_params"])
         self._find_files()
 
     def _find_files(self):
@@ -237,6 +241,7 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("path_to_gsas2")
         self.check_and_populate_with_default("timeout")
         self.check_and_populate_with_default("dSpacing_min")
+        self.check_and_populate_with_default("monte_carlo_params")
 
     # -----------------------
     # Observers / Observables

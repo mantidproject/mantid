@@ -104,6 +104,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_dSpacing_min(self):
         return self.dSpacing_min_lineedit.text()
 
+    def get_monte_carlo_params(self):
+        return self.monte_carlo_lineedit.text()
+
     # =================
     # Component Setters
     # =================
@@ -161,6 +164,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_dSpacing_min(self, text):
         self.dSpacing_min_lineedit.setText(text)
+
+    def set_monte_carlo_params(self, text):
+        self.monte_carlo_lineedit.setText(text)
 
     # =================
     # Force Actions

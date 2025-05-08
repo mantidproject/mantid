@@ -17,6 +17,7 @@ import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import V3D
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from os import path, makedirs
 
 
@@ -94,10 +95,31 @@ class TextureCorrectionModel:
                 valid = True
         return valid
 
-    def calc_absorption(self, ws, method_dict):
+    def calc_absorption(self, ws):
+        mc_param_str = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "monte_carlo_params")
+        method_dict = self._param_str_to_dict(mc_param_str)
         temp_ws = ConvertUnits(ws, Target="Wavelength")
         Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
+        method_dict["OutputWorkspace"] = "_abs_corr"
         MonteCarloAbsorption(temp_ws, **method_dict)
+
+    def _param_str_to_dict(self, param_string):
+        out_dict = {}
+        for params in param_string.split(","):
+            k, v = params.split(":")
+            out_dict[k] = self._parse_param_values(v)
+        return out_dict
+
+    def _parse_param_values(self, string):
+        l_string = string.lower()
+        if l_string == "true":
+            return True
+        elif l_string == "false":
+            return False
+        elif string.isnumeric():
+            return int(string)
+        else:
+            return string
 
     def calc_divergence(self, ws, horz, vert, det_horz):
         EstimateDivergence(ws, vert, horz, det_horz, OutputWorkspace="_div_corr")
