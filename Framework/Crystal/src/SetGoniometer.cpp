@@ -70,10 +70,10 @@ std::map<std::string, std::string> SetGoniometer::validateInputs() {
   const Kernel::DblMatrix GMatrix(Gvec);
 
   // if a Goniometer Matrix is supplied, check it is a valid rotation
-  if (not isDefault("GoniometerMatrix")) {
+  if (!isDefault("GoniometerMatrix")) {
     try {
       bool isRot = GMatrix.isRotation();
-      if (not isRot) {
+      if (!isRot) {
         issues["GoniometerMatrix"] = "Supplied Goniometer Matrix is not a proper rotation";
       }
     } catch (std::invalid_argument &) {
