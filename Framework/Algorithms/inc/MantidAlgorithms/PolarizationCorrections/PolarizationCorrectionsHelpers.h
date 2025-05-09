@@ -10,7 +10,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/MultiThreaded.h"
+#include <Eigen/Dense>
 #include <optional>
+#include <unsupported/Eigen/AutoDiff>
 
 namespace Mantid::Algorithms {
 namespace PolarizationCorrectionsHelpers {
@@ -66,4 +69,74 @@ MANTID_ALGORITHMS_DLL const std::string &getORSONotationForSpinState(const std::
 MANTID_ALGORITHMS_DLL void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws,
                                                   const std::string &spinState);
 } // namespace SpinStatesORSO
+
+namespace Arithmetic {
+
+template <size_t N> class ErrorTypeHelper {
+public:
+  using DerType = Eigen::Matrix<double, N, 1>;
+  using InputArray = DerType;
+  using ADScalar = Eigen::AutoDiffScalar<DerType>;
+};
+
+template <size_t N, typename Func> class ErrorPropagation {
+public:
+  using Types = ErrorTypeHelper<N>;
+  using DerType = Types::DerType;
+  using ADScalar = Types::ADScalar;
+  using InputArray = Types::InputArray;
+  ErrorPropagation(Func func) : compute_func(std::move(func)) {}
+
+  struct AutoDevResult {
+    double value;
+    double error;
+    Eigen::Array<double, N, 1> derivatives;
+  };
+
+  AutoDevResult evaluate(const InputArray &values, const InputArray &errors) const {
+    std::array<ADScalar, N> x;
+    for (size_t i = 0; i < N; ++i) {
+      x[i] = ADScalar(values[i], DerType::Unit(N, i));
+    }
+    const ADScalar y = compute_func(x);
+    const auto &derivatives = y.derivatives();
+    return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
+  }
+
+  template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
+  API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) const {
+    const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
+    auto outWs = firstWs->clone();
+    const size_t numSpec = outWs->getNumberHistograms();
+    const size_t specSize = outWs->blocksize();
+
+    // cppcheck-suppress unreadVariable
+    const bool condition = Kernel::threadSafe((*args)..., *outWs);
+    // cppcheck-suppress unreadVariable
+    const bool specOverBins = numSpec > specSize;
+
+    PARALLEL_FOR_IF(condition && specOverBins)
+    for (int64_t i = 0; i < static_cast<int64_t>(numSpec); i++) {
+      auto &yOut = outWs->mutableY(i);
+      auto &eOut = outWs->mutableE(i);
+
+      PARALLEL_FOR_IF(condition && !specOverBins)
+      for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
+        const auto result = evaluate(InputArray{args->y(i)[j]...}, InputArray(args->e(i)[j]...));
+        yOut[j] = result.value;
+        eOut[j] = result.error;
+      }
+    }
+    return outWs;
+  }
+
+private:
+  Func compute_func;
+};
+
+template <size_t N, typename Func> auto make_error_propagation(Func &&func) {
+  return ErrorPropagation<N, std::decay_t<Func>>(std::forward<Func>(func));
+}
+
+} // namespace Arithmetic
 } // namespace Mantid::Algorithms
