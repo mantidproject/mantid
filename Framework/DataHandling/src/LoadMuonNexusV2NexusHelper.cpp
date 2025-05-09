@@ -118,9 +118,8 @@ LoadMuonNexusV2NexusHelper::loadDetectorGroupingFromNexus(const std::vector<deti
 std::string LoadMuonNexusV2NexusHelper::loadMainFieldDirectionFromNexus() {
   std::string mainFieldDirection = "Longitudinal"; // default
   try {
-    NXChar orientation = m_entry.openNXChar(NeXusEntry::ORIENTATON);
     // some files have no data there
-    orientation.load();
+    const std::string orientation = m_entry.getString(NeXusEntry::ORIENTATON);
     if (std::tolower(orientation[0]) == 't') {
       mainFieldDirection = "Transverse";
     }
