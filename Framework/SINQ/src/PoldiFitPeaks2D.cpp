@@ -592,6 +592,8 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(const std::string &initialCe
   fit->setProperty("Function", std::static_pointer_cast<IFunction>(latticeFunction));
   fit->setProperty("InputWorkspace", peakTable);
   fit->setProperty("CostFunction", "Unweighted least squares");
+  // NOTE: Defaulting IgnoreInvalidData to true since this algorithm is to be replaced
+  fit->setProperty("IgnoreInvalidData", true);
   fit->execute();
 
   Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
