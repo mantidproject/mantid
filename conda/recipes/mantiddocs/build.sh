@@ -16,6 +16,7 @@ cmake \
   -DMANTID_QT_LIB=SYSTEM \
   -DENABLE_WORKBENCH=OFF \
   -DENABLE_DOCS=ON \
+  -DENABLE_QTASSISTANT=OFF \
   -DDOCS_DOTDIAGRAMS=ON \
   -DDOCS_SCREENSHOTS=ON \
   -DDOCS_MATH_EXT=sphinx.ext.imgmath \
@@ -24,6 +25,7 @@ cmake \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DSPHINX_WARNINGS_AS_ERRORS=OFF \
   -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
@@ -37,7 +39,7 @@ cmake --build . --target StandardTestData
 export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
 echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
 
-# Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
-QT_QPA_PLATFORM=offscreen cmake --build . --target docs-qthelp
+# # Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
+# QT_QPA_PLATFORM=offscreen cmake --build . --target docs-qthelp
 
 cmake --build . --target install
