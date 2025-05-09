@@ -342,8 +342,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
 void LoadMLZ::loadExperimentDetails(const NXEntry &entry) {
   // TODO: Do the rest
   // Pick out the geometry information
-
-  std::string description = boost::lexical_cast<std::string>(entry.getFloat("sample/description"));
+  std::string description = entry.getString("sample/description");
 
   m_localWorkspace->mutableSample().setName(description);
 }

@@ -104,17 +104,15 @@ public:
   std::string const &path() const { return m_path; }
   /// Returns the name of the object
   std::string name() const;
-  /// Attributes
-  NXAttributes attributes;
   /// Nexus file id
   std::shared_ptr<::NeXus::File> m_fileID;
 
 protected:
-  std::string m_path; ///< Keeps the absolute path to the object
-  bool m_open;        ///< Set to true if the object has been open
+  std::string m_path;        ///< Keeps the absolute path to the object
+  std::string m_path_parent; ///< Absolute path of the parent this object should reset to
+  bool m_open;               ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
-  void getAttributes();
 };
 
 /** Abstract base class for a Nexus data set. A typical use include:
@@ -155,6 +153,8 @@ public:
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
+  /// Attributes
+  NXAttributes attributes;
 
 protected:
   /**
@@ -188,6 +188,7 @@ protected:
 
 private:
   NXInfo m_info; ///< Holds the data info
+  void getAttributes();
 };
 
 template <typename T>
@@ -462,6 +463,7 @@ public:
    * @param name :: The name of the NXClass relative to its parent
    */
   NXClass(NXClass const &parent, std::string const &name);
+  virtual ~NXClass() override;
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
 
@@ -595,7 +597,7 @@ protected:
   void readAllInfo();                                 ///< Fills in m_groups and m_datasets.
   void clear();                                       ///< Deletes content of m_groups and m_datasets
 private:
-  /// Pricate constructor.
+  /// Private constructor.
   NXClass() : NXObject() { clear(); }
 };
 

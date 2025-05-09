@@ -2,15 +2,14 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
-#include <map>
+#include "MantidNexus/NexusDescriptor.h"
+#include <H5Cpp.h>
+#include <filesystem>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
-
-namespace {
-static const std::string NULL_STR("NULL");
-}
 
 /**
  * \file NeXusFile.hpp Definition of the NeXus C++ API.
@@ -21,48 +20,20 @@ static const std::string NULL_STR("NULL");
 
 namespace NeXus {
 
-static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
-
 /**
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
  */
-class MANTID_NEXUS_DLL File {
+class MANTID_NEXUS_DLL File : public H5::H5File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  /** The handle for the C-API. */
-  std::shared_ptr<NXhandle> m_pfile_id;
+  std::filesystem::path m_path;
+  std::shared_ptr<H5::H5Location> m_current;
   /** should be close handle on exit */
   bool m_close_handle;
-
-public:
-  /**
-   * \return A pair of the next entry available in a listing.
-   */
-  Entry getNextEntry();
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
-
-  /**
-   * Initialize the pending group search to start again.
-   */
-  void initGroupDir();
-
-private:
-  /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * Function to consolidate the file opening code for the various constructors
-   * \param filename The name of the file to open.
-   * \param access How to access the file.
-   */
-  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
+  /** nexus descriptor to track the file tree */
+  Mantid::Nexus::NexusDescriptor m_descriptor;
 
 public:
   /**
@@ -71,7 +42,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const std::string &filename, const NXaccess access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXACC_READ);
 
   /**
    * Create a new File.
@@ -79,7 +50,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const char *filename, const NXaccess access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXACC_READ);
 
   /**
    * Copy constructor
@@ -113,10 +84,27 @@ public:
   ~File();
 
   /** Close the file before the constructor is called. */
-  void close();
+  void close() override;
 
   /** Flush the file. */
-  void flush();
+  void flush(H5F_scope_t scope = H5F_SCOPE_LOCAL) const;
+
+  /**
+   * Return the root of the file as a group
+   */
+  H5::H5File getRoot();
+
+  /** @brief Get the current location in the stack, cast to pointer to type T; exception if not possible
+   * @tparam T the type for the result to pointer to (e.g. DataSet, Group, H5Object, etc)
+   * @return A pointer to the current location, treated as a T*
+   */
+  template <typename T> std::shared_ptr<T> getCurrentLocationAs();
+
+  bool verifyGroupClass(H5::Group const &, std::string const &) const;
+
+  bool hasPath(std::string const &);
+  bool hasGroup(std::string const &, std::string const &);
+  bool hasData(std::string const &);
 
   /**
    * Create a new group.
@@ -334,13 +322,6 @@ public:
   /**
    * Put the supplied data as an attribute into the currently open data.
    *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
@@ -353,13 +334,13 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(char const *name, char const *value);
+  void putAttr(std::string const &name, char const *value);
 
   /**
-   * Put a string as an attribute in the file.
+   * Put the supplied string literal as an attribute into the currently open data.
    *
    * \param name Name of the attribute to add.
-   * \param value The attribute value.
+   * \param value A string literal.
    */
   void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
@@ -400,7 +381,7 @@ public:
 
   /**
    * Create a link in the current location to the supplied id.
-   *
+   *s
    * \param link The object (group or data) in the file to link to.
    */
   void makeLink(NXlink &link);
@@ -410,7 +391,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *data);
+  template <typename NumT> void getData(NumT *const data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -422,20 +403,23 @@ public:
    */
   template <typename NumT> void getData(std::vector<NumT> &data);
 
-  /** Get data and coerce into an int vector.
+  /** Get data and coerce into a vector of type NumT.
    *
    * @throw Exception if the data is actually a float or
    *    another type that cannot be coerced to an int.
    * @param data :: vector to be filled.
    */
-  void getDataCoerce(std::vector<int> &data);
+  template <typename NumT> void getDataCoerce(std::vector<NumT> &data);
 
-  /** Get data and coerce into a vector of doubles.
+  /**
+   * Get a section of data from the file.
    *
-   * @throw Exception if the data cannot be coerced to a double.
-   * @param data :: vector to be filled.
+   * \param data The pointer to insert that data into.
+   * \param start The offset into the file's data block to start the read
+   * from.
+   * \param size The size of the block to read from the file.
    */
-  void getDataCoerce(std::vector<double> &data);
+  template <typename NumT> void getSlab(NumT *const data, DimSizeVector const &start, DimSizeVector const &size);
 
   /** Return true if the data opened is of one of the
    * int data types, 32 bits or less.
@@ -452,7 +436,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, std::vector<NumT> &data);
+  template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -462,7 +446,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, NumT &data);
+  template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -473,7 +457,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  void readData(const std::string &dataName, std::string &data);
+  void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.
@@ -498,48 +482,31 @@ public:
   void getEntries(Entries &result);
 
   /**
-   * Get a section of data from the file.
-   *
-   * \param data The pointer to insert that data into.
-   * \param start The offset into the file's data block to start the read
-   * from.
-   * \param size The size of the block to read from the file.
+   * Return all entries in the file, with absolute paths.
    */
-  template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
+  void getEntryDirectory(Entries &result);
+
+  /** Return the string name of the top-level entry
+   *
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
 
   /**
-   * \return Information about all attributes on the data that is
-   * currently open.
+   * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();
+
+  /**
+   * \return A set containing names of all attributes at current level
+   */
+  std::set<std::string> getAttrNames();
 
   /**
    *  \return true if the current point in the file has the named attribute
    *  \param name the name of the attribute to look for.
    */
-  bool hasAttr(const std::string &name);
-
-  /**
-   * Get the value of the attribute specified by the AttrInfo supplied.
-   *
-   * \param info Designation of which attribute to read.
-   * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
-   */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
-
-  /**
-   * Get the value of an attribute that is a scalar number.
-   *
-   * \param info Designation of which attribute to read.
-   * \tparam NumT numeric data type of result
-   *
-   * \return The attribute value.
-   */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
-
-  template <typename NumT> NumT getAttr(std::string const &name);
+  bool hasAttr(std::string const &name);
 
   /**
    * Get the value of an attribute that is a scalar number.
@@ -548,16 +515,16 @@ public:
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void getAttr(const std::string &name, NumT &value);
+  template <typename NumT> void getAttr(std::string const &name, NumT &value);
 
   /**
-   * Get the value of a string attribute.
+   * Get the value of an attribute that is a scalar number.
    *
-   * \param info Which attribute to read.
-   *
-   * \return The value of the attribute.
+   * \param[in] name Name of attribute to read
+   * \return The read attribute value
+   * \tparam NumT numeric data type of \a value
    */
-  std::string getStrAttr(const AttrInfo &info);
+  template <typename NumT> NumT getAttr(std::string const &name);
 
   /**
    * \return The id of the group used for linking.
@@ -569,6 +536,11 @@ public:
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
+
+private:
+  void resetToFileRoot();
+  std::filesystem::path formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
 };
 
 /**

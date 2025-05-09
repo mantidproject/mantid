@@ -701,12 +701,9 @@ template <class T> bool LoadBBY::loadNXDataSet(const NeXus::NXEntry &entry, cons
 }
 bool LoadBBY::loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
   try {
-    NeXus::NXChar dataSet = entry.openNXChar(path);
-    dataSet.load();
-
-    value = std::string(dataSet(), dataSet.dim0());
+    value = entry.getString(path);
     return true;
-  } catch (std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     return false;
   }
 }
