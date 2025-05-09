@@ -7,7 +7,6 @@
 from mantid.api import AnalysisDataServiceObserver
 from functools import wraps
 import sys
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _catch_exceptions(func):
@@ -31,15 +30,10 @@ def _catch_exceptions(func):
 class FittingADSObserver(AnalysisDataServiceObserver):
     def __init__(self, delete_callback, clear_callback, replace_callback, rename_callback):
         super(FittingADSObserver, self).__init__()
-        # self.delete_callback = delete_callback
-        # self.clear_callback = clear_callback
-        # self.replace_callback = replace_callback
-        # self.rename_callback = rename_callback
-
-        self.replace_callback = QAppThreadCall(replace_callback, blocking=False)
-        self.rename_callback = QAppThreadCall(rename_callback, blocking=False)
-        self.clear_callback = QAppThreadCall(clear_callback, blocking=False)
-        self.delete_callback = QAppThreadCall(delete_callback, blocking=False)
+        self.delete_callback = delete_callback
+        self.clear_callback = clear_callback
+        self.replace_callback = replace_callback
+        self.rename_callback = rename_callback
 
         self.observeDelete(True)
         self.observeRename(True)
