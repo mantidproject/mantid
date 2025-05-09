@@ -536,7 +536,7 @@ public:
     file.closeData();
     // confirm
     TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 18);
+    TS_ASSERT_EQUALS(info.dims.front(), 17);
     TS_ASSERT_EQUALS(string(word), string(read));
   }
 
