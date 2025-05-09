@@ -119,13 +119,11 @@ public:
 
     const double m = 5.0;
     const double c = 3.0;
-    auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
+    const auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
     const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
 
-    const double error = result.error;
-    TS_ASSERT_EQUALS(error, 2.5);
-    const double value = result.value;
-    TS_ASSERT_EQUALS(value, 103);
+    TS_ASSERT_EQUALS(result.error, 2.5);
+    TS_ASSERT_EQUALS(result.value, 103);
   }
 
   void testErrorPropagation_quad() {
@@ -134,28 +132,24 @@ public:
     const double a = 5.0;
     const double b = 3.0;
     const double c = 10.0;
-    auto errorProp = Arithmetic::make_error_propagation<vars>(
+    const auto errorProp = Arithmetic::make_error_propagation<vars>(
         [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
     const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
 
-    const double error = result.error;
-    TS_ASSERT_DELTA(error, 101.5, 0.001);
-    const double value = result.value;
-    TS_ASSERT_EQUALS(value, 2070);
+    TS_ASSERT_DELTA(result.error, 101.5, 0.001);
+    TS_ASSERT_EQUALS(result.value, 2070);
   }
 
   void testErrorPropagation_mult_vars() {
     const size_t vars = 2;
     using Types = Arithmetic::ErrorTypeHelper<vars>;
 
-    auto errorProp =
+    const auto errorProp =
         Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
     const auto result = errorProp.evaluate(Types::InputArray{{3.141, 1.0}}, Types::InputArray{{0.01, 0.05}});
 
-    const double error = result.error;
-    TS_ASSERT_DELTA(error, 0.139495, 0.001);
-    const double value = result.value;
-    TS_ASSERT_DELTA(value, 2.72014, 0.00001);
+    TS_ASSERT_DELTA(result.error, 0.139495, 0.001);
+    TS_ASSERT_DELTA(result.value, 2.72014, 0.00001);
   }
 
   void testErrorPropagation_workspaces_quad() {
@@ -163,31 +157,31 @@ public:
     const double a = 5.0;
     const double b = 3.0;
     const double c = 10.0;
-    auto errorProp = Arithmetic::make_error_propagation<vars>(
+    const auto errorProp = Arithmetic::make_error_propagation<vars>(
         [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
 
-    auto ws = createWorkspace("ws", {20, 22, 24, 26, 28}, {0.0, 1.0, 2.0, 3.0, 4.0}, {0.5, 0.6, 0.7, 0.8, 0.9});
+    const auto ws = createWorkspace("ws", {0.0, 1.0, 2.0, 3.0, 4.0}, {20, 22, 24, 26, 28}, {0.5, 0.6, 0.7, 0.8, 0.9});
     const auto result = errorProp.evaluateWorkspaces(ws);
 
     const std::vector<double> expectedY{2070, 2496, 2962, 3468, 4014};
     const std::vector<double> expectedE{101.5, 133.8, 170.1, 210.4, 254.7};
     for (size_t i = 0; i < result->size(); i++) {
-      TS_ASSERT_EQUALS(expectedY.at(i), result->y(0)[i]);
-      TS_ASSERT_EQUALS(expectedE.at(i), result->e(0)[i]);
+      TS_ASSERT_DELTA(expectedY.at(i), result->y(0)[i], 0.001);
+      TS_ASSERT_DELTA(expectedE.at(i), result->e(0)[i], 0.001);
     }
   }
 
   void testErrorPropagation_workspaces_mult_vars() {
     const size_t vars = 2;
-    auto errorProp =
+    const auto errorProp =
         Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
 
-    auto wsA = createWorkspace("wsA", {3.14, 3.14, 3.14}, {0.0, 1.0, 2.0}, {0.01, 0.01, 0.01});
-    auto wsB = createWorkspace("wsB", {1.0, 1.0, 1.0}, {0.0, 1.0, 2.0}, {0.05, 0.05, 0.05});
+    auto wsA = createWorkspace("wsA", {0.0, 1.0, 2.0}, {3.141, 3.141, 3.141}, {0.01, 0.01, 0.01});
+    auto wsB = createWorkspace("wsB", {0.0, 1.0, 2.0}, {1.0, 1.0, 1.0}, {0.05, 0.05, 0.05});
     const auto result = errorProp.evaluateWorkspaces(wsA, wsB);
     for (size_t i = 0; i < result->size(); i++) {
-      TS_ASSERT_DELTA(0.139495, result->y(0)[i], 0.001);
-      TS_ASSERT_DELTA(2.72014, result->e(0)[i], 0.001);
+      TS_ASSERT_DELTA(2.72014, result->y(0)[i], 0.001);
+      TS_ASSERT_DELTA(0.139495, result->e(0)[i], 0.001);
     }
   }
 

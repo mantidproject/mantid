@@ -604,8 +604,9 @@ private:
   }
 
   void runCalculationTest(const MatrixWorkspace_sptr &polarizerEffWs, const MatrixWorkspace_sptr &analyserEffWs,
-                          const std::pair<double, double> expectedP, const std::pair<double, double> expectedA,
-                          const std::pair<double, double> expectedTPMO, const std::pair<double, double> expectedTAMO) {
+                          const std::pair<double, double> &expectedP, const std::pair<double, double> &expectedA,
+                          const std::pair<double, double> &expectedTPMO,
+                          const std::pair<double, double> &expectedTAMO) {
     const bool hasPEffWs = polarizerEffWs != nullptr;
     const bool hasanalyserEffWs = analyserEffWs != nullptr;
 
