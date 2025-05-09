@@ -131,6 +131,8 @@ public:
   operator std::string() const;
 };
 
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &value);
+
 /**
  * The available compression types. These are all ignored in xml files.
  * \li NONE no compression
