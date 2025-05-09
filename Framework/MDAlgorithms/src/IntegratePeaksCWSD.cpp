@@ -32,7 +32,9 @@ const signal_t THRESHOLD_SIGNAL = 0;
  */
 IntegratePeaksCWSD::IntegratePeaksCWSD()
     : m_haveMultipleRun(false), m_useSinglePeakCenterFmUser(false), m_peakRadius(), m_doMergePeak(false),
-      m_normalizeByMonitor(false), m_normalizeByTime(false), m_scaleFactor(0), m_haveInputPeakWS(false) {}
+      m_normalizeByMonitor(false), m_normalizeByTime(false), m_scaleFactor(0), m_haveInputPeakWS(false) {
+  deprecatedDate("2025-05-07");
+}
 
 /** Initialize the algorithm's properties.
  */
