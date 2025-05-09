@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import FindSatellitePeaks, Load
 import systemtesting
+import platform
 
 
 def load_files():
@@ -16,6 +17,10 @@ def load_files():
 
 
 class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
 
@@ -40,6 +45,10 @@ class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
 
 
 class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
 

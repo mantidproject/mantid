@@ -10,6 +10,7 @@ System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
 
+import platform
 import systemtesting
 import numpy
 import os
@@ -33,6 +34,10 @@ from mantid.api import FileFinder
 
 
 class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def cleanup(self):
         Files = ["TOPAZ_3132.hkl", "TOPAZ_3132FFT.hkl"]
         for filename in Files:

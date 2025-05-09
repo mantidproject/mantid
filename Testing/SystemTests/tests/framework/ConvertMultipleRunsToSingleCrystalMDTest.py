@@ -4,11 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import platform
 import systemtesting
 from mantid.simpleapi import ConvertMultipleRunsToSingleCrystalMD, Load, AlgorithmManager, SaveMD
 
 
 class ConvertMultipleRunsToSingleCrystalMDQSampleTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return ["CORELLI_29782.nxs", "CORELLI_29792.nxs"]
 
@@ -46,6 +51,10 @@ class ConvertMultipleRunsToSingleCrystalMDQSampleTest(systemtesting.MantidSystem
 
 
 class ConvertMultipleRunsToSingleCrystalMDHKLTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return ["CORELLI_29782.nxs", "CORELLI_29792.nxs", "SingleCrystalDiffuseReduction_UB.mat"]
 

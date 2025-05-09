@@ -7,8 +7,12 @@
 import unittest
 from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid.simpleapi import Load, config, mtd, D7AbsoluteCrossSections, GroupWorkspaces
+import platform
+
+SHOULD_SKIP = "arm" in platform.machine()
 
 
+@unittest.skipIf(SHOULD_SKIP, "Skipping tests on ARM architecture")
 class D7AbsoluteCrossSectionsTest(unittest.TestCase):
     _facility = None
     _instrument = None

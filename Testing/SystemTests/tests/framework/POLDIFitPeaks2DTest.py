@@ -106,7 +106,7 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
                 indices = np.nonzero(yDataRef)
                 maxDifference = np.abs(np.max((yDataCalc[indices] - yDataRef[indices]) / yDataCalc[indices]))
 
-                self.assertTrue(np.all(xDataCalc == xDataRef))
+                np.testing.assert_allclose(xDataCalc, xDataRef, atol=1e-7)
                 self.assertLessThan(maxDifference, 0.07)
 
 

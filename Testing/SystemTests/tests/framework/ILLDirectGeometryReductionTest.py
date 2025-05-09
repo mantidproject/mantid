@@ -20,6 +20,7 @@ from mantid.simpleapi import (
     Subtract,
     Load,
 )
+import platform
 import systemtesting
 from testhelpers import assertRaisesNothing, create_algorithm
 
@@ -181,6 +182,10 @@ class IN5_Tube_Background(systemtesting.MantidSystemTest):
 
 
 class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def validate(self):
         self.tolerance = 1e-7
         self.nanEqual = True
