@@ -776,7 +776,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  // NEXUS REFACTOR FAILURE
+  // NEXUS REFACTOR FAILURE -- LoadNexus
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
@@ -816,7 +816,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  // NEXUS REFACTOR FAILURE
+  // NEXUS REFACTOR FAILURE -- LoadNexus
   void test_ragged_x_bins_saves_correct_x_values_when_spectrum_indices_passed() {
     // stop regression related to bug in github issue #33152
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 2, 2);
@@ -923,7 +923,7 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  // NEXUS REFACTOR FAILURE
+  // NEXUS REFACTOR FAILURE -- due to LoadNexus
   void test_ragged_XY_readback() {
     // Reading and writing ragged-workspace data: verify that spectra match on readback
 

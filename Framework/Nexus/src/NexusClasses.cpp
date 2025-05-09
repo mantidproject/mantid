@@ -213,51 +213,16 @@ void NXClass::clear() {
   m_datasets.reset(new std::vector<NXInfo>);
 }
 
-namespace {
-/**
- * This assumes that the last "element" of the current path can overlap with the first "element" of the requested path
- * and removes duplication.
- */
-std::pair<std::string, std::string> splitPath(const std::string &current, const std::string &requested) {
-  // return early if it is already split
-  if (requested.find("/") == std::string::npos)
-    return std::pair<std::string, std::string>{current, requested};
-
-  // decompose the two components to see if the inner element overlaps
-  const auto currentLastPos = current.rfind("/");
-  const auto currentLast = (currentLastPos == std::string::npos) ? std::string("") : current.substr(currentLastPos + 1);
-
-  const auto requestedFirstPos = requested.find("/");
-  const auto requestedFirst =
-      (requestedFirstPos == std::string::npos) ? std::string("") : requested.substr(0, requestedFirstPos);
-
-  // construct the effective path
-  std::string fullPath;
-  if (currentLast == requestedFirst) {
-    fullPath = current + requested.substr(requestedFirstPos);
-  } else {
-    fullPath = current + "/" + requested;
-  }
-
-  // last / is the division between path and data
-  const auto last = fullPath.rfind("/");
-  return std::pair<std::string, std::string>{fullPath.substr(0, last), fullPath.substr(last + 1)};
-}
-} // namespace
-
 std::string NXClass::getString(const std::string &name) const {
   const std::string oldPath = m_fileID->getPath();
-  // split the input into group and name
-  auto pathParts = splitPath(oldPath, name);
 
   std::string value;
 
-  // open the containing group
-  m_fileID->openPath(pathParts.first);
-
+  // open the containing dataset
+  m_fileID->openPath(name);
   // read the value
   try {
-    m_fileID->readData(pathParts.second, value);
+    value = m_fileID->getStrData();
   } catch (const ::NeXus::Exception &) {
     m_fileID->openPath(oldPath); // go back to original location
     throw;                       // rethrow the exception
