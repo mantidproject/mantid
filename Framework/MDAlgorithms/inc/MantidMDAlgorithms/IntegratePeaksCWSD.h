@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -22,7 +23,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-04-13 18:11:53.496539
  */
-class MANTID_MDALGORITHMS_DLL IntegratePeaksCWSD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegratePeaksCWSD final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   IntegratePeaksCWSD();
 
