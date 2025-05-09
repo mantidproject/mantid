@@ -431,7 +431,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 /// This is the implementation of openPath("/")
 void File::resetToFileRoot() {
   m_path = "/";
-  m_current = nullptr;
+  m_current = std::make_shared<H5::Group>(getRoot());
 }
 
 void File::openPath(std::string const &pathname) {
@@ -464,8 +464,13 @@ void File::openGroupPath(std::string const &pathname) {
     throw NXEXCEPTION("Supplied empty path");
   }
   std::filesystem::path new_path = formAbsolutePath(pathname);
-  if (m_descriptor.isEntry(new_path)) {
-    // if this refers to an SDS, open the parent group otherwise, this is a group: open it
+  if (new_path == m_path) {
+    // do nothing
+  } else if (new_path == "/") {
+    this->resetToFileRoot();
+  } else if (m_descriptor.isEntry(new_path)) {
+    // if this refers to an SDS, open the parent group
+    // otherwise, this is a group: open it
     if (m_descriptor.isEntry(new_path, scientific_data_set)) {
       new_path = new_path.parent_path();
     }
@@ -762,7 +767,7 @@ void File::closeData() {
       dataset->close();
       m_path = m_path.parent_path();
       if (m_path == "/") {
-        m_current = nullptr;
+        m_current = std::make_shared<H5::Group>(getRoot());
       } else {
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
       }
