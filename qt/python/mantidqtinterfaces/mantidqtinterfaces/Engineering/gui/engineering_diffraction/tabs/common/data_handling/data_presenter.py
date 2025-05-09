@@ -135,7 +135,6 @@ class FittingDataPresenter(object):
         workspaces_to_be_plotted = self.plotted.copy()
         if clear_plotted:
             self.plotted.clear()
-
         self._remove_all_table_rows()
         self.row_numbers.clear()
         self.all_plots_removed_notifier.notify_subscribers()
