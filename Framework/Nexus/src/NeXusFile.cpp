@@ -1218,7 +1218,15 @@ Info File::getInfo() {
     if (dt.isVariableStr()) {
       throw Exception("Do not have implementation for variable length strings", "getInfo", m_filename);
     }
-    dims[rank - 1] = dataset->getStorageSize() - 1;
+    if (rank == 1) {
+      dims[rank - 1] = dataset->getStorageSize() - 1;
+    } else if (rank == 2) {
+      dims[1] = dataset->getStorageSize() / dims[0];
+    } else {
+      std::stringstream msg;
+      msg << "No implementation for character arrays with rank=" << rank;
+      throw Exception(msg.str(), "getInfo", m_filename);
+    }
   }
 
   Info info;
