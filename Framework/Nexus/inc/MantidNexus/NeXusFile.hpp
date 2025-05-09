@@ -538,6 +538,7 @@ public:
   bool isDataSetOpen();
 
 private:
+  void resetToFileRoot();
   std::filesystem::path formAbsolutePath(std::string const &);
   void registerEntry(std::string const &, std::string const &);
 };
