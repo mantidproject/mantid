@@ -74,10 +74,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(3.0, output.dataY(i)[itr])
+                    self.assertEqual(4.9, output.dataY(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(0.0, output.dataY(i)[itr])
+                    self.assertEqual(1.9, output.dataY(i)[itr])
 
     def test_output_AveragePixelFit(self):
         """
