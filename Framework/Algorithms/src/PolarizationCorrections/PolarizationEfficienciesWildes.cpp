@@ -340,6 +340,8 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
       m_wsP = inWsP->clone();
     } else {
+      g_log.warning("The analayser efficiency workspace provided has been used to calculate the polarizer efficiency."
+                    "This could lead to inflated errors as the analyser efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
       constexpr int var_num = 5;
       const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
@@ -354,6 +356,8 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS)) {
       m_wsA = inWsA->clone();
     } else {
+      g_log.warning("The polarizer efficiency workspace provided has been used to calculate the analyser efficiency. "
+                    "This could lead to inflated errors as the polarizer efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
       constexpr int var_num = 5;
       const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
