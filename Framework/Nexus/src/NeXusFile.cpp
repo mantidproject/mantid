@@ -363,17 +363,17 @@ std::filesystem::path File::formAbsolutePath(std::string const &name) {
     // the path is already absolute
   } else {
     // if not already absolute path, make relative to current location
-    new_path = (m_path / new_name).lexically_normal();
+    // continue checking path relative to parent, until something exists
+    std::filesystem::path from_root = m_path;
+    do {
+      new_path = (from_root / new_name).lexically_normal();
+      from_root = from_root.parent_path();
+    } while (!m_descriptor.isEntry(new_path) && from_root != "/");
     if (!m_descriptor.isEntry(new_path)) {
-      // else, try making path relative to parent
-      new_path = (m_path.parent_path() / new_name).lexically_normal();
-      if (!m_descriptor.isEntry(new_path)) {
-        // else, try making relative to root
-        new_path = std::filesystem::path("/" + new_name).lexically_normal();
-        // the caller is responsible for checking that it exists
-      }
+      new_path = std::filesystem::path("/" + new_name).lexically_normal();
     }
   }
+  // the caller is responsible for checking that it exists
   return new_path;
 }
 
