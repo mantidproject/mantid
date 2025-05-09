@@ -161,7 +161,6 @@ public:
 
   void testErrorPropagation_workspaces_quad() {
     const size_t vars = 1;
-    using Types = Arithmetic::ErrorTypeHelper<vars>;
     const double a = 5.0;
     const double b = 3.0;
     const double c = 10.0;
@@ -181,8 +180,6 @@ public:
 
   void testErrorPropagation_workspaces_mult_vars() {
     const size_t vars = 2;
-    using Types = Arithmetic::ErrorTypeHelper<vars>;
-
     auto errorProp =
         Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
 
