@@ -73,7 +73,6 @@ class FittingADSObserver(AnalysisDataServiceObserver):
         :param name: The name of the workspace.
         :param workspace: A reference to the new workspace
         """
-        # self.replace_callback(name, workspace)
         self.replace_callback(name, workspace)
 
     def unsubscribe(self):
