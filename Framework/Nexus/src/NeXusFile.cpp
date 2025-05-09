@@ -1,6 +1,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
+#include <H5Exception.h>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -1054,7 +1055,11 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
   std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
-  H5Util::readArray1DCoerce(*dataset, data);
+  try {
+    H5Util::readArray1DCoerce(*dataset, data);
+  } catch (const H5::Exception &e) {
+    NXEXCEPTION(e.getDetailMsg());
+  }
 }
 
 template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::string> &data) {
