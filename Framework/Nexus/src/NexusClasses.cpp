@@ -257,7 +257,7 @@ std::string NXClass::getString(const std::string &name) const {
 
   // read the value
   try {
-    m_fileID->readData(name, value);
+    m_fileID->readData(pathParts.second, value);
   } catch (const ::NeXus::Exception &) {
     m_fileID->openPath(oldPath); // go back to original location
     throw;                       // rethrow the exception
