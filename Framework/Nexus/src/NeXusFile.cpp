@@ -767,7 +767,7 @@ void File::closeData() {
       dataset->close();
       m_path = m_path.parent_path();
       if (m_path == "/") {
-        m_current = std::make_shared<H5::Group>(getRoot());
+        this->resetToFileRoot();
       } else {
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
       }
@@ -1213,7 +1213,7 @@ Info File::getInfo() {
     if (dt.isVariableStr()) {
       throw Exception("Do not have implementation for variable length strings", "getInfo", m_filename);
     }
-    dims[rank - 1] = dataset->getStorageSize();
+    dims[rank - 1] = dataset->getStorageSize() - 1;
   }
 
   Info info;

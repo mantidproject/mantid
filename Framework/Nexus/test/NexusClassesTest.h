@@ -32,7 +32,7 @@ public:
     // check NXChar
     auto definition = root.openNXChar("entry/definition"); // relative path
     definition.load();
-    TS_ASSERT_EQUALS(std::string(definition(), definition.dim0()), "NXsnsevent");
+    TS_ASSERT_EQUALS(std::string(definition()), "NXsnsevent");
     // and from getString
     TS_ASSERT_EQUALS(root.getString("entry/definition"), "NXsnsevent");
 
