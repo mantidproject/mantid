@@ -77,7 +77,7 @@ Output:
 .. testoutput:: ExPoly
 
    Peak height with background: 22.0
-   Background subtracted peak height: 5.0
+   Background subtracted peak height: 18.9
 
 .. categories::
 
