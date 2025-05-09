@@ -1248,16 +1248,20 @@ void File::getEntries(Entries &result) {
   result.clear();
   auto current = this->getCurrentLocationAs<H5::Group>();
   for (size_t i = 0; i < current->getNumObjs(); i++) {
-    std::string name = current->getObjnameByIdx(i), className;
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
     H5G_obj_t type = current->getObjTypeByIdx(i);
     if (type == H5G_GROUP) {
       H5::Group grp = current->openGroup(name);
-      H5::Attribute attr = grp.openAttribute(group_class_spec);
-      attr.read(attr.getDataType(), className);
+      if (grp.attrExists(group_class_spec)) {
+        H5::Attribute attr = grp.openAttribute(group_class_spec);
+        attr.read(attr.getDataType(), className);
+      }
     } else if (type == H5G_DATASET) {
       className = "SDS";
     }
-    result[name] = className;
+    if (!className.empty())
+      result[name] = className;
   }
 }
 
