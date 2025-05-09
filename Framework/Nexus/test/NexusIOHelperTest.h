@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FileFinder.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusIOHelper.h"
+#include "test_helper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -18,7 +18,7 @@ class NexusIOHelperTest : public CxxTest::TestSuite {
 
 public:
   void test_nexus_io_helper_readNexusVector() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -39,7 +39,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusVector_out_buffer() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -68,7 +68,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusVector_throws_when_narrowing() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -87,7 +87,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusVector_allow_narrowing() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -108,8 +108,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusVector_v20_ess_integration_2018() {
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("event_data", "NXevent_data");
@@ -126,7 +125,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusSlab() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -143,7 +142,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusSlab_out_buffer() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -164,7 +163,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusSlab_throws_when_Narrowing() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("V20_ESS_example.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
@@ -184,8 +183,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusSlab_v20_ess_integration_2018() {
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
+    const std::string filename = NexusTest::getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
     ::NeXus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("event_data", "NXevent_data");
@@ -202,7 +200,7 @@ public:
   }
 
   void test_nexus_io_helper_readNexusValue() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("LARMOR00003368.nxs");
+    const std::string filename = NexusTest::getFullPath("LARMOR00003368.nxs");
     ::NeXus::File file(filename);
     file.openGroup("raw_data_1", "NXentry");
     file.openGroup("monitor_1", "NXmonitor");

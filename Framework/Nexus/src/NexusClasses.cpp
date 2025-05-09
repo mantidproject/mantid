@@ -113,7 +113,7 @@ std::string NXObject::name() const {
 
 /**  Reads in attributes
  */
-void NXObject::getAttributes() {
+void NXDataSet::getAttributes() {
   std::vector<char> buff(128);
   for (::NeXus::AttrInfo const &ainfo : m_fileID->getAttrInfos()) {
     if (ainfo.type != NXnumtype::CHAR && ainfo.length != 1) {

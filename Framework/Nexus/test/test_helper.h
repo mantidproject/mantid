@@ -1,3 +1,4 @@
+#include "MantidKernel/ConfigService.h"
 #include <filesystem>
 #include <string>
 
@@ -7,6 +8,12 @@ namespace NexusTest {
  * Conditionally remove the named file, it is exists
  */
 void removeFile(std::string const &filename);
+
+/**
+ * @param filename filename without path
+ * @return full path to file. This returns empty string if it doesn't exist.
+ */
+std::string getFullPath(const std::string &filename);
 
 /**
  * Let's face it, std::string is poorly designed,
