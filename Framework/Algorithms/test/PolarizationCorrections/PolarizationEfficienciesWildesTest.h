@@ -294,39 +294,40 @@ public:
   ///  Test calculations
 
   void test_all_calculations_are_correct_using_mag_ws() {
-    runCalculationTest(nullptr, nullptr, 1.03556249, 0.93515155, 1.07112498, 0.87030310);
+    runCalculationTest(nullptr, nullptr, {1.03556249, 0.1951872164}, {0.93515155, 0.1727967724},
+                       {1.07112498, 0.3903744329}, {0.87030310, 0.3455935448});
   }
 
   void test_all_calculations_are_correct_using_input_P_ws() {
-    const double expectedPEfficiency = 0.98;
-    const double expectedTPMO = (2 * expectedPEfficiency) - 1;
-    const double expectedAEfficiency = (EXPECTED_PHI / (2 * expectedTPMO)) + 0.5;
-    const double expectedTAMO = (2 * expectedAEfficiency) - 1;
+    const std::pair<double, double> expectedPEfficiency = {0.98, 0.9899494934};
+    const std::pair<double, double> expectedTPMO = {0.96, 1.9798989879};
+    const std::pair<double, double> expectedAEfficiency = {0.9855226, 1.0315912829};
+    const std::pair<double, double> expectedTAMO = {0.9710452, 2.0631825648};
 
-    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency);
+    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
 
     runCalculationTest(polarizerEffWs, nullptr, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
   }
 
   void test_all_calculations_are_correct_using_input_A_ws() {
-    const double expectedAEfficiency = 0.99;
-    const double expectedTAMO = (2 * expectedAEfficiency) - 1;
-    const double expectedPEfficiency = (EXPECTED_PHI / (2 * expectedTAMO)) + 0.5;
-    const double expectedTPMO = (2 * expectedPEfficiency) - 1;
+    const std::pair<double, double> expectedPEfficiency = {0.99, 1.0479338884};
+    const std::pair<double, double> expectedTPMO = {0.98, 2.0958677778};
+    const std::pair<double, double> expectedAEfficiency = {0.975614, 0.9877317447};
+    const std::pair<double, double> expectedTAMO = {0.9512279, 1.9754634895};
 
-    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency);
+    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
 
     runCalculationTest(nullptr, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
   }
 
   void test_all_calculations_are_correct_using_input_P_and_input_A_workspaces() {
-    const double expectedPEfficiency = 0.98;
-    const double expectedTPMO = (2 * expectedPEfficiency) - 1;
-    const double expectedAEfficiency = 0.99;
-    const double expectedTAMO = (2 * expectedAEfficiency) - 1;
+    const std::pair<double, double> expectedPEfficiency = {0.98, 0.9899494934};
+    const std::pair<double, double> expectedTPMO = {0.96, 1.9798989879};
+    const std::pair<double, double> expectedAEfficiency = {0.99, 0.9949874379};
+    const std::pair<double, double> expectedTAMO = {0.98, 1.9899748748};
 
-    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency);
-    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency);
+    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
+    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
 
     runCalculationTest(polarizerEffWs, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO,
                        expectedTAMO);
@@ -422,11 +423,11 @@ public:
 private:
   const std::vector<double> NON_MAG_Y_VALS = {12.0, 1.0, 2.0, 10.0};
   const std::vector<double> MAG_Y_VALS = {6.0, 0.2, 0.3, 1.0};
-  const double EXPECTED_F_P = 0.86363636;
-  const double EXPECTED_F_A = 0.95;
-  const double EXPECTED_PHI = 0.93220339;
-  const double EXPECTED_ALPHA = 0.9;
-  const double EXPECTED_RHO = 0.72727273;
+  const std::pair<double, double> EXPECTED_F_P{0.86363636, 0.19748435};
+  const std::pair<double, double> EXPECTED_F_A = {0.95, 0.2363260459};
+  const std::pair<double, double> EXPECTED_PHI = {0.93220339, 0.4761454221};
+  const std::pair<double, double> EXPECTED_ALPHA = {0.9, 0.4726520913};
+  const std::pair<double, double> EXPECTED_RHO = {0.72727273, 0.3949686990};
 
   WorkspaceGroup_sptr createNonMagWSGroup(const std::string &outName, const bool isWavelength = true,
                                           const bool isSingleSpectrum = true, const bool includeBinMismatch = false,
@@ -531,12 +532,15 @@ private:
 
   void checkOutputWorkspace(const std::unique_ptr<PolarizationEfficienciesWildes> &alg,
                             const std::string &outputPropertyName, const size_t expectedNumHistograms,
-                            const double expectedYValue) {
+                            const std::pair<double, double> &expectedValue) {
     const MatrixWorkspace_sptr outWs = alg->getProperty(outputPropertyName);
     TS_ASSERT(outWs != nullptr);
     TS_ASSERT_EQUALS(expectedNumHistograms, outWs->getNumberHistograms())
-    for (const double yVal : outWs->dataY(0)) {
-      TS_ASSERT_DELTA(expectedYValue, yVal, 1e-8);
+    for (int i = 0; i < outWs->blocksize(); i++) {
+      const double yVal = outWs->dataY(0)[i];
+      const double eVal = outWs->dataE(0)[i];
+      TS_ASSERT_DELTA(expectedValue.first, yVal, 1e-6);
+      TS_ASSERT_DELTA(expectedValue.second, eVal, 1e-6);
     }
   }
 
@@ -600,8 +604,8 @@ private:
   }
 
   void runCalculationTest(const MatrixWorkspace_sptr &polarizerEffWs, const MatrixWorkspace_sptr &analyserEffWs,
-                          const double expectedP, const double expectedA, const double expectedTPMO,
-                          const double expectedTAMO) {
+                          const std::pair<double, double> expectedP, const std::pair<double, double> expectedA,
+                          const std::pair<double, double> expectedTPMO, const std::pair<double, double> expectedTAMO) {
     const bool hasPEffWs = polarizerEffWs != nullptr;
     const bool hasanalyserEffWs = analyserEffWs != nullptr;
 
