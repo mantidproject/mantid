@@ -103,7 +103,7 @@ void LoadNexus::exec() {
     Mantid::LegacyNexus::NXRoot root(m_filename);
     Mantid::LegacyNexus::NXEntry entry = root.openEntry(root.groups().front().nxname);
     try {
-      Mantid::LegacyNexus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+      const std::string calibration_id = entry.getString("instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
       throw Exception::FileError("Unable to read File:", m_filename);
