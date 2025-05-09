@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
 #include "test_helper.h"
 #include <cxxtest/TestSuite.h>
@@ -38,6 +39,8 @@ public:
     TS_ASSERT(!entry.containsGroup("bank91_events")); // there aren't that many groups
     TS_ASSERT(entry.containsGroup("bank19_events"));
 
+    TS_ASSERT_THROWS(entry.openNXGroup("bank91_events"), const ::NeXus::Exception &); // next call should be fine
+
     auto bank19 = entry.openNXGroup("bank19_events");
     TS_ASSERT_EQUALS(bank19.name(), "bank19_events");
     // bank19.NX_class() returns the type in "NexusClasses" (i.e. NXClass) rather than what is in the file
@@ -52,6 +55,8 @@ public:
     TS_ASSERT_DELTA(time_of_flight[0], 16681.5, .01);
     TS_ASSERT_DELTA(time_of_flight[255], 958.1, .01);
     TS_ASSERT_THROWS_ANYTHING(time_of_flight[256]); // out of bounds
+
+    TS_ASSERT_THROWS(bank19.openNXFloat("timeofflight"), const ::NeXus::Exception &); // next call should be fine
 
     // load detector ids without letting previous data go out of scope
     auto detid = bank19.openNXDataSet<uint32_t>("event_id"); // type does not have a convenience function
