@@ -159,6 +159,42 @@ public:
     TS_ASSERT_DELTA(value, 2.72014, 0.00001);
   }
 
+  void testErrorPropagation_workspaces_quad() {
+    const size_t vars = 1;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+    const double a = 5.0;
+    const double b = 3.0;
+    const double c = 10.0;
+    auto errorProp = Arithmetic::make_error_propagation<vars>(
+        [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
+
+    auto ws = createWorkspace("ws", {20, 22, 24, 26, 28}, {0.0, 1.0, 2.0, 3.0, 4.0}, {0.5, 0.6, 0.7, 0.8, 0.9});
+    const auto result = errorProp.evaluateWorkspaces(ws);
+
+    const std::vector<double> expectedY{2070, 2496, 2962, 3468, 4014};
+    const std::vector<double> expectedE{101.5, 133.8, 170.1, 210.4, 254.7};
+    for (size_t i = 0; i < result->size(); i++) {
+      TS_ASSERT_EQUALS(expectedY.at(i), result->y(0)[i]);
+      TS_ASSERT_EQUALS(expectedE.at(i), result->e(0)[i]);
+    }
+  }
+
+  void testErrorPropagation_workspaces_mult_vars() {
+    const size_t vars = 2;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+
+    auto errorProp =
+        Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
+
+    auto wsA = createWorkspace("wsA", {3.14, 3.14, 3.14}, {0.0, 1.0, 2.0}, {0.01, 0.01, 0.01});
+    auto wsB = createWorkspace("wsB", {1.0, 1.0, 1.0}, {0.0, 1.0, 2.0}, {0.05, 0.05, 0.05});
+    const auto result = errorProp.evaluateWorkspaces(wsA, wsB);
+    for (size_t i = 0; i < result->size(); i++) {
+      TS_ASSERT_DELTA(0.139495, result->y(0)[i], 0.001);
+      TS_ASSERT_DELTA(2.72014, result->e(0)[i], 0.001);
+    }
+  }
+
 private:
   const std::vector<std::string> WILDES_SPIN_STATES{
       SpinStateConfigurationsWildes::PLUS_PLUS,  SpinStateConfigurationsWildes::PLUS_MINUS,
@@ -182,11 +218,14 @@ private:
     return grp;
   }
 
-  MatrixWorkspace_sptr createWorkspace(const std::string &name) {
+  MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::vector<double> &dataX = {0, 1},
+                                       const std::vector<double> &dataY = {0, 1},
+                                       const std::vector<double> &dataE = {}) {
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
-    createWorkspace->setProperty("DataX", std::vector<double>{0, 1});
-    createWorkspace->setProperty("DataY", std::vector<double>{0, 1});
+    createWorkspace->setProperty("DataX", dataX);
+    createWorkspace->setProperty("DataY", dataY);
+    createWorkspace->setProperty("DataE", dataE);
     createWorkspace->setProperty("OutputWorkspace", name);
     createWorkspace->execute();
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
