@@ -43,6 +43,8 @@ protected:
   /// Get mapped weights from FunctionValues
   virtual std::vector<double> getFitWeights(API::FunctionValues_sptr values) const;
 
+  virtual void updateValidateFitWeights() override;
+
   double m_factor;
 };
 

@@ -157,7 +157,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 62502470, delta=5)  # not realistic fit - no noise!
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 25894672, delta=5)  # not realistic fit - no noise!
 
     def test_exec_IOverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
@@ -170,7 +170,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["PeakFunction"] = "Gaussian"
         kwargs["FixPeakParameters"] = ""
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.04, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.97, delta=1e-2)
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")
@@ -185,7 +185,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["FractionalChangeDSpacing"] = 1e-10
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
         # I/sigma different now d-spacing constrained
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.16, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.18, delta=1e-2)
 
     def test_exec_fix_peak_params(self):
         kwargs = self.profile_kwargs.copy()

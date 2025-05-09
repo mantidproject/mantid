@@ -25,7 +25,7 @@ namespace Mantid::CurveFitting::CostFunctions {
  */
 CostFuncFitting::CostFuncFitting()
     : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true), m_includePenalty(true), m_value(0), m_pushed(false),
-      m_pushedValue(false) {}
+      m_pushedValue(false), m_ignoreInvalidData(false) {}
 
 /**
  * Set all dirty flags.
@@ -82,6 +82,7 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, API::Func
   m_function = std::move(function);
   m_domain = std::move(domain);
   m_values = std::move(values);
+  updateValidateFitWeights();
   reset();
 }
 

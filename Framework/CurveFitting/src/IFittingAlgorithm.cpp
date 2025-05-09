@@ -312,7 +312,8 @@ std::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFuncti
 
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
-  m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  m_domainCreator->ignoreInvalidData(ignoreInvalidData);
   m_domainCreator->createDomain(domain, values);
 
   // Set peak radius to the values which will be passed to
@@ -331,6 +332,7 @@ std::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFuncti
   auto costFunction = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
       API::CostFunctionFactory::Instance().create(getPropertyValue("CostFunction")));
 
+  costFunction->setIgnoreInvalidData(ignoreInvalidData);
   costFunction->setFittingFunction(m_function, domain, values);
 
   return costFunction;
