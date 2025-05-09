@@ -442,14 +442,14 @@ loop_
       _atom_site_U_iso_or_equiv
       _atom_site_symmetry_multiplicity
 Ce
-        0.0          0.0          0.0          1.0        Uiso   0.025         4
+Ce1        0.0          0.0          0.0          1.0        Uiso   0.025         4
 O
 O2      0.25         0.25         0.25         1.0        Uiso   0.025         8
 
 loop_ _atom_type_symbol
       _atom_type_number_in_cell
                    Ce  4.0
-                   O   8.0
+                   O2   8.0
 
 # If you change Z, be sure to change all 3 of the following
 _chemical_formula_sum                  "Ce O2"
