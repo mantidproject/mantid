@@ -120,7 +120,6 @@ public:
     const double m = 5.0;
     const double c = 3.0;
     auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
-    Types::InputArray a{{20.0}};
     const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
 
     const double error = result.error;
