@@ -63,5 +63,11 @@ void export_Object() {
 
       .def("volume", &CSGObject::volume, arg("self"), "Returns the volume of this shape.")
 
-      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh");
+      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh")
+
+      .def("getGeometryShape", &CSGObject::getGeometryShape, arg("self"), "")
+
+      .def("getGeometryPoints", &CSGObject::getGeometryPoints, arg("self"), "")
+
+      .def("getGeometryDimensions", &CSGObject::getGeometryDimensions, arg("self"), "");
 }
