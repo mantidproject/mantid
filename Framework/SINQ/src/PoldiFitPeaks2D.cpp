@@ -964,6 +964,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(const std::vector<PoldiPeakCo
   fit->setProperty("MaxIterations", maxIterations);
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fit->setProperty("IgnoreInvalidData", true);
 
   // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
   int oldLogLevel = g_log.getLevel();
