@@ -15,7 +15,7 @@ Interfaces
    :glob:
    :maxdepth: 1
 
-   ./isis_sans/ISIS SANS.rst
+   isis_sans/ISIS SANS.rst
    diffraction/*
    direct/*
    framework/*
@@ -23,7 +23,6 @@ Interfaces
    ILL/*
    indirect/*
    inelastic/*
-   isis_sans/*
    muon/*
    reflectometry/*
    utility/*
