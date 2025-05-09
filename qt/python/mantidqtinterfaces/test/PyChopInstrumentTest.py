@@ -275,7 +275,7 @@ class fake_Figure(mock.MagicMock):
 
 class fake_Slider(mock.MagicMock):
     def __init__(self, parent, label, valmin, valmax, **kwargs):
-        super().__init__(parent, label, valmin, valmax, **kwargs)
+        super().__init__(label, valmin, valmax, **kwargs)
         self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax
         self.val = kwargs.pop("valinit", 0.5)
         self.valtext = mock.MagicMock()

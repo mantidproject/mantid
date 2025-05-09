@@ -2254,7 +2254,7 @@ def parseLogFile(logfile):
     logkeywords = {"Rear_Det_X": 0.0, "Rear_Det_Z": 0.0, "Front_Det_X": 0.0, "Front_Det_Z": 0.0, "Front_Det_Rot": 0.0}
     if logfile is None:
         return tuple(logkeywords.values())
-    file_log = open(logfile, "rU")
+    file_log = open(logfile, "r")
     for line in file_log:
         entry = line.split()[1]
         if entry in list(logkeywords.keys()):

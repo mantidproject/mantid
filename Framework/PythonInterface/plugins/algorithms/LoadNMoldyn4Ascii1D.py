@@ -103,7 +103,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         x_axis = 0
         unit = ""
         header_data = [unit, func_name, x_axis]
-        with open(file_name, "rU") as f_handle:
+        with open(file_name, "r") as f_handle:
             while True:
                 line = f_handle.readline()
                 if not line:
