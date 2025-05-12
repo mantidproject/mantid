@@ -163,9 +163,11 @@ protected:
    * @throw runtime_error if the operation fails.
    */
   template <typename NumT> void getData(NumT *data) {
+    std::string oldPath = m_fileID->getPath();
+    m_fileID->openGroupPath(m_path);
     m_fileID->openData(name());
     m_fileID->getData(data);
-    m_fileID->closeData();
+    m_fileID->openPath(oldPath);
   }
 
   /**
@@ -616,6 +618,7 @@ public:
   std::string NX_class() const override { return "NXdata"; }
   /// Opens the dataset within this NXData with signal=1 attribute.
   template <typename T> NXDataSetTyped<T> openData() {
+    m_fileID->openGroupPath(m_path);
     for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();

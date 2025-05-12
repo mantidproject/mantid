@@ -11,7 +11,7 @@
 #include <sstream>
 #include <typeinfo>
 
-#define NXEXCEPTION(message) Exception(message, __func__, m_filename);
+#define NXEXCEPTION(message) Exception((message), __func__, m_filename);
 
 using namespace NeXus;
 using namespace Mantid::NeXus;
@@ -354,7 +354,7 @@ bool File::hasData(std::string const &name) {
 }
 
 std::filesystem::path File::formAbsolutePath(std::string const &name) {
-  // try forming path relative to current location
+  // perform some cleanup on path
   std::string new_name(name);
   if (new_name.ends_with('/')) {
     new_name.pop_back();
@@ -465,8 +465,24 @@ void File::openGroupPath(std::string const &pathname) {
     throw NXEXCEPTION("Supplied empty path");
   }
   std::filesystem::path new_path = formAbsolutePath(pathname);
+  // if (!m_descriptor.isEntry(new_path)) {
+  //   throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
+  // } else if (new_path == m_path) {
+  //   // do nothing if the path is not changingg
+  // } else if (new_path == "/") {
+  //   // if the path is the root, reset
+  //   this->resetToFileRoot();
+  // } else if (m_descriptor.isEntry(new_path, scientific_data_set)) {
+  //   // if this is a dataset, then open the parent group
+  //   new_path = new_path.parent_path();
+  //   this->openPath(new_path);
+  // } else {
+  //   // otherwise, if this is a group, then open the group
+  //   m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
+  //   m_path = new_path;
+  // }
   if (new_path == m_path) {
-    // do nothing
+    // intentionally do nothing if the path is not changingg
   } else if (new_path == "/") {
     this->resetToFileRoot();
   } else if (m_descriptor.isEntry(new_path)) {
@@ -746,7 +762,8 @@ void File::openData(std::string const &name) {
     m_path = new_path;
     m_current = std::make_shared<H5::DataSet>(this->openDataSet(m_path));
   } else {
-    throw NXEXCEPTION("The indicated dataset does not exist name=" + name);
+    throw NXEXCEPTION("The dataset " + name + " cannot be opened from " + m_path.string() + "|  tried to open " +
+                      new_path.string());
   }
   // if (this->isDataSetOpen()) {
   //   std::cerr << "Warning: Previous dataset unclosed before opening another. "

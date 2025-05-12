@@ -84,9 +84,12 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
 NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    m_path_parent = parent->path();
-
-    m_path = parent->path() + "/" + name;
+    std::filesystem::path new_path(parent->path() + "/" + name);
+    while (!fileID->hasPath(new_path)) {
+      new_path = new_path.parent_path();
+    }
+    m_path_parent = new_path.parent_path();
+    m_path = new_path;
   }
 }
 
@@ -99,8 +102,12 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    m_path_parent = parent->path();
-    m_path = parent->path() + "/" + name;
+    std::filesystem::path new_path(parent->path() + "/" + name);
+    while (!fileID->hasPath(new_path)) {
+      new_path = new_path.parent_path();
+    }
+    m_path_parent = new_path.parent_path();
+    m_path = new_path;
   }
 }
 
