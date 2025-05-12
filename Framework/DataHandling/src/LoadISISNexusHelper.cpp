@@ -134,12 +134,12 @@ void loadRunDetails(API::Run &run, const NXEntry &entry, const bool hasVMSBlock)
   // End date and time is stored separately in ISO format in the "raw_data1/endtime" class
   std::string end_time_iso = entry.getString("end_time");
   if (end_time_iso.size() > RUN_TIME_STRING_LENGTH)
-    end_time_iso = end_time_iso.substr(0, RUN_TIME_STRING_LENGTH);
+    end_time_iso.erase(RUN_TIME_STRING_LENGTH);
   run.addProperty("run_end", end_time_iso);
 
   std::string start_time_iso = entry.getString("start_time");
   if (start_time_iso.size() > RUN_TIME_STRING_LENGTH)
-    start_time_iso = start_time_iso.substr(0, RUN_TIME_STRING_LENGTH);
+    start_time_iso.erase(RUN_TIME_STRING_LENGTH);
   run.addProperty("run_start", start_time_iso);
 
   // If we have a vms block, load details from there
