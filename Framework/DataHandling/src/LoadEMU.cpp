@@ -129,8 +129,8 @@ std::string GetNeXusValue<std::string>(const NeXus::NXEntry &entry, const std::s
 }
 
 template <typename T>
-void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path, const T &defval, API::LogManager &logManager,
-                        const std::string &name, const T &factor, int32_t index) {
+void MapNeXusToProperty(const NeXus::NXEntry &entry, const std::string &path, const T &defval,
+                        API::LogManager &logManager, const std::string &name, const T &factor, int32_t index) {
 
   T value = GetNeXusValue<T>(entry, path, defval, index);
   logManager.addProperty<T>(name, value * factor);
@@ -138,7 +138,7 @@ void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path, const T 
 
 // sting is a special case
 template <>
-void MapNeXusToProperty<std::string>(NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+void MapNeXusToProperty<std::string>(const NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
                                      const std::string & /*unused*/, int32_t index) {
 
