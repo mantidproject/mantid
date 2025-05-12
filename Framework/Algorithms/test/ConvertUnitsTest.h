@@ -829,119 +829,60 @@ public:
     return raggedWS;
   }
 
-  void test_ragged_Workspace2D_edges() {
-    const std::string outname("raggedWSout_edges");
-    constexpr bool bin_edges(true);
+  void test_ragged_Workspace2D() {
+    const std::string outname("raggedWSout");
 
     for (const bool distribution : {true, false}) {
-      MatrixWorkspace_sptr raggedWS = createRaggedWS(bin_edges, distribution); // not registered with ADS
+      for (const bool bin_edges : {true, false}) {
 
-      // d->Q avoids the toTof branch, d->TOF goes right to it
-      for (const std::string &targetUnits : {TestUnits::MOMENTUM_TRANSFER, TestUnits::TOF}) {
-        // run the algorithm - out-of-place to force creating new output workspace
-        ConvertUnits convertUnits;
-        TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
-        TS_ASSERT(convertUnits.isInitialized());
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setProperty("InputWorkspace", raggedWS));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("OutputWorkspace", outname));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("Target", targetUnits));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.execute());
-        TS_ASSERT(convertUnits.isExecuted());
+        MatrixWorkspace_sptr raggedWS = createRaggedWS(bin_edges, distribution); // not registered with ADS
 
-        // for some reason the output has to be gotten from the ADS
-        if (AnalysisDataService::Instance().doesExist(outname)) {
-          const auto numHist = raggedWS->getNumberHistograms();
-          MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outname);
-          TS_ASSERT(outputWS->isRaggedWorkspace()); // output is still ragged
-          TS_ASSERT_EQUALS(outputWS->isDistribution(), distribution);
-          TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), numHist);
-          TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), targetUnits);
-          if (distribution) {
-            // counts are scaled by bin width in new units
-            TS_ASSERT_EQUALS(raggedWS->readY(0).size(), outputWS->readY(0).size());
-            TS_ASSERT_EQUALS(raggedWS->readY(1).size(), outputWS->readY(1).size());
-          } else {
-            // counts are the same
-            if (targetUnits.compare(TestUnits::TOF) == 0) {
-              TS_ASSERT_EQUALS(raggedWS->readY(0), outputWS->readY(0));
-              TS_ASSERT_EQUALS(raggedWS->readY(1), outputWS->readY(1));
-            } else { // reversed for MomentumTransfer
-              for (size_t i = 0; i < numHist; ++i) {
-                auto Yorig = outputWS->readY(i); // make a copy
-                std::reverse(Yorig.begin(), Yorig.end());
-                TS_ASSERT_EQUALS(Yorig, raggedWS->readY(i));
+        // d->Q avoids the toTof branch, d->TOF goes right to it
+        for (const std::string &targetUnits : {TestUnits::MOMENTUM_TRANSFER, TestUnits::TOF}) {
+          // run the algorithm - out-of-place to force creating new output workspace
+          ConvertUnits convertUnits;
+          TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
+          TS_ASSERT(convertUnits.isInitialized());
+          TS_ASSERT_THROWS_NOTHING(convertUnits.setProperty("InputWorkspace", raggedWS));
+          TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("OutputWorkspace", outname));
+          TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("Target", targetUnits));
+          TS_ASSERT_THROWS_NOTHING(convertUnits.execute());
+          TS_ASSERT(convertUnits.isExecuted());
+
+          // for some reason the output has to be gotten from the ADS
+          if (AnalysisDataService::Instance().doesExist(outname)) {
+            const auto numHist = raggedWS->getNumberHistograms();
+            MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outname);
+            TS_ASSERT(outputWS->isRaggedWorkspace()); // output is still ragged
+            TS_ASSERT_EQUALS(outputWS->isDistribution(), distribution);
+            TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), numHist);
+            TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), targetUnits);
+            if (distribution) {
+              // counts are scaled by bin width in new units
+              TS_ASSERT_EQUALS(raggedWS->readY(0).size(), outputWS->readY(0).size());
+              TS_ASSERT_EQUALS(raggedWS->readY(1).size(), outputWS->readY(1).size());
+            } else {
+              // counts are the same
+              if (targetUnits.compare(TestUnits::TOF) == 0) {
+                TS_ASSERT_EQUALS(raggedWS->readY(0), outputWS->readY(0));
+                TS_ASSERT_EQUALS(raggedWS->readY(1), outputWS->readY(1));
+              } else { // reversed for MomentumTransfer
+                for (size_t i = 0; i < numHist; ++i) {
+                  auto Yorig = outputWS->readY(i); // make a copy
+                  std::reverse(Yorig.begin(), Yorig.end());
+                  TS_ASSERT_EQUALS(Yorig, raggedWS->readY(i));
+                }
               }
             }
-          }
-          // size of bins hasn't changed
-          TS_ASSERT_EQUALS(raggedWS->readX(0).size(), outputWS->readX(0).size());
-          TS_ASSERT_EQUALS(raggedWS->readX(1).size(), outputWS->readX(1).size());
+            // size of bins hasn't changed
+            TS_ASSERT_EQUALS(raggedWS->readX(0).size(), outputWS->readX(0).size());
+            TS_ASSERT_EQUALS(raggedWS->readX(1).size(), outputWS->readX(1).size());
 
-          // remove output workspace
-          AnalysisDataService::Instance().remove(outname);
-        } else {
-          TS_FAIL(std::string("OutputWorkspace was not created when targeting ") + targetUnits);
-        }
-      } // for targetUnits
-    } // for distribution
-  }
-
-  /*
-   * This test is disabled because it requires changes to ConvertToHistogram which requires changes to it's parent
-   * XDataConverter. Maybe this could be combined with previous test
-   */
-  void test_ragged_Workspace2D_centers() {
-    const std::string outname("raggedWSout_edges");
-    constexpr bool bin_edges(false);
-
-    for (const bool distribution : {true, false}) {
-      MatrixWorkspace_sptr raggedWS = createRaggedWS(bin_edges, distribution); // not registered with ADS
-
-      // d->Q avoids the toTof branch, d->TOF goes right to it
-      for (const std::string &targetUnits : {TestUnits::MOMENTUM_TRANSFER, TestUnits::TOF}) {
-        // run the algorithm - out-of-place to force creating new output workspace
-        ConvertUnits convertUnits;
-        TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
-        TS_ASSERT(convertUnits.isInitialized());
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setProperty("InputWorkspace", raggedWS));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("OutputWorkspace", outname));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.setPropertyValue("Target", targetUnits));
-        TS_ASSERT_THROWS_NOTHING(convertUnits.execute());
-        TS_ASSERT(convertUnits.isExecuted());
-
-        // for some reason the output has to be gotten from the ADS
-        if (AnalysisDataService::Instance().doesExist(outname)) {
-          const auto numHist = raggedWS->getNumberHistograms();
-          MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outname);
-          TS_ASSERT(outputWS->isRaggedWorkspace()); // output is still ragged
-          TS_ASSERT_EQUALS(outputWS->isDistribution(), distribution);
-          TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), numHist);
-          TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), targetUnits);
-          if (distribution) {
-            // counts are scaled by bin width in new units
-            TS_ASSERT_EQUALS(raggedWS->readY(0).size(), outputWS->readY(0).size());
-            TS_ASSERT_EQUALS(raggedWS->readY(1).size(), outputWS->readY(1).size());
+            // remove output workspace
+            AnalysisDataService::Instance().remove(outname);
           } else {
-            // counts are the same
-            if (targetUnits.compare(TestUnits::TOF) == 0) {
-              TS_ASSERT_EQUALS(raggedWS->readY(0), outputWS->readY(0));
-              TS_ASSERT_EQUALS(raggedWS->readY(1), outputWS->readY(1));
-            } else { // reversed for MomentumTransfer
-              for (size_t i = 0; i < numHist; ++i) {
-                auto Yorig = outputWS->readY(i); // make a copy
-                std::reverse(Yorig.begin(), Yorig.end());
-                TS_ASSERT_EQUALS(Yorig, raggedWS->readY(i));
-              }
-            }
+            TS_FAIL(std::string("OutputWorkspace was not created when targeting ") + targetUnits);
           }
-          // size of bins hasn't changed
-          TS_ASSERT_EQUALS(raggedWS->readX(0).size(), outputWS->readX(0).size());
-          TS_ASSERT_EQUALS(raggedWS->readX(1).size(), outputWS->readX(1).size());
-
-          // remove output workspace
-          AnalysisDataService::Instance().remove(outname);
-        } else {
-          TS_FAIL(std::string("OutputWorkspace was not created when targeting ") + targetUnits);
         }
       } // for targetUnits
     } // for distribution
