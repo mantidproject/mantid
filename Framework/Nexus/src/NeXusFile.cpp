@@ -1218,8 +1218,6 @@ Info File::getInfo() {
     if (dt.isVariableStr()) {
       throw Exception("Do not have implementation for variable length strings", "getInfo", m_filename);
     }
-    if (rank == 0)
-      rank = 1; // assumption by callers
     if (rank == 0 || rank == 1) {
       dims[rank - 1] = dataset->getStorageSize() - 1;
     } else if (rank == 2) {
