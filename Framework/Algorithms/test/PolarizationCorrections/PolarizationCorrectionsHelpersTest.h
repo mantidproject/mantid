@@ -185,6 +185,22 @@ public:
     }
   }
 
+  void testErrorPropagation_linear_workspace_dist() {
+    constexpr size_t vars = 1;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+
+    const double m = 5.0;
+    const double c = 3.0;
+    auto ws = createWorkspace("wsA", {0.0, 1.0, 2.0}, {20.0, 20.0, 20.0}, {0.5, 0.5, 0.5});
+    const auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
+    const auto result = errorProp.evaluateWorkspaces(true, ws);
+    for (size_t i = 0; i < result->size(); i++) {
+      TS_ASSERT_DELTA(103, result->y(0)[i], 0.001);
+      TS_ASSERT_DELTA(2.5, result->e(0)[i], 0.001);
+    }
+    TS_ASSERT(result->isDistribution());
+  }
+
 private:
   const std::vector<std::string> WILDES_SPIN_STATES{
       SpinStateConfigurationsWildes::PLUS_PLUS,  SpinStateConfigurationsWildes::PLUS_MINUS,

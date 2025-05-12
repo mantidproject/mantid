@@ -533,7 +533,14 @@ private:
   void checkOutputWorkspace(const std::unique_ptr<PolarizationEfficienciesWildes> &alg,
                             const std::string &outputPropertyName, const size_t expectedNumHistograms,
                             const std::pair<double, double> &expectedValue) {
+    const WorkspaceGroup_sptr firstInWsGrp = alg->getProperty(InputPropNames::NON_MAG_WS);
+    const MatrixWorkspace_sptr firstInWs =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(firstInWsGrp->getItem(0));
     const MatrixWorkspace_sptr outWs = alg->getProperty(outputPropertyName);
+
+    TS_ASSERT_EQUALS(firstInWs->isDistribution(), outWs->isDistribution());
+    TS_ASSERT_EQUALS(firstInWs->YUnit(), outWs->YUnit());
+
     TS_ASSERT(outWs != nullptr);
     TS_ASSERT_EQUALS(expectedNumHistograms, outWs->getNumberHistograms())
     for (int i = 0; i < outWs->blocksize(); i++) {

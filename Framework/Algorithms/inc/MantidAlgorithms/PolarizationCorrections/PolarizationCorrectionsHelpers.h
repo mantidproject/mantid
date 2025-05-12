@@ -104,7 +104,20 @@ public:
   }
 
   template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
+  API::MatrixWorkspace_sptr evaluateWorkspaces(const bool outputWorkspaceDistribution, Ts... args) const {
+    return evaluateWorkspacesImpl(outputWorkspaceDistribution, std::forward<Ts>(args)...);
+  }
+
+  template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
   API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) const {
+    return evaluateWorkspacesImpl(std::nullopt, std::forward<Ts>(args)...);
+  }
+
+private:
+  Func compute_func;
+
+  template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
+  API::MatrixWorkspace_sptr evaluateWorkspacesImpl(std::optional<bool> outputWorkspaceDistribution, Ts... args) const {
     const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
     auto outWs = firstWs->clone();
     const size_t numSpec = outWs->getNumberHistograms();
@@ -127,11 +140,12 @@ public:
         eOut[j] = result.error;
       }
     }
+
+    if (outputWorkspaceDistribution.has_value()) {
+      outWs->setDistribution(outputWorkspaceDistribution.value());
+    }
     return outWs;
   }
-
-private:
-  Func compute_func;
 };
 
 template <size_t N, typename Func> auto make_error_propagation(Func &&func) {
