@@ -103,18 +103,62 @@ QGroupBox:title {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_sample">
       <item>
-       <widget class="QCheckBox" name="check_absorption">
+       <widget class="QCheckBox" name="check_scatt">
         <property name="text">
          <string>Include Scattering Power Correction</string>
         </property>
        </widget>
       </item>
+      <!-- Crystal Structure Info -->
+      <item>
+  <layout class="QHBoxLayout" name="latticeInfoLayout">
+    <item>
+      <widget class="QLabel" name="label_lattice">
+        <property name="text">
+          <string>Lattice:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="lattice_lineedit"/>
+    </item>
+    <item>
+      <widget class="QLabel" name="label_spacegroup">
+        <property name="text">
+          <string>Space Group:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="spacegroup_lineedit"/>
+    </item>
+    <item>
+      <widget class="QLabel" name="label_basis">
+        <property name="text">
+          <string>Basis:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="basis_lineedit"/>
+    </item>
+  </layout>
+</item>
+
    <!-- Crystal Buttons Row -->
    <item>
     <layout class="QHBoxLayout" name="transferSampleLayout">
      <item>
-    <widget class="QComboBox" name="combo_workspaceList"/>
-   </item>
+  <widget class="QComboBox" name="combo_workspaceList">
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+
         <item>
     <widget class="QPushButton" name="btn_setCrystal">
      <property name="text">
@@ -123,21 +167,78 @@ QGroupBox:title {
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="btn_copyCrystalToAll">
+    <widget class="QPushButton" name="btn_setAllCrystal">
      <property name="text">
-      <string>Copy Crystal to All</string>
+      <string>Set Crystal to All</string>
      </property>
     </widget>
    </item>
-        <item>
- <widget class="QLabel" name="label_10">
-  <property name="text">
-   <string>HKL: </string>
-  </property>
- </widget>
+<item>
+  <widget class="QLabel" name="label_hkl">
+    <property name="text">
+      <string>HKL: (</string>
+    </property>
+  </widget>
 </item>
 <item>
- <widget class="QLineEdit" name="hkl_lineedit"/>
+  <widget class="QLineEdit" name="h_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+        <item>
+  <widget class="QLabel" name="label_comma1">
+    <property name="text">
+      <string>,</string>
+    </property>
+  </widget>
+</item>
+<item>
+  <widget class="QLineEdit" name="k_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+                <item>
+  <widget class="QLabel" name="label_comma2">
+    <property name="text">
+      <string>,</string>
+    </property>
+  </widget>
+</item>
+<item>
+  <widget class="QLineEdit" name="l_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+                <item>
+  <widget class="QLabel" name="label_bracket">
+    <property name="text">
+      <string>)</string>
+    </property>
+  </widget>
 </item>
 
     </layout>
@@ -146,33 +247,50 @@ QGroupBox:title {
  </widget>
 </item>
 
-   <!-- Absorption Correction Section -->
-   <item>
-    <widget class="QGroupBox" name="groupBox_absorption">
-     <property name="title">
+   <!-- Pole Figure Calculation Section -->
+ <item>
+  <widget class="QGroupBox" name="groupBox_absorption">
+    <property name="title">
       <string>Pole Figure Calculation</string>
-     </property>
-     <layout class="QVBoxLayout">
-         <item>
-          <widget class="FittingPlotView" name="widget_plot" native="true">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>400</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-      <widget class="QPushButton" name="btn_calc_pf">
-       <property name="text">
-        <string>Calculate Pole Figure</string>
-       </property>
-      </widget>
-     </item>
-     </layout>
-    </widget>
-   </item>
+    </property>
+    <layout class="QVBoxLayout">
+
+      <!-- Matplotlib Canvas Placeholder -->
+      <item>
+        <widget class="QWidget" name="plot_canvas" native="true"/>
+      </item>
+
+      <!-- Combo box and button on same row -->
+      <item>
+        <layout class="QHBoxLayout" name="hozLayout_proj">
+          <item>
+            <widget class="QComboBox" name="combo_projMethod">
+              <item>
+                <property name="text">
+                  <string>Azimuthal</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>Stereographic</string>
+                </property>
+              </item>
+            </widget>
+          </item>
+          <item>
+            <widget class="QPushButton" name="btn_calc_pf">
+              <property name="text">
+                <string>Calculate Pole Figure</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+
+    </layout>
+  </widget>
+</item>
+
 
   </layout>
  </widget>
@@ -181,12 +299,6 @@ QGroupBox:title {
    <class>FileFinderWidget</class>
    <extends>QWidget</extends>
    <header>mantidqt.widgets.filefinderwidget</header>
-   <container>1</container>
-  </customwidget>
-     <customwidget>
-   <class>FittingPlotView</class>
-   <extends>QWidget</extends>
-   <header>mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

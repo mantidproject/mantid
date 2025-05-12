@@ -22,6 +22,8 @@ SETTINGS_DICT = {
     "timeout": str,
     "dSpacing_min": str,
     "monte_carlo_params": str,
+    "cost_func_thresh": str,
+    "peak_pos_thresh": str,
 }
 
 DEFAULT_SETTINGS = {
@@ -35,6 +37,8 @@ DEFAULT_SETTINGS = {
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
     "monte_carlo_params": "SparseInstrument:True",
+    "cost_func_thresh": "100",
+    "peak_pos_thresh": "0.1",
 }
 
 ALL_LOGS = ",".join(
@@ -181,6 +185,8 @@ class SettingsPresenter(object):
         self.settings["timeout"] = self.view.get_timeout()
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
         self.settings["monte_carlo_params"] = self.view.get_monte_carlo_params()
+        self.settings["cost_func_thresh"] = self.view.get_cost_func_thresh()
+        self.settings["peak_pos_thresh"] = self.view.get_peak_pos_thresh()
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
@@ -194,6 +200,8 @@ class SettingsPresenter(object):
         self.view.set_timeout(self.settings["timeout"])
         self.view.set_dSpacing_min(self.settings["dSpacing_min"])
         self.view.set_monte_carlo_params(self.settings["monte_carlo_params"])
+        self.view.set_cost_func_thresh(self.settings["cost_func_thresh"])
+        self.view.set_peak_pos_thresh(self.settings["peak_pos_thresh"])
         self._find_files()
 
     def _find_files(self):
@@ -242,6 +250,8 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("timeout")
         self.check_and_populate_with_default("dSpacing_min")
         self.check_and_populate_with_default("monte_carlo_params")
+        self.check_and_populate_with_default("cost_func_thresh")
+        self.check_and_populate_with_default("peak_pos_thresh")
 
     # -----------------------
     # Observers / Observables

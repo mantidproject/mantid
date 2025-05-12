@@ -1,8 +1,9 @@
-from mantid.simpleapi import CreatePoleFigureTableWorkspace, CloneWorkspace, CombineTableWorkspaces
+from mantid.simpleapi import CreatePoleFigureTableWorkspace, CloneWorkspace, CombineTableWorkspaces, logger
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
 import matplotlib.pyplot as plt
+from mantid.geometry import CrystalStructure
 
 
 class TextureProjection:
@@ -60,8 +61,8 @@ class TextureProjection:
         for tw in table_workspaces[1:]:
             CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
 
-    def plot_pole_figure(self, ws, projection: str, **kwargs) -> None:
-        if projection == "stereo":
+    def plot_pole_figure(self, ws, projection: str, fig=None, **kwargs) -> None:
+        if projection.lower() == "stereographic":
             proj = ster_proj
         else:
             proj = azim_proj
@@ -79,7 +80,7 @@ class TextureProjection:
         z = np.zeros_like(x)
         eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
-        fig = plt.figure()
+        fig = plt.figure() if not fig else fig
         ax = fig.add_subplot(1, 1, 1)
         ax.scatter(pfi[:, 1], pfi[:, 0], c=np.log(pfi[:, 2]), s=20, cmap="jet", **kwargs)
         ax.plot(eq[0], eq[1], c="grey")
@@ -87,7 +88,34 @@ class TextureProjection:
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-        fig.show()
+
+    def get_pf_table_name(self, wss, fit_params, hkl):
+        fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
+        run_range = f"{fws.run().getLogData('run_number').value}-{lws.run().getLogData('run_number').value}"
+        instr = fws.getInstrument().getName()
+        try:
+            # try and get a peak reference either from hkl or from the X0 column of param
+            peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
+            table_name = f"{instr}_{run_range}_{peak}_pf_table"
+        except Exception:
+            # if no param table given, no peak reference
+            table_name = f"{instr}_{run_range}_pf_table"
+        return table_name
+
+    def _parse_hkl(self, H, K, L):
+        try:
+            return [int(H), int(K), int(L)]
+        except Exception:
+            return None
+
+    def set_ws_xtal(self, ws: str, lattice: str, space_group: str, basis: str) -> None:
+        ws = ADS.retrieve(ws)
+        ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
+        logger.notice("Crystal Structure Set")
+
+    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str) -> None:
+        for ws in wss:
+            self.set_ws_xtal(ws, lattice, space_group, basis)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
