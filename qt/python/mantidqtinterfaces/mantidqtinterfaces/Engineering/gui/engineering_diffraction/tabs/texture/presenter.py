@@ -2,8 +2,9 @@ from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
 from mantid.simpleapi import Load
-from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
 import os
 
@@ -25,6 +26,14 @@ class TexturePresenter:
 
         self.view.set_on_select_all_clicked(self.view.select_all_workspaces)
         self.view.set_on_delete_clicked(self.delete_selected_files)
+
+        self.view.set_on_check_inc_scatt_corr_state_changed(self.view.update_crystal_section_visibility)
+        self.view.set_include_scatter_corr(False)
+        self.view.set_crystal_section_visibility(False)
+        self.view.set_on_set_crystal_clicked(self.on_set_crystal_clicked)
+        self.view.set_on_set_all_crystal_clicked(self.on_set_all_crystal_clicked)
+
+        self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
 
     def load_ws_files(self):
         filenames = self.view.finder_texture_ws.getFilenames()
@@ -61,46 +70,52 @@ class TexturePresenter:
         for ws in selected_wss:
             self.ws_names.pop(self.ws_names.index(ws))
         for param in selected_params:
-            self.fit_param_files.pop(self.fit_param_files.index(param))
+            if param != "Not set":
+                self.fit_param_files.pop(self.fit_param_files.index(param))
         self.redraw_table()
 
     def redraw_table(self):
         self.update_ws_info()
         self.view.populate_workspace_table(self.ws_info)
-        self.view.populate_workspace_list()
+        self.view.populate_workspace_list(self.ws_names)
 
     def update_ws_info(self):
         ws_info = {}
-        selected = self.view.get_selected_workspaces()
+        selected_ws, _ = self.view.get_selected_workspaces()
         for pos_ind, ws_name in enumerate(self.ws_names):
             param_status = self.fit_param_files[pos_ind] if pos_ind < len(self.fit_param_files) else "Not set"
-            ws_info[ws_name] = self.model.get_ws_info(ws_name, param_status, ws_name in selected)  # maintain state of selected boxes
+            ws_info[ws_name] = self.model.get_ws_info(ws_name, param_status, ws_name in selected_ws)  # maintain state of selected boxes
         self.ws_info = ws_info
 
-    def on_apply_clicked(self):
-        wss = self.view.get_selected_workspaces()
-        out_wss = [f"Corrected_{ws}" for ws in wss]
+    def on_set_crystal_clicked(self):
+        self.model.set_ws_xtal(self.view.get_crystal_ws(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+
+    def on_set_all_crystal_clicked(self):
+        wss, _ = self.view.get_selected_workspaces()
+        self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+
+    def on_calc_pf_clicked(self):
+        wss, params = self.view.get_selected_workspaces()
+        hkl = self.model._parse_hkl(*self.view.get_hkl())
+        inc_scatt = self.view.get_inc_scatt_power()
+        out_ws = self.model.get_pf_table_name(wss, params, hkl)
+
+        # default for now
+        scat_vol_pos = (0.0, 0.0, 0.0)
+        chi2_thresh = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "cost_func_thresh")
+        peak_thresh = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "peak_pos_thresh")
 
         self.worker = AsyncTask(
-            self._apply_all_corrections, (wss, out_wss), error_cb=self._on_worker_error, finished_cb=self._on_worker_success
+            self._calc_pf,
+            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh),
+            error_cb=self._on_worker_error,
+            finished_cb=self._on_worker_success,
         )
         self.worker.start()
 
-    def _apply_all_corrections(self, wss, out_wss):
-        for i, ws in enumerate(wss):
-            abs_corr = 1.0
-            div_corr = 1.0
-
-            if self.view.include_absorption():
-                self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
-                self.model.calc_absorption(ws)
-                abs_corr = "_abs_corr"
-
-            if self.view.include_divergence():
-                self.model.calc_divergence(ws, self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
-                div_corr = "_div_corr"
-
-            self.model.apply_corrections(ws, out_wss[i], abs_corr, div_corr)
+    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh):
+        self.model.make_pole_figure_tables(wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh)
+        self.plot_pf(out_ws, self.view.get_projection_method())
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
@@ -114,24 +129,16 @@ class TexturePresenter:
     def _on_worker_error(self, error_info):
         logger.error(str(error_info))
 
-    def open_goniometer_dialog(self):
-        self._open_alg_dialog("SetGoniometer")
-
-    def open_load_sample_shape_dialog(self):
-        self._open_alg_dialog("LoadSampleShape")
-
-    def open_set_sample_shape_dialog(self):
-        self._open_alg_dialog("SetSampleShape")
-
-    def open_set_material_dialog(self):
-        self._open_alg_dialog("SetSampleMaterial")
-
-    def _open_alg_dialog(self, alg_str):
-        manager = InterfaceManager()
-        dialog = manager.createDialogFromName(alg_str, -1)
-        if dialog is not None:
-            dialog.finished.connect(self._redraw_on_alg_exec)
-            dialog.open()
-
     def _redraw_on_alg_exec(self):
         QTimer.singleShot(200, self.redraw_table)
+
+    def plot_pf(self, pf_ws, proj):
+        # Get figure and canvas from view
+        fig, canvas = self.view.get_plot_axis()
+
+        # Clear existing figure
+        fig.clf()
+
+        self.model.plot_pole_figure(pf_ws, proj, fig=fig)
+
+        canvas.draw()

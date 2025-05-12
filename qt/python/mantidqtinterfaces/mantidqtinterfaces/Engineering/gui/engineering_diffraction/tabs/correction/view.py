@@ -20,6 +20,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.finder_orientation_file.setLabelText("Orientation File")
         self.finder_orientation_file.setInstrumentOverride("ENGINX")
         self.finder_orientation_file.allowMultipleFiles(False)
+        self.finder_orientation_file.setFileExtensions([".txt"])
 
         self.finder_gauge_vol.setLabelText("Custom Gauge Volume Shape")
         self.finder_gauge_vol.setInstrumentOverride("ENGINX")
@@ -156,25 +157,23 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     # ============ Visibility =============
 
-    def toggle_absorption_section_enabled(self):
-        self.combo_shapeMethod.setVisible(not self.combo_shapeMethod.isVisible())
-        self.finder_gauge_vol.setVisible(not self.finder_gauge_vol.isVisible())
+    def update_absorption_section_visibility(self):
+        self.set_absorption_section_visibility(self.check_absorption.isChecked())
 
-    def toggle_divergence_section_enabled(self):
-        self.label_divHorz.setVisible(not self.label_divHorz.isVisible())
-        self.line_divHorz.setVisible(not self.line_divHorz.isVisible())
-        self.label_divVert.setVisible(not self.label_divVert.isVisible())
-        self.line_divVert.setVisible(not self.line_divVert.isVisible())
-        self.label_detHorz.setVisible(not self.label_detHorz.isVisible())
-        self.line_detHorz.setVisible(not self.line_detHorz.isVisible())
+    def update_divergence_section_visibility(self):
+        self.set_divergence_section_visibility(self.check_divergence.isChecked())
 
-    def set_divergence_section_off(self):
-        self.label_divHorz.setVisible(False)
-        self.line_divHorz.setVisible(False)
-        self.label_divVert.setVisible(False)
-        self.line_divVert.setVisible(False)
-        self.label_detHorz.setVisible(False)
-        self.line_detHorz.setVisible(False)
+    def set_absorption_section_visibility(self, vis):
+        self.combo_shapeMethod.setVisible(vis)
+        self.finder_gauge_vol.setVisible(vis)
+
+    def set_divergence_section_visibility(self, vis):
+        self.label_divHorz.setVisible(vis)
+        self.line_divHorz.setVisible(vis)
+        self.label_divVert.setVisible(vis)
+        self.line_divVert.setVisible(vis)
+        self.label_detHorz.setVisible(vis)
+        self.line_detHorz.setVisible(vis)
 
     def set_on_check_inc_abs_corr_state_changed(self, slot):
         self.check_absorption.stateChanged.connect(slot)

@@ -1,6 +1,9 @@
 from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt import load_ui
-from mantid.api import AnalysisDataService as ADS
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
+from qtpy.QtWidgets import QVBoxLayout
 
 Ui_texture, _ = load_ui(__file__, "texture_tab.ui")
 
@@ -21,7 +24,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.finder_texture_tables.setInstrumentOverride("ENGINX")
         self.finder_texture_tables.allowMultipleFiles(True)
 
-        self.populate_workspace_list()
+        self._setup_plot()
 
     # ========== Signal Connectors ==========
     def set_on_load_ws_clicked(self, slot):
@@ -38,6 +41,21 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
     def set_on_select_all_clicked(self, slot):
         self.btn_selectAll.clicked.connect(slot)
+
+    def set_on_calc_pf_clicked(self, slot):
+        self.btn_calc_pf.clicked.connect(slot)
+
+    def set_include_scatter_corr(self, val):
+        return self.check_scatt.setChecked(val)
+
+    def set_on_check_inc_scatt_corr_state_changed(self, slot):
+        self.check_scatt.stateChanged.connect(slot)
+
+    def set_on_set_crystal_clicked(self, slot):
+        self.btn_setCrystal.clicked.connect(slot)
+
+    def set_on_set_all_crystal_clicked(self, slot):
+        self.btn_setAllCrystal.clicked.connect(slot)
 
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
@@ -59,8 +77,28 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
             layout.setContentsMargins(0, 0, 0, 0)
             self.table_loaded_data.setCellWidget(row, 3, cell_widget)
 
-    def populate_workspace_list(self):
-        workspace_names = list(ADS.getObjectNames())
+    def get_projection_method(self):
+        return self.combo_projMethod.currentText()
+
+    def get_hkl(self):
+        return self.h_lineedit.text(), self.k_lineedit.text(), self.l_lineedit.text()
+
+    def get_inc_scatt_power(self):
+        return self.check_scatt.isChecked()
+
+    def get_lattice(self):
+        return self.lattice_lineedit.text()
+
+    def get_spacegroup(self):
+        return self.spacegroup_lineedit.text()
+
+    def get_basis(self):
+        return self.basis_lineedit.text()
+
+    def get_crystal_ws(self):
+        return self.combo_workspaceList.currentText()
+
+    def populate_workspace_list(self, workspace_names):
         self.combo_workspaceList.clear()
         self.combo_workspaceList.addItems(sorted(workspace_names))
 
@@ -89,3 +127,39 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
     def is_searching(self):
         return self.finder_corr.isSearching()
+
+    def _setup_plot(self):
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setMinimumHeight(400)
+
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        layout = QVBoxLayout()
+        self.plot_canvas.setLayout(layout)
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+
+    def get_plot_axis(self):
+        return self.figure, self.canvas
+
+    def update_crystal_section_visibility(self):
+        self.set_crystal_section_visibility(self.check_scatt.isChecked())
+
+    def set_crystal_section_visibility(self, vis):
+        self.label_lattice.setVisible(vis)
+        self.lattice_lineedit.setVisible(vis)
+        self.label_spacegroup.setVisible(vis)
+        self.spacegroup_lineedit.setVisible(vis)
+        self.label_basis.setVisible(vis)
+        self.basis_lineedit.setVisible(vis)
+        self.combo_workspaceList.setVisible(vis)
+        self.btn_setCrystal.setVisible(vis)
+        self.btn_setAllCrystal.setVisible(vis)
+        self.label_hkl.setVisible(vis)
+        self.h_lineedit.setVisible(vis)
+        self.label_comma1.setVisible(vis)
+        self.k_lineedit.setVisible(vis)
+        self.label_comma2.setVisible(vis)
+        self.l_lineedit.setVisible(vis)
+        self.label_bracket.setVisible(vis)

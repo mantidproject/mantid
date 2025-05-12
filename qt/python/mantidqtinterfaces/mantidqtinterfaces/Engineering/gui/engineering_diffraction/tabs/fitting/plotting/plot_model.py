@@ -178,6 +178,80 @@ class FittingPlotModel(object):
         wslist += [model]
         group_name = log_workspace_name.split("_log")[0] + "_fits"
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
+        summary_tables = self.create_bank_fit_summary_tables_by_run(self.get_fit_results(), active_ws_list)
+        wslist.extend(summary_tables.values())
+
+    def create_bank_fit_summary_tables_by_run(self, fit_results, active_ws_list):
+        """
+        Create one TableWorkspace per run, summarizing fit parameters for each bank.
+        Includes 'chi2' column. If only one function is used, column names are simplified.
+
+        :param fit_results: Dictionary of fit results (usually self._fit_results)
+        :param active_ws_list: List of active workspace names
+        :return: Dict of {run_number: TableWorkspace}
+        """
+        run_to_banks = defaultdict(list)
+        run_to_prefix = {}
+
+        for wsname in active_ws_list:
+            try:
+                ws = ADS.retrieve(wsname)
+                run_number = str(ws.getRun().getLogData("run_number").value)
+                prefix = wsname.split(run_number)[0]
+                bank_id = int(ws.getRun().getLogData("bankid").value.split()[-1])  # e.g., "group 1"
+            except Exception:
+                run_number = "unknown"
+                prefix = ""
+                bank_id = 9999
+
+            run_to_banks[run_number].append((bank_id, wsname))
+            run_to_prefix[run_number] = prefix
+
+        summary_tables = {}
+
+        for run, bank_ws_pairs in run_to_banks.items():
+            bank_ws_pairs.sort(key=lambda x: x[0])
+            banks_sorted = [ws for _, ws in bank_ws_pairs]
+
+            all_params = sorted(set(param for ws in banks_sorted if ws in fit_results for param in fit_results[ws]["results"].keys()))
+
+            func_names = {param.split("_")[0] for param in all_params if "_" in param}
+            use_short_names = len(func_names) == 1
+
+            prefix = run_to_prefix[run]
+            table_name = f"{prefix}{run}_Fit_Parameters"
+
+            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+            table.addColumn("str", "Bank")
+
+            for param in all_params:
+                if use_short_names and "_" in param:
+                    param_label = param.split("_", 1)[1]
+                else:
+                    param_label = param
+                table.addColumn("double", param_label)
+                table.addColumn("double", f"{param_label}_Error")
+
+            # Add chi2 column
+            table.addColumn("double", "chi2")
+
+            for ws in banks_sorted:
+                row = [ws]
+                for param in all_params:
+                    if param in fit_results.get(ws, {}).get("results", {}):
+                        val_err = fit_results[ws]["results"][param][0]
+                        row.extend(val_err)
+                    else:
+                        row.extend([nan, nan])
+
+                chi2 = fit_results.get(ws, {}).get("costFunction", nan)
+                row.append(chi2)
+
+                table.addRow(row)
+
+            summary_tables[run] = table
+
+        return summary_tables
 
     def get_fit_results(self):
         return self._fit_results

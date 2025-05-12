@@ -107,6 +107,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_monte_carlo_params(self):
         return self.monte_carlo_lineedit.text()
 
+    def get_cost_func_thresh(self):
+        return self.cost_func_thresh_lineedit.text()
+
+    def get_peak_pos_thresh(self):
+        return self.peak_pos_thresh_lineedit.text()
+
     # =================
     # Component Setters
     # =================
@@ -167,6 +173,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_monte_carlo_params(self, text):
         self.monte_carlo_lineedit.setText(text)
+
+    def set_cost_func_thresh(self, text):
+        self.cost_func_thresh_lineedit.setText(text)
+
+    def set_peak_pos_thresh(self, text):
+        self.peak_pos_thresh_lineedit.setText(text)
 
     # =================
     # Force Actions

@@ -28,12 +28,12 @@ class TextureCorrectionPresenter:
         self.view.set_on_load_sample_shape_clicked(self.open_load_sample_shape_dialog)
         self.view.set_on_set_sample_shape_clicked(self.open_set_sample_shape_dialog)
         self.view.set_on_set_material_clicked(self.open_set_material_dialog)
-        self.view.set_on_check_inc_abs_corr_state_changed(self.view.toggle_absorption_section_enabled)
-        self.view.set_on_check_inc_div_corr_state_changed(self.view.toggle_divergence_section_enabled)
+        self.view.set_on_check_inc_abs_corr_state_changed(self.view.update_absorption_section_visibility)
+        self.view.set_on_check_inc_div_corr_state_changed(self.view.update_divergence_section_visibility)
         self.view.set_on_copy_sample_clicked(self._copy_sample_to_all_selected)
 
         self.view.set_include_divergence(False)
-        self.view.set_divergence_section_off()
+        self.view.update_divergence_section_visibility()
 
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
