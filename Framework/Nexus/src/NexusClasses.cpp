@@ -85,7 +85,10 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
     std::filesystem::path new_path(parent->path() + "/" + name);
-    while (!fileID->hasPath(new_path)) {
+    if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
+      std::cerr << "Note: You are apprently trying to load an NXObject named " << name
+                << " with itself as a parent, from " << new_path.parent_path() << ".\n"
+                << "The path is being re-resolved to " << new_path.parent_path() << " to hopefully fix this.\n";
       new_path = new_path.parent_path();
     }
     m_path_parent = new_path.parent_path();
@@ -103,7 +106,10 @@ NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent,
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
     std::filesystem::path new_path(parent->path() + "/" + name);
-    while (!fileID->hasPath(new_path)) {
+    if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
+      std::cerr << "Note: You are apprently trying to load an NXObject named " << name
+                << " with itself as a parent, from " << new_path.parent_path() << ".\n"
+                << "The path is being re-resolved to to hopefully fix this.\n";
       new_path = new_path.parent_path();
     }
     m_path_parent = new_path.parent_path();

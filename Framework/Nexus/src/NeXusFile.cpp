@@ -765,11 +765,6 @@ void File::openData(std::string const &name) {
     throw NXEXCEPTION("The dataset " + name + " cannot be opened from " + m_path.string() + "|  tried to open " +
                       new_path.string());
   }
-  // if (this->isDataSetOpen()) {
-  //   std::cerr << "Warning: Previous dataset unclosed before opening another. "
-  //             << "Current dataset will be closed and requested data found in parent group.\n";
-  //   this->closeData();
-  // }
 }
 
 void File::closeData() {
@@ -1023,18 +1018,6 @@ template <typename NumT> void File::getData(NumT *const data) {
   std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
   H5::DataType iCurrentT = iCurrentD->getDataType();
 
-  // make sure the data has the correct type
-  if (hdf5ToNXType(iCurrentT) != getType<NumT>()) {
-    std::stringstream msg;
-    msg << "inconsistent NXnumtype file datatype=" << hdf5ToNXType(iCurrentT)
-        << " supplied datatype=" << getType<NumT>();
-    throw NXEXCEPTION(msg.str());
-  }
-  // // make sure this is not a string
-  // if (iCurrentT.getClass() == H5T_STRING) {
-  //   throw Exception("NeXusFile::getData() failed -- attemtping to read string in non-string method", m_filename);
-  // }
-
   // now try to read
   try {
     H5::DataSpace iCurrentS = iCurrentD->getSpace();
@@ -1072,6 +1055,13 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
   std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  H5::DataType iCurrentT = dataset->getDataType();
+  if (hdf5ToNXType(iCurrentT) != getType<NumT>()) {
+    std::stringstream msg;
+    msg << "inconsistent NXnumtype file datatype=" << hdf5ToNXType(iCurrentT)
+        << " supplied datatype=" << getType<NumT>();
+    throw NXEXCEPTION(msg.str());
+  }
   try {
     H5Util::readArray1DCoerce(*dataset, data);
   } catch (const H5::Exception &e) {
