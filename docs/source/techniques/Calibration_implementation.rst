@@ -1,6 +1,7 @@
-====================================
- Calibration Implementation Details
-====================================
+.. _Calibration_Implementation_Details:
+
+Calibration Implementation Details
+==================================
 
 .. automodule:: tube_calib
    :members:
