@@ -104,8 +104,6 @@ public:
   std::string const &path() const { return m_path; }
   /// Returns the name of the object
   std::string name() const;
-  /// Attributes
-  NXAttributes attributes;
   /// Nexus file id
   std::shared_ptr<::NeXus::File> m_fileID;
 
@@ -114,7 +112,6 @@ protected:
   bool m_open;        ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
-  void getAttributes();
 };
 
 /** Abstract base class for a Nexus data set. A typical use include:
@@ -155,6 +152,8 @@ public:
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
   NXnumtype type() const { return m_info.type; }
+  /// Attributes
+  NXAttributes attributes;
 
 protected:
   /**
@@ -188,6 +187,7 @@ protected:
 
 private:
   NXInfo m_info; ///< Holds the data info
+  void getAttributes();
 };
 
 template <typename T>
