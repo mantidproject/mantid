@@ -1095,11 +1095,6 @@ void WorkspaceTreeWidget::workspaceSelected() {
   addSaveMenuOption("SaveAscii", "ASCII");
 
   m_saveButton->setMenu(m_saveMenu);
-
-  if (selectedNames.size() == 1) {
-    auto wsName = selectedNames[0];
-    m_mantidDisplayModel->enableSaveNexus(QString::fromStdString(wsName));
-  }
 }
 
 /// Handles group button clicks
