@@ -146,7 +146,7 @@ functionality within Mantid will not be explained here. For those who want more 
 `POCO logging classes <https://pocoproject.org/docs/package-Foundation.Logging.html>`_ and the
 `Log4J logging module <https://logging.apache.org/log4j/>`_ that it closely emulates.
 There are several comments in the properties file itself that explain the configuration we provide by default.
-However there are some obvious areas thatyou may want to alter and those properties are detailed below.
+However there are some obvious areas that you may want to alter and those properties are detailed below.
 Information on how to customize the logging system can be found in the
 `POCO documentation <https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders>`_.
 
