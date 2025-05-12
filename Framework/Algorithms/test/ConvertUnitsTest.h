@@ -890,7 +890,7 @@ public:
    * This test is disabled because it requires changes to ConvertToHistogram which requires changes to it's parent
    * XDataConverter. Maybe this could be combined with previous test
    */
-  void xtest_ragged_Workspace2D_centers() {
+  void test_ragged_Workspace2D_centers() {
     const std::string outname("raggedWSout_edges");
     constexpr bool bin_edges(false);
 
