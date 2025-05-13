@@ -371,17 +371,25 @@ void WorkspaceTreeWidget::saveWorkspaceCollection() {
 
 void WorkspaceTreeWidget::handleShowSaveAlgorithm() {
   const QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  if (!sendingAction)
+    return;
 
-  if (sendingAction) {
-    QString actionName = sendingAction->text();
+  QString actionName = sendingAction->text();
 
-    if (actionName.compare("Nexus") == 0)
-      m_saveFileType = SaveFileType::Nexus;
-    else if (actionName.compare("ASCII") == 0)
-      m_saveFileType = SaveFileType::ASCII;
+  if (actionName.compare("Nexus") == 0)
+    m_saveFileType = SaveFileType::Nexus;
+  else if (actionName.compare("ASCII") == 0)
+    m_saveFileType = SaveFileType::ASCII;
+
+  auto selectedNames = getSelectedWorkspaceNames();
+
+  if (selectedNames.size() > 1) {
+    // Save multiple workspaces
+    saveWorkspaces(selectedNames);
+  } else if (selectedNames.size() == 1) {
+    // Save single workspace
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
   }
-
-  m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
 }
 
 WorkspaceTreeWidget::SaveFileType WorkspaceTreeWidget::getSaveFileType() const { return m_saveFileType; }
@@ -413,22 +421,39 @@ void WorkspaceTreeWidget::saveWorkspaces(const StringList &wsNames) {
 
   m_saveFolderDialog->setWindowTitle("Select save folder");
   m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
+
   auto res = m_saveFolderDialog->exec();
+  if (res != QFileDialog::Accepted)
+    return;
+
   auto folder = m_saveFolderDialog->selectedFiles()[0].toStdString();
 
-  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+  std::string algorithmName;
+  std::string fileExtension;
+
+  switch (m_saveFileType) {
+  case SaveFileType::ASCII:
+    algorithmName = "SaveAscii";
+    fileExtension = ".dat";
+    break;
+  case SaveFileType::Nexus:
+  default:
+    algorithmName = "SaveNexus";
+    fileExtension = ".nxs";
+    break;
+  }
+
+  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algorithmName);
   saveAlg->initialize();
 
-  if (res == QFileDialog::Accepted) {
-    for (auto &wsName : wsNames) {
-      std::string filename = folder + "/" + wsName + ".nxs";
-      try {
-        saveAlg->setProperty("InputWorkspace", wsName);
-        saveAlg->setProperty("Filename", filename);
-        saveAlg->execute();
-      } catch (std::exception &ex) {
-        docklog.error() << "Error saving workspace " << wsName << ": " << ex.what() << '\n';
-      }
+  for (auto &wsName : wsNames) {
+    std::string filename = folder + "/" + wsName + fileExtension;
+    try {
+      saveAlg->setProperty("InputWorkspace", wsName);
+      saveAlg->setProperty("Filename", filename);
+      saveAlg->execute();
+    } catch (std::exception &ex) {
+      docklog.error() << "Error saving workspace " << wsName << ": " << ex.what() << '\n';
     }
   }
 }
@@ -1063,30 +1088,13 @@ void WorkspaceTreeWidget::workspaceSelected() {
   if (selectedNames.empty())
     return;
 
-  // If there are multiple workspaces selected group and save as Nexus
-  if (selectedNames.size() > 1) {
-    connect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceCollection()));
+  // Remove all existing save algorithms from list
+  m_saveMenu->clear();
 
-    // Don't display as a group
-    m_saveButton->setMenu(nullptr);
-  } else {
-    // Don't run the save group function when clicked
-    disconnect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceCollection()));
+  addSaveMenuOption("SaveNexus", "Nexus");
+  addSaveMenuOption("SaveAscii", "ASCII");
 
-    // Remove all existing save algorithms from list
-    m_saveMenu->clear();
-
-    // Add some save algorithms
-    addSaveMenuOption("SaveNexus", "Nexus");
-    addSaveMenuOption("SaveAscii", "ASCII");
-
-    // Set the button to show the menu
-    m_saveButton->setMenu(m_saveMenu);
-  }
-
-  auto wsName = selectedNames[0];
-  // TODO: Wire signal correctly in applicationwindow
-  m_mantidDisplayModel->enableSaveNexus(QString::fromStdString(wsName));
+  m_saveButton->setMenu(m_saveMenu);
 }
 
 /// Handles group button clicks
