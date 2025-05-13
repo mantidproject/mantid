@@ -874,23 +874,23 @@ class SliceViewerModelTest(unittest.TestCase):
             help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
 
             if not transpose:
-                if cut_type == "x":
+                if cut_type == "x" or cut_type == "c":
                     mock_extract_roi.assert_called_once_with(self.ws2d_histo, None, None, ypos, ypos, False, "ws2d_histo_cut_x")
                     self.assertEqual("Cut along X created: ws2d_histo_cut_x", help_msg)
-                elif cut_type == "y":
+                elif cut_type == "y" or cut_type == "c":
                     mock_extract_roi.assert_called_once_with(self.ws2d_histo, xpos, xpos, None, None, True, "ws2d_histo_cut_y")
                     self.assertEqual("Cut along Y created: ws2d_histo_cut_y", help_msg)
             else:
-                if cut_type == "x":
+                if cut_type == "x" or cut_type == "c":
                     mock_extract_roi.assert_called_once_with(self.ws2d_histo, ypos, ypos, None, None, True, "ws2d_histo_cut_y")
                     self.assertEqual("Cut along X created: ws2d_histo_cut_y", help_msg)
-                elif cut_type == "y":
+                elif cut_type == "y" or cut_type == "c":
                     mock_extract_roi.assert_called_once_with(self.ws2d_histo, None, None, xpos, xpos, False, "ws2d_histo_cut_x")
                     self.assertEqual("Cut along Y created: ws2d_histo_cut_x", help_msg)
 
-            for cut_type in ("x", "y"):
+            for cut_type in ("x", "y", "c"):
                 assert_call_as_expected(transpose=False, cut_type=cut_type)
-                assert_call_as_expected(transpose=False, cut_type=cut_type)
+                assert_call_as_expected(transpose=True, cut_type=cut_type)
 
     @patch("mantidqt.widgets.sliceviewer.models.model.TransposeMD")
     @patch("mantidqt.widgets.sliceviewer.models.model.IntegrateMDHistoWorkspace")
