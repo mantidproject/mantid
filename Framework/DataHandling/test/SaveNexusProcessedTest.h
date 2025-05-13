@@ -1029,8 +1029,8 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("InputWorkspace", "gws2"));
-    std::string file = "namesdoesntmatterasitshouldntsaveanyway.nxs";
-    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    FileResource file("namesdoesntmatterasitshouldntsaveanyway.nxs", !clearfiles);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file.fullPath()));
     TS_ASSERT_THROWS(saveAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!saveAlg.isExecuted());
   }
