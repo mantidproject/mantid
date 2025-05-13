@@ -69,7 +69,7 @@ template <typename T> static DimArray toDimArray(vector<T> const &small_v) {
 }
 
 static std::map<int, void const *> const nxToHDF5Map{
-    std::pair<int, void const *>(NXnumtype::CHAR, &H5::PredType::NATIVE_CHAR),
+    std::pair<int, void const *>(NXnumtype::CHAR, &H5::PredType::C_S1),
     std::pair<int, void const *>(NXnumtype::INT8, &H5::PredType::NATIVE_SCHAR),
     std::pair<int, void const *>(NXnumtype::UINT8, &H5::PredType::NATIVE_UCHAR),
     std::pair<int, void const *>(NXnumtype::INT16, &H5::PredType::NATIVE_INT16),
@@ -697,23 +697,31 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   H5::DataType datatype = nxToHDF5Type(type);
 
-  // handle char data
-  if (type == NXnumtype::CHAR) {
-    std::size_t byte_zahl = (std::size_t)dims.back();
-    if (unlimited) {
-      mydims.front() = 1;
-      maxdims.front() = H5S_UNLIMITED;
-    }
-    if (mydims[rank - 1] > 1) {
-      maxdims[rank - 1] = 1;
-    }
-    mydims[rank - 1] = 1;
-    chunkdims[rank - 1] = 1;
-    H5Tset_size(datatype.getId(), byte_zahl);
-  }
-
   // create a dataspace
-  H5::DataSpace dataspace((int)rank, mydims.data(), maxdims.data());
+  H5::DataSpace dataspace;
+  if (type == NXnumtype::CHAR) {
+    std::size_t byte_zahl = mydims[rank - 1];
+    DimArray mydim1(mydims);
+    if (unlimited) {
+      mydim1[0] = 1;
+      maxdims[0] = H5S_UNLIMITED;
+    }
+    mydim1[rank - 1] = 1;
+    if (mydims[rank - 1] > 1) {
+      mydims[rank - 1] = maxdims[rank - 1] = 1;
+    }
+    if (chunkdims[rank - 1] > 1) {
+      chunkdims[rank - 1] = 1;
+    }
+    dataspace = H5::DataSpace((int)rank, mydim1.data(), maxdims.data());
+    H5Tset_size(datatype.getId(), byte_zahl);
+  } else {
+    if (unlimited) {
+      dataspace = H5::DataSpace((int)rank, mydims.data(), maxdims.data());
+    } else {
+      dataspace = H5::DataSpace((int)rank, mydims.data(), NULL);
+    }
+  }
 
   // set the compression parameters
   H5::DSetCreatPropList cparms(H5P_DATASET_CREATE);
@@ -725,7 +733,13 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   // NOTE if compression is NONE but a dimension is unlimited,
   // then it still compresses by CHUNK.
   // this behavior is inherited from napi
-  else if (comp == NXcompression::CHUNK || unlimited) {
+  else if (comp == NXcompression::NONE) {
+    if (unlimited) {
+      cparms.setChunk((int)rank, chunkdims.data());
+    } else {
+      cparms = H5::DSetCreatPropList::DEFAULT;
+    }
+  } else if (comp == NXcompression::CHUNK) {
     cparms.setChunk((int)rank, chunkdims.data());
   } else {
     cparms = H5::DSetCreatPropList::DEFAULT;
@@ -821,7 +835,7 @@ template <typename NumT> void File::putData(NumT const *data) {
     this->putSlab(data, slab_start, slab_size);
   } else {
     try {
-      dataset->write(data, H5Util::getType<NumT>());
+      dataset->write(data, dataset->getDataType());
     } catch (...) {
       throw NXEXCEPTION("Failed to write data");
     }
@@ -1054,19 +1068,24 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const 
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
-  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
-  H5::DataType iCurrentT = dataset->getDataType();
-  if (hdf5ToNXType(iCurrentT) != getType<NumT>()) {
+  Info info = this->getInfo();
+
+  if (info.type != getType<NumT>()) {
     std::stringstream msg;
-    msg << "inconsistent NXnumtype file datatype=" << hdf5ToNXType(iCurrentT)
-        << " supplied datatype=" << getType<NumT>();
+    msg << "inconsistent NXnumtype file datatype=" << info.type << " supplied datatype=" << getType<NumT>();
     throw NXEXCEPTION(msg.str());
   }
-  try {
-    H5Util::readArray1DCoerce(*dataset, data);
-  } catch (const H5::Exception &e) {
-    NXEXCEPTION(e.getDetailMsg());
-  }
+  // determine the number of elements
+  size_t length =
+      std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
+                      [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+
+  // allocate memory to put the data into
+  // need to use resize() rather than reserve() so vector length gets set
+  data.resize(length);
+
+  // fetch the data
+  this->getData<NumT>(data.data());
 }
 
 template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::string> &data) {
@@ -1217,25 +1236,36 @@ Info File::getInfo() {
   auto ds = dataset->getSpace();
   std::size_t rank = ds.getSimpleExtentNdims();
   DimArray dims{0};
-  ds.getSimpleExtentDims(dims.data());
 
-  // strings need the length of the string hiding in there too
-  // this doesn't work for variable length strings
-  if (hdf5ToNXType(dt) == NXnumtype::CHAR) {
+  /* NOTE: the below was copied from napi to properly set lengths for string arrays.
+    Unless you were there when the Deep Magic was written, and can look back further  into the stillness
+    and the darkness before Time dawned and have read there a different incantation,
+    then do not try to edit this.
+  */
+  if (rank == 0) {
+    rank = 1; /* we pretend */
+    dims[0] = 1;
+  } else {
+    ds.getSimpleExtentDims(dims.data());
+  }
+  if (dt.getClass() == H5T_STRING && dims[rank - 1] == 1) {
     if (dt.isVariableStr()) {
-      throw Exception("Do not have implementation for variable length strings", "getInfo", m_filename);
-    }
-    if (rank == 0 || rank == 1) {
-      dims[rank - 1] = dataset->getStorageSize() - 1;
-    } else if (rank == 2) {
-      dims[1] = dataset->getStorageSize() / dims[0];
+      /* this will not work for arrays of strings */
+      hid_t memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      char *vlData = NULL;
+      H5Dread(dataset->getId(), memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        dims[rank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, ds.getId(), H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
     } else {
-      std::stringstream msg;
-      msg << "No implementation for character arrays with rank=" << rank;
-      throw Exception(msg.str(), "getInfo", m_filename);
+      dims[rank - 1] = H5Tget_size(dt.getId());
     }
   }
 
+  // Now prepare the info to be returned
   Info info;
   info.type = hdf5ToNXType(dt);
   info.dims.push_back(dims.front());
@@ -1265,7 +1295,7 @@ void File::getEntries(Entries &result) {
         attr.read(attr.getDataType(), className);
       }
     } else if (type == H5G_DATASET) {
-      className = "SDS";
+      className = scientific_data_set;
     }
     if (!className.empty())
       result[name] = className;
