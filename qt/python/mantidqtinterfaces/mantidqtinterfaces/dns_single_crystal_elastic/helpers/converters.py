@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
