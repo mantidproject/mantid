@@ -545,7 +545,7 @@ private:
 
     TS_ASSERT(outWs != nullptr);
     TS_ASSERT_EQUALS(expectedNumHistograms, outWs->getNumberHistograms())
-    for (int i = 0; i < outWs->blocksize(); i++) {
+    for (size_t i = 0; i < outWs->blocksize(); i++) {
       const double yVal = outWs->dataY(0)[i];
       const double eVal = outWs->dataE(0)[i];
       TS_ASSERT_DELTA(expectedValue.first, yVal, 1e-6);
