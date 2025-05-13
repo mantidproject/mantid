@@ -41,6 +41,7 @@
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -79,41 +80,77 @@ public:
 
   void testExec() {
     auto useXErrors = false;
-    std::string outputFile = "SaveNexusProcessedTest_testExec.nxs";
-    outputFile = doExec(outputFile, useXErrors);
+    FileResource outputFile("SaveNexusProcessedTest_testExec.nxs", !clearfiles);
+    doExec(outputFile.fullPath(), useXErrors);
 
     // Clean up
-    if (clearfiles)
-      Poco::File(outputFile).remove();
     AnalysisDataService::Instance().remove("testSpace");
   }
 
   void testExecWithXErrors() {
     auto useXErrors = true;
-    std::string outputFile = "SaveNexusProcessedTest_testExec.nxs";
-    outputFile = doExec(outputFile, useXErrors);
+    FileResource outputFile("SaveNexusProcessedTest_testExec.nxs", !clearfiles);
+    doExec(outputFile.fullPath(), useXErrors);
 
     // Assert XError correctness
-    ::NeXus::File savedNexus(outputFile);
+    ::NeXus::File savedNexus(outputFile.fullPath());
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("workspace", "NXdata");
 
     TSM_ASSERT_THROWS_NOTHING("Should find xerrors entry", savedNexus.openData("xerrors"));
     savedNexus.close();
     // Clean up
-    if (clearfiles)
-      Poco::File(outputFile).remove();
     AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void testSetNonAbsolutePath() {
+    // All of the tests rely on FileResource, which resolves absolute paths relative to temp directory
+    // This test ensures that files are still loadable from a partial path
+
+    // create dummy 2D-workspace
+    Workspace2D_sptr localWorkspace2D =
+        std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    double d = 0.0;
+    for (int i = 0; i < 10; ++i, d += 0.1) {
+      localWorkspace2D->dataX(0)[i] = d;
+      localWorkspace2D->dataY(0)[i] = d;
+      localWorkspace2D->dataE(0)[i] = d;
+    }
+    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "testSpace");
+
+    // specify name of file to save workspace to
+    std::string outputFile = AnalysisDataService::Instance().uniqueName(5, "test_filename", ".nxs");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
+    std::string fullOutputFile = alg.getPropertyValue("Filename");
+    TS_ASSERT_DIFFERS(fullOutputFile, outputFile);
+    if (Poco::File(fullOutputFile).exists())
+      Poco::File(fullOutputFile).remove();
+
+    // execute, check path exists
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(Poco::File(fullOutputFile).exists())
+
+    if (Poco::File(fullOutputFile).exists())
+      Poco::File(fullOutputFile).remove();
+    if (Poco::File(outputFile).exists())
+      Poco::File(outputFile).remove();
   }
 
   void testExecOnLoadraw() {
     SaveNexusProcessed algToBeTested;
     std::string inputFile = "LOQ48127.raw";
+    Mantid::DataHandling::LoadRaw3 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename", inputFile);
 
-    outputSpace = "outer4";
+    std::string outputSpace = "outer4";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -131,25 +168,18 @@ public:
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "SaveNexusProcessedTest_testExecOnLoadraw.nxs";
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
-    dataName = "spectra";
-    title = "A save of a workspace from Loadraw file";
-    algToBeTested.setPropertyValue("Filename", outputFile);
+    FileResource outputFile("SaveNexusProcessedTest_testExecOnLoadraw.nxs", !clearfiles);
+    std::string dataName = "spectra";
+    std::string title = "A save of a workspace from Loadraw file";
+    algToBeTested.setPropertyValue("Filename", outputFile.fullPath());
 
     algToBeTested.setPropertyValue("Title", title);
     algToBeTested.setPropertyValue("Append", "0");
     outputFile = algToBeTested.getPropertyValue("Filename");
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(outputFile));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
 
-    if (clearfiles)
-      remove(outputFile.c_str());
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
@@ -180,28 +210,16 @@ public:
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
-    outputFile = "SaveNexusProcessedTest_testExecOnMuon.nxs";
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
-    dataName = "spectra";
-    title = "A save of a 2D workspace from Muon file";
-    algToBeTested.setPropertyValue("Filename", outputFile);
-    outputFile = algToBeTested.getPropertyValue("Filename");
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
-
+    FileResource outputFile("SaveNexusProcessedTest_testExecOnMuon.nxs", !clearfiles);
+    std::string dataName = "spectra";
+    std::string title("A save of a 2D workspace from Muon file");
+    algToBeTested.setPropertyValue("Filename", outputFile.fullPath());
     algToBeTested.setPropertyValue("Title", title);
     algToBeTested.setPropertyValue("Append", "0");
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(outputFile));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
 
-    if (clearfiles)
-      Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
@@ -217,7 +235,7 @@ public:
    * @return
    */
   static EventWorkspace_sptr do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
-                                                         std::string &outputFile, bool makeDifferentTypes,
+                                                         std::string &outputFileName, bool makeDifferentTypes,
                                                          bool clearfiles, bool PreserveEvents = true,
                                                          bool CompressNexus = false) {
     std::vector<std::vector<int>> groups(5);
@@ -252,26 +270,19 @@ public:
     // specify name of file to save workspace to
     std::ostringstream mess;
     mess << filename_root << static_cast<int>(type) << ".nxs";
-    outputFile = mess.str();
+    FileResource outputFile(mess.str(), !clearfiles);
     std::string dataName = "spectra";
     std::string title = "A simple workspace saved in Processed Nexus format";
 
-    alg.setPropertyValue("Filename", outputFile);
-    outputFile = alg.getPropertyValue("Filename");
+    alg.setPropertyValue("Filename", outputFile.fullPath());
     alg.setPropertyValue("Title", title);
     alg.setProperty("PreserveEvents", PreserveEvents);
     alg.setProperty("CompressNexus", CompressNexus);
-
-    // Clear the existing file, if any
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
-
-    if (clearfiles)
-      Poco::File(outputFile).remove();
+    TS_ASSERT(outputFile.exists());
+    outputFileName = outputFile.fullPath();
 
     return WS;
   }
@@ -333,37 +344,22 @@ public:
     // Now set it...
     // specify name of file to save workspace to
     alg.setPropertyValue("InputWorkspace", "testSpace");
-    outputFile = "SaveNexusProcessedTest_testExec.nxs";
-    dataName = "spectra";
-    title = "A simple workspace saved in Processed Nexus format";
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
-    outputFile = alg.getPropertyValue("Filename");
+    FileResource outputFile("SaveNexusProcessedTest_testExec.nxs", !clearfiles);
+    std::string dataName = "spectra";
+    std::string title = "A simple workspace saved in Processed Nexus format";
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile.fullPath()));
     alg.setPropertyValue("Title", title);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = alg.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(outputFile));
 
     // changed so that 1D workspaces are no longer written.
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    if (clearfiles)
-      Poco::File(outputFile).remove();
-
     AnalysisDataService::Instance().remove("testSpace");
   }
 
   void testSaveGroupWorkspace() {
-    const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
+    FileResource output_filename("SaveNexusProcessedTest_GroupWorkspaceFile.nxs", !clearfiles);
 
-    // Clean out any previous instances.
-    bool doesFileExist = Poco::File(output_filename).exists();
-    if (doesFileExist) {
-      Poco::File(output_filename).remove();
-    }
     const int nEntries = 3;
     const int nHist = 1;
     const int nBins = 1;
@@ -376,19 +372,15 @@ public:
     alg.setChild(true);
     alg.initialize();
 
-    alg.setProperty("Filename", output_filename);
+    alg.setProperty("Filename", output_filename.fullPath());
     alg.setProperty("InputWorkspace", group_ws);
     alg.execute();
 
-    doesFileExist = Poco::File(output_filename).exists();
-    TSM_ASSERT("File should have been created", doesFileExist);
-    if (doesFileExist) {
-      Poco::File(output_filename).remove();
-    }
+    TSM_ASSERT("File should have been created", output_filename.exists());
   }
 
   void testSaveTableVectorColumn() {
-    std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
+    FileResource outputFileName("SaveNexusProcessedTest_testSaveTableVectorColumn.nxs", !clearfiles);
 
     // Create a table which we will save
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
@@ -414,7 +406,7 @@ public:
     SaveNexusProcessed alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWsEntry.name());
-    alg.setPropertyValue("Filename", outputFileName);
+    alg.setPropertyValue("Filename", outputFileName.fullPath());
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -422,11 +414,8 @@ public:
     if (!alg.isExecuted())
       return; // Nothing to check
 
-    // Get full output file path
-    outputFileName = alg.getPropertyValue("Filename");
-
     try {
-      ::NeXus::File savedNexus(outputFileName);
+      ::NeXus::File savedNexus(outputFileName.fullPath());
 
       savedNexus.openGroup("mantid_workspace_1", "NXentry");
       savedNexus.openGroup("table_workspace", "NXdata");
@@ -505,12 +494,10 @@ public:
     } catch (std::exception &e) {
       TS_FAIL(e.what());
     }
-
-    Poco::File(outputFileName).remove();
   }
 
   void testSaveTableColumn() {
-    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+    FileResource outputFileName("SaveNexusProcessedTest_testSaveTable.nxs", !clearfiles);
 
     // Create a table which we will save
     auto table =
@@ -583,7 +570,7 @@ public:
     SaveNexusProcessed alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", table);
-    alg.setPropertyValue("Filename", outputFileName);
+    alg.setPropertyValue("Filename", outputFileName.fullPath());
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -591,10 +578,7 @@ public:
     if (!alg.isExecuted())
       return; // Nothing to check
 
-    // Get full output file path
-    outputFileName = alg.getPropertyValue("Filename");
-
-    ::NeXus::File savedNexus(outputFileName);
+    ::NeXus::File savedNexus(outputFileName.fullPath());
 
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("table_workspace", "NXdata");
@@ -693,12 +677,12 @@ public:
     }
 
     savedNexus.close();
-    Poco::File(outputFileName).remove();
     AnalysisDataService::Instance().clear();
   }
 
   void testSaveTableEmptyColumn() {
-    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+    FileResource outputFile("SaveNexusProcessedTest_testSaveTable.nxs", !clearfiles);
+    std::string outputFileName = outputFile.fullPath();
 
     // Create a table which we will save
     auto table =
@@ -723,9 +707,6 @@ public:
 
     if (!alg.isExecuted())
       return; // Nothing to check
-
-    // Get full output file path
-    outputFileName = alg.getPropertyValue("Filename");
 
     ::NeXus::File savedNexus(outputFileName);
 
@@ -771,7 +752,6 @@ public:
     }
 
     savedNexus.close();
-    Poco::File(outputFileName).remove();
     AnalysisDataService::Instance().clear();
   }
 
@@ -790,16 +770,14 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", "testSpace");
-    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
-    if (Poco::File(file).exists())
-      Poco::File(file).remove();
-    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    FileResource file("SaveNexusProcessedTest_test_masking.nxs", !clearfiles);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file.fullPath()));
     TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
     TS_ASSERT(saveAlg.isExecuted());
 
     LoadNexus loadAlg;
     loadAlg.initialize();
-    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("Filename", file.fullPath());
     loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
     TS_ASSERT(loadAlg.isExecuted());
@@ -809,8 +787,6 @@ public:
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
 
-    if (clearfiles)
-      Poco::File(file).remove();
     AnalysisDataService::Instance().remove("testSpace");
   }
 
@@ -824,17 +800,15 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", "testSpace");
-    std::string file = "SaveNexusProcessedTest_test_ragged_bins_spectrum_indices.nxs";
-    if (Poco::File(file).exists())
-      Poco::File(file).remove();
-    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    FileResource file("SaveNexusProcessedTest_test_ragged_bins_spectrum_indices.nxs", !clearfiles);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file.fullPath()));
     TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("WorkspaceIndexList", "1")); // 2nd spectrum
     TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
     TS_ASSERT(saveAlg.isExecuted());
 
     LoadNexus loadAlg;
     loadAlg.initialize();
-    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("Filename", file.fullPath());
     loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
     TS_ASSERT(loadAlg.isExecuted());
@@ -843,8 +817,6 @@ public:
     // check has saved x values from 2nd spectrum not 1st
     TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
 
-    if (clearfiles)
-      Poco::File(file).remove();
     AnalysisDataService::Instance().remove("testSpace");
   }
 
@@ -904,18 +876,14 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", "testSpace");
-    std::string fileName = "SaveNexusProcessedTest_test_ragged_bins_data_bounds.nxs";
-    if (Poco::File(fileName).exists())
-      Poco::File(fileName).remove();
-    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName));
+    FileResource fileName("SaveNexusProcessedTest_test_ragged_bins_data_bounds.nxs", !clearfiles);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName.fullPath()));
 
     // Verify that the current implementation doesn't produce a SEGFAULT.
     TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
     TS_ASSERT(saveAlg.isExecuted());
 
     // If the save successfully executed without producing a SEGFAULT, this test is complete.
-    if (clearfiles)
-      Poco::File(fileName).remove();
     AnalysisDataService::Instance().remove("testSpace");
   }
 
@@ -965,10 +933,8 @@ public:
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", "testSpace");
-    std::string fileName = "SaveNexusProcessedTest_test_ragged_xy_readback.nxs";
-    if (Poco::File(fileName).exists())
-      Poco::File(fileName).remove();
-    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName));
+    FileResource fileName("SaveNexusProcessedTest_test_ragged_xy_readback.nxs", !clearfiles);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", fileName.fullPath()));
 
     // Verify that the current implementation doesn't produce a SEGFAULT.
     TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
@@ -976,7 +942,7 @@ public:
 
     LoadNexus loadAlg;
     loadAlg.initialize();
-    loadAlg.setPropertyValue("Filename", fileName);
+    loadAlg.setPropertyValue("Filename", fileName.fullPath());
     loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
     TS_ASSERT(loadAlg.isExecuted());
@@ -989,8 +955,6 @@ public:
       TS_ASSERT_EQUALS(wsReloaded->readY(i), ws->readY(i));
     }
 
-    if (clearfiles)
-      Poco::File(fileName).remove();
     AnalysisDataService::Instance().remove("testSpace");
     AnalysisDataService::Instance().remove("testSpaceReloaded");
   }
@@ -1161,13 +1125,10 @@ private:
     // Now set it...
     // specify name of file to save workspace to
     algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
-    dataName = "spectra";
-    title = "A simple workspace saved in Processed Nexus format";
+    std::string dataName = "spectra";
+    std::string title = "A simple workspace saved in Processed Nexus format";
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("Filename", outputFile));
-    outputFile = algToBeTested.getPropertyValue("Filename");
     algToBeTested.setPropertyValue("Title", title);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
@@ -1203,14 +1164,5 @@ private:
     return ws2;
   }
 
-  std::string outputFile;
-  std::string entryName;
-  std::string dataName;
-  std::string title;
-  Workspace2D myworkspace;
-
-  Mantid::DataHandling::LoadRaw3 loader;
-  std::string inputFile;
-  std::string outputSpace;
   bool clearfiles;
 };
