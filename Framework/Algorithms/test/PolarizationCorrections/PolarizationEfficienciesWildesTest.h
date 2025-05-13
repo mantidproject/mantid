@@ -305,6 +305,7 @@ public:
     const std::pair<double, double> expectedTAMO = {0.9710452, 2.0631825648};
 
     const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
+    polarizerEffWs->setDistribution(true);
 
     runCalculationTest(polarizerEffWs, nullptr, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
   }
@@ -316,6 +317,7 @@ public:
     const std::pair<double, double> expectedTAMO = {0.9512279, 1.9754634895};
 
     const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
+    analyserEffWs->setDistribution(true);
 
     runCalculationTest(nullptr, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
   }
@@ -327,7 +329,10 @@ public:
     const std::pair<double, double> expectedTAMO = {0.98, 1.9899748748};
 
     const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
+    polarizerEffWs->setDistribution(true);
+
     const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
+    analyserEffWs->setDistribution(true);
 
     runCalculationTest(polarizerEffWs, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO,
                        expectedTAMO);
@@ -533,13 +538,10 @@ private:
   void checkOutputWorkspace(const std::unique_ptr<PolarizationEfficienciesWildes> &alg,
                             const std::string &outputPropertyName, const size_t expectedNumHistograms,
                             const std::pair<double, double> &expectedValue) {
-    const WorkspaceGroup_sptr firstInWsGrp = alg->getProperty(InputPropNames::NON_MAG_WS);
-    const MatrixWorkspace_sptr firstInWs =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(firstInWsGrp->getItem(0));
     const MatrixWorkspace_sptr outWs = alg->getProperty(outputPropertyName);
 
-    TS_ASSERT_EQUALS(firstInWs->isDistribution(), outWs->isDistribution());
-    TS_ASSERT_EQUALS(firstInWs->YUnit(), outWs->YUnit());
+    TS_ASSERT_EQUALS(true, outWs->isDistribution());
+    TS_ASSERT_EQUALS("Counts", outWs->YUnit());
 
     TS_ASSERT(outWs != nullptr);
     TS_ASSERT_EQUALS(expectedNumHistograms, outWs->getNumberHistograms())

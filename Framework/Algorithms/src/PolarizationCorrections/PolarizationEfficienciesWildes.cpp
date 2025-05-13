@@ -281,15 +281,15 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
   constexpr int var_num = 4;
   // Calculate fp
   const auto errorPropFp = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFp(x); });
-  m_wsFp = errorPropFp.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+  m_wsFp = errorPropFp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 
   // Calculate fa
   const auto errorPropFa = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFa(x); });
-  m_wsFa = errorPropFa.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+  m_wsFa = errorPropFa.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 
   // Calculate phi
   const auto errorPropPhi = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnPhi(x); });
-  m_wsPhi = errorPropPhi.evaluateWorkspaces(ws00, ws01, ws10, ws11);
+  m_wsPhi = errorPropPhi.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 }
 
 MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO() {
@@ -304,7 +304,7 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO() {
     const auto denominator = fnDenominator(x, fp);
     return sqrt(fnPhi(x) * (numerator / denominator));
   });
-  const auto outWs = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
+  const auto outWs = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
   return outWs;
 }
 
@@ -330,7 +330,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
         const auto TPMO = sqrt(phi * (numerator / denominator));
         return (phi / (2 * TPMO)) + 0.5;
       });
-      m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
+      m_wsA = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, ws00Mag, ws01Mag, ws10Mag, ws11Mag);
     }
 
     return;
@@ -348,7 +348,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
-      m_wsP = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsA);
+      m_wsP = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsA);
     }
   }
 
@@ -364,7 +364,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
-      m_wsA = errorProp.evaluateWorkspaces(ws00, ws01, ws10, ws11, inWsP);
+      m_wsA = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsP);
     }
   }
 }
