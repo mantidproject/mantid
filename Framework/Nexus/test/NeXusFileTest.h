@@ -536,8 +536,25 @@ public:
     file.closeData();
     // confirm
     TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 17);
+    TS_ASSERT_EQUALS(info.dims.front(), 18);
     TS_ASSERT_EQUALS(string(word), string(read));
+
+    // put/get a 2D char array
+    char words[3][10] = {"First row", "2", ""};
+    char reads[3][10];
+    dims = {3, 9};
+    file.makeData("data_char_2d", NeXus::getType<char>(), dims, true);
+    file.putData(&(words[0][0]));
+    info = file.getInfo();
+    file.getData(&(reads[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 9);
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      TS_ASSERT_EQUALS(string(words[i]), string(reads[i]));
+    }
   }
 
   void test_data_putget_vector() {

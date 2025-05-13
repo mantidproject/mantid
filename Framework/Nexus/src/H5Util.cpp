@@ -54,9 +54,9 @@ template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATI
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
-template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::NATIVE_CHAR; }
+template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::C_S1; }
 
-template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::NATIVE_CHAR; }
+template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::C_S1; }
 
 template <> MANTID_NEXUS_DLL DataType getType<bool>() { return PredType::NATIVE_HBOOL; }
 
@@ -107,6 +107,8 @@ template <typename InT, typename OutT, Narrowing narrow> inline void throwIfUnal
     func_name<int64_t, OutT, narrow>(__VA_ARGS__);                                                                     \
   } else if (dataType == PredType::NATIVE_UINT64) {                                                                    \
     func_name<uint64_t, OutT, narrow>(__VA_ARGS__);                                                                    \
+  } else if (dataType == PredType::C_S1) {                                                                             \
+    func_name<char, OutT, narrow>(__VA_ARGS__);                                                                        \
   } else {                                                                                                             \
     std::string msg = "H5Util: error in narrowing, unknown H5Cpp PredType ";                                           \
     msg += dataType.fromClass() + ".";                                                                                 \

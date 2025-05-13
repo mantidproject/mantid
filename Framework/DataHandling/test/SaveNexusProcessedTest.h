@@ -79,7 +79,6 @@ public:
     auto useXErrors = false;
     FileResource outputFile("SaveNexusProcessedTest_testExec.nxs", !clearfiles);
     doExec(outputFile.fullPath(), useXErrors);
-
     // Clean up
     AnalysisDataService::Instance().remove("testSpace");
   }
@@ -493,7 +492,6 @@ public:
     }
   }
 
-  // NEXUS REFACTOR FAILURE
   void testSaveTableColumn() {
     FileResource outputFileName("SaveNexusProcessedTest_testSaveTable.nxs", !clearfiles);
 
@@ -646,18 +644,14 @@ public:
       TS_ASSERT_EQUALS(columnInfo.dims[1], 9);
       TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
-      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      auto attrInfos = savedNexus.getAttrNames();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
 
-      if (attrInfos.size() == 3) {
-        TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[1].name), "A string");
-
-        TS_ASSERT_EQUALS(attrInfos[2].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[2].name), "StringColumn");
-
-        TS_ASSERT_EQUALS(attrInfos[0].name, "units");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[0].name), "N/A");
+      std::vector<std::string> expected_names{"interpret_as", "name", "units"};
+      std::vector<std::string> expected_values{"A string", "StringColumn", "N/A"};
+      for (std::size_t i = 0; i < expected_names.size(); i++) {
+        TS_ASSERT_EQUALS(attrInfos.count(expected_names[i]), 1);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(expected_names[i]), expected_values[i]);
       }
 
       std::vector<char> data;
@@ -727,18 +721,14 @@ public:
       TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
       TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
-      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      auto attrInfos = savedNexus.getAttrNames();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
 
-      if (attrInfos.size() == 3) {
-        TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[1].name), "A string");
-
-        TS_ASSERT_EQUALS(attrInfos[2].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[2].name), "EmptyColumn");
-
-        TS_ASSERT_EQUALS(attrInfos[0].name, "units");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(attrInfos[0].name), "N/A");
+      std::vector<std::string> expected_names{"interpret_as", "name", "units"};
+      std::vector<std::string> expected_values{"A string", "EmptyColumn", "N/A"};
+      for (std::size_t i = 0; i < expected_names.size(); i++) {
+        TS_ASSERT_EQUALS(attrInfos.count(expected_names[i]), 1);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<std::string>(expected_names[i]), expected_values[i]);
       }
 
       std::vector<char> data;
@@ -753,7 +743,6 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  // NEXUS REFACTOR FAILURE -- LoadNexus
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
@@ -789,7 +778,6 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  // NEXUS REFACTOR FAILURE -- LoadNexus
   void test_ragged_x_bins_saves_correct_x_values_when_spectrum_indices_passed() {
     // stop regression related to bug in github issue #33152
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 2, 2);
@@ -820,7 +808,6 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  // NEXUS REFACTOR FAILURE
   void test_ragged_x_bins_input_data_bounds() {
     // Fix SEGFAULT when writing ragged data: respect input vector bounds at `putSlab`.
 
@@ -888,7 +875,6 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  // NEXUS REFACTOR FAILURE -- due to LoadNexus
   void test_ragged_XY_readback() {
     // Reading and writing ragged-workspace data: verify that spectra match on readback
 
@@ -1047,18 +1033,14 @@ private:
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    auto attrInfos = file.getAttrNames();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 3);
 
-    if (attrInfos.size() == 3) {
-      TSM_ASSERT_EQUALS(name, attrInfos[1].name, "interpret_as");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[1].name), interpret_as);
-
-      TSM_ASSERT_EQUALS(name, attrInfos[2].name, "name");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[2].name), name);
-
-      TSM_ASSERT_EQUALS(name, attrInfos[0].name, "units");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[0].name), "Not known");
+    std::vector<std::string> expected_names{"interpret_as", "name", "units"};
+    std::vector<std::string> expected_values{interpret_as, name, "Not known"};
+    for (std::size_t i = 0; i < expected_names.size(); i++) {
+      TSM_ASSERT_EQUALS(name, attrInfos.count(expected_names[i]), 1);
+      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(expected_names[i]), expected_values[i]);
     }
   }
 
@@ -1070,18 +1052,14 @@ private:
     TSM_ASSERT_EQUALS(name, columnInfo.dims[1], dim1);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    auto attrInfos = file.getAttrNames();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 6);
 
-    if (attrInfos.size() == 6) {
-      TSM_ASSERT_EQUALS(name, attrInfos[4].name, "interpret_as");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[4].name), interpret_as);
-
-      TSM_ASSERT_EQUALS(name, attrInfos[5].name, "name");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[5].name), name);
-
-      TSM_ASSERT_EQUALS(name, attrInfos[3].name, "units");
-      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(attrInfos[3].name), "Not known");
+    std::vector<std::string> expected_names{"interpret_as", "name", "units"};
+    std::vector<std::string> expected_values{interpret_as, name, "Not known"};
+    for (std::size_t i = 0; i < expected_names.size(); i++) {
+      TSM_ASSERT_EQUALS(name, attrInfos.count(expected_names[i]), 1);
+      TSM_ASSERT_EQUALS(name, file.getAttr<std::string>(expected_names[i]), expected_values[i]);
     }
   }
 
