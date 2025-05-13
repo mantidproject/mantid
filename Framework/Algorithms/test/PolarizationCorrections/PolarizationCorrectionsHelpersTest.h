@@ -187,8 +187,6 @@ public:
 
   void testErrorPropagation_linear_workspace_dist() {
     constexpr size_t vars = 1;
-    using Types = Arithmetic::ErrorTypeHelper<vars>;
-
     const double m = 5.0;
     const double c = 3.0;
     auto ws = createWorkspace("wsA", {0.0, 1.0, 2.0}, {20.0, 20.0, 20.0}, {0.5, 0.5, 0.5});
