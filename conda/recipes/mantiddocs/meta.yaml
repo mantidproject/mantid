@@ -37,8 +37,6 @@ requirements:
     - mantidqt {{ version }}
     - versioningit {{ versioningit }}
     - graphviz {{ graphviz }}
-    - doxygen {{ doxygen }}
-    - texlive-core {{ texlive_core }}
 
 # there are no run requirements as it's just pure html
 
