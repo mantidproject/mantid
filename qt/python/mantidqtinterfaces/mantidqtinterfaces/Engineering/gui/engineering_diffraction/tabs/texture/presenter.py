@@ -96,6 +96,8 @@ class TexturePresenter:
 
     def on_calc_pf_clicked(self):
         wss, params = self.view.get_selected_workspaces()
+        # remove any 'not set' parameters workspaces from the list
+        params = [p for p in params if p != "Not set"]
         hkl = self.model._parse_hkl(*self.view.get_hkl())
         inc_scatt = self.view.get_inc_scatt_power()
         out_ws = self.model.get_pf_table_name(wss, params, hkl)

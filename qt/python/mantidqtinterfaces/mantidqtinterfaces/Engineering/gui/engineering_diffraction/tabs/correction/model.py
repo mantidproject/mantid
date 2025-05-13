@@ -15,7 +15,6 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from mantid.kernel import V3D
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from os import path, makedirs
@@ -38,8 +37,21 @@ class TextureCorrectionModel:
         SetSampleMaterial(ws, material)
 
     def copy_sample_info(self, ref_ws, wss):
+        # currently copy shape bakes the orientation matrix into the sample shape
+        # need to create a ws with an unorientated sample to copy over
+        ws = ADS.retrieve(ref_ws)
+        trans_mat = ws.getRun().getGoniometer().getR()
+
+        _tmp_ws = CloneWorkspace(ws, OutputWorkspace="_tmp_ws")
+        _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
+
+        CopySample(InputWorkspace=ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+
         for ws in wss:
-            CopySample(InputWorkspace=ref_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+
+        # remove the tmp ws
+        ADS.remove("_tmp_ws")
 
     def get_ws_info(self, ws_name, select=True):
         return {
@@ -167,12 +179,12 @@ def NewSetGoniometer(
         except KeyError:
             logger.error(f"{ws} not found")
     if transformation_str:
-        info = ws.componentInfo()
+        # info = ws.componentInfo()
         or_vals = transformation_str.split(",")
         run_mat = np.asarray(or_vals[:9], dtype=float).reshape((3, 3))
-        trans_vec = np.asarray(or_vals[9:], dtype=float) * trans_scale
+        # trans_vec = np.asarray(or_vals[9:], dtype=float) * trans_scale
         SetGoniometer(ws, Axis0=get_rot_vec_and_angle(run_mat))
-        info.setPosition(info.sample(), V3D(*trans_vec))
+        # info.setPosition(info.sample(), V3D(*trans_vec))
     else:
         SetGoniometer(ws, Axis0=axis0, Axis1=axis1, Axis2=axis2, Axis3=axis3, Axis4=axis4, Axis5=axis5)
 
