@@ -30,8 +30,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusFile.hpp"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -64,8 +62,7 @@ public:
   SaveNexusProcessedTest() {
     // clearfiles - make true for SVN as dont want to leave on build server.
     // Unless the file "KEEP_NXS_FILES" exists, then clear up nxs files
-    Poco::File file("KEEP_NXS_FILES");
-    clearfiles = !file.exists();
+    clearfiles = !std::filesystem::exists("KEEP_NXS_FILES");
   }
 
   void setUp() override {}
@@ -128,18 +125,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
     std::string fullOutputFile = alg.getPropertyValue("Filename");
     TS_ASSERT_DIFFERS(fullOutputFile, outputFile);
-    if (Poco::File(fullOutputFile).exists())
-      Poco::File(fullOutputFile).remove();
+    if (std::filesystem::exists(fullOutputFile))
+      std::filesystem::remove(fullOutputFile);
 
     // execute, check path exists
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    TS_ASSERT(Poco::File(fullOutputFile).exists())
+    TS_ASSERT(std::filesystem::exists(fullOutputFile))
 
-    if (Poco::File(fullOutputFile).exists())
-      Poco::File(fullOutputFile).remove();
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(fullOutputFile))
+      std::filesystem::remove(fullOutputFile);
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
   void testExecOnLoadraw() {
