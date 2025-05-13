@@ -92,86 +92,189 @@ QGroupBox:title {
    <string>Set Sample Properties</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_sample">
-   <!-- Orientation Row -->
+<!-- Orientation Section -->
    <item>
-    <layout class="QHBoxLayout" name="orientationLayout">
-     <item>
-      <widget class="QPushButton" name="btn_setOrientation">
-       <property name="text">
-        <string>Set Single Orientation</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="FileFinderWidget" name="finder_orientation_file" native="true"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_loadOrientation">
-       <property name="text">
-        <string>Load Orientation File</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-
-   <!-- Shape Buttons Row -->
-   <item>
-    <layout class="QHBoxLayout" name="shapeLayout">
-     <item>
-      <spacer name="spacer_shape_left">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_loadSampleShape">
-       <property name="text">
-        <string>Load Shape onto single WS</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_setSampleShape">
-       <property name="text">
-        <string>Set Shape onto single WS</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="spacer_shape_right">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-
-   <!-- Material Buttons Row -->
-   <item>
-    <widget class="QPushButton" name="btn_setSampleMaterial">
-     <property name="text">
-      <string>Set Sample Material</string>
+    <widget class="QGroupBox" name="groupBox_orientation">
+     <property name="title">
+      <string>Orientation</string>
      </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QPushButton" name="btn_setOrientation">
+        <property name="text">
+         <string>Set Single Orientation</string>
+        </property>
+       </widget>
+      </item>
+<item>
+  <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
+      <item>
+       <widget class="FileFinderWidget" name="finder_orientation_file" native="true"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_loadOrientation">
+        <property name="text">
+         <string>Load Orientation File</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
+
+   <!-- Sample Shape Section -->
    <item>
-    <layout class="QHBoxLayout" name="transferSampleLayout">
-     <item>
-    <widget class="QComboBox" name="combo_workspaceList"/>
-   </item>
-   <item>
-    <widget class="QPushButton" name="btn_copySampleToAll">
-     <property name="text">
-      <string>Copy Full Sample Environment to All</string>
+    <widget class="QGroupBox" name="groupBox_shape">
+     <property name="title">
+      <string>Sample Shape</string>
      </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QPushButton" name="btn_loadSampleShape">
+        <property name="text">
+         <string>Load Shape onto single WS</string>
+        </property>
+       </widget>
+      </item>
+<item>
+  <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
+      <item>
+       <widget class="QPushButton" name="btn_setSampleShape">
+        <property name="text">
+         <string>Set Shape onto single WS</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-    </layout>
+
+   <!-- Sample Material Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_material">
+     <property name="title">
+      <string>Sample Material</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QPushButton" name="btn_setSampleMaterial">
+        <property name="text">
+         <string>Set Sample Material</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
-  </layout>
+
+   <!-- Apply to All Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_applyAll">
+     <property name="title">
+      <string>Apply to All Workspaces</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QComboBox" name="combo_workspaceList"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_copySampleToAll">
+        <property name="text">
+         <string>Copy Full Sample Environment to All</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+     </layout>
  </widget>
 </item>
 
