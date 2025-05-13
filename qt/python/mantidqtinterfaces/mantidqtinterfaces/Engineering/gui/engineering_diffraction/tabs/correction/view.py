@@ -72,6 +72,12 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Env", "Orientation", "Select"])
         self.table_loaded_data.setRowCount(len(workspace_info_list))
 
+        header = self.table_loaded_data.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
             self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
             self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(metadata.get("env", "Not set")))
