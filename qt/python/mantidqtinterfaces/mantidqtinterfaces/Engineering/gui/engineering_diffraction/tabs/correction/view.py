@@ -2,12 +2,14 @@ from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt import load_ui
 from mantid.api import AnalysisDataService as ADS
 
+
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
 
 
 class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     sig_enable_controls = QtCore.Signal(bool)
     sig_view_requested = QtCore.Signal(str)
+    sig_view_shape_requested = QtCore.Signal(str)
 
     def __init__(self, parent=None):
         super(TextureCorrectionView, self).__init__(parent)
@@ -68,20 +70,35 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
-        self.table_loaded_data.setColumnCount(4)
-        self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Env", "Orientation", "Select"])
+        self.table_loaded_data.setColumnCount(5)
+        self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Shape", "Material", "Orientation", "Select"])
         self.table_loaded_data.setRowCount(len(workspace_info_list))
 
         header = self.table_loaded_data.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
 
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
             self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
-            self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(metadata.get("env", "Not set")))
-            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
+            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
+            self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
+
+            if metadata.get("shape", "Not set") == "Not set":
+                self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem("Not set"))
+            else:
+                self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(""))
+                view_btn = QtWidgets.QPushButton()
+                view_btn.setProperty("text", "View Shape")
+                view_btn.clicked.connect(lambda _, ws_name=ws: self.sig_view_shape_requested.emit(ws_name))
+                cell_widget = QtWidgets.QWidget()
+                layout = QtWidgets.QHBoxLayout(cell_widget)
+                layout.addWidget(view_btn)
+                layout.setAlignment(QtCore.Qt.AlignCenter)
+                layout.setContentsMargins(0, 0, 0, 0)
+                self.table_loaded_data.setCellWidget(row, 1, cell_widget)
 
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(metadata["select"])
@@ -90,7 +107,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
             layout.addWidget(checkbox)
             layout.setAlignment(QtCore.Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
-            self.table_loaded_data.setCellWidget(row, 3, cell_widget)
+            self.table_loaded_data.setCellWidget(row, 4, cell_widget)
 
     def populate_workspace_list(self):
         workspace_names = list(ADS.getObjectNames())
@@ -100,7 +117,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def get_selected_workspaces(self):
         selected = []
         for row in range(self.table_loaded_data.rowCount()):
-            cell_widget = self.table_loaded_data.cellWidget(row, 3)
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox and checkbox.isChecked():
@@ -109,7 +126,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     def select_all_workspaces(self):
         for row in range(self.table_loaded_data.rowCount()):
-            cell_widget = self.table_loaded_data.cellWidget(row, 3)
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:

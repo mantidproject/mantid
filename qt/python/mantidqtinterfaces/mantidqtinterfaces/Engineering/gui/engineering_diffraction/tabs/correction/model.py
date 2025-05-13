@@ -55,7 +55,8 @@ class TextureCorrectionModel:
 
     def get_ws_info(self, ws_name, select=True):
         return {
-            "env": "Not set" if self._has_no_valid_shape(ws_name) else "set",
+            "shape": "Not set" if self._has_no_valid_shape(ws_name) else "set",
+            "material": "Not set" if self._has_no_valid_material(ws_name) else self._get_material_name(ws_name),
             "orient": "default" if self._has_no_orientation_set(ws_name) else "set",
             "select": select,
         }
@@ -73,6 +74,12 @@ class TextureCorrectionModel:
         except RuntimeError:
             no_shape = True
         return no_shape
+
+    def _get_material_name(self, ws_name):
+        return ADS.retrieve(ws_name).sample().getMaterial().name()
+
+    def _has_no_valid_material(self, ws_name):
+        return self._get_material_name(ws_name) == ""
 
     def define_gauge_volume(self, ws, preset, custom):
         if preset == "4mmCube":

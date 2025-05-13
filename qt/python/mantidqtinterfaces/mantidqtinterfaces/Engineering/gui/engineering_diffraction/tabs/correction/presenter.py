@@ -4,6 +4,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import Load
 from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
+from mantidqt.plotting import sample_shape
 
 import os
 
@@ -24,6 +25,9 @@ class TextureCorrectionPresenter:
         self.view.set_on_select_all_clicked(self.view.select_all_workspaces)
         self.view.set_on_apply_clicked(self.on_apply_clicked)
         self.view.set_on_delete_clicked(self.delete_selected_files)
+
+        self.view.sig_view_shape_requested.connect(self._on_view_shape_clicked)
+
         self.view.set_on_set_orientation_clicked(self.open_goniometer_dialog)
         self.view.set_on_load_sample_shape_clicked(self.open_load_sample_shape_dialog)
         self.view.set_on_set_sample_shape_clicked(self.open_set_sample_shape_dialog)
@@ -73,6 +77,12 @@ class TextureCorrectionPresenter:
         orientation_file = self.view.get_orientation_file()
         self.model.load_all_orientations(wss, orientation_file)
         self.redraw_table()
+
+    def _on_view_shape_clicked(self, ws_name):
+        try:
+            sample_shape.plot_sample_container_and_components(ws_name)
+        except Exception as exception:
+            logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(ws_name, exception))
 
     def on_apply_clicked(self):
         wss = self.view.get_selected_workspaces()
