@@ -677,6 +677,221 @@ class SliceViewerModelTest(unittest.TestCase):
             mock_ws.name.return_value = "mock_ws"
             assert_call_as_expected(mock_ws, transpose=False, export_type=export_type, is_spectra=is_spectra, is_ragged=is_ragged)
 
+    @patch("mantidqt.widgets.sliceviewer.models.model.IntegrateMDHistoWorkspace")
+    @patch("mantidqt.widgets.sliceviewer.models.model.TransposeMD")
+    def test_export_pixel_cut_to_workspace_mdhisto(self, mock_transpose, mock_intMD):
+        slicepoint = [None, None, 0.5]
+        bin_params = [100, 100, 0.1]
+
+        def assert_call_as_expected(transpose, cut_type):
+            xpos, ypos = 0.0, 2.0
+            xidx, yidx = 0, 1
+            dimension_indices = [0, 1, None]
+            if transpose:
+                xpos, ypos = ypos, xpos
+                xidx, yidx = yidx, xidx
+                dimension_indices = [1, 0, None]
+
+            model = SliceViewerModel(self.ws_MD_3D)
+            help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
+
+            xdim = self.ws_MD_3D.getDimension(xidx)
+            ydim = self.ws_MD_3D.getDimension(yidx)
+
+            deltax = xdim.getBinWidth()
+            deltay = ydim.getBinWidth()
+
+            limits_x = ((xdim.getMinimum(), xdim.getMaximum()), (ypos - 0.5 * deltay, ypos + 0.5 * deltay))
+            limits_y = ((xpos - 0.5 * deltax, xpos + 0.5 * deltax), (ydim.getMinimum(), ydim.getMaximum()))
+
+            zmin, zmax = 0.45, 0.55
+
+            assert_called = mock_intMD.assert_called_with if cut_type == "c" else mock_intMD.assert_called_once_with
+
+            if not transpose:
+                if cut_type == "y" or cut_type == "c":
+                    xmin, xmax = limits_y[xidx]
+                    ymin, ymax = limits_y[yidx]
+
+                    ycut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, xmax],
+                        P2Bin=[ymin, 0, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_y",
+                    )
+                    assert_called(**ycut_params)
+                elif cut_type == "x" or cut_type == "c":
+                    xmin, xmax = limits_x[xidx]
+                    ymin, ymax = limits_x[yidx]
+
+                    xcut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, 0, xmax],
+                        P2Bin=[ymin, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_x",
+                    )
+                    assert_called(**xcut_params)
+            else:
+                if cut_type == "y" or cut_type == "c":
+                    xmin, xmax = limits_y[xidx]
+                    ymin, ymax = limits_y[yidx]
+
+                    ycut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, 0, xmax],
+                        P2Bin=[ymin, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_y",
+                    )
+                    assert_called(**ycut_params)
+
+                elif cut_type == "x" or cut_type == "c":
+                    xmin, xmax = limits_x[xidx]
+                    ymin, ymax = limits_x[yidx]
+
+                    xcut_params = dict(
+                        InputWorkspace=self.ws_MD_3D,
+                        P1Bin=[xmin, xmax],
+                        P2Bin=[ymin, 0, ymax],
+                        P3Bin=[zmin, zmax],
+                        OutputWorkspace="ws_MD_3D_cut_x",
+                    )
+                    assert_called(**xcut_params)
+
+            if cut_type == "c":
+                self.assertEqual("Cuts along X/Y created: ws_MD_3D_cut_x & ws_MD_3D_cut_y", help_msg)
+            elif cut_type == "x":
+                self.assertEqual("Cut along X created: ws_MD_3D_cut_x", help_msg)
+            elif cut_type == "y":
+                self.assertEqual("Cut along Y created: ws_MD_3D_cut_y", help_msg)
+
+            mock_intMD.reset_mock()
+
+        for cut_type in ("x", "y", "c"):
+            assert_call_as_expected(transpose=False, cut_type=cut_type)
+            assert_call_as_expected(transpose=True, cut_type=cut_type)
+
+    @patch("mantidqt.widgets.sliceviewer.models.model.BinMD")
+    @patch("mantidqt.widgets.sliceviewer.models.model.TransposeMD")
+    def test_export_pixel_cut_to_workspace_mdevent(self, mock_transpose, mock_binmd):
+        slicepoint = [None, None, 0.5]
+        bin_params = [100, 100, 0.1]
+
+        def assert_call_as_expected(transpose, cut_type):
+            xpos, ypos = 0.0, 2.0
+            xidx, yidx = 0, 1
+            dimension_indices = [0, 1, None]
+            if transpose:
+                xpos, ypos = ypos, xpos
+                xidx, yidx = yidx, xidx
+                dimension_indices = [1, 0, None]
+
+            model = SliceViewerModel(self.ws_MDE_3D)
+            help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
+
+            xdim = self.ws_MDE_3D.getDimension(xidx)
+            ydim = self.ws_MDE_3D.getDimension(yidx)
+
+            deltax = xdim.getBinWidth() / bin_params[xidx]
+            deltay = ydim.getBinWidth() / bin_params[yidx]
+
+            if cut_type == "x":
+                xmin, xmax = xdim.getMinimum(), xdim.getMaximum()
+                ymin, ymax = ypos - 0.5 * deltay, ypos + 0.5 * deltay
+            else:
+                xmin, xmax = xpos - 0.5 * deltax, xpos + 0.5 * deltax
+                ymin, ymax = ydim.getMinimum(), ydim.getMaximum()
+
+            zmin, zmax = 0.45, 0.55
+
+            common_params = dict(
+                InputWorkspace=self.ws_MDE_3D,
+                AxisAligned=False,
+                BasisVector0="h,rlu,1.0,0.0,0.0",
+                BasisVector1="k,rlu,0.0,1.0,0.0",
+                BasisVector2="l,rlu,0.0,0.0,1.0",
+            )
+
+            assert_called = mock_binmd.assert_called_with if cut_type == "c" else mock_binmd.assert_called_once_with
+
+            if not transpose:
+                extents = [xmin, xmax, ymin, ymax, zmin, zmax]
+
+                if cut_type == "y" or cut_type == "c":
+                    expected_bins = [1, 100, 1]
+                    expected_ws = "ws_MDE_3D_cut_y"
+                    expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
+
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+                elif cut_type == "x" or cut_type == "c":
+                    expected_bins = [100, 1, 1]
+                    expected_ws = "ws_MDE_3D_cut_x"
+                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+
+            else:
+                extents = [ymin, ymax, xmin, xmax, zmin, zmax]
+
+                if cut_type == "y" or cut_type == "c":
+                    expected_bins = [100, 1, 1]
+                    expected_ws = "ws_MDE_3D_cut_y"
+                    expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+                elif cut_type == "x" or cut_type == "c":
+                    expected_bins = [1, 100, 1]
+                    expected_ws = "ws_MDE_3D_cut_x"
+                    expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+                    assert_called(**common_params, OutputExtents=extents, OutputBins=expected_bins, OutputWorkspace=expected_ws)
+
+            if cut_type == "c":
+                expected_msg = "Cuts along X/Y created: ws_MDE_3D_cut_x & ws_MDE_3D_cut_y"
+            elif cut_type == "x":
+                expected_msg = "Cut along X created: ws_MDE_3D_cut_x"
+            elif cut_type == "y":
+                expected_msg = "Cut along Y created: ws_MDE_3D_cut_y"
+
+            self.assertEqual(expected_msg, help_msg)
+            mock_binmd.reset_mock()
+
+        for cut_type in ("x", "y", "c"):
+            assert_call_as_expected(transpose=False, cut_type=cut_type)
+            assert_call_as_expected(transpose=True, cut_type=cut_type)
+
+    @patch("mantidqt.widgets.sliceviewer.models.roi.extract_roi_matrix")
+    def test_export_pixel_cut_to_workspace_matrix(self, mock_extract_roi):
+        slicepoint = [None, None]
+        bin_params = [100, 100]
+        dimension_indices = [0, 1]
+        xpos, ypos = 1.5, 3.0
+
+        def assert_call_as_expected(transpose, cut_type):
+            model = SliceViewerModel(self.ws2d_histo)
+            mock_extract_roi.reset_mock()
+
+            help_msg = model.export_pixel_cut_to_workspace(slicepoint, bin_params, (xpos, ypos), transpose, dimension_indices, cut_type)
+
+            if not transpose:
+                if cut_type == "x" or cut_type == "c":
+                    mock_extract_roi.assert_called_once_with(self.ws2d_histo, None, None, ypos, ypos, False, "ws2d_histo_cut_x")
+                    self.assertEqual("Cut along X created: ws2d_histo_cut_x", help_msg)
+                elif cut_type == "y" or cut_type == "c":
+                    mock_extract_roi.assert_called_once_with(self.ws2d_histo, xpos, xpos, None, None, True, "ws2d_histo_cut_y")
+                    self.assertEqual("Cut along Y created: ws2d_histo_cut_y", help_msg)
+            else:
+                if cut_type == "x" or cut_type == "c":
+                    mock_extract_roi.assert_called_once_with(self.ws2d_histo, ypos, ypos, None, None, True, "ws2d_histo_cut_y")
+                    self.assertEqual("Cut along X created: ws2d_histo_cut_y", help_msg)
+                elif cut_type == "y" or cut_type == "c":
+                    mock_extract_roi.assert_called_once_with(self.ws2d_histo, None, None, xpos, xpos, False, "ws2d_histo_cut_x")
+                    self.assertEqual("Cut along Y created: ws2d_histo_cut_x", help_msg)
+
+            for cut_type in ("x", "y", "c"):
+                assert_call_as_expected(transpose=False, cut_type=cut_type)
+                assert_call_as_expected(transpose=True, cut_type=cut_type)
+
     @patch("mantidqt.widgets.sliceviewer.models.model.TransposeMD")
     @patch("mantidqt.widgets.sliceviewer.models.model.IntegrateMDHistoWorkspace")
     def test_export_region_for_mdhisto_workspace(self, mock_intMD, mock_transposemd):
