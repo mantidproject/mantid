@@ -88,6 +88,7 @@ set(SRC_FILES
     src/CreateLogPropertyTable.cpp
     src/CreateLogTimeCorrection.cpp
     src/CreateMonteCarloWorkspace.cpp
+    src/CreateBootstrapWorkspace.cpp
     src/CreatePSDBleedMask.cpp
     src/CreatePeaksWorkspace.cpp
     src/CreateSampleWorkspace.cpp
@@ -439,6 +440,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateLogPropertyTable.h
     inc/MantidAlgorithms/CreateLogTimeCorrection.h
     inc/MantidAlgorithms/CreateMonteCarloWorkspace.h
+    inc/MantidAlgorithms/CreateBootstrapWorkspace.h
     inc/MantidAlgorithms/CreatePSDBleedMask.h
     inc/MantidAlgorithms/CreatePeaksWorkspace.h
     inc/MantidAlgorithms/CreateSampleWorkspace.h
