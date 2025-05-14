@@ -88,9 +88,8 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     37); // 34 logs in file + 1 synthetic nperiods log
+                     36); // 34 logs in file + 1 synthetic nperiods log
                           // + 1 proton_charge_by_period log
-                          // + 1 gd_prtn_chrg_unfiltered log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
@@ -187,6 +186,54 @@ public:
     std::vector<double> protonChargeByPeriod =
         run.getPropertyValueAsType<std::vector<double>>("proton_charge_by_period");
     TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
+  }
+
+  void test_gd_prtn_chrg_unfiltered_added_for_period_dataset() {
+
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    TSM_ASSERT("Should not have gd_prtn_chrg_unfiltered until we run LoadNexusLogs",
+               !run.hasProperty("gd_prtn_chrg_unfiltered"));
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+
+    run = testWS->run();
+    run.addProperty("current_period", 1, true);
+    const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasGdPrtnChrgUnfiltered);
+
+    bool gdPrtnChrgUnfiltered = run.getPropertyValueAsType<bool>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered true until getProtonCharge called", gdPrtnChrgUnfiltered);
+
+    run.getProtonCharge();
+    gdPrtnChrgUnfiltered = run.getPropertyValueAsType<bool>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered false following getProtonCharge call", !gdPrtnChrgUnfiltered);
+  }
+
+  void test_gd_prtn_chrg_unfiltered_added_for_period_dataset_n_equal_1() {
+
+    auto testWS = createTestWorkspace();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LOQ49886.nxs");
+    loader.execute();
+
+    auto run = testWS->run();
+    run.addProperty("current_period", 1, true);
+
+    TSM_ASSERT("Confirm dataset has 1 period", run.getPropertyValueAsType<int>("nperiods"), 1)
+
+    const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Confirm does not have gd_prtn_chrg_unfiltered as nperiods < 1", !hasGdPrtnChrgUnfiltered);
   }
 
   void test_extract_run_title_from_event_nexus() {
