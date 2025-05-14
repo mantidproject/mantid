@@ -503,40 +503,46 @@ class FittingDataPresenterTest(unittest.TestCase):
 
     @patch(dir_path + ".data_presenter.FittingDataPresenter._repopulate_table")
     def test_remove_loaded_workspace(self, mock_repopulate_table):
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
+        model_dict = {"name1": self.ws1, "name2": self.ws2, "name3": self.ws3}
         self.model.get_loaded_workspaces.return_value = model_dict
-        self.model.get_all_workspace_names.return_value = ["name1", "name2", "name1_bg", "name1_bg"]
-        self.presenter.plotted = {"name1_bg", "name2_bg"}
-        self.presenter.row_numbers = {"name1": 0, "name2": 1}
+        self.model.get_all_workspace_names.return_value = ["name1", "name2", "name3", "name1_bg", "name1_bg", "name3_bg"]
+        self.presenter.plotted = {"name1_bg", "name2_bg", "name3_bg"}
+        self.presenter.row_numbers = {"name1": 0, "name2": 1, "name3": 2}
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.remove_workspace("name1")
+        self.presenter.remove_workspace("name2")
 
-        self.model.remove_workspace.assert_called_once_with("name1")
-        self.assertEqual({"name2": 1}, self.presenter.row_numbers)
-        mock_repopulate_table.assert_called_once_with(False)
+        self.model.remove_workspace.assert_has_calls([call("name1"), call("name2")], any_order=False)
+        self.assertEqual({"name3": 2}, self.presenter.row_numbers)
+        mock_repopulate_table.assert_has_calls([call(False), call(False)])
         self.model.update_sample_log_workspace_group.assert_not_called()
 
     def test_remove_bg_workspace(self):
-        self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_all_workspace_names.return_value = ["name1", "name2", "name1_bg", "name1_bg"]
+        self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2, "name3": self.ws3}
+        self.model.get_all_workspace_names.return_value = ["name1", "name2", "name3", "name1_bg", "name2_bg", "name3_bg"]
         self.model.get_sample_log_from_ws.side_effect = lambda _, log: "runnumb" if log == "run_number" else "bank"
         self.model.get_active_ws_name.side_effect = lambda name: name + "_bg"
-        self.presenter.plotted = {"name1_bg", "name2_bg"}
-        self.presenter.row_numbers = {"name1": 0, "name2": 1}
+        self.presenter.plotted = {"name1_bg", "name2_bg", "name3_bg"}
+        self.presenter.row_numbers = {"name1": 0, "name2": 1, "name3": 2}
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.remove_workspace("name1_bg")
+        self.presenter.remove_workspace("name2_bg")
 
-        self.model.remove_workspace.assert_called_once_with("name1_bg")
-        self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
+        self.model.remove_workspace.assert_has_calls([call("name1_bg"), call("name2_bg")], any_order=False)
+        self.assertEqual({"name1": 0, "name2": 1, "name3": 2}, self.presenter.row_numbers)
         self.model.update_sample_log_workspace_group.assert_not_called()
-        self.assertEqual(self.presenter.plotted, {"name2_bg"})
-        self.view.remove_all.assert_called_once()
-        self.presenter.all_plots_removed_notifier.notify_subscribers.assert_called_once()
-        expected_calls = [call("runnumb", "bank", False, ANY, ANY, ANY, ANY), call("runnumb", "bank", True, ANY, ANY, ANY, ANY)]
+        self.assertEqual(self.presenter.plotted, {"name3_bg"})
+        self.assertEqual(self.view.remove_all.call_count, 2)
+        self.assertEqual(self.presenter.all_plots_removed_notifier.notify_subscribers.call_count, 2)
+        expected_calls = [
+            call("runnumb", "bank", False, ANY, ANY, ANY, ANY),
+            call("runnumb", "bank", True, ANY, ANY, ANY, ANY),
+            call("runnumb", "bank", True, ANY, ANY, ANY, ANY),
+        ]
         self.view.add_table_row.assert_has_calls(expected_calls, any_order=False)
 
 
