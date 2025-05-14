@@ -12,12 +12,14 @@ from mantid.simpleapi import (
     SaveNexus,
     SetGoniometer,
     logger,
+    CreateEmptyTableWorkspace,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from os import path, makedirs
+from scipy import interpolate
 
 
 class TextureCorrectionModel:
@@ -166,6 +168,38 @@ class TextureCorrectionModel:
             if not path.exists(corr_dir):
                 makedirs(corr_dir)
             SaveNexus(InputWorkspace=ws, Filename=path.join(corr_dir, ws + ".nxs"))
+
+    def read_attenuation_coefficient_at_value(self, ws, val, unit):
+        conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
+        coefs = []
+        xbins = conv_ws.readX(0)
+        xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
+        for r in range(conv_ws.getNumberHistograms()):
+            ydat = conv_ws.readY(r)
+            f = interpolate.interp1d(xdat, ydat)
+            interp_val = f([val])[0]
+            print(
+                interp_val,
+                type(interp_val),
+            )
+            coefs.append(interp_val)
+        return coefs
+
+    def get_atten_table_name(self, ws_str, eval_val, unit):
+        ws = ADS.retrieve(ws_str)
+        run_num = str(ws.run().getLogData("run_number").value)
+        instr = ws.getInstrument().getName()
+        return f"{instr}_{run_num}_attenuation_coefficient_{eval_val}_{unit}"
+
+    def write_atten_val_table(self, ws, vals, eval_val, unit):
+        table = CreateEmptyTableWorkspace(OutputWorkspace=self.get_atten_table_name(ws, eval_val, unit))
+        table.addColumn("float", "I")
+        for r in range(ADS.retrieve(ws).getNumberHistograms()):
+            table.addRow(
+                [
+                    vals[r],
+                ]
+            )
 
 
 # temporary methods until SetGoniometer PR is merged

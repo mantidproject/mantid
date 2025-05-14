@@ -39,6 +39,10 @@ class TextureCorrectionPresenter:
         self.view.set_include_divergence(False)
         self.view.update_divergence_section_visibility()
 
+        self.view.set_on_check_att_tab_state_changed(self.view.update_atten_tab_section_visibility)
+        self.view.set_include_atten_tab(False)
+        self.view.update_atten_tab_section_visibility()
+
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
 
@@ -94,6 +98,8 @@ class TextureCorrectionPresenter:
         self.worker.start()
 
     def _apply_all_corrections(self, wss, out_wss):
+        include_atten_table = self.view.include_atten_tab()
+
         for i, ws in enumerate(wss):
             abs_corr = 1.0
             div_corr = 1.0
@@ -102,6 +108,11 @@ class TextureCorrectionPresenter:
                 self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
                 self.model.calc_absorption(ws)
                 abs_corr = "_abs_corr"
+                if include_atten_table:
+                    atten_vals = self.model.read_attenuation_coefficient_at_value(
+                        abs_corr, self.view.get_evaluation_value(), self.view.get_evaluation_units()
+                    )
+                    self.model.write_atten_val_table(ws, atten_vals, self.view.get_evaluation_value(), self.view.get_evaluation_units())
 
             if self.view.include_divergence():
                 self.model.calc_divergence(ws, self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())

@@ -114,8 +114,19 @@ class TexturePresenter:
 
         # default for now
         scat_vol_pos = (0.0, 0.0, 0.0)
-        chi2_thresh = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "cost_func_thresh")
-        peak_thresh = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "peak_pos_thresh")
+        has_chi2_col, has_x0_col = False, False
+        if len(params) > 0:
+            has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
+        chi2_thresh = (
+            get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "cost_func_thresh")
+            if has_chi2_col
+            else 0.0
+        )
+        peak_thresh = (
+            get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "peak_pos_thresh")
+            if has_x0_col
+            else 0.0
+        )
 
         self.worker = AsyncTask(
             self._calc_pf,

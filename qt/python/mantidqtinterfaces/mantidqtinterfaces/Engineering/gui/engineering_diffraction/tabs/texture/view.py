@@ -17,11 +17,9 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.setupUi(self)
 
         self.finder_texture_ws.setLabelText("Sample Run(s)")
-        self.finder_texture_ws.setInstrumentOverride("ENGINX")
         self.finder_texture_ws.allowMultipleFiles(True)
 
         self.finder_texture_tables.setLabelText("Fit Parameters")
-        self.finder_texture_tables.setInstrumentOverride("ENGINX")
         self.finder_texture_tables.allowMultipleFiles(True)
 
         self._setup_plot()

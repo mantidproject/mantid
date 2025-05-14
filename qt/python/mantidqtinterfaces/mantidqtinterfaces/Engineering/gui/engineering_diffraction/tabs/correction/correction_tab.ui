@@ -292,6 +292,9 @@ QGroupBox:title {
         </property>
        </widget>
       </item>
+       <item>
+           <widget class="QWidget" name="widget_absorptionContainer">
+             <layout class="QVBoxLayout">
       <item>
        <widget class="QComboBox" name="combo_shapeMethod">
         <item>
@@ -313,6 +316,77 @@ QGroupBox:title {
         </item>
        </layout>
       </item>
+                        <!-- Attenuation Table Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_attenuationTable">
+     <property name="title">
+      <string>Tabulate Attenuation Coefficient</string>
+     </property>
+        <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QCheckBox" name="check_attenTab">
+        <property name="text">
+         <string>Create Attenuation Value Table</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+          <widget class="QWidget" name="widget_attenuationTableContainer">
+              <layout class="QHBoxLayout">
+                  <item>
+       <widget class="QLabel" name="label_value">
+        <property name="text">
+         <string>Evaluation Point: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="line_evalVal"/>
+      </item>
+                  <item>
+       <widget class="QLabel" name="label_units">
+        <property name="text">
+         <string>Units: </string>
+        </property>
+       </widget>
+      </item>
+                  <item>
+  <widget class="QComboBox" name="combo_Units">
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+              </layout>
+          </widget>
+      </item>
+
+     </layout>
+    </widget>
+   </item>
+         </layout>
+    </widget>
+   </item>
+
      </layout>
     </widget>
    </item>
@@ -364,6 +438,7 @@ QGroupBox:title {
      </layout>
     </widget>
    </item>
+
 
    <!-- Exec Button -->
    <item>
