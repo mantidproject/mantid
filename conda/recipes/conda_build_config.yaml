@@ -101,6 +101,9 @@ sphinx_bootstrap_theme:
 scipy:
   - '>=1.10.0'
 
+rhash:
+  - '<1.4.6'
+
 pip:
   - '>=21.0.1'
 
