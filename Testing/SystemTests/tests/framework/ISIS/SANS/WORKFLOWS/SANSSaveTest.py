@@ -254,28 +254,19 @@ class SANSSaveTest(unittest.TestCase):
 
         file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
         pol_props = {
-            "InputSpinStates": "0,1",
-            "PolarizerComponentName": "a",
-            "AnalyzerComponentName": "b",
-            "FlipperComponentNames": ["c", "d", "e"],
-            "MagneticFieldStrengthLogName": "f",
-            "MagneticFieldDirection": "g,h,i",
+            "InputSpinStatez": "0,1",
         }
-        for i in range(0, len(pol_props)):
-            one_removed = pol_props.copy()
-            one_removed.pop(list(one_removed.keys())[i])
-            with self.assertRaisesRegex(
-                RuntimeError,
-                f".*PolarizationProps: Missing property for SavePolarizedNXCanSAS. "
-                f"These properties are missing: {{'{list(pol_props.keys())[i]}'}}",
-            ):
-                # Act
-                SANSSave(
-                    InputWorkspace=workspace,
-                    Filename=file_name,
-                    PolarizedNXCanSAS=True,
-                    PolarizationProps=one_removed,
-                )
+        with self.assertRaisesRegex(
+            RuntimeError,
+            ".*PolarizationProps: Missing property for SavePolarizedNXCanSAS. These properties are missing: InputSpinStates",
+        ):
+            # Act
+            SANSSave(
+                InputWorkspace=workspace,
+                Filename=file_name,
+                PolarizedNXCanSAS=True,
+                PolarizationProps=pol_props,
+            )
 
     def test_polarizer_algorithm_executed(self):
         # Arrange

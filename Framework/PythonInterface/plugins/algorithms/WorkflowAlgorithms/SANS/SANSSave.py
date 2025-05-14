@@ -314,18 +314,9 @@ class SANSSave(DataProcessorAlgorithm):
         if not polarization_props:
             errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXCanSAS."})
             return
-        mandatory_props = [
-            "InputSpinStates",
-            "PolarizerComponentName",
-            "AnalyzerComponentName",
-            "FlipperComponentNames",
-            "MagneticFieldStrengthLogName",
-            "MagneticFieldDirection",
-        ]
-        if not all(prop in polarization_props.keys() for prop in mandatory_props):
-            missing_props = set(mandatory_props) - set(polarization_props.keys())
+        if "InputSpinStates" not in polarization_props.keys():
             errors.update(
-                {"PolarizationProps": f"Missing property for SavePolarizedNXCanSAS. These properties are missing: {missing_props}"}
+                {"PolarizationProps": "Missing property for SavePolarizedNXCanSAS. These properties are missing: InputSpinStates."}
             )
 
     def _get_file_formats(self):
