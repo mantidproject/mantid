@@ -16,5 +16,5 @@ from mantid.geometry import UnitCell
 def d_spacing_from_lattice(a, b, c, alpha, beta, gamma, hkl):
     unit_cell = UnitCell(a, b, c, alpha, beta, gamma)
     h, k, l = hkl
-    d = round(UnitCell.d(unit_cell, h, k, l), 5)
+    d = UnitCell.d(unit_cell, h, k, l)
     return d

@@ -139,23 +139,29 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_param_lines(self, options):
         indent = "\n" + INDENT_SPACE
         if self._use_lattice_parameters:
-            dx = d_spacing_from_lattice(
-                options["a"],
-                options["b"],
-                options["c"],
-                options["alpha"],
-                options["beta"],
-                options["gamma"],
-                convert_hkl_string_to_float(options["hkl1"]),
+            dx = round(
+                d_spacing_from_lattice(
+                    options["a"],
+                    options["b"],
+                    options["c"],
+                    options["alpha"],
+                    options["beta"],
+                    options["gamma"],
+                    convert_hkl_string_to_float(options["hkl1"]),
+                ),
+                5,
             )
-            dy = d_spacing_from_lattice(
-                options["a"],
-                options["b"],
-                options["c"],
-                options["alpha"],
-                options["beta"],
-                options["gamma"],
-                convert_hkl_string_to_float(options["hkl2"]),
+            dy = round(
+                d_spacing_from_lattice(
+                    options["a"],
+                    options["b"],
+                    options["c"],
+                    options["alpha"],
+                    options["beta"],
+                    options["gamma"],
+                    convert_hkl_string_to_float(options["hkl2"]),
+                ),
+                5,
             )
             lattice_parameters_str = (
                 "params = {"
