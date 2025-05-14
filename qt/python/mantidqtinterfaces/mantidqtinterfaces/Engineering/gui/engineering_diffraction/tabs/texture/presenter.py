@@ -5,6 +5,7 @@ from mantid.simpleapi import Load
 from qtpy.QtCore import QTimer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqt.interfacemanager import InterfaceManager
 
 import os
 
@@ -30,6 +31,8 @@ class TexturePresenter:
         self.view.set_on_check_inc_scatt_corr_state_changed(self.view.update_crystal_section_visibility)
         self.view.set_include_scatter_corr(False)
         self.view.set_crystal_section_visibility(False)
+        self.view.set_on_load_cif_clicked(self._open_load_cif_dialog)
+        self.view.set_on_copy_all_xtal_clicked(self.on_copy_all_crystal_clicked)
         self.view.set_on_set_crystal_clicked(self.on_set_crystal_clicked)
         self.view.set_on_set_all_crystal_clicked(self.on_set_all_crystal_clicked)
 
@@ -88,18 +91,25 @@ class TexturePresenter:
         self.ws_info = ws_info
 
     def on_set_crystal_clicked(self):
-        self.model.set_ws_xtal(self.view.get_crystal_ws(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+        self.model.set_ws_xtal(self.view.get_crystal_ws_prop(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+        self.redraw_table()
 
     def on_set_all_crystal_clicked(self):
         wss, _ = self.view.get_selected_workspaces()
         self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+        self.redraw_table()
+
+    def on_copy_all_crystal_clicked(self):
+        wss, _ = self.view.get_selected_workspaces()
+        self.model.copy_xtal_to_all(self.view.get_crystal_ws_cif(), wss)
+        self.redraw_table()
 
     def on_calc_pf_clicked(self):
         wss, params = self.view.get_selected_workspaces()
         # remove any 'not set' parameters workspaces from the list
         params = [p for p in params if p != "Not set"]
-        hkl = self.model._parse_hkl(*self.view.get_hkl())
         inc_scatt = self.view.get_inc_scatt_power()
+        hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
         out_ws = self.model.get_pf_table_name(wss, params, hkl)
 
         # default for now
@@ -119,12 +129,6 @@ class TexturePresenter:
         self.model.make_pole_figure_tables(wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh)
         self.plot_pf(out_ws, self.view.get_projection_method())
 
-    def _copy_sample_to_all_selected(self):
-        ref_ws = self.view.get_sample_reference_ws()
-        wss = self.view.get_selected_workspaces()
-        self.model.copy_sample_info(ref_ws, wss)
-        self.redraw_table()
-
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Corrections Applied")
 
@@ -133,6 +137,13 @@ class TexturePresenter:
 
     def _redraw_on_alg_exec(self):
         QTimer.singleShot(200, self.redraw_table)
+
+    def _open_load_cif_dialog(self, alg_str):
+        manager = InterfaceManager()
+        dialog = manager.createDialogFromName("LoadCIF", -1)
+        if dialog is not None:
+            dialog.finished.connect(self._redraw_on_alg_exec)
+            dialog.open()
 
     def plot_pf(self, pf_ws, proj):
         # Get figure and canvas from view
