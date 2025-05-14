@@ -288,6 +288,14 @@ class SANSSaveTest(unittest.TestCase):
         # Act
         SANSSave(workspace, file_name, PolarizedNXcanSAS=True, PolarizationProps=pol_props)
 
+        expected_files = [
+            file_name + "00.h5",
+            file_name + "01.h5",
+        ]
+        for pol_file in expected_files:
+            self._assert_that_file_exists(pol_file)
+            self._remove_file(pol_file)
+
     def test_group_workspaces_handled_by_non_pol_alg(self):
         # Arrange
         workspace = self._get_sample_group_workspace(True)
