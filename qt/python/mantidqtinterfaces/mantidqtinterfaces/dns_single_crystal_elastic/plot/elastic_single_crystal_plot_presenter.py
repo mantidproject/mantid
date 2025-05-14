@@ -96,11 +96,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
         self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
 
-    def _set_colormap(self):
-        cmap = self._get_plot_styles()[0]
-        self.view.single_crystal_plot.set_cmap(cmap)
-        self.view.draw()
-
     def _want_plot(self, plot_type):
         axis_type = self.view.get_axis_type()
         self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
@@ -110,6 +105,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         shading = "flat"
         edge_colors = ["face", "white", "black"][self._plot_param.lines]
         colormap_name = own_dict["colormap"]
+        if own_dict["invert_cb"]:
+            colormap_name += "_r"
         cmap = mpl_helpers.get_cmap(colormap_name)
         return cmap, edge_colors, shading
 
@@ -148,6 +145,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         axis_type = self.view.get_axis_type()
         a, b, c, d = self.model.get_changing_hkl_components()
         return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
+
+    def _set_colormap(self):
+        cmap = self._get_plot_styles()[0]
+        self.view.single_crystal_plot.set_cmap(cmap)
+        self.view.draw()
 
     def _change_font_size(self, draw=True):
         own_dict = self.view.get_state()

@@ -142,3 +142,4 @@ class DNSElasticSCPlotView(DNSView):
         self._map["grid"].clicked.connect(self._change_grid)
         self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
         self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)
+        self._map["invert_cb"].clicked.connect(self._change_colormap)
