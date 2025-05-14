@@ -55,6 +55,9 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
+libuv:
+ - '<1.50'
+
 #v2.8.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
   - '>=2.3.2, <2.3.5'
