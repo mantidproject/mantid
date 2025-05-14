@@ -16,6 +16,8 @@ cxx_compiler_version:          # [unix]
   - 13                         # [linux]
 llvm_openmp:                   # [osx]
   - 18                         # [osx]
+rhash:
+  - '<1.4.6'                   # [osx]
 
 python:
   - 3.10

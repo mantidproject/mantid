@@ -51,6 +51,7 @@ requirements:
     - quasielasticbayes {{ quasielasticbayes }}
     - quickbayes {{ quickbayes }}
     - requests>=2.25.1
+    - rhash {{ rhash }} # [osx]
     - scipy {{ scipy }}
     - setuptools
     - sphinx {{ sphinx }}
