@@ -1,6 +1,7 @@
 from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt import load_ui
 from mantid.api import AnalysisDataService as ADS
+from mantid.kernel import UnitFactory
 
 
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
@@ -16,16 +17,13 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.setupUi(self)
 
         self.finder_corr.setLabelText("Sample Run(s)")
-        self.finder_corr.setInstrumentOverride("ENGINX")
         self.finder_corr.allowMultipleFiles(True)
 
         self.finder_orientation_file.setLabelText("Orientation File")
-        self.finder_orientation_file.setInstrumentOverride("ENGINX")
         self.finder_orientation_file.allowMultipleFiles(False)
         self.finder_orientation_file.setFileExtensions([".txt"])
 
         self.finder_gauge_vol.setLabelText("Custom Gauge Volume Shape")
-        self.finder_gauge_vol.setInstrumentOverride("ENGINX")
         self.finder_gauge_vol.allowMultipleFiles(False)
         self.finder_gauge_vol.setFileExtensions([".xml"])
 
@@ -33,6 +31,8 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.set_include_divergence(True)
 
         self.populate_workspace_list()
+        self.populate_unit_list()
+        self.set_default_unit("dSpacing")
 
     # ========== Signal Connectors ==========
     def set_on_apply_clicked(self, slot):
@@ -114,6 +114,16 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.combo_workspaceList.clear()
         self.combo_workspaceList.addItems(sorted(workspace_names))
 
+    def populate_unit_list(self):
+        units = UnitFactory.getKeys()
+        self.combo_Units.clear()
+        self.combo_Units.addItems(units)
+
+    def set_default_unit(self, default_val):
+        units = [self.combo_Units.itemText(i) for i in range(self.combo_Units.count())]
+        default_ind = units.index(default_val)
+        self.combo_Units.setCurrentIndex(default_ind)
+
     def get_selected_workspaces(self):
         selected = []
         for row in range(self.table_loaded_data.rowCount()):
@@ -162,17 +172,31 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def get_shape_method(self):
         return self.combo_shapeMethod.currentText()
 
+    def get_evaluation_value(self):
+        return float(self.line_evalVal.text())
+
+    def get_evaluation_units(self):
+        return self.combo_Units.currentText()
+
+    # ========== Component Setters ==========
+
     def set_include_absorption(self, val):
         return self.check_absorption.setChecked(val)
 
     def set_include_divergence(self, val):
         return self.check_divergence.setChecked(val)
 
+    def set_include_atten_tab(self, val):
+        return self.check_attenTab.setChecked(val)
+
     def include_absorption(self):
         return self.check_absorption.isChecked()
 
     def include_divergence(self):
         return self.check_divergence.isChecked()
+
+    def include_atten_tab(self):
+        return self.check_attenTab.isChecked()
 
     def setup_tabbing_order(self):
         self.finder_corr.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -181,10 +205,13 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     # ============ Visibility =============
 
     def update_absorption_section_visibility(self):
-        self.set_absorption_section_visibility(self.check_absorption.isChecked())
+        self.set_absorption_section_visibility(self.include_absorption())
 
     def update_divergence_section_visibility(self):
-        self.set_divergence_section_visibility(self.check_divergence.isChecked())
+        self.set_divergence_section_visibility(self.include_divergence())
+
+    def update_atten_tab_section_visibility(self):
+        self.set_atten_tab_visibility(self.include_atten_tab())
 
     def set_absorption_section_visibility(self, vis):
         self.combo_shapeMethod.setVisible(vis)
@@ -198,8 +225,14 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.label_detHorz.setVisible(vis)
         self.line_detHorz.setVisible(vis)
 
+    def set_atten_tab_visibility(self, vis):
+        self.widget_attenuationTableContainer.setVisible(vis)
+
     def set_on_check_inc_abs_corr_state_changed(self, slot):
         self.check_absorption.stateChanged.connect(slot)
 
     def set_on_check_inc_div_corr_state_changed(self, slot):
         self.check_divergence.stateChanged.connect(slot)
+
+    def set_on_check_att_tab_state_changed(self, slot):
+        self.check_attenTab.stateChanged.connect(slot)

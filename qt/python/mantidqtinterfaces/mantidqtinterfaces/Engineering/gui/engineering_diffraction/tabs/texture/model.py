@@ -23,6 +23,18 @@ class TextureProjection:
         scatts = ", ".join([scat.split(" ")[0] for scat in xtal.getScatterers()])
         return f"{scatts}: {sg}"
 
+    def check_param_ws_for_columns(self, wss):
+        has_chi2, has_x0 = True, True
+        for ws in wss:
+            param_ws = ADS.retrieve(ws)
+            column_names = param_ws.getColumnNames()
+            # check if any param ws are missing chi2 or x0
+            if "chi2" not in column_names:
+                has_chi2 = False
+            if "x0" not in column_names:
+                has_x0 = False
+            return has_chi2, has_x0
+
     def make_pole_figure_tables(
         self,
         wss: Sequence[str],
