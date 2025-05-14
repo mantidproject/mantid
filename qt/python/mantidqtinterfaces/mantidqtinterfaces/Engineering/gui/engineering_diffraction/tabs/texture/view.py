@@ -51,6 +51,12 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_check_inc_scatt_corr_state_changed(self, slot):
         self.check_scatt.stateChanged.connect(slot)
 
+    def set_on_load_cif_clicked(self, slot):
+        self.btn_loadCif.clicked.connect(slot)
+
+    def set_on_copy_all_xtal_clicked(self, slot):
+        self.btn_copyXtalToAll.clicked.connect(slot)
+
     def set_on_set_crystal_clicked(self, slot):
         self.btn_setCrystal.clicked.connect(slot)
 
@@ -101,12 +107,17 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def get_basis(self):
         return self.basis_lineedit.text()
 
-    def get_crystal_ws(self):
-        return self.combo_workspaceList.currentText()
+    def get_crystal_ws_prop(self):
+        return self.combo_workspaceListProp.currentText()
+
+    def get_crystal_ws_cif(self):
+        return self.combo_workspaceListCIF.currentText()
 
     def populate_workspace_list(self, workspace_names):
-        self.combo_workspaceList.clear()
-        self.combo_workspaceList.addItems(sorted(workspace_names))
+        self.combo_workspaceListProp.clear()
+        self.combo_workspaceListProp.addItems(sorted(workspace_names))
+        self.combo_workspaceListCIF.clear()
+        self.combo_workspaceListCIF.addItems(sorted(workspace_names))
 
     def get_selected_workspaces(self):
         selected_wss = []
@@ -153,19 +164,4 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.set_crystal_section_visibility(self.check_scatt.isChecked())
 
     def set_crystal_section_visibility(self, vis):
-        self.label_lattice.setVisible(vis)
-        self.lattice_lineedit.setVisible(vis)
-        self.label_spacegroup.setVisible(vis)
-        self.spacegroup_lineedit.setVisible(vis)
-        self.label_basis.setVisible(vis)
-        self.basis_lineedit.setVisible(vis)
-        self.combo_workspaceList.setVisible(vis)
-        self.btn_setCrystal.setVisible(vis)
-        self.btn_setAllCrystal.setVisible(vis)
-        self.label_hkl.setVisible(vis)
-        self.h_lineedit.setVisible(vis)
-        self.label_comma1.setVisible(vis)
-        self.k_lineedit.setVisible(vis)
-        self.label_comma2.setVisible(vis)
-        self.l_lineedit.setVisible(vis)
-        self.label_bracket.setVisible(vis)
+        self.widget_scattPowerContainer.setVisible(vis)

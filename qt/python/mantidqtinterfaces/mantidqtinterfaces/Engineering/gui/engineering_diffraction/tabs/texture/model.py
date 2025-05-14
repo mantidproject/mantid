@@ -10,12 +10,18 @@ class TextureProjection:
     def get_ws_info(self, ws_name, parameter_file, select=True):
         return {
             "fit_parameters": parameter_file,
-            "crystal": "Not set" if self._has_xtal(ws_name) else "set",
+            "crystal": "Not set" if not self._has_xtal(ws_name) else self._get_xtal_info(ws_name),
             "select": select,
         }
 
     def _has_xtal(self, ws):
         return ADS.retrieve(ws).sample().hasCrystalStructure()
+
+    def _get_xtal_info(self, ws):
+        xtal = ADS.retrieve(ws).sample().getCrystalStructure()
+        sg = xtal.getSpaceGroup().getHMSymbol()  # get the HM symbol
+        scatts = ", ".join([scat.split(" ")[0] for scat in xtal.getScatterers()])
+        return f"{scatts}: {sg}"
 
     def make_pole_figure_tables(
         self,
@@ -116,6 +122,11 @@ class TextureProjection:
     def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str) -> None:
         for ws in wss:
             self.set_ws_xtal(ws, lattice, space_group, basis)
+
+    def copy_xtal_to_all(self, ref_ws: str, wss: Sequence[str]) -> None:
+        xtal = ADS.retrieve(ref_ws).sample().getCrystalStructure()
+        for ws in wss:
+            ADS.retrieve(ws).sample().setCrystalStructure(xtal)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
