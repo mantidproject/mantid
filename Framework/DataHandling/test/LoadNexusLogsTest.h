@@ -230,7 +230,7 @@ public:
     auto run = testWS->run();
     run.addProperty("current_period", 1, true);
 
-    TSM_ASSERT("Confirm dataset has 1 period", run.getPropertyValueAsType<int>("nperiods"), 1)
+    TSM_ASSERT("Confirm dataset has 1 period", run.getPropertyValueAsType<int>("nperiods"), 1);
 
     const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
     TSM_ASSERT("Confirm does not have gd_prtn_chrg_unfiltered as nperiods < 1", !hasGdPrtnChrgUnfiltered);
