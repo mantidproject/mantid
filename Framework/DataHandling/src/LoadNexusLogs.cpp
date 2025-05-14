@@ -607,7 +607,8 @@ void LoadNexusLogs::execLoader() {
   if (!workspace->run().hasProperty(workspace->run().getProtonChargeLogName())) {
     try {
       // For period data mark proton charge log value as unfiltered to enable subsequent filtering by period.
-      if (workspace->run().hasProperty("proton_charge_by_period")) {
+      if (workspace->run().hasProperty("proton_charge_by_period") &&
+          std::stoi(workspace->run().getProperty("nperiods")->value()) > 1) {
         Kernel::PropertyWithValue<bool> *pChargeUnfiltered =
             new Kernel::PropertyWithValue<bool>(workspace->run().getProtonChargeUnfilteredName(), true);
         workspace->mutableRun().addProperty(pChargeUnfiltered, true);
