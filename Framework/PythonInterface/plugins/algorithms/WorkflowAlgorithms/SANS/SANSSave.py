@@ -110,7 +110,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         self.setPropertyGroup("Nexus", "FileFormats")
         self.setPropertyGroup("CanSAS", "FileFormats")
-        self.setPropertyGroup("NXCanSAS", "FileFormats")
+        self.setPropertyGroup("NXcanSAS", "FileFormats")
         self.setPropertyGroup("PolarizedNXcanSAS", "FileFormats")
         self.setPropertyGroup("NistQxy", "FileFormats")
         self.setPropertyGroup("RKH", "FileFormats")
@@ -312,11 +312,11 @@ class SANSSave(DataProcessorAlgorithm):
     def _validate_pol_props(self, errors):
         polarization_props = self.getProperty("PolarizationProps").value
         if not polarization_props:
-            errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXCanSAS."})
+            errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXcanSAS."})
             return
         if "InputSpinStates" not in polarization_props.keys():
             errors.update(
-                {"PolarizationProps": "Missing property for SavePolarizedNXCanSAS. These properties are missing: InputSpinStates."}
+                {"PolarizationProps": "Missing property for SavePolarizedNXcanSAS. These properties are missing: InputSpinStates."}
             )
 
     def _get_file_formats(self):

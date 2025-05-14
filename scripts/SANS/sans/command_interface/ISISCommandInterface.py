@@ -532,7 +532,7 @@ def set_save(
                     save_algs.append(SaveType.CAN_SAS)
                 case "SaveCSV":
                     save_algs.append(SaveType.CSV)
-                case "SaveNXCanSAS":
+                case "SaveNXcanSAS":
                     save_algs.append(SaveType.NX_CAN_SAS)
                 case _:
                     raise RuntimeError(f"The save format {key} is not known")

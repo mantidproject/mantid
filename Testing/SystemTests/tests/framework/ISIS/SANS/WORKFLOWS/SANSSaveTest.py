@@ -66,7 +66,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": False,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": True,
+            "NXcanSAS": True,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -92,7 +92,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": True,
             "CanSAS": True,
-            "NXCanSAS": True,
+            "NXcanSAS": True,
             "NistQxy": True,
             "RKH": True,
             "CSV": True,
@@ -132,7 +132,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": True,
             "RKH": False,
             "CSV": False,
@@ -159,7 +159,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -186,7 +186,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": True,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -223,12 +223,12 @@ class SANSSaveTest(unittest.TestCase):
         save_options = {
             "InputWorkspace": workspace,
             "Filename": file_name,
-            "PolarizedNXCanSAS": True,
+            "PolarizedNXcanSAS": True,
         }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.setRethrows(True)
         # Act
-        self.assertRaisesRegex(RuntimeError, "PolarizationProps must be set to use SavePolarizedNXCanSAS.", save_alg.execute)
+        self.assertRaisesRegex(RuntimeError, "PolarizationProps must be set to use SavePolarizedNXcanSAS.", save_alg.execute)
 
     def test_workspace_must_be_group_to_use_polarized_nx_can_sas(self):
         # Arrange
@@ -238,7 +238,7 @@ class SANSSaveTest(unittest.TestCase):
         save_options = {
             "InputWorkspace": workspace,
             "Filename": file_name,
-            "PolarizedNXCanSAS": True,
+            "PolarizedNXcanSAS": True,
         }
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
         save_alg.setRethrows(True)
@@ -258,13 +258,13 @@ class SANSSaveTest(unittest.TestCase):
         }
         with self.assertRaisesRegex(
             RuntimeError,
-            ".*PolarizationProps: Missing property for SavePolarizedNXCanSAS. These properties are missing: InputSpinStates",
+            ".*PolarizationProps: Missing property for SavePolarizedNXcanSAS. These properties are missing: InputSpinStates",
         ):
             # Act
             SANSSave(
                 InputWorkspace=workspace,
                 Filename=file_name,
-                PolarizedNXCanSAS=True,
+                PolarizedNXcanSAS=True,
                 PolarizationProps=pol_props,
             )
 

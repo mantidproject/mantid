@@ -27,7 +27,7 @@ def save_to_file(workspace, file_format, file_name, additional_properties, addit
     :param file_name: the file name.
     :param additional_properties: a dict of additional save algorithm inputs
             e.g. Transmission and TransmissionCan for SaveCanSAS1D-v2
-    :param additional_run_numbers: a dict of workspace type to run number. Used in SaveNXCanSAS only.
+    :param additional_run_numbers: a dict of workspace type to run number. Used in SaveNXcanSAS only.
     :return:
     """
     save_options = {"InputWorkspace": workspace}
