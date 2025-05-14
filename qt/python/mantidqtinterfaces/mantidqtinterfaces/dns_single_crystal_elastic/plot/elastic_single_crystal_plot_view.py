@@ -92,6 +92,11 @@ class DNSElasticSCPlotView(DNSView):
     sig_change_grid = Signal()
     sig_change_crystal_axes = Signal(bool)
     sig_change_colormap = Signal()
+    sig_change_font_size = Signal()
+
+    # emitting custom signals for presenter
+    def _change_font_size(self):
+        self.sig_change_font_size.emit()
 
     def _change_colormap(self):
         self.sig_change_colormap.emit()
@@ -133,6 +138,7 @@ class DNSElasticSCPlotView(DNSView):
         self.canvas.draw()
 
     def _attach_signal_slots(self):
+        self._map["fontsize"].editingFinished.connect(self._change_font_size)
         self._map["grid"].clicked.connect(self._change_grid)
         self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
         self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)

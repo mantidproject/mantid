@@ -25,6 +25,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.grid_state = 0
         self._plot_param.grid_helper = None
         self._plot_param.colormap_name = "jet"
+        self._plot_param.font_size = 1
         self._plot_param.lines = 0
 
     def _datalist_updated(self, workspaces):
@@ -40,6 +41,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         if not plot_list:
             return
         self._plot_param.plot_name = plot_list[0]
+        self._change_font_size(draw=False)
         generated_dict = self.param_dict["elastic_single_crystal_script_generator"]
         data_array = generated_dict["data_arrays"][self._plot_param.plot_name]
         options = self.param_dict["elastic_single_crystal_options"]
@@ -147,6 +149,15 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         a, b, c, d = self.model.get_changing_hkl_components()
         return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
 
+    def _change_font_size(self, draw=True):
+        own_dict = self.view.get_state()
+        font_size = own_dict["fontsize"]
+        if self._plot_param.font_size != font_size:
+            self._plot_param.font_size = font_size
+            self.view.single_crystal_plot.set_fontsize(font_size)
+            if draw:
+                self._plot()
+
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
         self.view.sig_update_omega_offset.connect(self._update_omega_offset)
@@ -157,3 +168,4 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plotted_script_number = 0
         self.view.sig_change_grid.connect(self._change_grid_state)
         self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
+        self.view.sig_change_font_size.connect(self._change_font_size)
