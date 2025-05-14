@@ -9,7 +9,12 @@
 Helper functions for DNS single crystal elastic calculations.
 """
 
+import numpy as np
 from numpy import cos, pi, radians, sin
+
+
+def get_hkl_float_array(hkl_string):
+    return np.asarray([float(x) for x in hkl_string.split(",")])
 
 
 def angle_to_q(two_theta, omega, wavelength):  # should work with np arrays

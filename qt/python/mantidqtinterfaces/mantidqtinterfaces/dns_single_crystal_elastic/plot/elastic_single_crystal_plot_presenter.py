@@ -12,6 +12,7 @@ DNS single crystal elastic plot tab presenter of DNS reduction GUI.
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot import mpl_helpers
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.grid_locator import get_grid_helper
 
 
 class DNSElasticSCPlotPresenter(DNSObserver):
@@ -43,8 +44,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         data_array = generated_dict["data_arrays"][self._plot_param.plot_name]
         options = self.param_dict["elastic_single_crystal_options"]
         self.model.create_single_crystal_map(data_array, options, initial_values)
+        self._change_grid_state(draw=False, change=False)
         self.view.create_subfigure(self._plot_param.grid_helper)
         self._want_plot(axis_type["plot_type"])
+        self._change_grid_state(draw=False, change=False)
         self._set_axis_labels()
         self.view.single_crystal_plot.create_colorbar()
         self.view.single_crystal_plot.on_resize()
@@ -114,6 +117,36 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         x_label, y_label = self.model.get_axis_labels(axis_type["type"], own_dict["crystal_axes"])
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
 
+    def _change_crystal_axes_grid(self):
+        self._plot_param.grid_state = self._plot_param.grid_state % 4
+        self._plot_param.grid_helper = self._create_grid_helper()
+        self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 3)
+
+    def _change_normal_grid(self):
+        self._plot_param.grid_state = self._plot_param.grid_state % 3
+        self._plot_param.grid_helper = None
+        self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 2)
+
+    def _change_grid_state(self, draw=True, change=True):
+        own_dict = self.view.get_state()
+        if change:
+            self._plot_param.grid_state = self._plot_param.grid_state + 1
+        if own_dict["crystal_axes"]:
+            self._change_crystal_axes_grid()
+        else:
+            self._change_normal_grid()
+        if draw:
+            self.view.draw()
+
+    def _change_crystal_axes(self):
+        self._plot_param.grid_state = 1
+        self._plot()
+
+    def _create_grid_helper(self):
+        axis_type = self.view.get_axis_type()
+        a, b, c, d = self.model.get_changing_hkl_components()
+        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
+
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
         self.view.sig_update_omega_offset.connect(self._update_omega_offset)
@@ -122,3 +155,5 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_restore_default_dxdy.connect(self._set_default_dx_dy)
         self.view.sig_change_colormap.connect(self._set_colormap)
         self._plotted_script_number = 0
+        self.view.sig_change_grid.connect(self._change_grid_state)
+        self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
