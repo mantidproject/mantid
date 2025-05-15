@@ -516,7 +516,6 @@ void QtCheckBoxFactory::disconnectPropertyManager(QtBoolPropertyManager *manager
 // QtDoubleSpinBoxFactory
 
 void QtDoubleSpinBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, double value) {
-  QList<QDoubleSpinBox *> editors = m_createdEditors[property];
   QListIterator<QDoubleSpinBox *> itEditor(m_createdEditors[property]);
   while (itEditor.hasNext()) {
     QDoubleSpinBox *editor = itEditor.next();
