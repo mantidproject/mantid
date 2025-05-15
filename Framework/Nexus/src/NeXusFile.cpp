@@ -295,12 +295,7 @@ void File::close() { H5::H5File::close(); }
 
 void File::flush(H5F_scope_t scope) const { H5::H5File::flush(scope); }
 
-H5::H5File File::getRoot() {
-  // return std::dynamic_pointer_cast<H5::Group>(std::make_shared<::NeXus::File>(this));
-  // H5::H5File *cpy = dynamic_cast<H5::H5File *>(this);
-  // return *cpy;
-  return *this;
-}
+H5::H5File File::getRoot() { return *this; }
 
 namespace {
 // methods for better exception messages
@@ -465,22 +460,6 @@ void File::openGroupPath(std::string const &pathname) {
     throw NXEXCEPTION("Supplied empty path");
   }
   std::filesystem::path new_path = formAbsolutePath(pathname);
-  // if (!m_descriptor.isEntry(new_path)) {
-  //   throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
-  // } else if (new_path == m_path) {
-  //   // do nothing if the path is not changingg
-  // } else if (new_path == "/") {
-  //   // if the path is the root, reset
-  //   this->resetToFileRoot();
-  // } else if (m_descriptor.isEntry(new_path, scientific_data_set)) {
-  //   // if this is a dataset, then open the parent group
-  //   new_path = new_path.parent_path();
-  //   this->openPath(new_path);
-  // } else {
-  //   // otherwise, if this is a group, then open the group
-  //   m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
-  //   m_path = new_path;
-  // }
   if (new_path == m_path) {
     // intentionally do nothing if the path is not changingg
   } else if (new_path == "/") {
@@ -1191,12 +1170,8 @@ MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *const data, const 
     if (mySize[0] == 1) {
       mySize[0] = iCurrentT.getSize();
     }
-    // char *tmp_data = new char[mySize[0]]{0};
     iCurrentS.selectHyperslab(H5S_SELECT_SET, mySize.data(), mStart.data(), NULL, NULL);
     iCurrentD->read(data, iCurrentT, H5S_ALL, H5S_ALL, H5::DSetMemXferPropList::DEFAULT);
-    // char const *data1 = tmp_data + start[0];
-    // strncpy(static_cast<char *>(data), data1, (size_t)size[0]);
-    // delete[] tmp_data;
   }
 }
 

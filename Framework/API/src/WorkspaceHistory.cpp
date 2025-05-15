@@ -417,7 +417,6 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
   ++Algorithm::g_execCount;
 
   // Add property information
-  // NEXUS REFACTOR -- failure occurs at this line
   for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines; ++index) {
     const std::string line = info[index];
     std::string::size_type colon = line.find(':');

@@ -41,10 +41,6 @@
 #include <random>
 #include <string>
 
-#define LOG_ERROR(file)                                                                                                \
-  printf("LENH L%d %s\n", __LINE__, (file).getPath().c_str());                                                         \
-  fflush(stdout);
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -610,12 +606,9 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
                                        const Nexus::NexusDescriptor &descriptor) {
   // Open the file
   ::NeXus::File file(nexusfilename);
-  LOG_ERROR(file);
   file.openGroup(entry_name, "NXentry");
-  LOG_ERROR(file);
 
   // get the title
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/title", "SDS")) {
     file.openData("title");
     if (file.getInfo().type == NXnumtype::CHAR) {
@@ -625,10 +618,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     }
     file.closeData();
   }
-  LOG_ERROR(file);
 
   // get the notes
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/notes", "SDS")) {
     file.openData("notes");
     if (file.getInfo().type == NXnumtype::CHAR) {
@@ -638,10 +629,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     }
     file.closeData();
   }
-  LOG_ERROR(file);
 
   // Get the run number
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/run_number", "SDS")) {
     file.openData("run_number");
     std::string run;
@@ -659,10 +648,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     }
     file.closeData();
   }
-  LOG_ERROR(file);
 
   // get the experiment identifier
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/experiment_identifier", "SDS")) {
     file.openData("experiment_identifier");
     std::string expId;
@@ -674,11 +661,9 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     }
     file.closeData();
   }
-  LOG_ERROR(file);
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/sample", "NXsample")) {
     file.openGroup("sample", "NXsample");
     try {
@@ -688,39 +673,27 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
         std::string sampleName;
         if (info.type == NXnumtype::CHAR) {
           if (info.dims.size() == 1) {
-            LOG_ERROR(file);
             sampleName = file.getStrData();
-            LOG_ERROR(file);
           } else { // something special for 2-d array
             const int64_t total_length = std::accumulate(info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
                                                          std::multiplies<int64_t>());
             boost::scoped_array<char> val_array(new char[total_length]);
-            LOG_ERROR(file);
             file.getData(val_array.get());
-            LOG_ERROR(file);
             sampleName = std::string(val_array.get(), total_length);
           }
         }
-        LOG_ERROR(file);
         file.closeData();
-        LOG_ERROR(file);
         if (!sampleName.empty()) {
           WS->mutableSample().setName(sampleName);
         }
       }
     } catch (::NeXus::Exception &) {
-      LOG_ERROR(file);
-      // file.openPath("/entry/sample");
       // let it drop on floor if an exception occurs while reading sample
     }
-    LOG_ERROR(file);
     file.closeGroup();
-    LOG_ERROR(file);
   }
-  LOG_ERROR(file);
 
   // get the duration
-  LOG_ERROR(file);
   if (descriptor.isEntry("/" + entry_name + "/duration", "SDS")) {
     file.openData("duration");
     std::vector<double> duration;
@@ -737,7 +710,6 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     }
     file.closeData();
   }
-  LOG_ERROR(file);
 
   // close the file
   file.close();
