@@ -365,8 +365,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:36
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:56
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+=knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
@@ -411,7 +410,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Replicate
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.cpp:83
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Muon/src/EstimateMuonAsymmetryFromCounts.cpp:157
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:151
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:156
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:44
