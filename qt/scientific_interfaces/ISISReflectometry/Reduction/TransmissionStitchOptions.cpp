@@ -17,7 +17,7 @@ TransmissionStitchOptions::TransmissionStitchOptions(std::optional<RangeInLambda
 
 std::optional<RangeInLambda> TransmissionStitchOptions::overlapRange() const { return m_overlapRange; }
 
-RebinParameters TransmissionStitchOptions::rebinParameters() const { return m_rebinParameters; }
+const RebinParameters &TransmissionStitchOptions::rebinParameters() const { return m_rebinParameters; }
 
 bool TransmissionStitchOptions::scaleRHS() const { return m_scaleRHS; }
 

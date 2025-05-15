@@ -185,7 +185,7 @@ public:
   /// Update high-level structure tooltip and return it
   QString updateStructureTooltip();
 
-  QMap<QString, QtProperty *> getTies() { return m_ties; };
+  const QMap<QString, QtProperty *> &getTies() { return m_ties; };
   bool hasTies() { return !m_ties.isEmpty(); };
 
 protected slots:

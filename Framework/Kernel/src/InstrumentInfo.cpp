@@ -61,7 +61,7 @@ bool InstrumentInfo::operator==(const InstrumentInfo &rhs) const {
 const std::string &InstrumentInfo::delimiter() const { return m_delimiter; }
 
 /// Return the name of the instrument
-const std::string InstrumentInfo::name() const { return m_name; }
+const std::string &InstrumentInfo::name() const { return m_name; }
 
 /// Return the short name of the instrument
 const std::string &InstrumentInfo::shortName() const { return m_shortName; }

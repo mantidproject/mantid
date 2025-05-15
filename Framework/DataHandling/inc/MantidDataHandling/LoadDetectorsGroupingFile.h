@@ -101,7 +101,7 @@ public:
   void loadXMLFile(const std::string &xmlfilename);
   void setDefaultStartingGroupID(int startgroupid) { m_startGroupID = startgroupid; }
 
-  std::string getInstrumentName() { return m_instrumentName; }
+  const std::string &getInstrumentName() { return m_instrumentName; }
   bool isGivenInstrumentName() const { return m_userGiveInstrument; }
 
   const std::string &getDate() const { return m_date; }

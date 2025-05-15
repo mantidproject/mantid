@@ -62,7 +62,7 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
   static std::string retrieveValidInstrumentFilenameExtension(const std::string &filename);
-  static std::vector<std::string> getValidInstrumentFilenameExtensions();
+  static const std::vector<std::string> &getValidInstrumentFilenameExtensions();
 
 private:
   /// Overwrites Algorithm method.

@@ -119,10 +119,10 @@ public:
   bool isOptional() const;
 
   /// @return the vector of suggested extensions. For use in GUIs showing files.
-  std::vector<std::string> getExts() const { return m_exts; }
+  const std::vector<std::string> &getExts() const { return m_exts; }
 
   /// Returns the main file extension that's used
-  std::string getDefaultExt() const { return m_defaultExt; }
+  const std::string &getDefaultExt() const { return m_defaultExt; }
 
   // Unhide the PropertyWithValue assignment operator
   using Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>::operator=;

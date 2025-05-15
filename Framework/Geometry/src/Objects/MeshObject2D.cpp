@@ -394,7 +394,7 @@ size_t MeshObject2D::numberOfTriangles() const { return m_triangles.size() / 3; 
 
 std::vector<double> MeshObject2D::getVertices() const { return MeshObjectCommon::getVertices(m_vertices); }
 
-std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
+const std::vector<uint32_t> &MeshObject2D::getTriangles() const { return m_triangles; }
 
 detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
   // should be consistent with MeshObject2D::GetObjectGeom

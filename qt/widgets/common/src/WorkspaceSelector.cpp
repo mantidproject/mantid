@@ -85,7 +85,7 @@ void WorkspaceSelector::connectObservers() {
   m_connected = true;
 }
 
-QStringList WorkspaceSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
+const QStringList &WorkspaceSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
 
 void WorkspaceSelector::setWorkspaceTypes(const QStringList &types) {
   if (types != m_workspaceTypes) {
@@ -142,7 +142,7 @@ void WorkspaceSelector::setSorted(bool sorted) {
 
 bool WorkspaceSelector::isConnected() const { return m_connected; }
 
-QStringList WorkspaceSelector::getSuffixes() const { return m_suffix; }
+const QStringList &WorkspaceSelector::getSuffixes() const { return m_suffix; }
 
 void WorkspaceSelector::setSuffixes(const QStringList &suffix) {
   if (suffix != m_suffix) {
@@ -157,7 +157,7 @@ void WorkspaceSelector::setLowerBinLimit(int numberOfBins) { m_binLimits.first =
 
 void WorkspaceSelector::setUpperBinLimit(int numberOfBins) { m_binLimits.second = numberOfBins; }
 
-QString WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
+const QString &WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
 
 void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
   if (algName == m_algName) {

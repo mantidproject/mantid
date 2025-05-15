@@ -89,7 +89,7 @@ public:
 
   std::unique_ptr<IMDIterator> createIterator(Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
-  std::string getConvention() const;
+  const std::string &getConvention() const;
   void setConvention(std::string convention);
   std::string changeQConvention();
 

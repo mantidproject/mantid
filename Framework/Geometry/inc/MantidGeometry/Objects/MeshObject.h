@@ -130,7 +130,7 @@ public:
   std::vector<double> getVertices() const;
   const std::vector<Kernel::V3D> &getV3Ds() const;
   size_t numberOfTriangles() const;
-  std::vector<uint32_t> getTriangles() const;
+  const std::vector<uint32_t> &getTriangles() const;
 
   void rotate(const Kernel::Matrix<double> &);
   void translate(const Kernel::V3D &);

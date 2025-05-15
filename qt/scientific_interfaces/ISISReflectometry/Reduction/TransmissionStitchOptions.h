@@ -31,7 +31,7 @@ public:
   TransmissionStitchOptions(std::optional<RangeInLambda> overlapRange, RebinParameters rebinParameters, bool scaleRHS);
 
   std::optional<RangeInLambda> overlapRange() const;
-  RebinParameters rebinParameters() const;
+  const RebinParameters &rebinParameters() const;
   bool scaleRHS() const;
 
 private:

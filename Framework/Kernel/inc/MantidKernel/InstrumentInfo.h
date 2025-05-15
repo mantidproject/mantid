@@ -44,7 +44,7 @@ public:
   /// Equality operator
   bool operator==(const InstrumentInfo &rhs) const;
   /// Return the name of the instrument
-  const std::string name() const;
+  const std::string &name() const;
   /// Return the short name of the instrument
   const std::string &shortName() const;
   /// Returns zero padding for this instrument and a run number

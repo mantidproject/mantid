@@ -144,14 +144,14 @@ public:
   /// Get the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
   /// SPHERICAL_Z
-  std::string getDefaultView() const { return m_defaultView; }
+  const std::string &getDefaultView() const { return m_defaultView; }
   /// Set the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
   /// SPHERICAL_Z
   void setDefaultView(const std::string &type);
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
-  std::string getDefaultAxis() const { return m_defaultViewAxis; }
+  const std::string &getDefaultAxis() const { return m_defaultViewAxis; }
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
   void setDefaultViewAxis(const std::string &axis) { m_defaultViewAxis = axis; }
