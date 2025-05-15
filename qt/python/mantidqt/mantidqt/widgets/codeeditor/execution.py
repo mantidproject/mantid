@@ -19,8 +19,6 @@ except ImportError:
     builtins = __main__.__builtins__
 import copy
 import os
-from io import BytesIO
-from lib2to3.pgen2.tokenize import detect_encoding
 
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
@@ -44,10 +42,7 @@ def _get_imported_from_future(code_str):
     :return list: List of names that are imported from __future__
     """
     future_imports = []
-    try:
-        code_str = code_str.encode(detect_encoding(BytesIO(code_str.encode()).readline)[0])
-    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
-        code_str = code_str.encode("utf-8")
+    code_str = code_str.encode("utf-8")
     for node in ast.walk(ast.parse(code_str)):
         if isinstance(node, ast.ImportFrom):
             if node.module == "__future__":

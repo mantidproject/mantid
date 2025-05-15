@@ -133,7 +133,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         axis = (None, None)
         unit = None
 
-        with open(function_filename, "rU") as f_handle:
+        with open(function_filename, "r") as f_handle:
             while True:
                 line = f_handle.readline()
                 if not line:
@@ -185,7 +185,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         data = None
         unit = None
 
-        with open(axis_filename, "rU") as f_handle:
+        with open(axis_filename, "r") as f_handle:
             while True:
                 line = f_handle.readline()
                 if not line:

@@ -44,6 +44,10 @@ def main(args=None):
     except ImportError:
         pass  # silently skip this
 
+    # Avoid warning about frozen modules coming from the jupyter debugger on launch
+    # https://stackoverflow.com/questions/75114841/debugger-warning-from-ipython-frozen-modules
+    os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
+
     # parse the command line options
     options = parser.parse_args(args=args)
 
