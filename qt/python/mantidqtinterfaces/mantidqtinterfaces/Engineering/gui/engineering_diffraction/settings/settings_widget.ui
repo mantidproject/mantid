@@ -72,6 +72,20 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
+      <item row="2" column="2">
+         <widget class="QCheckBox" name="abs_corr_checkBox">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Remove Files From ADS after processing</string>
+          </property>
+         </widget>
+        </item>
      </layout>
     </widget>
    </item>

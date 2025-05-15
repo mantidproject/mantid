@@ -16,10 +16,9 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from os import path, makedirs
 from scipy import interpolate
+from Engineering.EnggUtils import GROUP
 
 
 class TextureCorrectionModel:
@@ -116,8 +115,7 @@ class TextureCorrectionModel:
                 valid = True
         return valid
 
-    def calc_absorption(self, ws):
-        mc_param_str = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "monte_carlo_params")
+    def calc_absorption(self, ws, mc_param_str):
         method_dict = self._param_str_to_dict(mc_param_str)
         temp_ws = ConvertUnits(ws, Target="Wavelength")
         Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
@@ -145,29 +143,44 @@ class TextureCorrectionModel:
     def calc_divergence(self, ws, horz, vert, det_horz):
         EstimateDivergence(ws, vert, horz, det_horz, OutputWorkspace="_div_corr")
 
-    def apply_corrections(self, ws, out_ws, abs_corr=1.0, div_corr=1.0, save_dir=None):
+    def apply_corrections(
+        self, ws, out_ws, calibration, root_dir, abs_corr=1.0, div_corr=1.0, rb_num=None, remove_ws_after_processing=False
+    ):
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing")
         if isinstance(abs_corr, str):
             abs_ws = ConvertUnits(ADS.retrieve(abs_corr), Target="dSpacing")
             temp_ws = temp_ws / abs_ws
+            ADS.remove("abs_ws")
         else:
             temp_ws = temp_ws / abs_corr
         if isinstance(div_corr, str):
             div_ws = ConvertUnits(ADS.retrieve(div_corr), Target="dSpacing")
             temp_ws = temp_ws / div_ws
+            ADS.remove("div_ws")
         else:
             temp_ws = temp_ws / div_corr
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws)
-        self._save_corrected_files(out_ws)
+        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", rb_num, calibration)
+        if remove_ws_after_processing:
+            # remove output ws from ADS to free up memory
+            ADS.remove(out_ws)
+            ADS.remove("temp_ws")
+            if isinstance(abs_corr, str):
+                ADS.remove(abs_corr)
+            if isinstance(div_corr, str):
+                ADS.remove(div_corr)
 
-    def _save_corrected_files(self, ws):
-        save_dir = output_settings.get_output_path()
-        corr_dirs = [path.join(save_dir, "AbsorptionCorrected")]
-        for corr_dir in corr_dirs:
-            if not path.exists(corr_dir):
-                makedirs(corr_dir)
-            SaveNexus(InputWorkspace=ws, Filename=path.join(corr_dir, ws + ".nxs"))
+    def _save_corrected_files(self, ws, root_dir, dir_name, rb_num, calibration):
+        save_dirs = [path.join(root_dir, dir_name)]
+        if rb_num:
+            save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
+            if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+                save_dirs.pop(0)  # only save to RB directory to limit number files saved
+        for save_dir in save_dirs:
+            if not path.exists(save_dir):
+                makedirs(save_dir)
+            SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
 
     def read_attenuation_coefficient_at_value(self, ws, val, unit):
         conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
@@ -178,11 +191,8 @@ class TextureCorrectionModel:
             ydat = conv_ws.readY(r)
             f = interpolate.interp1d(xdat, ydat)
             interp_val = f([val])[0]
-            print(
-                interp_val,
-                type(interp_val),
-            )
             coefs.append(interp_val)
+        ADS.remove("conv_ws")
         return coefs
 
     def get_atten_table_name(self, ws_str, eval_val, unit):
@@ -191,8 +201,9 @@ class TextureCorrectionModel:
         instr = ws.getInstrument().getName()
         return f"{instr}_{run_num}_attenuation_coefficient_{eval_val}_{unit}"
 
-    def write_atten_val_table(self, ws, vals, eval_val, unit):
-        table = CreateEmptyTableWorkspace(OutputWorkspace=self.get_atten_table_name(ws, eval_val, unit))
+    def write_atten_val_table(self, ws, vals, eval_val, unit, rb_num, calibration, root_dir):
+        out_ws = self.get_atten_table_name(ws, eval_val, unit)
+        table = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
         table.addColumn("float", "I")
         for r in range(ADS.retrieve(ws).getNumberHistograms()):
             table.addRow(
@@ -200,6 +211,7 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration)
 
 
 # temporary methods until SetGoniometer PR is merged

@@ -37,8 +37,14 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_delete_clicked(self, slot):
         self.btn_deleteSelected.clicked.connect(slot)
 
+    def set_on_delete_param_clicked(self, slot):
+        self.btn_deleteSelectedParams.clicked.connect(slot)
+
     def set_on_select_all_clicked(self, slot):
         self.btn_selectAll.clicked.connect(slot)
+
+    def set_on_deselect_all_clicked(self, slot):
+        self.btn_deselectAll.clicked.connect(slot)
 
     def set_on_calc_pf_clicked(self, slot):
         self.btn_calc_pf.clicked.connect(slot)
@@ -129,13 +135,13 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
                     selected_params.append(self.table_loaded_data.item(row, 1).text())
         return selected_wss, selected_params
 
-    def select_all_workspaces(self):
+    def set_all_workspaces_selected(self, selected):
         for row in range(self.table_loaded_data.rowCount()):
             cell_widget = self.table_loaded_data.cellWidget(row, 3)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:
-                    checkbox.setChecked(True)
+                    checkbox.setChecked(selected)
 
     def get_file_paths(self):
         return self.finder_corr.getFilenames()

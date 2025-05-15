@@ -62,18 +62,32 @@ QGroupBox:title {
      </size>
     </property>
    </spacer>
+        <item>
+   <widget class="QPushButton" name="btn_selectAll">
+    <property name="text">
+     <string>Select All Files</string>
+    </property>
+   </widget>
+  </item>
+      <item>
+   <widget class="QPushButton" name="btn_deselectAll">
+    <property name="text">
+     <string>Deselect All Files</string>
+    </property>
+   </widget>
+  </item>
   </item>
     <item>
    <widget class="QPushButton" name="btn_deleteSelected">
     <property name="text">
-     <string>Delete Selected Files</string>
+     <string>Delete All Selected Files</string>
     </property>
    </widget>
   </item>
-  <item>
-   <widget class="QPushButton" name="btn_selectAll">
+     <item>
+   <widget class="QPushButton" name="btn_deleteSelectedParams">
     <property name="text">
-     <string>Select All Files</string>
+     <string>Delete Selected Parameter Files</string>
     </property>
    </widget>
   </item>

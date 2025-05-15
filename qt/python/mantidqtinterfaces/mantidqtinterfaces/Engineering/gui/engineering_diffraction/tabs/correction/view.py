@@ -53,6 +53,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def set_on_select_all_clicked(self, slot):
         self.btn_selectAll.clicked.connect(slot)
 
+    def set_on_deselect_all_clicked(self, slot):
+        self.btn_deselectAll.clicked.connect(slot)
+
     def set_on_set_orientation_clicked(self, slot):
         self.btn_setOrientation.clicked.connect(slot)
 
@@ -134,13 +137,13 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
                     selected.append(self.table_loaded_data.item(row, 0).text())
         return selected
 
-    def select_all_workspaces(self):
+    def set_all_workspaces_selected(self, selected):
         for row in range(self.table_loaded_data.rowCount()):
             cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:
-                    checkbox.setChecked(True)
+                    checkbox.setChecked(selected)
 
     def get_file_paths(self):
         return self.finder_corr.getFilenames()
