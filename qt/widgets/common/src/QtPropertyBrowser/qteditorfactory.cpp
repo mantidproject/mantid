@@ -531,7 +531,7 @@ void QtDoubleSpinBoxFactoryPrivate::slotRangeChanged(QtProperty *property, doubl
   if (!m_createdEditors.contains(property))
     return;
 
-  QtDoublePropertyManager *manager = q_ptr->propertyManager(property);
+  const QtDoublePropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -1749,7 +1749,7 @@ void QtColorEditorFactoryPrivate::slotPropertyChanged(QtProperty *property, cons
 }
 
 void QtColorEditorFactoryPrivate::slotSetValue(const QColor &value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
   for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
     if (itEditor.key() == object) {
@@ -1911,7 +1911,7 @@ void QtFontEditorFactoryPrivate::slotPropertyChanged(QtProperty *property, const
 }
 
 void QtFontEditorFactoryPrivate::slotSetValue(const QFont &value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
   for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
     if (itEditor.key() == object) {
