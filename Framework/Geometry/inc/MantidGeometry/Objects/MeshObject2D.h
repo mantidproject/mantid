@@ -77,7 +77,7 @@ public:
   size_t numberOfVertices() const;
   size_t numberOfTriangles() const;
   std::vector<double> getVertices() const;
-  std::vector<uint32_t> getTriangles() const;
+  const std::vector<uint32_t> &getTriangles() const;
 
 private:
   struct PlaneParameters {

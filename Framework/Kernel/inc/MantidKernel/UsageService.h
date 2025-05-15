@@ -60,7 +60,7 @@ public:
   /// Sets the application name that has invoked Mantid
   void setApplicationName(const std::string &name);
   /// Returns the application name that has invoked Mantid
-  std::string getApplicationName() const;
+  const std::string &getApplicationName() const;
   /// Sets the interval that the timer checks for tasks
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid

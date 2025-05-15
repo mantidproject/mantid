@@ -35,7 +35,7 @@ public:
       const std::shared_ptr<PoldiAbstractDetector> &sqdetector = std::shared_ptr<PoldiAbstractDetector>());
 
   void setDeadWires(std::set<int> deadWires);
-  std::set<int> deadWires();
+  const std::set<int> &deadWires();
 
   size_t elementCount() override;
   const std::vector<int> &availableElements() override;

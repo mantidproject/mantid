@@ -42,7 +42,7 @@ void PoldiDeadWireDecorator::setDeadWires(std::set<int> deadWires) {
   detectorSetHook();
 }
 
-std::set<int> PoldiDeadWireDecorator::deadWires() { return m_deadWireSet; }
+const std::set<int> &PoldiDeadWireDecorator::deadWires() { return m_deadWireSet; }
 
 size_t PoldiDeadWireDecorator::elementCount() { return m_goodElements.size(); }
 
