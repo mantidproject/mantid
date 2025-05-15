@@ -11,7 +11,7 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 . source/buildconfig/Jenkins/Conda/mamba-utils
 
 # Install conda and environment
-setup_mamba $WORKSPACE/mambaforge "docs-build" true
+setup_mamba $WORKSPACE/miniforge "docs-build" true
 mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory
@@ -37,7 +37,7 @@ cmake --build . --target StandardTestData
 
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
 export STANDARD_TEST_DATA_DIR=$PWD/ExternalData/Testing/Data
-echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/mambaforge/envs/docs-build/bin/Mantid.properties
+echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/miniforge/envs/docs-build/bin/Mantid.properties
 
 # Build the html docs
 export LC_ALL=C
