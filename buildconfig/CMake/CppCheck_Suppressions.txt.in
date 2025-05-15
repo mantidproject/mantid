@@ -264,7 +264,6 @@ unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cp
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:280
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
-duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:144
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:989
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:911
