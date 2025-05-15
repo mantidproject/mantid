@@ -798,6 +798,7 @@ set(TEST_FILES
     CreateLogPropertyTableTest.h
     CreateLogTimeCorrectionTest.h
     CreateMonteCarloWorkspaceTest.h
+    CreateBootstrapWorkspaceTest.h
     CreatePSDBleedMaskTest.h
     CreatePeaksWorkspaceTest.h
     CreateSampleWorkspaceTest.h
