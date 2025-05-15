@@ -308,7 +308,7 @@ void CalculatePolynomialBackground::init() {
   declareProperty(Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
                   std::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
                   "The minimizer to be passed to the Fit algorithm.");
-  declareProperty(Prop::IGNORE_INVALID_DATA, true, "Flag to ignore infinities, NaNs and data with zero errors.");
+  declareProperty(Prop::IGNORE_INVALID_DATA, false, "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 //----------------------------------------------------------------------------------------------
