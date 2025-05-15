@@ -147,7 +147,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZe
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:174
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:223
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CombineDiffCal.cpp:86
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:246
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertToConstantL2.cpp:144
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateGroupingWorkspace.cpp:684
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateLogPropertyTable.cpp:126
@@ -263,7 +262,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioH
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:370
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:280
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
@@ -407,11 +405,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h:166
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h:27
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CalculateCoverageDGS.cpp:165
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompactMD.cpp:30
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompactMD.cpp:31
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:163
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:293
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWorkspace.cpp:178
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PreprocessDetectorsToMD.cpp:394
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ReplicateMD.cpp:111
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ReplicateMD.cpp:151
@@ -463,7 +458,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLo
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:196
 missingOverride:${CMAKE_SOURCE_DIR}/Testing/Tools/cxxtest/cxxtest/GlobalFixture.h:22
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/icons/src/Icon.cpp:80
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.h:47
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/IReflMessageHandler.h:21
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:267
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:271
@@ -490,7 +484,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidge
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h:39
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FlowLayout.h:68
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
-passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ImageInfoPresenter.h:28
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ManageUserDirectories.h:39
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/MessageHandler.h:17
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ProgressPresenter.h:35
@@ -528,7 +521,6 @@ duplicateAssignExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrow
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:974
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoModelMD.cpp:17
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoModelMD.cpp:24
-passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ImageInfoPresenter.cpp:33
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelector.cpp:38
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:171
