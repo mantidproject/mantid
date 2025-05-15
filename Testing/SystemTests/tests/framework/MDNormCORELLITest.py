@@ -23,10 +23,15 @@ from mantid.simpleapi import (
     RecalculateTrajectoriesExtents,
     SetGoniometer,
 )
+import platform
 import systemtesting
 
 
 class MDNormCORELLITest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return [
             "CORELLI_29782.nxs",

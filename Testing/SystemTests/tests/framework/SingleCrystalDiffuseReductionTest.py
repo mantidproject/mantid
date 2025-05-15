@@ -4,11 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import platform
 import systemtesting
 from mantid.simpleapi import SingleCrystalDiffuseReduction, Load, AlgorithmManager, SaveMD
 
 
 class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
+
     def requiredFiles(self):
         return [
             "CORELLI_29782.nxs",

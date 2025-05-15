@@ -18,6 +18,7 @@
 #
 # Possible parameters:
 #   --package-suffix: An optional suffix to pass to the standalone package step.
+#   --platform: Target platform, e.g. linux-64
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
@@ -44,11 +45,15 @@ fi
 
 # Parse options
 STANDALONE_PACKAGE_SUFFIX=
+PLATFORM=""
 while [ ! $# -eq 0 ]
 do
     case "$1" in
         --package-suffix)
             STANDALONE_PACKAGE_SUFFIX="$2"
+            shift ;;
+        --platform)
+            PLATFORM="$2"
             shift ;;
         *)
             echo "Argument not accepted: $1"
@@ -59,7 +64,7 @@ do
 done
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true
+setup_mamba $WORKSPACE/mambaforge "" true $PLATFORM
 mamba activate base
 mamba install --yes conda-index
 
@@ -77,11 +82,15 @@ PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
 if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
     PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
 fi
+
 if [[ $OSTYPE == 'msys'* ]]; then
     rm -fr *.exe
     ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
 elif [[ $OSTYPE == 'darwin'* ]]; then
     rm -fr *.dmg
+    if [ -n "${PLATFORM}" ]; then
+        PACKAGING_ARGS="${PACKAGING_ARGS} -p ${PLATFORM}"
+    fi
     ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
 else
     rm -fr *.tar.xz
