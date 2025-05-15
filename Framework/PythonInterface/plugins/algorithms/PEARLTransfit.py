@@ -332,7 +332,7 @@ class PEARLTransfit(PythonAlgorithm):
 
     def calc_effective_temp_and_error(
         self, fwhm: float, fwhm_err: float, energy: float, energy_err: float, correlation: float, mass: float
-    ) -> (float, float):
+    ) -> tuple[float, float]:
         const = ((1 / self.eV_TO_meV) * constants.e * ((1 + mass) ** 2)) / (4 * constants.k * mass)
         temp = const * (fwhm**2) / energy
         # propagate errors
@@ -345,7 +345,7 @@ class PEARLTransfit(PythonAlgorithm):
         temp_err = const * np.sqrt((dtemp_by_dfwhm * fwhm_err) ** 2 + (dtemp_by_denergy * energy_err) ** 2 + covar_term)
         return temp, temp_err
 
-    def calc_sample_temp_and_error_from_effective(self, temp_eff: float, temp_eff_err: float, temp_debye: float) -> (float, float):
+    def calc_sample_temp_and_error_from_effective(self, temp_eff: float, temp_eff_err: float, temp_debye: float) -> tuple[float, float]:
         if 8 * temp_eff < 3 * temp_debye:
             self.log().warning("The effective temperature is currently too far below the Debye temperature to give an accurate measure.")
             return temp_eff, temp_eff_err
@@ -380,7 +380,7 @@ class PEARLTransfit(PythonAlgorithm):
         return ws
 
     @staticmethod
-    def estimate_linear_background(x: np.ndarray, y: np.ndarray, nbg: int = 3) -> (float, float):
+    def estimate_linear_background(x: np.ndarray, y: np.ndarray, nbg: int = 3) -> tuple[float, float]:
         if len(y) < 2 * nbg:
             # not expected as trying to fit a function with 7 parameters
             return 2 * [0.0]
