@@ -207,7 +207,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitor
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UpdateScriptRepository.cpp:51
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/SCDCalibratePanels2.h:134
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CalculateUMatrix.cpp:65
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CentroidPeaks.cpp:75
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindClusterFaces.cpp:59
