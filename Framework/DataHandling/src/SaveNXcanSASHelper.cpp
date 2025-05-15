@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/NXcanSASHelper.h"
+#include "MantidDataHandling/SaveNXcanSASHelper.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidDataHandling/NXcanSASUtil.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -34,14 +35,7 @@ namespace {
 //=== UTILITY ===//
 
 // For h5 -> hsize_t = unsigned long long
-
 using AttrMap = std::map<std::string, std::string>;
-
-std::optional<size_t> findWorkspaceIndexForSpinState(const std::vector<std::string> &spinStates,
-                                                     const std::string &targetState) {
-  size_t index = std::ranges::find(spinStates, targetState) - spinStates.cbegin();
-  return index == spinStates.size() ? std::nullopt : std::optional(index);
-}
 
 std::string getIntensityUnit(const MatrixWorkspace_sptr &workspace) {
   auto iUnit = workspace->YUnit();
@@ -82,47 +76,6 @@ H5::DSetCreatPropList setCompression(const size_t rank, const hsize_t *chunkDims
   propList.setDeflate(deflateLevel);
   return propList;
 }
-
-class DataDimensions {
-public:
-  // Prepares size and shape vectors and variables for data to be stored in file
-  explicit DataDimensions(const MatrixWorkspace_sptr &workspace,
-                          const std::optional<std::pair<size_t, size_t>> &spinVecSize = std::nullopt)
-      : m_numberOfPoints(static_cast<hsize_t>(workspace->dataY(0).size())),
-        m_numberOfHistograms(static_cast<hsize_t>(workspace->getNumberHistograms())) {
-    auto dataShape = std::vector<hsize_t>({m_numberOfPoints});
-    auto slabShape = dataShape;
-    if (m_numberOfHistograms > 1) {
-      dataShape.insert(dataShape.cbegin(), m_numberOfHistograms);
-      slabShape.insert(slabShape.cbegin(), 1);
-    }
-    // If data is polarized only
-    if (spinVecSize.has_value()) {
-      const auto &[PinSize, PoutSize] = *spinVecSize;
-      dataShape.insert(dataShape.cbegin(), {PinSize, PoutSize});
-      slabShape.insert(slabShape.cbegin(), {1, 1});
-    }
-    m_dataShape = dataShape;
-    m_slabShape = slabShape;
-    m_dataSpace = H5::DataSpace(static_cast<int>(dataShape.size()), dataShape.data());
-    m_dataType = H5::DataType(H5Util::getType<double>());
-  }
-
-  const hsize_t &getNumberOfPoints() const { return m_numberOfPoints; }
-  const hsize_t &getNumberOfHistograms() const { return m_numberOfHistograms; }
-  const std::vector<hsize_t> &getDataShape() const { return m_dataShape; }
-  const std::vector<hsize_t> &getSlabShape() const { return m_slabShape; }
-  const H5::DataSpace &getDataSpace() const { return m_dataSpace; }
-  const H5::DataType &getDataType() const { return m_dataType; }
-
-private:
-  hsize_t m_numberOfPoints;
-  hsize_t m_numberOfHistograms;
-  std::vector<hsize_t> m_dataShape;
-  std::vector<hsize_t> m_slabShape;
-  H5::DataSpace m_dataSpace;
-  H5::DataType m_dataType;
-};
 
 //=== Functors to Extract Data From Workspaces ===//
 
@@ -203,18 +156,12 @@ bool isCanSASCompliant(bool isStrict, const std::string &input) {
   return std::regex_match(input, baseRegex);
 }
 
-void removeSpecialCharacters(std::string &input) {
-  const std::regex toReplace("[-\\.]");
-  const std::string replaceWith("_");
-  input = std::regex_replace(input, toReplace, replaceWith);
-}
-
 std::string makeCompliantName(const std::string &input, bool isStrict,
                               const std::function<void(std::string &)> &capitalizeStrategy) {
   auto output = input;
   // Check if input is compliant
   if (!isCanSASCompliant(isStrict, output)) {
-    removeSpecialCharacters(output);
+    output = std::regex_replace(output, std::regex("[-\\.]"), std::string("_"));
     capitalizeStrategy(output);
     // Check if the changes have made it compliant
     if (!isCanSASCompliant(isStrict, output)) {
@@ -265,32 +212,9 @@ void addPropertyFromRunIfExists(const Run &run, const std::string &propertyName,
 
 //=== SASpolarization ===//
 
-struct SpinStateHelper {
-  explicit SpinStateHelper(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
-    // If there is polarized data, we set the default state vector as -1,1 and then arrange workspaces accordingly
-    // when storing the polarized data set.
-    const auto stateVector = std::vector<int>({-1, 1});
-    if (spinStateStr.size() == 4) {
-      pIn = stateVector;
-      pOut = stateVector;
-    } else if (spinStateStr.size() == 2) {
-      if (spinStateStr.begin()->starts_with("0")) {
-        pIn = std::vector<int>(1, 0);
-        pOut = stateVector;
-      } else {
-        pIn = stateVector;
-        pOut = std::vector<int>(1, 0);
-      }
-    }
-  }
-  std::vector<std::string> spinVec;
-  std::vector<int> pIn;
-  std::vector<int> pOut;
-};
-
 template <typename WorkspaceExtractorFunctor>
 void writePolarizedDataToFile(H5::DataSet &dataSet, WorkspaceExtractorFunctor func, const DataDimensions &dimensions,
-                              const SpinStateHelper &spin) {
+                              const SpinVectorBuilder &spin) {
   auto stateConverter = [](int spin) -> std::string { return (spin == 1) ? "+1" : std::to_string(spin); };
 
   const auto rank = dimensions.getDataShape().size();
@@ -325,8 +249,8 @@ void writePolarizedDataToFile(H5::DataSet &dataSet, WorkspaceExtractorFunctor fu
 
 template <typename WorkspaceExtractorFunctor>
 void savePolarizedDataSet(H5::Group &group, const WorkspaceGroup_sptr &workspaces, WorkspaceExtractorFunctor func,
-                          const std::string &dataSetName, const SpinStateHelper &spin, const AttrMap &attributes = {}) {
-
+                          const std::string &dataSetName, const SpinVectorBuilder &spin,
+                          const AttrMap &attributes = {}) {
   const auto ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(workspaces->getItem(0));
   auto dataDimensions = DataDimensions(ws0, std::make_pair(spin.pIn.size(), spin.pOut.size()));
   const auto propList =
@@ -337,8 +261,7 @@ void savePolarizedDataSet(H5::Group &group, const WorkspaceGroup_sptr &workspace
   writeDataSetAttributes(dataSet, attributes);
 }
 
-void writeSpinDataAttributes(H5::Group &data, const SpinStateHelper &spinPairs) {
-
+void writeSpinDataAttributes(H5::Group &data, const SpinVectorBuilder &spinPairs) {
   // store Pin/ Pout
   H5Util::writeNumAttribute(data, sasDataPinIndicesAttr, sasDataPinIndicesValue);
   H5Util::writeNumAttribute(data, sasDataPoutIndicesAttr, sasDataPoutIndicesValue);
@@ -629,6 +552,10 @@ void addEMFieldDirection(H5::Group &group, const std::string &emFieldDir) {
  */
 void addSampleEMFields(H5::Group &group, const MatrixWorkspace_sptr &workspace, const std::string &emFieldStrengthLog,
                        const std::string &emFieldDir) {
+  if (emFieldStrengthLog.empty() && emFieldDir.empty()) {
+    return;
+  }
+
   auto sampleGroup = group.exists(sasInstrumentSampleGroupAttr)
                          ? group.openGroup(sasInstrumentSampleGroupAttr)
                          : H5Util::createGroupCanSAS(group, sasInstrumentSampleGroupAttr, nxInstrumentSampleClassAttr,
@@ -865,7 +792,7 @@ void addPolarizedData(H5::Group &data, const WorkspaceGroup_sptr &wsGroup, const
 
   writeStandardDataAttributes(data, sasDataIAxesAttrSpin, qIndices);
   const auto inputSpinOrder = StringTokenizer{inputSpinStates, ",", StringTokenizer::TOK_TRIM}.asVector();
-  const auto &spinPairs = SpinStateHelper(inputSpinOrder);
+  const auto &spinPairs = SpinVectorBuilder(inputSpinOrder);
   writeSpinDataAttributes(data, spinPairs);
 
   // add Q
@@ -892,16 +819,6 @@ void addPolarizedData(H5::Group &data, const WorkspaceGroup_sptr &wsGroup, const
   AttrMap eAttributes;
   eAttributes.insert(std::make_pair(sasUnitAttr, iAttributes[sasUnitAttr]));
   savePolarizedDataSet(data, wsGroup, wsGroupExtractor, sasDataIdev, spinPairs, eAttributes);
-}
-
-/**
- * Retrieves workspace dimensionality enum value: oneD , twoD, other (error)
- * @param workspace: The workspace from which to get the data dimensionality
- *
- */
-WorkspaceDimensionality getWorkspaceDimensionality(const MatrixWorkspace_sptr &workspace) {
-  const auto numberOfHists = workspace->getNumberHistograms();
-  return static_cast<WorkspaceDimensionality>(numberOfHists > 1 ? 2 : numberOfHists);
 }
 
 /**
