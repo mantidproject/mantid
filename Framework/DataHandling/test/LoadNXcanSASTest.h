@@ -16,334 +16,302 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 #include "NXcanSASTestHelper.h"
 
-using Mantid::DataHandling::LoadNXcanSAS;
+using Mantid::DataHandling::NXcanSAS::LoadNXcanSAS;
 using namespace NXcanSASTestHelper;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling::NXcanSAS;
 namespace {
-const double eps = 1e-6;
+constexpr double eps = 1e-6;
+
+MatrixWorkspace_sptr convertToPointData(const MatrixWorkspace_sptr &ws) {
+  const auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToPointData");
+  toPointAlg->initialize();
+  toPointAlg->setChild(true);
+  toPointAlg->setProperty("InputWorkspace", ws);
+  toPointAlg->setProperty("OutputWorkspace", "toPointOutput");
+  toPointAlg->execute();
+  return toPointAlg->getProperty("OutputWorkspace");
 }
+
+void compareLogTo(const MatrixWorkspace_sptr &ws, const std::string &logName, const std::string &logValue) {
+  const auto &run = ws->mutableRun();
+  // Check for User file
+  const bool hasProperty = run.hasProperty(logName);
+  TS_ASSERT(hasProperty);
+  if (hasProperty) {
+    const auto prop = run.getProperty(logName);
+    TS_ASSERT_EQUALS(logValue, prop->value());
+  }
+}
+} // namespace
 
 class LoadNXcanSASTest : public CxxTest::TestSuite {
 public:
+  LoadNXcanSASTest() : m_ads(Mantid::API::AnalysisDataService::Instance()), m_parameters() {}
   // This pair of boilerplate methods prevent the suite being created
   // statically
   // This means the constructor isn't called when running other tests
   static LoadNXcanSASTest *createSuite() { return new LoadNXcanSASTest(); }
   static void destroySuite(LoadNXcanSASTest *suite) { delete suite; }
+  void setUp() override { m_parameters = NXcanSASTestParameters(); }
+  void tearDown() override {
+    m_ads.clear();
+    removeFile(m_parameters.filename);
+  }
 
   void test_that_1D_workspace_with_Q_resolution_can_be_loaded() {
-    // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
-    parameters.hasDx = true;
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.hasDx = true;
 
-    auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
-    parameters.idf = getIDFfromWorkspace(ws);
-    save_file_no_issues(ws, parameters);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    const auto ws = provide1DWorkspace(m_parameters);
+    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
+    m_parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
 
     // Assert
-    do_assert_load(ws, wsOut, parameters);
-
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    do_assert_load(ws, wsOut);
   }
 
   void test_that_1D_workspace_without_Q_resolution_can_be_loaded() {
     // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
-    parameters.hasDx = false;
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.hasDx = false;
 
-    auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
-    parameters.idf = getIDFfromWorkspace(ws);
-    save_file_no_issues(ws, parameters);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    const auto ws = provide1DWorkspace(m_parameters);
+    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
+    m_parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
 
     // Assert
-    do_assert_load(ws, wsOut, parameters);
-
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    do_assert_load(ws, wsOut);
   }
 
   void test_that_1D_workspace_with_transmissions_can_be_loaded() {
     // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
-    parameters.hasDx = false;
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.hasDx = false;
+    m_parameters.loadTransmission = true;
 
-    auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
-    parameters.idf = getIDFfromWorkspace(ws);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    const auto ws = provide1DWorkspace(m_parameters);
+    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
+    m_parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission
-    parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
-    parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameCanAttrValue);
+    m_parameters.transmissionParameters = TransmissionTestParameters(sasTransmissionSpectrumNameSampleAttrValue);
+    m_parameters.transmissionCanParameters = TransmissionTestParameters(sasTransmissionSpectrumNameCanAttrValue);
 
-    auto transmission = getTransmissionWorkspace(parameters.transmissionParameters);
-    auto transmissionCan = getTransmissionWorkspace(parameters.transmissionCanParameters);
-    save_file_no_issues(ws, parameters, transmission, transmissionCan);
+    const auto transmission = getTransmissionWorkspace(m_parameters.transmissionParameters);
+    const auto transmissionCan = getTransmissionWorkspace(m_parameters.transmissionCanParameters);
+    save_file_no_issues(ws, transmission, transmissionCan);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, true /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
 
     // Assert
-    do_assert_load(ws, wsOut, parameters, transmission, transmissionCan);
-
-    // Clean up
-    auto transName = ws->getTitle();
-    const std::string transExtension = "_trans_" + parameters.transmissionParameters.name;
-    transName += transExtension;
-
-    auto transNameCan = ws->getTitle();
-    const std::string transExtensionCan = "_trans_" + parameters.transmissionCanParameters.name;
-    transNameCan += transExtensionCan;
-
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
-    removeWorkspaceFromADS(transName);
-    removeWorkspaceFromADS(transNameCan);
+    do_assert_load(ws, wsOut, transmission, transmissionCan);
   }
 
   void test_that_legacy_transmissions_saved_as_histograms_are_loaded() {
-    NXcanSASTestParameters parameters;
-    parameters.filename = "NXcanSAS-histo-lambda.h5";
-    const std::string outWsName{"loaded_histo_trans"};
+    m_parameters.filename = "NXcanSAS-histo-lambda.h5";
 
-    Mantid::API::MatrixWorkspace_sptr wsOut;
-    TS_ASSERT_THROWS_NOTHING(wsOut = load_file_no_issues(parameters, true /*load transmission*/, outWsName));
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
     TS_ASSERT(!wsOut->isHistogramData());
-
-    removeWorkspaceFromADS(outWsName);
   }
 
   void test_that_2D_workspace_can_be_loaded() {
-    // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
 
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
+    m_parameters.is2dData = true;
+    m_parameters.hasDx = false;
 
-    parameters.is2dData = true;
-
-    auto ws = provide2DWorkspace(parameters);
+    const auto ws = provide2DWorkspace(m_parameters);
     set2DValues(ws);
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
-    parameters.idf = getIDFfromWorkspace(ws);
+    m_parameters.idf = getIDFfromWorkspace(ws);
 
-    save_file_no_issues(ws, parameters);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
 
     // Assert
-    do_assert_load(ws, wsOut, parameters);
-
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    do_assert_load(ws, wsOut);
   }
 
   void test_that_2D_workspace_histogram_can_be_loaded() {
-    // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
 
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
+    m_parameters.is2dData = true;
+    m_parameters.hasDx = false;
+    m_parameters.isHistogram = true;
 
-    parameters.is2dData = true;
-    parameters.isHistogram = true;
-
-    auto ws = provide2DWorkspace(parameters);
+    const auto ws = provide2DWorkspace(m_parameters);
     set2DValues(ws);
     const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
-    parameters.idf = getIDFfromWorkspace(ws);
+    m_parameters.idf = getIDFfromWorkspace(ws);
 
-    save_file_no_issues(ws, parameters);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
+
+    // NXcanSAS loads as point data
+    const auto wsPoint = convertToPointData(ws);
 
     // Assert
-
-    // We need to convert the ws file back into point data since the would have
-    // loaded point data
-    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToPointData");
-    std::string toPointOutputName("toPointOutput");
-    toPointAlg->initialize();
-    toPointAlg->setChild(true);
-    toPointAlg->setProperty("InputWorkspace", ws);
-    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
-    toPointAlg->execute();
-    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
-
-    do_assert_load(wsPoint, wsOut, parameters);
-
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    do_assert_load(wsPoint, wsOut);
   }
 
   void test_that_1D_workspace_histogram_can_be_loaded() {
-    // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
-    parameters.hasDx = true;
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.hasDx = true;
+    m_parameters.isHistogram = true;
 
-    parameters.isHistogram = true;
-
-    auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
-    parameters.idf = getIDFfromWorkspace(ws);
-    save_file_no_issues(ws, parameters);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    const auto ws = provide1DWorkspace(m_parameters);
+    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
+    m_parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
+
+    // NXcanSAS loads as point data
+    const auto wsPoint = convertToPointData(ws);
 
     // Assert
-    // We need to convert the ws file back into point data since the would have
-    // loaded point data
-    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToPointData");
-    std::string toPointOutputName("toPointOutput");
-    toPointAlg->initialize();
-    toPointAlg->setChild(true);
-    toPointAlg->setProperty("InputWorkspace", ws);
-    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
-    toPointAlg->execute();
-    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
-
-    do_assert_load(wsPoint, wsOut, parameters);
-
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    do_assert_load(wsPoint, wsOut);
   }
 
   void test_that_1D_workspace_with_sample_set_is_loaded_correctly() {
-    // Arrange
-    NXcanSASTestParameters parameters;
-    removeFile(parameters.filename);
-    parameters.detectors.emplace_back("front-detector");
-    parameters.detectors.emplace_back("rear-detector");
-    parameters.invalidDetectors = false;
-    parameters.hasDx = true;
-    parameters.geometry = "FlatPlate";
-    parameters.beamHeight = 23;
-    parameters.beamWidth = 12;
-    parameters.sampleThickness = 6;
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.hasDx = true;
+    m_parameters.geometry = "FlatPlate";
+    m_parameters.beamHeight = 23;
+    m_parameters.beamWidth = 12;
+    m_parameters.sampleThickness = 6;
+    m_parameters.isHistogram = true;
 
-    parameters.isHistogram = true;
-
-    auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
-    parameters.idf = getIDFfromWorkspace(ws);
-    save_file_no_issues(ws, parameters);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    const auto ws = provide1DWorkspace(m_parameters);
+    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
+    m_parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws);
 
     // Act
-    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+    const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
+
+    // NXcanSAS loads as point data
+    const auto wsPoint = convertToPointData(ws);
 
     // Assert
-    // We need to convert the ws file back into point data since the would have
-    // loaded point data
-    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToPointData");
-    std::string toPointOutputName("toPointOutput");
-    toPointAlg->initialize();
-    toPointAlg->setChild(true);
-    toPointAlg->setProperty("InputWorkspace", ws);
-    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
-    toPointAlg->execute();
-    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
+    do_assert_load(wsPoint, wsOut);
+  }
 
-    do_assert_load(wsPoint, wsOut, parameters);
+  void test_1D_half_polarized_data_is_loaded_correctly() {
+    m_parameters.polWorkspaceNumber = 2;
+    m_parameters.is2dData = false;
+    m_parameters.isPolarized = true;
+    m_parameters.hasDx = false;
+    m_parameters.inputSpinStates = std::string("0-1,0+1");
+    m_parameters.magneticFieldDirection = "1,2,3";
 
-    // Clean up
-    removeFile(parameters.filename);
-    removeWorkspaceFromADS(outWsName);
+    const auto groupIn = providePolarizedGroup(m_ads, m_parameters);
+    save_file_no_issues(std::dynamic_pointer_cast<Workspace>(groupIn));
+    const auto groupOut = std::dynamic_pointer_cast<WorkspaceGroup>(load_file_no_issues());
+
+    // Assert
+    do_assert_polarized_groups(groupIn, groupOut);
+  }
+
+  void test_2d_full_polarized_data_is_loaded_correctly() {
+    m_parameters.polWorkspaceNumber = 4;
+    m_parameters.is2dData = true;
+    m_parameters.isPolarized = true;
+    m_parameters.hasDx = false;
+    m_parameters.inputSpinStates = std::string("-1-1,-1+1,+1-1,+1+1");
+
+    const auto groupIn = providePolarizedGroup(m_ads, m_parameters);
+    save_file_no_issues(std::dynamic_pointer_cast<Workspace>(groupIn));
+    const auto groupOut = std::dynamic_pointer_cast<WorkspaceGroup>(load_file_no_issues());
+
+    // Assert
+    do_assert_polarized_groups(groupIn, groupOut);
   }
 
 private:
-  void removeWorkspaceFromADS(const std::string &toRemove) {
-    if (AnalysisDataService::Instance().doesExist(toRemove)) {
-      AnalysisDataService::Instance().remove(toRemove);
-    }
-  }
+  AnalysisDataServiceImpl &m_ads;
+  NXcanSASTestParameters m_parameters;
 
-  MatrixWorkspace_sptr load_file_no_issues(NXcanSASTestParameters &parameters, bool loadTransmission,
-                                           const std::string &outWsName) {
+  Workspace_sptr load_file_no_issues() const {
     LoadNXcanSAS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", parameters.filename));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadTransmission", loadTransmission));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadTransmission", m_parameters.loadTransmission));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_parameters.loadedWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service.
-    Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(outWsName));
+    Mantid::API::Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::Workspace>(
+                                 m_parameters.loadedWSName));
+    if (m_parameters.isPolarized) {
+      TS_ASSERT(ws->isGroup());
+    }
     TS_ASSERT(ws);
     return ws;
   }
 
-  void save_file_no_issues(const MatrixWorkspace_sptr &workspace, const NXcanSASTestParameters &parameters,
-                           const MatrixWorkspace_sptr &transmission = nullptr,
+  void save_file_no_issues(const Workspace_sptr &workspace, const MatrixWorkspace_sptr &transmission = nullptr,
                            const MatrixWorkspace_sptr &transmissionCan = nullptr) {
-    auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
+
+    const std::string saveAlgName = m_parameters.isPolarized ? "SavePolarizedNXcanSAS" : "SaveNXcanSAS";
+    const auto saveAlg = AlgorithmManager::Instance().createUnmanaged(saveAlgName);
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", parameters.filename);
-    saveAlg->setProperty("InputWorkspace", workspace);
-    saveAlg->setProperty("RadiationSource", parameters.radiationSource);
-    if (!parameters.detectors.empty()) {
-      std::string detectorsAsString = concatenateStringVector(parameters.detectors);
-      saveAlg->setProperty("DetectorNames", detectorsAsString);
+    saveAlg->setProperty("Filename", m_parameters.filename);
+
+    if (m_parameters.isPolarized) {
+      saveAlg->setProperty("InputWorkspace", std::dynamic_pointer_cast<WorkspaceGroup>(workspace));
+      saveAlg->setProperty("InputSpinStates", m_parameters.inputSpinStates);
+      saveAlg->setProperty("MagneticFieldDirection", m_parameters.magneticFieldDirection);
+    } else {
+      saveAlg->setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
     }
-    saveAlg->setProperty("Geometry", parameters.geometry);
-    saveAlg->setProperty("SampleHeight", parameters.beamHeight);
-    saveAlg->setProperty("SampleWidth", parameters.beamWidth);
-    saveAlg->setProperty("SampleThickness", parameters.sampleThickness);
+
+    saveAlg->setProperty("RadiationSource", m_parameters.radiationSource);
+    if (!m_parameters.detectors.empty()) {
+      saveAlg->setProperty("DetectorNames", concatenateStringVector(m_parameters.detectors));
+    }
+    saveAlg->setProperty("Geometry", m_parameters.geometry);
+    saveAlg->setProperty("SampleHeight", m_parameters.beamHeight);
+    saveAlg->setProperty("SampleWidth", m_parameters.beamWidth);
+    saveAlg->setProperty("SampleThickness", m_parameters.sampleThickness);
 
     if (transmission) {
       saveAlg->setProperty("Transmission", transmission);
@@ -359,7 +327,7 @@ private:
   template <typename Functor> void do_assert_data(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut, Functor func) {
     TSM_ASSERT("Should have the same number of histograms",
                wsIn->getNumberHistograms() == wsOut->getNumberHistograms());
-    auto numberOfHistograms = wsIn->getNumberHistograms();
+    const auto numberOfHistograms = wsIn->getNumberHistograms();
 
     for (size_t index = 0; index < numberOfHistograms; ++index) {
       const auto &dataIn = func(wsIn, index);
@@ -454,13 +422,13 @@ private:
   }
 
   void do_assert_transmission(const MatrixWorkspace_sptr &mainWorkspace, const MatrixWorkspace_sptr &transIn,
-                              const TransmissionTestParameters &parameters) {
-    if (!parameters.usesTransmission || !transIn) {
+                              const TransmissionTestParameters &transmissionParams) {
+    if (!transmissionParams.usesTransmission || !transIn) {
       return;
     }
 
     auto transName = mainWorkspace->getTitle();
-    const std::string transExtension = "_trans_" + parameters.name;
+    const std::string transExtension = "_trans_" + transmissionParams.name;
     transName += transExtension;
 
     auto transOut = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transName);
@@ -479,7 +447,7 @@ private:
   }
 
   void do_assert_load(const MatrixWorkspace_sptr &wsIn, const MatrixWorkspace_sptr &wsOut,
-                      NXcanSASTestParameters &parameters, const MatrixWorkspace_sptr &transmission = nullptr,
+                      const MatrixWorkspace_sptr &transmission = nullptr,
                       const MatrixWorkspace_sptr &transmissionCan = nullptr) {
     // Ensure that both have the same units
     do_assert_units(wsIn, wsOut);
@@ -500,7 +468,7 @@ private:
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data
-    if (parameters.hasDx) {
+    if (m_parameters.hasDx) {
       auto readDataDX = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->dataDx(index); };
       do_assert_data(wsIn, wsOut, readDataDX);
     }
@@ -518,11 +486,24 @@ private:
     do_assert_instrument(wsIn, wsOut);
 
     // Test transmission workspaces
-    if (parameters.transmissionParameters.usesTransmission) {
-      do_assert_transmission(wsOut, std::move(transmission), parameters.transmissionParameters);
+    if (m_parameters.transmissionParameters.usesTransmission) {
+      do_assert_transmission(wsOut, std::move(transmission), m_parameters.transmissionParameters);
     }
-    if (parameters.transmissionCanParameters.usesTransmission) {
-      do_assert_transmission(wsOut, std::move(transmissionCan), parameters.transmissionCanParameters);
+    if (m_parameters.transmissionCanParameters.usesTransmission) {
+      do_assert_transmission(wsOut, std::move(transmissionCan), m_parameters.transmissionCanParameters);
+    }
+  }
+
+  void do_assert_polarized_groups(const WorkspaceGroup_sptr &groupIn, const WorkspaceGroup_sptr &groupOut) {
+    const auto spinVec = VectorHelper::splitStringIntoVector<std::string>(m_parameters.inputSpinStates, ",");
+    TSM_ASSERT_EQUALS("Both input/output groups must have the same number of entries", groupIn->getNumberOfEntries(),
+                      groupOut->getNumberOfEntries());
+    for (auto n = 0; n < groupOut->getNumberOfEntries(); n++) {
+      const auto wsIn = std::dynamic_pointer_cast<MatrixWorkspace>(groupIn->getItem(n));
+      const auto wsPoint = convertToPointData(wsIn);
+      const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(groupOut->getItem(n));
+      compareLogTo(wsOut, "spin_state_NXcanSAS", spinVec.at(n));
+      do_assert_load(wsPoint, wsOut);
     }
   }
 };
@@ -575,7 +556,7 @@ private:
     parameters1D.invalidDetectors = false;
     parameters1D.hasDx = true;
 
-    auto ws = provide1DWorkspace(parameters1D);
+    const auto ws = provide1DWorkspace(parameters1D);
     setXValuesOn1DWorkspace(ws, parameters1D.xmin, parameters1D.xmax);
     parameters1D.idf = getIDFfromWorkspace(ws);
 
@@ -600,7 +581,7 @@ private:
 
     parameters2D.is2dData = true;
 
-    auto ws = provide2DWorkspace(parameters2D);
+    const auto ws = provide2DWorkspace(parameters2D);
     set2DValues(ws);
     const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
     parameters2D.idf = getIDFfromWorkspace(ws);
