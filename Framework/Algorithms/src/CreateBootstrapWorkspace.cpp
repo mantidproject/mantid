@@ -76,6 +76,7 @@ HistogramData::HistogramY CreateBootstrapWorkspace::sampleHistogramFromGaussian(
 
   HistogramData::HistogramY outputY(dataY.size(), 0.0);
 
+  // For each bin, sample y from Gaussian(y, e)
   for (size_t index = 0; index < dataY.size(); index++) {
     std::normal_distribution<double> dist(dataY[index], dataE[index]);
     outputY[index] = dist(gen);
@@ -112,6 +113,7 @@ void CreateBootstrapWorkspace::exec() {
         bootWs->mutableE(index) = inputWs->e(index);
 
       } else {
+        // Sample from spectra indices with replacement
         std::uniform_int_distribution<size_t> dist(0, inputWs->getNumberHistograms() - 1);
         size_t new_index = dist(gen);
         bootWs->mutableY(index) = inputWs->y(new_index);
