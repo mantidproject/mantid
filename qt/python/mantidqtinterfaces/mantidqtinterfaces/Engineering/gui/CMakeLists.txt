@@ -15,6 +15,8 @@ set(TEST_PY_FILES
     # Calibration
     engineering_diffraction/tabs/calibration/test/test_calib_model.py
     engineering_diffraction/tabs/calibration/test/test_calib_presenter.py
+    # Correction
+    engineering_diffraction/tabs/correction/test/test_correction_model.py
     # Fitting
     engineering_diffraction/tabs/fitting/test/test_presenter.py
     engineering_diffraction/tabs/fitting/plotting/test/test_plot_presenter.py

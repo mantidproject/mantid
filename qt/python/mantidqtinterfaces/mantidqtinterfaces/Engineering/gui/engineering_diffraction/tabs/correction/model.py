@@ -23,7 +23,6 @@ from Engineering.EnggUtils import GROUP
 
 class TextureCorrectionModel:
     def load_all_orientations(self, wss, txt_file):
-        print(txt_file, self._validate_file(txt_file, ".txt"))
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
                 goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
@@ -197,7 +196,7 @@ class TextureCorrectionModel:
 
     def get_atten_table_name(self, ws_str, eval_val, unit):
         ws = ADS.retrieve(ws_str)
-        run_num = str(ws.run().getLogData("run_number").value)
+        run_num = str(ws.getRun().getProperty("run_number").value)
         instr = ws.getInstrument().getName()
         return f"{instr}_{run_num}_attenuation_coefficient_{eval_val}_{unit}"
 
