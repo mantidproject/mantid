@@ -111,16 +111,6 @@ def hkl_xy_to_q(hkl, d):
     return hkl / d * 2.0 * np.pi
 
 
-def string_range_to_float(string_range):
-    if string_range.count(":") != 1:
-        return [None, None]
-    try:
-        m_min, m_max = [float(x) for x in string_range.split(":")]
-    except ValueError:
-        return [None, None]
-    return [m_min, m_max]
-
-
 def q_to_hkl_xy(q, d):
     return q * d / 2.0 / np.pi
 

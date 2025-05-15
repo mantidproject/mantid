@@ -45,9 +45,12 @@ class DNSElasticSCPlotView(DNSView):
             "grid": _content.tB_grid,
             "linestyle": _content.tB_linestyle,
             "crystal_axes": _content.tB_crystal_axes,
-            "x_range": _content.lE_x_range,
-            "y_range": _content.lE_y_range,
-            "z_range": _content.lE_z_range,
+            "x_min": _content.sB_x_min,
+            "x_max": _content.sB_x_max,
+            "y_min": _content.sB_y_min,
+            "y_max": _content.sB_y_max,
+            "z_min": _content.sB_z_min,
+            "z_max": _content.sB_z_max,
             "colormap": _content.combB_colormap,
             "projections": _content.tB_projections,
             "log_scale": _content.tB_log,
@@ -181,9 +184,12 @@ class DNSElasticSCPlotView(DNSView):
         self._map["linestyle"].clicked.connect(self._change_linestyle)
         self._map["projections"].clicked.connect(self._toggle_projections)
         self._map["save_data"].clicked.connect(self._save_data)
-        self._map["x_range"].returnPressed.connect(self._manual_lim_changed)
-        self._map["y_range"].returnPressed.connect(self._manual_lim_changed)
-        self._map["z_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["x_min"].editingFinished.connect(self._manual_lim_changed)
+        self._map["x_max"].editingFinished.connect(self._manual_lim_changed)
+        self._map["y_min"].editingFinished.connect(self._manual_lim_changed)
+        self._map["y_max"].editingFinished.connect(self._manual_lim_changed)
+        self._map["z_min"].editingFinished.connect(self._manual_lim_changed)
+        self._map["z_max"].editingFinished.connect(self._manual_lim_changed)
         self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
         self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)
         self._map["invert_cb"].clicked.connect(self._change_colormap)

@@ -87,14 +87,6 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
 
-    @staticmethod
-    def get_m_limits(*args):
-        return [helper.string_range_to_float(arg) for arg in args]
-
-    @staticmethod
-    def get_mz_limit(arg):
-        return helper.string_range_to_float(arg)
-
     def get_data_z_min_max(self, xlim=None, ylim=None):
         return helper.get_z_min_max(self._data.z, xlim, ylim, self._data.x, self._data.y)
 
