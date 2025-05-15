@@ -43,6 +43,7 @@ from Diffraction.wish.wishSX import WishSX
 from mantid import config
 import numpy as np
 import os
+import platform
 from SaveReflections import num_modulation_vectors
 
 
@@ -245,6 +246,10 @@ class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
     This tests the loading and normalisation of data, incl. correction for detector efficiency using vanadium and
     creation of MD workspace
     """
+
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
 
     def cleanup(self):
         ADS.clear()

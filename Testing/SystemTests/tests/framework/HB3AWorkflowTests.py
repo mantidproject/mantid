@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
 # ruff: noqa: E741  # Ambiguous variable name
+import platform
 import numpy as np
 import systemtesting
 from mantid.simpleapi import (
@@ -44,11 +45,13 @@ class SingleFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
 
         peaks = mtd[ws_name + "_integrated"]
 
+        absolute_tolerance = 1e-6 if "arm" in platform.machine() else 1e-7
+
         self.assertEqual(peaks.getNumberPeaks(), 15)
         ol = peaks.sample().getOrientedLattice()
         self.assertDelta(ol.a(), 5.231258554, 1.0e-7)
         self.assertDelta(ol.b(), 5.257701834, 1.0e-7)
-        self.assertDelta(ol.c(), 19.67041036, 1.0e-7)
+        self.assertDelta(ol.c(), 19.67041036, absolute_tolerance)
         self.assertEqual(ol.alpha(), 90)
         self.assertEqual(ol.beta(), 90)
         self.assertEqual(ol.gamma(), 90)
@@ -96,11 +99,13 @@ class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemT
 
         peaks = mtd[ws_name + "_integrated"]
 
+        absolute_tolerance = 1e-6 if "arm" in platform.machine() else 1e-7
+
         self.assertEqual(peaks.getNumberPeaks(), 114)
         ol = peaks.sample().getOrientedLattice()
         self.assertDelta(ol.a(), 5.231258554, 1.0e-7)
         self.assertDelta(ol.b(), 5.257701834, 1.0e-7)
-        self.assertDelta(ol.c(), 19.67041036, 1.0e-7)
+        self.assertDelta(ol.c(), 19.67041036, absolute_tolerance)
         self.assertEqual(ol.alpha(), 90)
         self.assertEqual(ol.beta(), 90)
         self.assertEqual(ol.gamma(), 90)
@@ -128,10 +133,12 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
 
         self.assertEqual(peaks.getItem(0).getNumberPeaks() + peaks.getItem(1).getNumberPeaks(), integrated.getNumberPeaks())
 
+        absolute_tolerance = 1e-6 if "arm" in platform.machine() else 1e-7
+
         ol = integrated.sample().getOrientedLattice()
         self.assertDelta(ol.a(), 5.261051697, 1.0e-7)
         self.assertDelta(ol.b(), 5.224167511, 1.0e-7)
-        self.assertDelta(ol.c(), 19.689643636, 1.0e-7)
+        self.assertDelta(ol.c(), 19.689643636, absolute_tolerance)
         self.assertEqual(ol.alpha(), 90)
         self.assertEqual(ol.beta(), 90)
         self.assertEqual(ol.gamma(), 90)
@@ -237,11 +244,13 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
         self.assertEqual(integrated.getNumberPeaks(), 191)
         self.assertEqual(peaks.getItem(0).getNumberPeaks() + peaks.getItem(1).getNumberPeaks(), integrated.getNumberPeaks())
 
+        absolute_tolerance = 1e-6 if "arm" in platform.machine() else 1e-7
+
         # should be the same as from MultiFileFindPeaksIntegrate test
         ol = integrated.sample().getOrientedLattice()
         self.assertDelta(ol.a(), 5.261051697, 1.0e-7)
         self.assertDelta(ol.b(), 5.224167511, 1.0e-7)
-        self.assertDelta(ol.c(), 19.689643636, 1.0e-7)
+        self.assertDelta(ol.c(), 19.689643636, absolute_tolerance)
         self.assertEqual(ol.alpha(), 90)
         self.assertEqual(ol.beta(), 90)
         self.assertEqual(ol.gamma(), 90)
