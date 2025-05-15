@@ -60,10 +60,21 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         # setup that can only happen with presenter created
         self.setup_statusbar()
+        # Calibration Tab
         self.set_on_instrument_changed(self.presenter.calibration_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
+        # Absorption Correction Tab
+        self.set_on_instrument_changed(self.presenter.correction_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.correction_presenter.set_rb_num)
+        # Focus Tab
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+        # Fitting Tab
+        self.set_on_rb_num_changed(self.presenter.fitting_presenter.set_rb_num)
+        # Texture Tab
+        self.set_on_instrument_changed(self.presenter.texture_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.texture_presenter.set_rb_num)
+        # GSAS Tab
         # self.set_on_instrument_changed(self.presenter.gsas2_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.gsas2_presenter.set_rb_num)
 

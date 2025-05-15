@@ -22,6 +22,7 @@ SETTINGS_DICT = {
     "timeout": str,
     "dSpacing_min": str,
     "monte_carlo_params": str,
+    "clear_absorption_ws_after_processing": bool,
     "cost_func_thresh": str,
     "peak_pos_thresh": str,
 }
@@ -37,6 +38,7 @@ DEFAULT_SETTINGS = {
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
     "monte_carlo_params": "SparseInstrument:True",
+    "clear_absorption_ws_after_processing": True,
     "cost_func_thresh": "100",
     "peak_pos_thresh": "0.1",
 }
@@ -185,6 +187,7 @@ class SettingsPresenter(object):
         self.settings["timeout"] = self.view.get_timeout()
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
         self.settings["monte_carlo_params"] = self.view.get_monte_carlo_params()
+        self.settings["clear_absorption_ws_after_processing"] = self.view.get_remove_corr_ws_after_processing()
         self.settings["cost_func_thresh"] = self.view.get_cost_func_thresh()
         self.settings["peak_pos_thresh"] = self.view.get_peak_pos_thresh()
 
@@ -200,6 +203,7 @@ class SettingsPresenter(object):
         self.view.set_timeout(self.settings["timeout"])
         self.view.set_dSpacing_min(self.settings["dSpacing_min"])
         self.view.set_monte_carlo_params(self.settings["monte_carlo_params"])
+        self.view.set_remove_corr_ws_after_processing(self.settings["clear_absorption_ws_after_processing"])
         self.view.set_cost_func_thresh(self.settings["cost_func_thresh"])
         self.view.set_peak_pos_thresh(self.settings["peak_pos_thresh"])
         self._find_files()
@@ -250,6 +254,7 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("timeout")
         self.check_and_populate_with_default("dSpacing_min")
         self.check_and_populate_with_default("monte_carlo_params")
+        self.check_and_populate_with_default("clear_absorption_ws_after_processing")
         self.check_and_populate_with_default("cost_func_thresh")
         self.check_and_populate_with_default("peak_pos_thresh")
 

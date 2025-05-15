@@ -6,17 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from itertools import chain
-from numpy import full, nan, max, array, vstack
+from numpy import full, nan, max, array, vstack, mean, round
 from collections import defaultdict
 
 from mantid import FunctionFactory
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
-from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace, FindPeaksConvolve
+from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace, FindPeaksConvolve, SaveNexus
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
 from mantid.api import CompositeFunction
 from mantid.fitfunctions import FunctionWrapper
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from os import path, makedirs
 
 
 class FittingPlotModel(object):
@@ -24,6 +26,7 @@ class FittingPlotModel(object):
         self.plotted_workspaces = set()
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
+        self.rb_num = None
 
     # ===============
     # Plotting
@@ -184,7 +187,8 @@ class FittingPlotModel(object):
     def create_bank_fit_summary_tables_by_run(self, fit_results, active_ws_list):
         """
         Create one TableWorkspace per run, summarizing fit parameters for each bank.
-        Includes 'chi2' column. If only one function is used, column names are simplified.
+        For use in Texture Analysis Pipeline
+        Includes cost function as 'chi2' column. If only one function is used, column names are simplified.
 
         :param fit_results: Dictionary of fit results (usually self._fit_results)
         :param active_ws_list: List of active workspace names
@@ -218,17 +222,28 @@ class FittingPlotModel(object):
             func_names = {param.split("_")[0] for param in all_params if "_" in param}
             use_short_names = len(func_names) == 1
 
-            prefix = run_to_prefix[run]
-            table_name = f"{prefix}{run}_Fit_Parameters"
+            param_labels = []
 
-            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-            table.addColumn("str", "Bank")
+            fit_peak = ""
 
             for param in all_params:
                 if use_short_names and "_" in param:
                     param_label = param.split("_", 1)[1]
+                    param_labels.append(param_label)
+                    # if we only have one X0 in the table, we would like a unique file name
+                    if param_label == "X0":
+                        x0s = [fit_results[ws]["results"][param][0][0] for ws in banks_sorted]
+                        fit_peak = str(round(mean(x0s), 2))
                 else:
-                    param_label = param
+                    param_labels.append(param)
+
+            prefix = run_to_prefix[run]
+            table_name = f"{prefix}{run}_{fit_peak}_Fit_Parameters"
+
+            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+            table.addColumn("str", "Bank")
+
+            for param_label in param_labels:
                 table.addColumn("double", param_label)
                 table.addColumn("double", f"{param_label}_Error")
 
@@ -249,9 +264,20 @@ class FittingPlotModel(object):
 
                 table.addRow(row)
 
+            self._save_files(table_name, "FitParameters")
             summary_tables[run] = table
 
         return summary_tables
+
+    def _save_files(self, ws, dir_name):
+        root_dir = output_settings.get_output_path()
+        save_dirs = [path.join(root_dir, dir_name)]
+        if self.rb_num:
+            save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name))
+        for save_dir in save_dirs:
+            if not path.exists(save_dir):
+                makedirs(save_dir)
+            SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
 
     def get_fit_results(self):
         return self._fit_results

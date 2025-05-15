@@ -5,6 +5,13 @@ from mantid.simpleapi import Load
 from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
 from mantidqt.plotting import sample_shape
+from Engineering.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
+    INSTRUMENT_DICT,
+    CalibrationObserver,
+)
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 import os
 
@@ -18,11 +25,17 @@ class TextureCorrectionPresenter:
         self.ws_names = []
         self.ws_info = {}
 
+        self.calibration_observer = CalibrationObserver(self)
+        self.current_calibration = CalibrationInfo()
+        self.instrument = "ENGINX"
+        self.rb_num = None
+
         self.correction_notifier = GenericObservable()
 
         self.view.set_on_load_clicked(self.load_files_into_table)
         self.view.set_on_load_orientation_clicked(self.load_all_orientations)
-        self.view.set_on_select_all_clicked(self.view.select_all_workspaces)
+        self.view.set_on_select_all_clicked(self.select_all)
+        self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_apply_clicked(self.on_apply_clicked)
         self.view.set_on_delete_clicked(self.delete_selected_files)
 
@@ -82,6 +95,12 @@ class TextureCorrectionPresenter:
         self.model.load_all_orientations(wss, orientation_file)
         self.redraw_table()
 
+    def select_all(self):
+        self.view.set_all_workspaces_selected(True)
+
+    def deselect_all(self):
+        self.view.set_all_workspaces_selected(False)
+
     def _on_view_shape_clicked(self, ws_name):
         try:
             sample_shape.plot_sample_container_and_components(ws_name)
@@ -100,25 +119,44 @@ class TextureCorrectionPresenter:
     def _apply_all_corrections(self, wss, out_wss):
         include_atten_table = self.view.include_atten_tab()
 
+        root_dir = output_settings.get_output_path()
+
         for i, ws in enumerate(wss):
             abs_corr = 1.0
             div_corr = 1.0
 
             if self.view.include_absorption():
+                mc_param_str = get_setting(
+                    output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "monte_carlo_params"
+                )
+
                 self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
-                self.model.calc_absorption(ws)
+                self.model.calc_absorption(ws, mc_param_str)
                 abs_corr = "_abs_corr"
                 if include_atten_table:
                     atten_vals = self.model.read_attenuation_coefficient_at_value(
                         abs_corr, self.view.get_evaluation_value(), self.view.get_evaluation_units()
                     )
-                    self.model.write_atten_val_table(ws, atten_vals, self.view.get_evaluation_value(), self.view.get_evaluation_units())
+                    self.model.write_atten_val_table(
+                        ws,
+                        atten_vals,
+                        self.view.get_evaluation_value(),
+                        self.view.get_evaluation_units(),
+                        self.rb_num,
+                        self.current_calibration,
+                        root_dir,
+                    )
 
             if self.view.include_divergence():
                 self.model.calc_divergence(ws, self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
                 div_corr = "_div_corr"
 
-            self.model.apply_corrections(ws, out_wss[i], abs_corr, div_corr)
+            remove_ws_after_processing = get_setting(
+                output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "clear_absorption_ws_after_processing"
+            )
+            self.model.apply_corrections(
+                ws, out_wss[i], self.current_calibration, root_dir, abs_corr, div_corr, self.rb_num, remove_ws_after_processing
+            )
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
@@ -153,3 +191,18 @@ class TextureCorrectionPresenter:
 
     def _redraw_on_alg_exec(self):
         QTimer.singleShot(200, self.redraw_table)
+
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
+
+    def update_calibration(self, calibration):
+        """
+        Update the current calibration following a call from a CalibrationNotifier
+        :param calibration: The new current calibration.
+        """
+        self.current_calibration = calibration
+
+    def set_instrument_override(self, instrument):
+        instrument = INSTRUMENT_DICT[instrument]
+        self.view.set_instrument_override(instrument)
+        self.instrument = instrument

@@ -6,6 +6,11 @@ from qtpy.QtCore import QTimer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqt.interfacemanager import InterfaceManager
+from Engineering.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
+    INSTRUMENT_DICT,
+    CalibrationObserver,
+)
 
 import os
 
@@ -22,11 +27,18 @@ class TexturePresenter:
 
         self.correction_notifier = GenericObservable()
 
+        self.calibration_observer = CalibrationObserver(self)
+        self.current_calibration = CalibrationInfo()
+        self.instrument = "ENGINX"
+        self.rb_num = None
+
         self.view.set_on_load_ws_clicked(self.load_ws_files)
         self.view.set_on_load_param_clicked(self.load_param_files)
 
-        self.view.set_on_select_all_clicked(self.view.select_all_workspaces)
+        self.view.set_on_select_all_clicked(self.select_all)
+        self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_delete_clicked(self.delete_selected_files)
+        self.view.set_on_delete_param_clicked(self.delete_selected_param_files)
 
         self.view.set_on_check_inc_scatt_corr_state_changed(self.view.update_crystal_section_visibility)
         self.view.set_include_scatter_corr(False)
@@ -76,6 +88,19 @@ class TexturePresenter:
             if param != "Not set":
                 self.fit_param_files.pop(self.fit_param_files.index(param))
         self.redraw_table()
+
+    def delete_selected_param_files(self):
+        selected_wss, selected_params = self.view.get_selected_workspaces()
+        for param in selected_params:
+            if param != "Not set":
+                self.fit_param_files.pop(self.fit_param_files.index(param))
+        self.redraw_table()
+
+    def select_all(self):
+        self.view.set_all_workspaces_selected(True)
+
+    def deselect_all(self):
+        self.view.set_all_workspaces_selected(False)
 
     def redraw_table(self):
         self.update_ws_info()
@@ -130,14 +155,14 @@ class TexturePresenter:
 
         self.worker = AsyncTask(
             self._calc_pf,
-            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh),
+            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, self.rb_num),
             error_cb=self._on_worker_error,
             finished_cb=self._on_worker_success,
         )
         self.worker.start()
 
-    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh):
-        self.model.make_pole_figure_tables(wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh)
+    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num):
+        self.model.make_pole_figure_tables(wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num)
         self.plot_pf(out_ws, self.view.get_projection_method())
 
     def _on_worker_success(self):
@@ -166,3 +191,18 @@ class TexturePresenter:
         self.model.plot_pole_figure(pf_ws, proj, fig=fig)
 
         canvas.draw()
+
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
+
+    def update_calibration(self, calibration):
+        """
+        Update the current calibration following a call from a CalibrationNotifier
+        :param calibration: The new current calibration.
+        """
+        self.current_calibration = calibration
+
+    def set_instrument_override(self, instrument):
+        instrument = INSTRUMENT_DICT[instrument]
+        self.view.set_instrument_override(instrument)
+        self.instrument = instrument

@@ -1,9 +1,11 @@
-from mantid.simpleapi import CreatePoleFigureTableWorkspace, CloneWorkspace, CombineTableWorkspaces, logger
+from mantid.simpleapi import CreatePoleFigureTableWorkspace, CloneWorkspace, CombineTableWorkspaces, logger, SaveNexus
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
 import matplotlib.pyplot as plt
 from mantid.geometry import CrystalStructure
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from os import path, makedirs
 
 
 class TextureProjection:
@@ -45,6 +47,7 @@ class TextureProjection:
         scat_vol_pos: Sequence[float],
         chi2_thresh: Optional[float],
         peak_thresh: Optional[float],
+        rb_num: Optional[str] = None,
     ) -> None:
         table_workspaces = []
         if len(peak_wss) == len(wss):
@@ -78,6 +81,7 @@ class TextureProjection:
         CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
         for tw in table_workspaces[1:]:
             CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
+        self._save_files(out_ws, "PoleFigureTables", rb_num)
 
     def plot_pole_figure(self, ws, projection: str, fig=None, **kwargs) -> None:
         if projection.lower() == "stereographic":
@@ -139,6 +143,16 @@ class TextureProjection:
         xtal = ADS.retrieve(ref_ws).sample().getCrystalStructure()
         for ws in wss:
             ADS.retrieve(ws).sample().setCrystalStructure(xtal)
+
+    def _save_files(self, ws, dir_name, rb_num=None):
+        root_dir = output_settings.get_output_path()
+        save_dirs = [path.join(root_dir, dir_name)]
+        if rb_num:
+            save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
+        for save_dir in save_dirs:
+            if not path.exists(save_dir):
+                makedirs(save_dir)
+            SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:

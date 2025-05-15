@@ -626,6 +626,14 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
         mantid.SaveFocusedXYE(
             InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"), SplitFiles=False, Format="TOPAS"
         )
+        # for dSpacing save all spectra in single nxs
+        if xunit_suffix == "dSpacing":
+            combined_dir = path.join(focus_dir, "CombinedFiles")
+            filename = _generate_output_file_name(
+                calibration.get_instrument(), sample_run_no, van_run, foc_suffix, xunit_suffix, ext=".nxs"
+            )
+            mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=path.join(combined_dir, filename))
+
         # Save nxs per spectrum
         nxs_paths = []
         mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)

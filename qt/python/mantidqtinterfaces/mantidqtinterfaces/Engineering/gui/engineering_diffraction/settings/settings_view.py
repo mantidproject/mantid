@@ -107,6 +107,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_monte_carlo_params(self):
         return self.monte_carlo_lineedit.text()
 
+    def get_remove_corr_ws_after_processing(self):
+        return self.abs_corr_checkBox.isChecked()
+
     def get_cost_func_thresh(self):
         return self.cost_func_thresh_lineedit.text()
 
@@ -173,6 +176,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_monte_carlo_params(self, text):
         self.monte_carlo_lineedit.setText(text)
+
+    def set_remove_corr_ws_after_processing(self, val):
+        self.abs_corr_checkBox.setChecked(val)
 
     def set_cost_func_thresh(self, text):
         self.cost_func_thresh_lineedit.setText(text)
