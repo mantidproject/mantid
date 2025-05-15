@@ -61,7 +61,7 @@ void CreateBootstrapWorkspace::init() {
                   "Integer seed that initialises the random-number generator, for reproducibility");
   declareProperty("NumberOfReplicas", 0, mustBePositive,
                   "Number of Monte Carlo events to simulate. Defaults to integral of input workspace if 0.");
-  declareProperty("useErrorSampling", true, "Whether to use sampling from errors");
+  declareProperty("UseErrorSampling", true, "Whether to use sampling from errors");
   declareProperty("OutputPrefix", "", "Prefix to add to bootstrap workspaces");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap_samples",
                                                                       Direction::Output),
@@ -94,7 +94,7 @@ void CreateBootstrapWorkspace::exec() {
   int inputSeed = getProperty("Seed");
   std::mt19937 gen(static_cast<size_t>(inputSeed));
   int numReplicas = getProperty("NumberOfReplicas");
-  bool useErrorSampling = getProperty("useErrorSampling");
+  bool useErrorSampling = getProperty("UseErrorSampling");
   std::string prefix = getProperty("OutputPrefix");
   Progress progress(this, 0, 1, numReplicas);
 
