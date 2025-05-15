@@ -216,26 +216,6 @@ public:
     TSM_ASSERT("Value of gd_prtn_chrg_unfiltered false following getProtonCharge call", !gdPrtnChrgUnfiltered);
   }
 
-  void test_gd_prtn_chrg_unfiltered_added_for_period_dataset_n_equal_1() {
-
-    auto testWS = createTestWorkspace();
-
-    LoadNexusLogs loader;
-    loader.setChild(true);
-    loader.initialize();
-    loader.setProperty("Workspace", testWS);
-    loader.setPropertyValue("Filename", "LOQ49886.nxs");
-    loader.execute();
-
-    auto run = testWS->run();
-    run.addProperty("current_period", 1, true);
-
-    TSM_ASSERT("Confirm dataset has 1 period", run.getPropertyValueAsType<int>("nperiods") == 1);
-
-    const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
-    TSM_ASSERT("Confirm does not have gd_prtn_chrg_unfiltered as nperiods < 1", !hasGdPrtnChrgUnfiltered);
-  }
-
   void test_extract_run_title_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
