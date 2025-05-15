@@ -7,10 +7,18 @@
 #  This file is part of the mantid workbench.
 from datetime import datetime
 from mantid.api import AnalysisDataService as ads, WorkspaceFactory
-from mantid.kernel import FloatTimeSeriesProperty
+from mantid.kernel import (
+    FloatTimeSeriesProperty,
+    Int32TimeSeriesProperty,
+    Int64TimeSeriesProperty,
+    FloatPropertyWithValue,
+    StringPropertyWithValue,
+    IntPropertyWithValue,
+)
 from enum import Enum
 
 # Constants
+TO_FLOAT_COLUMNS = (FloatTimeSeriesProperty, FloatPropertyWithValue, Int32TimeSeriesProperty, Int64TimeSeriesProperty, IntPropertyWithValue)
 DEFAULT_TABLE_NAME = "ResultsTable"
 ALLOWED_NON_TIME_SERIES_LOGS = (
     "run_number",
@@ -22,6 +30,7 @@ ALLOWED_NON_TIME_SERIES_LOGS = (
     "sample_magn_field",
     "analysis_asymmetry_norm",
     "analysis_group_name",
+    "current_period",
 )
 ERROR_COL_SUFFIX = "Error"
 # This is not a particularly robust way of ignoring this as it
@@ -250,23 +259,41 @@ class ResultsTabModel(object):
         table = WorkspaceFactory.Instance().createTable()
         table.addColumn("str", "workspace_name", TableColumnType.NoType.value)
 
-        def float_log(wksp_name, log_name):
+        def create_wkps_name_list(wksp_name):
+            """Creates a list with all the workspaces used in the fit and puts the current workspace
+            in the first position of the list."""
+            all_names = [ws_name for fit in all_fits for ws_name in fit.input_workspaces]
+            if all_names[0] != wksp_name:
+                all_names.pop(all_names.index(wksp_name))
+                all_names.insert(0, wksp_name)
+            return all_names
+
+        def is_str_convertible_to_float(prop_value):
             try:
-                run = ads.Instance().retrieve(wksp_name).run()
+                float(prop_value)
+                return True
+            except ValueError:
+                return False
+
+        def add_log_table_columns(wksp_name, log_name, table):
+            all_names = create_wkps_name_list(wksp_name)
+            for name in all_names:
+                run = ads.Instance().retrieve(name).run()
+                if not run.hasProperty(log_name):
+                    continue
                 prop = run.getProperty(log_name)
-                if isinstance(prop, FloatTimeSeriesProperty):
-                    return True
-                try:
-                    float(prop.value)
-                    return True
-                except ValueError:
-                    return False
-            except (TypeError, ValueError):
-                for fit in all_fits:
-                    for input_workspace in fit.input_workspaces:
-                        ws = ads.Instance().retrieve(input_workspace)
-                        if ws.run().hasProperty(log_name):
-                            return float_log(input_workspace, log_name)
+                if isinstance(prop, TO_FLOAT_COLUMNS):
+                    table.addColumn("float", log_name, TableColumnType.X.value)
+                    table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
+                    break
+                elif isinstance(prop, StringPropertyWithValue):
+                    if is_str_convertible_to_float(prop.value):
+                        table.addColumn("float", log_name, TableColumnType.X.value)
+                        table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
+                    else:
+                        table.addColumn("str", log_name, TableColumnType.X.value)
+                    break
+            return table
 
         for log_name in log_selection:
             wksp_name = all_fits[0].input_workspaces[0]
@@ -274,12 +301,8 @@ class ResultsTabModel(object):
                 table.addColumn("str", log_name, TableColumnType.X.value)
                 table.addColumn("float", log_name + "_seconds", TableColumnType.X.value)
             else:
-                if float_log(wksp_name, log_name):
-                    table.addColumn("float", log_name, TableColumnType.X.value)
-                    # only add the errors column if the value is numerical
-                    table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
-                else:
-                    table.addColumn("str", log_name, TableColumnType.X.value)
+                table = add_log_table_columns(wksp_name, log_name, table)
+
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
         parameters = self._find_parameters_for_table(results_selection)
