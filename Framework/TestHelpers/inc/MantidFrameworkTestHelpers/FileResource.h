@@ -24,6 +24,7 @@ public:
   void setDebugMode(bool mode);
   std::string fullPath() const;
   ~FileResource();
+  bool exists();
 
 private:
   bool m_debugMode;
