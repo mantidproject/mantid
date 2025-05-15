@@ -23,7 +23,7 @@ public:
   explicit OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, std::string const &algorithmName);
 
   template <typename T>
-  T getValueOrDefault(std::string const &propertyName, std::string const &parameterName, T defaultValue) const;
+  T getValueOrDefault(std::string const &propertyName, std::string const &parameterName, const T &defaultValue) const;
   template <typename T>
   std::optional<T> getOptionalValue(std::string const &propertyName, std::string const &parameterName) const;
   template <typename T> T getValue(std::string const &propertyName, std::string const &parameterName) const;
@@ -44,7 +44,7 @@ private:
 
 template <typename T>
 T OptionDefaults::getValueOrDefault(std::string const &propertyName, std::string const &parameterName,
-                                    T defaultValue) const {
+                                    const T &defaultValue) const {
   auto maybeValue =
       Mantid::API::checkForOptionalInstrumentDefault<T>(m_algorithm.get(), propertyName, m_instrument, parameterName);
   if (maybeValue.has_value())

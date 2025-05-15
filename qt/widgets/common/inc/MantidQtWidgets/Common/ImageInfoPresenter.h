@@ -25,7 +25,7 @@ public:
 
   inline const ImageInfoModel &model() { return *m_model; }
 
-  void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString> extraValues);
+  void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString> &extraValues);
   void setWorkspace(const Mantid::API::Workspace_sptr &ws);
   void fillTableCells(const ImageInfoModel::ImageInfo &info);
   inline void setShowSignal(const bool showSignal) { m_showSignal = showSignal; }

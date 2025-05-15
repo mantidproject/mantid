@@ -58,7 +58,7 @@ private:
   using Variable_ptr = std::shared_ptr<Variable>;
 
   void setAxisValue(const double value, const std::vector<Variable_ptr> &variables);
-  void calculateValues(mu::Parser &p, std::vector<double> &vec, std::vector<Variable_ptr> variables);
+  void calculateValues(mu::Parser &p, std::vector<double> &vec, std::vector<Variable_ptr> &variables);
   void setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
                          const std::vector<Variable_ptr> &variables);
   double evaluateResult(mu::Parser &p);
