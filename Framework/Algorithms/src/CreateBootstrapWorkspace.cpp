@@ -101,7 +101,7 @@ void CreateBootstrapWorkspace::exec() {
 
   for (int i = 1; i <= numReplicas; i++) {
     MatrixWorkspace_sptr bootWs = WorkspaceFactory::Instance().create(inputWs);
-    ADS.add(prefix + std::to_string(i), bootWs);
+    ADS.addOrReplace(prefix + std::to_string(i), bootWs);
     boot_names.push_back(prefix + std::to_string(i));
 
     for (size_t index = 0; index < bootWs->getNumberHistograms(); index++) {
