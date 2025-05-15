@@ -69,6 +69,7 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
             "BackgroundCalculationMethod": "Polynomial",
             "DegreeOfPolynomial": "0",
             "OutputWorkspace": "output",
+            "IgnoreInvalidData": True,
         }
         output = self._assert_run_algorithm_succeeds(args)
         for i in range(0, output.getNumberHistograms()):
