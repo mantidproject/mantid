@@ -20,7 +20,7 @@ rhash:
   - '<1.4.6'                   # [osx]
 
 python:
-  - 3.10
+  - 3.11
 
 libboost_devel:
   - 1.84 # Aim to follow conda-forge

@@ -41,10 +41,10 @@ int traceLineNumber(PyObject *obj, PyFrameObject *frame, int event, PyObject *ar
   Q_UNUSED(arg);
   if (event != PyTrace_LINE)
     return 0;
-  auto iter = EDITOR_LOOKUP.constFind(frame->f_code->co_filename);
+  auto iter = EDITOR_LOOKUP.constFind(PyFrame_GetCode(frame)->co_filename);
   if (iter != EDITOR_LOOKUP.constEnd()) {
     const auto &details = iter.value();
-    int lineLoc = frame->f_lineno + details.lineOffset;
+    int lineLoc = PyFrame_GetLineNumber(frame) + details.lineOffset;
     details.editor->updateProgressMarkerFromThread(lineLoc, false);
   }
   return 0;

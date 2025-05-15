@@ -34,9 +34,6 @@ import re
 import sys
 import warnings
 
-from lib2to3.pgen2.tokenize import detect_encoding
-from io import BytesIO
-
 from inspect import getfullargspec
 
 from mantidqt.utils.asynchronous import AsyncTask
@@ -223,10 +220,7 @@ def get_line_number_from_index(string, index):
 
 
 def get_module_import_alias(import_name, text):
-    try:
-        text = text.encode(detect_encoding(BytesIO(text.encode()).readline)[0])
-    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
-        text = text.encode("utf-8")
+    text = text.encode("utf-8")
     try:
         ast.parse(text)
     except SyntaxError:  # Script contains syntax errors so cannot parse text
