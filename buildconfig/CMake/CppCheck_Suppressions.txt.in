@@ -320,7 +320,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeomet
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Sphere.h:72
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:1027
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:381
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/StructureFactorCalculatorSummation.cpp:55
@@ -365,7 +364,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:36
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:56
-=knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
@@ -545,7 +544,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:320
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:347
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:443
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:519
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:535
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1563
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1578
