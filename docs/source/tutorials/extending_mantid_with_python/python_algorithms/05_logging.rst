@@ -19,6 +19,9 @@ There are several levels of logging available, ordered in terms of increasing pr
 
 Any log message that is sent at a priority level above or equal to the value set in the properties file will appear in the appropriate location, i.e. Messages Box, log file.
 
+Additionally, the log message format can be customized by setting the **logging.formatters.f1.pattern** key in the :ref:`properties file <Properties File>`.
+Detailed information about valid log format placeholders can be found in the `POCO documentation <https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders>`_.
+
 Within a Python algorithm the log can be accessed using ``self.log()`` which is a configured instance of the :class:`~mantid.kernel.Logger`.
 To post a message, simply choose a priority level and call a function that has that name with the message as an argument
 
