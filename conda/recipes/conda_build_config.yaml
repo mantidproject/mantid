@@ -20,7 +20,7 @@ rhash:
   - '<1.4.6'                   # [osx]
 
 python:
-  - 3.10
+  - 3.11
 
 libboost_devel:
   - 1.84 # Aim to follow conda-forge
@@ -49,7 +49,8 @@ graphviz:
 
 # this must match the version in the developer dependencies
 jemalloc:
-  - 5.2.0
+  - 5.2.0 # [linux]
+  - 5.2.* # [osx]
 
 jsoncpp:
   - '>=1.9.4,<2'
@@ -131,10 +132,13 @@ qtpy:
   - '>=2.4,!=2.4.2'
 
 # We must pin this because it is known to be particularly unstable (especially in system tests).
-# 0.3.0 is the first version that supports Python > 3.10, but it currently breaks BayesQuasi in the
-# standalone.
 quasielasticbayes:
-  - '<0.3.0'
+  - 0.3.0
+
+# There have previously been API breaking changes in patch version updates to quickBayes,
+# so pin this to the patch version number.
+quickbayes:
+  - '1.0.2'
 
 tbb:
   - 2021
@@ -146,7 +150,7 @@ toml:
   - '>=0.10.2'
 # Keep gsl a specific version to reduce changes in our fitting
 gsl:
-  - 2.7
+  - 2.8
 
 # v0.3.23 causes a hang on osx for some system tests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux, v0.3.29 causes failures on macOS and linux.
 # Just pin it to 0.3.27 for simplicity, rather than '!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.28','!=0.3.29'

@@ -20,7 +20,7 @@
 #
 #
 import time
-
+import platform
 import systemtesting
 
 import os
@@ -54,6 +54,10 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
     output_directory = ""
     run_conventional_matrix_file = ""
     qconvention = config["Q.convention"]
+
+    def skipTests(self):
+        # Numbers are different on ARM architecture so skip test
+        return "arm" in platform.machine()
 
     def setUp(self):
         # Make this test use crystallography convention

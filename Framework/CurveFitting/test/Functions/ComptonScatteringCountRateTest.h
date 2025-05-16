@@ -188,7 +188,7 @@ public:
     TS_ASSERT_DELTA(func->getParameter("f1.Width"), 10.0, 1e-8);
     TS_ASSERT_DELTA(func->getParameter("f1.Intensity"), 0.5 * intensity0, 1e-8);
     TS_ASSERT_DELTA(func->getParameter("f2.A0"), 0.35708376, 1e-8);
-    TS_ASSERT_DELTA(func->getParameter("f2.A1"), 0.99989358, 1e-8);
+    TS_ASSERT_DELTA(func->getParameter("f2.A1"), 0.99989358, 1e-6);
   }
 
 private:

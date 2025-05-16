@@ -156,9 +156,6 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Pip install quickBayes until there's a conda package
-$bundle_conda_prefix/bin/python -m pip install quickBayes==1.0.0b15
-
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
 fixup_bundle "$bundle_conda_prefix" "$bundle_icon"
