@@ -1213,7 +1213,7 @@ Info File::getInfo() {
   DimArray dims{0};
 
   /* NOTE: the below was copied from napi to properly set lengths for string arrays.
-    Unless you were there when the Deep Magic was written, and can look back further  into the stillness
+    Unless you were there when the Deep Magic was written, and can look back further into the stillness
     and the darkness before Time dawned and have read there a different incantation,
     then do not try to edit this.
   */
