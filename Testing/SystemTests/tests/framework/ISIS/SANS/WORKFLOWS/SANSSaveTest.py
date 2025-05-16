@@ -258,7 +258,7 @@ class SANSSaveTest(unittest.TestCase):
 
         file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
         pol_props = {
-            "InputSpinStatez": "0,1",
+            "InvalidPropName": "0,1",
         }
         with self.assertRaisesRegex(
             RuntimeError,
