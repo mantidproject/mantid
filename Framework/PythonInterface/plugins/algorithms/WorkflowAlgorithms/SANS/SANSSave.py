@@ -177,19 +177,11 @@ class SANSSave(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        use_zero_error_free = self.getProperty("UseZeroErrorFree").value
         file_formats = self._get_file_formats()
         file_name = self.getProperty("Filename").value
         workspace = self.getProperty("InputWorkspace").value
 
-        if isinstance(workspace, WorkspaceGroup):
-            additional_properties = self._extract_metadata(workspace.getItem(0))
-        else:
-            additional_properties = self._extract_metadata(workspace)
-
-        transmission = self.getProperty("Transmission").value
-        transmission_can = self.getProperty("TransmissionCan").value
-
+        use_zero_error_free = self.getProperty("UseZeroErrorFree").value
         if use_zero_error_free:
             if isinstance(workspace, WorkspaceGroup):
                 group = WorkspaceGroup()
@@ -198,13 +190,6 @@ class SANSSave(DataProcessorAlgorithm):
                 workspace = group
             else:
                 workspace = get_zero_error_free_workspace(workspace)
-            if transmission:
-                transmission = get_zero_error_free_workspace(transmission)
-            if transmission_can:
-                transmission_can = get_zero_error_free_workspace(transmission_can)
-
-        additional_properties["Transmission"] = transmission
-        additional_properties["TransmissionCan"] = transmission_can
 
         additional_run_numbers = {
             "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
@@ -212,6 +197,8 @@ class SANSSave(DataProcessorAlgorithm):
             "CanScatterRunNumber": self.getProperty("CanScatterRunNumber").value,
             "CanDirectRunNumber": self.getProperty("CanDirectRunNumber").value,
         }
+
+        additional_properties = self._get_additional_properties(workspace, use_zero_error_free)
 
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
@@ -233,10 +220,35 @@ class SANSSave(DataProcessorAlgorithm):
                 raise e
         progress.report("Finished saving workspace to files.")
 
-    def _extract_metadata(self, workspace) -> dict[str:Any]:
+    def _get_additional_properties(self, workspace, use_zero_error_free) -> dict[str:Any]:
         additional_properties = {}
+
+        # Transmission workspaces from alg props, replace with zero-error free versions if requested.
+        transmission = self.getProperty("Transmission").value
+        transmission_can = self.getProperty("TransmissionCan").value
+        if use_zero_error_free:
+            if transmission:
+                transmission = get_zero_error_free_workspace(transmission)
+            if transmission_can:
+                transmission_can = get_zero_error_free_workspace(transmission_can)
+        additional_properties["Transmission"] = transmission
+        additional_properties["TransmissionCan"] = transmission_can
+
+        # Background Subtraction properties from the alg props.
+        additional_properties["BackgroundSubtractionWorkspace"] = self.getProperty("BackgroundSubtractionWorkspace").value
+        additional_properties["BackgroundSubtractionScaleFactor"] = self.getProperty("BackgroundSubtractionScaleFactor").value
+
+        # Any other metadata is extracted directly from the reduced workspace.
+        if isinstance(workspace, WorkspaceGroup):
+            self._extract_metadata(workspace.getItem(0), additional_properties)
+        else:
+            self._extract_metadata(workspace, additional_properties)
+
+        return additional_properties
+
+    @staticmethod
+    def _extract_metadata(workspace, additional_properties: dict[str:Any]):
         sample = workspace.sample()
-        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
         additional_properties["SampleHeight"] = sample.getHeight()
         additional_properties["SampleWidth"] = sample.getWidth()
         additional_properties["SampleThickness"] = sample.getThickness()
@@ -244,13 +256,9 @@ class SANSSave(DataProcessorAlgorithm):
         instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrument().getName()]
         additional_properties["DetectorNames"] = ",".join(get_detector_names_from_instrument(instrument))
 
+        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
         if maybe_geometry is not None:
             additional_properties["Geometry"] = maybe_geometry.value
-
-        additional_properties["BackgroundSubtractionWorkspace"] = self.getProperty("BackgroundSubtractionWorkspace").value
-        additional_properties["BackgroundSubtractionScaleFactor"] = self.getProperty("BackgroundSubtractionScaleFactor").value
-
-        return additional_properties
 
     def _fix_polarization_props_types(self, polarization_props) -> dict[str:str]:
         return dict([(key, polarization_props[key].value) for key in polarization_props.keys()])
