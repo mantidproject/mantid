@@ -68,10 +68,20 @@ public:
     FunctionValues values(domain);
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
+
+// The intel compiler doesn't get quite to the precision
+// of the other platforms
+#if defined(__INTEL_COMPILER)
     const double tol(1e-6);
+    TS_ASSERT_DELTA(0.104894, values.getCalculated(0), tol);
+    TS_ASSERT_DELTA(0.104489, values.getCalculated(1), tol);
+    TS_ASSERT_DELTA(0.102977, values.getCalculated(2), tol);
+#else
+    const double tol(1e-10);
     TS_ASSERT_DELTA(0.1048941000, values.getCalculated(0), tol);
     TS_ASSERT_DELTA(0.1044889285, values.getCalculated(1), tol);
     TS_ASSERT_DELTA(0.1029765223, values.getCalculated(2), tol);
+#endif
   }
 
 private:

@@ -60,7 +60,7 @@ public:
         auto x = v[0];
         auto y = v[1];
         auto f = ws->getSignalAt(linearIndex);
-        TS_ASSERT_DELTA(f, x + y, 1e-7);
+        TS_ASSERT_DELTA(f, x + y, 1e-15);
       }
 
     // Remove workspace from the data service.

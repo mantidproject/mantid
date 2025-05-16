@@ -9,18 +9,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 #   1. Install prefix
 #   2. Optional. If provided, the name of an environment to create and activate
 #   3. Optional. If true is specified any existing mamba installation is removed
-#   4. Optional. Target platform, e.g. linux-64
 setup_mamba () {
   local install_prefix=$1
   local env_name=$2
-  local clean=$3
-  local platform=$4
+  local clean=false
+  if [ $# -eq 3 ]; then
+    clean=$3
+  fi
   $SCRIPT_DIR/download-and-install-mambaforge $install_prefix $clean
   source $install_prefix/etc/profile.d/conda.sh
   source $install_prefix/etc/profile.d/mamba.sh
 
   if [ -n "$env_name" ]; then
-    create_and_activate_env "$env_name" "$platform"
+    create_and_activate_env "$env_name"
   fi
 }
 
@@ -28,16 +29,23 @@ setup_mamba () {
 # create and activate a mamba environment
 # Args:
 #   1. Name of environment.
-#   2. Optional platform, e.g. linux-64
+#   2. Optional environment file
 create_and_activate_env() {
-  local env_name=$1
-  local conda_subdir_str=$2
-  CONDA_SUBDIR=$conda_subdir_str mamba create --yes --name $env_name
-  mamba activate $env_name
-
-  if [[ -n "$conda_subdir_str" ]]; then
-    conda config --env --set subdir "$conda_subdir_str"
+  #on ARM MAC OS, create x64 env rather than default ARM env.
+  if [[ $OSTYPE == 'darwin'* && $(uname -p) == 'arm' ]]; then
+    local conda_subdir_str="osx-64"
+  else
+    local conda_subdir_str=""
   fi
+
+  local env_name=$1
+  local env_file=$2
+  if [ -z "$env_file" ]; then
+    CONDA_SUBDIR=$conda_subdir_str mamba create --yes --name $env_name
+  else
+    CONDA_SUBDIR=$conda_subdir_str mamba env create --force --name $env_name --file $env_file
+  fi
+  mamba activate $env_name
 }
 
 # Build the mantid-developer metapackage from source and
@@ -45,17 +53,22 @@ create_and_activate_env() {
 # Args:
 #   1. Path to pass to the package-conda script for building
 #      the mantid-developer metapackage.
-#   2. Optional platform, e.g. linux-64
 create_and_activate_mantid_developer_env() {
   local packaging_dir=$1
   if [[ -z "$packaging_dir" ]]; then
     echo "A path is required for building the mantid-developer metapackage."
     exit 1
   fi
-  shift
-  local platform=$1
 
-  $SCRIPT_DIR/package-conda "$packaging_dir" --build-mantid-developer --platform "$platform"
-  create_and_activate_env mantid-developer "$platform"
+  $SCRIPT_DIR/package-conda "$packaging_dir" --build-mantid-developer
+  create_and_activate_env mantid-developer
+
+  # We currently only build the mantid-developer metapackage for osx-64
+  # so we need to make sure we set the subdir if we're running on an ARM machine.
+  # This should be removed once we start creating developer packages for ARM machine.
+  if [[ $OSTYPE == 'darwin'* && $(uname -p) == 'arm' ]]; then
+    conda config --env --set subdir osx-64
+  fi
+
   mamba install -c "$packaging_dir"/conda-bld mantid-developer --yes
 }

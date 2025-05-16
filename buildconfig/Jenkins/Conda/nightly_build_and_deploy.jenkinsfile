@@ -39,7 +39,7 @@ switch(GIT_BRANCH) {
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64']
+    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
     break
 }
 
@@ -198,28 +198,6 @@ pipeline {
             }
           }
         }
-        stage('build and test: osx-arm64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-              anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-arm64' }
-            }
-          }
-          agent { label 'osx-arm64' }
-          options { timestamps () }
-          steps {
-            checkoutSource("${GIT_SHA}")
-            build_and_test('osx-arm64')
-          }
-          post {
-            always {
-              archive_test_logs()
-              publish_test_reports()
-            }
-          }
-        }
         stage('package conda: linux-64') {
           when {
             beforeAgent true
@@ -316,38 +294,6 @@ pipeline {
             }
           }
         }
-        stage('package conda: osx-arm64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-            anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-arm64' }
-              expression { env.BUILD_PACKAGE == 'all' }
-            }
-          }
-          agent { label 'osx-arm64' }
-          options {
-              timestamps ()
-              retry(3)
-          }
-          steps {
-            // Clean up conda-bld before we start to avoid any
-            // confusion with old packages
-            dir('conda-bld') {
-              deleteDir()
-            }
-            checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('osx-arm64', 'base')
-            archive_conda_packages('osx-arm64')
-          }
-          post {
-            always {
-              archive_env_logs('osx-arm64')
-            }
-          }
-        }
       }
     }
     stage('Package workbench') {
@@ -355,7 +301,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64', 'osx-arm64'
+            values 'linux-64', 'win-64', 'osx-64'
           }
         }
         stages {
@@ -390,7 +336,7 @@ pipeline {
 
               package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}")
-              package_standalone("${PLATFORM}")
+              package_standalone()
               archive_standalone_package("${PLATFORM}")
             }
             post {
@@ -619,7 +565,7 @@ def package_conda_options(platform, base_or_workbench) {
     }
   }
 
-  package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
+  package_options = "${package_flags} --git-tag ${GIT_TAG}"
   return package_options.trim()
 }
 
@@ -644,23 +590,23 @@ def generate_git_tag() {
   return git_tag
 }
 
-def package_standalone(platform) {
+def package_standalone() {
   packagescript_path = "${CISCRIPT_DIR}/package-standalone"
   if(isUnix()) {
-    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options(platform)}"
+    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options()}"
   } else {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
-      ${package_standalone_options(platform)}\""
+      ${package_standalone_options()}\""
   }
 }
 
-def package_standalone_options(platform) {
+def package_standalone_options() {
   package_options = ""
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
-  return package_options.trim() + " --platform ${platform}"
+  return package_options.trim()
 }
 
 // Determine whether this build should be marked as a prerelease on GitHub.

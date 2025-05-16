@@ -118,7 +118,7 @@ public:
                                       4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
-      TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-11);
+      TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
     }
   }
 
@@ -147,7 +147,7 @@ public:
                                       4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
-      TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) / (reference[i] / 679.59369981039407842726), 1.0, 1e-11);
+      TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) / (reference[i] / 679.59369981039407842726), 1.0, 1e-14);
     }
   }
 

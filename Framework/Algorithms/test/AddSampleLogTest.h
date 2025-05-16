@@ -263,11 +263,11 @@ public:
     // check the center angles from downstream
     // V3D::angle returns radians
     const Mantid::Kernel::V3D downstream(0, 0, 1);
-    TS_ASSERT_DELTA(westPosGood.angle(downstream) * 180 / M_PI, abs(det_arc1), 1e-12);
-    TS_ASSERT_DELTA(eastPosGood.angle(downstream) * 180 / M_PI, abs(det_arc2), 1e-12);
+    TS_ASSERT_EQUALS(westPosGood.angle(downstream) * 180 / M_PI, abs(det_arc1));
+    TS_ASSERT_EQUALS(eastPosGood.angle(downstream) * 180 / M_PI, abs(det_arc2));
 
     // check the center distance - detector is 0.5m + det_lin motor
-    TS_ASSERT_DELTA(westPosGood.distance(ORIGIN), 0.5 + det_lin1, 1e-12);
-    TS_ASSERT_DELTA(eastPosGood.distance(ORIGIN), 0.5 + det_lin2, 1e-12);
+    TS_ASSERT_EQUALS(westPosGood.distance(ORIGIN), 0.5 + det_lin1);
+    TS_ASSERT_EQUALS(eastPosGood.distance(ORIGIN), 0.5 + det_lin2);
   }
 };

@@ -761,7 +761,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         allEi = PropertyManager.incident_energy.getAllEiList()
 
-        np.testing.assert_allclose([allEi[0], allEi[1]], [8.8, 15.8], rtol=2e-2)
+        self.assertAlmostEqual(allEi[0], 8.8, 1)
+        self.assertAlmostEqual(allEi[1], 15.8, 1)
 
     def test_ignore_complex_defailts_changes_fom_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)

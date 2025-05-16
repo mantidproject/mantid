@@ -284,7 +284,7 @@ public:
 
   void test_BSpline_fit_uniform_finer() {
     double startx = -3.14;
-    double endx = 3.139;
+    double endx = 3.14;
 
     std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
@@ -337,7 +337,7 @@ public:
   void test_BSpline_derivative() {
 
     double startx = -3.14;
-    double endx = 3.139;
+    double endx = 3.14;
 
     std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
@@ -361,7 +361,7 @@ public:
   void test_BSpline_derivative_2() {
 
     double startx = -3.14;
-    double endx = 3.139;
+    double endx = 3.14;
 
     std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 4);
@@ -385,7 +385,7 @@ public:
   void test_BSpline_derivative_3() {
 
     double startx = -3.14;
-    double endx = 3.139;
+    double endx = 3.14;
 
     std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 5);

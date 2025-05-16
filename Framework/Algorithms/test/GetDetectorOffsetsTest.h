@@ -561,8 +561,6 @@ public:
 
   // Verify that detectors which fail during peak fitting are masked.
   void testExecFailuresAreMasked() {
-// Peak fitting gives different results on ARM
-#ifndef __aarch64__
     const std::string uniquePrefix = "test_EFAM";
     const std::string outputWSName(uniquePrefix + "_offsets");
 
@@ -605,14 +603,11 @@ public:
 
     AnalysisDataService::Instance().remove(outputWSName);
     AnalysisDataService::Instance().remove(maskWSName);
-#endif
   }
 
   // Verify that detectors masked in the output include both those masked in the input, and also those that fail during
   // peak fitting.
   void testExecMasksAreCombined() {
-// Peak fitting gives different results on ARM
-#ifndef __aarch64__
     const std::string uniquePrefix = "test_EFAM";
     const std::string outputWSName(uniquePrefix + "_offsets");
 
@@ -661,7 +656,6 @@ public:
 
     AnalysisDataService::Instance().remove(outputWSName);
     AnalysisDataService::Instance().remove(maskWSName);
-#endif
   }
 
   /**
@@ -669,8 +663,6 @@ public:
    * values.
    */
   void testExecMasksAreConsistentWithDetectorFlags() {
-// Peak fitting gives different results on ARM
-#ifndef __aarch64__
     const std::string uniquePrefix = "test_EFAM";
     const std::string outputWSName(uniquePrefix + "_offsets");
 
@@ -722,7 +714,6 @@ public:
 
     AnalysisDataService::Instance().remove(outputWSName);
     AnalysisDataService::Instance().remove(maskWSName);
-#endif
   }
 };
 

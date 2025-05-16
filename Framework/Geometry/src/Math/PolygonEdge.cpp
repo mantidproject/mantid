@@ -49,10 +49,10 @@ PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
   const V2D &a = edge.direction();
   const V2D b = p2 - edge.start();
   double sa = a.X() * b.Y() - b.X() * a.Y();
-  if (sa > EPSILON) {
+  if (sa > 0.0) {
     return OnLeft;
   }
-  if (sa < -EPSILON) {
+  if (sa < 0.0) {
     return OnRight;
   }
   if ((a.X() * b.X() < 0.0) || (a.Y() * b.Y() < 0.0)) {
@@ -81,7 +81,7 @@ PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
 PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge, const PolygonEdge &refEdge, double &t) {
   V2D normalToRef((refEdge.end().Y() - refEdge.start().Y()), (refEdge.start().X() - refEdge.end().X()));
   double denom = normalToRef.scalar_prod(focusEdge.direction());
-  if (std::abs(denom) < EPSILON) {
+  if (Kernel::equals(denom, 0.0)) {
     PointClassification edgeClass = classify(focusEdge.start(), refEdge);
     if (edgeClass == OnLeft || edgeClass == OnRight) {
       return PolygonEdge::Parallel;

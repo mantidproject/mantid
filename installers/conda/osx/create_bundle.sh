@@ -136,22 +136,17 @@ function usage() {
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  -p Target platform, e.g. osx-64 or osx-arm64"
+  echo
   exit $exitcode
 }
 
 ## Script begin
 # Optional arguments
 conda_channel=mantid
-platform=""
 suffix=
 while [ ! $# -eq 0 ]
 do
   case "$1" in
-    -p)
-        platform="$2"
-        shift
-        ;;
     -c)
         conda_channel="$2"
         shift
@@ -215,7 +210,7 @@ if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
 fi
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
-CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+CONDA_SUBDIR=osx-64 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \
   jq  # used for processing the version string
@@ -242,6 +237,6 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 # `create-dmg` returns error code by default due to lack of signing - this is suppressed using a command list.
 # Failure of the following `mv` command likely signifies `create-dmg` error.
 export PATH=$PATH:/opt/homebrew/bin/
-version_name="$bundle_name"-"$platform"-"$version"
+version_name="$bundle_name"-"$version"
 create-dmg "$BUILD_DIR"/"$bundle_dirname" || true
 mv "${bundle_name} ${version}.dmg" "${version_name}.dmg"

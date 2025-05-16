@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import platform
+
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
@@ -44,10 +44,6 @@ class SANS2D_GDW20_4m_22_02_2D_M3(systemtesting.MantidSystemTest):
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        # Numbers are different on ARM architecture so skip test
-        return "arm" in platform.machine()
-
     def requiredMemoryMB(self):
         return 2000
 

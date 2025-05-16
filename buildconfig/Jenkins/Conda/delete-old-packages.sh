@@ -69,7 +69,7 @@ function delete_package() {
 ###
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "deletion-anaconda" false ""
+setup_mamba $WORKSPACE/mambaforge "deletion-anaconda"
 mamba install --yes curl jq
 
 for name in "$@"; do

@@ -11,7 +11,7 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 . source/buildconfig/Jenkins/Conda/mamba-utils
 
 # Install conda and environment
-setup_mamba $WORKSPACE/mambaforge "docs-build" true ""
+setup_mamba $WORKSPACE/mambaforge "docs-build" true
 mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory

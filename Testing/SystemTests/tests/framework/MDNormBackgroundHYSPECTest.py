@@ -28,7 +28,6 @@ from mantid.simpleapi import (
     SetGoniometer,
     SetUB,
 )
-import platform
 import systemtesting
 
 # Define symmetry operation
@@ -39,10 +38,6 @@ LOG_VALUE_STEP = 1
 
 
 class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        # Numbers are different on ARM architecture so skip test
-        return "arm" in platform.machine()
-
     @staticmethod
     def prepare_single_exp_info_background(input_md_name, output_md_name, target_qframe="Q_lab"):
         if target_qframe not in ["Q_sample", "Q_lab"]:

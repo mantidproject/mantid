@@ -613,7 +613,7 @@ public:
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A"), 1000, 30.0);
     TS_ASSERT_DELTA(out->getParameter("B"), 26, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.2);
+    TS_ASSERT_DELTA(out->getParameter("C"), 7.7, 0.1);
     TS_ASSERT_DELTA(out->getParameter("D"), 0, 0.1);
   }
 

@@ -8,12 +8,8 @@
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import config, mtd, DirectILLAutoProcess
-import platform
-
-SHOULD_SKIP = "arm" in platform.machine()
 
 
-@unittest.skipIf(SHOULD_SKIP, "Skipping tests on ARM architecture")
 class DirectILLAutoProcessTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -49,8 +49,7 @@ graphviz:
 
 # this must match the version in the developer dependencies
 jemalloc:
-  - 5.2.0 # [linux]
-  - 5.2.* # [osx]
+  - 5.2.0
 
 jsoncpp:
   - '>=1.9.4,<2'
