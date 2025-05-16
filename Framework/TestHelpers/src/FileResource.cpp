@@ -31,6 +31,14 @@ FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debu
   }
 }
 
+bool FileResource::exists() {
+  if (std::filesystem::is_regular_file(m_full_path)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void FileResource::setDebugMode(bool mode) { m_debugMode = mode; }
 std::string FileResource::fullPath() const { return m_full_path.generic_string(); }
 
