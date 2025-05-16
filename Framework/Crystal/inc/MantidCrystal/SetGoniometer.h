@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -39,6 +40,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Crystal
