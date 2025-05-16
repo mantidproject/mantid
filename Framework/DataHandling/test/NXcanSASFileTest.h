@@ -10,7 +10,7 @@
 
 #include "../../Nexus/inc/MantidNexus/H5Util.h"
 #include "../inc/MantidDataHandling/NXcanSASDefinitions.h"
-#include "../inc/MantidDataHandling/NXcanSASHelper.h"
+#include "../inc/MantidDataHandling/SaveNXcanSASHelper.h"
 
 #include "MantidKernel/VectorHelper.h"
 #include "NXcanSASTestHelper.h"

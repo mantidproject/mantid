@@ -10,7 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
-#include "MantidDataHandling/NXcanSASHelper.h"
+#include "MantidDataHandling/SaveNXcanSASHelper.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;

@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/NXcanSASHelper.h"
+#include "MantidDataHandling/SaveNXcanSASHelper.h"
 
 using namespace Mantid::API;
 

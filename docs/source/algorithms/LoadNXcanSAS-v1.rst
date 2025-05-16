@@ -12,7 +12,8 @@ Description
 Loads the given file, which should be in the NXcanSAS format specified
 by NXcanSAS Data Formats Working Group schema
 http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html and
-creates an output workspace. The current loader is optimized to work with NXcanSAS data which was saved using the :ref:`algm-SaveNXcanSAS` algorithm.
+creates an output workspace. The current loader is optimized to work with NXcanSAS data which was saved using
+the :ref:`algm-SaveNXcanSAS` or the :ref:`algm-SavePolarizedNXcanSAS` algorithms.
 
 If the file contains transmission workspaces then they can be loaded into separate workspaces.
 

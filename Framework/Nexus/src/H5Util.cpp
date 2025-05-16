@@ -255,9 +255,9 @@ std::string readString(H5::H5File &file, const std::string &path) {
   }
 }
 
-std::string readString(H5::Group &group, const std::string &name) {
+std::string readString(const H5::Group &group, const std::string &name) {
   try {
-    auto data = group.openDataSet(name);
+    const auto data = group.openDataSet(name);
     return readString(data);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);

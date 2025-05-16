@@ -11,7 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/NXcanSASHelper.h"
+#include "MantidDataHandling/SaveNXcanSASHelper.h"
 #include "MantidDataHandling/SavePolarizedNXcanSAS.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "NXcanSASFileTest.h"
