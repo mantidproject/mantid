@@ -144,5 +144,11 @@ void export_ComponentInfo() {
       .def("uniqueName", &ComponentInfo::uniqueName, (arg("self"), arg("name")),
            "Returns True if the name is a unique single occurance. Zero occurances yields False.")
 
-      .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component");
+      .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
+
+      .def("quadrilateralComponentCornerIndices", &ComponentInfo::quadrilateralComponentCornerIndices,
+           (arg("self"), arg("componentIndex")), "Returns indices of the vertices of a quadrilateral component")
+
+      .def("componentTypeName", &ComponentInfo::componentTypeName, (arg("self"), arg("componentIndex")),
+           "Returns the type of the specified component");
 }
