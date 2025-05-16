@@ -39,15 +39,6 @@ typedef struct {
   NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
-/** \enum NXstatus
- * Special codes for NeXus file status.
- * \li OKAY success +1.
- * \li ERROR error 0
- * \li EOD end of file -1
- * \ingroup cpp_types
- */
-enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
-
 /**
  * \ingroup c_types
  * \def NX_FLOAT32

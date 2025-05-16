@@ -825,7 +825,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -980,7 +980,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -1260,7 +1260,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -2156,7 +2156,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
-  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NXstatus::NX_ERROR) {
+  if (!wksp_cls.getDataSetInfo("masked_spectra").allGood) {
     return;
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
