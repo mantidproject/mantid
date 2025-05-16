@@ -10,15 +10,9 @@
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidNexus/H5Util.h"
 
-#include <regex>
-
-using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using namespace Mantid::DataHandling::NXcanSAS;
 using namespace Mantid::NeXus;
 
 namespace Mantid::DataHandling::NXcanSAS {

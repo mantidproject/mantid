@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <H5Cpp.h>
+#include <optional>
 #include <vector>
 
 namespace Mantid::DataHandling::NXcanSAS {
