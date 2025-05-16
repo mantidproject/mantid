@@ -47,13 +47,13 @@ private:
   void loadTransmission(const H5::Group &entry, const std::string &name, const InstrumentNameInfo &instrumentInfo);
   /// General data loader, uses m_dataDims
   void loadData(const H5::Group &dataGroup, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                const std::vector<hsize_t> &spinOffset) const;
-  void loadMetadata(const H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspace,
+                const std::pair<size_t, size_t> &spinIndexPair) const;
+  void loadMetadata(const H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const InstrumentNameInfo &instrumentInfo, const std::optional<API::Sample> &sample,
-                    const bool hasPolarizedData = false) const;
+                    bool hasPolarizedData = false) const;
 
   /// Prepares data to be loaded based on type and dimensionality
-  Mantid::API::WorkspaceGroup_sptr transferFileDataIntoWorkspace(const H5::Group &entry,
+  Mantid::API::WorkspaceGroup_sptr transferFileDataIntoWorkspace(const H5::Group &group,
                                                                  const DataSpaceInformation &dataInfo,
                                                                  const InstrumentNameInfo &instrumentInfo);
   std::vector<SpinState> prepareDataDimensions(const H5::Group &group, const DataSpaceInformation &dataInfo);

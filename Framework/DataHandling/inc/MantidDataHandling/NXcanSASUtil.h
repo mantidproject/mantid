@@ -12,7 +12,7 @@
 
 namespace Mantid::DataHandling::NXcanSAS {
 // Utils library for small helper classes, structures and functions used in either loading or saving NXcanSAS data.
-
+enum WorkspaceDataAxes : std::uint8_t { Y = 0, YErr = 1, X = 2, XErr = 3 };
 enum class WorkspaceDimensionality : std::uint8_t { other = 0, oneD = 1, twoD = 2 };
 class DataDimensions {
 public:
@@ -63,8 +63,7 @@ struct SpinVectorBuilder {
 
 struct SpinState {
   std::string strSpinState{""};
-  size_t indexPin{0};
-  size_t indexPout{0};
+  std::pair<size_t, size_t> spinIndexPair{0, 0};
 };
 
 std::optional<size_t> findWorkspaceIndexForSpinState(const std::vector<std::string> &spinStates,

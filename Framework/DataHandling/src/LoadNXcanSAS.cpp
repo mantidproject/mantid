@@ -48,6 +48,29 @@ std::string getNameOfEntry(const H5::H5File &root) {
   return root.getObjnameByIdx(0);
 }
 
+/**
+ * Tries to find a nexus or sas entry definition on the loaded file to provide a confidence estimation for the loader.
+ * @param file: Reference to loaded file
+ */
+bool findDefinition(NeXus::File &file) {
+  bool foundDefinition = false;
+  const auto entries = file.getEntries();
+  for (const auto &[sasEntry, nxEntry] : entries) {
+    if (nxEntry == sasEntryClassAttr || nxEntry == nxEntryClassAttr) {
+      file.openGroup(sasEntry, nxEntry);
+      file.openData(sasEntryDefinition);
+      const auto definitionFromFile = file.getStrData();
+      if (definitionFromFile == sasEntryDefinitionFormat) {
+        foundDefinition = true;
+        break;
+      }
+      file.closeData();
+      file.closeGroup();
+    }
+  }
+  return foundDefinition;
+}
+
 Mantid::API::MatrixWorkspace_sptr createWorkspace(const DataSpaceInformation &dimInfo, const bool asHistogram = false) {
   const auto &[dimSpectrumAxis, dimBin, _] = dimInfo;
   // Create a workspace based on the dataSpace information
@@ -105,16 +128,25 @@ void loadTitle(const H5::Group &entry, const Workspace_sptr &workspace) {
 
 //----- Polarization ----- //
 
-bool checkPolarization(const H5::Group &entry) {
-  const auto pIn = entry.nameExists(sasDataPin);
-  const auto pOut = entry.nameExists(sasDataPout);
+/**
+ * Checks wheter there is Pin or Pout axis in the Data Group of the loaded file.
+ * @param group: H5Group to inspect
+ */
+bool checkPolarization(const H5::Group &group) {
+  const auto pIn = group.nameExists(sasDataPin);
+  const auto pOut = group.nameExists(sasDataPout);
   if (pIn != pOut) {
     throw std::invalid_argument("Polarized data requires to have Pin and Pout axes");
   }
   return pIn && pOut;
 }
 
-std::pair<std::vector<int>, std::vector<int>> initializeSpinVectors(const H5::Group &group) {
+/**
+ * Loads Pin and Pout axis from the Data Group onto integer vectors and packs them in a std::pair
+ * @param group: H5Group group to inspect
+ * @return Pin, Pout vectors packed in a std::pair
+ */
+std::pair<std::vector<int>, std::vector<int>> loadSpinVectors(const H5::Group &group) {
   // Check for polarization first
   std::vector<int> pIn;
   std::vector<int> pOut;
@@ -125,6 +157,16 @@ std::pair<std::vector<int>, std::vector<int>> initializeSpinVectors(const H5::Gr
   return std::make_pair(pIn, pOut);
 }
 
+/**
+ * Generates, for every value of (Pin, Pout), a struct SpinState that contains
+ * a string labeling the corresponding spin states
+ * (i.e "+1+1" for Pin(i) = 1  ,Pout(j) = 1)
+ * as well as the vector indexes that retrieve that state.
+ * Used to offset the signal hyperslab as well as record the spin state on the sample logs
+ * @param pIn: Pin axes, a vector of with polarization states {-1,+1,0} .
+ * @param pOut: Pout axes, a vector of int with polarization states {-1,+1,0}.
+ * @return vector of SpinState structs.
+ */
 std::vector<SpinState> prepareSpinIndexes(const std::vector<int> &pIn, const std::vector<int> &pOut) {
   // Helds spin pair with vector indexes to iterate hyperslab
   auto spinToString = [](const int spinIndex) {
@@ -136,25 +178,22 @@ std::vector<SpinState> prepareSpinIndexes(const std::vector<int> &pIn, const std
     for (size_t j = 0; j < pOut.size(); j++) {
       SpinState state;
       state.strSpinState = spinToString(pIn.at(i)) + spinToString(pOut.at(j));
-      state.indexPin = i;
-      state.indexPout = j;
+      state.spinIndexPair = std::make_pair(i, j);
       spinIndexes.push_back(state);
     }
   }
   return spinIndexes;
 }
 
-void updateSpinOffset(const size_t indexPin, const size_t indexPout, std::vector<hsize_t> &spinOffset) {
-  if (!spinOffset.empty()) {
-    spinOffset[0] = indexPin;
-    spinOffset[1] = indexPout;
-  }
-}
-
+/**
+ * Loads logs corresponding to polarization metadata stored in the H5 File.
+ * @param group: H5 Group to read data from.
+ * @param workspace: Matrix workspace in which to load logs.
+ */
 void loadPolarizedLogs(const H5::Group &group, const MatrixWorkspace_sptr &workspace) {
   const auto logNames = std::vector({sasSampleEMFieldDirectionAzimuthal, sasSampleEMFieldDirectionPolar,
                                      sasSampleEMFieldDirectionRotation, sasSampleMagneticField});
-  for (auto const &log : logNames) {
+  for (const auto &log : logNames) {
     auto logValue = getNumDataSetIfExists(group, log);
     if (!logValue.empty()) {
       std::string logUnits;
@@ -169,22 +208,26 @@ std::optional<H5::Group> getGroupIfExists(const std::optional<H5::Group> &group,
   if (!group.has_value()) {
     return std::nullopt;
   }
-  if (const auto entry = group.value(); entry.nameExists(groupName)) {
+  if (const auto &entry = group.value(); entry.nameExists(groupName)) {
     return entry.openGroup(groupName);
   }
   return std::nullopt;
 }
 
-std::optional<Sample> loadSample(const H5::Group &entry) {
+/**
+ * Loads sample information from the H5 file and stores it in a sample object if such information exists.
+ * @param group: H5 Group to read data from.
+ * @return optional Sample object
+ */
+std::optional<Sample> loadSample(const H5::Group &group) {
   //  Load Height, Width, and Geometry from the aperture group and save to Sample object.
-  const auto &instrumentGroup = getGroupIfExists(entry, sasInstrumentGroupName);
+  const auto &instrumentGroup = getGroupIfExists(group, sasInstrumentGroupName);
   const auto &apertureGroup = getGroupIfExists(instrumentGroup, sasInstrumentApertureGroupName);
-  const auto &sampleGroup = getGroupIfExists(entry, sasInstrumentSampleGroupAttr);
+  const auto &sampleGroup = getGroupIfExists(group, sasInstrumentSampleGroupAttr);
 
   if (!apertureGroup.has_value() && !sampleGroup.has_value()) {
     return std::nullopt;
   }
-
   auto sample = Sample();
   if (apertureGroup.has_value()) {
     const auto &height = getNumDataSetIfExists(apertureGroup.value(), sasInstrumentApertureGapHeight);
@@ -213,10 +256,14 @@ std::optional<Sample> loadSample(const H5::Group &entry) {
   return sample;
 }
 
+/**
+ * Loads an instrument into the workspace
+ * @param workspace: Matrix workspace to load instrument to.
+ * @param instrumentInfo: Struct containing the instrument name and the idf.
+ */
 void loadInstrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const InstrumentNameInfo &instrumentInfo) {
   // Try to load the instrument. If it fails we will continue nevertheless.
   try {
-    // Get IDF
     const auto instAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
     instAlg->initialize();
     instAlg->setChild(true);
@@ -235,15 +282,48 @@ void loadInstrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const In
 }
 
 //----- Data ----- //
+
+/**
+ * Prepares the slabShape and offset vectors to extract data from a given slice of the signal or Q datasets in the H5
+ * file. For non polarized data, slabShape and position indexes have same dimensions, but for polarized data these
+ * vectors have to be trimmed for extracting Q datasets.
+ * @param axesIndex: Index to know which kind of axes the data is going to be stored in the workspace (X, Y, XErr,
+ * YErr). If data is X or XErr, the dimensions of the slab and offset vectors are different.
+ * @param spinIndexPair: pair of size_t containing the offset indexes on the hyperslab if there is polarized data.
+ * @param slabShape: Reference to vector containing the shape of the slab from which to slice the signal or Q datasets
+ * on the H5 File.
+ * @return Vector with offset position on the hyperslab of the signal or Q datasets.
+ */
+std::vector<hsize_t> updateOffset(const int axesIndex, const std::pair<size_t, size_t> &spinIndexPair,
+                                  std::vector<hsize_t> &slabShape) {
+  const bool isXAxis = axesIndex == WorkspaceDataAxes::X || axesIndex == WorkspaceDataAxes::XErr;
+  const auto &[indexPin, indexPout] = spinIndexPair;
+  auto position = std::vector<hsize_t>(slabShape.size(), 0);
+  if (slabShape.size() > 2) {
+    if (isXAxis) {
+      // cut slabShape for Q data
+      slabShape = std::vector<hsize_t>(slabShape.cbegin() + 2, slabShape.cend());
+      position = std::vector<hsize_t>(position.cbegin() + 2, position.cend());
+    } else {
+      position.at(0) = indexPin;
+      position.at(1) = indexPout;
+    }
+  }
+  return position;
+}
+
 std::string getStrAttribute(const H5::DataSet &dataSet, const std::string &attrName) {
   std::string attrValue;
   H5Util::readStringAttribute(dataSet, attrName, attrValue);
   return attrValue;
 }
 
-enum WorkspaceDataAxes : std::uint8_t { Y = 0, YErr = 1, X = 2, XErr = 3 };
+/**
+ * Struct used to store data in different axes on a workspace, as well as set the units. Uses the WorkspaceDataAxes enum
+ * to lock the axes.
+ */
 struct WorkspaceDataInserter {
-  explicit WorkspaceDataInserter(const MatrixWorkspace_sptr &workspace) : workspace(workspace), axisType(0) {}
+  explicit WorkspaceDataInserter(MatrixWorkspace_sptr workspace) : workspace(std::move(workspace)), axisType(0) {}
 
   void insertData(const size_t index, const std::vector<double> &data) const {
     switch (axisType) {
@@ -263,44 +343,56 @@ struct WorkspaceDataInserter {
       throw std::runtime_error("Provided axis is not compatible with workspace.");
     }
   }
+
   void setUnits(const H5::DataSet &dataSet) const {
-    if (axisType == Y || axisType == YErr) {
+    if (axisType == Y) {
       workspace->setYUnit(getStrAttribute(dataSet, sasUnitAttr));
-    } else if (axisType == X || axisType == XErr) {
+    } else if (axisType == X) {
       workspace->getAxis(0)->setUnit("MomentumTransfer");
     }
   }
+
   void setAxisType(const int type) { axisType = type; }
   MatrixWorkspace_sptr workspace;
   int axisType;
 };
 
+/**
+ * Reads data from the h5 file and stores in the workspace through the data inserter struct
+ * @param dataSet: Dataset to read data from
+ * @param inserter: Inserter struct helping to insert data into the appropriate axes of the workspace
+ * @param slabShape: Vector containg the shape of the slice that's to be extracted from the dataset
+ * @param nPoints : Number of points (or bins) to select in the 1D slab.
+ * @param nHistograms: Number of histograms (iteration reference)
+ * @param offset: Offset position on the dataset.
+ */
 void readDataIntoWorkspace(const H5::DataSet &dataSet, const WorkspaceDataInserter &inserter,
-                           const std::vector<hsize_t> &slabShape, const hsize_t nPoints, const hsize_t nHistograms = 1,
-                           const std::vector<hsize_t> &spinOffset = {}) {
+                           const std::vector<hsize_t> &slabShape, const hsize_t nPoints, const hsize_t nHistograms,
+                           std::vector<hsize_t> &offset) {
 
   // Memory Data Space
   const std::array<hsize_t, 1> memSpaceDimension = {nPoints};
   const H5::DataSpace memSpace(1, memSpaceDimension.data());
-
-  auto position = (nHistograms > 1) ? std::vector<hsize_t>(2, 0) : std::vector<hsize_t>(1, 0);
-  size_t histogramIndex = 0;
-  if (!spinOffset.empty()) {
-    position.insert(position.cbegin(), spinOffset.cbegin(), spinOffset.cend());
-    histogramIndex = spinOffset.size();
-  }
+  const auto histogramIndex = slabShape.size() > 2 ? slabShape.size() - 2 : 0;
 
   const auto fileSpace = dataSet.getSpace();
   auto data = std::vector<double>(nPoints, 0);
   for (size_t index = 0; index < nHistograms; ++index) {
     // Set the dataSpace to a 1D HyperSlab
-    fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), position.data());
+    fileSpace.selectHyperslab(H5S_SELECT_SET, slabShape.data(), offset.data());
     dataSet.read(data.data(), H5Util::getType<double>(), memSpace, fileSpace);
     inserter.insertData(index, data);
-    position[histogramIndex]++;
+    offset.at(histogramIndex)++;
   }
 }
 
+/**
+ * Extracts the first column of the Qy dataset from the H5 File and uses it to construct a numeric axis on the
+ * workspace.
+ * @param dataSet: Dataset to read data from
+ * @param workspace: Matrix workspace to set the axis to.
+ * @param nHistograms: Number of histograms (iteration reference)
+ */
 void readQyInto2DWorkspace(const H5::DataSet &dataSet, const Mantid::API::MatrixWorkspace_sptr &workspace,
                            const hsize_t nHistograms) {
   // Size of single slab
@@ -326,25 +418,6 @@ void readQyInto2DWorkspace(const H5::DataSet &dataSet, const Mantid::API::Matrix
   workspace->getAxis(1)->setUnit("MomentumTransfer");
 }
 
-bool findDefinition(NeXus::File &file) {
-  bool foundDefinition = false;
-  const auto entries = file.getEntries();
-  for (const auto &[sasEntry, nxEntry] : entries) {
-    if (nxEntry == sasEntryClassAttr || nxEntry == nxEntryClassAttr) {
-      file.openGroup(sasEntry, nxEntry);
-      file.openData(sasEntryDefinition);
-      const auto definitionFromFile = file.getStrData();
-      if (definitionFromFile == sasEntryDefinitionFormat) {
-        foundDefinition = true;
-        break;
-      }
-      file.closeData();
-      file.closeGroup();
-    }
-  }
-  return foundDefinition;
-}
-
 //----- Transmission ----- //
 bool fileHasTransmissionEntry(const H5::Group &entry, const std::string &name) {
   const bool hasTransmission = entry.nameExists(sasTransmissionSpectrumGroupName + "_" + name);
@@ -354,6 +427,11 @@ bool fileHasTransmissionEntry(const H5::Group &entry, const std::string &name) {
   return hasTransmission;
 }
 
+/**
+ * Takes transmission signal and Q from the corresponding group in the H5 File and puts in a tranmission workspace
+ * @param transmission: Group containing transmission or transmission can datasets.
+ * @param workspace: Matrix workspace containing transmission data.
+ */
 void loadTransmissionData(const H5::Group &transmission, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   //-----------------------------------------
   // Load T
@@ -461,57 +539,27 @@ void LoadNXcanSAS::exec() {
   setProperty("OutputWorkspace", wsOut);
 }
 
-Mantid::API::WorkspaceGroup_sptr LoadNXcanSAS::transferFileDataIntoWorkspace(const H5::Group &entry,
-                                                                             const DataSpaceInformation &dataInfo,
-                                                                             const InstrumentNameInfo &instrumentInfo) {
-  const auto dataGroup = entry.openGroup(sasDataGroupName);
-  const auto states = prepareDataDimensions(dataGroup, dataInfo);
-  auto spinOffset = dataInfo.spinStates > 1 ? std::vector<hsize_t>(2, 0) : std::vector<hsize_t>();
-
-  auto dataOut = std::make_shared<WorkspaceGroup>();
-  const auto sample = loadSample(entry); // Sample should be similar in all workspaces
-  // spinStr will be empty if data is not polarized -> Only one output workspace
-  for (const auto &state : states) {
-    const auto &[spinStr, indexPin, indexPout] = state;
-    auto ws = createWorkspace(dataInfo);
-    updateSpinOffset(indexPin, indexPout, spinOffset);
-
-    loadMetadata(entry, ws, instrumentInfo, sample, !spinStr.empty());
-    loadData(dataGroup, ws, spinOffset);
-
-    if (!spinStr.empty()) {
-      addLogToWs<std::string>(ws, NX_SPIN_LOG, spinStr);
-    }
-    dataOut->addWorkspace(ws);
-  }
-  return dataOut;
-}
-std::vector<SpinState> LoadNXcanSAS::prepareDataDimensions(const H5::Group &group,
-                                                           const DataSpaceInformation &dataInfo) {
-  const auto &[pIn, pOut] = initializeSpinVectors(group);
-  const auto spinPairs =
-      !pIn.empty() && !pOut.empty() ? std::optional(std::make_pair(pIn.size(), pOut.size())) : std::nullopt;
-
-  const auto spinStates = spinPairs.has_value() ? prepareSpinIndexes(pIn, pOut) :
-                                                /* default unpolarized: 1 state */ std::vector({SpinState()});
-  // prepare data dimensions and offset
-  m_dataDims = std::make_unique<DataDimensions>(dataInfo.dimBin, dataInfo.dimSpectrumAxis, spinPairs);
-  return spinStates;
-}
-
-void LoadNXcanSAS::loadMetadata(const H5::Group &entry, const MatrixWorkspace_sptr &workspace,
+/**
+ * Loads metadata from H5 File into a Workspace: sample logs, instrument and sample information.
+ * @param group: H5 group
+ * @param workspace: Matrix workspace in which to store metadata
+ * @param instrumentInfo: Struct containing instrument name and idf.
+ * @param sample: Optional sample object. Sample data won't be stored in workspace if this is empty.
+ * @param hasPolarizedData: Flag to check if polarized logs have to be loaded.
+ */
+void LoadNXcanSAS::loadMetadata(const H5::Group &group, const MatrixWorkspace_sptr &workspace,
                                 const InstrumentNameInfo &instrumentInfo, const std::optional<Sample> &sample,
                                 const bool hasPolarizedData) const {
   // Load logs
   m_progress->report("Loading logs.");
-  loadLogs(entry, workspace);
-  if (hasPolarizedData && entry.nameExists(sasInstrumentSampleGroupAttr)) {
-    loadPolarizedLogs(entry.openGroup(sasInstrumentSampleGroupAttr), workspace);
+  loadLogs(group, workspace);
+  if (hasPolarizedData && group.nameExists(sasInstrumentSampleGroupAttr)) {
+    loadPolarizedLogs(group.openGroup(sasInstrumentSampleGroupAttr), workspace);
   }
 
   // Load title
   m_progress->report("Loading title");
-  loadTitle(entry, workspace);
+  loadTitle(group, workspace);
 
   // Load sample info
   m_progress->report("Loading sample.");
@@ -523,8 +571,14 @@ void LoadNXcanSAS::loadMetadata(const H5::Group &entry, const MatrixWorkspace_sp
   loadInstrument(workspace, instrumentInfo);
 }
 
+/**
+ * Loads signal, Q and error data from the H5 file into the corresponding matrix workspace
+ * @param dataGroup: H5 group containing the target datasets
+ * @param workspace: Matrix workspace in which to store data
+ * @param spinIndexPair: pair containing the spin state to select the appropriate slice on the signal dataset.
+ */
 void LoadNXcanSAS::loadData(const H5::Group &dataGroup, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                            const std::vector<hsize_t> &spinOffset) const {
+                            const std::pair<size_t, size_t> &spinIndexPair) const {
   m_progress->report("Loading data.");
   workspace->setDistribution(true);
   WorkspaceDataInserter dataInserter(workspace);
@@ -538,17 +592,11 @@ void LoadNXcanSAS::loadData(const H5::Group &dataGroup, const Mantid::API::Matri
   const auto nPoints = m_dataDims->getNumberOfPoints();
   const auto nHisto = m_dataDims->getNumberOfHistograms();
 
-  for (auto const &[setName, axesIndex] : dataSets) {
+  for (const auto &[setName, axesIndex] : dataSets) {
     auto dataSet = dataGroup.openDataSet(setName);
+    auto offset = updateOffset(axesIndex, spinIndexPair, slabShape);
     dataInserter.setAxisType(axesIndex);
-
-    const bool isXAxis = axesIndex == WorkspaceDataAxes::X || axesIndex == WorkspaceDataAxes::XErr;
-    if (isXAxis && slabShape.size() > 2) {
-      // cut slabShape for Q data
-      slabShape = std::vector<hsize_t>(slabShape.cbegin() + 2, slabShape.cend());
-    }
-    readDataIntoWorkspace(dataSet, dataInserter, slabShape, nPoints, nHisto,
-                          isXAxis ? std::vector<hsize_t>() : spinOffset);
+    readDataIntoWorkspace(dataSet, dataInserter, slabShape, nPoints, nHisto, offset);
     dataInserter.setUnits(dataSet);
   }
 
@@ -556,6 +604,57 @@ void LoadNXcanSAS::loadData(const H5::Group &dataGroup, const Mantid::API::Matri
   if (dataGroup.nameExists(sasDataQy)) {
     readQyInto2DWorkspace(dataGroup.openDataSet(sasDataQy), workspace, m_dataDims->getNumberOfHistograms());
   }
+}
+
+/**
+ * Prepares the DataDimensions struct that contains the shapes of the dataset objects, as well as the
+ * information about the spin vectors stored in the file.
+ * @param group: H5 group containing the target datasets
+ * @param dataInfo: struct containing information about the dimensions of the signal dataset
+ */
+std::vector<SpinState> LoadNXcanSAS::prepareDataDimensions(const H5::Group &group,
+                                                           const DataSpaceInformation &dataInfo) {
+  const auto &[pIn, pOut] = loadSpinVectors(group);
+  const auto spinPairs =
+      !pIn.empty() && !pOut.empty() ? std::optional(std::make_pair(pIn.size(), pOut.size())) : std::nullopt;
+
+  const auto spinStates = spinPairs.has_value() ? prepareSpinIndexes(pIn, pOut) :
+                                                /* default unpolarized: 1 state */ std::vector({SpinState()});
+  // prepare data dimensions and offset
+  m_dataDims = std::make_unique<DataDimensions>(dataInfo.dimBin, dataInfo.dimSpectrumAxis, spinPairs);
+  return spinStates;
+}
+
+/**
+ * Prepares the DataDimensions struct that contains the shapes of the dataset objects, as well as the
+ * information about the spin vectors stored in the file.
+ * @param group: H5 group containing the target datasets
+ * @param dataInfo: Struct containing information about the dimensions of the signal dataset
+ * @param instrumentInfo: Struct containing information about instrument name and idf
+ */
+Mantid::API::WorkspaceGroup_sptr LoadNXcanSAS::transferFileDataIntoWorkspace(const H5::Group &group,
+                                                                             const DataSpaceInformation &dataInfo,
+                                                                             const InstrumentNameInfo &instrumentInfo) {
+  const auto dataGroup = group.openGroup(sasDataGroupName);
+  const auto states = prepareDataDimensions(dataGroup, dataInfo);
+  const auto wsName = getPropertyValue("OutputWorkspace");
+
+  auto dataOut = std::make_shared<WorkspaceGroup>();
+  const auto sample = loadSample(group); // Sample should be similar in all workspaces
+  // spinStr will be empty if data is not polarized -> Only one output workspace
+  for (const auto &[spinStr, spinIndexPair] : states) {
+    auto ws = createWorkspace(dataInfo);
+
+    loadMetadata(group, ws, instrumentInfo, sample, !spinStr.empty());
+    loadData(dataGroup, ws, spinIndexPair);
+
+    if (!spinStr.empty()) {
+      addLogToWs(ws, NX_SPIN_LOG, spinStr);
+      ws->setTitle(wsName + "_" + spinStr);
+    }
+    dataOut->addWorkspace(ws);
+  }
+  return dataOut;
 }
 
 void LoadNXcanSAS::loadTransmission(const H5::Group &entry, const std::string &name,
