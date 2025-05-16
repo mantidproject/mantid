@@ -73,10 +73,8 @@ std::string InstrumentNameInfo::getIdfFromFile(const std::string &instrumentName
   return idf;
 }
 
-InstrumentNameInfo::InstrumentNameInfo(const H5::Group &entry) {
-  instrumentName = getInstrumentNameFromFile(entry);
-  idf = getIdfFromFile(instrumentName);
-}
+InstrumentNameInfo::InstrumentNameInfo(const H5::Group &entry)
+    : instrumentName(getInstrumentNameFromFile(entry)), idf(getIdfFromFile(instrumentName)) {}
 
 std::optional<size_t> findWorkspaceIndexForSpinState(const std::vector<std::string> &spinStates,
                                                      const std::string &targetState) {
