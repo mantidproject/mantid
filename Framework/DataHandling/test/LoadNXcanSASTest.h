@@ -255,6 +255,7 @@ public:
     m_parameters.isPolarized = true;
     m_parameters.hasDx = false;
     m_parameters.inputSpinStates = std::string("-1-1,-1+1,+1-1,+1+1");
+    m_parameters.magneticFieldDirection = "1,2,3";
 
     const auto groupIn = providePolarizedGroup(m_ads, m_parameters);
     save_file_no_issues(std::dynamic_pointer_cast<Workspace>(groupIn));
@@ -503,6 +504,9 @@ private:
       const auto wsPoint = convertToPointData(wsIn);
       const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(groupOut->getItem(n));
       compareLogTo(wsOut, "spin_state_NXcanSAS", spinVec.at(n));
+      compareLogTo(wsOut, sasSampleEMFieldDirectionPolar, "1");
+      compareLogTo(wsOut, sasSampleEMFieldDirectionAzimuthal, "2");
+      compareLogTo(wsOut, sasSampleEMFieldDirectionRotation, "3");
       do_assert_load(wsPoint, wsOut);
     }
   }
