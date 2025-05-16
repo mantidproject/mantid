@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
+from sans.algorithm_detail.move_workspaces import move_component
 from sans.common.general_functions import (
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
@@ -17,7 +18,7 @@ from sans.common.general_functions import (
     get_transmission_output_name,
     get_wav_range_from_ws,
 )
-from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType
+from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType, CanonicalCoordinates
 from sans.common.constants import (
     TRANS_SUFFIX,
     SANS_SUFFIX,
@@ -1338,12 +1339,14 @@ def save_to_file(
     state = reduction_packages[0].state
     save_info = state.save
     scaled_bg_info = state.background_subtraction
+    polarization_info = state.polarization
     file_formats = save_info.file_format
     for to_save in workspaces_names_to_save:
         if isinstance(to_save, tuple):
             for i, ws_name_to_save in enumerate(to_save[0]):
                 transmission = to_save[1][i] if to_save[1] else ""
                 transmission_can = to_save[2][i] if to_save[2] else ""
+                _move_polarization_components(polarization_info, ws_name_to_save)
                 _add_scaled_background_metadata_if_relevant(scaled_bg_info, ws_name_to_save, additional_metadata)
                 save_workspace_to_file(
                     ws_name_to_save,
@@ -1355,6 +1358,7 @@ def save_to_file(
                     transmission_can,
                 )
         else:
+            _move_polarization_components(polarization_info, str(to_save))
             _add_scaled_background_metadata_if_relevant(scaled_bg_info, str(to_save), additional_metadata)
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
 
@@ -1364,6 +1368,26 @@ def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata
         return
     metadata["BackgroundSubtractionWorkspace"] = str(bg_state.workspace)
     metadata["BackgroundSubtractionScaleFactor"] = float(bg_state.scale_factor)
+
+
+def _move_polarization_components(polarization_state, ws_name: str):
+    def _move_component(component_state):
+        idf_name = component_state.idf_component_name
+        idf_pos = ws.getInstrument().getComponentByName(idf_name).getPos()
+        location = {
+            CanonicalCoordinates.X: component_state.location_x if component_state.location_x is not None else idf_pos.getX(),
+            CanonicalCoordinates.Y: component_state.location_y if component_state.location_y is not None else idf_pos.getY(),
+            CanonicalCoordinates.Z: component_state.location_z if component_state.location_z is not None else idf_pos.getZ(),
+        }
+        move_component(ws, location, idf_name, False)
+
+    ws = AnalysisDataService.retrieve(ws_name)
+    if polarization_state.polarizer:
+        _move_component(polarization_state.polarizer)
+    if polarization_state.analyzer:
+        _move_component(polarization_state.analyzer)
+    for flipper in polarization_state.flippers:
+        _move_component(flipper)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
