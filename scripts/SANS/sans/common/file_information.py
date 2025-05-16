@@ -61,9 +61,6 @@ WIDTH = "width"
 HEIGHT = "height"
 THICKNESS = "thickness"
 SHAPE = "shape"
-CYLINDER = "CYLINDER"
-FLAT_PLATE = "FLAT PLATE"
-DISC = "DISC"
 GEOM_HEIGHT = "geom_height"
 GEOM_WIDTH = "geom_width"
 GEOM_THICKNESS = "geom_thickness"
@@ -304,6 +301,25 @@ def convert_to_flag(shape_string):
     return shape
 
 
+def convert_nexus_shape_to_sample_shape(nexus_shape: str) -> SampleShape | None:
+    """
+    The ISIS nexus shape format can contain a space in flat plate.
+    Handle this here for consistency with the other conversions.
+    :param nexus_shape: The shape extracted from the ISIS nexus file.
+    :return: The SampleShape version of the shape.
+    """
+    nexus_shape = nexus_shape.upper()
+    match nexus_shape:
+        case "FLAT PLATE" | "FLATPLATE":
+            return SampleShape.FLAT_PLATE
+        case "DISC":
+            return SampleShape.DISC
+        case "CYLINDER":
+            return SampleShape.CYLINDER
+        case _:
+            return None
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for ISIS Nexus
 # ----------------------------------------------------------------------------------------------------------------------
@@ -423,14 +439,7 @@ def get_geometry_information_isis_nexus(file_name):
         width = float(sample[WIDTH][0])
         thickness = float(sample[THICKNESS][0])
         shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
-        if shape_as_string == CYLINDER:
-            shape = SampleShape.CYLINDER
-        elif shape_as_string == FLAT_PLATE:
-            shape = SampleShape.FLAT_PLATE
-        elif shape_as_string == DISC:
-            shape = SampleShape.DISC
-        else:
-            shape = None
+        shape = convert_nexus_shape_to_sample_shape(shape_as_string)
     return height, width, thickness, shape
 
 

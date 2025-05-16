@@ -1,0 +1,2 @@
+- :ref:`ISIS_SANS_Sum_Runs_Tab-ref` in the ISIS SANS interface now maintains the sample properties
+  (shape, thickness, height, and width) of the runs in the added output file.
