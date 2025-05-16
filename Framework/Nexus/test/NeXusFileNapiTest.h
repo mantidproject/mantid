@@ -247,10 +247,12 @@ private:
     TS_ASSERT_EQUALS(doubles[1], 21.0)
     file.closeData();
 
-    // Throws when you coerce to int from a real/double source
+    // No problem coercing to int from a real/double source
     ints.clear();
     file.openData("r8_data");
-    TS_ASSERT_THROWS_ANYTHING(file.getDataCoerce(ints));
+    file.getDataCoerce(ints);
+    TS_ASSERT_EQUALS(ints.size(), 20);
+    TS_ASSERT_EQUALS(ints[1], 21);
     file.closeData();
 
     // Close the "entry" group

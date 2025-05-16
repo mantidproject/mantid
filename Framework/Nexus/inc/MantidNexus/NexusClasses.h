@@ -35,26 +35,25 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  * Structure for keeping information about a Nexus data set, such as the dimensions and the type
  */
 struct NXInfo {
-  NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
+  NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), allGood(false) {}
   NXInfo(::NeXus::Info const &info, std::string const &name);
-  std::string nxname; ///< name of the object
-  std::size_t rank;   ///< number of dimensions of the data
-  NXDimArray dims;    ///< sizes along each dimension
-  NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
-  NXstatus stat;      ///< return status
-  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
+  std::string nxname;                 ///< name of the object
+  std::size_t rank;                   ///< number of dimensions of the data
+  NXDimArray dims;                    ///< sizes along each dimension
+  NXnumtype type;                     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
+  bool allGood;                       ///< return status
+  operator bool() { return allGood; } ///< returns success of an operation
 };
 
 /// Information about a Nexus class
 struct NXClassInfo {
-  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
-  NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
-  std::string nxname;  ///< name of the object
-  std::string nxclass; ///< NX class of the object or "SDS" if a dataset
-  NXnumtype datatype;  ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
-  /// napi.h
-  NXstatus stat;                                      ///< return status
-  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
+  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
+  NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), allGood(false) {}
+  std::string nxname;                 ///< name of the object
+  std::string nxclass;                ///< NX class of the object or "SDS" if a dataset
+  NXnumtype datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
+  bool allGood;                       ///< return status
+  operator bool() { return allGood; } ///< returns success of an operation
 };
 
 /*
@@ -108,8 +107,9 @@ public:
   std::shared_ptr<::NeXus::File> m_fileID;
 
 protected:
-  std::string m_path; ///< Keeps the absolute path to the object
-  bool m_open;        ///< Set to true if the object has been open
+  std::string m_path;        ///< Keeps the absolute path to the object
+  std::string m_path_parent; ///< Absolute path of the parent this object should reset to
+  bool m_open;               ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
 };
@@ -163,9 +163,11 @@ protected:
    * @throw runtime_error if the operation fails.
    */
   template <typename NumT> void getData(NumT *data) {
+    std::string oldPath = m_fileID->getPath();
+    m_fileID->openGroupPath(m_path);
     m_fileID->openData(name());
     m_fileID->getData(data);
-    m_fileID->closeData();
+    m_fileID->openPath(oldPath);
   }
 
   /**
@@ -462,6 +464,7 @@ public:
    * @param name :: The name of the NXClass relative to its parent
    */
   NXClass(NXClass const &parent, std::string const &name);
+  virtual ~NXClass() override;
   /// The NX class identifier
   std::string NX_class() const override { return "NXClass"; }
 
@@ -570,7 +573,7 @@ public:
   /**
    * Returns NXInfo for a dataset
    * @param name :: The name of the dataset
-   * @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
+   * @return NXInfo::allGood is set to false if the dataset does not exist
    */
   NXInfo getDataSetInfo(const std::string &name) const;
   /// Returns whether an individual dataset is present
@@ -595,7 +598,7 @@ protected:
   void readAllInfo();                                 ///< Fills in m_groups and m_datasets.
   void clear();                                       ///< Deletes content of m_groups and m_datasets
 private:
-  /// Pricate constructor.
+  /// Private constructor.
   NXClass() : NXObject() { clear(); }
 };
 
@@ -615,6 +618,7 @@ public:
   std::string NX_class() const override { return "NXdata"; }
   /// Opens the dataset within this NXData with signal=1 attribute.
   template <typename T> NXDataSetTyped<T> openData() {
+    m_fileID->openGroupPath(m_path);
     for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();

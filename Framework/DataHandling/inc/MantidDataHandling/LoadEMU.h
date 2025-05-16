@@ -66,7 +66,7 @@ protected:
 
   // calibrate doppler phase
   void calibrateDopplerPhase(const std::vector<size_t> &eventCounts, const std::vector<EventVector_pt> &eventVectors);
-  void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors, double &minTOF, double &maxTOF);
+  void dopplerTimeToTOF(const std::vector<EventVector_pt> &eventVectors, double &minTOF, double &maxTOF);
 
   // prepare event storage
   void prepareEventStorage(ANSTO::ProgressTracker &prog, const std::vector<size_t> &eventCounts,

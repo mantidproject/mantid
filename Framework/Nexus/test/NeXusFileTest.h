@@ -81,6 +81,56 @@ public:
     TS_ASSERT(std::filesystem::exists(filename));
   }
 
+  void test_can_readwrite() {
+    cout << "\ntest readwrite\n";
+
+    // create the file and ensure it exists
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read/write mode, edit it
+    file.openFile(filename, NXACC_RDWR);
+    string groupName("test_grp"), input("test"), output;
+    file.createGroup(groupName);
+    file.setComment(groupName, input);
+    file.close();
+
+    // reopen, check still there
+    file.openFile(filename, NXACC_READ);
+    output = file.getComment(groupName);
+    TS_ASSERT_EQUALS(input, output);
+    file.close();
+  }
+
+  void test_create_readonly() {
+    cout << "\ntest readonly\n";
+    fflush(stdout);
+
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+
+    string grp("test_grp"), expected("teststring"), notexpected("never used"), actual;
+
+    // create the file and ensure it exists
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.createGroup(grp);
+    file.setComment(grp, expected);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read-only mode, edit it -- should fail, and still be same
+    file.openFile(filename, NXACC_READ);
+    TS_ASSERT(file.exists(grp));
+    TS_ASSERT_THROWS_ANYTHING(file.setComment(grp, notexpected));
+    actual = file.getComment(grp);
+    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_DIFFERS(actual, notexpected);
+    file.close();
+  }
+
   void test_flush() {
     cout << "\ntest flush\n";
     // make sure flush works
@@ -100,14 +150,18 @@ public:
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
 
     string grp("test_group"), cls("NXsample");
 
+    // check there are no groups
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
     // check error conditions
     TS_ASSERT_THROWS(file.makeGroup(grp, ""), NeXus::Exception &);
     TS_ASSERT_THROWS(file.makeGroup("", cls), NeXus::Exception &);
     // check works when correct
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
   }
 
   void test_open_group() {
@@ -116,9 +170,14 @@ public:
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
 
+    // get location of root file
+    auto loc = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", loc);
+
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // check error conditions
     TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
@@ -127,6 +186,9 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
+    auto new_loc = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", new_loc);
+    TS_ASSERT_DIFFERS(loc, new_loc);
   }
 
   void test_open_group_bad() {
@@ -138,6 +200,7 @@ public:
     // create a group, to be opened
     string grp("test_group"), cls("NXpants");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // try to open it with wrong class name
     string notcls("NXshorts");
@@ -154,10 +217,17 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
+    auto layer1 = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 0);
 
     // create a group inside the group -- open it
     file.makeGroup(grp2, cls2, false);
     file.openGroup(grp2, cls2);
+    auto layer2 = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 1);
+    TS_ASSERT_DIFFERS(layer1->getObjName(), layer2->getObjName());
   }
 
   void test_closeGroup() {
@@ -165,16 +235,17 @@ public:
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
-
     // check error at root
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
 
     // now make group, close it, and check we are back at root
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, true);
-    file.closeGroup();
-
+    auto ingrp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_DIFFERS(ingrp->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
+    // if the group is closed, then its ID will be set to -1
+    TS_ASSERT_EQUALS(ingrp->getId(), -1);
   }
 
   // #################################################################################################################
@@ -197,13 +268,19 @@ public:
 
     // now make a NXentry group and try
     file.makeGroup("entry", "NXentry", true);
+    auto grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     // check some failing cases
     TS_ASSERT_THROWS(file.makeData("", type, dims), NeXus::Exception &);
     TS_ASSERT_THROWS(file.makeData(name, type, DimVector()), NeXus::Exception &);
 
     // check it works when it works
-    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims, true));
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 1);
+
+    auto data = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_EQUALS(data->getObjName(), "/entry/some_data");
   }
 
   void test_makeData_length() {
@@ -213,6 +290,8 @@ public:
 
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
+    auto grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     NXnumtype type(NXnumtype::CHAR);
 
@@ -229,10 +308,15 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
+    // get location of top-level
+    auto top = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", top);
+
     // create a dataset, to be opened
     string data("test_group");
     NXnumtype type(NXnumtype::CHAR);
     file.makeData(data, type, 3, false);
+    TS_ASSERT_EQUALS(top->getNumObjs(), 1);
 
     // check error conditions
     TS_ASSERT_THROWS(file.openData(string()), NeXus::Exception &);
@@ -240,6 +324,9 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
+    auto layer1 = file.getCurrentLocationAs<H5::DataSet>();
+    cout << strmakef("Located at %p\n", layer1);
+    TS_ASSERT_DIFFERS(top->getId(), layer1->getId());
   }
 
   void test_make_data_layers_bad() {
@@ -255,6 +342,14 @@ public:
     file.makeGroup("entry", "NXentry", true);
     file.makeData(data1, type, 1, false);
     file.openData(data1);
+
+    // try to create a dataset inside the dataset -- this throws an errpr
+    TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
+    // make the dataset one layer up, open data 1, then try opening data2 from within
+    file.closeData();
+    file.makeData(data2, type, 2, false);
+    file.openData(data1);
+    TS_ASSERT_THROWS_NOTHING(file.openData(data2));
   }
 
   void test_closeData() {
@@ -264,13 +359,16 @@ public:
     NeXus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
-    // check error at root
+    // check error at top-level
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
 
-    // now make data, close it, and check we are back at root
+    // now make data, close it, and check we are back at beginning
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
+    auto indata = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_DIFFERS(indata->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeData());
-
+    // if the dataset is closed, then its ID will be set to -1
+    TS_ASSERT_EQUALS(indata->getId(), -1);
     TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
   }
 
@@ -349,6 +447,23 @@ public:
     // put/get a string
     cout << "\nread/write string...\n";
     string in("this is a string"), out;
+    file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // do it another way
+    in = "this is some different data";
+    DimVector dims({(dimsize_t)in.size()});
+    file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // yet another way
+    in = "even more data";
     file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
     out = file.getStrData();
@@ -414,14 +529,32 @@ public:
     // put/get a char array
     char word[] = "silicovolcaniosis";
     char read[18];
-    file.makeData("data_char", NeXus::getType<char>(), 17, true);
+    file.makeData("data_char", NeXus::getType<char>(), 18, true);
     file.putData(word);
     info = file.getInfo();
     file.getData(read);
     file.closeData();
     // confirm
     TS_ASSERT_EQUALS(info.dims.size(), 1);
-    TS_ASSERT_EQUALS(info.dims.front(), 17);
+    TS_ASSERT_EQUALS(info.dims.front(), 18);
+    TS_ASSERT_EQUALS(string(word), string(read));
+
+    // put/get a 2D char array
+    char words[3][10] = {"First row", "2", ""};
+    char reads[3][10];
+    dims = {3, 9};
+    file.makeData("data_char_2d", NeXus::getType<char>(), dims, true);
+    file.putData(&(words[0][0]));
+    info = file.getInfo();
+    file.getData(&(reads[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 9);
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      TS_ASSERT_EQUALS(string(words[i]), string(reads[i]));
+    }
   }
 
   void test_data_putget_vector() {
@@ -517,19 +650,20 @@ public:
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
     NeXus::File file(filename, NXACC_CREATE5);
+    const std::string NXENTRY("NXentry");
 
     // setup a recursive group tree
-    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
-                            Entry{"/entry1/layer2a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+    std::vector<Entry> tree{Entry{"/entry1", NXENTRY},
+                            Entry{"/entry1/layer2a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3b", NXENTRY},
                             Entry{"/entry1/layer2a/data1", "SDS"},
-                            Entry{"/entry1/layer2b", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
-                            Entry{"/entry2", "NXentry"},
-                            Entry{"/entry2/layer2c", "NXentry"},
-                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+                            Entry{"/entry1/layer2b", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3b", NXENTRY},
+                            Entry{"/entry2", NXENTRY},
+                            Entry{"/entry2/layer2c", NXENTRY},
+                            Entry{"/entry2/layer2c/layer3c", NXENTRY}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -540,7 +674,7 @@ public:
         current = file.getPath();
       }
       string name = path.substr(path.find_last_of("/") + 1, path.npos);
-      if (it->second == "NXentry") {
+      if (it->second == NXENTRY) {
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
         string data = "Data";
@@ -553,30 +687,46 @@ public:
     file.closeGroup();
     file.closeGroup();
 
-    // tests invalid cases
-    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
-
     // make sure we are at root
     file.openPath("/");
 
-    // open the root
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
+    TS_ASSERT_THROWS_NOTHING(file.openPath("entry1"));
+    TS_ASSERT_EQUALS(file.getPath(), "/entry1");
+    file.closeGroup();
+    TS_ASSERT_EQUALS(file.getPath(), "/");
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), "/");
+
+    // move to inside the entry
     file.openGroup("entry1", "NXentry");
-    std::string actual, expected = "/";
+
+    // open the root
+    std::string expected = "/";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
 
     expected = "/entry1/layer2b/layer3a";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
 
     expected = "/entry1/layer2a/data1";
     file.openPath(expected);
-    actual = file.getPath();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
+
+    // failling should leave path alone
+    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getPath(), expected);
+
+    // intermingle working and failing opens
+    file.openPath("/entry1/layer2a/");
+    TS_ASSERT_THROWS(file.openGroup("pants", NXENTRY), NeXus::Exception &);
+    file.openGroup("layer3a", NXENTRY);
+    TS_ASSERT_EQUALS(file.getPath(), "/entry1/layer2a/layer3a");
   }
 
   void test_getInfo() {
@@ -654,13 +804,16 @@ public:
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
 
-    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
 
     // put/get an int attribute
     do_test_putget_attr(file, expected_names[0], 12);
 
     // put/get a double attribute
     do_test_putget_attr(file, expected_names[1], 120.2e6);
+
+    // put/get a single char attribute
+    do_test_putget_attr(file, expected_names[2], 'x');
 
     // check attr infos
     auto attrInfos = file.getAttrInfos();
@@ -696,10 +849,10 @@ public:
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
     TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
     TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
+    TS_ASSERT_EQUALS(attrInfos[0].length, 1);
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
-    TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
+    TS_ASSERT_EQUALS(attrInfos[1].length, 1);
   }
 
   void test_getEntries() {
@@ -774,6 +927,16 @@ public:
     actual = file.getEntries();
     expected = Entries({Entry{"layer3c", "NXentry"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // also test root level name
+    TS_ASSERT_EQUALS("entry1", file.getTopLevelEntryName());
+
+    // also test getting the directory
+    file.getEntryDirectory(actual);
+    for (auto it = tree.cbegin(); it != tree.cend(); it++) {
       TS_ASSERT_EQUALS(actual.count(it->first), 1);
       TS_ASSERT_EQUALS(it->second, actual[it->first]);
     }

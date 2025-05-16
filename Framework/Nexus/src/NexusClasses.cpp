@@ -23,7 +23,7 @@ static NXDimArray nxdimArray(::NeXus::DimVector xd) {
 }
 
 NXInfo::NXInfo(::NeXus::Info const &info, std::string const &name)
-    : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), stat(NXstatus::NX_OK) {}
+    : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), allGood(true) {}
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
@@ -64,9 +64,7 @@ void NXAttributes::set(const std::string &name, const std::string &value) { m_va
  *   @param value :: The new value of the attribute
  */
 template <typename T> void NXAttributes::set(const std::string &name, T value) {
-  std::ostringstream ostr;
-  ostr << value;
-  m_values[name] = ostr.str();
+  m_values[name] = std::to_string(value);
 }
 
 //---------------------------------------------------------
@@ -84,9 +82,17 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    m_path = parent->path() + "/" + name;
+    std::filesystem::path new_path(parent->path() + "/" + name);
+    if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
+      std::cerr << "Note: You are apprently trying to load an NXObject named " << name
+                << " with itself as a parent, from " << new_path.parent_path() << ".\n"
+                << "The path is being re-resolved to " << new_path.parent_path() << " to hopefully fix this.\n";
+      new_path = new_path.parent_path();
+    }
+    m_path_parent = new_path.parent_path();
+    m_path = new_path;
   }
 }
 
@@ -97,9 +103,17 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
  *   @param name :: The name of the object relative to its parent
  */
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+    : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    m_path = parent->path() + "/" + name;
+    std::filesystem::path new_path(parent->path() + "/" + name);
+    if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
+      std::cerr << "Note: You are apprently trying to load an NXObject named " << name
+                << " with itself as a parent, from " << new_path.parent_path() << ".\n"
+                << "The path is being re-resolved to to hopefully fix this.\n";
+      new_path = new_path.parent_path();
+    }
+    m_path_parent = new_path.parent_path();
+    m_path = new_path;
   }
 }
 
@@ -122,7 +136,7 @@ void NXDataSet::getAttributes() {
 
     switch (ainfo.type) {
     case NXnumtype::CHAR: {
-      attributes.set(ainfo.name, m_fileID->getStrAttr(ainfo));
+      attributes.set(ainfo.name, m_fileID->getAttr<std::string>(ainfo.name));
       break;
     }
     case NXnumtype::INT16: {
@@ -148,6 +162,11 @@ void NXDataSet::getAttributes() {
 
 NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(parent.m_fileID, &parent, name) { clear(); }
 
+NXClass::~NXClass() {
+  if (m_open && (!m_path_parent.empty()))
+    m_fileID->openPath(m_path_parent);
+}
+
 void NXClass::readAllInfo() {
   clear();
   for (auto const &entry : m_fileID->getEntries()) {
@@ -162,15 +181,7 @@ void NXClass::readAllInfo() {
   }
 }
 
-bool NXClass::isValid(const std::string &path) const {
-  try {
-    m_fileID->openGroupPath(path);
-    m_fileID->closeGroup();
-    return true;
-  } catch (::NeXus::Exception const &) {
-    return false;
-  }
-}
+bool NXClass::isValid(const std::string &path) const { return m_fileID->hasPath(path); }
 
 void NXClass::open() {
   m_fileID->openGroupPath(m_path);
@@ -216,14 +227,22 @@ void NXClass::clear() {
 }
 
 std::string NXClass::getString(const std::string &name) const {
-  NXChar buff = openNXChar(name);
+  const std::string oldPath = m_fileID->getPath();
+
+  std::string value;
+
+  // open the containing dataset
+  m_fileID->openPath(name);
+  // read the value
   try {
-    buff.load();
-    return std::string(buff(), buff.dim0());
-  } catch (std::runtime_error &) {
-    // deals with reading uninitialized/empty data
-    return std::string();
+    value = m_fileID->getStrData();
+  } catch (const ::NeXus::Exception &) {
+    m_fileID->openPath(oldPath); // go back to original location
+    throw;                       // rethrow the exception
   }
+  m_fileID->openPath(oldPath); // go back to original location
+
+  return value;
 }
 
 double NXClass::getDouble(const std::string &name) const {
@@ -255,25 +274,24 @@ bool NXClass::containsGroup(const std::string &query) const {
 /**
  *  Returns NXInfo for a dataset
  *  @param name :: The name of the dataset
- *  @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
+ *  @return NXInfo::allGood is set to false if the dataset does not exist
  */
 NXInfo NXClass::getDataSetInfo(const std::string &name) const {
   const auto it = std::find_if(datasets().cbegin(), datasets().cend(),
                                [&name](const auto &dataset) { return dataset.nxname == name; });
-  if (it != datasets().cend()) {
-    return *it;
-  }
   NXInfo info;
-  info.stat = NXstatus::NX_ERROR;
+  if (it != datasets().cend()) {
+    info = *it;
+  } else {
+    info.allGood = false;
+  }
   return info;
 }
 
 /**
  * Returns whether an individual dataset is present.
  */
-bool NXClass::containsDataSet(const std::string &query) const {
-  return getDataSetInfo(query).stat != NXstatus::NX_ERROR;
-}
+bool NXClass::containsDataSet(const std::string &query) const { return getDataSetInfo(query).allGood; }
 
 //---------------------------------------------------------
 //          NXRoot methods
@@ -342,18 +360,24 @@ NXDataSet::NXDataSet(const NXClass &parent, const std::string &name) : NXObject(
     m_info.nxname = name.substr(i + 1);
 }
 
-// Opens the data set. Does not read in any data. Call load(...) to load the
-// data
+// Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open() {
   size_t i = m_path.find_last_of('/');
   if (i == std::string::npos || i == 0)
     return; // we are in the root group, assume it is open
+  std::string path_before = m_fileID->getPath();
   std::string group_path = m_path.substr(0, i);
-  m_fileID->openPath(group_path);
-  m_fileID->openData(name());
-  m_info = NXInfo(m_fileID->getInfo(), name());
-  getAttributes();
-  m_fileID->closeData();
+  try {
+    m_fileID->openPath(group_path);
+    m_fileID->openData(name());
+    m_info = NXInfo(m_fileID->getInfo(), name());
+    getAttributes();
+  } catch (const ::NeXus::Exception &) {
+    // go back to where the file was before
+    if (!path_before.empty())
+      m_fileID->openPath(path_before);
+    throw;
+  }
 }
 
 void NXDataSet::openLocal() {

@@ -644,9 +644,23 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot &root, const std::strin
  */
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                                              const double &progressStart, const double &progressRange) {
-  NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
-  indices_data.load();
-  size_t numspec = indices_data.dim0() - 1;
+  // indices of events
+  std::vector<int64_t> indices;
+  size_t numspec;
+  std::string units;
+  std::string unitLabel;
+  { // scope the variable so the node gets closed
+    NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
+    indices_data.load();
+    numspec = indices_data.dim0() - 1;
+    indices = indices_data.vecBuffer();
+
+    // Set the YUnit label
+    units = indices_data.attributes("units");
+    unitLabel = indices_data.attributes("unit_label");
+    if (unitLabel.empty())
+      unitLabel = units;
+  }
 
   // process optional spectrum parameters, if set
   checkOptionalProperties(numspec);
@@ -664,10 +678,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
       WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins, num_xbins - 1));
 
   // Set the YUnit label
-  ws->setYUnit(indices_data.attributes("units"));
-  std::string unitLabel = indices_data.attributes("unit_label");
-  if (unitLabel.empty())
-    unitLabel = indices_data.attributes("units");
+  ws->setYUnit(units);
   ws->setYUnitLabel(unitLabel);
 
   // Handle optional fields.
@@ -711,8 +722,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
   else
     throw std::runtime_error("Could not figure out the type of event list!");
 
-  // indices of events
-  std::vector<int64_t> indices = indices_data.vecBuffer();
   // Create all the event lists
   auto max = static_cast<int64_t>(m_filtered_spec_idxs.size());
   Progress progress(this, progressStart, progressStart + progressRange, max);
@@ -816,7 +825,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(dataSetName);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -971,7 +980,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -1251,7 +1260,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     std::string str = "column_" + std::to_string(columnNumber);
 
     NXInfo info = nx_tw.getDataSetInfo(str);
-    if (info.stat == NXstatus::NX_ERROR) {
+    if (!info.allGood) {
       // Assume we done last column of table
       break;
     }
@@ -2043,13 +2052,11 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
       axis->setValue(i, axisData[i]);
     }
   } else if (axis->isText()) {
-    NXChar axisData = data.openNXChar("axis2");
-    std::string axisLabels;
+    std::string axisLabels("");
     try {
-      axisData.load();
-      axisLabels = std::string(axisData(), axisData.dim0());
+      axisLabels = data.getString("axis2");
     } catch (std::runtime_error &) {
-      axisLabels = "";
+      // let it drop on the floor
     }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -2149,7 +2156,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
-  if (wksp_cls.getDataSetInfo("masked_spectra").stat == NXstatus::NX_ERROR) {
+  if (!wksp_cls.getDataSetInfo("masked_spectra").allGood) {
     return;
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
