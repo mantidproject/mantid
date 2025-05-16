@@ -44,7 +44,7 @@ std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(Mantid::Geometry::MDIm
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-std::string IMDWorkspace::getConvention() const { return m_convention; }
+const std::string &IMDWorkspace::getConvention() const { return m_convention; }
 
 /** Sets the convention of the workspace
  * @param convention : The convention to use.

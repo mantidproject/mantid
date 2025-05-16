@@ -175,8 +175,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax, size_t &numberO
  * @param logger : Logging object
  * @return
  */
-MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS, std::vector<std::vector<double>> pbins,
-                                         Logger &logger) {
+MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
+                                         const std::vector<std::vector<double>> &pbins, Logger &logger) {
   const size_t nDims = inWS->getNumDims();
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions(nDims);
   for (size_t i = 0; i < nDims; ++i) {

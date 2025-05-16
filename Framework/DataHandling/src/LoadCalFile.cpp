@@ -304,8 +304,7 @@ void LoadCalFile::readCalFile(const std::string &calFileName, const GroupingWork
         } else {
           // Selected, set the value to be 0
           maskWS->mutableY(wi)[0] = 0.0;
-          if (!hasUnmasked)
-            hasUnmasked = true;
+          hasUnmasked = true;
         }
       } else {
         // Ignore the error if the IS is actually for a monitor

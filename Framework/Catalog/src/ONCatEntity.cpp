@@ -31,9 +31,9 @@ ONCatEntity &ONCatEntity::operator=(ONCatEntity other) {
 
 ONCatEntity::~ONCatEntity() = default;
 
-std::string ONCatEntity::id() const { return m_id; }
+const std::string &ONCatEntity::id() const { return m_id; }
 
-std::string ONCatEntity::type() const { return m_type; }
+const std::string &ONCatEntity::type() const { return m_type; }
 
 std::string ONCatEntity::toString() const { return m_content->toStyledString(); }
 

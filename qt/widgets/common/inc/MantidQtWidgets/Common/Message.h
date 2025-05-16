@@ -49,11 +49,11 @@ public:
 
 public:
   /// @returns The message text
-  inline QString text() const { return m_text; }
+  inline const QString &text() const { return m_text; }
   /// @returns The message priority
   inline Priority priority() const { return m_priority; }
   /// @returns The name of the script the message came from
-  inline QString scriptPath() const { return m_scriptPath; }
+  inline const QString &scriptPath() const { return m_scriptPath; }
   /// Set the script name. This is useful if a script is renamed
   void setScriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
 

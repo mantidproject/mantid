@@ -243,7 +243,7 @@ void ConvertAxisByFormula::setAxisValue(const double value, const std::vector<Va
   }
 }
 
-void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec, std::vector<Variable_ptr> variables) {
+void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec, const std::vector<Variable_ptr> &variables) {
   MantidVec::iterator iter;
   for (iter = vec.begin(); iter != vec.end(); ++iter) {
     setAxisValue(*iter, variables);

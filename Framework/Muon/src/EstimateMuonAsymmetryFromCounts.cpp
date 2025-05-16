@@ -154,7 +154,6 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   double normConst = getProperty("NormalizationIn");
 
   std::string status = (normConst == 0) ? "Estimate" : "Fixed";
-  std::vector<std::string> methods(specLength, status);
   std::string baseName = (specLength > 1) ? wsName + "_spec_" : wsName;
   std::vector<std::string> wsNames(specLength, baseName);
 
@@ -198,6 +197,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // update table
   Mantid::API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
   if (table) {
+    std::vector<std::string> methods(specLength, status);
     updateNormalizationTable(table, wsNames, norm, methods);
     setProperty("NormalizationTable", table);
   }

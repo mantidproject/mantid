@@ -104,7 +104,7 @@ size_t SymmetryOperation::order() const { return m_order; }
  *
  * @return Identifier of the symmetry operation
  */
-std::string SymmetryOperation::identifier() const { return m_identifier; }
+const std::string &SymmetryOperation::identifier() const { return m_identifier; }
 
 /// Returns true if this is the identity operation.
 bool SymmetryOperation::isIdentity() const {

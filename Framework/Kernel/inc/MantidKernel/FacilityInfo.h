@@ -45,7 +45,7 @@ public:
   /// Returns the default delimiter between instrument name and run number
   const std::string &delimiter() const { return m_delimiter; }
   /// Returns a list of file extensions
-  const std::vector<std::string> extensions() const { return m_extensions; }
+  const std::vector<std::string> &extensions() const { return m_extensions; }
   /// Returns the preferred file extension
   const std::string &preferredExtension() const { return m_extensions.front(); }
 

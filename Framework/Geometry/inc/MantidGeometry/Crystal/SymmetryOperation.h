@@ -115,7 +115,7 @@ public:
   const V3R &reducedVector() const;
 
   size_t order() const;
-  std::string identifier() const;
+  const std::string &identifier() const;
 
   bool isIdentity() const;
   bool hasTranslation() const;

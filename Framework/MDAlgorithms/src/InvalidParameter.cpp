@@ -15,7 +15,7 @@ InvalidParameter::InvalidParameter(std::string value) : m_value(std::move(value)
 
 std::string InvalidParameter::getName() const { return parameterName(); }
 
-std::string InvalidParameter::getValue() const { return m_value; }
+const std::string &InvalidParameter::getValue() const { return m_value; }
 
 bool InvalidParameter::isValid() const { return false; }
 
