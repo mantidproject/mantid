@@ -7,7 +7,7 @@ SANS Changes
 
 New Features
 ------------
-- Metadata indicating the subtracted workspace and the scale factor is now saved to CanSAS1D and NXCanSAS subtracted
+- Metadata indicating the subtracted workspace and the scale factor is now saved to CanSAS1D and NXcanSAS subtracted
   output files when a :ref:`ISIS_SANS_scaled_background-ref` has been performed. This information is located in
   ``SASprocess``.
 - All beam centre settings can now be left uncommented in the TOML file. The appropriate beam centre values will now be
