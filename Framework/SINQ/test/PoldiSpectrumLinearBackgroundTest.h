@@ -118,6 +118,7 @@ public:
     fit->setProperty("Function", function);
     fit->setProperty("InputWorkspace", ws);
     fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fit->setProperty("IgnoreInvalidData", true);
 
     fit->execute();
 

@@ -375,6 +375,7 @@ IAlgorithm_sptr PoldiFitPeaks1D2::getFitAlgorithm(const Workspace2D_sptr &dataWo
   fitAlgorithm->setProperty("WorkspaceIndex", 0);
   fitAlgorithm->setProperty("StartX", range->getXStart());
   fitAlgorithm->setProperty("EndX", range->getXEnd());
+  fitAlgorithm->setProperty("IgnoreInvalidData", true);
 
   return fitAlgorithm;
 }

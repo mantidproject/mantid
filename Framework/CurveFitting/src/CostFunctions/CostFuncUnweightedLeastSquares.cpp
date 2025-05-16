@@ -53,6 +53,21 @@ std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(API::FunctionV
   return weights;
 }
 
+/// Update the fit weights of m_values so that correct fit weights are used by the minimizer and GSLFunctions
+void CostFuncUnweightedLeastSquares::updateValidateFitWeights() {
+  for (size_t i = 0; i < m_values->size(); i++) {
+    if (m_ignoreInvalidData) {
+      auto currentWeight = m_values->getFitWeight(i);
+      // Checking whether currentWeight != 0.0
+      if (std::abs(currentWeight) > std::max(1.0, std::abs(currentWeight)) * std::numeric_limits<double>::epsilon()) {
+        m_values->setFitWeight(i, 1.0);
+      }
+    } else {
+      m_values->setFitWeight(i, 1.0);
+    }
+  }
+}
+
 /// Calculates the residual variance from the internally stored FunctionValues.
 double CostFuncUnweightedLeastSquares::getResidualVariance() const {
   if (!m_values || m_values->size() == 0) {

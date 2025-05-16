@@ -65,7 +65,7 @@ Output:
    dataY = [a + b for a, b in zip(polynomial, peak)]
    ws = CreateWorkspace(dataX, dataY, NSpec = 9)
 
-   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexType='SpectrumNumber', ProcessingInstructions = "1-4,6-9", BackgroundCalculationMethod = "Polynomial", DegreeOfPolynomial = 2)
+   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexType='SpectrumNumber', ProcessingInstructions = "1-4,6-9", BackgroundCalculationMethod = "Polynomial", DegreeOfPolynomial = 2, IgnoreInvalidData=True)
 
    Y = ws.readY(4)[0]
    print('Peak height with background: {:.1f}'.format(Y))
@@ -77,7 +77,7 @@ Output:
 .. testoutput:: ExPoly
 
    Peak height with background: 22.0
-   Background subtracted peak height: 5.0
+   Background subtracted peak height: 18.9
 
 .. categories::
 

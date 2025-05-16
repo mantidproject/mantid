@@ -592,6 +592,8 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(const std::string &initialCe
   fit->setProperty("Function", std::static_pointer_cast<IFunction>(latticeFunction));
   fit->setProperty("InputWorkspace", peakTable);
   fit->setProperty("CostFunction", "Unweighted least squares");
+  // NOTE: Defaulting IgnoreInvalidData to true since this algorithm is to be replaced
+  fit->setProperty("IgnoreInvalidData", true);
   fit->execute();
 
   Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
@@ -962,6 +964,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(const std::vector<PoldiPeakCo
   fit->setProperty("MaxIterations", maxIterations);
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fit->setProperty("IgnoreInvalidData", true);
 
   // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
   int oldLogLevel = g_log.getLevel();

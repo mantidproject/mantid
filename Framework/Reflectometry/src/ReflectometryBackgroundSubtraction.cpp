@@ -126,6 +126,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(MatrixWor
   poly->setProperty("XRanges", spectrumRanges);
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
   poly->setProperty("Minimizer", "Levenberg-Marquardt");
+  poly->setProperty("IgnoreInvalidData", getPropertyValue("IgnoreInvalidData"));
   poly->execute();
   MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
 
@@ -237,6 +238,7 @@ void ReflectometryBackgroundSubtraction::init() {
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "The output workspace containing the InputWorkspace with the "
       "background removed.");
+  declareProperty("IgnoreInvalidData", false, "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 //----------------------------------------------------------------------------------------------
