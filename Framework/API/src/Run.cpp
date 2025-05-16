@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
@@ -18,6 +19,7 @@
 #include <memory>
 
 #include <algorithm>
+#include <functional>
 #include <numeric>
 
 namespace Mantid::API {
@@ -26,12 +28,49 @@ using namespace Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-/// The number of log entries summed when adding a run
-const int ADDABLES = 12;
-/// The names of the log entries summed when adding two runs together
-const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
-                                       "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
-                                       "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
+/// helper struct for addable properties
+
+auto addPeriodSeries = [](Property *left, const Property *right) {
+  auto *leftAP = dynamic_cast<ArrayProperty<double> *>(left);
+  const auto *rightAP = dynamic_cast<const ArrayProperty<double> *>(right);
+  if (!leftAP || !rightAP) {
+    throw std::runtime_error("Expected ArrayProperty<double> for both inputs.");
+  }
+  const auto &leftVec = leftAP->operator()();
+  const auto &rightVec = rightAP->operator()();
+  if (leftVec.size() != rightVec.size()) {
+    return;
+  }
+  std::vector<double> resVec;
+  resVec.reserve(leftVec.size());
+  for (int i = 0; i < leftVec.size(); i++) {
+    resVec.push_back(leftVec[i] + rightVec[i]);
+  }
+  *leftAP = resVec;
+};
+
+struct addableProperty {
+public:
+  using func = std::function<void(Property *, const Property *)>;
+  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(opFunc_in) {};
+  std::string name;
+  func opFunc;
+};
+
+/// The log entries that can be summed when adding two runs together
+const std::vector<addableProperty> ADDABLE{addableProperty("tot_prtn_chrg"),
+                                           addableProperty("rawfrm"),
+                                           addableProperty("goodfrm"),
+                                           addableProperty("dur"),
+                                           addableProperty("gd_prtn_chrg"),
+                                           addableProperty("uA.hour"),
+                                           addableProperty("monitor0_counts"),
+                                           addableProperty("monitor1_counts"),
+                                           addableProperty("monitor2_counts"),
+                                           addableProperty("monitor3_counts"),
+                                           addableProperty("monitor4_counts"),
+                                           addableProperty("monitor5_counts"),
+                                           addableProperty("proton_charge_by_period", addPeriodSeries)};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 const char *GONIOMETERS_LOG_NAME = "goniometers";
@@ -192,7 +231,8 @@ Run &Run::operator+=(const Run &rhs) {
   mergeMergables(*m_manager, *rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
-  for (const auto &name : ADDABLE) {
+  for (const auto &addableProp : ADDABLE) {
+    const std::string name = addableProp.name;
     if (rhs.m_manager->existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
       const Property *right = rhs.m_manager->getProperty(name);
@@ -200,7 +240,11 @@ Run &Run::operator+=(const Run &rhs) {
       // now deal with the left-hand side
       if (m_manager->existsProperty(name)) {
         Property *left = m_manager->getProperty(name);
-        left->operator+=(right);
+        if (!addableProp.opFunc) {
+          left->operator+=(right);
+        } else {
+          addableProp.opFunc(left, right);
+        }
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
