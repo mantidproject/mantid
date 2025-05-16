@@ -1,0 +1,1 @@
+- `#39139 <https://github.com/mantidproject/mantid/issues/39139>`_ : Type driven refactor of Engineering Diffraction Interface ``GSAS-II`` model and centralisation of how ``GSAS-II`` call is configured. Refactor removes the need for hard-coded paths in favour of recursively searching for files within a user defined path.

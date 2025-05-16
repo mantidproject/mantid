@@ -14,11 +14,11 @@ INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 ENGINEERING_PREFIX = "EngineeringDiffraction2/"
 
 
-def get_output_path():
+def get_output_path() -> str:
     location = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "save_location")
-    return location if location is not None else ""
+    return str(location) if location is not None else ""
 
 
-def get_path_to_gsas2():
+def get_path_to_gsas2() -> str:
     location = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "path_to_gsas2")
-    return location if location is not None else ""
+    return str(location) if location is not None else ""
