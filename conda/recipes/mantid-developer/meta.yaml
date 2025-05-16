@@ -57,7 +57,8 @@ requirements:
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - tbb-devel {{ tbb }}
-    - texlive-core {{ texlive_core }} # [osx or linux]
+    - texlive-core {{ texlive_core }} # [linux]
+    - texlive-core {{ texlive_core }} # [osx and not arm64]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
     - zlib
