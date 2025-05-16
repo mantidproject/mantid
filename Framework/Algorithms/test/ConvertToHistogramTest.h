@@ -18,6 +18,8 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
@@ -99,6 +101,48 @@ public:
         TS_ASSERT_EQUALS(dx[j], xErrors[j])
       }
     }
+  }
+
+  void test_ragged() {
+    // create ragged workspace
+    Workspace2D_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
+
+    // create and replace histograms with ragged ones
+    raggedWS->setHistogram(0, Histogram(Points{150., 250., 350.}, Counts{1., 2., 3.}));
+    raggedWS->setHistogram(1, Histogram(Points{300., 500.}, Counts{4., 5.}));
+
+    // quick check of the input workspace
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    TS_ASSERT(!raggedWS->isHistogramData())
+    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
+
+    MatrixWorkspace_sptr outputWS = runAlgorithm(raggedWS);
+    TS_ASSERT(outputWS)
+    TS_ASSERT(outputWS->isHistogramData())   // output is a histogram workspace
+    TS_ASSERT(outputWS->isRaggedWorkspace()) // output is a ragged workspace
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
+
+    // check the data
+    const Mantid::MantidVec &Y0 = outputWS->readY(0);
+    const Mantid::MantidVec &X0 = outputWS->readX(0);
+    const Mantid::MantidVec &Y1 = outputWS->readY(1);
+    const Mantid::MantidVec &X1 = outputWS->readX(1);
+    TS_ASSERT_EQUALS(Y0.size(), 3);
+    TS_ASSERT_EQUALS(X0.size(), 4);
+    TS_ASSERT_EQUALS(Y1.size(), 2);
+    TS_ASSERT_EQUALS(X1.size(), 3);
+    TS_ASSERT_EQUALS(X0[0], 100.);
+    TS_ASSERT_EQUALS(X0[1], 200.);
+    TS_ASSERT_EQUALS(X0[2], 300.);
+    TS_ASSERT_EQUALS(X0[3], 400.);
+    TS_ASSERT_EQUALS(X1[0], 200.);
+    TS_ASSERT_EQUALS(X1[1], 400.);
+    TS_ASSERT_EQUALS(X1[2], 600.);
+    TS_ASSERT_EQUALS(Y0[0], 1.);
+    TS_ASSERT_EQUALS(Y0[1], 2.);
+    TS_ASSERT_EQUALS(Y0[2], 3.);
+    TS_ASSERT_EQUALS(Y1[0], 4.);
+    TS_ASSERT_EQUALS(Y1[1], 5.);
   }
 
 private:

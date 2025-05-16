@@ -54,8 +54,12 @@ void XDataConverter::exec() {
     return;
   }
 
+  const bool ragged = inputWS->isRaggedWorkspace();
+
   const auto numSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const size_t numYValues = getNewYSize(inputWS);
+  size_t numYValues{1};
+  if (!ragged)
+    numYValues = getNewYSize(inputWS);
   const size_t numXValues = getNewXSize(numYValues);
   m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);
   // Create the new workspace
@@ -73,6 +77,9 @@ void XDataConverter::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERRUPT_REGION
+
+    if (ragged)
+      outputWS->resizeHistogram(i, inputWS->histogramSize(i));
 
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
