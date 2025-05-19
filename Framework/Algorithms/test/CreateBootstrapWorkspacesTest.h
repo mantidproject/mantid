@@ -98,11 +98,11 @@ public:
     const auto &outputY = ws->y(0);
     const auto &outputE = ws->e(0);
 
-    HistogramY expectedY = {0.988227, 2.23355, 2.75155, 3.28837, 5.32049};
+    HistogramY expectedY = {0.9343453718, 1.8440432784, 3.3932732169, 3.8540516706, 5.2606365402};
 
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
     for (size_t i = 0; i < outputY.size(); ++i) {
-      TS_ASSERT_DELTA(outputY[i], expectedY[i], 1e-5);
+      TS_ASSERT_DELTA(outputY[i], expectedY[i], 1e-6);
       TS_ASSERT_EQUALS(outputE[i], inputWS->e(0)[i]);
     }
     std::cout << "\n";
@@ -135,11 +135,11 @@ public:
     // Check that output is a particular resampling of entire spectrums
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
     for (size_t i = 0; i < inputWS->blocksize(); ++i) {
-      TS_ASSERT_EQUALS(ws->y(0)[i], inputWS->y(1)[i]);
-      TS_ASSERT_EQUALS(ws->e(0)[i], inputWS->e(1)[i]);
+      TS_ASSERT_EQUALS(ws->y(0)[i], inputWS->y(2)[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], inputWS->e(2)[i]);
 
-      TS_ASSERT_EQUALS(ws->y(1)[i], inputWS->y(1)[i]);
-      TS_ASSERT_EQUALS(ws->e(1)[i], inputWS->e(1)[i]);
+      TS_ASSERT_EQUALS(ws->y(1)[i], inputWS->y(0)[i]);
+      TS_ASSERT_EQUALS(ws->e(1)[i], inputWS->e(0)[i]);
 
       TS_ASSERT_EQUALS(ws->y(2)[i], inputWS->y(0)[i]);
       TS_ASSERT_EQUALS(ws->e(2)[i], inputWS->e(0)[i]);

@@ -19,6 +19,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/normal_distribution.h"
+#include "MantidKernel/uniform_int_distribution.h"
 
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
@@ -88,7 +90,7 @@ HistogramData::HistogramY CreateBootstrapWorkspaces::sampleHistogramFromGaussian
 
   // For each bin, sample y from Gaussian(y, e)
   for (size_t index = 0; index < dataY.size(); index++) {
-    std::normal_distribution<double> dist(dataY[index], dataE[index]);
+    Kernel::normal_distribution<double> dist(dataY[index], dataE[index]);
     outputY[index] = dist(gen);
   }
   return outputY;
@@ -124,7 +126,7 @@ void CreateBootstrapWorkspaces::exec() {
 
       } else if (bootType == "SpectraSampling") {
         // Sample from spectra indices with replacement
-        std::uniform_int_distribution<size_t> dist(0, inputWs->getNumberHistograms() - 1);
+        Kernel::uniform_int_distribution<size_t> dist(0, inputWs->getNumberHistograms() - 1);
         size_t new_index = dist(gen);
         bootWs->mutableY(index) = inputWs->y(new_index);
         bootWs->mutableE(index) = inputWs->e(new_index);
