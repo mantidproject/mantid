@@ -9,7 +9,7 @@ from unittest import mock
 import numpy as np
 from unittest.mock import patch, MagicMock, mock_open
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import TextureCorrectionModel
 
@@ -55,6 +55,16 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def tearDown(self):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
+
+    def get_cube_xml(self, name, side_len):
+        return f"""
+        <cuboid id='{name}'> \
+        <height val='{side_len}'  /> \
+        <width val='{side_len}' />  \
+        <depth  val='{side_len}' />  \
+        <centre x='0.0' y='0.0' z='0.0'  />  \
+        </cuboid>  \
+        <algebra val='{name}' /> \\ """
 
     @patch(correction_model_path + ".TextureCorrectionModel._has_no_orientation_set")
     @patch(correction_model_path + ".TextureCorrectionModel._has_no_valid_material")
@@ -107,6 +117,38 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.return_value = self.mock_ws
         name = self.model._get_material_name(self.ws_name)
         self.assertEqual(name, "Fe")
+
+    def test_copy_sample_moves_correct_shape_and_retains_correct_orientation(self):
+        # Create a reference ws with a goniometer set and a shape
+        CreateSampleWorkspace(OutputWorkspace=self.ws_name)
+        SetGoniometer(self.ws_name, Axis0="30,0,1,0,1", Axis1="15,0,0,1,1", Axis2="30,0,1,0,1")
+        SetSample(self.ws_name, Geometry={"Shape": "CSG", "Value": self.get_cube_xml("cube", 10.0)})
+
+        # Create another ws with a different Goniometer set to copy the shape to
+        other_ws = "copy_to_ws"
+        copy_ws = CreateSampleWorkspace(OutputWorkspace=other_ws)
+        SetGoniometer(other_ws, Axis0="20,0,1,0,1", Axis1="35,0,0,1,1", Axis2="10,0,1,0,1")
+        copy_mat = copy_ws.getRun().getGoniometer().getR()
+        self.model.copy_sample_info(self.ws_name, [other_ws])
+
+        # Create a third ws with the desired shape and goniometer set directly with algs
+        non_copy_str = "non_copy"
+        uncopy_ws = CreateSampleWorkspace(OutputWorkspace=non_copy_str)
+        SetGoniometer(non_copy_str, Axis0="20,0,1,0,1", Axis1="35,0,0,1,1", Axis2="10,0,1,0,1")
+        SetSample(non_copy_str, Geometry={"Shape": "CSG", "Value": self.get_cube_xml("cube", 10.0)})
+        ref_shape = uncopy_ws.sample().getShape()
+        ref_mat = uncopy_ws.getRun().getGoniometer().getR()
+
+        # compare the second and third ws shapes
+        copied_ws = ADS.retrieve(other_ws)
+        copied_shape = copied_ws.sample().getShape()
+        copied_mat = copied_ws.getRun().getGoniometer().getR()
+
+        # assert shapes and orientations are the same
+        self.assertTrue(np.all(ref_shape.getMesh() == copied_shape.getMesh()))
+        self.assertTrue(np.all(copied_mat == copy_mat))
+        self.assertTrue(np.all(copied_mat == ref_mat))
+        ADS.clear()
 
     def test_has_no_valid_material_returns_true_on_empty(self):
         # Force material to be empty
@@ -168,31 +210,20 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".DefineGaugeVolume")
     def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol):
         preset = "4mmCube"
-        expected_str = """
-<cuboid id='some-gv'> \
-<height val='4.0'  /> \
-<width val='4.0' />  \
-<depth  val='4.0' />  \
-<centre x='0.0' y='0.0' z='0.0'  />  \
-</cuboid>  \
-<algebra val='some-gv' /> \\ """
+        expected_str = (
+            "\n<cuboid id='some-gv'> <height val='4.0'  /> <width val='4.0' />  <depth  val='4.0' />  "
+            "<centre x='0.0' y='0.0' z='0.0'  />  </cuboid>  <algebra val='some-gv' /> \\ "
+        )
         self.model.define_gauge_volume(self.ws_name, preset=preset, custom=None)
         mock_def_gauge_vol.assert_called_once_with(self.ws_name, expected_str)
 
     @patch(correction_model_path + ".DefineGaugeVolume")
     @patch(correction_model_path + ".TextureCorrectionModel._read_xml")
     def test_define_gauge_vol_for_custom(self, mock_read_xml, mock_def_gauge_vol):
-        preset = "Custom"
-        expected_str = """
-<cuboid id='some-gv'> \
-<height val='4.0'  /> \
-<width val='4.0' />  \
-<depth  val='4.0' />  \
-<centre x='0.0' y='0.0' z='0.0'  />  \
-</cuboid>  \
-<algebra val='some-gv' /> \\ """
+        preset = "Custom Shape"
+        expected_str = self.get_cube_xml("some-gv", 4.0)
         mock_read_xml.return_value = expected_str
-        self.model.define_gauge_volume(self.ws_name, preset=preset, custom=None)
+        self.model.define_gauge_volume(self.ws_name, preset=preset, custom="gv.xml")
         mock_def_gauge_vol.assert_called_once_with(self.ws_name, expected_str)
 
     @patch(correction_model_path + ".LoadSampleShape")
@@ -322,6 +353,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
+        mock_clone.return_value = None
 
         self.model.apply_corrections("ws1", "out_ws", mock_calib, "dir", abs_corr=1.0, div_corr=1.0, rb_num="rb123")
 
@@ -335,6 +367,17 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_table = MagicMock()
         mock_create.return_value = mock_table
         self.model.write_atten_val_table("ws1", [3.14], 2.0, "Wavelength", "rb123", mock.MagicMock(), "/tmp")
+        mock_save.assert_called()
+
+    @patch(correction_model_path + ".SaveNexus")
+    @patch(correction_model_path + ".makedirs")
+    @patch(correction_model_path + ".path.exists")
+    def test_save_corrected_files_creates_expected_paths(self, mock_exists, mock_makedirs, mock_save):
+        mock_exists.return_value = False
+        calib = MagicMock()
+        calib.group = "CUSTOM"
+        self.model._save_corrected_files("ws", "/tmp", "AbsorptionCorrection", "RB123", calib)
+        mock_makedirs.assert_called()
         mock_save.assert_called()
 
 

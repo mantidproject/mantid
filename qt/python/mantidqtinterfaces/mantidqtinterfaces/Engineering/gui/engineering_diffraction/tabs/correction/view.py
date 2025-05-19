@@ -239,3 +239,6 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     def set_on_check_att_tab_state_changed(self, slot):
         self.check_attenTab.stateChanged.connect(slot)
+
+    def set_on_gauge_vol_state_changed(self, slot):
+        self.combo_shapeMethod.currentIndexChanged.connect(slot)
