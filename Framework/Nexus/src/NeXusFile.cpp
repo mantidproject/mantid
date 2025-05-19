@@ -107,7 +107,10 @@ static H5::DataType nxToHDF5Type(NXnumtype const &datatype) {
 static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
   NXnumtype iPtype = NXnumtype::BAD;
 
-  if (dt == H5::PredType::NATIVE_CHAR) {
+  H5T_class_t tclass = dt.getClass();
+  if (tclass == H5T_STRING) {
+    // first check for string types -- due to the double-meaning of NXnumtype::CHAR
+    // as both an integer and a marker for strings, it is important to do this first.
     iPtype = NXnumtype::CHAR;
   } else {
     // if the type is one of the predefined datatypes used by us, just get it
@@ -117,60 +120,58 @@ static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
 
     if (findit != nxToHDF5Map.end()) {
       iPtype = findit->first;
-    } else {
-      // if it's not a usual type, try to deduce the type from the datatype object
-      auto tclass = dt.getClass();
-      if (tclass == H5T_STRING) {
-        iPtype = NXnumtype::CHAR;
-      } else if (tclass == H5T_INTEGER) {
-        size_t size = dt.getSize();
-        H5T_sign_t sign = H5T_SGN_2;
-        // NOTE H5Cpp only defines the getSign method for IntType objects
-        // Can cause segfault if used on any other object.  Therefore we
-        // have to default to assuming signed int and only go to unsigned
-        // if we are able to deduce otherwise
-        H5::IntType const *it = dynamic_cast<H5::IntType const *>(&dt);
-        if (it != nullptr) {
-          sign = it->getSign();
-        }
-        // signed integers
-        if (sign == H5T_SGN_2) { // NOTE: the "2" means 2's-complement
-          if (size == 1) {
-            iPtype = NXnumtype::INT8;
-          } else if (size == 2) {
-            iPtype = NXnumtype::INT16;
-          } else if (size == 4) {
-            iPtype = NXnumtype::INT32;
-          } else if (size == 8) {
-            iPtype = NXnumtype::INT64;
-          }
-        }
-        // unsigned integers
-        else {
-          if (size == 1) {
-            iPtype = NXnumtype::UINT8;
-          } else if (size == 2) {
-            iPtype = NXnumtype::UINT16;
-          } else if (size == 4) {
-            iPtype = NXnumtype::UINT32;
-          } else if (size == 8) {
-            iPtype = NXnumtype::UINT64;
-          }
-        }
-      } else if (tclass == H5T_FLOAT) {
-        size_t size = dt.getSize();
-        if (size == 4) {
-          iPtype = NXnumtype::FLOAT32;
+    }
+    // if it's not a usual type, try to deduce the type from the datatype object
+    // check the class, if either H5T_INTEGER or H5T_FLOAT, then match by size and sign
+    // NOTE theseblocks were copied from napi5.cpp
+    else if (tclass == H5T_INTEGER) {
+      size_t size = dt.getSize();
+      H5T_sign_t sign = H5T_SGN_2;
+      // NOTE H5Cpp only defines the getSign method for IntType objects
+      // Can cause segfault if used on any other object.  Therefore we
+      // have to default to assuming signed int and only go to unsigned
+      // if we are able to deduce otherwise
+      H5::IntType const *it = dynamic_cast<H5::IntType const *>(&dt);
+      if (it != nullptr) {
+        sign = it->getSign();
+      }
+      // signed integers
+      if (sign == H5T_SGN_2) { // NOTE: the "2" means 2's-complement
+        if (size == 1) {
+          iPtype = NXnumtype::INT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::INT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::INT32;
         } else if (size == 8) {
-          iPtype = NXnumtype::FLOAT64;
+          iPtype = NXnumtype::INT64;
         }
       }
+      // unsigned integers
+      else {
+        if (size == 1) {
+          iPtype = NXnumtype::UINT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::UINT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::UINT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::UINT64;
+        }
+      }
+    } else if (tclass == H5T_FLOAT) {
+      size_t size = dt.getSize();
+      if (size == 4) {
+        iPtype = NXnumtype::FLOAT32;
+      } else if (size == 8) {
+        iPtype = NXnumtype::FLOAT64;
+      }
     }
-    if (iPtype == NXnumtype::BAD) {
-      std::stringstream msg;
-      msg << "cannot convert type=" << dt.getId();
-      throw Exception(msg.str(), "hdf5ToNXtype");
-    }
+  }
+  if (iPtype == NXnumtype::BAD) {
+    std::stringstream msg;
+    msg << "cannot convert type=" << dt.getId();
+    throw Exception(msg.str(), "hdf5ToNXtype");
   }
   return iPtype;
 }
@@ -693,6 +694,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       chunkdims[rank - 1] = 1;
     }
     dataspace = H5::DataSpace((int)rank, mydim1.data(), maxdims.data());
+    // NOTE there is no corresponding DataType::setSize method in current H5Cpp
+    // must use underlying C method to set the proper size
     H5Tset_size(datatype.getId(), byte_zahl);
   } else {
     if (unlimited) {
@@ -1214,7 +1217,7 @@ Info File::getInfo() {
 
   /* NOTE: the below was copied from napi to properly set lengths for string arrays.
     Unless you were there when the Deep Magic was written, and can look back further into the stillness
-    and the darkness before Time dawned and have read there a different incantation,
+    and the darkness before Time dawned to read a different incantation,
     then do not try to edit this.
   */
   if (rank == 0) {
