@@ -15,6 +15,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
+#include <filesystem>
 #include <memory>
 #include <utility>
 
@@ -59,9 +60,9 @@ std::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
     const std::string groupingFile = groupingFiles[0];
 
     // Get search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory().string();
+    const auto directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
 
-    loadGroupingFromXML(directoryName + groupingFile, *loadedGrouping);
+    loadGroupingFromXML((directoryName / groupingFile).string(), *loadedGrouping);
   } else {
     throw std::runtime_error("Multiple groupings specified for the instrument");
   }
