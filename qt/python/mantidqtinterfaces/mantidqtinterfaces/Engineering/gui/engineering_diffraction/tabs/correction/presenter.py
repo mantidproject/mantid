@@ -52,9 +52,13 @@ class TextureCorrectionPresenter:
         self.view.set_include_divergence(False)
         self.view.update_divergence_section_visibility()
 
+        self.view.set_on_gauge_vol_state_changed(self.update_custom_shape_finder_vis)
+
         self.view.set_on_check_att_tab_state_changed(self.view.update_atten_tab_section_visibility)
         self.view.set_include_atten_tab(False)
         self.view.update_atten_tab_section_visibility()
+
+        self.update_custom_shape_finder_vis()
 
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
@@ -206,3 +210,9 @@ class TextureCorrectionPresenter:
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def update_custom_shape_finder_vis(self):
+        if self.view.get_shape_method() == "Custom Shape":
+            self.view.finder_gauge_vol.setVisible(True)
+        else:
+            self.view.finder_gauge_vol.setVisible(False)
