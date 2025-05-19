@@ -27,7 +27,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(log.size(), 4)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 46)
+        self.assertEqual(len(log_names), 47)
         self.assertIn("w", log_names)
 
         values = model.get_log_display_values("w")
@@ -80,7 +80,7 @@ class SampleLogsModelTest(unittest.TestCase):
         model = SampleLogsModel(ws)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 140)
+        self.assertEqual(len(log_names), 141)
         self.assertIn("raw_uah_log", log_names)
         self.assertIn("current_period", log_names)
         self.assertIn("period", log_names)
@@ -138,7 +138,7 @@ class SampleLogsModelTest(unittest.TestCase):
 
         model = SampleLogsModel(ws)
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 48)
+        self.assertEqual(len(log_names), 49)
         invalid_logs = model.get_logs_with_invalid_data()
         self.assertEqual(2, len(invalid_logs.keys()))
         self.assertIn("cryo_temp1", invalid_logs.keys())

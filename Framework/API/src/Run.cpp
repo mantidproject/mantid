@@ -28,7 +28,8 @@ using namespace Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-/// helper struct for addable properties
+/// static logger object
+Kernel::Logger g_log("Run");
 
 auto addPeriodSeries = [](Property *left, const Property *right) {
   auto *leftAP = dynamic_cast<ArrayProperty<double> *>(left);
@@ -39,6 +40,8 @@ auto addPeriodSeries = [](Property *left, const Property *right) {
   const auto &leftVec = leftAP->operator()();
   const auto &rightVec = rightAP->operator()();
   if (leftVec.size() != rightVec.size()) {
+    g_log.warning(
+        "Summing runs with differing number of periods. Proton charge logs will retain values from LHS operand.");
     return;
   }
   std::vector<double> resVec;
@@ -49,6 +52,7 @@ auto addPeriodSeries = [](Property *left, const Property *right) {
   *leftAP = resVec;
 };
 
+/// helper struct for addable properties
 struct addableProperty {
 public:
   using func = std::function<void(Property *, const Property *)>;
@@ -71,6 +75,7 @@ const std::vector<addableProperty> ADDABLE{addableProperty("tot_prtn_chrg"),
                                            addableProperty("monitor4_counts"),
                                            addableProperty("monitor5_counts"),
                                            addableProperty("proton_charge_by_period", addPeriodSeries)};
+
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 const char *GONIOMETERS_LOG_NAME = "goniometers";
@@ -79,9 +84,6 @@ const char *HISTO_BINS_LOG_NAME = "processed_histogram_bins";
 const char *PEAK_RADIUS_GROUP = "peak_radius";
 const char *INNER_BKG_RADIUS_GROUP = "inner_bkg_radius";
 const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
-
-/// static logger object
-Kernel::Logger g_log("Run");
 } // namespace
 
 Run::Run() {
