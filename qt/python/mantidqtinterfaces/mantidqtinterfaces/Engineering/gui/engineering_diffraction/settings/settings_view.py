@@ -74,6 +74,15 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_save_location(self):
         return self.finder_save.getFirstFilename()
 
+    def get_rd_dir(self):
+        return ",".join([self.lineedit_RD0.text(), self.lineedit_RD1.text(), self.lineedit_RD2.text()])
+
+    def get_td_dir(self):
+        return ",".join([self.lineedit_TD0.text(), self.lineedit_TD1.text(), self.lineedit_TD2.text()])
+
+    def get_nd_dir(self):
+        return ",".join([self.lineedit_ND0.text(), self.lineedit_ND1.text(), self.lineedit_ND2.text()])
+
     def get_full_calibration(self):
         return self.finder_fullCalib.getFirstFilename()
 
@@ -122,6 +131,24 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_save_location(self, text):
         self.finder_save.setText(text)
+
+    def set_rd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_RD0.setText(vec[0])
+        self.lineedit_RD1.setText(vec[1])
+        self.lineedit_RD2.setText(vec[2])
+
+    def set_td_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_TD0.setText(vec[0])
+        self.lineedit_TD1.setText(vec[1])
+        self.lineedit_TD2.setText(vec[2])
+
+    def set_nd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_ND0.setText(vec[0])
+        self.lineedit_ND1.setText(vec[1])
+        self.lineedit_ND2.setText(vec[2])
 
     def set_full_calibration(self, text):
         self.finder_fullCalib.setText(text)

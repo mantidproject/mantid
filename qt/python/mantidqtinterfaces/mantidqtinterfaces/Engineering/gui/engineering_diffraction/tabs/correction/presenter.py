@@ -41,6 +41,10 @@ class TextureCorrectionPresenter:
 
         self.view.sig_view_shape_requested.connect(self._on_view_shape_clicked)
 
+        self.view.set_on_create_ref_ws_clicked(self.on_create_ref_sample_clicked)
+        self.view.set_on_set_ref_ws_orientation_clicked(self.open_goniometer_dialog)
+        self.view.set_on_view_reference_shape_clicked(self._on_view_ref_shape_clicked)
+
         self.view.set_on_set_orientation_clicked(self.open_goniometer_dialog)
         self.view.set_on_load_sample_shape_clicked(self.open_load_sample_shape_dialog)
         self.view.set_on_set_sample_shape_clicked(self.open_set_sample_shape_dialog)
@@ -48,6 +52,7 @@ class TextureCorrectionPresenter:
         self.view.set_on_check_inc_abs_corr_state_changed(self.view.update_absorption_section_visibility)
         self.view.set_on_check_inc_div_corr_state_changed(self.view.update_divergence_section_visibility)
         self.view.set_on_copy_sample_clicked(self._copy_sample_to_all_selected)
+        self.view.set_on_copy_ref_sample_clicked(self._copy_ref_sample_to_all_selected)
 
         self.view.set_include_divergence(False)
         self.view.update_divergence_section_visibility()
@@ -59,6 +64,7 @@ class TextureCorrectionPresenter:
         self.view.update_atten_tab_section_visibility()
 
         self.update_custom_shape_finder_vis()
+        self.update_reference_info()
 
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
@@ -107,9 +113,16 @@ class TextureCorrectionPresenter:
 
     def _on_view_shape_clicked(self, ws_name):
         try:
-            sample_shape.plot_sample_container_and_components(ws_name)
+            fig = sample_shape.plot_sample_container_and_components(ws_name)
+            ax_transform = output_settings.get_texture_axes_transform()
+            self.model.plot_sample_directions(fig, ws_name, ax_transform)
         except Exception as exception:
             logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(ws_name, exception))
+
+    def _on_view_ref_shape_clicked(self):
+        fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws)
+        ax_transform = output_settings.get_texture_axes_transform()
+        self.model.plot_sample_directions(fig, None, ax_transform)
 
     def on_apply_clicked(self):
         wss = self.view.get_selected_workspaces()
@@ -168,6 +181,13 @@ class TextureCorrectionPresenter:
         self.model.copy_sample_info(ref_ws, wss)
         self.redraw_table()
 
+    def _copy_ref_sample_to_all_selected(self):
+        ref_ws = self.model.reference_ws
+        if ref_ws:
+            wss = self.view.get_selected_workspaces()
+            self.model.copy_sample_info(ref_ws, wss, True)
+            self.redraw_table()
+
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Corrections Applied")
 
@@ -195,6 +215,7 @@ class TextureCorrectionPresenter:
 
     def _redraw_on_alg_exec(self):
         QTimer.singleShot(200, self.redraw_table)
+        QTimer.singleShot(200, self.update_reference_info)
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
@@ -216,3 +237,10 @@ class TextureCorrectionPresenter:
             self.view.finder_gauge_vol.setVisible(True)
         else:
             self.view.finder_gauge_vol.setVisible(False)
+
+    def on_create_ref_sample_clicked(self):
+        self.model.create_reference_ws(self.rb_num)
+        self.update_reference_info()
+
+    def update_reference_info(self):
+        self.view.update_reference_info_section(*self.model.get_reference_info())

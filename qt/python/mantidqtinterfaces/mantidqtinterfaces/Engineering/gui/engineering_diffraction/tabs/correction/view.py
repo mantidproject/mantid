@@ -56,6 +56,15 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def set_on_deselect_all_clicked(self, slot):
         self.btn_deselectAll.clicked.connect(slot)
 
+    def set_on_view_reference_shape_clicked(self, slot):
+        self.btn_viewRefShape.clicked.connect(slot)
+
+    def set_on_create_ref_ws_clicked(self, slot):
+        self.btn_createRefWS.clicked.connect(slot)
+
+    def set_on_set_ref_ws_orientation_clicked(self, slot):
+        self.btn_setRefOrientation.clicked.connect(slot)
+
     def set_on_set_orientation_clicked(self, slot):
         self.btn_setOrientation.clicked.connect(slot)
 
@@ -67,6 +76,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     def set_on_set_material_clicked(self, slot):
         self.btn_setSampleMaterial.clicked.connect(slot)
+
+    def set_on_copy_ref_sample_clicked(self, slot):
+        self.btn_copyRefSample.clicked.connect(slot)
 
     def set_on_copy_sample_clicked(self, slot):
         self.btn_copySampleToAll.clicked.connect(slot)
@@ -144,6 +156,11 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:
                     checkbox.setChecked(selected)
+
+    def update_reference_info_section(self, ws_name, shape_enabled, material):
+        self.ref_frame_status.setText(ws_name)
+        self.btn_viewRefShape.setEnabled(shape_enabled)
+        self.ref_material_status.setText(material)
 
     def get_file_paths(self):
         return self.finder_corr.getFilenames()
