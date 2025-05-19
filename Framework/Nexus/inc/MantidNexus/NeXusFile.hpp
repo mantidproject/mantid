@@ -100,8 +100,6 @@ public:
    */
   template <typename T> std::shared_ptr<T> getCurrentLocationAs();
 
-  bool verifyGroupClass(H5::Group const &, std::string const &) const;
-
   bool hasPath(std::string const &);
   bool hasGroup(std::string const &, std::string const &);
   bool hasData(std::string const &);

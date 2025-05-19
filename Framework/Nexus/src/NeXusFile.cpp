@@ -84,8 +84,8 @@ static std::map<int, void const *> const nxToHDF5Map{
 
 static H5::DataType nxToHDF5Type(NXnumtype const &datatype) {
   H5::DataType type;
-  if (nxToHDF5Map.contains(datatype)) {
-    type = *static_cast<H5::PredType const *>(nxToHDF5Map.at(datatype));
+  if (auto const value = nxToHDF5Map.find(datatype); value != nxToHDF5Map.end()) {
+    type = *static_cast<H5::PredType const *>(value->second);
   } else {
     type = H5::PredType::NATIVE_HERR;
   }
@@ -174,35 +174,6 @@ static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
     throw Exception(msg.str(), "hdf5ToNXtype");
   }
   return iPtype;
-}
-
-void recursivePopulateEntries(H5::Group const &grp, Entries &entries) {
-  // get the path and class of this group
-  std::string const groupNameStr = grp.getObjName();
-  std::string nxClass = "";
-  if (groupNameStr != "/") {
-    if (grp.attrExists(group_class_spec)) {
-      H5::Attribute const attr = grp.openAttribute(group_class_spec);
-      attr.read(attr.getDataType(), nxClass);
-    }
-  }
-
-  if (!nxClass.empty()) {
-    entries[groupNameStr] = nxClass;
-  }
-
-  // recursively grab all entries within this group
-  for (hsize_t i = 0; i < grp.getNumObjs(); i++) {
-    H5G_obj_t type = grp.getObjTypeByIdx(i);
-    H5std_string memberName = grp.getObjnameByIdx(i);
-
-    if (type == H5G_GROUP) {
-      recursivePopulateEntries(grp.openGroup(memberName), entries);
-    } else if (type == H5G_DATASET) {
-      std::string absoluteEntryName = groupNameStr + "/" + memberName;
-      entries[absoluteEntryName] = scientific_data_set;
-    }
-  }
 }
 
 } // end of anonymous namespace
@@ -327,13 +298,6 @@ template <typename T> std::shared_ptr<T> File::getCurrentLocationAs() {
   return loc;
 }
 
-/** Verify that the class name attribute set on the group
- *  matches the class name being looked up.
- */
-bool File::verifyGroupClass(H5::Group const &grp, std::string const &class_name) const {
-  return H5Util::keyHasValue(grp, group_class_spec, class_name);
-}
-
 bool File::hasPath(std::string const &name) {
   const std::string path = formAbsolutePath(name);
   return m_descriptor.isEntry(path);
@@ -413,13 +377,8 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
     return;
   }
   if (m_descriptor.isEntry(new_path, class_name)) {
-    H5::Group grp = H5::H5File::openGroup(new_path);
-    if (!verifyGroupClass(grp, class_name)) {
-      throw NXEXCEPTION("Invalid group class=" + class_name + " name=" + name);
-    } else {
-      m_path = new_path;
-      m_current = std::make_shared<H5::Group>(grp);
-    }
+    m_path = new_path;
+    m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
   } else {
     throw NXEXCEPTION("The supplied group name=" + name + " does not exist");
   }
@@ -1246,7 +1205,7 @@ Info File::getInfo() {
   // Now prepare the info to be returned
   Info info;
   info.type = hdf5ToNXType(dt);
-  info.dims.push_back(dims.front());
+  info.dims.push_back(dims.front()); // include rank=0
   for (std::size_t i = 1; i < rank; i++) {
     info.dims.push_back(dims[i]);
   }
@@ -1282,7 +1241,13 @@ void File::getEntries(Entries &result) {
 
 void File::getEntryDirectory(Entries &result) {
   result.clear();
-  recursivePopulateEntries(getRoot(), result);
+  auto allEntries = m_descriptor.getAllEntries();
+  for (auto ikey = allEntries.cbegin(); ikey != allEntries.cend(); ikey++) {
+    auto values = ikey->second;
+    for (auto iname = values.cbegin(); iname != values.cend(); iname++) {
+      result[*iname] = ikey->first;
+    }
+  }
 }
 
 std::string File::getTopLevelEntryName() {
@@ -1294,7 +1259,7 @@ std::string File::getTopLevelEntryName() {
     if (this->getObjTypeByIdx(firstGrp) == H5G_GROUP) {
       top = this->getObjnameByIdx(firstGrp);
       H5::Group grp = H5::H5File::openGroup(top);
-      if (this->verifyGroupClass(grp, "NXentry")) {
+      if (m_descriptor.isEntry(grp.getObjName(), "NXentry")) {
         break;
       } else {
         top = "";
