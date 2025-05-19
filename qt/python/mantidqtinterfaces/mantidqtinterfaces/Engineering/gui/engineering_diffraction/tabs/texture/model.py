@@ -1,4 +1,11 @@
-from mantid.simpleapi import CreatePoleFigureTableWorkspace, CloneWorkspace, CombineTableWorkspaces, logger, SaveNexus
+from mantid.simpleapi import (
+    CreatePoleFigureTableWorkspace,
+    CloneWorkspace,
+    CombineTableWorkspaces,
+    logger,
+    SaveNexus,
+    CreateEmptyTableWorkspace,
+)
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -66,10 +73,12 @@ class TextureProjection:
                 table_workspaces.append(ws_str)
         else:
             for iws, ws in enumerate(wss):
+                default_param_vals = "_default_param_table"
+                self.create_default_parameter_table_with_value(ws, iws + 1, default_param_vals)
                 ws_str = f"_{iws}_abi_table"
                 CreatePoleFigureTableWorkspace(
                     InputWorkspace=ws,
-                    PeakParameterWorkspace=None,
+                    PeakParameterWorkspace=default_param_vals,
                     OutputWorkspace=ws_str,
                     Reflection=hkl,
                     Chi2Threshold=chi2_thresh,
@@ -82,6 +91,17 @@ class TextureProjection:
         for tw in table_workspaces[1:]:
             CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
         self._save_files(out_ws, "PoleFigureTables", rb_num)
+
+    def create_default_parameter_table_with_value(self, ws_name, val, out_ws):
+        tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
+        tab.addColumn("float", "I")
+        ws = ADS.retrieve(ws_name)
+        for _ in range(ws.getNumberHistograms()):
+            tab.addRow(
+                [
+                    float(val),
+                ]
+            )
 
     def plot_pole_figure(self, ws, projection: str, fig=None, **kwargs) -> None:
         if projection.lower() == "stereographic":
