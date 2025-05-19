@@ -1,1 +1,1 @@
-- New algorithm :ref:`algm-CreateBootstrapWorkspace` for creating randomly simulated samples for performing Bootstrap analysis.
+- New algorithm :ref:`algm-CreateBootstrapWorkspaces` for creating randomly simulated samples for performing Bootstrap analysis.

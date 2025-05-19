@@ -1,7 +1,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidAlgorithms/CreateBootstrapWorkspace.h"
+#include "MantidAlgorithms/CreateBootstrapWorkspaces.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -9,13 +9,13 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class CreateBootstrapWorkspaceTest : public CxxTest::TestSuite {
+class CreateBootstrapWorkspacesTest : public CxxTest::TestSuite {
 public:
-  static CreateBootstrapWorkspaceTest *createSuite() { return new CreateBootstrapWorkspaceTest(); }
-  static void destroySuite(CreateBootstrapWorkspaceTest *suite) { delete suite; }
+  static CreateBootstrapWorkspacesTest *createSuite() { return new CreateBootstrapWorkspacesTest(); }
+  static void destroySuite(CreateBootstrapWorkspacesTest *suite) { delete suite; }
 
   void test_Init() {
-    CreateBootstrapWorkspace alg;
+    CreateBootstrapWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -23,7 +23,7 @@ public:
   void test_sampleHistogramFromGaussian_with_zero_errors() {
     // Gaussian with zero deviation should return mean exactly
 
-    CreateBootstrapWorkspace alg;
+    CreateBootstrapWorkspaces alg;
     Progress progress(nullptr, 0.0, 1.0, 1); // Dummy progress
     HistogramY dataY = {1.0, 2.0, 3.0, 4.0};
     HistogramE dataE = {0.0, 0.0, 0.0, 0.0};
@@ -155,10 +155,10 @@ private:
 
 // -- Helper method implementations below --
 
-void CreateBootstrapWorkspaceTest::runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int numReplicas,
-                                                         bool useErrorSampling, const std::string &prefix,
-                                                         const std::string &outputName) {
-  CreateBootstrapWorkspace alg;
+void CreateBootstrapWorkspacesTest::runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed,
+                                                          int numReplicas, bool useErrorSampling,
+                                                          const std::string &prefix, const std::string &outputName) {
+  CreateBootstrapWorkspaces alg;
   alg.initialize();
   alg.setProperty("InputWorkspace", inputWS);
   alg.setProperty("Seed", seed);

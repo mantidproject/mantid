@@ -20,7 +20,7 @@ using namespace std;
 /** CreateMonteCarloWorkspace : The algorithm generates a simulated workspace by sampling from the probability
 distribution of input data, useful for testing of fitting functions and modeling.
  */
-class MANTID_ALGORITHMS_DLL CreateBootstrapWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateBootstrapWorkspaces : public API::Algorithm {
 public:
   const string name() const override;
   int version() const override;

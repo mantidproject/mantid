@@ -12,7 +12,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/CreateBootstrapWorkspace.h"
+#include "MantidAlgorithms/CreateBootstrapWorkspaces.h"
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -21,7 +21,7 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-Mantid::Kernel::Logger g_log("CreateBootstrapWorkspace");
+Mantid::Kernel::Logger g_log("CreateBootstrapWorkspaces");
 }
 
 namespace Mantid::Algorithms {
@@ -30,28 +30,28 @@ using namespace Mantid::API;
 using namespace std;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CreateBootstrapWorkspace)
+DECLARE_ALGORITHM(CreateBootstrapWorkspaces)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CreateBootstrapWorkspace::name() const { return "CreateBootstrapWorkspace"; }
+const std::string CreateBootstrapWorkspaces::name() const { return "CreateBootstrapWorkspaces"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateBootstrapWorkspace::version() const { return 1; }
+int CreateBootstrapWorkspaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateBootstrapWorkspace::category() const { return "Simulation"; }
+const std::string CreateBootstrapWorkspaces::category() const { return "Simulation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CreateBootstrapWorkspace::summary() const {
+const std::string CreateBootstrapWorkspaces::summary() const {
   return "Creates a randomly simulated workspace by sampling from the probability distribution of input data.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void CreateBootstrapWorkspace::init() {
+void CreateBootstrapWorkspaces::init() {
   auto mustBePositive = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
@@ -70,9 +70,9 @@ void CreateBootstrapWorkspace::init() {
 
 //----------------------------------------------------------------------------------------------
 
-HistogramData::HistogramY CreateBootstrapWorkspace::sampleHistogramFromGaussian(const HistogramData::HistogramY &dataY,
-                                                                                const HistogramData::HistogramE &dataE,
-                                                                                std::mt19937 &gen) {
+HistogramData::HistogramY CreateBootstrapWorkspaces::sampleHistogramFromGaussian(const HistogramData::HistogramY &dataY,
+                                                                                 const HistogramData::HistogramE &dataE,
+                                                                                 std::mt19937 &gen) {
 
   HistogramData::HistogramY outputY(dataY.size(), 0.0);
 
@@ -87,7 +87,7 @@ HistogramData::HistogramY CreateBootstrapWorkspace::sampleHistogramFromGaussian(
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void CreateBootstrapWorkspace::exec() {
+void CreateBootstrapWorkspaces::exec() {
 
   auto &ADS = AnalysisDataService::Instance();
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");

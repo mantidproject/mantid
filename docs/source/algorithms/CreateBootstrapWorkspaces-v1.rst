@@ -20,7 +20,7 @@ The Bootstrap replicas can be generated in two ways:
 Usage
 -----
 
-**Example - CreateBootstrapWorkspace**
+**Example - CreateBootstrapWorkspaces**
 
 .. testcode:: Create bootstrap replicas with error sampling
 
@@ -34,7 +34,7 @@ Usage
    dataE = [1,1,1,1,1,1,1,1,1] # or use dataY=[1]*9
    inputWs = CreateWorkspace(dataX, dataY, dataE)
 
-   CreateBootstrapWorkspace(
+   CreateBootstrapWorkspaces(
       InputWorkspace=inputWs,
       Seed=32,
       NumberOfReplicas=10,
@@ -45,7 +45,7 @@ Usage
 
    plotSpectrum(["inputWs", "boot_1"], indices=0, error_bars=True)
 
-.. image:: ../images/CreateBootstrapWorkspace_with_error_sampling.png
+.. image:: ../images/CreateBootstrapWorkspaces_with_error_sampling.png
    :alt: Comparison between original spectra and simulated spectra with error sampling
    :width: 500px
    :height: 400px
@@ -64,7 +64,7 @@ Usage
    dataE = [1,1,1,1,1,1,1,1,1] # or use dataY=[1]*9
    inputWs = CreateWorkspace(dataX, dataY, dataE, NSpec=3)
 
-   CreateBootstrapWorkspace(
+   CreateBootstrapWorkspaces(
        InputWorkspace=inputWs,
        Seed=32,
        NumberOfReplicas=10,
@@ -80,7 +80,7 @@ Usage
    axes[1].set_title("boot_2")
    # fig.show()
 
-.. image:: ../images/CreateBootstrapWorkspace_with_spectra_sampling.png
+.. image:: ../images/CreateBootstrapWorkspaces_with_spectra_sampling.png
    :alt: Comparison between original workspace and simulated workspace in the case of spectra sampling
    :width: 500px
    :height: 400px
