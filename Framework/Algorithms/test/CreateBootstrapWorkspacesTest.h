@@ -45,8 +45,8 @@ public:
     inputWS->mutableY(0) = {1.0, 2.0, 3.0, 4.0, 5.0};
     inputWS->mutableE(0) = {0.5, 0.5, 0.5, 0.5, 0.5};
 
-    runBootstrapWorkspace(inputWS, 32, 5, true, "Boot1_sample_", "Boot1_Group");
-    runBootstrapWorkspace(inputWS, 32, 5, true, "Boot2_sample_", "Boot2_Group");
+    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot1_sample_", "Boot1_Group");
+    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot2_sample_", "Boot2_Group");
 
     auto &ADS = AnalysisDataService::Instance();
     auto ws1 = ADS.retrieveWS<MatrixWorkspace>("Boot1_sample_5");
@@ -73,7 +73,7 @@ public:
     inputWS->mutableY(0) = {1.0};
     inputWS->mutableE(0) = {0.1};
 
-    runBootstrapWorkspace(inputWS, 32, 10, true, "Nsample_", "BootNSamples_Group");
+    runBootstrapWorkspace(inputWS, 32, 10, "ErrorSampling", "Nsample_", "BootNSamples_Group");
 
     auto &ADS = AnalysisDataService::Instance();
     auto ws_group = ADS.retrieveWS<WorkspaceGroup>("BootNSamples_Group");
@@ -89,7 +89,7 @@ public:
     inputWS->mutableY(0) = {1.0, 2.0, 3.0, 4.0, 5.0};
     inputWS->mutableE(0) = {0.1, 0.2, 0.3, 0.4, 0.5};
 
-    runBootstrapWorkspace(inputWS, 32, 1, true, "BootErr_sample_", "BootErr_Group");
+    runBootstrapWorkspace(inputWS, 32, 1, "ErrorSampling", "BootErr_sample_", "BootErr_Group");
     auto &ADS = AnalysisDataService::Instance();
     auto ws = ADS.retrieveWS<MatrixWorkspace>("BootErr_sample_1");
 
@@ -122,7 +122,7 @@ public:
     inputWS->mutableY(2) = {3.0, 3.0, 3.0, 3.0, 3.0};
     inputWS->mutableE(2) = {0.3, 0.3, 0.3, 0.3, 0.3};
 
-    runBootstrapWorkspace(inputWS, 32, 5, false, "BootSpec_sample_", "BootSpec_Group");
+    runBootstrapWorkspace(inputWS, 32, 5, "SpectraSampling", "BootSpec_sample_", "BootSpec_Group");
     auto &ADS = AnalysisDataService::Instance();
 
     auto ws = ADS.retrieveWS<MatrixWorkspace>("BootSpec_sample_2");
@@ -149,24 +149,21 @@ public:
   }
 
 private:
+  // -- Helper method implementations below --
+
   static void runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int numReplicas,
-                                    bool useErrorSampling, const std::string &prefix, const std::string &outputName);
+                                    const std::string &bootType, const std::string &prefix,
+                                    const std::string &outputName) {
+    CreateBootstrapWorkspaces alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("Seed", seed);
+    alg.setProperty("NumberOfReplicas", numReplicas);
+    alg.setProperty("BootstrapType", bootType);
+    alg.setProperty("OutputPrefix", prefix);
+    alg.setPropertyValue("OutputWorkspaceGroup", outputName);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
 };
-
-// -- Helper method implementations below --
-
-void CreateBootstrapWorkspacesTest::runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed,
-                                                          int numReplicas, bool useErrorSampling,
-                                                          const std::string &prefix, const std::string &outputName) {
-  CreateBootstrapWorkspaces alg;
-  alg.initialize();
-  alg.setProperty("InputWorkspace", inputWS);
-  alg.setProperty("Seed", seed);
-  alg.setProperty("NumberOfReplicas", numReplicas);
-  alg.setProperty("UseErrorSampling", useErrorSampling);
-  alg.setProperty("OutputPrefix", prefix);
-  alg.setPropertyValue("OutputWorkspaceGroup", outputName);
-
-  TS_ASSERT_THROWS_NOTHING(alg.execute());
-  TS_ASSERT(alg.isExecuted());
-}

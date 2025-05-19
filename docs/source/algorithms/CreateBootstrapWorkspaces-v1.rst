@@ -38,7 +38,7 @@ Usage
       InputWorkspace=inputWs,
       Seed=32,
       NumberOfReplicas=10,
-      UseErrorSampling=True,
+      BootstrapType="ErrorSampling",
       OutputPrefix="boot_",
       OutputWorkspaceGroup="bootstrap_samples"
    )
@@ -68,7 +68,7 @@ Usage
        InputWorkspace=inputWs,
        Seed=32,
        NumberOfReplicas=10,
-       UseErrorSampling=False,
+       BootstrapType="SpectraSampling",
        OutputPrefix="boot_",
        OutputWorkspaceGroup="bootstrap_samples"
    )

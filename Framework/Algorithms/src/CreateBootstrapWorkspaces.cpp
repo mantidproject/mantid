@@ -16,18 +16,20 @@
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Logger.h"
+
+using Mantid::Kernel::BoundedValidator;
+using Mantid::Kernel::Direction;
+using Mantid::Kernel::StringListValidator;
+using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateBootstrapWorkspaces");
 }
 
 namespace Mantid::Algorithms {
-using Mantid::Kernel::Direction;
-using namespace Mantid::API;
-using namespace std;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateBootstrapWorkspaces)
@@ -52,17 +54,25 @@ const std::string CreateBootstrapWorkspaces::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CreateBootstrapWorkspaces::init() {
-  auto mustBePositive = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
-  mustBePositive->setLower(0);
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input Workspace containing data to be simulated");
-  declareProperty("Seed", 32, mustBePositive,
+
+  auto mustBePositiveOrEqualToZero = std::make_shared<BoundedValidator<int>>();
+  mustBePositiveOrEqualToZero->setLower(0);
+  declareProperty("Seed", 32, mustBePositiveOrEqualToZero,
                   "Integer seed that initialises the random-number generator, for reproducibility");
-  declareProperty("NumberOfReplicas", 0, mustBePositive,
+
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(1);
+  declareProperty("NumberOfReplicas", 100, mustBePositive,
                   "Number of Monte Carlo events to simulate. Defaults to integral of input workspace if 0.");
-  declareProperty("UseErrorSampling", true, "Whether to use sampling from errors");
-  declareProperty("OutputPrefix", "", "Prefix to add to bootstrap workspaces");
+
+  std::vector<std::string> bootstrapOptions{"ErrorSampling", "SpectraSampling"};
+  declareProperty("BootstrapType", "ErrorSampling", std::make_shared<StringListValidator>(bootstrapOptions),
+                  "Type of bootstrap sampling to use.");
+
+  declareProperty("OutputPrefix", "boot_", "Prefix to add to bootstrap workspaces");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap_samples",
                                                                       Direction::Output),
                   "Name of output workspace.");
@@ -94,7 +104,7 @@ void CreateBootstrapWorkspaces::exec() {
   int inputSeed = getProperty("Seed");
   std::mt19937 gen(static_cast<size_t>(inputSeed));
   int numReplicas = getProperty("NumberOfReplicas");
-  bool useErrorSampling = getProperty("UseErrorSampling");
+  std::string bootType = getProperty("BootstrapType");
   std::string prefix = getProperty("OutputPrefix");
   Progress progress(this, 0, 1, numReplicas);
 
@@ -108,11 +118,11 @@ void CreateBootstrapWorkspaces::exec() {
     for (size_t index = 0; index < bootWs->getNumberHistograms(); index++) {
       bootWs->setSharedX(index, inputWs->sharedX(index));
 
-      if (useErrorSampling) {
+      if (bootType == "ErrorSampling") {
         bootWs->mutableY(index) = sampleHistogramFromGaussian(inputWs->y(index), inputWs->e(index), gen);
         bootWs->mutableE(index) = inputWs->e(index);
 
-      } else {
+      } else if (bootType == "SpectraSampling") {
         // Sample from spectra indices with replacement
         std::uniform_int_distribution<size_t> dist(0, inputWs->getNumberHistograms() - 1);
         size_t new_index = dist(gen);
