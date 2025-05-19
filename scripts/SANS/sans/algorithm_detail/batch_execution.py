@@ -1346,7 +1346,7 @@ def save_to_file(
             for i, ws_name_to_save in enumerate(to_save[0]):
                 transmission = to_save[1][i] if to_save[1] else ""
                 transmission_can = to_save[2][i] if to_save[2] else ""
-                _move_polarization_components(polarization_info, ws_name_to_save)
+                _apply_polarization_component_adjustments(polarization_info, ws_name_to_save)
                 _add_scaled_background_metadata_if_relevant(scaled_bg_info, ws_name_to_save, additional_metadata)
                 save_workspace_to_file(
                     ws_name_to_save,
@@ -1358,7 +1358,7 @@ def save_to_file(
                     transmission_can,
                 )
         else:
-            _move_polarization_components(polarization_info, str(to_save))
+            _apply_polarization_component_adjustments(polarization_info, str(to_save))
             _add_scaled_background_metadata_if_relevant(scaled_bg_info, str(to_save), additional_metadata)
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
 
@@ -1370,8 +1370,29 @@ def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata
     metadata["BackgroundSubtractionScaleFactor"] = float(bg_state.scale_factor)
 
 
-def _move_polarization_components(polarization_state, ws_name: str):
-    def _move_component(component_state):
+def _apply_polarization_component_adjustments(polarization_state, ws_name: str):
+    def _update_component_parameters(idf_name, parameter_map):
+        for parameter_name, parameter_value in parameter_map.items():
+            if parameter_value is not None:
+                set_options = {
+                    "Workspace": ws,
+                    "ComponentName": idf_name,
+                    "ParameterName": parameter_name,
+                    "ParameterType": "String" if isinstance(parameter_value, str) else "Number",
+                    "Value": parameter_value,
+                }
+                alg = create_unmanaged_algorithm("SetInstrumentParameter", **set_options)
+                alg.execute()
+
+    def _move_pol_component(location_x, location_y, location_z, idf_pos, idf_name):
+        location = {
+            CanonicalCoordinates.X: location_x if location_x is not None else idf_pos.getX(),
+            CanonicalCoordinates.Y: location_y if location_y is not None else idf_pos.getY(),
+            CanonicalCoordinates.Z: location_z if location_z is not None else idf_pos.getZ(),
+        }
+        move_component(ws, location, idf_name, False)
+
+    def _update_component_properties(component_state):
         idf_name = component_state.idf_component_name
         component = ws.getInstrument().getComponentByName(idf_name)
         if component is None:
@@ -1380,21 +1401,22 @@ def _move_polarization_components(polarization_state, ws_name: str):
                 f'Please ensure any "idf_component_name" fields in the User File match an existing entry in the IDF for the '
                 f"component you wish to override."
             )
-        idf_pos = component.getPos()
-        location = {
-            CanonicalCoordinates.X: component_state.location_x if component_state.location_x is not None else idf_pos.getX(),
-            CanonicalCoordinates.Y: component_state.location_y if component_state.location_y is not None else idf_pos.getY(),
-            CanonicalCoordinates.Z: component_state.location_z if component_state.location_z is not None else idf_pos.getZ(),
-        }
-        move_component(ws, location, idf_name, False)
+        _move_pol_component(
+            component_state.location_x, component_state.location_y, component_state.location_z, component.getPos(), idf_name
+        )
+        parameter_map = {"device_type": component_state.device_type}
+        if hasattr(component_state, "cell_length"):  # Only StateFilters (polarizers & analyzers) have these properties.
+            parameter_map["cell_length"] = component_state.cell_length
+            parameter_map["gas_pressure"] = component_state.gas_pressure
+        _update_component_parameters(idf_name, parameter_map)
 
     ws = AnalysisDataService.retrieve(ws_name)
     if polarization_state.polarizer:
-        _move_component(polarization_state.polarizer)
+        _update_component_properties(polarization_state.polarizer)
     if polarization_state.analyzer:
-        _move_component(polarization_state.analyzer)
+        _update_component_properties(polarization_state.analyzer)
     for flipper in polarization_state.flippers:
-        _move_component(flipper)
+        _update_component_properties(flipper)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):

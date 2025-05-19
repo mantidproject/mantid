@@ -23,7 +23,7 @@ from sans.algorithm_detail.batch_execution import (
     check_for_background_workspace_in_ads,
     group_bgsub_if_required,
     save_to_file,
-    _move_polarization_components,
+    _apply_polarization_component_adjustments,
 )
 from sans.common.enums import SaveType, ReductionMode
 from sans.common.constants import SCALED_BGSUB_SUFFIX
@@ -146,6 +146,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarizer.location_x = 1.2
         mock_polarizer.location_y = 3.4
         mock_polarizer.location_z = 5.6
+        mock_polarizer.device_type = "He3"
+        mock_polarizer.cell_length = 0.3
+        mock_polarizer.gas_pressure = 5
         mock_polarization_state.polarizer = mock_polarizer
         mock_polarization_state.analyzer = None
         mock_polarization_state.flippers = []
@@ -356,7 +359,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
-    @mock.patch("sans.algorithm_detail.batch_execution._move_polarization_components")
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func, _):
@@ -366,7 +369,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         save_to_file([reduction_package], False, {}, {})
         mock_save_func.assert_called_with("unsubbed_ws", file_formats_mock, "unsubbed_ws", {}, {})
 
-    @mock.patch("sans.algorithm_detail.batch_execution._move_polarization_components")
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func, _):
@@ -385,7 +388,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
-    @mock.patch("sans.algorithm_detail.batch_execution._move_polarization_components")
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
     def test_save_to_file_moves_polarization_components(self, move_mock, mock_names_func, _, mock_ads):
         reduction_package, _ = self._create_saving_reduction_package()
         mock_names_func.return_value = ["polarization_ws"]
@@ -395,13 +398,14 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         save_to_file([reduction_package], False, {}, {})
         self.assertEqual(move_mock.call_count, 1)
 
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     @mock.patch("sans.algorithm_detail.batch_execution.move_component")
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
-    def test_move_polarization_components_uses_state_first(self, mock_ads, mock_move):
+    def test_apply_polarization_component_adjustments_uses_state_first(self, mock_ads, mock_move, mock_alg_manager):
         mock_polarization_state, mock_ws = self._create_move_objects()
         mock_ads.retrieve.return_value = mock_ws
 
-        _move_polarization_components(mock_polarization_state, "mock_ws_name")
+        _apply_polarization_component_adjustments(mock_polarization_state, "mock_ws_name")
         self.assertEqual(mock_move.call_count, 1)
         mock_move.assert_called_with(mock_ws, mock.ANY, "mocked_polarizer", False)
         # For some reason assert_called_with doesn't like doing the dict comparison, so do it ourselves.
@@ -409,24 +413,43 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             set(mock_move.call_args.args[1].values()),
             set({CanonicalCoordinates.X: 1.2, CanonicalCoordinates.Y: 3.4, CanonicalCoordinates.Z: 5.6}.values()),
         )
+        mock_alg_manager.assert_called_with(
+            "SetInstrumentParameter",
+            Workspace=mock_ws,
+            ComponentName="mocked_polarizer",
+            ParameterName="gas_pressure",
+            ParameterType="Number",
+            Value=5,
+        )
 
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     @mock.patch("sans.algorithm_detail.batch_execution.move_component")
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
-    def test_move_polarization_components_uses_idf_if_state_not_present(self, mock_ads, mock_move):
+    def test_apply_polarization_component_adjustments_uses_idf_if_state_not_present(self, mock_ads, mock_move, mock_alg_manager):
         mock_polarization_state, mock_ws = self._create_move_objects()
         mock_ads.retrieve.return_value = mock_ws
         mock_polarization_state.polarizer.location_x = None
         mock_polarization_state.polarizer.location_z = None
+        mock_polarization_state.polarizer.gas_pressure = None
+        mock_polarization_state.polarizer.cell_length = None
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getX = mock.Mock(return_value=9.8)
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getY = mock.Mock(return_value=7.6)
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getZ = mock.Mock(return_value=5.4)
         mock_ads.retrieve.return_value = mock_ws
 
-        _move_polarization_components(mock_polarization_state, "mock_ws_name")
+        _apply_polarization_component_adjustments(mock_polarization_state, "mock_ws_name")
         mock_move.assert_any_call(mock_ws, mock.ANY, "mocked_polarizer", False)
         self.assertEqual(
             set(mock_move.call_args.args[1].values()),
             set({CanonicalCoordinates.X: 9.8, CanonicalCoordinates.Y: 3.4, CanonicalCoordinates.Z: 5.4}.values()),
+        )
+        mock_alg_manager.assert_called_with(
+            "SetInstrumentParameter",
+            Workspace=mock_ws,
+            ComponentName="mocked_polarizer",
+            ParameterName="device_type",
+            ParameterType="String",
+            Value="He3",
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
