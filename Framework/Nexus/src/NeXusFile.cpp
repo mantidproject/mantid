@@ -70,7 +70,7 @@ template <typename T> static DimArray toDimArray(vector<T> const &small_v) {
 
 static std::map<int, void const *> const nxToHDF5Map{
     std::pair<int, void const *>(NXnumtype::CHAR, &H5::PredType::C_S1),
-    std::pair<int, void const *>(NXnumtype::INT8, &H5::PredType::NATIVE_SCHAR),
+    std::pair<int, void const *>(NXnumtype::INT8, &H5::PredType::NATIVE_CHAR),
     std::pair<int, void const *>(NXnumtype::UINT8, &H5::PredType::NATIVE_UCHAR),
     std::pair<int, void const *>(NXnumtype::INT16, &H5::PredType::NATIVE_INT16),
     std::pair<int, void const *>(NXnumtype::UINT16, &H5::PredType::NATIVE_UINT16),
