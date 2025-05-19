@@ -13,6 +13,7 @@ from mantid.simpleapi import (
     SetGoniometer,
     logger,
     CreateEmptyTableWorkspace,
+    LoadEmptyInstrument,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -22,6 +23,9 @@ from Engineering.EnggUtils import GROUP
 
 
 class TextureCorrectionModel:
+    def __init__(self):
+        self.reference_ws = None
+
     def load_all_orientations(self, wss, txt_file):
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
@@ -36,22 +40,27 @@ class TextureCorrectionModel:
             SetSample(ws, Geometry={"Shape": "CSG", "Value": shape})
         SetSampleMaterial(ws, material)
 
-    def copy_sample_info(self, ref_ws, wss):
+    def copy_sample_info(self, ref_ws, wss, is_ref=False):
         # currently copy shape bakes the orientation matrix into the sample shape
-        # need to create a ws with an unorientated sample to copy over
-        ws = ADS.retrieve(ref_ws)
-        trans_mat = ws.getRun().getGoniometer().getR()
+        if not is_ref:
+            # need to create a ws with an unorientated sample to copy over
+            ws = ADS.retrieve(ref_ws)
+            trans_mat = ws.getRun().getGoniometer().getR()
 
-        _tmp_ws = CloneWorkspace(ws, OutputWorkspace="_tmp_ws")
-        _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
+            _tmp_ws = CloneWorkspace(ws, OutputWorkspace="_tmp_ws")
+            _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
 
-        CopySample(InputWorkspace=ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(InputWorkspace=ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
-        for ws in wss:
-            CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            for ws in wss:
+                CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
-        # remove the tmp ws
-        ADS.remove("_tmp_ws")
+            # remove the tmp ws
+            ADS.remove("_tmp_ws")
+        else:
+            # if is_ref flag then we want to take this baked orientation forward
+            for ws in wss:
+                CopySample(InputWorkspace=ref_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     def get_ws_info(self, ws_name, select=True):
         return {
@@ -211,6 +220,43 @@ class TextureCorrectionModel:
                 ]
             )
         self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration)
+
+    def create_reference_ws(self, rb_num):
+        self.reference_ws = f"{rb_num}_reference_workspace"
+        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace=self.reference_ws)
+
+    def get_reference_info(self):
+        material = "Not set"
+        shape_enabled = False
+        if self.reference_ws:
+            material = self.get_ws_info(self.reference_ws).get("material", "Not set")
+            shape_enabled = not self._has_no_valid_shape(self.reference_ws)
+        return self.reference_ws, shape_enabled, material
+
+    def plot_sample_directions(self, fig, ws_name, ax_transform):
+        ax = fig.axes[0]
+        if not ws_name:
+            ws_name = self.reference_ws
+            # if we are looking at the reference, we want to rotate the sample independently of our definition axes
+            rotation_matrix = np.eye(3)
+            ws = ADS.retrieve(ws_name)
+        else:
+            ws = ADS.retrieve(ws_name)
+            # if not looking at the reference, we want our definition axes to rotate with the sample
+            rotation_matrix = ws.getRun().getGoniometer().getR()
+        sample_mesh = ws.sample().getShape().getMesh()
+        furthest_vertex_from_origin = np.linalg.norm(sample_mesh[:, :, 0], axis=1).max()
+        arrow_len = 1.3 * furthest_vertex_from_origin
+        rotated_ax_transform = rotation_matrix @ ax_transform.T
+        rd = rotated_ax_transform[:, 0] * arrow_len
+        nd = rotated_ax_transform[:, 1] * arrow_len
+        td = rotated_ax_transform[:, 2] * arrow_len
+        ax.quiver(0, 0, 0, *rd, color="red", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(0, 0, 0, *td, color="blue", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(0, 0, 0, *nd, color="green", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
+        ax.text(*rd, "RD")
+        ax.text(*nd, "ND")
+        ax.text(*td, "TD")
 
 
 # temporary methods until SetGoniometer PR is merged

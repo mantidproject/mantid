@@ -92,6 +92,114 @@ QGroupBox:title {
      </layout>
     </widget>
    </item>
+
+         <!-- Reference Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_reference">
+     <property name="title">
+      <string>Reference Workspace Information</string>
+     </property>
+     <layout class="QGridLayout">
+         <item row="0" column="0">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="ref_frame">
+        <property name="text">
+         <string>Reference Frame: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="ref_frame_status">
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+         <item row="0" column="3">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="ref_shape">
+        <property name="text">
+         <string>Shape: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QPushButton" name="btn_viewRefShape">
+        <property name="text">
+         <string>View</string>
+        </property>
+       </widget>
+      </item>
+         <item row="0" column="6">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+         <item row="0" column="7">
+       <widget class="QLabel" name="ref_material">
+        <property name="text">
+         <string>Material: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="QLabel" name="ref_material_status">
+        <property name="text">
+         <string>Not set</string>
+        </property>
+       </widget>
+      </item>
+         <item row="0" column="9">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+
+     </layout>
+    </widget>
+   </item>
+
+
  <!-- Sample Section -->
  <item>
  <widget class="QGroupBox" name="groupBox_sample">
@@ -99,11 +207,11 @@ QGroupBox:title {
    <string>Set Sample Properties</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_sample">
-<!-- Orientation Section -->
+         <!-- Reference Frame Section -->
    <item>
-    <widget class="QGroupBox" name="groupBox_orientation">
+    <widget class="QGroupBox" name="groupBox_material">
      <property name="title">
-      <string>Orientation</string>
+      <string>Setup Reference Frame</string>
      </property>
  <property name="styleSheet">
   <string notr="true">
@@ -123,32 +231,16 @@ QGroupBox:title {
  </property>
      <layout class="QHBoxLayout">
       <item>
-       <widget class="QPushButton" name="btn_setOrientation">
+       <widget class="QPushButton" name="btn_createRefWS">
         <property name="text">
-         <string>Set Single Orientation</string>
+         <string>Create Reference Workspace</string>
         </property>
        </widget>
       </item>
-<item>
-  <widget class="QLabel" name="label_or">
-    <property name="text">
-      <string>or</string>
-    </property>
-    <property name="alignment">
-      <set>Qt::AlignCenter</set>
-    </property>
-    <property name="styleSheet">
-      <string notr="true">color: grey; font-style: italic;</string>
-    </property>
-  </widget>
-</item>
-      <item>
-       <widget class="FileFinderWidget" name="finder_orientation_file" native="true"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_loadOrientation">
+         <item>
+       <widget class="QPushButton" name="btn_setRefOrientation">
         <property name="text">
-         <string>Load Orientation File</string>
+         <string>Set Reference Orientation</string>
         </property>
        </widget>
       </item>
@@ -243,6 +335,62 @@ QGroupBox:title {
      </layout>
     </widget>
    </item>
+      <!-- Orientation Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_orientation">
+     <property name="title">
+      <string>Orientation</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QPushButton" name="btn_setOrientation">
+        <property name="text">
+         <string>Set Single Orientation</string>
+        </property>
+       </widget>
+      </item>
+<item>
+  <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
+      <item>
+       <widget class="FileFinderWidget" name="finder_orientation_file" native="true"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_loadOrientation">
+        <property name="text">
+         <string>Load Orientation File</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
 
    <!-- Apply to All Section -->
    <item>
@@ -267,13 +415,33 @@ QGroupBox:title {
   </string>
  </property>
      <layout class="QHBoxLayout">
+         <item>
+       <widget class="QPushButton" name="btn_copyRefSample">
+        <property name="text">
+         <string>Copy Reference Sample</string>
+        </property>
+       </widget>
+      </item>
+<item>
+  <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
       <item>
        <widget class="QComboBox" name="combo_workspaceList"/>
       </item>
       <item>
        <widget class="QPushButton" name="btn_copySampleToAll">
         <property name="text">
-         <string>Copy Full Sample Environment to All</string>
+         <string>Copy WS Sample</string>
         </property>
        </widget>
       </item>

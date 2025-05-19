@@ -13,6 +13,9 @@ DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
     "save_location": str,
+    "rd_dir": str,
+    "nd_dir": str,
+    "td_dir": str,
     "full_calibration": str,
     "logs": str,
     "primary_log": str,
@@ -29,6 +32,9 @@ SETTINGS_DICT = {
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
+    "rd_dir": "1,0,0",
+    "nd_dir": "0,1,0",
+    "td_dir": "0,0,1",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "logs": ",".join(["Temp_1", "W_position", "X_position", "Y_position", "Z_position", "stress", "strain", "stressrig_go"]),
     "primary_log": "strain",
@@ -178,6 +184,9 @@ class SettingsPresenter(object):
     def _collect_new_settings_from_view(self):
         self._validate_settings()
         self.settings["save_location"] = self.view.get_save_location()
+        self.settings["rd_dir"] = self.view.get_rd_dir()
+        self.settings["nd_dir"] = self.view.get_nd_dir()
+        self.settings["td_dir"] = self.view.get_td_dir()
         self.settings["full_calibration"] = self.view.get_full_calibration()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
@@ -194,6 +203,9 @@ class SettingsPresenter(object):
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
         self.view.set_save_location(self.settings["save_location"])
+        self.view.set_rd_dir(self.settings["rd_dir"])
+        self.view.set_nd_dir(self.settings["nd_dir"])
+        self.view.set_td_dir(self.settings["td_dir"])
         self.view.set_full_calibration(self.settings["full_calibration"])
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
@@ -236,6 +248,9 @@ class SettingsPresenter(object):
         for key in list(self.settings):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
+        self.check_and_populate_with_default("rd_dir")
+        self.check_and_populate_with_default("nd_dir")
+        self.check_and_populate_with_default("td_dir")
         self.check_and_populate_with_default("default_peak")
         if self.settings["default_peak"] not in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
