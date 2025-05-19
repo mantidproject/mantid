@@ -5,14 +5,9 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <numeric>
-
+using namespace Mantid::HistogramData;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace Mantid::HistogramData;
-
-using Mantid::Algorithms::CreateBootstrapWorkspace;
-using Mantid::API::AnalysisDataService;
 
 class CreateBootstrapWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -26,13 +21,15 @@ public:
   }
 
   void test_sampleHistogramFromGaussian_with_zero_errors() {
+    // Gaussian with zero deviation should return mean exactly
+
     CreateBootstrapWorkspace alg;
-    Mantid::API::Progress progress(nullptr, 0.0, 1.0, 1); // Dummy progress
-    Mantid::HistogramData::HistogramY dataY = {1.0, 2.0, 3.0, 4.0};
-    Mantid::HistogramData::HistogramE dataE = {0.0, 0.0, 0.0, 0.0};
+    Progress progress(nullptr, 0.0, 1.0, 1); // Dummy progress
+    HistogramY dataY = {1.0, 2.0, 3.0, 4.0};
+    HistogramE dataE = {0.0, 0.0, 0.0, 0.0};
     std::mt19937 gen(32);
 
-    Mantid::HistogramData::HistogramY outputY = alg.sampleHistogramFromGaussian(dataY, dataE, gen);
+    HistogramY outputY = alg.sampleHistogramFromGaussian(dataY, dataE, gen);
 
     // Expect result equal to input dataY
     TS_ASSERT_EQUALS(dataY.size(), outputY.size());
@@ -66,14 +63,31 @@ public:
       TS_ASSERT_EQUALS(outputY1[i], outputY2[i]);
     }
 
-    removeWorkspace("Boot1_Group");
-    removeWorkspace("Boot2_Group");
+    ADS.remove("Boot1_Group");
+    ADS.remove("Boot2_Group");
+  }
+
+  void test_number_of_bootstrap_samples() {
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    inputWS->mutableY(0) = {1.0};
+    inputWS->mutableE(0) = {0.1};
+
+    runBootstrapWorkspace(inputWS, 32, 10, true, "Nsample_", "BootNSamples_Group");
+
+    auto &ADS = AnalysisDataService::Instance();
+    auto ws_group = ADS.retrieveWS<WorkspaceGroup>("BootNSamples_Group");
+
+    TS_ASSERT_EQUALS(ws_group->getNumberOfEntries(), 10);
+
+    ADS.remove("BootNSamples_Group");
   }
 
   void test_bootstrap_with_error_sampling() {
+
     auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 5);
     inputWS->mutableY(0) = {1.0, 2.0, 3.0, 4.0, 5.0};
-    inputWS->mutableE(0) = {0.5, 0.5, 0.5, 0.5, 0.5};
+    inputWS->mutableE(0) = {0.1, 0.2, 0.3, 0.4, 0.5};
 
     runBootstrapWorkspace(inputWS, 32, 1, true, "BootErr_sample_", "BootErr_Group");
     auto &ADS = AnalysisDataService::Instance();
@@ -84,50 +98,59 @@ public:
     const auto &outputY = ws->y(0);
     const auto &outputE = ws->e(0);
 
+    HistogramY expectedY = {0.988227, 2.23355, 2.75155, 3.28837, 5.32049};
+
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
     for (size_t i = 0; i < outputY.size(); ++i) {
-      cout << outputY[i] << " ";
+      TS_ASSERT_DELTA(outputY[i], expectedY[i], 1e-5);
       TS_ASSERT_EQUALS(outputE[i], inputWS->e(0)[i]);
     }
-    cout << std::endl;
+    std::cout << "\n";
 
-    removeWorkspace("BootErr_Group");
+    ADS.remove("BootErr_Group");
   }
 
   void test_bootstrap_with_spectra_sampling() {
+
     auto inputWS = WorkspaceCreationHelper::create2DWorkspace(3, 5);
     inputWS->mutableY(0) = {1.0, 1.0, 1.0, 1.0, 1.0};
-    inputWS->mutableY(1) = {2.0, 2.0, 2.0, 2.0, 2.0};
-    inputWS->mutableY(2) = {3.0, 3.0, 3.0, 3.0, 3.0};
+    inputWS->mutableE(0) = {0.1, 0.1, 0.1, 0.1, 0.1};
 
-    runBootstrapWorkspace(inputWS, 32, 5, true, "BootSpec_sample_", "BootSpec_Group");
+    inputWS->mutableY(1) = {2.0, 2.0, 2.0, 2.0, 2.0};
+    inputWS->mutableE(1) = {0.2, 0.2, 0.2, 0.2, 0.2};
+
+    inputWS->mutableY(2) = {3.0, 3.0, 3.0, 3.0, 3.0};
+    inputWS->mutableE(2) = {0.3, 0.3, 0.3, 0.3, 0.3};
+
+    runBootstrapWorkspace(inputWS, 32, 5, false, "BootSpec_sample_", "BootSpec_Group");
     auto &ADS = AnalysisDataService::Instance();
 
-    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootSpec_sample_3");
+    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootSpec_sample_2");
 
     TS_ASSERT(ws);
 
     const auto &outputY = ws->y(0);
     const auto &outputE = ws->e(0);
 
+    // Check that output is a particular resampling of entire spectrums
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
     for (size_t i = 0; i < inputWS->blocksize(); ++i) {
-      cout << ws->y(0)[i] << " ";
-      TS_ASSERT_EQUALS(ws->y(0)[i], inputWS->y(0)[i]);
-      cout << ws->y(1)[i] << " ";
-      TS_ASSERT_EQUALS(ws->y(1)[i], inputWS->y(0)[i]);
-      cout << ws->y(2)[i] << " ";
-      TS_ASSERT_EQUALS(ws->y(2)[i], inputWS->y(0));
-    }
-    cout << std::endl;
+      TS_ASSERT_EQUALS(ws->y(0)[i], inputWS->y(1)[i]);
+      TS_ASSERT_EQUALS(ws->e(0)[i], inputWS->e(1)[i]);
 
-    removeWorkspace("BootErr_Group");
+      TS_ASSERT_EQUALS(ws->y(1)[i], inputWS->y(1)[i]);
+      TS_ASSERT_EQUALS(ws->e(1)[i], inputWS->e(1)[i]);
+
+      TS_ASSERT_EQUALS(ws->y(2)[i], inputWS->y(0)[i]);
+      TS_ASSERT_EQUALS(ws->e(2)[i], inputWS->e(0)[i]);
+    }
+
+    ADS.remove("BootSpec_Group");
   }
 
 private:
   static void runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int numReplicas,
                                     bool useErrorSampling, const std::string &prefix, const std::string &outputName);
-  static void removeWorkspace(const std::string &workspaceName);
 };
 
 // -- Helper method implementations below --
@@ -146,9 +169,4 @@ void CreateBootstrapWorkspaceTest::runBootstrapWorkspace(const MatrixWorkspace_s
 
   TS_ASSERT_THROWS_NOTHING(alg.execute());
   TS_ASSERT(alg.isExecuted());
-}
-
-void CreateBootstrapWorkspaceTest::removeWorkspace(const std::string &workspaceName) {
-  using Mantid::API::AnalysisDataService;
-  AnalysisDataService::Instance().remove(workspaceName);
 }
