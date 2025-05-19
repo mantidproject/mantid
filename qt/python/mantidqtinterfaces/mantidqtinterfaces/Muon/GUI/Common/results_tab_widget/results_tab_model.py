@@ -259,13 +259,13 @@ class ResultsTabModel(object):
         table = WorkspaceFactory.Instance().createTable()
         table.addColumn("str", "workspace_name", TableColumnType.NoType.value)
 
-        def create_wkps_name_list(wksp_name):
+        def create_ws_name_list(selected_ws_name):
             """Creates a list with all the workspaces used in the fit and puts the current workspace
             in the first position of the list."""
             all_names = [ws_name for fit in all_fits for ws_name in fit.input_workspaces]
-            if all_names[0] != wksp_name:
-                all_names.pop(all_names.index(wksp_name))
-                all_names.insert(0, wksp_name)
+            if all_names[0] != selected_ws_name:
+                all_names.pop(all_names.index(selected_ws_name))
+                all_names.insert(0, selected_ws_name)
             return all_names
 
         def is_str_convertible_to_float(prop_value):
@@ -275,33 +275,33 @@ class ResultsTabModel(object):
             except ValueError:
                 return False
 
-        def add_log_table_columns(wksp_name, log_name, table):
-            all_names = create_wkps_name_list(wksp_name)
-            for name in all_names:
-                run = ads.Instance().retrieve(name).run()
-                if not run.hasProperty(log_name):
+        def add_log_table_columns(selected_ws_name, target_log_name, target_table):
+            all_names = create_ws_name_list(selected_ws_name)
+            for ws_name in all_names:
+                run = ads.Instance().retrieve(ws_name).run()
+                if not run.hasProperty(target_log_name):
                     continue
-                prop = run.getProperty(log_name)
+                prop = run.getProperty(target_log_name)
                 if isinstance(prop, TO_FLOAT_COLUMNS):
-                    table.addColumn("float", log_name, TableColumnType.X.value)
-                    table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
+                    target_table.addColumn("float", target_log_name, TableColumnType.X.value)
+                    target_table.addColumn("float", _error_column_name(target_log_name), TableColumnType.XErr.value)
                     break
                 elif isinstance(prop, StringPropertyWithValue):
                     if is_str_convertible_to_float(prop.value):
-                        table.addColumn("float", log_name, TableColumnType.X.value)
-                        table.addColumn("float", _error_column_name(log_name), TableColumnType.XErr.value)
+                        target_table.addColumn("float", target_log_name, TableColumnType.X.value)
+                        target_table.addColumn("float", _error_column_name(target_log_name), TableColumnType.XErr.value)
                     else:
-                        table.addColumn("str", log_name, TableColumnType.X.value)
+                        target_table.addColumn("str", target_log_name, TableColumnType.X.value)
                     break
-            return table
+            return target_table
 
         for log_name in log_selection:
-            wksp_name = all_fits[0].input_workspaces[0]
+            sel_ws_name = all_fits[0].input_workspaces[0]
             if log_name in ["run_start", "run_end"]:
                 table.addColumn("str", log_name, TableColumnType.X.value)
                 table.addColumn("float", log_name + "_seconds", TableColumnType.X.value)
             else:
-                table = add_log_table_columns(wksp_name, log_name, table)
+                table = add_log_table_columns(sel_ws_name, log_name, table)
 
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
