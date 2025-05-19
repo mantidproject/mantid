@@ -49,7 +49,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(itemModel.horizontalHeaderItem(1).text(), "Type")
         self.assertEqual(itemModel.horizontalHeaderItem(2).text(), "Value")
         self.assertEqual(itemModel.horizontalHeaderItem(3).text(), "Units")
-        self.assertEqual(itemModel.rowCount(), 46)
+        self.assertEqual(itemModel.rowCount(), 47)
         self.assertEqual(itemModel.item(0, 0).text(), "C6_MASTER_FREQUENCY")
         self.assertEqual(itemModel.item(0, 1).text(), "float series")
         self.assertEqual(itemModel.item(0, 2).text(), "50.0 (2 entries)")
