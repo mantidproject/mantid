@@ -932,7 +932,7 @@ public:
     }
 
     // also test root level name
-    TS_ASSERT_EQUALS("entry1", file.getTopLevelEntryName());
+    TS_ASSERT_EQUALS("/entry1", file.getTopLevelEntryName());
 
     // also test getting the directory
     file.getEntryDirectory(actual);

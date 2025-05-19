@@ -1252,18 +1252,16 @@ void File::getEntryDirectory(Entries &result) {
 
 std::string File::getTopLevelEntryName() {
   std::string top("");
-
-  // look for first group off of root of class NXentry
-  std::size_t firstGrp = 0;
-  for (; firstGrp < this->getNumObjs(); firstGrp++) {
-    if (this->getObjTypeByIdx(firstGrp) == H5G_GROUP) {
-      top = this->getObjnameByIdx(firstGrp);
-      H5::Group grp = H5::H5File::openGroup(top);
-      if (m_descriptor.isEntry(grp.getObjName(), "NXentry")) {
-        break;
-      } else {
-        top = "";
-      }
+  Entry firstEntry = m_descriptor.firstEntryNameType();
+  if (firstEntry.second == "NXentry") {
+    top = firstEntry.first;
+  } else {
+    // check all of the
+    auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
+    auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
+                                 [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
+    if (iTopPath != allEntryPaths.cend()) {
+      top = *iTopPath;
     }
   }
   if (top.empty()) {
