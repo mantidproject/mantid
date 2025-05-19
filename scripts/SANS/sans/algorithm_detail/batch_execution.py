@@ -1373,7 +1373,14 @@ def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata
 def _move_polarization_components(polarization_state, ws_name: str):
     def _move_component(component_state):
         idf_name = component_state.idf_component_name
-        idf_pos = ws.getInstrument().getComponentByName(idf_name).getPos()
+        component = ws.getInstrument().getComponentByName(idf_name)
+        if component is None:
+            raise AttributeError(
+                f'The name "{idf_name}" is not present in the Instrument Definition File for {ws.getInstrument().getName()}. '
+                f'Please ensure any "idf_component_name" fields in the User File match an existing entry in the IDF for the '
+                f"component you wish to override."
+            )
+        idf_pos = component.getPos()
         location = {
             CanonicalCoordinates.X: component_state.location_x if component_state.location_x is not None else idf_pos.getX(),
             CanonicalCoordinates.Y: component_state.location_y if component_state.location_y is not None else idf_pos.getY(),
