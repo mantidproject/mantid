@@ -125,6 +125,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_peak_pos_thresh(self):
         return self.peak_pos_thresh_lineedit.text()
 
+    def get_use_euler_angles(self):
+        return self.eulerAngles_checkBox.isChecked()
+
+    def get_euler_angles_scheme(self):
+        return self.eulerAngles_lineedit.text()
+
     # =================
     # Component Setters
     # =================
@@ -212,6 +218,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_peak_pos_thresh(self, text):
         self.peak_pos_thresh_lineedit.setText(text)
+
+    def set_use_euler_angles(self, val):
+        self.eulerAngles_checkBox.setChecked(val)
+
+    def set_euler_angles_scheme(self, text):
+        self.eulerAngles_lineedit.setText(text)
 
     # =================
     # Force Actions

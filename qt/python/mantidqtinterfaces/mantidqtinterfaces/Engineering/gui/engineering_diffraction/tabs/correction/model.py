@@ -26,12 +26,27 @@ class TextureCorrectionModel:
     def __init__(self):
         self.reference_ws = None
 
-    def load_all_orientations(self, wss, txt_file):
+    def load_all_orientations(self, wss, txt_file, use_euler, euler_scheme):
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
                 goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
-            for iws, ws in enumerate(wss):
-                NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
+            try:
+                if not use_euler:
+                    # if use euler angles not selected then assumes it is a scans output matrix
+                    for iws, ws in enumerate(wss):
+                        NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
+                else:
+                    axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
+                    for iws, ws in enumerate(wss):
+                        angles = goniometer_strings[iws].split(",")
+                        kwargs = {}
+                        for iang, angle in enumerate(angles):
+                            kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},1"
+                        SetGoniometer(ws, **kwargs)
+            except BaseException as e:
+                logger.error(
+                    f"{str(e)}. Failed to set goniometer, are your settings for `use_euler_angles` correct? Currently: {use_euler}"
+                )
 
     def set_sample_info(self, ws, shape, material):
         if shape.endswith(".stl"):
