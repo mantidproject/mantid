@@ -40,7 +40,7 @@ class TextureProjection:
             # check if any param ws are missing chi2 or x0
             if "chi2" not in column_names:
                 has_chi2 = False
-            if "x0" not in column_names:
+            if "X0" not in column_names:
                 has_x0 = False
             return has_chi2, has_x0
 
@@ -56,6 +56,7 @@ class TextureProjection:
         peak_thresh: Optional[float],
         rb_num: Optional[str] = None,
         ax_transform: Sequence[float] = np.eye(3),
+        readout_col: str = "",
     ) -> None:
         flat_ax_transform = np.reshape(ax_transform, (9,))
         table_workspaces = []
@@ -72,6 +73,7 @@ class TextureProjection:
                     ApplyScatteringPowerCorrection=inc_scatt_corr,
                     ScatteringVolumePosition=scat_vol_pos,
                     AxesTransform=flat_ax_transform,
+                    ReadoutColumn=readout_col,
                 )
                 table_workspaces.append(ws_str)
         else:
@@ -107,7 +109,7 @@ class TextureProjection:
                 ]
             )
 
-    def plot_pole_figure(self, ws, projection: str, fig=None, **kwargs) -> None:
+    def plot_pole_figure(self, ws, projection: str, fig=None, readout_col="I", **kwargs) -> None:
         if projection.lower() == "stereographic":
             proj = ster_proj
         else:
@@ -116,7 +118,7 @@ class TextureProjection:
             ws = ADS.retrieve(ws)
         alphas = np.asarray(ws.column("Alpha"))
         betas = np.asarray(ws.column("Beta"))
-        i = np.asarray(ws.column("I"))
+        i = np.asarray(ws.column(readout_col))
 
         pfi = proj(alphas, betas, i)
 
@@ -134,6 +136,8 @@ class TextureProjection:
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
+        ax.text(-0.8, -0.95, "TD", fontsize=10)
+        ax.text(-0.95, -0.8, "RD", fontsize=10)
 
     def get_pf_table_name(self, wss, fit_params, hkl):
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
@@ -177,6 +181,12 @@ class TextureProjection:
             if not path.exists(save_dir):
                 makedirs(save_dir)
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
+
+    def read_param_cols(self, ws_name, target_default="I"):
+        ws = ADS.retrieve(ws_name)
+        col_names = ws.getColumnNames()
+        index = col_names.index(target_default) if target_default in col_names else 0
+        return col_names, index
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
