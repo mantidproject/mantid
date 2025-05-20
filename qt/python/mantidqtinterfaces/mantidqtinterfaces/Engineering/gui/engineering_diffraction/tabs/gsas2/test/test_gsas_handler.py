@@ -198,16 +198,43 @@ class TestGSAS2Handler(unittest.TestCase):
             with self.subTest(substring=substring):
                 self.assertIn(substring, json_output)
 
-    def test_set_binaries_windows(self):
+    def test_set_binaries_windows_mingw_variants(self):
         self.handler.os_platform = "Windows"
+        base = self.path_to_gsas2
 
-        mock_paths_level_1 = [Path(self.path_to_gsas2) / "binary1.exe", Path(self.path_to_gsas2) / "binary2.dll"]
-        mock_paths_library = [Path(self.path_to_gsas2) / "Library" / "binary3.dll", Path(self.path_to_gsas2) / "Library" / "binary4.dll"]
+        test_cases = [
+            {
+                "desc": "mingw-w64",
+                "mingw_dir": base / "Library" / "mingw-w64" / "bin",
+            },
+            {
+                "desc": "mingw64",
+                "mingw_dir": base / "Library" / "mingw64" / "bin",
+            },
+        ]
 
-        self.handler.limited_rglob = mock.Mock(side_effect=[iter(mock_paths_level_1), iter(mock_paths_library)])
-        self.handler.set_binaries()
-        expected_binaries = [os.fspath(path) for path in mock_paths_level_1 + mock_paths_library]
-        self.assertEqual(self.handler.python_binaries, expected_binaries)
+        for case in test_cases:
+            expected_dirs = [
+                base,
+                base / "bin",
+                base / "Library" / "bin",
+                base / "Library" / "usr" / "bin",
+                case["mingw_dir"],
+                base / "Scripts",
+            ]
+
+            # Patch Path.exists and Path.is_dir to return True for the expected directories by string comparison
+            def is_expected_dir(path):
+                return str(path) in {str(d) for d in expected_dirs}
+
+            with (
+                self.subTest(mingw_variant=case["desc"]),
+                mock.patch.object(Path, "exists", is_expected_dir),
+                mock.patch.object(Path, "is_dir", is_expected_dir),
+            ):
+                self.handler.set_binaries()
+                expected_binaries = [str(d.resolve()).replace("/", "\\") for d in expected_dirs]
+                self.assertEqual(self.handler.python_binaries, expected_binaries)
 
     def test_set_binaries_non_windows(self):
         self.handler.os_platform = "Linux"
