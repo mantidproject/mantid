@@ -13,10 +13,9 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/CreateBootstrapWorkspaces.h"
-
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/CreateBootstrapWorkspaces.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Logger.h"
@@ -50,7 +49,7 @@ const std::string CreateBootstrapWorkspaces::category() const { return "Simulati
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CreateBootstrapWorkspaces::summary() const {
-  return "Creates a randomly simulated workspace by sampling from the probability distribution of input data.";
+  return "Creates a randomly simulated workspace by sampling from the input data.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -76,22 +75,6 @@ void CreateBootstrapWorkspaces::init() {
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap_samples",
                                                                       Direction::Output),
                   "Name of output workspace.");
-}
-
-//----------------------------------------------------------------------------------------------
-
-HistogramData::HistogramY CreateBootstrapWorkspaces::sampleHistogramFromGaussian(const HistogramData::HistogramY &dataY,
-                                                                                 const HistogramData::HistogramE &dataE,
-                                                                                 std::mt19937 &gen) {
-
-  HistogramData::HistogramY outputY(dataY.size(), 0.0);
-
-  // For each bin, sample y from Gaussian(y, e)
-  for (size_t index = 0; index < dataY.size(); index++) {
-    Kernel::normal_distribution<double> dist(dataY[index], dataE[index]);
-    outputY[index] = dist(gen);
-  }
-  return outputY;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -127,13 +110,28 @@ void CreateBootstrapWorkspaces::exec() {
       } else if (bootType == "SpectraSampling") {
         // Sample from spectra indices with replacement
         Kernel::uniform_int_distribution<size_t> dist(0, inputWs->getNumberHistograms() - 1);
-        size_t new_index = dist(gen);
-        bootWs->mutableY(index) = inputWs->y(new_index);
-        bootWs->mutableE(index) = inputWs->e(new_index);
+        size_t randomIndex = dist(gen);
+        bootWs->mutableY(index) = inputWs->y(randomIndex);
+        bootWs->mutableE(index) = inputWs->e(randomIndex);
       }
     }
     progress.report("Creating Bootstrap Samples...");
   }
   setProperty("OutputWorkspaceGroup", wsGroup);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Helpers.
+ */
+HistogramData::HistogramY CreateBootstrapWorkspaces::sampleHistogramFromGaussian(const HistogramData::HistogramY &dataY,
+                                                                                 const HistogramData::HistogramE &dataE,
+                                                                                 std::mt19937 &gen) {
+  HistogramData::HistogramY outputY(dataY.size(), 0.0);
+  // For each bin, sample y from Gaussian(y, e)
+  for (size_t index = 0; index < dataY.size(); index++) {
+    Kernel::normal_distribution<double> dist(dataY[index], dataE[index]);
+    outputY[index] = dist(gen);
+  }
+  return outputY;
 }
 } // namespace Mantid::Algorithms
