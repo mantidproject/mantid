@@ -265,15 +265,25 @@ class GSAS2Handler(object):
         Finds and sets additional binary paths required for GSAS-II.
         """
         if self.os_platform == "Windows":
-            # On Windows, search for binaries in specific subdirectories
-            extra_paths = [os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2, "*", max_depth=1, search_for_file=False)]
-            extra_paths.extend(
-                os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2 / "Library", "*", max_depth=2, search_for_file=False)
-            )
+            search_dirs = [
+                self.path_to_gsas2,
+                self.path_to_gsas2 / "bin",
+                self.path_to_gsas2 / "Library" / "bin",
+                self.path_to_gsas2 / "Library" / "usr" / "bin",
+                *(
+                    self.path_to_gsas2 / "Library" / mingw / "bin"
+                    for mingw in ["mingw-w64", "mingw64"]
+                    if (self.path_to_gsas2 / "Library" / mingw / "bin").is_dir()
+                ),
+                self.path_to_gsas2 / "Scripts",
+            ]
+            # Filter existing directories and deduplicate
+            extra_paths = list(dict.fromkeys(str(path.resolve()) for path in search_dirs if path.exists() and path.is_dir()))
+            # Set Windows-style backslashes
+            extra_paths = [p.replace("/", "\\") for p in extra_paths]
         else:
             # On Linux/macOS, search for binaries in the "bin" directory
             extra_paths = [os.fspath(path) for path in self.limited_rglob(self.path_to_gsas2, "bin", max_depth=1, search_for_file=False)]
-
         self.python_binaries = extra_paths
 
     def limited_rglob(self, directory: Path, pattern: str, max_depth: int, search_for_file: bool = True):
