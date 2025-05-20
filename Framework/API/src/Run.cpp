@@ -312,7 +312,7 @@ double Run::getProtonCharge() const {
     const std::vector<double> &protonChargeByPeriod = m_manager->getProperty("proton_charge_by_period");
     const int currentPeriod = m_manager->getProperty("current_period");
     m_manager->setProperty(PROTON_CHARGE_LOG_NAME, protonChargeByPeriod[currentPeriod - 1]);
-    m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
+    m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, 0);
   }
 
   if (m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
