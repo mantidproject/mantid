@@ -1339,16 +1339,20 @@ def save_to_file(
     state = reduction_packages[0].state
     save_info = state.save
     scaled_bg_info = state.background_subtraction
-    polarization_info = state.polarization
     file_formats = save_info.file_format
+
+    if SaveType.POL_NX_CAN_SAS in file_formats:
+        save_group_to_file(reduction_packages, state, save_can, file_formats, additional_run_numbers, additional_metadata)
+        file_formats.remove(SaveType.POL_NX_CAN_SAS)
+        if not file_formats:
+            return
+
     for to_save in workspaces_names_to_save:
         if isinstance(to_save, tuple):
             for i, ws_name_to_save in enumerate(to_save[0]):
                 transmission = to_save[1][i] if to_save[1] else ""
                 transmission_can = to_save[2][i] if to_save[2] else ""
                 _add_scaled_background_metadata_if_relevant(scaled_bg_info, ws_name_to_save, additional_metadata)
-                workspace = AnalysisDataService.retrieve(ws_name_to_save)
-                _add_polarization_metadata_if_relevant(polarization_info, additional_metadata, workspace)
                 save_workspace_to_file(
                     ws_name_to_save,
                     file_formats,
@@ -1359,10 +1363,37 @@ def save_to_file(
                     transmission_can,
                 )
         else:
-            workspace = AnalysisDataService.retrieve(str(to_save))
-            _add_polarization_metadata_if_relevant(polarization_info, additional_metadata, workspace)
             _add_scaled_background_metadata_if_relevant(scaled_bg_info, str(to_save), additional_metadata)
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
+
+
+def save_group_to_file(reduction_packages, state, save_can, file_formats, additional_run_numbers, additional_metadata):
+    polarization_state = state.polarization
+    groups_to_save = {}
+    for package in reduction_packages:
+        trans_runs = get_transmission_names_to_save(package, False)
+        trans_name = trans_runs[0] if trans_runs else ""
+        trans_can_runs = get_transmission_names_to_save(package, True) if save_can else []
+        trans_can_name = trans_can_runs[0] if trans_can_runs else ""
+        match package.reduction_mode:
+            case ReductionMode.HAB:
+                groups_to_save[package.reduced_hab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.LAB:
+                groups_to_save[package.reduced_lab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.BOTH:
+                groups_to_save[package.reduced_lab_base_name[0]] = (trans_name, trans_can_name)
+                groups_to_save[package.reduced_hab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.MERGED:
+                groups_to_save[package.reduced_merged_base_name[0]] = (trans_name, trans_can_name)
+    for ws_name, trans_runs in groups_to_save.items():
+        ws = AnalysisDataService.retrieve(ws_name)
+        _add_polarization_metadata_if_relevant(polarization_state, additional_metadata, ws)
+        if not additional_metadata["PolarizationProps"]:
+            raise AttributeError(
+                f"A polarization section containing at least 'spin_configuration' must be defined in the user file to use "
+                f"SavePolarizedNXCanSAS. Current properties: {str(additional_metadata['PolarizationProps'])}"
+            )
+        save_workspace_to_file(ws_name, file_formats, ws_name, additional_run_numbers, additional_metadata, trans_runs[0], trans_runs[1])
 
 
 def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata: dict[str, Any]):
@@ -1373,7 +1404,10 @@ def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata
 
 
 def _add_polarization_metadata_if_relevant(polarization_state, metadata: dict[str, Any], ws):
-    _apply_polarization_component_adjustments(polarization_state, ws)
+    if isinstance(ws, WorkspaceGroup):
+        for sub_ws in ws:
+            _apply_polarization_component_adjustments(polarization_state, sub_ws)
+        ws = ws.getItem(0)
     pol_props = {}
     if polarization_state.spin_configuration:
         pol_props["InputSpinStates"] = str(polarization_state.spin_configuration)
@@ -1394,7 +1428,7 @@ def _add_polarization_metadata_if_relevant(polarization_state, metadata: dict[st
             pol_props["MagneticFieldStrengthLog"] = polarization_state.magnetic_field.sample_strength_log
         if mag_field.sample_direction_log:
             pol_props["MagneticFieldDirection"] = ws.getRun().getProperty(mag_field.sample_direction_log).value
-        if mag_field.sample_direction_a:  # We don't need to check for all axes, the schema enforces all or nothing.
+        if mag_field.sample_direction_a is not None:  # We don't need to check for all axes, the schema enforces all or nothing.
             pol_props["MagneticFieldDirection"] = ",".join(
                 [str(mag_field.sample_direction_a), str(mag_field.sample_direction_p), str(mag_field.sample_direction_d)]
             )
@@ -1441,9 +1475,9 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
             parameter_map["gas_pressure"] = component_state.gas_pressure
         _update_component_parameters(idf_name, parameter_map)
 
-    if polarization_state.polarizer:
+    if polarization_state.polarizer.idf_component_name:
         _update_component_properties(polarization_state.polarizer)
-    if polarization_state.analyzer:
+    if polarization_state.analyzer.idf_component_name:
         _update_component_properties(polarization_state.analyzer)
     for flipper in polarization_state.flippers:
         _update_component_properties(flipper)

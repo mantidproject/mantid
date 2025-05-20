@@ -151,12 +151,14 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarizer.device_type = "He3"
         mock_polarizer.cell_length = 0.3
         mock_polarizer.gas_pressure = 5
+        mock_analyzer = mock.MagicMock()
+        mock_analyzer.idf_component_name = None
         mock_mag_field = mock.MagicMock()
         mock_mag_field.sample_strength_log = "str_log_name"
         mock_mag_field.sample_direction_log = "dir_log_name"
         mock_mag_field.sample_direction_a = None
         mock_polarization_state.polarizer = mock_polarizer
-        mock_polarization_state.analyzer = None
+        mock_polarization_state.analyzer = mock_analyzer
         mock_polarization_state.flippers = []
         mock_polarization_state.magnetic_field = mock_mag_field
         mock_ws = mock.MagicMock()
@@ -395,17 +397,17 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
-    @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_group_to_file")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
-    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
-    def test_save_to_file_applies_polarization_metadata(self, mock_pol_meta, mock_names_func, _, mock_ads):
+    def test_save_to_file_uses_save_by_group_for_pol_nx_can_sas(self, mock_names_func, mock_save_group, mock_ads):
         reduction_package, _ = self._create_saving_reduction_package()
+        reduction_package.state.save.file_format = [SaveType.POL_NX_CAN_SAS]
         mock_names_func.return_value = ["polarization_ws"]
         mock_ws = mock.MagicMock()
         mock_ads.retrieve.return_value = mock_ws
 
         save_to_file([reduction_package], False, {}, {})
-        self.assertEqual(mock_pol_meta.call_count, 1)
+        self.assertEqual(mock_save_group.call_count, 1)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     @mock.patch("sans.algorithm_detail.batch_execution.move_component")
