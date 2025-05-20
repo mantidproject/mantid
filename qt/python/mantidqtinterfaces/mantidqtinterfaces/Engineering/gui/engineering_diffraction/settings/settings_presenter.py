@@ -28,6 +28,8 @@ SETTINGS_DICT = {
     "clear_absorption_ws_after_processing": bool,
     "cost_func_thresh": str,
     "peak_pos_thresh": str,
+    "use_euler_angles": bool,
+    "euler_angles_scheme": str,
 }
 
 DEFAULT_SETTINGS = {
@@ -47,6 +49,8 @@ DEFAULT_SETTINGS = {
     "clear_absorption_ws_after_processing": True,
     "cost_func_thresh": "100",
     "peak_pos_thresh": "0.1",
+    "use_euler_angles": False,
+    "euler_angles_scheme": "YZY",
 }
 
 ALL_LOGS = ",".join(
@@ -199,6 +203,8 @@ class SettingsPresenter(object):
         self.settings["clear_absorption_ws_after_processing"] = self.view.get_remove_corr_ws_after_processing()
         self.settings["cost_func_thresh"] = self.view.get_cost_func_thresh()
         self.settings["peak_pos_thresh"] = self.view.get_peak_pos_thresh()
+        self.settings["use_euler_angles"] = self.view.get_use_euler_angles()
+        self.settings["euler_angles_scheme"] = self.view.get_euler_angles_scheme()
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
@@ -218,6 +224,8 @@ class SettingsPresenter(object):
         self.view.set_remove_corr_ws_after_processing(self.settings["clear_absorption_ws_after_processing"])
         self.view.set_cost_func_thresh(self.settings["cost_func_thresh"])
         self.view.set_peak_pos_thresh(self.settings["peak_pos_thresh"])
+        self.view.set_use_euler_angles(self.settings["use_euler_angles"])
+        self.view.set_euler_angles_scheme(self.settings["euler_angles_scheme"])
         self._find_files()
 
     def _find_files(self):
@@ -272,6 +280,8 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("clear_absorption_ws_after_processing")
         self.check_and_populate_with_default("cost_func_thresh")
         self.check_and_populate_with_default("peak_pos_thresh")
+        self.check_and_populate_with_default("use_euler_angles")
+        self.check_and_populate_with_default("euler_angles_scheme")
 
     # -----------------------
     # Observers / Observables

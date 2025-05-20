@@ -102,7 +102,9 @@ class TextureCorrectionPresenter:
     def load_all_orientations(self):
         wss = self.view.get_selected_workspaces()
         orientation_file = self.view.get_orientation_file()
-        self.model.load_all_orientations(wss, orientation_file)
+        use_euler = self._get_setting("use_euler_angles", bool)
+        euler_scheme = self._get_setting("euler_angles_scheme")
+        self.model.load_all_orientations(wss, orientation_file, use_euler, euler_scheme)
         self.redraw_table()
 
     def select_all(self):
@@ -143,9 +145,7 @@ class TextureCorrectionPresenter:
             div_corr = 1.0
 
             if self.view.include_absorption():
-                mc_param_str = get_setting(
-                    output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "monte_carlo_params"
-                )
+                mc_param_str = self._get_setting("monte_carlo_params")
 
                 self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
                 self.model.calc_absorption(ws, mc_param_str)
@@ -168,9 +168,7 @@ class TextureCorrectionPresenter:
                 self.model.calc_divergence(ws, self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
                 div_corr = "_div_corr"
 
-            remove_ws_after_processing = get_setting(
-                output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "clear_absorption_ws_after_processing"
-            )
+            remove_ws_after_processing = self._get_setting("clear_absorption_ws_after_processing", bool)
             self.model.apply_corrections(
                 ws, out_wss[i], self.current_calibration, root_dir, abs_corr, div_corr, self.rb_num, remove_ws_after_processing
             )
@@ -244,3 +242,6 @@ class TextureCorrectionPresenter:
 
     def update_reference_info(self):
         self.view.update_reference_info_section(*self.model.get_reference_info())
+
+    def _get_setting(self, setting_name, return_type=str):
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
