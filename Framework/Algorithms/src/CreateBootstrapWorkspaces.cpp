@@ -59,11 +59,7 @@ void CreateBootstrapWorkspaces::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input Workspace containing data to be simulated");
-
-  auto mustBePositiveOrEqualToZero = std::make_shared<BoundedValidator<int>>();
-  mustBePositiveOrEqualToZero->setLower(0);
-  declareProperty("Seed", 32, mustBePositiveOrEqualToZero,
-                  "Integer seed that initialises the random-number generator, for reproducibility");
+  declareProperty("Seed", 32, "Integer seed that initialises the random-number generator, for reproducibility");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
