@@ -63,12 +63,13 @@ void CreateBootstrapWorkspaces::init() {
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  declareProperty("NumberOfReplicas", 100, mustBePositive,
-                  "Number of Monte Carlo events to simulate. Defaults to integral of input workspace if 0.");
+  declareProperty("NumberOfReplicas", 100, mustBePositive, "Number of Bootstrap workspaces to simulate.");
 
   std::vector<std::string> bootstrapOptions{"ErrorSampling", "SpectraSampling"};
-  declareProperty("BootstrapType", "ErrorSampling", std::make_shared<StringListValidator>(bootstrapOptions),
-                  "Type of bootstrap sampling to use.");
+  declareProperty(
+      "BootstrapType", "ErrorSampling", std::make_shared<StringListValidator>(bootstrapOptions),
+      "Type of bootstrap sampling to use. "
+      "ErrorSampling samples at each data point, while SpectraSampling samples each spectra with repetition.");
 
   declareProperty("OutputPrefix", "boot_", "Prefix to add to bootstrap workspaces");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap_samples",
