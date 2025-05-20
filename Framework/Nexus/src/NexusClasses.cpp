@@ -84,7 +84,7 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
 NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    std::filesystem::path new_path(parent->path() + "/" + name);
+    ::NeXus::NexusPath new_path(parent->path() + "/" + name);
     if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
       std::cerr << "Note: You are apprently trying to load an NXObject named " << name
                 << " with itself as a parent, from " << new_path.parent_path() << ".\n"
@@ -105,7 +105,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
 NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_path(""), m_path_parent(""), m_open(false) {
   if (parent && !name.empty()) {
-    std::filesystem::path new_path(parent->path() + "/" + name);
+    ::NeXus::NexusPath new_path(parent->path() + "/" + name);
     if (!fileID->hasPath(new_path) && new_path.stem() == new_path.parent_path().stem()) {
       std::cerr << "Note: You are apprently trying to load an NXObject named " << name
                 << " with itself as a parent, from " << new_path.parent_path() << ".\n"
