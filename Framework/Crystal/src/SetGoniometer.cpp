@@ -70,13 +70,13 @@ std::map<std::string, std::string> SetGoniometer::validateInputs() {
 
   // if a Goniometer Matrix is supplied, check it is a valid rotation
   if (!isDefault("GoniometerMatrix")) {
-    try {
+    if (GMatrix.numRows() == GMatrix.numCols()) {
       bool isRot = GMatrix.isRotation();
       if (!isRot) {
         issues["GoniometerMatrix"] = "Supplied Goniometer Matrix is not a proper rotation";
       }
-    } catch (std::invalid_argument &) {
-      // this should not be thrown because of the input validator
+    } else {
+      // this should not be reached because of the input validator
       issues["GoniometerMatrix"] = "Supplied Goniometer Matrix is not a proper rotation: Matrix is not Square";
     }
   }

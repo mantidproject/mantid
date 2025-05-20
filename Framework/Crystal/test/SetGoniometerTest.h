@@ -171,6 +171,17 @@ public:
     refMat[1][2] = 1.0;
     refMat[2][2] = 0.0;
     TS_ASSERT_EQUALS(gon.getR().equals(refMat), true);
+
+    // Check this is equivalent to setting R directly
+
+    Workspace2D_sptr ws_set = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerStringTestSetDirectly_ws", ws);
+
+    Goniometer setGon = ws_set->mutableRun().getGoniometer();
+    setGon.setR(refMat);
+
+    TS_ASSERT_EQUALS(gon.getR().equals(setGon.getR()), true);
+
     AnalysisDataService::Instance().remove("SetGoniometerStringTest_ws");
   }
 
