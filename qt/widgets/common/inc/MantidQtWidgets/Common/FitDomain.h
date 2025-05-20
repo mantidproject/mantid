@@ -32,7 +32,7 @@ public:
   void setWorkspaceName(std::string const &workspaceName);
 
   [[nodiscard]] std::string domainName() const;
-  [[nodiscard]] std::string workspaceName() const noexcept { return m_workspaceName; }
+  [[nodiscard]] const std::string &workspaceName() const noexcept { return m_workspaceName; }
   [[nodiscard]] WorkspaceIndex workspaceIndex() const noexcept { return m_workspaceIndex; }
 
   [[nodiscard]] bool setStartX(double startX);

@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -41,7 +42,7 @@ void export_SymmetryOperation() {
            "Returns the order of the symmetry operation, which indicates how "
            "often the operation needs to be applied to a point to arrive at "
            "identity.")
-      .def("getIdentifier", &SymmetryOperation::identifier, arg("self"),
+      .def("getIdentifier", &SymmetryOperation::identifier, arg("self"), return_value_policy<copy_const_reference>(),
            "The identifier of the operation in x,y,z-notation.")
       .def("transformCoordinates", &applyToCoordinates, (arg("self"), arg("coordinates")),
            "Returns transformed coordinates. For transforming HKLs, use "

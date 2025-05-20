@@ -61,8 +61,8 @@ public:
 
   // These are the only two fields the ONCat API guarantees will be there
   // across *all* entity types.
-  std::string id() const;
-  std::string type() const;
+  const std::string &id() const;
+  const std::string &type() const;
 
   // For all other fields, you can either supply a default value for when a
   // value does not exist ...

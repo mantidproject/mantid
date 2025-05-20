@@ -40,7 +40,7 @@ public:
   /// Destructor
   ~InstrumentSelector() override;
   /// Return the list of techniques
-  QStringList getTechniques() const;
+  const QStringList &getTechniques() const;
   /// Set the list of techniques
   void setTechniques(const QStringList &techniques);
   /// Returns true of auto reloading on facility change is enabled

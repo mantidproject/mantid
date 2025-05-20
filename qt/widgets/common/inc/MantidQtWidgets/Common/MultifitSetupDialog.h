@@ -28,7 +28,7 @@ public:
 
   /// Returns a list of parameter ties. Empty string means no ties and parameter
   /// is local
-  QStringList getParameterTies() const { return m_ties; }
+  const QStringList &getParameterTies() const { return m_ties; }
 
 private slots:
 

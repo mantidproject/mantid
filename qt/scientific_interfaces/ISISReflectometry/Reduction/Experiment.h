@@ -51,7 +51,7 @@ public:
   PolarizationCorrections const &polarizationCorrections() const;
   FloodCorrections const &floodCorrections() const;
   TransmissionStitchOptions transmissionStitchOptions() const;
-  std::map<std::string, std::string> stitchParameters() const;
+  const std::map<std::string, std::string> &stitchParameters() const;
   std::string stitchParametersString() const;
   std::vector<LookupRow> const &lookupTableRows() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;

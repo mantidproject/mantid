@@ -49,7 +49,7 @@ FloodCorrections const &Experiment::floodCorrections() const { return m_floodCor
 
 TransmissionStitchOptions Experiment::transmissionStitchOptions() const { return m_transmissionStitchOptions; }
 
-std::map<std::string, std::string> Experiment::stitchParameters() const { return m_stitchParameters; }
+const std::map<std::string, std::string> &Experiment::stitchParameters() const { return m_stitchParameters; }
 
 std::string Experiment::stitchParametersString() const {
   return MantidQt::MantidWidgets::optionsToString(m_stitchParameters);
