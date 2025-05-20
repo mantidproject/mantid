@@ -46,7 +46,7 @@ auto addPeriodSeries = [](Property *left, const Property *right) {
   }
   std::vector<double> resVec;
   resVec.reserve(leftVec.size());
-  for (int i = 0; i < leftVec.size(); i++) {
+  for (size_t i = 0; i < leftVec.size(); i++) {
     resVec.push_back(leftVec[i] + rightVec[i]);
   }
   *leftAP = resVec;
