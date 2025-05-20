@@ -96,12 +96,12 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         x0_thresh = self.getProperty("PeakPositionThreshold").value
         readout_column = self.getProperty("ReadoutColumn").value
         # if the chi2_threshold is set to allow all peaks, no chi2 column is needed
-        self.no_chi2_needed = chi2_thresh < 1e-6
+        self.no_chi2_needed = np.allclose(chi2_thresh, 0)
         # if the x0_threshold is set to allow all peaks, no x0 column is needed
-        self.no_x0_needed = x0_thresh < 1e-6
+        self.no_x0_needed = np.allclose(x0_thresh, 0)
 
         ax_trans = np.asarray(self.getProperty("AxesTransform").value).reshape((3, 3))
-        if np.abs(np.abs(np.linalg.det(ax_trans)) - 1) > 1e-6:
+        if np.allclose(np.abs(np.linalg.det(ax_trans)), 1):
             issues["AxesTransform"] = (
                 "Algorithm currently expects axes transforms to volume-preserving, as such the determinant must equal 1 (or -1)"
             )
@@ -117,13 +117,17 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 except RuntimeError:
                     issues["PeakParameterWorkspace"] = f"PeakParameterWorkspace must have column: '{col_name}'"
 
-            # if peak parameter ws is given, expect these columns
+            # if peak parameter ws is given, expect these columns:
+
+            # the specified readout column
             check_col(readout_column)
 
             if not self.no_x0_needed:
+                # x0, if needed
                 check_col("X0")
 
             if not self.no_chi2_needed:
+                # chi2, if needed
                 check_col("chi2")
 
         if not self.getProperty("Reflection").isDefault:
