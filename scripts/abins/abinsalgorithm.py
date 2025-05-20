@@ -23,7 +23,7 @@ except ImportError:
     from yaml import SafeLoader
 
 from euphonic import Quantity
-from euphonic.spectra import Spectrum
+from euphonic.spectra import Spectrum, Spectrum1DCollection, Spectrum2DCollection
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
 from mantid.kernel import ConfigService, Direction, StringListValidator, StringArrayProperty, logger
@@ -34,7 +34,6 @@ from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PRE
 from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
 import abins.parameters
-from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection
 
 
 class AbinsAlgorithm:
@@ -425,7 +424,7 @@ class AbinsAlgorithm:
             yield common_data | row
 
     @classmethod
-    def get_masses_table(cls, spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection) -> Dict[str, List[float]]:
+    def get_masses_table(cls, spectra: Spectrum1DCollection | Spectrum2DCollection) -> Dict[str, List[float]]:
         """
         Collect masses associated with each element in SpectrumNDCollection
 
@@ -454,7 +453,7 @@ class AbinsAlgorithm:
         atoms_symbols: Optional[Iterable[str]] = None,
         atom_numbers: Optional[Iterable[int]] = None,
         *,
-        spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        spectra: Spectrum1DCollection | Spectrum2DCollection,
         max_quantum_order: int,
     ):
         """
@@ -526,7 +525,7 @@ class AbinsAlgorithm:
             return spectrum.z_data
 
     def _atom_number_s(
-        self, *, atom_number: int, spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection, s_atom_data: np.ndarray
+        self, *, atom_number: int, spectra: Spectrum1DCollection | Spectrum2DCollection, s_atom_data: np.ndarray
     ) -> List[str]:
         """
         Helper function for calculating S for the given atomic index
@@ -565,7 +564,7 @@ class AbinsAlgorithm:
     def _atom_type_s(
         self,
         *,
-        spectra: AbinsSpectrum1DCollection | AbinsSpectrum2DCollection,
+        spectra: Spectrum1DCollection | Spectrum2DCollection,
         mass: float,
         element_symbol: str,
         s_atom_data: np.ndarray,

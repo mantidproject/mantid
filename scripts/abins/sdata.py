@@ -99,13 +99,7 @@ LineData = Sequence[OneLineData]
 Metadata = Dict[str, Union[str, int, LineData]]
 
 
-class AbinsSpectrum1DCollection(Spectrum1DCollection): ...
-
-
-class AbinsSpectrum2DCollection(Spectrum2DCollection): ...
-
-
-def apply_kinematic_constraints(spectra: AbinsSpectrum2DCollection, instrument: DirectInstrument) -> None:
+def apply_kinematic_constraints(spectra: Spectrum2DCollection, instrument: DirectInstrument) -> None:
     """Replace inaccessible intensity bins with NaN
 
     This passes frequencies to instrument.get_abs_q_limits() method to get
@@ -130,8 +124,8 @@ def apply_kinematic_constraints(spectra: AbinsSpectrum2DCollection, instrument: 
 
 
 def add_autoconvolution_spectra(
-    spectra: AbinsSpectrum1DCollection, max_order: Optional[int] = None, output_bins: Optional[Quantity] = None
-) -> AbinsSpectrum1DCollection:
+    spectra: Spectrum1DCollection, max_order: Optional[int] = None, output_bins: Optional[Quantity] = None
+) -> Spectrum1DCollection:
     """
     Atom-by-atom, add higher order spectra by convolution with fundamentals
 
@@ -161,7 +155,7 @@ def add_autoconvolution_spectra(
     if max_order is None:
         max_order = abins.parameters.autoconvolution["max_order"]
 
-    assert isinstance(spectra, AbinsSpectrum1DCollection)
+    assert isinstance(spectra, Spectrum1DCollection)
 
     # group spectra by atom (using sort and itertools groupby)
     spectra_by_atom = groupby(
@@ -181,16 +175,10 @@ def add_autoconvolution_spectra(
         if output_bins is not None:
             output_spectra = p.map(partial(_resample_spectra, input_bins=x_data, output_bins=output_bins), output_spectra)
 
-    return _fast_1d_from_spectra(chain(*output_spectra))
+    return Spectrum1DCollection.from_spectra(list(chain(*output_spectra)), unsafe=True)
 
 
-def _fast_1d_from_spectra(spectra: Iterable[Spectrum1D]) -> AbinsSpectrum1DCollection:
-    """Quickly produce a Spectrum1DCollection, trusting that data is consistent"""
-    result = Spectrum1DCollection.from_spectra(list(spectra), unsafe=True)
-    return AbinsSpectrum1DCollection(x_data=result.x_data, y_data=result.y_data, metadata=result.metadata)
-
-
-def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, max_order: int) -> AbinsSpectrum1DCollection:
+def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, max_order: int) -> Spectrum1DCollection:
     """
     Autoconvolve pre-sorted list of spectra; convolve first element with last until order reaches max_order
 
@@ -220,10 +208,10 @@ def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity,
     y_data = ureg.Quantity(np.asarray(new_y_data), units=y_units)
     metadata = atom_spectra[0].metadata | {"line_data": new_line_data}
 
-    return AbinsSpectrum1DCollection(x_data=x_data, y_data=y_data, metadata=metadata)
+    return Spectrum1DCollection(x_data=x_data, y_data=y_data, metadata=metadata)
 
 
-def _resample_spectra(spectra: AbinsSpectrum1DCollection, input_bins: Quantity, output_bins: Quantity) -> AbinsSpectrum1DCollection:
+def _resample_spectra(spectra: Spectrum1DCollection, input_bins: Quantity, output_bins: Quantity) -> Spectrum1DCollection:
     """
     Naive resampling by rebuilding histogram on new bins
 

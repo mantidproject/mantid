@@ -224,12 +224,12 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     def _check_data(self, good_data=None, data=None):
         from operator import attrgetter
-        from abins.sdata import AbinsSpectrum1DCollection, AbinsSpectrum2DCollection
+        from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
 
-        if isinstance(data, AbinsSpectrum1DCollection):
+        if isinstance(data, Spectrum1DCollection):
             assert_almost_equal(good_data["frequencies"], data.x_data.to("1/cm").magnitude)
             get_s = attrgetter("y_data")
-        elif isinstance(data, AbinsSpectrum2DCollection):
+        elif isinstance(data, Spectrum2DCollection):
             assert_almost_equal(good_data["q_bins"], data.x_data.to("1/angstrom").magnitude)
             assert_almost_equal(good_data["frequencies"], data.y_data.to("1/cm").magnitude)
             get_s = attrgetter("z_data")
