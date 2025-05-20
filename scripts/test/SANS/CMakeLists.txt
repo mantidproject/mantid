@@ -1,6 +1,7 @@
 pyunittest_add_test(
   ${CMAKE_CURRENT_SOURCE_DIR}
   python.SANS
+  SANSadd2Test.py
   SANSBatchModeTest.py
   SANSCentreFinderTest.py
   SANSCommandInterfaceTest.py
