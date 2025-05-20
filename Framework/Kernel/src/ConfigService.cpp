@@ -443,15 +443,6 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
     return converted;
   }
 
-  // MG 05/10/09: When the Poco::FilePropertyConfiguration object reads its
-  // key/value pairs it
-  // treats a backslash as the start of an escape sequence. If the next
-  // character does not
-  // form a valid sequence then the backslash is removed from the stream. This
-  // has the effect
-  // of giving malformed paths when using Windows-style directories. E.g
-  // C:\Mantid ->C:Mantid
-  // and Poco::Path::isRelative throws an exception on this
   bool is_relative(false);
   try {
     is_relative = std::filesystem::path(dir).is_relative();
@@ -461,18 +452,15 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   }
   if (is_relative) {
     const std::filesystem::path propFileDir(getPropertiesDir());
-    converted = std::filesystem::relative(propFileDir, dir).string();
+    converted = std::filesystem::absolute(propFileDir / dir).string();
   } else {
     converted = dir;
   }
 
-  converted = std::filesystem::path(converted).string();
-
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445.
   // Ticket #2460 prompts a review of our path handling in the config service.
-  boost::replace_all(converted, "\\", "/");
-  return converted;
+  return std::filesystem::path(converted).generic_string();
 }
 
 /**
