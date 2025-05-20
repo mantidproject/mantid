@@ -25,22 +25,20 @@ DataDimensions::DataDimensions(const MatrixWorkspace_sptr &workspace,
 
 DataDimensions::DataDimensions(const hsize_t numberOfPoints, const hsize_t numberOfHistograms,
                                const std::optional<std::pair<size_t, size_t>> &spinVecSize)
-    : m_numberOfPoints(numberOfPoints), m_numberOfHistograms(numberOfHistograms) {
-  auto dataShape = std::vector<hsize_t>({m_numberOfPoints});
-  auto slabShape = dataShape;
+    : m_numberOfPoints(numberOfPoints), m_numberOfHistograms(numberOfHistograms),
+      m_dataShape(std::vector<hsize_t>({m_numberOfPoints})), m_slabShape(std::vector<hsize_t>({m_numberOfPoints})) {
   if (m_numberOfHistograms > 1) {
-    dataShape.insert(dataShape.cbegin(), m_numberOfHistograms);
-    slabShape.insert(slabShape.cbegin(), 1);
+    m_dataShape.insert(m_dataShape.cbegin(), m_numberOfHistograms);
+    m_slabShape.insert(m_slabShape.cbegin(), 1);
   }
   // If data is polarized only
   if (spinVecSize.has_value()) {
     const auto &[PinSize, PoutSize] = *spinVecSize;
-    dataShape.insert(dataShape.cbegin(), {PinSize, PoutSize});
-    slabShape.insert(slabShape.cbegin(), {1, 1});
+    m_dataShape.insert(m_dataShape.cbegin(), {PinSize, PoutSize});
+    m_slabShape.insert(m_slabShape.cbegin(), {1, 1});
   }
-  m_dataShape = dataShape;
-  m_slabShape = slabShape;
-  m_dataSpace = H5::DataSpace(static_cast<int>(dataShape.size()), dataShape.data());
+
+  m_dataSpace = H5::DataSpace(static_cast<int>(m_dataShape.size()), m_dataShape.data());
   m_dataType = H5::DataType(H5Util::getType<double>());
 }
 
@@ -100,17 +98,28 @@ DataSpaceInformation getDataSpaceInfo(const H5::DataSet &dataSet) {
   const auto rank = dataSpace.getSimpleExtentNdims();
   auto dims = std::vector<hsize_t>(rank);
   dataSpace.getSimpleExtentDims(dims.data());
-  if (rank == 1 || rank == 2) {
-    dataSpaceInfo.dimSpectrumAxis = rank == 1 ? 1 : dims[0];
-    dataSpaceInfo.dimBin = rank == 1 ? dims[0] : dims[1];
-  } else if (rank == 3 || rank == 4) {
+  switch (rank) {
+  case 1:
+    dataSpaceInfo.dimSpectrumAxis = 1;
+    dataSpaceInfo.dimBin = dims[0];
+    break;
+  case 2:
+    dataSpaceInfo.dimSpectrumAxis = dims[0];
+    dataSpaceInfo.dimBin = dims[1];
+    break;
+  case 3:
     dataSpaceInfo.spinStates = dims[0] * dims[1];
-    dataSpaceInfo.dimSpectrumAxis = rank == 3 ? 1 : dims[2];
-    dataSpaceInfo.dimBin = rank == 3 ? dims[2] : dims[3];
-  } else {
+    dataSpaceInfo.dimSpectrumAxis = 1;
+    dataSpaceInfo.dimBin = dims[2];
+    break;
+  case 4:
+    dataSpaceInfo.spinStates = dims[0] * dims[1];
+    dataSpaceInfo.dimSpectrumAxis = dims[2];
+    dataSpaceInfo.dimBin = dims[3];
+    break;
+  default:
     throw std::invalid_argument("LoadNXcanSAS:: Cannot load a data set with " + std::to_string(rank) + " m_dataDims.");
   }
-
   return dataSpaceInfo;
 }
 

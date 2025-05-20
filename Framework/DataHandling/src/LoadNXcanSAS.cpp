@@ -102,7 +102,7 @@ void addLogToWs(const MatrixWorkspace_sptr &workspace, const std::string &logNam
   if (!logUnits.empty()) {
     property->setUnits(logUnits);
   }
-  run.addLogData(property.release());
+  run.addProperty(std::move(property));
 }
 
 void loadLogs(const H5::Group &entry, const MatrixWorkspace_sptr &workspace) {
@@ -138,7 +138,7 @@ bool checkPolarization(const H5::Group &group) {
   if (pIn != pOut) {
     throw std::invalid_argument("Polarized data requires to have Pin and Pout axes");
   }
-  return pIn && pOut;
+  return pIn;
 }
 
 /**
@@ -168,7 +168,7 @@ std::pair<std::vector<int>, std::vector<int>> loadSpinVectors(const H5::Group &g
  * @return vector of SpinState structs.
  */
 std::vector<SpinState> prepareSpinIndexes(const std::vector<int> &pIn, const std::vector<int> &pOut) {
-  // Helds spin pair with vector indexes to iterate hyperslab
+  // Holds spin pair with vector indexes to iterate hyperslab
   auto spinToString = [](const int spinIndex) {
     return spinIndex == 1 ? '+' + std::to_string(spinIndex) : std::to_string(spinIndex);
   };
@@ -204,12 +204,9 @@ void loadPolarizedLogs(const H5::Group &group, const MatrixWorkspace_sptr &works
 }
 
 //----- Sample ----- //
-std::optional<H5::Group> getGroupIfExists(const std::optional<H5::Group> &group, const std::string &groupName) {
-  if (!group.has_value()) {
-    return std::nullopt;
-  }
-  if (const auto &entry = group.value(); entry.nameExists(groupName)) {
-    return entry.openGroup(groupName);
+std::optional<H5::Group> getGroupIfExists(const H5::Group &group, const std::string &groupName) {
+  if (group.nameExists(groupName)) {
+    return group.openGroup(groupName);
   }
   return std::nullopt;
 }
@@ -222,7 +219,10 @@ std::optional<H5::Group> getGroupIfExists(const std::optional<H5::Group> &group,
 std::optional<Sample> loadSample(const H5::Group &group) {
   //  Load Height, Width, and Geometry from the aperture group and save to Sample object.
   const auto &instrumentGroup = getGroupIfExists(group, sasInstrumentGroupName);
-  const auto &apertureGroup = getGroupIfExists(instrumentGroup, sasInstrumentApertureGroupName);
+  auto apertureGroup = std::optional<H5::Group>();
+  if (instrumentGroup.has_value()) {
+    apertureGroup = getGroupIfExists(instrumentGroup.value(), sasInstrumentApertureGroupName);
+  }
   const auto &sampleGroup = getGroupIfExists(group, sasInstrumentSampleGroupAttr);
 
   if (!apertureGroup.has_value() && !sampleGroup.has_value()) {
@@ -238,7 +238,7 @@ std::optional<Sample> loadSample(const H5::Group &group) {
     if (!width.empty()) {
       sample.setWidth(width.front());
     }
-    auto &&geometry = getStrDataSetIfExists(apertureGroup.value(), sasInstrumentApertureShape);
+    auto geometry = getStrDataSetIfExists(apertureGroup.value(), sasInstrumentApertureShape);
     boost::to_lower(geometry);
     if (!geometry.empty()) {
       SAMPLE_GEOMETRIES.contains(geometry) ? sample.setGeometryFlag(SAMPLE_GEOMETRIES.at(geometry))
@@ -285,8 +285,16 @@ void loadInstrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const In
 
 /**
  * Prepares the slabShape and offset vectors to extract data from a given slice of the signal or Q datasets in the H5
- * file. For non polarized data, slabShape and position indexes have same dimensions, but for polarized data these
- * vectors have to be trimmed for extracting Q datasets.
+ * file.
+ * The Y and X axis of the workspace are stored in the H5 File as signal (I) and Q datasets. For non-polarized data,
+ * signal (I) can either be 1D or 2D (1 x M vector or N x M matrix - N: number of spectra, M:number of bins per
+ * spectra-), and Q has the same dimensions as I (vector for 1D contained in a Q dataset, or a matrix for 2D split into
+ * two datasets Qx and Qy). When the data is polarized, the signal dataset has a larger number of dimensions to
+ * accomodate all the spin states that were saved from different workspaces. For 1D data: 2 x 1 x M (half-polarized) or
+ * 2 x 2 x M (full-polarized). For 2D data: 2 x 1 x N x M (half-polarized) or 2 x 2 x N (full-polarized). As the Q
+ * ranges were the same for all the spin state workspaces saved into the signal dataset, the dimensions of the Q
+ * datasets are the same as in the non-polarized data, therefore, we trim them. (This discussion is equivalent for axes
+ * XErr and YErr)
  * @param axesIndex: Index to know which kind of axes the data is going to be stored in the workspace (X, Y, XErr,
  * YErr). If data is X or XErr, the dimensions of the slab and offset vectors are different.
  * @param spinIndexPair: pair of size_t containing the offset indexes on the hyperslab if there is polarized data.
@@ -320,7 +328,7 @@ std::string getStrAttribute(const H5::DataSet &dataSet, const std::string &attrN
 
 /**
  * Struct used to store data in different axes on a workspace, as well as set the units. Uses the WorkspaceDataAxes enum
- * to lock the axes.
+ * to select the workspace axis in which data will be inserted from the file.
  */
 struct WorkspaceDataInserter {
   explicit WorkspaceDataInserter(MatrixWorkspace_sptr workspace) : workspace(std::move(workspace)), axisType(0) {}
@@ -373,7 +381,8 @@ void readDataIntoWorkspace(const H5::DataSet &dataSet, const WorkspaceDataInsert
   // Memory Data Space
   const std::array<hsize_t, 1> memSpaceDimension = {nPoints};
   const H5::DataSpace memSpace(1, memSpaceDimension.data());
-  const auto histogramIndex = slabShape.size() > 2 ? slabShape.size() - 2 : 0;
+  const bool isPolarizedDataSet = slabShape.size() > 2;
+  const auto histogramIndex = isPolarizedDataSet ? slabShape.size() - 2 : 0;
 
   const auto fileSpace = dataSet.getSpace();
   auto data = std::vector<double>(nPoints, 0);
@@ -518,7 +527,8 @@ void LoadNXcanSAS::exec() {
   const auto dataInfo = getDataSpaceInfo(dataGroup.openDataSet(sasDataI));
 
   // Setup progress bar
-  const auto numberOfSteps = isLoadTransmissionChecked ? dataInfo.spinStates * 5 + 1 : dataInfo.spinStates * 5;
+  const size_t stepsPerSpinState = dataInfo.spinStates * 5;
+  const auto numberOfSteps = isLoadTransmissionChecked ? stepsPerSpinState + 1 : stepsPerSpinState;
   m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, numberOfSteps);
 
   // Load metadata and data into output workspace
