@@ -76,7 +76,6 @@ std::map<std::string, std::string> SetGoniometer::validateInputs() {
     for (size_t i = 0; i < NUM_AXES; i++) {
       std::ostringstream propName;
       propName << "Axis" << i;
-      std::string axisDesc = getPropertyValue(propName.str());
       if (!isDefault(propName.str())) {
         issues[propName.str()] = "Can't provide a goniometer axis if a matrix string has also been provided";
       }
