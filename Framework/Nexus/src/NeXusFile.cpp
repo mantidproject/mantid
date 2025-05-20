@@ -35,9 +35,9 @@ typedef std::array<hsize_t, NX_MAXRANK> DimArray;
 
 namespace { // anonymous namespace to keep it in the file
 
-constexpr std::string group_class_spec("NX_class");
-constexpr std::string target_attr_name("target");
-constexpr std::string scientific_data_set("SDS");
+std::string const group_class_spec("NX_class");
+std::string const target_attr_name("target");
+std::string const scientific_data_set("SDS");
 constexpr int default_deflate_level(6);
 
 template <typename NumT> static std::string toString(vector<NumT> const &data) {
@@ -219,11 +219,11 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(bool const) { return NXnumtype::B
 namespace NeXus {
 
 File::File(std::string const &filename, NXaccess const access)
-    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path(),
       m_current(nullptr), m_close_handle(true), m_descriptor(filename) {};
 
 File::File(char const *filename, NXaccess const access)
-    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path("/"),
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path(),
       m_current(nullptr), m_close_handle(true), m_descriptor(std::string(filename)) {};
 
 // copy constructors
@@ -283,7 +283,7 @@ template <> std::string H5TypeAsString<H5::H5File>() { return "H5File"; }
  */
 template <typename T> std::shared_ptr<T> File::getCurrentLocationAs() {
   std::shared_ptr<T> loc;
-  if (m_path == "/") {
+  if (m_path.isRoot()) {
     std::shared_ptr<H5::H5File> proot = std::make_shared<H5::H5File>(getRoot().getId());
     loc = std::dynamic_pointer_cast<T>(proot);
   } else {
@@ -299,17 +299,17 @@ template <typename T> std::shared_ptr<T> File::getCurrentLocationAs() {
 }
 
 bool File::hasPath(std::string const &name) {
-  const std::string path = formAbsolutePath(name);
+  std::string const path = formAbsolutePath(name);
   return m_descriptor.isEntry(path);
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) {
-  const std::string path = formAbsolutePath(name);
+  std::string const path = formAbsolutePath(name);
   return m_descriptor.isEntry(path, class_type);
 }
 
 bool File::hasData(std::string const &name) {
-  const std::string path = formAbsolutePath(name);
+  std::string const path = formAbsolutePath(name);
   return m_descriptor.isEntry(path, scientific_data_set);
 }
 
@@ -317,33 +317,28 @@ bool File::hasData(std::string const &name) {
  * napi used to allow opening datasets at same level without closing previous
  * many client codes follow this (bad) usage, therefore it needs to be enabled
  */
-std::filesystem::path File::formAbsolutePath(std::string const &name) {
-  // perform some cleanup on path
-  std::string new_name(name);
-  if (new_name.ends_with('/')) {
-    new_name.pop_back();
-  }
-  std::filesystem::path new_path = std::filesystem::path(new_name).lexically_normal();
-  if (new_name.starts_with('/')) {
+NexusPath File::formAbsolutePath(std::string const &name) {
+  NexusPath new_path(name);
+  if (new_path.isAbsolute()) {
     // the path is already absolute
   } else {
     // if not already absolute path, make relative to current location
     // continue checking path relative to parent, until something exists
-    std::filesystem::path from_root = m_path;
+    NexusPath from_root = m_path;
     do {
-      new_path = (from_root / new_name).lexically_normal();
+      new_path = (from_root / name);
       from_root = from_root.parent_path();
-    } while (!m_descriptor.isEntry(new_path) && from_root != "/");
+    } while (!m_descriptor.isEntry(new_path) && !from_root.isRoot());
     if (!m_descriptor.isEntry(new_path)) {
-      new_path = std::filesystem::path("/" + new_name).lexically_normal();
+      new_path = NexusPath(name).fromRoot();
     }
   }
   // the caller is responsible for checking that it exists
   return new_path;
 }
 
-void File::registerEntry(std::string const &path, std::string const &name) {
-  if (path.front() != '/') {
+void File::registerEntry(NexusPath const &path, std::string const &name) {
+  if (!path.isAbsolute()) {
     throw NXEXCEPTION("Paths must be absolute: " + path);
   } else if (!this->nameExists(path)) {
     throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
@@ -376,7 +371,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   if (class_name.empty()) {
     throw NXEXCEPTION("Supplied empty class name");
   }
-  const std::filesystem::path new_path = formAbsolutePath(name);
+  NexusPath const new_path = formAbsolutePath(name);
   if (new_path == m_path) {
     return;
   }
@@ -390,7 +385,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 
 /// This is the implementation of openPath("/")
 void File::resetToFileRoot() {
-  m_path = "/";
+  m_path = NexusPath::root();
   m_current = std::make_shared<H5::Group>(getRoot());
 }
 
@@ -399,10 +394,10 @@ void File::openPath(std::string const &pathname) {
     throw NXEXCEPTION("Supplied empty path");
   } else if (pathname == m_path) {
     return;
-  } else if (pathname == "/") {
+  } else if (pathname == NexusPath::root()) {
     this->resetToFileRoot();
   } else {
-    const std::filesystem::path new_path = formAbsolutePath(pathname);
+    NexusPath const new_path = formAbsolutePath(pathname);
     if (m_descriptor.isEntry(new_path)) {
       // if the path exists:
       // -- check the type of the entry, Group or DataSet
@@ -414,7 +409,7 @@ void File::openPath(std::string const &pathname) {
       }
       m_path = new_path;
     } else {
-      throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string() + " from " + m_path.string());
+      throw NXEXCEPTION("Attempted to open invalid path: " + new_path + " from " + m_path);
     }
   }
 }
@@ -423,10 +418,10 @@ void File::openGroupPath(std::string const &pathname) {
   if (pathname.empty()) {
     throw NXEXCEPTION("Supplied empty path");
   }
-  std::filesystem::path new_path = formAbsolutePath(pathname);
+  NexusPath new_path = formAbsolutePath(pathname);
   if (new_path == m_path) {
     // intentionally do nothing if the path is not changingg
-  } else if (new_path == "/") {
+  } else if (new_path.isRoot()) {
     this->resetToFileRoot();
   } else if (m_descriptor.isEntry(new_path)) {
     // if this refers to an SDS, open the parent group
@@ -434,7 +429,7 @@ void File::openGroupPath(std::string const &pathname) {
     if (m_descriptor.isEntry(new_path, scientific_data_set)) {
       new_path = new_path.parent_path();
     }
-    if (new_path == "/") {
+    if (new_path.isRoot()) {
       this->resetToFileRoot();
     } else if (new_path != m_path) {
       m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
@@ -442,14 +437,14 @@ void File::openGroupPath(std::string const &pathname) {
     }
     // intentionally do nothing if the path is not changing
   } else {
-    throw NXEXCEPTION("Attempted to open invalid path: " + new_path.string());
+    throw NXEXCEPTION("Attempted to open invalid path: " + new_path);
   }
 }
 
-string File::getPath() { return m_path; }
+string File::getPath() { return std::string(m_path); }
 
 void File::closeGroup() {
-  if (m_path == "/") {
+  if (m_path.isRoot()) {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else {
@@ -457,7 +452,7 @@ void File::closeGroup() {
       std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
       grp->close();
       m_path = m_path.parent_path();
-      if (m_path == "/") {
+      if (m_path.isRoot()) {
         this->resetToFileRoot();
       } else {
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
@@ -476,7 +471,7 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
     throw NXEXCEPTION("Supplied empty dimensions");
   }
   // ensure we are not at root -- NeXus should not allow datsets at root
-  if (m_path == "/") {
+  if (m_path.isRoot()) {
     throw NXEXCEPTION("Cannot create dataset at root level in NeXus");
   }
 
@@ -714,29 +709,28 @@ void File::openData(std::string const &name) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name");
   }
-  std::filesystem::path new_path = formAbsolutePath(name);
+  NexusPath const new_path = formAbsolutePath(name);
   if (m_descriptor.isEntry(new_path, scientific_data_set)) {
     m_path = new_path;
     m_current = std::make_shared<H5::DataSet>(this->openDataSet(m_path));
   } else {
-    throw NXEXCEPTION("The dataset " + name + " cannot be opened from " + m_path.string() + "|  tried to open " +
-                      new_path.string());
+    throw NXEXCEPTION("The dataset " + name + " cannot be opened from " + m_path + "|  tried to open " + new_path);
   }
 }
 
 void File::closeData() {
-  if (m_path == "/") {
+  if (m_path.isRoot()) {
     // do nothing in the root -- this preserves behavior from napi
     return;
   } else if (!isDataSetOpen()) {
-    throw NXEXCEPTION("Attempting to close a data set while within group at " + getPath() + " of class " +
+    throw NXEXCEPTION("Attempting to close a data set while within group at " + m_path + " of class " +
                       m_descriptor.classTypeForName(m_path));
   } else {
     try {
       std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
       dataset->close();
       m_path = m_path.parent_path();
-      if (m_path == "/") {
+      if (m_path.isRoot()) {
         this->resetToFileRoot();
       } else {
         m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
@@ -953,8 +947,8 @@ bool File::isDataSetOpen() { return m_descriptor.isEntry(m_path, scientific_data
 void File::makeLink(NXlink &link) {
   // construct a path to the target
   std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
-  std::filesystem::path linkTarget(m_path);
-  linkTarget /= std::filesystem::path(link.targetPath).stem();
+  NexusPath linkTarget(m_path);
+  linkTarget /= NexusPath(link.targetPath).stem();
 
   // create link
   current->link(link.targetPath, H5L_SAME_LOC, linkTarget);
@@ -1276,7 +1270,7 @@ template <typename NumT> void File::getAttr(std::string const &name, NumT &value
   // verify the current location can hold an attribute, and has the attribute named
   std::shared_ptr<H5::H5Object const> const current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw NXEXCEPTION("Could not find attribute " + name + " at " + m_path.string());
+    throw NXEXCEPTION("Could not find attribute " + name + " at " + m_path);
   }
 
   // now open the attribute, read it, and close
@@ -1291,7 +1285,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::st
   // verify the current location can hold an attribute, and has the attribute named
   std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
   if (!current->attrExists(name)) {
-    throw NXEXCEPTION("Could not find string attribute " + name + " at " + m_path.string());
+    throw NXEXCEPTION("Could not find string attribute " + name + " at " + m_path);
   }
 
   // open the attribute, and read it
@@ -1519,7 +1513,6 @@ template MANTID_NEXUS_DLL void File::getData(int64_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint64_t *data);
 template MANTID_NEXUS_DLL void File::getData(char *data);
 template MANTID_NEXUS_DLL void File::getData(bool *data);
-template MANTID_NEXUS_DLL void File::getData(std::string *data);
 
 template MANTID_NEXUS_DLL void File::getData(vector<float> &data);
 template MANTID_NEXUS_DLL void File::getData(vector<double> &data);
@@ -1788,3 +1781,6 @@ template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, c
                                              const DimSizeVector &size);
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
                                              const DimSizeVector &size);
+
+template MANTID_NEXUS_DLL void File::putSlab(std::vector<double> const &data, dimsize_t const start,
+                                             dimsize_t const size);

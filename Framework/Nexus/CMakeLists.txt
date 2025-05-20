@@ -1,5 +1,11 @@
-set(SRC_FILES src/H5Util.cpp src/NexusClasses.cpp src/NeXusException.cpp src/NeXusFile.cpp src/stptok.cpp
-              src/NexusDescriptor.cpp
+set(SRC_FILES
+    src/H5Util.cpp
+    src/NexusClasses.cpp
+    src/NeXusException.cpp
+    src/NeXusFile.cpp
+    src/stptok.cpp
+    src/NexusDescriptor.cpp
+    src/NexusPath.cpp
 )
 
 set(INC_FILES
@@ -10,6 +16,7 @@ set(INC_FILES
     inc/MantidNexus/NeXusException.hpp
     inc/MantidNexus/NeXusFile.hpp
     inc/MantidNexus/NexusDescriptor.h
+    inc/MantidNexus/NexusPath.h
 )
 
 set(TEST_FILES
@@ -21,6 +28,7 @@ set(TEST_FILES
     NeXusFileLeakTest.h
     NeXusFileNapiTest.h
     NeXusFileReadWriteTest.h
+    NexusPathTest.h
 )
 
 if(COVERAGE)

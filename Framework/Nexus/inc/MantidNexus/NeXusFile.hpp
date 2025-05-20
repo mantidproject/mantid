@@ -3,6 +3,7 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusPath.h"
 #include <H5Cpp.h>
 #include <filesystem>
 #include <memory>
@@ -28,7 +29,7 @@ class MANTID_NEXUS_DLL File : public H5::H5File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  std::filesystem::path m_path;
+  NexusPath m_path;
   std::shared_ptr<H5::H5Location> m_current;
   /** should be close handle on exit */
   bool m_close_handle;
@@ -537,8 +538,8 @@ public:
 
 private:
   void resetToFileRoot();
-  std::filesystem::path formAbsolutePath(std::string const &);
-  void registerEntry(std::string const &, std::string const &);
+  NexusPath formAbsolutePath(std::string const &);
+  void registerEntry(NexusPath const &, std::string const &);
 };
 
 /**
