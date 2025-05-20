@@ -178,6 +178,7 @@ class AbinsBasicTest(unittest.TestCase):
                 Atoms="C,C,H",
                 OutputWorkspace=self._workspace_name,
                 CacheDirectory=self._cache_directory,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_non_unique_atoms(self):
@@ -193,6 +194,7 @@ class AbinsBasicTest(unittest.TestCase):
                 Atoms="atom_1,atom_2,atom1",
                 OutputWorkspace=self._workspace_name,
                 CacheDirectory=self._cache_directory,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_non_existing_atoms(self):
@@ -209,6 +211,7 @@ class AbinsBasicTest(unittest.TestCase):
                 Atoms="N",
                 OutputWorkspace=self._workspace_name,
                 CacheDirectory=self._cache_directory,
+                QuantumOrderEventsNumber=self._quantum_order_events_number,
             )
 
     def test_atom_index_limits(self):
