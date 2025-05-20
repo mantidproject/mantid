@@ -44,14 +44,16 @@ class PyChopInstrument(DirectInstrument):
     def get_angle_range(self) -> Tuple[float, float]:
         return np.min(self._tthlims), np.max(self._tthlims)
 
+    def prepare_resolution(self):
+        if self._e_init not in self._polyfits:
+            self._polyfit_resolution()
+
     def calculate_sigma(self, frequencies):
         """
         Calculates width of Gaussian resolution function.
         :return: width of Gaussian resolution function
         """
-        if self._e_init not in self._polyfits:
-            self._polyfit_resolution()
-
+        self.prepare_resolution()
         return np.polyval(self._polyfits[self._e_init], frequencies)
 
     def _polyfit_resolution(self, n_values=40, order=4):
