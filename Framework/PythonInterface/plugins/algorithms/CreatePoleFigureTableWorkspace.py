@@ -101,7 +101,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         self.no_x0_needed = np.allclose(x0_thresh, 0)
 
         ax_trans = np.asarray(self.getProperty("AxesTransform").value).reshape((3, 3))
-        if np.allclose(np.abs(np.linalg.det(ax_trans)), 1):
+        if not np.allclose(np.abs(np.linalg.det(ax_trans)), 1):
             issues["AxesTransform"] = (
                 "Algorithm currently expects axes transforms to volume-preserving, as such the determinant must equal 1 (or -1)"
             )
