@@ -313,6 +313,10 @@ bool File::hasData(std::string const &name) {
   return m_descriptor.isEntry(path, scientific_data_set);
 }
 
+/**
+ * napi used to allow opening datasets at same level without closing previous
+ * many client codes follow this (bad) usage, therefore it needs to be enabled
+ */
 std::filesystem::path File::formAbsolutePath(std::string const &name) {
   // perform some cleanup on path
   std::string new_name(name);
@@ -710,8 +714,6 @@ void File::openData(std::string const &name) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name");
   }
-  // napi used to allow opening datasets at same level without closing previous
-  // many client codes follow this (bad) usage, therefore it needs to be enabled
   std::filesystem::path new_path = formAbsolutePath(name);
   if (m_descriptor.isEntry(new_path, scientific_data_set)) {
     m_path = new_path;
