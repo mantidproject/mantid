@@ -1844,8 +1844,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   }
 
   // MatrixWorkspace axis 1
-  NXDouble axis2 = wksp_cls.openNXDouble("axis2");
-  std::string unit2 = axis2.attributes("units");
+  std::string unit2;
+  { // limit scope so dataset closes
+    NXDouble axis2 = wksp_cls.openNXDouble("axis2");
+    unit2 = axis2.attributes("units");
+  }
 
   // --- Load workspace (as event_workspace or workspace2d) ---
   API::MatrixWorkspace_sptr local_workspace;
@@ -1867,9 +1870,8 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
       label->setLabel(ax.attributes("caption"), ax.attributes("label"));
     }
 
-    // If this doesn't throw then it is a numeric access so grab the data so
-    // we
-    // can set it later
+    // If this doesn't throw then it is a numeric access so grab the data so we can set it later
+    NXDouble axis2 = wksp_cls.openNXDouble("axis2");
     axis2.load();
     if (static_cast<size_t>(axis2.size()) == nspectra + 1)
       verticalHistogram = true;
@@ -2055,7 +2057,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
     std::string axisLabels("");
     try {
       axisLabels = data.getString("axis2");
-    } catch (std::runtime_error &) {
+    } catch (const std::runtime_error &) {
       // let it drop on the floor
     }
     // Use boost::tokenizer to split up the input

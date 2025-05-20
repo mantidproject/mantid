@@ -232,7 +232,10 @@ std::string NXClass::getString(const std::string &name) const {
   std::string value;
 
   // open the containing dataset
-  m_fileID->openPath(name);
+  if (m_path == m_fileID->getPath())
+    m_fileID->openPath(name);
+  else
+    m_fileID->openPath(m_path + "/" + name);
   // read the value
   try {
     value = m_fileID->getStrData();
