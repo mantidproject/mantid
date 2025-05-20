@@ -384,7 +384,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     const_cast<Run *>(this)->setProtonCharge(total);
     // Mark gd_prtn_chrg as filtered as this method accounts for period filtering
     if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
-      m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
+      m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, 0);
     }
 
   } else {
@@ -936,6 +936,12 @@ void Run::loadNexusCommon(::NeXus::File *file, const std::string &nameClass) {
     double charge;
     file->readData("proton_charge", charge);
     this->setProtonCharge(charge);
+  } else if (nameClass == "proton_charge_by_period") {
+    file->openGroup(nameClass, "NXlog");
+    std::vector<double> values;
+    file->readData("value", values);
+    file->closeGroup();
+    this->addProperty("proton_charge_by_period", values, true);
   }
 }
 
