@@ -30,7 +30,7 @@ ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_vi
  * @param extraValues A map of extra column names and values to display
  */
 void ImageInfoPresenter::cursorAt(const double x, const double y, const double signal,
-                                  const QMap<QString, QString> extraValues) {
+                                  const QMap<QString, QString> &extraValues) {
   assert(m_model);
   m_view->showInfo(m_model->info(x, y, signal, extraValues));
 }

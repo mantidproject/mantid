@@ -28,7 +28,7 @@ public:
   SampleEnvironment(std::string name, const Container_const_sptr &getContainer);
 
   /// @return The name of kit
-  inline const std::string name() const { return m_name; }
+  inline const std::string &name() const { return m_name; }
   /// @return The name of can
   inline const std::string containerID() const { return getContainer().id(); }
   /// @return A const ptr to the can instance

@@ -32,7 +32,7 @@ public:
 
   std::string getName() const override;
 
-  std::string getValue() const;
+  const std::string &getValue() const;
 
   bool isValid() const override;
 

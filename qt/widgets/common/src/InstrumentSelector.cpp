@@ -57,7 +57,7 @@ InstrumentSelector::~InstrumentSelector() {
  * widget
  * @returns A list of supported techniques
  */
-QStringList InstrumentSelector::getTechniques() const { return m_techniques; }
+const QStringList &InstrumentSelector::getTechniques() const { return m_techniques; }
 
 /**
  * Returns if the list of instruments will be refeshed when the facility
