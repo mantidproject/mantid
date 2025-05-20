@@ -55,7 +55,9 @@ class TextureProjection:
         chi2_thresh: Optional[float],
         peak_thresh: Optional[float],
         rb_num: Optional[str] = None,
+        ax_transform: Sequence[float] = np.eye(3),
     ) -> None:
+        flat_ax_transform = np.reshape(ax_transform, (9,))
         table_workspaces = []
         if len(peak_wss) == len(wss):
             for iws, ws in enumerate(wss):
@@ -69,6 +71,7 @@ class TextureProjection:
                     PeakPositionThreshold=peak_thresh,
                     ApplyScatteringPowerCorrection=inc_scatt_corr,
                     ScatteringVolumePosition=scat_vol_pos,
+                    AxesTransform=flat_ax_transform,
                 )
                 table_workspaces.append(ws_str)
         else:
@@ -85,6 +88,7 @@ class TextureProjection:
                     PeakPositionThreshold=peak_thresh,
                     ApplyScatteringPowerCorrection=inc_scatt_corr,
                     ScatteringVolumePosition=scat_vol_pos,
+                    AxesTransform=flat_ax_transform,
                 )
                 table_workspaces.append(ws_str)
         CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
@@ -112,7 +116,7 @@ class TextureProjection:
             ws = ADS.retrieve(ws)
         alphas = np.asarray(ws.column("Alpha"))
         betas = np.asarray(ws.column("Beta"))
-        i = np.asarray(ws.column("Intensity"))
+        i = np.asarray(ws.column("I"))
 
         pfi = proj(alphas, betas, i)
 
