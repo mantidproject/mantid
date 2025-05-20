@@ -181,19 +181,34 @@ def import_gsasii(gsasii_scriptable: Path) -> ModuleType:
         FileNotFoundError: If the specified file does not exist.
     """
     if not gsasii_scriptable.is_file():
-        raise FileNotFoundError(f"The specified GSASIIscriptable.py file does not exist: {gsasii_scriptable}")
+        raise FileNotFoundError(
+            f"The specified GSASIIscriptable.py file does not exist: {gsasii_scriptable}\n"
+            f"Please ensure you have installed GSAS-II from https://advancedphotonsource.github.io/GSAS-II-tutorials/install.html"
+        )
 
-    # Add the directory containing GSASIIscriptable.py to sys.path
-    gsasii_directory = gsasii_scriptable.parent
-    if str(gsasii_directory) not in sys.path:
-        sys.path.insert(0, str(gsasii_directory))
+    gsasii_dir = gsasii_scriptable.parent
+    gsasii_package_parent = gsasii_dir.parent
 
     try:
-        import GSASIIscriptable as G2sc
+        if str(gsasii_package_parent) not in sys.path:
+            sys.path.insert(0, str(gsasii_package_parent))
+        import GSASII.GSASIIscriptable as G2sc
 
         return G2sc
-    except ImportError as exc:
-        raise ImportError(f"GSASIIscriptable module found at {gsasii_scriptable}, but it could not be imported.") from exc
+    except ImportError as exc1:
+        try:
+            if str(gsasii_dir) not in sys.path:
+                sys.path.insert(0, str(gsasii_dir))
+            import GSASIIscriptable as G2sc
+
+            return G2sc
+        except ImportError as exc2:
+            raise ImportError(
+                f"GSASIIscriptable module found at {gsasii_scriptable}, but it could not be imported.\n"
+                f"Package import failed: {exc1}\n"
+                f"Top-level import failed: {exc2}\n"
+                f"Check that your PYTHONPATH and sys.path are set correctly for your GSAS-II installation.\n"
+            )
 
 
 def main():
