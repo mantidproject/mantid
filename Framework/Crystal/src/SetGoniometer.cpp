@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -47,6 +48,9 @@ void SetGoniometer::init() {
                   "Set the axes and motor names according to goniometers that "
                   "we define in the code (Universal defined for SNS)");
 
+  declareProperty(std::make_unique<ArrayProperty<double>>("GoniometerMatrix", std::move(zeroes), threeVthree),
+                  "Directly set the goniometer rotation matrix. Input should be in the form of a flattened 3x3 matrix");
+
   std::string axisHelp = ": name, x,y,z, 1/-1 (1 for ccw, -1 for cw rotation). "
                          "A number of degrees can be used instead of name. "
                          "Leave blank for no axis";
@@ -55,12 +59,11 @@ void SetGoniometer::init() {
     propName << "Axis" << i;
     declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
+    setPropertySettings(propName.str(), std::make_unique<EnabledWhenProperty>("GoniometerMatrix", IS_DEFAULT));
   }
   declareProperty("Average", true,
                   "Use the average value of the log, if false a separate "
                   "goniometer will be created for each value in the logs");
-  declareProperty(std::make_unique<ArrayProperty<double>>("GoniometerMatrix", std::move(zeroes), threeVthree),
-                  "Directly set the goniometer rotation matrix. Input should be in the form of a flattened 3x3 matrix");
 }
 
 std::map<std::string, std::string> SetGoniometer::validateInputs() {
@@ -70,6 +73,15 @@ std::map<std::string, std::string> SetGoniometer::validateInputs() {
 
   // if a Goniometer Matrix is supplied, check it is a valid rotation
   if (!isDefault("GoniometerMatrix")) {
+    for (size_t i = 0; i < NUM_AXES; i++) {
+      std::ostringstream propName;
+      propName << "Axis" << i;
+      std::string axisDesc = getPropertyValue(propName.str());
+      if (!isDefault(propName.str())) {
+        issues[propName.str()] = "Can't provide a goniometer axis if a matrix string has also been provided";
+      }
+    }
+
     if (GMatrix.numRows() == GMatrix.numCols()) {
       bool isRot = GMatrix.isRotation();
       if (!isRot) {
