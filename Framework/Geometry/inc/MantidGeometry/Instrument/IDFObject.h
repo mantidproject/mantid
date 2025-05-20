@@ -11,7 +11,7 @@
 #include <memory>
 #endif
 #include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 #include <stdexcept>
 
 namespace Mantid {
@@ -32,8 +32,8 @@ class MANTID_GEOMETRY_DLL AbstractIDFObject {
 public:
   AbstractIDFObject() = default;
   static const std::string expectedExtension();
-  virtual const Poco::Path getParentDirectory() const = 0;
-  virtual const Poco::Path &getFileFullPath() const = 0;
+  virtual const std::filesystem::path getParentDirectory() const = 0;
+  virtual const std::filesystem::path &getFileFullPath() const = 0;
   virtual const std::string &getFileFullPathStr() const = 0;
   virtual std::string getFileNameOnly() const = 0;
   virtual std::string getExtension() const = 0;
@@ -52,8 +52,8 @@ private:
 class MANTID_GEOMETRY_DLL IDFObject : public AbstractIDFObject {
 public:
   IDFObject(const std::string &fileName);
-  const Poco::Path getParentDirectory() const override;
-  const Poco::Path &getFileFullPath() const override;
+  const std::filesystem::path getParentDirectory() const override;
+  const std::filesystem::path &getFileFullPath() const override;
   const std::string &getFileFullPathStr() const override;
   std::string getFileNameOnly() const override;
   std::string getExtension() const override;
@@ -65,8 +65,8 @@ private:
   IDFObject &operator=(const IDFObject &);
   const Poco::File m_defFile;
   const bool m_hasFileName;
-  const Poco::Path m_cachePath;
-  const Poco::Path m_cacheParentDirectory;
+  const std::filesystem::path m_cachePath;
+  const std::filesystem::path m_cacheParentDirectory;
   const std::string m_cachePathStr;
 };
 
@@ -79,8 +79,12 @@ private:
 
 public:
   NullIDFObject() : m_emptyResponse("") {}
-  const Poco::Path getParentDirectory() const override { throw std::runtime_error("Not implemented on NullIDFObject"); }
-  const Poco::Path &getFileFullPath() const override { throw std::runtime_error("Not implemented on NullIDFObject"); }
+  const std::filesystem::path getParentDirectory() const override {
+    throw std::runtime_error("Not implemented on NullIDFObject");
+  }
+  const std::filesystem::path &getFileFullPath() const override {
+    throw std::runtime_error("Not implemented on NullIDFObject");
+  }
   const std::string &getFileFullPathStr() const override { return m_emptyResponse; }
   std::string getFileNameOnly() const override { return m_emptyResponse; }
   std::string getExtension() const override { return m_emptyResponse; }

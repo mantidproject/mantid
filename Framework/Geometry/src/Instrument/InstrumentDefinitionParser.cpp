@@ -2516,8 +2516,10 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
 
   g_log.notice("Geometry cache is not available");
   try {
-    Poco::File dir = usedCache->getParentDirectory();
-    if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
+    const auto dir = usedCache->getParentDirectory();
+    if (dir.empty() || !std::filesystem::exists(dir) ||
+        (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) ==
+            std::filesystem::perms::none) {
       usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information() << "Geometrycache directory is read only, writing cache "
