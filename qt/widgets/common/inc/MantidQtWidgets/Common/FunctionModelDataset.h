@@ -25,7 +25,7 @@ struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
   FunctionModelDataset(std::string workspaceName, FunctionModelSpectra spectra);
 
-  inline std::string datasetName() const noexcept { return m_workspaceName; }
+  inline const std::string &datasetName() const noexcept { return m_workspaceName; }
   std::vector<std::string> domainNames() const;
 
   inline std::size_t numberOfSpectra() const noexcept { return m_spectra.size().value; }

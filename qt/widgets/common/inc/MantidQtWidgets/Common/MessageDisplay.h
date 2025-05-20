@@ -68,7 +68,7 @@ public:
   /// Get the window's QPlainTextEdit object
   QPlainTextEdit *getTextEdit() { return m_textDisplay; }
   /// Get the window's message history
-  QList<Message> getHistory() { return m_messageHistory; }
+  const QList<Message> &getHistory() { return m_messageHistory; }
   /// Generate the display's context menu QMenu object
   QMenu *generateContextMenu();
   /// Filter messages by message type
@@ -90,7 +90,7 @@ public:
   /// Get whether only active script output should be displayed
   void setShowActiveScriptOutput(const bool &show) { m_showActiveScriptOutput = show; }
   /// Get the path of the currently active script
-  inline QString activeScript() const { return m_activeScript; }
+  inline const QString &activeScript() const { return m_activeScript; }
   /// Set the path of the currently active script
   void setActiveScript(const QString &scriptPath) { m_activeScript = scriptPath; }
 

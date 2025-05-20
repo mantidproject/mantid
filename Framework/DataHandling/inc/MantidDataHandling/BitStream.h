@@ -27,7 +27,7 @@ private:
   std::ifstream stream_;
   const uint64_t fileSize_;
 
-  long getFileSize(std::string filename) {
+  long getFileSize(const std::string &filename) {
     struct stat stat_buf;
     int rc = stat(filename.c_str(), &stat_buf);
     return rc == 0 ? stat_buf.st_size : -1;

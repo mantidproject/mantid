@@ -370,7 +370,7 @@ void export_MatrixWorkspace() {
            "Returns ``True`` if this is considered to be binned data.")
       .def("isDistribution", (bool (MatrixWorkspace::*)() const) & MatrixWorkspace::isDistribution, arg("self"),
            "Returns the status of the distribution flag")
-      .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
+      .def("YUnit", &MatrixWorkspace::YUnit, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
            MatrixWorkspace_YUnitLabelOverloads((arg("self"), arg("useLatex"), arg("plotAsDistribution")),

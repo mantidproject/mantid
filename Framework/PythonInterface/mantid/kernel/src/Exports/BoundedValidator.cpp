@@ -7,6 +7,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidPythonInterface/core/IsNone.h"
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/overloads.hpp>
@@ -70,8 +71,10 @@ BoundedValidator<T> *createExclusiveBoundedValidator(object lower = object(), ob
            "Sets if the upper bound is exclsuive")                                                                     \
       .def("setExclusive", &BoundedValidator<ElementType>::setExclusive, (arg("self"), arg("exclusive")),              \
            "Sets both bounds to be inclusive/exclusive")                                                               \
-      .def("lower", &BoundedValidator<ElementType>::lower, arg("self"), "Returns the lower bound")                     \
-      .def("upper", &BoundedValidator<ElementType>::upper, arg("self"), "Returns the upper bound")                     \
+      .def("lower", &BoundedValidator<ElementType>::lower, arg("self"), return_value_policy<copy_const_reference>(),   \
+           "Returns the lower bound")                                                                                  \
+      .def("upper", &BoundedValidator<ElementType>::upper, arg("self"), return_value_policy<copy_const_reference>(),   \
+           "Returns the upper bound")                                                                                  \
       .def("setBounds", &BoundedValidator<ElementType>::setBounds, (arg("self"), arg("lower"), arg("upper")),          \
            "Set both bounds")                                                                                          \
       .def("hasLower", &BoundedValidator<ElementType>::hasLower, arg("self"),                                          \

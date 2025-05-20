@@ -85,7 +85,7 @@ Mantid::Geometry::Instrument_const_sptr SlitCalculator::getInstrument() { return
 void SlitCalculator::setCurrentInstrumentName(const std::string &instrumentName) {
   this->currentInstrumentName = instrumentName;
 }
-std::string SlitCalculator::getCurrentInstrumentName() { return currentInstrumentName; }
+const std::string &SlitCalculator::getCurrentInstrumentName() { return currentInstrumentName; }
 void SlitCalculator::on_recalculate_triggered() {
   const auto currentInstrument = getInstrument();
   if (currentInstrument->getName() != currentInstrumentName) {

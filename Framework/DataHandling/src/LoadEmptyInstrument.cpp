@@ -74,7 +74,9 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
 }
 
 // Return all valid instrument file name extensions
-std::vector<std::string> LoadEmptyInstrument::getValidInstrumentFilenameExtensions() { return validFilenameExtensions; }
+const std::vector<std::string> &LoadEmptyInstrument::getValidInstrumentFilenameExtensions() {
+  return validFilenameExtensions;
+}
 
 /**
  * Return the confidence with with this algorithm can load the file

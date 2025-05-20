@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/reference_existing_object.hpp>
 
@@ -76,7 +77,7 @@ void export_UsageService() {
       .def("setApplicationName", &UsageServiceImpl::setApplicationName, (arg("self"), arg("name")),
            "Sets the application name that has invoked Mantid.")
       .def("getApplicationName", &UsageServiceImpl::getApplicationName, arg("self"),
-           "Gets the application name that has invoked Mantid.")
+           return_value_policy<copy_const_reference>(), "Gets the application name that has invoked Mantid.")
       .def("registerStartup", &UsageServiceImpl::registerStartup, arg("self"), "Registers the startup of Mantid.")
       .def("registerFeatureUsage", &registerFeatureUsage, (arg("self"), arg("type"), arg("name"), arg("internal")),
            "Registers the use of a feature in Mantid.")

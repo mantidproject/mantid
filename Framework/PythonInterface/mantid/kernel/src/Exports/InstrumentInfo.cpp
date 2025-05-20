@@ -20,7 +20,7 @@ void export_InstrumentInfo() {
   std_vector_exporter<InstrumentInfo>::wrap("std_vector_InstrumentInfo");
 
   class_<InstrumentInfo>("InstrumentInfo", no_init)
-      .def("name", &InstrumentInfo::name, arg("self"),
+      .def("name", &InstrumentInfo::name, arg("self"), return_value_policy<copy_const_reference>(),
            ""
            "Returns the full name of the instrument as defined in the "
            "Facilites.xml file")
