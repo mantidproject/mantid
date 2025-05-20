@@ -18,7 +18,6 @@
 #include "MantidAlgorithms/CreateBootstrapWorkspaces.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/normal_distribution.h"
 #include "MantidKernel/uniform_int_distribution.h"
 
@@ -26,10 +25,6 @@ using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::StringListValidator;
 using namespace Mantid::API;
-
-namespace {
-Mantid::Kernel::Logger g_log("CreateBootstrapWorkspaces");
-}
 
 namespace Mantid::Algorithms {
 
@@ -71,10 +66,9 @@ void CreateBootstrapWorkspaces::init() {
       "Type of bootstrap sampling to use. "
       "ErrorSampling samples at each data point, while SpectraSampling samples each spectra with repetition.");
 
-  declareProperty("OutputPrefix", "boot_", "Prefix to add to bootstrap workspaces");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap_samples",
-                                                                      Direction::Output),
-                  "Name of output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceGroup", "bootstrap", Direction::Output),
+      "Name of output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -90,15 +84,16 @@ void CreateBootstrapWorkspaces::exec() {
 
   int numReplicas = getProperty("NumberOfReplicas");
   std::string bootType = getProperty("BootstrapType");
-  std::string prefix = getProperty("OutputPrefix");
+  std::string prefix = getProperty("OutputWorkspaceGroup");
   Progress progress(this, 0, 1, numReplicas);
 
-  WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
+  std::vector<std::string> bootNames;
 
   for (int i = 1; i <= numReplicas; i++) {
     MatrixWorkspace_sptr bootWs = WorkspaceFactory::Instance().create(inputWs);
-    ADS.addOrReplace(prefix + std::to_string(i), bootWs);
-    wsGroup->addWorkspace(bootWs);
+    std::string wsName = prefix + '_' + std::to_string(i);
+    ADS.addOrReplace(wsName, bootWs);
+    bootNames.push_back(wsName);
 
     for (size_t index = 0; index < bootWs->getNumberHistograms(); index++) {
       bootWs->setSharedX(index, inputWs->sharedX(index));
@@ -117,7 +112,11 @@ void CreateBootstrapWorkspaces::exec() {
     }
     progress.report("Creating Bootstrap Samples...");
   }
-  setProperty("OutputWorkspaceGroup", wsGroup);
+  auto alg = createChildAlgorithm("GroupWorkspaces");
+  alg->setProperty("InputWorkspaces", bootNames);
+  alg->executeAsChildAlg();
+  WorkspaceGroup_sptr outputGroup = alg->getProperty("OutputWorkspace");
+  setProperty("OutputWorkspaceGroup", outputGroup);
 }
 
 //----------------------------------------------------------------------------------------------

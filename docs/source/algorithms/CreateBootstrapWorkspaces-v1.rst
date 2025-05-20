@@ -39,11 +39,10 @@ Usage
       Seed=32,
       NumberOfReplicas=10,
       BootstrapType="ErrorSampling",
-      OutputPrefix="boot_",
-      OutputWorkspaceGroup="bootstrap_samples"
+      OutputWorkspaceGroup="bootErr"
    )
 
-   plotSpectrum(["inputWs", "boot_1"], indices=0, error_bars=True)
+   plotSpectrum(["inputWs", "bootErr_1"], indices=0, error_bars=True)
 
 .. image:: ../images/CreateBootstrapWorkspaces_with_error_sampling.png
    :alt: Comparison between original spectra and simulated spectra with error sampling
@@ -69,15 +68,14 @@ Usage
        Seed=32,
        NumberOfReplicas=10,
        BootstrapType="SpectraSampling",
-       OutputPrefix="boot_",
-       OutputWorkspaceGroup="bootstrap_samples"
+       OutputWorkspaceGroup="bootSpectra"
    )
 
    fig, axes = plt.subplots(nrows=1, ncols=2, subplot_kw={'projection':'mantid'})
    axes[0].imshow(inputWs, origin = 'lower', cmap='viridis', aspect='auto')
    axes[0].set_title("inputWs")
-   axes[1].imshow(mtd["boot_2"], origin = 'lower', cmap='viridis', aspect='auto')
-   axes[1].set_title("boot_2")
+   axes[1].imshow(mtd["bootSpectra_2"], origin = 'lower', cmap='viridis', aspect='auto')
+   axes[1].set_title("bootSpectra_2")
    # fig.show()
 
 .. image:: ../images/CreateBootstrapWorkspaces_with_spectra_sampling.png

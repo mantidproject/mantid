@@ -45,12 +45,12 @@ public:
     inputWS->mutableY(0) = {1.0, 2.0, 3.0, 4.0, 5.0};
     inputWS->mutableE(0) = {0.5, 0.5, 0.5, 0.5, 0.5};
 
-    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot1_sample_", "Boot1_Group");
-    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot2_sample_", "Boot2_Group");
+    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot1");
+    runBootstrapWorkspace(inputWS, 32, 5, "ErrorSampling", "Boot2");
 
     auto &ADS = AnalysisDataService::Instance();
-    auto ws1 = ADS.retrieveWS<MatrixWorkspace>("Boot1_sample_5");
-    auto ws2 = ADS.retrieveWS<MatrixWorkspace>("Boot2_sample_5");
+    auto ws1 = ADS.retrieveWS<MatrixWorkspace>("Boot1_5");
+    auto ws2 = ADS.retrieveWS<MatrixWorkspace>("Boot2_5");
 
     TS_ASSERT(ws1);
     TS_ASSERT(ws2);
@@ -63,8 +63,8 @@ public:
       TS_ASSERT_EQUALS(outputY1[i], outputY2[i]);
     }
 
-    ADS.remove("Boot1_Group");
-    ADS.remove("Boot2_Group");
+    ADS.remove("Boot1");
+    ADS.remove("Boot2");
   }
 
   void test_number_of_bootstrap_samples() {
@@ -73,14 +73,14 @@ public:
     inputWS->mutableY(0) = {1.0};
     inputWS->mutableE(0) = {0.1};
 
-    runBootstrapWorkspace(inputWS, 32, 10, "ErrorSampling", "Nsample_", "BootNSamples_Group");
+    runBootstrapWorkspace(inputWS, 32, 10, "ErrorSampling", "BootNSamples");
 
     auto &ADS = AnalysisDataService::Instance();
-    auto ws_group = ADS.retrieveWS<WorkspaceGroup>("BootNSamples_Group");
+    auto ws_group = ADS.retrieveWS<WorkspaceGroup>("BootNSamples");
 
     TS_ASSERT_EQUALS(ws_group->getNumberOfEntries(), 10);
 
-    ADS.remove("BootNSamples_Group");
+    ADS.remove("BootNSamples");
   }
 
   void test_bootstrap_with_error_sampling() {
@@ -89,9 +89,9 @@ public:
     inputWS->mutableY(0) = {1.0, 2.0, 3.0, 4.0, 5.0};
     inputWS->mutableE(0) = {0.1, 0.2, 0.3, 0.4, 0.5};
 
-    runBootstrapWorkspace(inputWS, 32, 1, "ErrorSampling", "BootErr_sample_", "BootErr_Group");
+    runBootstrapWorkspace(inputWS, 32, 1, "ErrorSampling", "BootErr");
     auto &ADS = AnalysisDataService::Instance();
-    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootErr_sample_1");
+    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootErr_1");
 
     TS_ASSERT(ws);
 
@@ -107,7 +107,7 @@ public:
     }
     std::cout << "\n";
 
-    ADS.remove("BootErr_Group");
+    ADS.remove("BootErr");
   }
 
   void test_bootstrap_with_spectra_sampling() {
@@ -122,10 +122,10 @@ public:
     inputWS->mutableY(2) = {3.0, 3.0, 3.0, 3.0, 3.0};
     inputWS->mutableE(2) = {0.3, 0.3, 0.3, 0.3, 0.3};
 
-    runBootstrapWorkspace(inputWS, 32, 5, "SpectraSampling", "BootSpec_sample_", "BootSpec_Group");
+    runBootstrapWorkspace(inputWS, 32, 5, "SpectraSampling", "BootSpec");
     auto &ADS = AnalysisDataService::Instance();
 
-    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootSpec_sample_2");
+    auto ws = ADS.retrieveWS<MatrixWorkspace>("BootSpec_2");
 
     TS_ASSERT(ws);
 
@@ -145,22 +145,20 @@ public:
       TS_ASSERT_EQUALS(ws->e(2)[i], inputWS->e(0)[i]);
     }
 
-    ADS.remove("BootSpec_Group");
+    ADS.remove("BootSpec");
   }
 
 private:
   // -- Helper method implementations below --
 
   static void runBootstrapWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int numReplicas,
-                                    const std::string &bootType, const std::string &prefix,
-                                    const std::string &outputName) {
+                                    const std::string &bootType, const std::string &outputName) {
     CreateBootstrapWorkspaces alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWS);
     alg.setProperty("Seed", seed);
     alg.setProperty("NumberOfReplicas", numReplicas);
     alg.setProperty("BootstrapType", bootType);
-    alg.setProperty("OutputPrefix", prefix);
     alg.setPropertyValue("OutputWorkspaceGroup", outputName);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
