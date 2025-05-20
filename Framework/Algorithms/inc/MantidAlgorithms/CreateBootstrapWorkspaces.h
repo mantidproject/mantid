@@ -7,25 +7,25 @@
 #pragma once
 
 #include <random>
-#include <vector>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramY.h"
 
-namespace Mantid {
-namespace Algorithms {
-using namespace std;
+namespace Mantid::Algorithms {
 
-/** CreateMonteCarloWorkspace : The algorithm generates a simulated workspace by sampling from the probability
-distribution of input data, useful for testing of fitting functions and modeling.
+/** CreateBootstrapWorkspaces: The algorithm generates several simulated workspaces by sampling
+randomly from the input data, useful for doing a Bootstrap Analysis.
+Two kinds of sampling are provided:
+  - Sampling from a gaussian at each data point: y = Gaussian(y, e)
+  - Sampling entire spectra with repetition: bootWs.Y(index) = origWs.Y(Uniform(0, nHist))
  */
 class MANTID_ALGORITHMS_DLL CreateBootstrapWorkspaces : public API::Algorithm {
 public:
-  const string name() const override;
+  const std::string name() const override;
   int version() const override;
-  const string category() const override;
-  const string summary() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
   static HistogramData::HistogramY sampleHistogramFromGaussian(const HistogramData::HistogramY &dataY,
                                                                const HistogramData::HistogramE &dataE,
@@ -36,5 +36,4 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms
