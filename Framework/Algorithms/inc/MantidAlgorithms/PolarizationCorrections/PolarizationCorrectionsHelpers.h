@@ -85,7 +85,7 @@ public:
   using DerType = Types::DerType;
   using ADScalar = Types::ADScalar;
   using InputArray = Types::InputArray;
-  ErrorPropagation(Func func) : compute_func(std::move(func)) {}
+  ErrorPropagation(Func func) : computeFunc(std::move(func)) {}
 
   struct AutoDevResult {
     double value;
@@ -98,7 +98,7 @@ public:
     for (size_t i = 0; i < N; ++i) {
       x[i] = ADScalar(values[i], DerType::Unit(N, i));
     }
-    const ADScalar y = compute_func(x);
+    const ADScalar y = computeFunc(x);
     const auto &derivatives = y.derivatives();
     return {y.value(), std::sqrt((derivatives.array().square() * errors.array().square()).sum()), derivatives};
   }
@@ -114,7 +114,7 @@ public:
   }
 
 private:
-  Func compute_func;
+  Func computeFunc;
 
   template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
   API::MatrixWorkspace_sptr evaluateWorkspacesImpl(std::optional<bool> outputWorkspaceDistribution, Ts... args) const {
@@ -124,16 +124,16 @@ private:
     const size_t specSize = outWs->blocksize();
 
     // cppcheck-suppress unreadVariable
-    const bool condition = Kernel::threadSafe((*args)..., *outWs);
+    const bool isThreadSafe = Kernel::threadSafe((*args)..., *outWs);
     // cppcheck-suppress unreadVariable
     const bool specOverBins = numSpec > specSize;
 
-    PARALLEL_FOR_IF(condition && specOverBins)
+    PARALLEL_FOR_IF(isThreadSafe && specOverBins)
     for (int64_t i = 0; i < static_cast<int64_t>(numSpec); i++) {
       auto &yOut = outWs->mutableY(i);
       auto &eOut = outWs->mutableE(i);
 
-      PARALLEL_FOR_IF(condition && !specOverBins)
+      PARALLEL_FOR_IF(isThreadSafe && !specOverBins)
       for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
         const auto result = evaluate(InputArray{args->y(i)[j]...}, InputArray(args->e(i)[j]...));
         yOut[j] = result.value;
@@ -148,7 +148,7 @@ private:
   }
 };
 
-template <size_t N, typename Func> auto make_error_propagation(Func &&func) {
+template <size_t N, typename Func> auto makeErrorPropagation(Func &&func) {
   return ErrorPropagation<N, std::decay_t<Func>>(std::forward<Func>(func));
 }
 

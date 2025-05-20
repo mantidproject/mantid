@@ -280,15 +280,15 @@ void PolarizationEfficienciesWildes::calculateFlipperEfficienciesAndPhi() {
 
   constexpr int var_num = 4;
   // Calculate fp
-  const auto errorPropFp = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFp(x); });
+  const auto errorPropFp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) { return fnFp(x); });
   m_wsFp = errorPropFp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 
   // Calculate fa
-  const auto errorPropFa = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnFa(x); });
+  const auto errorPropFa = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) { return fnFa(x); });
   m_wsFa = errorPropFa.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 
   // Calculate phi
-  const auto errorPropPhi = Arithmetic::make_error_propagation<var_num>([](const auto &x) { return fnPhi(x); });
+  const auto errorPropPhi = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) { return fnPhi(x); });
   m_wsPhi = errorPropPhi.evaluateWorkspaces(true, ws00, ws01, ws10, ws11);
 }
 
@@ -297,7 +297,7 @@ MatrixWorkspace_sptr PolarizationEfficienciesWildes::calculateTPMO() {
   const auto &[ws00Mag, ws01Mag, ws10Mag, ws11Mag] = getFlipperWorkspaces(true);
 
   constexpr int var_num = 8;
-  const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+  const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
     const auto fp = fnFp(x);
     const auto fa = fnFa(x);
     const auto numerator = fnNumerator(x, fa);
@@ -321,7 +321,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     }
 
     if (solveForA) {
-      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+      const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
         const auto phi = fnPhi(x);
         const auto fp = fnFp(x);
         const auto fa = fnFa(x);
@@ -340,11 +340,11 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
       m_wsP = inWsP->clone();
     } else {
-      g_log.warning("The analayser efficiency workspace provided has been used to calculate the polarizer efficiency."
+      g_log.warning("The analyser efficiency workspace provided has been used to calculate the polarizer efficiency."
                     "This could lead to inflated errors as the analyser efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
       constexpr int var_num = 5;
-      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+      const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
@@ -360,7 +360,7 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
                     "This could lead to inflated errors as the polarizer efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
       constexpr int var_num = 5;
-      const auto errorProp = Arithmetic::make_error_propagation<var_num>([](const auto &x) {
+      const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
@@ -445,7 +445,7 @@ void PolarizationEfficienciesWildes::populateSpinStateWorkspaces(const Workspace
 void PolarizationEfficienciesWildes::mapSpinStateWorkspaces() {
   const WorkspaceGroup_sptr magWsGrp = getProperty(PropNames::INPUT_MAG_WS);
   const WorkspaceGroup_sptr nonMagWsGrp = getProperty(PropNames::INPUT_NON_MAG_WS);
-  if (magWsGrp != nullptr) {
+  if (magWsGrp) {
     m_magWsProvided = true;
     populateSpinStateWorkspaces(magWsGrp, MAG_KEY_PREFIX);
   }
