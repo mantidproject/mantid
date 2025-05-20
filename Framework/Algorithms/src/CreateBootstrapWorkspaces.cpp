@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
+#include <memory>
 #include <random>
 #include <string>
 
@@ -109,12 +110,12 @@ void CreateBootstrapWorkspaces::exec() {
   std::string prefix = getProperty("OutputPrefix");
   Progress progress(this, 0, 1, numReplicas);
 
-  std::vector<std::string> boot_names;
+  WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
 
   for (int i = 1; i <= numReplicas; i++) {
     MatrixWorkspace_sptr bootWs = WorkspaceFactory::Instance().create(inputWs);
     ADS.addOrReplace(prefix + std::to_string(i), bootWs);
-    boot_names.push_back(prefix + std::to_string(i));
+    wsGroup->addWorkspace(bootWs);
 
     for (size_t index = 0; index < bootWs->getNumberHistograms(); index++) {
       bootWs->setSharedX(index, inputWs->sharedX(index));
@@ -133,11 +134,6 @@ void CreateBootstrapWorkspaces::exec() {
     }
     progress.report("Creating Bootstrap Samples...");
   }
-
-  auto alg = createChildAlgorithm("GroupWorkspaces");
-  alg->setProperty("InputWorkspaces", boot_names);
-  alg->executeAsChildAlg();
-  WorkspaceGroup_sptr outputGroup = alg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspaceGroup", outputGroup);
+  setProperty("OutputWorkspaceGroup", wsGroup);
 }
 } // namespace Mantid::Algorithms
