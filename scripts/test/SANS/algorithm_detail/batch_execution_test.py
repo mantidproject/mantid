@@ -24,6 +24,7 @@ from sans.algorithm_detail.batch_execution import (
     group_bgsub_if_required,
     save_to_file,
     _apply_polarization_component_adjustments,
+    _add_polarization_metadata_if_relevant,
 )
 from sans.common.enums import SaveType, ReductionMode
 from sans.common.constants import SCALED_BGSUB_SUFFIX
@@ -141,6 +142,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
     def _create_move_objects(self):
         mock_polarization_state = mock.MagicMock()
+        mock_polarization_state.spin_configuration = "+1+1,-1+1,+1-1,-1-1"
         mock_polarizer = mock.MagicMock()
         mock_polarizer.idf_component_name = "mocked_polarizer"
         mock_polarizer.location_x = 1.2
@@ -149,9 +151,14 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarizer.device_type = "He3"
         mock_polarizer.cell_length = 0.3
         mock_polarizer.gas_pressure = 5
+        mock_mag_field = mock.MagicMock()
+        mock_mag_field.sample_strength_log = "str_log_name"
+        mock_mag_field.sample_direction_log = "dir_log_name"
+        mock_mag_field.sample_direction_a = None
         mock_polarization_state.polarizer = mock_polarizer
         mock_polarization_state.analyzer = None
         mock_polarization_state.flippers = []
+        mock_polarization_state.magnetic_field = mock_mag_field
         mock_ws = mock.MagicMock()
         return mock_polarization_state, mock_ws
 
@@ -359,7 +366,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
-    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func, _):
@@ -369,7 +377,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         save_to_file([reduction_package], False, {}, {})
         mock_save_func.assert_called_with("unsubbed_ws", file_formats_mock, "unsubbed_ws", {}, {})
 
-    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func, _):
@@ -388,24 +397,22 @@ class GetAllNamesToSaveTest(unittest.TestCase):
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
-    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
-    def test_save_to_file_moves_polarization_components(self, move_mock, mock_names_func, _, mock_ads):
+    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
+    def test_save_to_file_applies_polarization_metadata(self, mock_pol_meta, mock_names_func, _, mock_ads):
         reduction_package, _ = self._create_saving_reduction_package()
         mock_names_func.return_value = ["polarization_ws"]
         mock_ws = mock.MagicMock()
         mock_ads.retrieve.return_value = mock_ws
 
         save_to_file([reduction_package], False, {}, {})
-        self.assertEqual(move_mock.call_count, 1)
+        self.assertEqual(mock_pol_meta.call_count, 1)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     @mock.patch("sans.algorithm_detail.batch_execution.move_component")
-    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
-    def test_apply_polarization_component_adjustments_uses_state_first(self, mock_ads, mock_move, mock_alg_manager):
+    def test_apply_polarization_component_adjustments_uses_state_first(self, mock_move, mock_alg_manager):
         mock_polarization_state, mock_ws = self._create_move_objects()
-        mock_ads.retrieve.return_value = mock_ws
 
-        _apply_polarization_component_adjustments(mock_polarization_state, "mock_ws_name")
+        _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
         self.assertEqual(mock_move.call_count, 1)
         mock_move.assert_called_with(mock_ws, mock.ANY, "mocked_polarizer", False)
         # For some reason assert_called_with doesn't like doing the dict comparison, so do it ourselves.
@@ -424,10 +431,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     @mock.patch("sans.algorithm_detail.batch_execution.move_component")
-    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
-    def test_apply_polarization_component_adjustments_uses_idf_if_state_not_present(self, mock_ads, mock_move, mock_alg_manager):
+    def test_apply_polarization_component_adjustments_uses_idf_if_state_not_present(self, mock_move, mock_alg_manager):
         mock_polarization_state, mock_ws = self._create_move_objects()
-        mock_ads.retrieve.return_value = mock_ws
         mock_polarization_state.polarizer.location_x = None
         mock_polarization_state.polarizer.location_z = None
         mock_polarization_state.polarizer.gas_pressure = None
@@ -435,9 +440,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getX = mock.Mock(return_value=9.8)
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getY = mock.Mock(return_value=7.6)
         mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getZ = mock.Mock(return_value=5.4)
-        mock_ads.retrieve.return_value = mock_ws
 
-        _apply_polarization_component_adjustments(mock_polarization_state, "mock_ws_name")
+        _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
         mock_move.assert_any_call(mock_ws, mock.ANY, "mocked_polarizer", False)
         self.assertEqual(
             set(mock_move.call_args.args[1].values()),
@@ -450,6 +454,46 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             ParameterName="device_type",
             ParameterType="String",
             Value="He3",
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    def test_polarization_metadata_added(self, _):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_ws.getRun.return_value.getProperty.return_value.value = "mocked_ws_run_log:1,-3,23"
+        metadata = {}
+        _add_polarization_metadata_if_relevant(mock_polarization_state, metadata, mock_ws)
+        self.assertEqual(
+            {
+                "PolarizationProps": {
+                    "InputSpinStates": "+1+1,-1+1,+1-1,-1-1",
+                    "MagneticFieldDirection": "mocked_ws_run_log:1,-3,23",
+                    "MagneticFieldStrengthLog": "str_log_name",
+                    "PolarizerComponentName": "mocked_polarizer",
+                }
+            },
+            metadata,
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    def test_polarization_metadata_added_mag_field_direction_not_using_log(self, _):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_polarization_state.magnetic_field.sample_direction_log = None
+        mock_polarization_state.magnetic_field.sample_direction_a = 1
+        mock_polarization_state.magnetic_field.sample_direction_p = -3
+        mock_polarization_state.magnetic_field.sample_direction_d = 23
+
+        metadata = {}
+        _add_polarization_metadata_if_relevant(mock_polarization_state, metadata, mock_ws)
+        self.assertEqual(
+            {
+                "PolarizationProps": {
+                    "InputSpinStates": "+1+1,-1+1,+1-1,-1-1",
+                    "MagneticFieldDirection": "1,-3,23",
+                    "MagneticFieldStrengthLog": "str_log_name",
+                    "PolarizerComponentName": "mocked_polarizer",
+                }
+            },
+            metadata,
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")

@@ -1346,8 +1346,9 @@ def save_to_file(
             for i, ws_name_to_save in enumerate(to_save[0]):
                 transmission = to_save[1][i] if to_save[1] else ""
                 transmission_can = to_save[2][i] if to_save[2] else ""
-                _apply_polarization_component_adjustments(polarization_info, ws_name_to_save)
                 _add_scaled_background_metadata_if_relevant(scaled_bg_info, ws_name_to_save, additional_metadata)
+                workspace = AnalysisDataService.retrieve(ws_name_to_save)
+                _add_polarization_metadata_if_relevant(polarization_info, additional_metadata, workspace)
                 save_workspace_to_file(
                     ws_name_to_save,
                     file_formats,
@@ -1358,7 +1359,8 @@ def save_to_file(
                     transmission_can,
                 )
         else:
-            _apply_polarization_component_adjustments(polarization_info, str(to_save))
+            workspace = AnalysisDataService.retrieve(str(to_save))
+            _add_polarization_metadata_if_relevant(polarization_info, additional_metadata, workspace)
             _add_scaled_background_metadata_if_relevant(scaled_bg_info, str(to_save), additional_metadata)
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
 
@@ -1370,7 +1372,36 @@ def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata
     metadata["BackgroundSubtractionScaleFactor"] = float(bg_state.scale_factor)
 
 
-def _apply_polarization_component_adjustments(polarization_state, ws_name: str):
+def _add_polarization_metadata_if_relevant(polarization_state, metadata: dict[str, Any], ws):
+    _apply_polarization_component_adjustments(polarization_state, ws)
+    pol_props = {}
+    if polarization_state.spin_configuration:
+        pol_props["InputSpinStates"] = str(polarization_state.spin_configuration)
+    if polarization_state.polarizer is not None and polarization_state.polarizer.idf_component_name:
+        pol_props["PolarizerComponentName"] = str(polarization_state.polarizer.idf_component_name)
+    if polarization_state.analyzer is not None and polarization_state.analyzer.idf_component_name:
+        pol_props["AnalyzerComponentName"] = str(polarization_state.analyzer.idf_component_name)
+    flipper_component_names = []
+    for flipper in polarization_state.flippers:
+        if flipper.idf_component_name:
+            flipper_component_names.append(str(flipper.idf_component_name))
+    flipper_component_names_str = ",".join(flipper_component_names)
+    if flipper_component_names_str:
+        pol_props["FlipperComponentNames"] = flipper_component_names_str
+    mag_field = polarization_state.magnetic_field
+    if mag_field is not None:
+        if mag_field.sample_strength_log:
+            pol_props["MagneticFieldStrengthLog"] = polarization_state.magnetic_field.sample_strength_log
+        if mag_field.sample_direction_log:
+            pol_props["MagneticFieldDirection"] = ws.getRun().getProperty(mag_field.sample_direction_log).value
+        if mag_field.sample_direction_a:  # We don't need to check for all axes, the schema enforces all or nothing.
+            pol_props["MagneticFieldDirection"] = ",".join(
+                [str(mag_field.sample_direction_a), str(mag_field.sample_direction_p), str(mag_field.sample_direction_d)]
+            )
+    metadata["PolarizationProps"] = pol_props
+
+
+def _apply_polarization_component_adjustments(polarization_state, ws):
     def _update_component_parameters(idf_name, parameter_map):
         for parameter_name, parameter_value in parameter_map.items():
             if parameter_value is not None:
@@ -1410,7 +1441,6 @@ def _apply_polarization_component_adjustments(polarization_state, ws_name: str):
             parameter_map["gas_pressure"] = component_state.gas_pressure
         _update_component_parameters(idf_name, parameter_map)
 
-    ws = AnalysisDataService.retrieve(ws_name)
     if polarization_state.polarizer:
         _update_component_properties(polarization_state.polarizer)
     if polarization_state.analyzer:
