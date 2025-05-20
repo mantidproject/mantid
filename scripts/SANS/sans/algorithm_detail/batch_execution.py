@@ -1731,6 +1731,8 @@ def save_workspace_to_file(
         save_options.update({"CanSAS": True})
     if SaveType.NX_CAN_SAS in file_formats:
         save_options.update({"NXcanSAS": True})
+    if SaveType.POL_NX_CAN_SAS in file_formats:
+        save_options.update({"PolarizedNXcanSAS": True})
     if SaveType.NIST_QXY in file_formats:
         save_options.update({"NistQxy": True})
     if SaveType.RKH in file_formats:

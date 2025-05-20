@@ -521,7 +521,15 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         filename = "fileName"
         additional_run_numbers = {}
         additional_metadata = {}
-        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
+        file_types = [
+            SaveType.NEXUS,
+            SaveType.CAN_SAS,
+            SaveType.NX_CAN_SAS,
+            SaveType.POL_NX_CAN_SAS,
+            SaveType.NIST_QXY,
+            SaveType.RKH,
+            SaveType.CSV,
+        ]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers, additional_metadata)
 
@@ -533,6 +541,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "Nexus": True,
             "CanSAS": True,
             "NXcanSAS": True,
+            "PolarizedNXcanSAS": True,
             "NistQxy": True,
             "RKH": True,
             "CSV": True,
