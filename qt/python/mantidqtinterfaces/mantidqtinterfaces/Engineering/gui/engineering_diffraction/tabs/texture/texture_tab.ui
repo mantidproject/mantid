@@ -430,7 +430,7 @@ QGroupBox:title {
 </item>
 
    <!-- Pole Figure Calculation Section -->
- <item>
+<item>
   <widget class="QGroupBox" name="groupBox_absorption">
     <property name="title">
       <string>Pole Figure Calculation</string>
@@ -442,9 +442,29 @@ QGroupBox:title {
         <widget class="QWidget" name="plot_canvas" native="true"/>
       </item>
 
-      <!-- Combo box and button on same row -->
+      <!-- Projection Combo Row -->
       <item>
         <layout class="QHBoxLayout" name="hozLayout_proj">
+          <item>
+            <spacer name="spacer_left">
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+                <size>
+                  <width>40</width>
+                  <height>20</height>
+                </size>
+              </property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QLabel" name="label_proj">
+              <property name="text">
+                <string>Projection:</string>
+              </property>
+            </widget>
+          </item>
           <item>
             <widget class="QComboBox" name="combo_projMethod">
               <item>
@@ -459,19 +479,46 @@ QGroupBox:title {
               </item>
             </widget>
           </item>
-          <item>
-            <widget class="QPushButton" name="btn_calc_pf">
+            <item>
+            <widget class="QLabel" name="label_param">
               <property name="text">
-                <string>Calculate Pole Figure</string>
+                <string>Parameter Readout Column:</string>
               </property>
             </widget>
           </item>
+          <item>
+            <widget class="QComboBox" name="combo_param">
+            </widget>
+          </item>
+          <item>
+            <spacer name="spacer_right">
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+                <size>
+                  <width>40</width>
+                  <height>20</height>
+                </size>
+              </property>
+            </spacer>
+          </item>
         </layout>
+      </item>
+
+      <!-- Calculate Button -->
+      <item>
+        <widget class="QPushButton" name="btn_calc_pf">
+          <property name="text">
+            <string>Calculate Pole Figure</string>
+          </property>
+        </widget>
       </item>
 
     </layout>
   </widget>
 </item>
+
 
 
   </layout>

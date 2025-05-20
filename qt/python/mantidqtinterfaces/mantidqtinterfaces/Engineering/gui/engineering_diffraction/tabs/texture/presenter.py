@@ -50,6 +50,8 @@ class TexturePresenter:
 
         self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
 
+        self.update_readout_column_list()
+
     def load_ws_files(self):
         filenames = self.view.finder_texture_ws.getFilenames()
 
@@ -106,6 +108,7 @@ class TexturePresenter:
         self.update_ws_info()
         self.view.populate_workspace_table(self.ws_info)
         self.view.populate_workspace_list(self.ws_names)
+        self.update_readout_column_list()
 
     def update_ws_info(self):
         ws_info = {}
@@ -137,6 +140,7 @@ class TexturePresenter:
         hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
         out_ws = self.model.get_pf_table_name(wss, params, hkl)
         ax_transform = output_settings.get_texture_axes_transform()
+        readout_col = self.view.get_readout_column()
 
         # default for now
         scat_vol_pos = (0.0, 0.0, 0.0)
@@ -156,17 +160,17 @@ class TexturePresenter:
 
         self.worker = AsyncTask(
             self._calc_pf,
-            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, self.rb_num, ax_transform),
+            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, self.rb_num, ax_transform, readout_col),
             error_cb=self._on_worker_error,
             finished_cb=self._on_worker_success,
         )
         self.worker.start()
 
-    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform):
+    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform, readout_col):
         self.model.make_pole_figure_tables(
-            wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform
+            wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform, readout_col
         )
-        self.plot_pf(out_ws, self.view.get_projection_method())
+        self.plot_pf(out_ws, self.view.get_projection_method(), readout_col)
 
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Corrections Applied")
@@ -184,14 +188,17 @@ class TexturePresenter:
             dialog.finished.connect(self._redraw_on_alg_exec)
             dialog.open()
 
-    def plot_pf(self, pf_ws, proj):
+    def plot_pf(self, pf_ws, proj, readout_col):
         # Get figure and canvas from view
         fig, canvas = self.view.get_plot_axis()
 
         # Clear existing figure
         fig.clf()
 
-        self.model.plot_pole_figure(pf_ws, proj, fig=fig)
+        # if no column specified, should default to I
+        readout_col = "I" if readout_col == "" else readout_col
+
+        self.model.plot_pole_figure(pf_ws, proj, fig=fig, readout_col=readout_col)
 
         canvas.draw()
 
@@ -209,3 +216,9 @@ class TexturePresenter:
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def update_readout_column_list(self):
+        params = self.fit_param_files
+        col_list, starting_index = self.model.read_param_cols(params[0]) if len(params) > 0 else ([], None)
+        self.view.populate_readout_column_list(col_list, starting_index)
+        self.view.update_col_select_visibility(len(col_list) > 0)

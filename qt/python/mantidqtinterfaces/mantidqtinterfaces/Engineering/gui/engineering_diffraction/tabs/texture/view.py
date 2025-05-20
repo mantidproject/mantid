@@ -117,11 +117,20 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def get_crystal_ws_cif(self):
         return self.combo_workspaceListCIF.currentText()
 
+    def get_readout_column(self):
+        return self.combo_param.currentText()
+
     def populate_workspace_list(self, workspace_names):
         self.combo_workspaceListProp.clear()
         self.combo_workspaceListProp.addItems(sorted(workspace_names))
         self.combo_workspaceListCIF.clear()
         self.combo_workspaceListCIF.addItems(sorted(workspace_names))
+
+    def populate_readout_column_list(self, cols, starting_index):
+        self.combo_param.clear()
+        self.combo_param.addItems(cols)
+        if starting_index:
+            self.combo_param.setCurrentIndex(starting_index)
 
     def get_selected_workspaces(self):
         selected_wss = []
@@ -169,3 +178,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
     def set_crystal_section_visibility(self, vis):
         self.widget_scattPowerContainer.setVisible(vis)
+
+    def update_col_select_visibility(self, vis):
+        self.label_param.setVisible(vis)
+        self.combo_param.setVisible(vis)
