@@ -308,7 +308,7 @@ double Run::getProtonCharge() const {
   if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   } else if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME) &&
-             m_manager->getProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
+             m_manager->getProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME).operator int()) {
     const std::vector<double> &protonChargeByPeriod = m_manager->getProperty("proton_charge_by_period");
     const int currentPeriod = m_manager->getProperty("current_period");
     m_manager->setProperty(PROTON_CHARGE_LOG_NAME, protonChargeByPeriod[currentPeriod - 1]);
