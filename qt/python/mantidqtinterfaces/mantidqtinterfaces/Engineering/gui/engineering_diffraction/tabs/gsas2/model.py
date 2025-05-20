@@ -58,7 +58,7 @@ class GSAS2ModelConfig:
     """
 
     path_to_gsas2: str = ""
-    timeout: int = 10  # done
+    timeout: int = 100
 
 
 @dataclass
@@ -377,6 +377,19 @@ class GSAS2Model:
             serialized_inputs,
         ]
 
+    def _prepare_gsas2_environment(self, gsas_binary_paths: List[str], serialized_inputs: str) -> dict:
+        """
+        Prepares the environment variables for the GSAS-II subprocess call.
+        """
+        env = os.environ.copy()
+        env["PYTHONHOME"] = self.config.path_to_gsas2
+        env["PATH"] = ";".join(gsas_binary_paths + [env["PATH"]])
+        gsasii_scriptable_path = json.loads(serialized_inputs).get("gsasii_scriptable_path")
+        if gsasii_scriptable_path:
+            gsasii_dir = Path(gsasii_scriptable_path).parent
+            env["PYTHONPATH"] = str(gsasii_dir.parent) if platform.system() == "Windows" else str(gsasii_dir)
+        return env
+
     def call_subprocess(self, command_string_list: List[str], gsas_binary_paths: List[str]) -> Optional[Tuple[str, str]]:
         """
         Notes:
@@ -397,10 +410,7 @@ class GSAS2Model:
         """
         shell_process = None  # Initialize shell_process to None to avoid unbound local error if exception occurs before try block
         try:
-            env = os.environ.copy()
-            env["PYTHONHOME"] = self.config.path_to_gsas2
-            # Search for binaries in GSASII directory before Mantid Conda environment
-            env["PATH"] = ";".join(gsas_binary_paths + [env["PATH"]])
+            env = self._prepare_gsas2_environment(gsas_binary_paths, command_string_list[2])
             empty_argv0 = "_"
             shell_process = subprocess.Popen(
                 [empty_argv0] + command_string_list[1:],
