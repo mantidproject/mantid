@@ -84,11 +84,11 @@ public:
 
     // One .log and four .txt files are listed in the alternate data stream.
     TS_ASSERT_EQUALS(5, logFiles.size());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile.log") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPdebug.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPevent.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), logFilePath.generic_string()) != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), icpDebugFilePath.generic_string()) != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), icpEventFilePath.generic_string()) != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), icpStatusFilePath.generic_string()) != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), statusFilePath.generic_string()) != logFiles.end());
 
     std::filesystem::remove(rawFilePath);
     std::filesystem::remove(logFilePath);

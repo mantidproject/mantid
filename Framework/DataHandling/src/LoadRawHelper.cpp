@@ -83,7 +83,7 @@ std::set<std::string> logFilesFromAlternateDataStream(const std::filesystem::pat
       std::filesystem::path logFilePath(dirOfFile);
       logFilePath.append(line.substr(asteriskPos + 1));
       if (std::filesystem::exists(logFilePath)) {
-        logfilesList.insert(logFilePath.string());
+        logfilesList.insert(logFilePath.generic_string());
       }
     }
   }
@@ -1139,9 +1139,9 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::p
   // potentialLogFiles
   // have we been given what looks like a log file
   const auto fileExt = pathToRawFile.extension().string();
-  if (boost::algorithm::iequals(fileExt, "log") || boost::algorithm::iequals(fileExt, "txt")) {
+  if (boost::algorithm::iequals(fileExt, ".log") || boost::algorithm::iequals(fileExt, ".txt")) {
     // then we will assume that the file is an ISIS log file
-    potentialLogFiles.insert(pathToRawFile.string());
+    potentialLogFiles.insert(pathToRawFile.generic_string());
   } else {
     // then we will assume that the file is an ISIS raw file. The file validator
     // will have warned the user if the extension is not one of the suggested
@@ -1162,7 +1162,7 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::p
       combinedLogPath.replace_extension("log");
       if (std::filesystem::exists(combinedLogPath)) {
         // Push three column filename to end of list.
-        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.string());
+        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.generic_string());
       }
     }
 
