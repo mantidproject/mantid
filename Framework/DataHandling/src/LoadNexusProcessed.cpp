@@ -2055,8 +2055,10 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
     }
   } else if (axis->isText()) {
     std::string axisLabels("");
+    NXChar axisData = data.openNXChar("axis2");
     try {
-      axisLabels = data.getString("axis2");
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
     } catch (const std::runtime_error &) {
       // let it drop on the floor
     }
