@@ -9,6 +9,7 @@ import os
 import shutil
 import numpy as np
 from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model import GSAS2Model
 
@@ -658,6 +659,24 @@ class TestGSAS2Model(unittest.TestCase):
         table.addRow(row_one_values)
         table.addRow(row_two_values)
         return table
+
+    def test_prepare_gsas2_environment_sets_env_correctly(self):
+        # Setup
+        gsas_binary_paths = ["/some/bin", "/other/bin"]
+        gsasii_scriptable_path = "/opt/gsas2/GSAS-II/GSASII/GSASIIscriptable.py"
+        serialized_inputs = '{"gsasii_scriptable_path": "%s"}' % gsasii_scriptable_path
+        self.model.config.path_to_gsas2 = "/opt/gsas2"
+
+        # Patch platform.system to test both OS branches
+        for test_os, expected_pythonpath in [
+            ("Windows", str(Path(gsasii_scriptable_path).parent.parent)),
+            ("Linux", str(Path(gsasii_scriptable_path).parent)),
+        ]:
+            with patch("platform.system", return_value=test_os):
+                env = self.model._prepare_gsas2_environment(gsas_binary_paths, serialized_inputs)
+                self.assertEqual(env["PYTHONHOME"], "/opt/gsas2")
+                self.assertTrue(env["PATH"].startswith("/some/bin;/other/bin;"))
+                self.assertEqual(env["PYTHONPATH"], expected_pythonpath)
 
 
 if __name__ == "__main__":
