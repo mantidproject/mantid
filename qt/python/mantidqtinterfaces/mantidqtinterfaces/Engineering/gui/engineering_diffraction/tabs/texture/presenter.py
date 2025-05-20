@@ -136,6 +136,7 @@ class TexturePresenter:
         inc_scatt = self.view.get_inc_scatt_power()
         hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
         out_ws = self.model.get_pf_table_name(wss, params, hkl)
+        ax_transform = output_settings.get_texture_axes_transform()
 
         # default for now
         scat_vol_pos = (0.0, 0.0, 0.0)
@@ -155,14 +156,16 @@ class TexturePresenter:
 
         self.worker = AsyncTask(
             self._calc_pf,
-            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, self.rb_num),
+            (wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, self.rb_num, ax_transform),
             error_cb=self._on_worker_error,
             finished_cb=self._on_worker_success,
         )
         self.worker.start()
 
-    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num):
-        self.model.make_pole_figure_tables(wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num)
+    def _calc_pf(self, wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform):
+        self.model.make_pole_figure_tables(
+            wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, rb_num, ax_transform
+        )
         self.plot_pf(out_ws, self.view.get_projection_method())
 
     def _on_worker_success(self):
