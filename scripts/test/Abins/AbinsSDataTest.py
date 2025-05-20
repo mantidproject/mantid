@@ -14,8 +14,8 @@ class AbinsSpectraTest(unittest.TestCase):
     """Test operations on euphonic-derived Spectrum classes"""
 
     def test_autoconvolution(self):
-        from abins.sdata import AbinsSpectrum1DCollection, add_autoconvolution_spectra
-        from euphonic import ureg
+        from abins.sdata import add_autoconvolution_spectra
+        from euphonic import Spectrum1DCollection, ureg
 
         # Check a trivial case: starting with a single peak,
         # expect evenly-spaced sequence of same intensity
@@ -28,7 +28,7 @@ class AbinsSpectraTest(unittest.TestCase):
         for i in range(10):
             expected_y_data[i][2 * (i + 1)] = 1.0 * ureg("1 / meV")
 
-        spectra = AbinsSpectrum1DCollection(
+        spectra = Spectrum1DCollection(
             x_data=(np.linspace(0, 10, 50) * ureg("meV")),
             y_data=y_data,
             metadata={"test_key": "test_value", "line_data": [{"atom_index": 0, "quantum_order": 1}]},
@@ -47,7 +47,7 @@ class AbinsSpectraTest(unittest.TestCase):
         y_data = np.zeros((2, 50)) * ureg("1 / meV")
         y_data[0, 2] = 1.0 * ureg("1 / meV")
         y_data[1, 3] = 1.0 * ureg("1 / meV")
-        spectra = AbinsSpectrum1DCollection(
+        spectra = Spectrum1DCollection(
             x_data=(np.linspace(0, 10, 50) * ureg("meV")),
             y_data=y_data,
             metadata={

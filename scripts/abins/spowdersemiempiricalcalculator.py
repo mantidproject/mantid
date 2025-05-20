@@ -13,7 +13,13 @@ from pathlib import Path
 from typing import Dict, Tuple, Union
 
 from euphonic import ureg
-from euphonic.spectra import Spectrum1D, Spectrum2D
+from euphonic.spectra import (
+    Spectrum1D,
+    Spectrum2D,
+    Spectrum1DCollection,
+    Spectrum2DCollection,
+)
+
 import numpy as np
 from pydantic import Field, validate_call
 from pydantic.types import PositiveFloat
@@ -24,15 +30,14 @@ from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
 from abins.sdata import (
-    AbinsSpectrum1DCollection,
-    AbinsSpectrum2DCollection,
     add_autoconvolution_spectra,
     apply_kinematic_constraints,
     check_thresholds,
 )
+
 from mantid.api import Progress
 
-SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
+SpectrumCollection = Spectrum1DCollection | Spectrum2DCollection
 
 # Raw S contributions as a dict keyed by (atom_index, quantum_order)
 SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
@@ -197,9 +202,9 @@ class SPowderSemiEmpiricalCalculator:
         data_dict = {key: _stringify(value) for key, value in data_dict.items()}
 
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            spectra = AbinsSpectrum1DCollection.from_dict(data_dict)
+            spectra = Spectrum1DCollection.from_dict(data_dict)
         else:
-            spectra = AbinsSpectrum2DCollection.from_dict(data_dict)
+            spectra = Spectrum2DCollection.from_dict(data_dict)
 
         return spectra
 
@@ -286,13 +291,13 @@ class SPowderSemiEmpiricalCalculator:
                 'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
             )
 
-    def _calculate_s_powder_2d(self) -> AbinsSpectrum2DCollection:
+    def _calculate_s_powder_2d(self) -> Spectrum2DCollection:
         spectra = self._calculate_s_powder_over_k_and_q()
         apply_kinematic_constraints(spectra, self._instrument)
 
         return spectra
 
-    def _calculate_s_powder_1d(self) -> AbinsSpectrum1DCollection:
+    def _calculate_s_powder_1d(self) -> Spectrum1DCollection:
         """
         Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
         """
@@ -388,7 +393,7 @@ class SPowderSemiEmpiricalCalculator:
                     s_by_atom_and_order,
                 )
 
-            spectra = AbinsSpectrum1DCollection(
+            spectra = Spectrum1DCollection(
                 x_data=(bin_centres * self.freq_unit),
                 y_data=np.array([value for value in s_by_atom_and_order.values()]) * self.s_unit,
                 metadata={
@@ -406,14 +411,14 @@ class SPowderSemiEmpiricalCalculator:
             )
         # Otherwise there is nothing to calculate, return suitable empty-ish data structure
         elif is_2d:
-            return AbinsSpectrum2DCollection(
+            return Spectrum2DCollection(
                 x_data=(self._q_bins * self.q_unit),
                 y_data=(bin_centres * self.freq_unit),
                 z_data=np.zeros((1, len(self._q_bin_centres), len(bin_centres))) * self.s_unit,
                 metadata={"quantum_order": 1},
             )
         else:
-            return AbinsSpectrum1DCollection(
+            return Spectrum1DCollection(
                 x_data=(bin_centres * self.freq_unit), y_data=np.zeros((1, len(bin_centres))) * self.s_unit, metadata={"quantum_order": 1}
             )
 
@@ -449,14 +454,14 @@ class SPowderSemiEmpiricalCalculator:
             for i, (y_data_1d, metadata) in enumerate(zip(spectra.y_data, spectra.iter_metadata())):
                 z_data[i] = y_data_1d * q2_order_corrections[metadata["quantum_order"] - 1]
 
-            spectra = AbinsSpectrum2DCollection(
+            spectra = Spectrum2DCollection(
                 x_data=(self._q_bins * self.q_unit), y_data=spectra.x_data, z_data=z_data, metadata=spectra.metadata
             )
         else:
             for i, metadata in enumerate(spectra.iter_metadata()):
                 spectra._y_data[i] *= q2_order_corrections[metadata["quantum_order"] - 1]
 
-        if isinstance(spectra, AbinsSpectrum1DCollection):
+        if isinstance(spectra, Spectrum1DCollection):
             get_raw_s = attrgetter("_y_data")
         else:
             get_raw_s = attrgetter("_z_data")
@@ -476,7 +481,7 @@ class SPowderSemiEmpiricalCalculator:
 
         return spectra
 
-    def _calculate_s_powder_over_k_and_q(self) -> AbinsSpectrum2DCollection:
+    def _calculate_s_powder_over_k_and_q(self) -> Spectrum2DCollection:
         """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -584,7 +589,7 @@ class SPowderSemiEmpiricalCalculator:
         n_threads = abins.parameters.performance.get("threads")
         chunksize = abins.parameters.performance.get("broadening_chunksize")
 
-        if isinstance(spectra, AbinsSpectrum1DCollection):
+        if isinstance(spectra, Spectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
             with Pool(n_threads) as p:
@@ -595,7 +600,7 @@ class SPowderSemiEmpiricalCalculator:
                 )
             broadened_spectra = list(broadened_spectra)
 
-            return AbinsSpectrum1DCollection(
+            return Spectrum1DCollection(
                 x_data=spectra.x_data,
                 y_data=(np.asarray(broadened_spectra, dtype=FLOAT_TYPE) * spectra.y_data.units),
                 metadata=spectra.metadata,
@@ -624,7 +629,7 @@ class SPowderSemiEmpiricalCalculator:
                 )
                 broadened_spectra = list(broadened_spectra)
 
-            return AbinsSpectrum2DCollection(
+            return Spectrum2DCollection(
                 x_data=spectra.x_data,
                 y_data=spectra.y_data,
                 z_data=ureg.Quantity(np.asarray(broadened_spectra).reshape(z_data_magnitude.shape), self.s_unit),
@@ -725,7 +730,7 @@ class SPowderSemiEmpiricalCalculator:
 
         match q2.shape:
             case (n_q, 1):
-                return AbinsSpectrum2DCollection(
+                return Spectrum2DCollection(
                     x_data=(self._q_bins * ureg("1/angstrom")),
                     y_data=(self._bin_centres * ureg("1/cm")),
                     z_data=(s_array * ureg("barn / (1/cm)")),
@@ -733,7 +738,7 @@ class SPowderSemiEmpiricalCalculator:
                 )
 
             case (n_q,):
-                return AbinsSpectrum1DCollection(
+                return Spectrum1DCollection(
                     x_data=(self._bin_centres * ureg("1/cm")), y_data=(s_array * ureg("barn / (1/cm)")), metadata=metadata
                 )
             case _:
