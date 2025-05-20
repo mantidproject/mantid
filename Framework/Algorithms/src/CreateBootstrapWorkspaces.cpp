@@ -103,8 +103,10 @@ void CreateBootstrapWorkspaces::exec() {
 
   auto &ADS = AnalysisDataService::Instance();
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
+
   int inputSeed = getProperty("Seed");
-  std::mt19937 gen(static_cast<size_t>(inputSeed));
+  std::mt19937 gen(static_cast<unsigned int>(inputSeed));
+
   int numReplicas = getProperty("NumberOfReplicas");
   std::string bootType = getProperty("BootstrapType");
   std::string prefix = getProperty("OutputPrefix");
