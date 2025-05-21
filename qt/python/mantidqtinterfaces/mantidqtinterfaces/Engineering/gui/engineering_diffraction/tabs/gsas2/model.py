@@ -67,10 +67,10 @@ class XLimitsState:
     Represents x-axis limits for the GSAS-II model.
 
     Attributes:
-        x_min: Minimum x-values for data regions.
-        x_max: Maximum x-values for data regions.
-        data_x_min: Minimum x-values for the data.
-        data_x_max: Maximum x-values for the data.
+        x_min: User-inputted minimum x-values for data regions.
+        x_max: User-inputted maximum x-values for data regions.
+        data_x_min: Minimum x-values determined from the loaded data.
+        data_x_max: Maximum x-values determined from the loaded data.
         limits: Limits for each region as [min, max] pairs.
     """
 
