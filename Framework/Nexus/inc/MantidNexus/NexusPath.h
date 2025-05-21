@@ -36,6 +36,8 @@ public:
 
   ~NexusPath() = default;
 
+  // comparison operators
+
   bool operator==(NexusPath const &p) const;
 
   bool operator==(std::string const &s) const;
@@ -47,6 +49,8 @@ public:
   bool operator!=(std::string const &s) const;
 
   bool operator!=(char const *const s) const;
+
+  // concatenation
 
   NexusPath operator/(std::string const &s) const;
 
@@ -60,6 +64,8 @@ public:
 
   NexusPath &operator/=(NexusPath const &p);
 
+  // access
+
   bool isAbsolute() const;
 
   bool isRoot() const;
@@ -70,13 +76,15 @@ public:
 
   NexusPath stem() const;
 
+  static NexusPath root();
+
+  // printing
+
   std::string operator+(std::string const &s);
 
-  operator std::string() const { return m_path.string(); }
+  operator std::string() const { return m_path.generic_string(); }
 
-  std::string string() const { return m_path.string(); }
-
-  static NexusPath root();
+  std::string string() const { return m_path.generic_string(); }
 
 private:
   /** standard filesystem path */
