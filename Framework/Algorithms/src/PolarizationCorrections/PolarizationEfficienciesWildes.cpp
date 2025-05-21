@@ -452,8 +452,9 @@ void PolarizationEfficienciesWildes::mapSpinStateWorkspaces() {
   populateSpinStateWorkspaces(nonMagWsGrp);
 }
 
-PolarizationEfficienciesWildes::FlipperWorkspaces PolarizationEfficienciesWildes::getFlipperWorkspaces(const bool mag) {
-  if (mag) {
+PolarizationEfficienciesWildes::FlipperWorkspaces
+PolarizationEfficienciesWildes::getFlipperWorkspaces(const bool returnMagWorkspaces) {
+  if (returnMagWorkspaces) {
     return {m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::OFF_OFF],
             m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::OFF_ON],
             m_spinStateWorkspaces[MAG_KEY_PREFIX + FlipperConfigurations::ON_OFF],

@@ -299,10 +299,10 @@ public:
   }
 
   void test_all_calculations_are_correct_using_input_P_ws() {
-    const std::pair<double, double> expectedPEfficiency = {0.98, 0.9899494934};
-    const std::pair<double, double> expectedTPMO = {0.96, 1.9798989879};
-    const std::pair<double, double> expectedAEfficiency = {0.9855226, 1.0315912829};
-    const std::pair<double, double> expectedTAMO = {0.9710452, 2.0631825648};
+    const std::pair expectedPEfficiency = {0.98, 0.9899494934};
+    const std::pair expectedTPMO = {0.96, 1.9798989879};
+    const std::pair expectedAEfficiency = {0.9855226, 1.0315912829};
+    const std::pair expectedTAMO = {0.9710452, 2.0631825648};
 
     const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
     polarizerEffWs->setDistribution(true);
@@ -311,10 +311,10 @@ public:
   }
 
   void test_all_calculations_are_correct_using_input_A_ws() {
-    const std::pair<double, double> expectedPEfficiency = {0.99, 1.0479338884};
-    const std::pair<double, double> expectedTPMO = {0.98, 2.0958677778};
-    const std::pair<double, double> expectedAEfficiency = {0.975614, 0.9877317447};
-    const std::pair<double, double> expectedTAMO = {0.9512279, 1.9754634895};
+    const std::pair expectedPEfficiency = {0.99, 1.0479338884};
+    const std::pair expectedTPMO = {0.98, 2.0958677778};
+    const std::pair expectedAEfficiency = {0.975614, 0.9877317447};
+    const std::pair expectedTAMO = {0.9512279, 1.9754634895};
 
     const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
     analyserEffWs->setDistribution(true);
@@ -323,10 +323,10 @@ public:
   }
 
   void test_all_calculations_are_correct_using_input_P_and_input_A_workspaces() {
-    const std::pair<double, double> expectedPEfficiency = {0.98, 0.9899494934};
-    const std::pair<double, double> expectedTPMO = {0.96, 1.9798989879};
-    const std::pair<double, double> expectedAEfficiency = {0.99, 0.9949874379};
-    const std::pair<double, double> expectedTAMO = {0.98, 1.9899748748};
+    const std::pair expectedPEfficiency = {0.98, 0.9899494934};
+    const std::pair expectedTPMO = {0.96, 1.9798989879};
+    const std::pair expectedAEfficiency = {0.99, 0.9949874379};
+    const std::pair expectedTAMO = {0.98, 1.9899748748};
 
     const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
     polarizerEffWs->setDistribution(true);
