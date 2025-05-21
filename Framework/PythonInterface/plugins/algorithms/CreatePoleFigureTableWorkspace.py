@@ -2,7 +2,14 @@
 import numpy as np
 from mantid.kernel import V3D
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, FloatArrayLengthValidator
+from mantid.kernel import (
+    Direction,
+    FloatBoundedValidator,
+    FloatArrayProperty,
+    FloatArrayLengthValidator,
+    PropertyCriterion,
+    EnabledWhenProperty,
+)
 from mantid.geometry import ReflectionGenerator, CrystalStructure
 from typing import Optional
 
@@ -81,6 +88,12 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             "This can be overridden by providing a flattened axes transform matrix, "
             "which transforms X and Z to the desired initial vectors",
         )
+        # disable properties which don't apply when there is no peak parameter workspace
+        self.setPropertySettings("ReadoutColumn", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("Chi2Threshold", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("PeakPositionThreshold", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
+        # disable properties which don't apply when there is no reflection
+        self.setPropertySettings("ApplyScatteringPowerCorrection", EnabledWhenProperty("Reflection", PropertyCriterion.IsNotDefault))
 
     def validateInputs(self):
         issues = dict()
