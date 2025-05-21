@@ -176,7 +176,7 @@ private:
 
     // real flush test
     file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
-    vector<int> slab_array;
+    vector<int32_t> slab_array;
     slab_array.push_back(0);
     for (int i = 0; i < 7; i++) {
       slab_array[0] = i;

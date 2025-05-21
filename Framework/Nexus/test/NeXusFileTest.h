@@ -172,7 +172,7 @@ public:
 
     // get location of root file
     auto loc = file.getCurrentLocationAs<H5::Group>();
-    cout << strmakef("Located at %p\n", loc);
+    cout << strmakef("Located at %p\n", loc.get());
 
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
@@ -187,7 +187,7 @@ public:
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
     auto new_loc = file.getCurrentLocationAs<H5::Group>();
-    cout << strmakef("Located at %p\n", new_loc);
+    cout << strmakef("Located at %p\n", new_loc.get());
     TS_ASSERT_DIFFERS(loc, new_loc);
   }
 
@@ -310,7 +310,7 @@ public:
 
     // get location of top-level
     auto top = file.getCurrentLocationAs<H5::Group>();
-    cout << strmakef("Located at %p\n", top);
+    cout << strmakef("Located at %p\n", top.get());
 
     // create a dataset, to be opened
     string data("test_group");
@@ -325,7 +325,7 @@ public:
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
     auto layer1 = file.getCurrentLocationAs<H5::DataSet>();
-    cout << strmakef("Located at %p\n", layer1);
+    cout << strmakef("Located at %p\n", layer1.get());
     TS_ASSERT_DIFFERS(top->getId(), layer1->getId());
   }
 

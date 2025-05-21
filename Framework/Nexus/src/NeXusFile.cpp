@@ -1441,6 +1441,9 @@ std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
 /* ---------------------------------------------------------------- */
 
 template MANTID_NEXUS_DLL std::shared_ptr<H5::H5File> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::H5Object> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::Group> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::DataSet> File::getCurrentLocationAs();
 
 // PUT / GET ATTR
 
