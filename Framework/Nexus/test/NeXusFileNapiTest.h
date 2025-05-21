@@ -178,9 +178,9 @@ private:
     file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
     vector<int32_t> slab_array;
     slab_array.push_back(0);
-    for (int i = 0; i < 7; i++) {
+    for (int32_t i = 0; i < 7; i++) {
       slab_array[0] = i;
-      file.putSlab(slab_array, i, 1);
+      file.putSlab<int32_t>(slab_array, i, 1);
       file.flush();
       file.openData("flush_data");
     }
