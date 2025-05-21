@@ -1784,5 +1784,7 @@ template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, c
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
                                              const DimSizeVector &size);
 
+template MANTID_NEXUS_DLL void File::putSlab(std::vector<int32_t> const &data, dimsize_t const start,
+                                             dimsize_t const size);
 template MANTID_NEXUS_DLL void File::putSlab(std::vector<double> const &data, dimsize_t const start,
                                              dimsize_t const size);
