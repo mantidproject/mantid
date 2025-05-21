@@ -232,7 +232,7 @@ File::File(File const &f)
     : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_path(f.m_path), m_current(f.m_current),
       m_close_handle(false), m_descriptor(f.m_descriptor) {}
 
-File::File(File const *const pf)
+File::File(File const *pf)
     : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
       m_close_handle(false), m_descriptor(pf->m_descriptor) {}
 
@@ -829,8 +829,7 @@ void File::putAttr(std::string const &name, char const *value) {
   }
 }
 
-template <typename NumT>
-void File::putSlab(NumT const *const data, const DimSizeVector &start, const DimSizeVector &size) {
+template <typename NumT> void File::putSlab(NumT const *data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
     throw NXEXCEPTION("Data specified as null");
   }
@@ -960,7 +959,7 @@ void File::makeLink(NXlink &link) {
   this->openPath(here);
 }
 
-template <typename NumT> void File::getData(NumT *const data) {
+template <typename NumT> void File::getData(NumT *data) {
   if (data == NULL) {
     throw NXEXCEPTION("Supplied null pointer to write data to");
   }
@@ -985,7 +984,7 @@ template <typename NumT> void File::getData(NumT *const data) {
   }
 }
 
-template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *const data) {
+template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *data) {
   std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
   H5::DataType datatype = dataset->getDataType();
   H5T_class_t typeclass = datatype.getClass();
@@ -1046,7 +1045,7 @@ template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
   H5Util::readArray1DCoerce(*dataset, data);
 }
 
-template <typename NumT> void File::getSlab(NumT *const data, const DimSizeVector &start, const DimSizeVector &size) {
+template <typename NumT> void File::getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
     throw NXEXCEPTION("Supplied null pointer for data");
   }
@@ -1089,7 +1088,7 @@ template <typename NumT> void File::getSlab(NumT *const data, const DimSizeVecto
 }
 
 template <>
-MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *const data, const DimSizeVector &start,
+MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *data, const DimSizeVector &start,
                                                  const DimSizeVector &size) {
   if (data == NULL) {
     throw NXEXCEPTION("Supplied null pointer for data");

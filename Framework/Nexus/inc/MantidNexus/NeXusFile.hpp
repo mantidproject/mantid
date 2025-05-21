@@ -65,7 +65,7 @@ public:
    *
    * \param pf Pointer to file to copy over
    */
-  File(File const *const pf);
+  File(File const *pf);
 
   /**
    * Copy constructor from pointer
@@ -390,7 +390,7 @@ public:
    *
    * \param data The pointer to copy the data to.
    */
-  template <typename NumT> void getData(NumT *const data);
+  template <typename NumT> void getData(NumT *data);
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -418,7 +418,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  template <typename NumT> void getSlab(NumT *const data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size);
 
   /** Return true if the data opened is of one of the
    * int data types, 32 bits or less.
