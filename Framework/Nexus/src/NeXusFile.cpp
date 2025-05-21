@@ -478,36 +478,11 @@ void File::makeData(std::string const &name, NXnumtype datatype, DimVector const
   // ensure we are in a group -- we cannot make data inside a dataset
   std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
 
-  // check if any dimension is unlimited
-  bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](dimsize_t const x) -> bool { return x == NX_UNLIMITED; });
-
-  // if no unlimited dimensions, use normal
-  if (!unlimited) {
-    // make the data set
-    H5::DataSpace ds((int)dims.size(), toDimArray(dims).data());
-    try {
-      H5::DataSet data = current->createDataSet(name, nxToHDF5Type(datatype), ds);
-      registerEntry(m_path / name, scientific_data_set);
-      if (open_data) {
-        m_path /= name;
-        m_current = std::make_shared<H5::DataSet>(data);
-      }
-    } catch (...) {
-      throw NXEXCEPTION("Datasets cannot be created at current location: " + getPath());
-    }
-  } else {
-    // farm out to makeCompData
-    try {
-      DimSizeVector chunk(dims.cbegin(), dims.cend());
-      for (std::size_t i = 0; i < dims.size(); i++) {
-        if (dims[i] == NX_UNLIMITED)
-          chunk[i] = 1;
-      }
-      this->makeCompData(name, datatype, dims, NXcompression::NONE, chunk, open_data);
-    } catch (...) {
-      throw NXEXCEPTION("Datasets cannot be created at current location");
-    }
+  DimSizeVector chunk_size(dims.size());
+  for (std::size_t i = 0; i < dims.size(); i++) {
+    chunk_size[i] = (dims[i] == NX_UNLIMITED || dims[i] <= 0 ? 1 : dims[i]);
   }
+  this->makeCompData(name, datatype, dims, NXcompression::NONE, chunk_size, open_data);
 }
 
 void File::makeData(const string &name, const NXnumtype type, const dimsize_t length, bool open_data) {
