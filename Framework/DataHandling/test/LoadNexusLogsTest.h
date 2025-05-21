@@ -209,11 +209,11 @@ public:
     const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
     TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasGdPrtnChrgUnfiltered);
 
-    bool gdPrtnChrgUnfiltered = run.getPropertyValueAsType<bool>("gd_prtn_chrg_unfiltered");
+    int gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
     TSM_ASSERT("Value of gd_prtn_chrg_unfiltered true until getProtonCharge called", gdPrtnChrgUnfiltered);
 
     run.getProtonCharge();
-    gdPrtnChrgUnfiltered = run.getPropertyValueAsType<bool>("gd_prtn_chrg_unfiltered");
+    gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
     TSM_ASSERT("Value of gd_prtn_chrg_unfiltered false following getProtonCharge call", !gdPrtnChrgUnfiltered);
   }
 
