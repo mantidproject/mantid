@@ -1,0 +1,1 @@
+- Fix issue with :ref:`GroupDetectors <algm-GroupDetectors-v2>` where mantid would freeze on large datasets by pre-allocating space in the EventList based on the eventType. Testing with TOPAZ_50006 compressed events, execution time dropped from 2+ hours to less than 1 second.
