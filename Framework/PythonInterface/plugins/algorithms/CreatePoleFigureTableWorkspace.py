@@ -89,9 +89,9 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             "which transforms X and Z to the desired initial vectors",
         )
         # disable properties which don't apply when there is no peak parameter workspace
-        self.setPropertySettings("ReadoutColumn", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
-        self.setPropertySettings("Chi2Threshold", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
-        self.setPropertySettings("PeakPositionThreshold", EnabledWhenProperty("PeaksParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("ReadoutColumn", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("Chi2Threshold", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("PeakPositionThreshold", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
         # disable properties which don't apply when there is no reflection
         self.setPropertySettings("ApplyScatteringPowerCorrection", EnabledWhenProperty("Reflection", PropertyCriterion.IsNotDefault))
 
