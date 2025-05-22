@@ -508,8 +508,7 @@ public:
   template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
-   * \return Information about all attributes on the data that is
-   * currently open.
+   * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();
 
