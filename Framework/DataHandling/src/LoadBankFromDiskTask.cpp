@@ -251,7 +251,10 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::Narrowing::Allow>(
       *event_time_of_flight, file, m_timeOfFlightFieldName, m_loadStart, m_loadSize);
   std::string tof_unit;
-  file.getAttr("units", tof_unit);
+  try {
+    file.getAttr("units", tof_unit);
+  } catch (::NeXus::Exception const &) {
+  }
   file.closeData();
 
   // Convert Tof to microseconds

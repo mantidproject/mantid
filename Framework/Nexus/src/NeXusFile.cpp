@@ -916,6 +916,11 @@ NXnumtype::operator std::string() const {
   return ret;
 }
 
+std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
+  os << std::string(value);
+  return os;
+}
+
 /* ---------------------------------------------------------------- */
 /* Concrete instantiations of template definitions.                 */
 /* ---------------------------------------------------------------- */
