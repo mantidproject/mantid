@@ -132,7 +132,6 @@ if(DOCS_QTHELP)
                  EXCLUDE_FROM_DEFAULT_BUILD 1
                  EXCLUDE_FROM_ALL 1
     )
-    # add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
     add_dependencies(docs-qthelp docs-qtassistant)
   endif() # ENABLE_QTASSISTANT
 endif()
