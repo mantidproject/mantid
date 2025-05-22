@@ -75,20 +75,20 @@ public:
     std::string str1("/entry"), str2("/entry"), str3("/other");
     NexusPath np1(str1), np2(str2), np3(str3);
     // comparison with NexusPath
-    TS_ASSERT_EQUALS(np1 == np2, true);
-    TS_ASSERT_EQUALS(np1 != np2, false);
-    TS_ASSERT_EQUALS(np1 == np3, false);
-    TS_ASSERT_EQUALS(np1 != np3, true);
+    TS_ASSERT_EQUALS((np1 == np2), true);
+    TS_ASSERT_EQUALS((np1 != np2), false);
+    TS_ASSERT_EQUALS((np1 == np3), false);
+    TS_ASSERT_EQUALS((np1 != np3), true);
     // comparison with string
-    TS_ASSERT_EQUALS(np1 == str1, true);
-    TS_ASSERT_EQUALS(np1 != str1, false);
-    TS_ASSERT_EQUALS(np1 == str2, true);
-    TS_ASSERT_EQUALS(np1 != str2, false);
-    TS_ASSERT_EQUALS(np1 == str3, false);
-    TS_ASSERT_EQUALS(np1 != str3, true);
+    TS_ASSERT_EQUALS((np1 == str1), true);
+    TS_ASSERT_EQUALS((np1 != str1), false);
+    TS_ASSERT_EQUALS((np1 == str2), true);
+    TS_ASSERT_EQUALS((np1 != str2), false);
+    TS_ASSERT_EQUALS((np1 == str3), false);
+    TS_ASSERT_EQUALS((np1 != str3), true);
     // swap comparison order
-    TS_ASSERT_EQUALS(str1 == np1, true);
-    TS_ASSERT_EQUALS(str1 != np1, false);
+    TS_ASSERT_EQUALS((str1 == np1), true);
+    TS_ASSERT_EQUALS((str1 != np1), false);
     // TS ASSERTS
     TS_ASSERT_EQUALS(np1, np2);
     TS_ASSERT_DIFFERS(np1, np3);
