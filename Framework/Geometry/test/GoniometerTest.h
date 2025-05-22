@@ -65,7 +65,6 @@ public:
     TS_ASSERT_THROWS_ANYTHING(G.pushAxis("Axis2", 0., 0., 1., 30));
     TS_ASSERT_EQUALS(M, G2.getR());
   }
-
   void testSense() {
     Goniometer G1, G2, G3;
     TS_ASSERT_THROWS_NOTHING(G1.pushAxis("Axis1", 0., 1., 0., 30));
@@ -280,5 +279,21 @@ public:
     Goniometer b(rotation_y);
     TS_ASSERT_DIFFERS(a, b);
     TS_ASSERT(!(a == b));
+  }
+
+  void test_setting_goniometer_when_matrix_has_small_numerical_inprecision() {
+    DblMatrix rotMat(3, 3, false);
+    rotMat[0][0] = -4.054652e-01;
+    rotMat[1][0] = -5.793048e-01;
+    rotMat[2][0] = 7.071096e-01;
+    rotMat[0][1] = 4.056876e-01;
+    rotMat[1][1] = 5.791560e-01;
+    rotMat[2][1] = 7.071039e-01;
+    rotMat[0][2] = -8.191554e-01;
+    rotMat[1][2] = 5.735716e-01;
+    rotMat[2][2] = 1.892000e-04;
+    Goniometer G(rotMat);
+    TS_ASSERT(G.isDefined());
+    TS_ASSERT_EQUALS(G.getR().equals(rotMat), true);
   }
 };
