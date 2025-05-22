@@ -1,0 +1,1 @@
+- :ref:`algm-LoadNXcanSAS` can now load polarized NXcanSAS data.

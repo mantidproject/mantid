@@ -13,8 +13,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
-#include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataHandling/SaveNXcanSAS.h"
+#include "MantidDataHandling/SaveNXcanSASHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "NXcanSASFileTest.h"

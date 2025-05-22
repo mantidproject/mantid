@@ -16,8 +16,6 @@
 namespace Mantid {
 namespace DataHandling {
 namespace NXcanSAS {
-// Helper functions for algorithms saving in NXcanSAS format.
-enum class WorkspaceDimensionality;
 
 // DATA
 void MANTID_DATAHANDLING_DLL addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace);
@@ -56,10 +54,7 @@ std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &inp
 H5::H5File MANTID_DATAHANDLING_DLL prepareFile(const std::filesystem::path &path);
 std::filesystem::path MANTID_DATAHANDLING_DLL prepareFilename(const std::string &baseFilename,
                                                               bool addDigitSuffix = false, size_t index = 0);
-
 std::string MANTID_DATAHANDLING_DLL addDigit(size_t index);
-WorkspaceDimensionality MANTID_DATAHANDLING_DLL
-getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
 } // namespace NXcanSAS
 } // namespace DataHandling
