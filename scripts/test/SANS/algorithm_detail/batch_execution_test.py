@@ -151,14 +151,12 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_polarizer.device_type = "He3"
         mock_polarizer.cell_length = 0.3
         mock_polarizer.gas_pressure = 5
-        mock_analyzer = mock.MagicMock()
-        mock_analyzer.idf_component_name = None
         mock_mag_field = mock.MagicMock()
         mock_mag_field.sample_strength_log = "str_log_name"
         mock_mag_field.sample_direction_log = "dir_log_name"
         mock_mag_field.sample_direction_a = None
         mock_polarization_state.polarizer = mock_polarizer
-        mock_polarization_state.analyzer = mock_analyzer
+        mock_polarization_state.analyzer = None
         mock_polarization_state.flippers = []
         mock_polarization_state.magnetic_field = mock_mag_field
         mock_ws = mock.MagicMock()

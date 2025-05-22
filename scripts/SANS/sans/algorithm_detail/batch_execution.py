@@ -1411,9 +1411,9 @@ def _add_polarization_metadata_if_relevant(polarization_state, metadata: dict[st
     pol_props = {}
     if polarization_state.spin_configuration:
         pol_props["InputSpinStates"] = str(polarization_state.spin_configuration)
-    if polarization_state.polarizer is not None and polarization_state.polarizer.idf_component_name:
+    if polarization_state.polarizer is not None:
         pol_props["PolarizerComponentName"] = str(polarization_state.polarizer.idf_component_name)
-    if polarization_state.analyzer is not None and polarization_state.analyzer.idf_component_name:
+    if polarization_state.analyzer is not None:
         pol_props["AnalyzerComponentName"] = str(polarization_state.analyzer.idf_component_name)
     flipper_component_names = []
     for flipper in polarization_state.flippers:
@@ -1450,6 +1450,17 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
                 alg.execute()
 
     def _move_pol_component(location_x, location_y, location_z, idf_pos, idf_name):
+        """
+        The position of polarizers, analyzers and flippers in polarized experiments can be moved
+        on an experiment to experiment basis. This means their position may be defined in the
+        user file rather than constantly updating the IDF. This methods performs that move to match
+        the user file for the supplied component.
+        :param location_x: The new X location.
+        :param location_y: The new Y location.
+        :param location_z: The new Z location.
+        :param idf_pos: The old component position from the workspace's Instrument object.
+        :param idf_name: The name defined in the IDF of the component to move.
+        """
         location = {
             CanonicalCoordinates.X: location_x if location_x is not None else idf_pos.getX(),
             CanonicalCoordinates.Y: location_y if location_y is not None else idf_pos.getY(),
@@ -1475,9 +1486,9 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
             parameter_map["gas_pressure"] = component_state.gas_pressure
         _update_component_parameters(idf_name, parameter_map)
 
-    if polarization_state.polarizer.idf_component_name:
+    if polarization_state.polarizer:
         _update_component_properties(polarization_state.polarizer)
-    if polarization_state.analyzer.idf_component_name:
+    if polarization_state.analyzer:
         _update_component_properties(polarization_state.analyzer)
     for flipper in polarization_state.flippers:
         _update_component_properties(flipper)
