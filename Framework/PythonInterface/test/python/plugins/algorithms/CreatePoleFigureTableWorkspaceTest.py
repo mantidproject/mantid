@@ -134,7 +134,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
 
         # alpha
-        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] - 90)
+        self.eval_arrays(outws.column("Alpha"), -(self.default_alphas[:2] + np.pi))
 
         # beta
         self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
@@ -190,7 +190,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
 
         # alpha
         print(outws.column("Alpha"))
-        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] + 45)
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] + (np.pi / 4))
 
         # beta
         self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
@@ -230,7 +230,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 1 along X axis, det 0 is 5 degrees towards +Z
         # det 1 Q is at -45 degrees from X axis (it points towards -Z)
         # det 0 Q is at -42.5 degrees
-        self.eval_arrays(outws.column("Alpha"), self.default_alphas + 45)
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas + (np.pi / 4))
         # beta
         self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity
