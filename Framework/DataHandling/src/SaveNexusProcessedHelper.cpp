@@ -279,7 +279,6 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
                                            const bool &uniformSpectra, const bool &raggedSpectra,
                                            const std::vector<int> &indices, const std::string &group_name,
                                            bool write2Ddata) const {
-  // NXstatus status;
 
   // write data entry
   try {
