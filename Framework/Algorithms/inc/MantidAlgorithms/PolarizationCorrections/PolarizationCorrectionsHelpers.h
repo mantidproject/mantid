@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -119,7 +120,12 @@ private:
   template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
   API::MatrixWorkspace_sptr evaluateWorkspacesImpl(std::optional<bool> outputWorkspaceDistribution, Ts... args) const {
     const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
-    auto outWs = firstWs->clone();
+    API::MatrixWorkspace_sptr outWs = firstWs->clone();
+
+    if (outWs->id() == "EventWorkspace") {
+      outWs = convertToWorkspace2D(outWs);
+    }
+
     const size_t numSpec = outWs->getNumberHistograms();
     const size_t specSize = outWs->blocksize();
 
@@ -145,6 +151,22 @@ private:
       outWs->setDistribution(outputWorkspaceDistribution.value());
     }
     return outWs;
+  }
+
+  API::MatrixWorkspace_sptr runWorkspaceConversionAlg(const API::MatrixWorkspace_sptr &workspace,
+                                                      const std::string &algName) const {
+    auto conversionAlg = API::AlgorithmManager::Instance().create(algName);
+    conversionAlg->initialize();
+    conversionAlg->setChild(true);
+    conversionAlg->setProperty("InputWorkspace", workspace);
+    conversionAlg->setProperty("OutputWorkspace", workspace->getName());
+    conversionAlg->execute();
+    return conversionAlg->getProperty("OutputWorkspace");
+  }
+
+  API::MatrixWorkspace_sptr convertToWorkspace2D(const API::MatrixWorkspace_sptr &workspace) const {
+    runWorkspaceConversionAlg(workspace, "ConvertToHistogram");
+    return runWorkspaceConversionAlg(workspace, "ConvertToMatrixWorkspace");
   }
 };
 

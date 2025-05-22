@@ -119,7 +119,7 @@ public:
 
     const double m = 5.0;
     const double c = 3.0;
-    const auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
+    const auto errorProp = Arithmetic::makeErrorPropagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
     const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
 
     TS_ASSERT_EQUALS(result.error, 2.5);
@@ -132,8 +132,8 @@ public:
     const double a = 5.0;
     const double b = 3.0;
     const double c = 10.0;
-    const auto errorProp = Arithmetic::make_error_propagation<vars>(
-        [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
+    const auto errorProp =
+        Arithmetic::makeErrorPropagation<vars>([a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
     const auto result = errorProp.evaluate(Types::InputArray{{20.0}}, Types::InputArray{{0.5}});
 
     TS_ASSERT_DELTA(result.error, 101.5, 0.001);
@@ -145,7 +145,7 @@ public:
     using Types = Arithmetic::ErrorTypeHelper<vars>;
 
     const auto errorProp =
-        Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
+        Arithmetic::makeErrorPropagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
     const auto result = errorProp.evaluate(Types::InputArray{{3.141, 1.0}}, Types::InputArray{{0.01, 0.05}});
 
     TS_ASSERT_DELTA(result.error, 0.139495, 0.001);
@@ -157,8 +157,8 @@ public:
     const double a = 5.0;
     const double b = 3.0;
     const double c = 10.0;
-    const auto errorProp = Arithmetic::make_error_propagation<vars>(
-        [a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
+    const auto errorProp =
+        Arithmetic::makeErrorPropagation<vars>([a, b, c](const auto &x) { return (a * x[0] * x[0]) + (b * x[0]) + c; });
 
     const auto ws = createWorkspace("ws", {0.0, 1.0, 2.0, 3.0, 4.0}, {20, 22, 24, 26, 28}, {0.5, 0.6, 0.7, 0.8, 0.9});
     const auto result = errorProp.evaluateWorkspaces(ws);
@@ -174,7 +174,7 @@ public:
   void testErrorPropagation_workspaces_mult_vars() {
     const size_t vars = 2;
     const auto errorProp =
-        Arithmetic::make_error_propagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
+        Arithmetic::makeErrorPropagation<vars>([](const auto &x) { return x[0] * sin(x[0]) + exp(x[1]); });
 
     auto wsA = createWorkspace("wsA", {0.0, 1.0, 2.0}, {3.141, 3.141, 3.141}, {0.01, 0.01, 0.01});
     auto wsB = createWorkspace("wsB", {0.0, 1.0, 2.0}, {1.0, 1.0, 1.0}, {0.05, 0.05, 0.05});
@@ -190,7 +190,7 @@ public:
     const double m = 5.0;
     const double c = 3.0;
     auto ws = createWorkspace("wsA", {0.0, 1.0, 2.0}, {20.0, 20.0, 20.0}, {0.5, 0.5, 0.5});
-    const auto errorProp = Arithmetic::make_error_propagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
+    const auto errorProp = Arithmetic::makeErrorPropagation<vars>([m, c](const auto &x) { return m * x[0] + c; });
     const auto result = errorProp.evaluateWorkspaces(true, ws);
     for (size_t i = 0; i < result->size(); i++) {
       TS_ASSERT_DELTA(103, result->y(0)[i], 0.001);
