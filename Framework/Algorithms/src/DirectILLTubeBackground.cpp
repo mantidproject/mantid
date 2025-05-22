@@ -373,8 +373,7 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(API::M
   calculateBkg->setProperty("Degree", degree);
   calculateBkg->setProperty("XRanges", xRanges);
   calculateBkg->setProperty("CostFunction", "Unweighted least squares");
-  const bool ignoreInvalidData = getProperty(Prop::IGNORE_INVALID_DATA);
-  calculateBkg->setProperty("IgnoreInvalidData", ignoreInvalidData);
+  calculateBkg->setProperty("IgnoreInvalidData", getPropertyValue(Prop::IGNORE_INVALID_DATA));
 
   calculateBkg->execute();
   return calculateBkg->getProperty("OutputWorkspace");
