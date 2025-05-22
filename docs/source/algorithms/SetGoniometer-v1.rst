@@ -34,6 +34,10 @@ will be created for each value in the log. When multiple log axes are
 defined they must have the same length and are assumed to be all the
 same time series.
 
+Alternatively, a rotation matrix can be passed directly using the GoniometerMatrix parameter.
+This parameter expects the matrix as a flattened (row major), comma separated string.
+If this parameter is set, all other inputs will be ignored.
+
 The "Universal" goniometer at SNS is equivalent to Axis0 tied to the
 "omega" log pointing vertically upward, Axis1 tied to "chi" log,
 pointing along the beam, and Axis2 tied to "phi", pointing vertically
@@ -110,6 +114,29 @@ Output:
    18 omega = 4.6
    19 omega = 4.8
    20 omega = 5.0
+
+**Example - set goniometer matrix directly**
+
+.. testcode:: GoniometerStringExample
+
+   ws = CreateWorkspace(
+        DataX=[0., 1.],
+        DataY=[1., 2., 3.,4.],
+        NSpec=4)
+   target_matrix = np.array(([0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,1.0,0.0]))
+   SetGoniometer(ws, GoniometerMatrix = "0.0,0.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0")
+
+   print('Goniometer rotation matrix =', ws.run().getGoniometer().getR())
+   print('Goniometer rotation matrix matches target: ', np.all(ws.run().getGoniometer().getR() == target_matrix))
+
+Output:
+
+.. testoutput:: GoniometerStringExample
+
+   Goniometer rotation matrix = [[0. 0. 1.]
+    [1. 0. 0.]
+    [0. 1. 0.]]
+   Goniometer rotation matrix matches target:  True
 
 **Example: WISH goniometer**
 
