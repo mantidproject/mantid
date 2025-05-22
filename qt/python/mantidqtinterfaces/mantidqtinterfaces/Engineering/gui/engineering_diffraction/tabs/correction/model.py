@@ -30,11 +30,12 @@ class TextureCorrectionModel:
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
                 goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
+                goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
                 if not use_euler:
                     # if use euler angles not selected then assumes it is a scans output matrix
                     for iws, ws in enumerate(wss):
-                        NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
+                        SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
                 else:
                     axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
                     for iws, ws in enumerate(wss):
