@@ -634,7 +634,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                             self.log().information(f"Remove {can_run_ws_name} as it is generated with a different method")
                             mtd.remove(can_run_ws_name)
 
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_container)
+            can_abs_ws = a_container if self._absMethod == "FullPaalmanPings" else a_sample
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=can_abs_ws)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -648,32 +649,39 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 van_run_ws_name = None
 
-            # return if there is no sample run
-            # Note: sample run must exist in logic
-            # VZ: Discuss with Pete
-            # if sam_ws_name == 0:
-            #   return
+            van_bkgd_run_number_list = self._info["vanadium_background"].value
+            van_bkgd_run_number_list = ["%s_%d" % (self._instrument, value) for value in van_bkgd_run_number_list]
+            van_bkgd_specified = not noRunSpecified(van_bkgd_run_number_list)
 
-            # the final bit of math to remove container run and vanadium run
-            if can_run_ws_name is not None and self._containerScaleFactor != 0:
-                # must convert the sample to a matrix workspace if the can run isn't one
-                if not allEventWorkspaces(can_run_ws_name, sam_ws_name):
-                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name)
+            if self._absMethod == "SampleOnly" and van_bkgd_specified:
+                # I_S = (I_{S+C}^E - I_{MTI}^E) / A_SS
+                van_bkgd_ws_name = self._process_vanadium_background_runs(van_bkgd_run_number_list, samRunIndex, absorptionWksp=a_sample)
+                self._subtract_workspace(sam_ws_name, van_bkgd_ws_name)
 
-                # remove container run
-                api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name, WorkspaceToMatch=sam_ws_name, OutputWorkspace=can_run_ws_name)
-                if samRunIndex == 0:
-                    api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
-                api.Minus(LHSWorkspace=sam_ws_name, RHSWorkspace=can_run_ws_name, OutputWorkspace=sam_ws_name)
-                # compress event if the sample run workspace is EventWorkspace
-                if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
-                    api.CompressEvents(
-                        InputWorkspace=sam_ws_name,
-                        OutputWorkspace=sam_ws_name,
-                        Tolerance=self.COMPRESS_TOL_TOF,
-                        BinningMode=self._compressBinningMode,
-                    )  # 10ns
-                # canRun = str(canRun)
+            elif self._absMethod == "SampleAndContainer":
+                # I_S = (I_{S+C}^E - I_C) / A_SS
+                self._subtract_workspace(sam_ws_name, can_run_ws_name)
+
+            elif self._absMethod == "FullPaalmanPings" and van_bkgd_specified:
+                # I_S = I_{S+C}^E / A_SSC - A_CSC / (A_CC * A_SSC) * I_C - (I_{MTI}^E / A_SSC - A_CSC / (A_CC * A_SSC) * I_{MTI}^E)
+                van_bkgd_name_sam = self._process_vanadium_background_runs(van_bkgd_run_number_list, samRunIndex, absorptionWksp=a_sample)
+                van_bkgd_name_can = self._process_vanadium_background_runs(
+                    van_bkgd_run_number_list, samRunIndex, absorptionWksp=a_container
+                )
+                self._subtract_workspace(van_bkgd_name_sam, van_bkgd_name_can)
+                self._subtract_workspace(sam_ws_name, can_run_ws_name)
+                self._subtract_workspace(sam_ws_name, van_bkgd_name_can)
+
+            elif (can_run_ws_name is not None and self._containerScaleFactor != 0) or self._absMethod == "SampleAndContainer":
+                self._subtract_workspace(sam_ws_name, can_run_ws_name)
+
+            if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
+                api.CompressEvents(
+                    InputWorkspace=sam_ws_name,
+                    OutputWorkspace=sam_ws_name,
+                    Tolerance=self.COMPRESS_TOL_TOF,
+                    BinningMode=self._compressBinningMode,
+                )
 
             if van_run_ws_name is not None:
                 # subtract vanadium run from sample run by division
@@ -1497,6 +1505,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         IgnoreXBins=True,
                         AllSpectra=True,
                     )
+        if samRunIndex == 0:
+            api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
 
             # END-IF-ELSE
         # END-IF (can run)
@@ -1669,6 +1679,52 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # END-IF-ELSE for get reference of vanadium workspace
 
         return van_run_ws_name
+
+    def _subtract_workspace(self, lhs_ws_name, rhs_ws_name):
+        """
+        Purpose: subtract two workspaces
+        :param lhs_ws_name: left hand side workspace
+        :param rhs_ws_name: right hand side workspace
+        :return:
+        """
+        if not allEventWorkspaces(rhs_ws_name, lhs_ws_name):
+            api.ConvertToMatrixWorkspace(InputWorkspace=lhs_ws_name, OutputWorkspace=lhs_ws_name)
+
+        api.RebinToWorkspace(WorkspaceToRebin=rhs_ws_name, WorkspaceToMatch=lhs_ws_name, OutputWorkspace=rhs_ws_name)
+        api.Minus(LHSWorkspace=lhs_ws_name, RHSWorkspace=rhs_ws_name, OutputWorkspace=lhs_ws_name)
+
+    def _process_vanadium_background_runs(self, van_bkgd_run_number_list, samRunIndex, absorptionWksp):
+        """
+        Purpose: process vanadium background runs
+        :param van_bkgd_run_number_list: list of vanadium background run
+        :param samRunIndex: sample run index
+        :param abs_workspace: absorption workspace
+        :return:
+        """
+        if len(van_bkgd_run_number_list) == 1:
+            van_bkgd_run_number = van_bkgd_run_number_list[0]
+        else:
+            van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
+        van_bkgd_ws_name = getBasename(van_bkgd_run_number) + "_vanbg"
+        try:
+            self.log().notice("Processing vanadium background {}".format(van_bkgd_ws_name))
+            # load background runs and sum if necessary
+            if self.getProperty("Sum").value:
+                self._focusAndSum(van_bkgd_run_number_list, preserveEvents=True, final_name=van_bkgd_ws_name, absorptionWksp=absorptionWksp)
+            else:
+                self._focusAndSum([van_bkgd_run_number], preserveEvents=True, final_name=van_bkgd_ws_name, absorptionWksp=absorptionWksp)
+
+            # do the subtraction
+            van_bkgd_ws = get_workspace(van_bkgd_ws_name)
+            if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
+                van_bkgd_ws_name = None
+                # skip if background run is empty
+                self.log().warning("vanadium background run has no events")
+        except RuntimeError as e:
+            self.log().warning("Failed to process vanadium background. Skipping: {}".format(e))
+            van_bkgd_ws_name = None
+
+        return van_bkgd_ws_name
 
     def _split_workspace(self, raw_ws_name, split_ws_name):
         """Split workspace
