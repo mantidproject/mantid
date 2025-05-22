@@ -410,12 +410,12 @@ def is_raw_nexus_event_mode(file_name):
                                     |--some_group|
                                                  |--Attribute: NX_class = NXevent_data
     """
+    is_event_mode = False
     with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         # Open instrument group
-        is_event_mode = False
         for value in list(first_entry.values()):
             if NX_CLASS in value.attrs and NX_EVENT_DATA == value.attrs[NX_CLASS].decode("utf-8"):
                 is_event_mode = True
