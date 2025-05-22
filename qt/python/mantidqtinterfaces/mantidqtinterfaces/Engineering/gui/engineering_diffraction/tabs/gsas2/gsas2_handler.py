@@ -14,6 +14,7 @@ import fnmatch
 import json
 import shutil
 from mantid.simpleapi import logger
+import platform
 
 
 @dataclass
@@ -140,7 +141,7 @@ class GSAS2Handler(object):
 
         # GSAS-II configuration
         self._gsas2_python_path: Optional[Path] = None
-        self.os_platform: Optional[str] = None
+        self.os_platform: str = platform.system()
         self.python_binaries: List[str] = []
 
         # Validate inputs

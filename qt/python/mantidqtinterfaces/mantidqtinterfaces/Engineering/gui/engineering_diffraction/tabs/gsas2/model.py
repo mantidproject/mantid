@@ -352,7 +352,6 @@ class GSAS2Model:
             config=config,
         )
 
-        gsas2_handler.os_platform = platform.system()
         gsas2_handler.set_gsas2_python_path()
         gsas2_handler.set_binaries()
 
