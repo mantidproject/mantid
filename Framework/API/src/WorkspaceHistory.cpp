@@ -318,7 +318,7 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto &entry : entries) {
+  for (auto const &entry : entries) {
     std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
@@ -347,6 +347,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
     PARAMS = 4     //< the algorithm's parameters
   };
 
+  // split on lines
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
 

@@ -13,10 +13,12 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+#define NXEXCEPTION(message) Exception((message), __func__, m_filename);
+
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
   if (tmp != NXstatus::NX_OK) {                                                                                        \
-    throw NeXus::Exception(msg, __func__, m_filename);                                                                 \
+    throw NXEXCEPTION(msg);                                                                                            \
   }
 
 /**
@@ -46,7 +48,7 @@ namespace NeXus {
 template <typename NumT> NXnumtype getType(NumT const number) {
   stringstream msg;
   msg << "NeXus::getType() does not know type of " << typeid(number).name();
-  throw Exception(msg.str());
+  throw Exception(msg.str(), "NXnumtype getType<NumT>");
 }
 
 // template specialisations for types we know
@@ -122,6 +124,8 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
     this->m_pfile_id = std::make_shared<NXhandle>(temp);
   }
 }
+
+// deconstructor
 
 File::~File() {
   if (m_close_handle && m_pfile_id != NULL) {
@@ -336,14 +340,14 @@ void File::makeCompData(const string &name, const NXnumtype type, const DimVecto
 }
 
 template <typename NumT>
-void File::writeCompData(const string &name, const vector<NumT> &value, const DimVector &dims, const NXcompression comp,
-                         const DimSizeVector &bufsize) {
+void File::writeCompData(std::string const &name, vector<NumT> const &value, DimVector const &dims,
+                         NXcompression const comp, DimSizeVector const &bufsize) {
   this->makeCompData(name, getType<NumT>(), dims, comp, bufsize, true);
   this->putData(value);
   this->closeData();
 }
 
-void File::openData(const string &name) {
+void File::openData(std::string const &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openData", m_filename);
   }
@@ -352,9 +356,9 @@ void File::openData(const string &name) {
 
 void File::closeData() { NAPI_CALL(NXclosedata(*(this->m_pfile_id).get()), "NXclosedata() failed"); }
 
-template <typename NumT> void File::putData(const NumT *data) {
+template <typename NumT> void File::putData(NumT const *data) {
   if (data == NULL) {
-    throw Exception("Data specified as null in putData", m_filename);
+    throw NXEXCEPTION("Data specified as null");
   }
   NAPI_CALL(NXputdata(*(this->m_pfile_id), data), "NXputdata failed");
 }
@@ -442,16 +446,16 @@ template <typename NumT> void File::putSlab(const NumT *data, const DimSizeVecto
 }
 
 template <typename NumT>
-void File::putSlab(const vector<NumT> &data, const DimSizeVector &start, const DimSizeVector &size) {
+void File::putSlab(vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size) {
   if (data.empty()) {
-    throw Exception("Supplied empty data to putSlab", m_filename);
+    throw NXEXCEPTION("Supplied empty data to putSlab");
   }
-  this->putSlab(&(data[0]), start, size);
+  this->putSlab(data.data(), start, size);
 }
 
-template <typename NumT> void File::putSlab(const vector<NumT> &data, const dimsize_t start, const dimsize_t size) {
-  DimSizeVector start_v(1, start);
-  DimSizeVector size_v(1, size);
+template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t const start, dimsize_t const size) {
+  DimSizeVector start_v{start};
+  DimSizeVector size_v{size};
   this->putSlab(data, start_v, size_v);
 }
 
@@ -484,19 +488,21 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   Info info = this->getInfo();
 
   if (info.type != getType<NumT>()) {
-    throw Exception("NXgetdata failed - invalid vector type", m_filename);
+    std::stringstream msg;
+    msg << "inconsistent NXnumtype file datatype=" << info.type << " supplied datatype=" << getType<NumT>();
+    throw NXEXCEPTION(msg.str());
   }
   // determine the number of elements
   size_t length =
       std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                      [](const auto subtotal, const auto &value) { return subtotal * static_cast<size_t>(value); });
+                      [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
 
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
   data.resize(length);
 
   // fetch the data
-  this->getData(data.data());
+  this->getData<NumT>(data.data());
 }
 
 void File::getDataCoerce(vector<int> &data) {
@@ -567,22 +573,22 @@ void File::getDataCoerce(vector<double> &data) {
   }
 }
 
-template <typename NumT> void File::readData(const std::string &dataName, std::vector<NumT> &data) {
+template <typename NumT> void File::readData(std::string const &dataName, std::vector<NumT> &data) {
   this->openData(dataName);
   this->getData(data);
   this->closeData();
 }
 
-template <typename NumT> void File::readData(const std::string &dataName, NumT &data) {
+template <typename NumT> void File::readData(std::string const &dataName, NumT &data) {
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (dataVector.size() > 0)
+  if (!dataVector.empty())
     data = dataVector[0];
   this->closeData();
 }
 
-void File::readData(const std::string &dataName, std::string &data) {
+void File::readData(std::string const &dataName, std::string &data) {
   this->openData(dataName);
   data = this->getStrData();
   this->closeData();
@@ -914,6 +920,11 @@ NXnumtype::operator std::string() const {
     ret = NXTYPE_PRINT(BINARY);
   }
   return ret;
+}
+
+std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
+  os << std::string(value);
+  return os;
 }
 
 /* ---------------------------------------------------------------- */

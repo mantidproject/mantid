@@ -74,6 +74,12 @@ typedef struct {
  */
 enum NXentrytype : int { group = 0, sds = 1 };
 
+/**
+ * \struct NXlink
+ * Represents a link between entries in a NeXus file
+ * \li targetPath path to item to link
+ * \li linkType 0 for group link, 1 for SDS link
+ */
 typedef struct {
   std::string targetPath; /* path to item to link */
   NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
@@ -177,6 +183,8 @@ public:
   operator int() const;
   operator std::string() const;
 };
+
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &value);
 
 /**
  * The available compression types. These are all ignored in xml files.

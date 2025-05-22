@@ -71,7 +71,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const std::string &filename, const NXaccess access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXACC_READ);
 
   /**
    * Create a new File.
@@ -79,7 +79,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const char *filename, const NXaccess access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXACC_READ);
 
   /**
    * Copy constructor
@@ -452,7 +452,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, std::vector<NumT> &data);
+  template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -462,7 +462,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, NumT &data);
+  template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -473,7 +473,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  void readData(const std::string &dataName, std::string &data);
+  void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.
@@ -508,8 +508,7 @@ public:
   template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
   /**
-   * \return Information about all attributes on the data that is
-   * currently open.
+   * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();
 
@@ -548,7 +547,7 @@ public:
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void getAttr(const std::string &name, NumT &value);
+  template <typename NumT> void getAttr(std::string const &name, NumT &value);
 
   /**
    * Get the value of a string attribute.

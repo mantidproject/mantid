@@ -23,7 +23,7 @@ static NXDimArray nxdimArray(::NeXus::DimVector xd) {
 }
 
 NXInfo::NXInfo(::NeXus::Info const &info, std::string const &name)
-    : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), stat(NXstatus::NX_OK) {}
+    : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), allGood(true) {}
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
@@ -64,9 +64,7 @@ void NXAttributes::set(const std::string &name, const std::string &value) { m_va
  *   @param value :: The new value of the attribute
  */
 template <typename T> void NXAttributes::set(const std::string &name, T value) {
-  std::ostringstream ostr;
-  ostr << value;
-  m_values[name] = ostr.str();
+  m_values[name] = std::to_string(value);
 }
 
 //---------------------------------------------------------
@@ -255,25 +253,24 @@ bool NXClass::containsGroup(const std::string &query) const {
 /**
  *  Returns NXInfo for a dataset
  *  @param name :: The name of the dataset
- *  @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
+ *  @return NXInfo::allGood is set to false if the dataset does not exist
  */
 NXInfo NXClass::getDataSetInfo(const std::string &name) const {
   const auto it = std::find_if(datasets().cbegin(), datasets().cend(),
                                [&name](const auto &dataset) { return dataset.nxname == name; });
-  if (it != datasets().cend()) {
-    return *it;
-  }
   NXInfo info;
-  info.stat = NXstatus::NX_ERROR;
+  if (it != datasets().cend()) {
+    info = *it;
+  } else {
+    info.allGood = false;
+  }
   return info;
 }
 
 /**
  * Returns whether an individual dataset is present.
  */
-bool NXClass::containsDataSet(const std::string &query) const {
-  return getDataSetInfo(query).stat != NXstatus::NX_ERROR;
-}
+bool NXClass::containsDataSet(const std::string &query) const { return getDataSetInfo(query).allGood; }
 
 //---------------------------------------------------------
 //          NXRoot methods
@@ -342,8 +339,7 @@ NXDataSet::NXDataSet(const NXClass &parent, const std::string &name) : NXObject(
     m_info.nxname = name.substr(i + 1);
 }
 
-// Opens the data set. Does not read in any data. Call load(...) to load the
-// data
+// Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open() {
   size_t i = m_path.find_last_of('/');
   if (i == std::string::npos || i == 0)
