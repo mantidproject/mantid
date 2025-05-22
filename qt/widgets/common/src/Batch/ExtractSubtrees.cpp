@@ -44,7 +44,7 @@ std::vector<Subtree> ExtractSubtrees::makeSubtreesFromRows(std::vector<Row> cons
 
 RowLocation rowToRowLocation(Row const &row) { return row.location(); }
 
-auto ExtractSubtrees::operator()(std::vector<Row> region) const -> boost::optional<std::vector<Subtree>> {
+auto ExtractSubtrees::operator()(std::vector<Row> region) const -> std::optional<std::vector<Subtree>> {
   std::sort(region.begin(), region.end());
   if (!region.empty()) {
     auto subtreeRootDepth = rowToRowLocation(region[0]).depth();
@@ -54,7 +54,7 @@ auto ExtractSubtrees::operator()(std::vector<Row> region) const -> boost::option
     if (allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(subtreeRootDepth, rowLocationBegin, rowLocationEnd))
       return makeSubtreesFromRows(region, subtreeRootDepth);
     else
-      return boost::none;
+      return std::nullopt;
   } else {
     return std::vector<Subtree>();
   }
