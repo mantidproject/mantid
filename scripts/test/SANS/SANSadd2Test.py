@@ -15,7 +15,11 @@ from mantid.simpleapi import Load
 
 class TestSANSAddSampleMetadata(unittest.TestCase):
     def test_raw_files_get_correct_sample_info(self):
-        SANSadd2.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
+        result = SANSadd2.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
+        assert result.startswith("The following file has been created:")
+        assert result.endswith("LOQ54432-add.nxs")
+
+        # load the output file and verify it has the sample information
         ws = Load("LOQ54432-add.nxs")
         sample = ws.sample()
         self.assertEqual(3, sample.getGeometryFlag())
@@ -29,7 +33,11 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
             self.assertEqual(2, mocked_load_sample.call_count)
 
     def test_isis_neuxs_files_get_correct_sample_info(self):
-        SANSadd2.add_runs(["74014"], "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
+        result = SANSadd2.add_runs(["74014"], "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
+        assert result.startswith("The following file has been created:")
+        assert result.endswith("LOQ74014-add.nxs")
+
+        # load the output file and verify it has the sample information
         ws = Load("LOQ74014-add.nxs")
         sample = ws.sample()
         self.assertEqual(3, sample.getGeometryFlag())
