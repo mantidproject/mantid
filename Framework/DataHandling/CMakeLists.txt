@@ -141,7 +141,7 @@ set(SRC_FILES
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
-    src/NXcanSASHelper.cpp
+    src/NXcanSASUtil.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
@@ -182,6 +182,7 @@ set(SRC_FILES
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
     src/SaveNXcanSASBase.cpp
+    src/SaveNXcanSASHelper.cpp
     src/SaveNexus.cpp
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
@@ -357,7 +358,7 @@ set(INC_FILES
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
-    inc/MantidDataHandling/NXcanSASHelper.h
+    inc/MantidDataHandling/NXcanSASUtil.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
     inc/MantidDataHandling/ParallelEventLoader.h
@@ -398,6 +399,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNXTomo.h
     inc/MantidDataHandling/SaveNXcanSAS.h
     inc/MantidDataHandling/SaveNXcanSASBase.h
+    inc/MantidDataHandling/SaveNXcanSASHelper.h
     inc/MantidDataHandling/SaveNexus.h
     inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h

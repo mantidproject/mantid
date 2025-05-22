@@ -65,6 +65,7 @@ struct NXcanSASTestParameters {
   std::string instrumentName{"SANS2D"};
   std::string radiationSource{"Spallation Neutron Source"};
   std::string geometry{"Disc"};
+  std::string loadedWSName{"loadNXcanSASTestOutputWorkspace"};
   std::string idf;
   std::string sampleTransmissionRun;
   std::string sampleDirectRun;
@@ -97,6 +98,7 @@ struct NXcanSASTestParameters {
   bool hasSampleRuns{false};
   bool hasBgSub{false};
   bool isHistogram{false};
+  bool loadTransmission{false};
 };
 
 std::string concatenateStringVector(const std::vector<std::string> &stringVector);
