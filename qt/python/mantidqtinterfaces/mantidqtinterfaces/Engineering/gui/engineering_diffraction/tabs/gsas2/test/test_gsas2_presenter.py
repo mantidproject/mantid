@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -21,6 +21,8 @@ class TestGSAS2Presenter(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(view.GSAS2View, instance=True)
         self.model = mock.create_autospec(model.GSAS2Model, instance=True)
+        self.model.x_limits = mock.create_autospec(model.XLimitsState, instance=True)
+
         self.presenter = presenter.GSAS2Presenter(self.model, self.view, test=True)
 
     @patch(presenter_path + ".view.GSAS2View.get_refinement_parameters")
@@ -36,8 +38,8 @@ class TestGSAS2Presenter(unittest.TestCase):
         mock_get_project.return_value = "project_name"
         mock_get_refine.return_value = ["Pawley", "3.65", False, True, True]
         mock_saved_limits.return_value = [18500, 50000]
-        self.model.x_min = [0, 1, 2]
-        self.model.x_max = [3, 4, 5]
+        self.model.x_limits.x_min = [0, 1, 2]
+        self.model.x_limits.x_max = [3, 4, 5]
         self.presenter.rb_num = "experiment"
         self.view.get_axes.return_value = ["axis"]
 
@@ -55,8 +57,8 @@ class TestGSAS2Presenter(unittest.TestCase):
     @patch(presenter_path + ".presenter.GSAS2Presenter.clear_plot")
     def test_on_refine_clicked_refined_failed(self, mock_clear, mock_saved_limits, mock_save_load):
         mock_saved_limits.return_value = [18500, 50000]
-        self.model.x_min = [0, 1, 2]
-        self.model.x_max = [3, 4, 5]
+        self.model.x_limits.x_min = [0, 1, 2]
+        self.model.x_limits.x_max = [3, 4, 5]
         self.presenter.rb_num = "experiment"
         self.view.get_axes.return_value = ["axis"]
 
