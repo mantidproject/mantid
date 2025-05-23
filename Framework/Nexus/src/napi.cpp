@@ -227,13 +227,10 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
    Definition of NeXus API
 
    --------------------------------------------------------------------- */
-static int determineFileTypeImpl(CONSTCHAR *filename) {
-  FILE *fd = NULL;
-  int iRet;
 
-  /*
-     this is for reading, check for existence first
-   */
+static int determineFileType(CONSTCHAR *filename) {
+  // this is for reading, check for existence first
+  FILE *fd = NULL;
   fd = fopen(filename, "r");
   if (fd == NULL) {
     return -1;
@@ -241,17 +238,13 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
   fclose(fd);
 
   // check that this is indeed hdf5
-  iRet = H5Fis_hdf5(static_cast<const char *>(filename));
-  if (iRet > 0) {
+  if (H5Fis_hdf5(static_cast<const char *>(filename)) > 0) {
     return NXACC_CREATE5;
+  } else {
+    // file type not recognized
+    return 0;
   }
-  /*
-     file type not recognized
-   */
-  return 0;
 }
-
-static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
 
 /*---------------------------------------------------------------------*/
 static pNexusFunction handleToNexusFunc(NXhandle fid) {
@@ -285,9 +278,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 
 /*-----------------------------------------------------------------------*/
 static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  int backend_type, iRet;
   pNexusFunction fHandle = NULL;
-  char error[1024];
   char *filename = NULL;
   int my_am = (am & NXACCMASK_REMOVEFLAGS);
 
@@ -306,6 +297,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
   memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
 
+  int backend_type;
   if (my_am == NXACC_CREATE5) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
@@ -318,23 +310,22 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
       free(fHandle);
       return NXstatus::NX_ERROR;
     }
-    /* check file type hdf4/hdf5/XML for reading */
-    iRet = determineFileType(filename);
-    if (iRet < 0) {
-      snprintf(error, 1023, "failed to open %s for reading", filename);
+    // check file type is hdf5 for reading
+    const int iRet = determineFileType(filename);
+    if (iRet == NXACC_CREATE5) {
+      backend_type = NXACC_CREATE5;
+    } else {
+      char error[1024];
+      if (iRet < 0) {
+        snprintf(error, 1023, "failed to open %s for reading", filename);
+      } else if (iRet == 0) {
+        snprintf(error, 1023, "failed to determine filetype for %s ", filename);
+      }
       NXReportError(error);
       free(filename);
       free(fHandle);
       return NXstatus::NX_ERROR;
     }
-    if (iRet == 0) {
-      snprintf(error, 1023, "failed to determine filetype for %s ", filename);
-      NXReportError(error);
-      free(filename);
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-    backend_type = iRet;
   }
   if (filename == NULL) {
     NXReportError("Out of memory in NeXus-API");
