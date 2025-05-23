@@ -66,14 +66,14 @@ requirements:
     - orsopy {{ orsopy }}
 
     # Not Windows, OpenGL implementation:
-    - mesa-libgl-devel-cos7-x86_64>=18.3.4 # [linux]
+    - {{ cdt('mesa-libgl-devel') }} # [linux]
 
     # Linux only
     - gxx_linux-64 {{ cxx_compiler_version }} # [linux]
     - libglu {{ libglu }} # [linux]
 
     # Needed for test suite on Linux
-    - pciutils-libs-cos7-x86_64>=3.5.1 # [linux]
+    - {{ cdt('pciutils-libs') }} # [linux]
     - xorg-libxcomposite>=0.4.5 # [linux]
     - xorg-libxcursor>=1.2.0 # [linux]
     - xorg-libxdamage>=1.1.5 # [linux]

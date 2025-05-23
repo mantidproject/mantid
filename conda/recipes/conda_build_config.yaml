@@ -1,5 +1,5 @@
 cdt_name:
-  - cos7
+  - conda
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]
