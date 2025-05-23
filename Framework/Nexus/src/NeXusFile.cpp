@@ -87,25 +87,29 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype:
 
 namespace NeXus {
 
-File::File(const std::string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true) {
+File::File(const string &filename, const NXaccess access)
+    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor() {
   this->initOpenFile(m_filename, m_access);
 }
 
-File::File(const char *filename, const NXaccess access) : m_filename(filename), m_access(access), m_close_handle(true) {
+File::File(const char *filename, const NXaccess access)
+    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor() {
   this->initOpenFile(m_filename, m_access);
 }
 
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false) {}
+    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false),
+      m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false),
+      m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false),
+      m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
@@ -114,6 +118,7 @@ File &File::operator=(File const &f) {
     this->m_access = f.m_access;
     this->m_pfile_id = f.m_pfile_id;
     this->m_close_handle = f.m_close_handle;
+    this->m_descriptor = f.m_descriptor;
   }
   return *this;
 }
@@ -207,6 +212,7 @@ void File::makeGroup(const std::string &name, const std::string &class_name, boo
   }
   NAPI_CALL(NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
             "NXmakegroup(" + name + ", " + class_name + ") failed");
+  registerEntry(formAbsolutePath(name), class_name);
   if (open_group) {
     this->openGroup(name, class_name);
   }
@@ -379,6 +385,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
         << comp << ", " << toString(chunk) << ") failed";
     throw NXEXCEPTION(msg.str());
   }
+  registerEntry(formAbsolutePath(name), scientific_data_set);
   if (open_data) {
     this->openData(name);
   }
@@ -434,6 +441,12 @@ template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *da
   NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
             "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
                 ") failed");
+  // napi hack to determine if at root -- NXgetgroupIDreturns NX_ERROR at root level
+  // add root, update the root attributes
+  NXlink id;
+  if (NXgetgroupID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
+    m_descriptor.addRootAttr(info.name);
+  }
 }
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
