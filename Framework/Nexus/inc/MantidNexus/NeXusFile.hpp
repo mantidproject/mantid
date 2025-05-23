@@ -43,11 +43,13 @@ private:
    */
   Mantid::Nexus::NexusDescriptor m_descriptor;
 
-public:
   /**
    * \return A pair of the next entry available in a listing.
+   * NOTE: this is to be deleted in 6.14.  do NOT make public
    */
   Entry getNextEntry();
+
+public:
   /**
    * \return Information about the next attribute.
    */
