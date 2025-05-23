@@ -112,28 +112,27 @@ add_sphinx_build_target(html "sphinx.ext.mathjax")
 add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 add_dependencies(docs-doctest DocTestData)
 
-# qthelp if building workbench
-if(DOCS_QTHELP)
+if(ENABLE_QTASSISTANT)
   find_package(
     Qt5 ${QT_MIN_VERSION}
     COMPONENTS Help
     REQUIRED
   )
   add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
-  if(ENABLE_QTASSISTANT)
-    add_custom_target(
-      docs-qthelp
-      COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
-      COMMENT "Compiling Qt help documentation"
-    )
-    set_target_properties(
-      docs-qthelp
-      PROPERTIES FOLDER "Documentation"
-                 EXCLUDE_FROM_DEFAULT_BUILD 1
-                 EXCLUDE_FROM_ALL 1
-    )
-    add_dependencies(docs-qthelp docs-qtassistant)
-  endif() # ENABLE_QTASSISTANT
+
+  add_custom_target(
+    docs-qthelp
+    COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
+    COMMENT "Compiling Qt help documentation"
+  )
+  set_target_properties(
+    docs-qthelp
+    PROPERTIES FOLDER "Documentation"
+               EXCLUDE_FROM_DEFAULT_BUILD 1
+               EXCLUDE_FROM_ALL 1
+  )
+  add_dependencies(docs-qthelp docs-qtassistant)
+
 endif()
 
 # add target for checking external links
@@ -144,8 +143,10 @@ option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the packag
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
-    if(ENABLE_QTASSISTANT AND TARGET Qt5::qcollectiongenerator)
-      # must "make docs-qthelp" before "make package" otherwise there will be a build failure
+    if(ENABLE_QTASSISTANT
+       AND TARGET Qt5::qcollectiongenerator
+       AND TARGET docs-qthelp
+    )
       install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
               DESTINATION ${_bundle}${HTML_DOCS_DEST}
       )
@@ -154,9 +155,8 @@ if(PACKAGE_DOCS)
         DESTINATION ${_bundle}${HTML_DOCS_DEST}
         FILES_MATCHING
         PATTERN "*.html"
-      )
-      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/ ${SPHINX_BUILD_DIR}/qthelp/_static/
-              DESTINATION ${_bundle}${HTML_DOCS_DEST}
+        PATTERN "_images"
+        PATTERN "_static"
       )
     else()
       install(DIRECTORY ${SPHINX_BUILD_DIR}/html/ DESTINATION ${_bundle}${HTML_DOCS_DEST})
