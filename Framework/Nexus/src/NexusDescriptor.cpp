@@ -68,11 +68,12 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 }
 } // namespace
 
+// PUBLIC
+
 NexusDescriptor::NexusDescriptor(std::string filename)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
-// PUBLIC
 const std::string &NexusDescriptor::filename() const noexcept { return m_filename; }
 
 bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
