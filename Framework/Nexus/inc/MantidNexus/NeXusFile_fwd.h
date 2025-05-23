@@ -15,9 +15,9 @@
  * NeXus file access codes.
  * these codes are taken directly from values used in hdf5 package
  * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
- * \li NXACC_READ read-only
- * \li NXACC_RDWR open an existing file for reading and writing.
- * \li NXACC_CREATE5 create a NeXus HDF-5 file.
+ * \li NXACC_READ read-only. Same as H5F_ACC_RDONLY
+ * \li NXACC_RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
+ * \li NXACC_CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
  */
 enum NXaccess : unsigned int { NXACC_READ = 0x0000u, NXACC_RDWR = 0x0001u, NXACC_CREATE5 = 0x0002u };
 
