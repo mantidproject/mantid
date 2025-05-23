@@ -121,6 +121,10 @@ public:
   /** Flush the file. */
   void flush();
 
+  bool hasPath(std::string const &);
+  bool hasGroup(std::string const &, std::string const &);
+  bool hasData(std::string const &);
+
   /**
    * Create a new group.
    *
@@ -510,6 +514,12 @@ public:
    */
   template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
+  /** Return the string name of the top-level entry
+   *
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
+
   /**
    * \return Information about all attributes on the data that is currently open.
    */
@@ -571,6 +581,10 @@ public:
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
+
+private:
+  std::string formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
 };
 
 /**

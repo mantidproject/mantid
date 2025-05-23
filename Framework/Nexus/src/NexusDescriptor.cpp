@@ -81,6 +81,9 @@ bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_roo
 const std::map<std::string, std::set<std::string>> &NexusDescriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
+
+void NexusDescriptor::addRootAttr(const std::string &name) { m_rootAttrs.insert(name); }
+
 void NexusDescriptor::addEntry(const std::string &entryName, const std::string &groupClass) {
   // simple checks
   if (entryName.empty())

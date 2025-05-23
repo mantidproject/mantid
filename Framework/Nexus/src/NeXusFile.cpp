@@ -3,6 +3,7 @@
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/napi.h"
+#include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <sstream>
@@ -27,6 +28,12 @@ using std::vector;
  */
 
 namespace { // anonymous namespace to keep it in the file
+
+std::string const group_class_spec("NX_class");
+std::string const target_attr_name("target");
+std::string const scientific_data_set("SDS");
+constexpr int default_deflate_level(6);
+
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
   result << "[";
@@ -149,6 +156,47 @@ void File::close() {
 }
 
 void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
+
+bool File::hasPath(std::string const &name) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path);
+}
+
+bool File::hasGroup(std::string const &name, std::string const &class_type) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, class_type);
+}
+
+bool File::hasData(std::string const &name) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, scientific_data_set);
+}
+
+std::string File::formAbsolutePath(std::string const &name) {
+  std::string new_name;
+  if (name.front() == '/') {
+    new_name = name;
+  } else {
+    std::string to_root = this->getPath();
+    if (to_root == "/") {
+      to_root = "";
+    }
+    new_name = to_root + "/" + name;
+  }
+  // the caller is responsible for checking that it exists
+  return new_name;
+}
+
+void File::registerEntry(std::string const &path, std::string const &name) {
+  if (m_descriptor.isEntry(path, name)) {
+    // do nothing
+  } else if (path.front() != '/') {
+    throw NXEXCEPTION("Paths must be absolute: " + path);
+  } else {
+    // NOTE the caller is responsible for only registering valid paths
+    m_descriptor.addEntry(path, name);
+  }
+}
 
 void File::makeGroup(const std::string &name, const std::string &class_name, bool open_group) {
   if (name.empty()) {
@@ -664,6 +712,26 @@ Entry File::getNextEntry() {
   } else {
     throw NXEXCEPTION("NXgetnextentry failed");
   }
+}
+
+std::string File::getTopLevelEntryName() {
+  std::string top("");
+  Entry firstEntry = m_descriptor.firstEntryNameType();
+  if (firstEntry.second == "NXentry") {
+    top = firstEntry.first;
+  } else {
+    // check all of the
+    auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
+    auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
+                                 [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
+    if (iTopPath != allEntryPaths.cend()) {
+      top = *iTopPath;
+    }
+  }
+  if (top.empty()) {
+    throw NXEXCEPTION("unable to find top-level entry, no valid groups");
+  }
+  return top;
 }
 
 Entries File::getEntries() {

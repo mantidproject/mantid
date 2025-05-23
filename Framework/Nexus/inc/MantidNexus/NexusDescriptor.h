@@ -109,6 +109,8 @@ public:
    */
   void addEntry(const std::string &entryName, const std::string &groupClass);
 
+  void addRootAttr(const std::string &name);
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.
