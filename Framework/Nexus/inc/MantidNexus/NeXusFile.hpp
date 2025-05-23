@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -35,6 +36,8 @@ private:
   std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** nexus descriptor to track the file tree */
+  Mantid::Nexus::NexusDescriptor m_descriptor;
 
 public:
   /**
