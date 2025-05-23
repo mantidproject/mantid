@@ -110,18 +110,13 @@ void NexusDescriptor::addEntry(const std::string &entryName, const std::string &
 
 // PRIVATE
 std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
 
   std::map<std::string, std::set<std::string>> allEntries;
 
   // if the file exists read it
   if (std::filesystem::exists(m_filename)) {
-    if (!H5::H5File::isAccessible(m_filename, access_plist)) {
-      throw std::runtime_error("REALLY BAD");
-    }
 
-    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, H5::FileCreatPropList::DEFAULT, access_plist);
+    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     H5::Group groupID = fileID.openGroup("/");
 
     // get root attributes

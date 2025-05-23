@@ -163,6 +163,9 @@ void File::close() {
 void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
 
 bool File::hasPath(std::string const &name) {
+  if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
+    return true;
+  }
   std::string const path = formAbsolutePath(name);
   return m_descriptor.isEntry(path);
 }
@@ -441,12 +444,6 @@ template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *da
   NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
             "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
                 ") failed");
-  // napi hack to determine if at root -- NXgetgroupIDreturns NX_ERROR at root level
-  // add root, update the root attributes
-  NXlink id;
-  if (NXgetgroupID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
-    m_descriptor.addRootAttr(info.name);
-  }
 }
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
@@ -729,17 +726,12 @@ Entry File::getNextEntry() {
 
 std::string File::getTopLevelEntryName() {
   std::string top("");
-  Entry firstEntry = m_descriptor.firstEntryNameType();
-  if (firstEntry.second == "NXentry") {
-    top = firstEntry.first;
-  } else {
-    // check all of the
-    auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
-    auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
-                                 [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
-    if (iTopPath != allEntryPaths.cend()) {
-      top = *iTopPath;
-    }
+  // check all of the NXentry's for one at top-level
+  auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
+  auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
+                               [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
+  if (iTopPath != allEntryPaths.cend()) {
+    top = *iTopPath;
   }
   if (top.empty()) {
     throw NXEXCEPTION("unable to find top-level entry, no valid groups");
