@@ -102,6 +102,7 @@ protected:
   void checkValidity() const;
   void calTransformationMatrixNumerically(EigenMatrix &tm);
   void setDirty();
+  void validateNegativeFitWeights();
 
   /// Shared pointer to the fitting function
   API::IFunction_sptr m_function;

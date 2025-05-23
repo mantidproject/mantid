@@ -68,12 +68,6 @@ double CostFuncRwp::calSqrtW(const API::FunctionValues_sptr &values) const {
 /**
  * Validates current fit weights and raise errors when necessary
  */
-void CostFuncRwp::updateValidateFitWeights() {
-  for (size_t i = 0; i < m_values->size(); i++) {
-    if (!m_ignoreInvalidData && (m_values->getFitWeight(i) < 0)) {
-      throw std::runtime_error("Invalid data found at bin=" + std::to_string(i) + " in input error.");
-    }
-  }
-}
+void CostFuncRwp::updateValidateFitWeights() { validateNegativeFitWeights(); }
 
 } // namespace Mantid::CurveFitting::CostFunctions
