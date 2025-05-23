@@ -17,8 +17,10 @@
 #include <Poco/Path.h>
 #include <fstream>
 #include <memory>
+#include <ranges>
 #include <regex>
 #include <string>
+#include <string_view>
 
 #include <Poco/NObserver.h>
 
@@ -671,31 +673,25 @@ public:
 
   void testsetDataSearchDirs() {
     std::string dirs;
-    std::string expected = "/test/a/;/test/b/;/test/c/";
+    std::vector<std::filesystem::path> expectedDirs{std::filesystem::absolute("/test/a/"),
+                                                    std::filesystem::absolute("/test/b/"),
+                                                    std::filesystem::absolute("/test/c/")};
 
     // separated all by ;
     dirs = "/test/a/;/test/b/;/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // separated all by ,
     dirs = "/test/a/,/test/b/,/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // separated all by , and ;
     dirs = "/test/a/,/test/b/;/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // one path
     dirs = "/test/a/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(std::vector<std::filesystem::path>{std::filesystem::absolute("/test/a/")}, dirs);
   }
 
 protected:
@@ -747,5 +743,28 @@ private:
   std::string readFile(const std::string &filename) {
     std::ifstream reader(filename.c_str());
     return std::string((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());
+  }
+
+  std::vector<std::filesystem::path> splitPathString(const std::string &path) {
+    std::vector<std::filesystem::path> paths;
+    for (auto part : std::views::split(path, ';')) {
+      paths.emplace_back(part.begin(), part.end());
+    }
+    return paths;
+  }
+
+  void compareConfigDirectories(const std::vector<std::filesystem::path> &expected, const std::string &dirs) {
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    const auto configDirs = splitPathString(ConfigService::Instance().getString("datasearch.directories"));
+    TS_ASSERT_EQUALS(configDirs.size(), expected.size());
+    for (size_t i = 0; i < expected.size(); ++i) {
+      TS_ASSERT(arePathsEquivalent(configDirs[i], expected[i]));
+    }
+    ConfigService::Instance().reset();
+  }
+
+  bool arePathsEquivalent(const std::filesystem::path &path1, const std::filesystem::path &path2) {
+    // If the paths do not exist, we cannot compare them using canonical() or equivalent()
+    return std::filesystem::weakly_canonical(path1) == std::filesystem::weakly_canonical(path2);
   }
 };
