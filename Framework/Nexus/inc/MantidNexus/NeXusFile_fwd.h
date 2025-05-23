@@ -52,8 +52,6 @@ typedef enum {
   NXACC_RDWR = 2,
   NXACC_CREATE5 = 5,
   NXACC_CREATEXML = 6,
-  NXACC_TABLE = 8,
-  NXACC_NOSTRIP = 128,
   NXACC_CHECKNAMESYNTAX = 256
 } NXaccess_mode;
 

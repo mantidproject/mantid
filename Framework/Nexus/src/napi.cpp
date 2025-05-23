@@ -332,11 +332,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   /*
      test the strip flag. Elimnate it for the rest of the tests to work
    */
-  fHandle->stripFlag = 1;
-  if (am & NXACC_NOSTRIP) {
-    fHandle->stripFlag = 0;
-    am = (NXaccess)(am & ~NXACC_NOSTRIP);
-  }
   fHandle->checkNameSyntax = 0;
   if (am & NXACC_CHECKNAMESYNTAX) {
     fHandle->checkNameSyntax = 1;
@@ -937,7 +932,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
   /* only strip one dimensional strings */
-  if ((type == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (rank == 1)) {
+  if ((type == NXnumtype::CHAR) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
     memset(pPtr, 0, (size_t)iDim[0] + 5);
@@ -1000,7 +995,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
      the length of a string may be trimmed....
    */
   /* only strip one dimensional strings */
-  if ((*iType == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (*rank == 1)) {
+  if ((*iType == NXnumtype::CHAR) && (*rank == 1)) {
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
