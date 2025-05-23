@@ -813,14 +813,17 @@ def is_nexus_file(file_name):
     full_file_path = FileFinder.findRuns(file_name)
     if hasattr(full_file_path, "__iter__"):
         file_name = full_file_path[0]
-    is_nexus = True
-    try:
-        with h5.File(file_name, "r") as h5_file:
-            keys = list(h5_file.keys())
-            nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
-            is_nexus = True if nexus_test else False
-    except:
-        is_nexus = False
+    # quick check that is hdf5
+    is_nexus = h5.is_hdf5(file_name)
+    # fuller test looks at top level entries
+    if is_nexus:
+        try:
+            keys = []
+            with h5.File(file_name, "r") as h5_file:
+                keys = list(h5_file.keys())
+            is_nexus = bool("raw_data_1" in keys or "mantid_workspace_1" in keys)
+        except:
+            is_nexus = False
     return is_nexus
 
 
