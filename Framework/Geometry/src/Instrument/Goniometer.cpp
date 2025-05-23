@@ -69,10 +69,9 @@ Goniometer::Goniometer(const DblMatrix &rot) {
   if (!isRot) {
     // constructor should fail if the matrix is invalid
     throw std::invalid_argument("rot has not been evaluated to be a valid rotation matrix");
-  } else {
-    R = rot;
-    initFromR = true;
   }
+  R = rot;
+  initFromR = true;
 }
 
 /// Add an explicit copy constructor
