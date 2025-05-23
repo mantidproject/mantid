@@ -65,14 +65,13 @@ Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
 Goniometer::Goniometer(const DblMatrix &rot) {
-  DblMatrix ide(3, 3), rtr(3, 3);
-  rtr = rot.Tprime() * rot;
-  ide.identityMatrix();
-  if (rtr == ide) {
-    R = rot;
-    initFromR = true;
-  } else
-    throw std::invalid_argument("rot is not a rotation matrix");
+  bool isRot = rot.isRotation(); // this can also throw if matrix is invalid rotation, but that is fine
+  if (!isRot) {
+    // constructor should fail if the matrix is invalid
+    throw std::invalid_argument("rot has not been evaluated to be a valid rotation matrix");
+  }
+  R = rot;
+  initFromR = true;
 }
 
 /// Add an explicit copy constructor
