@@ -65,4 +65,9 @@ double CostFuncRwp::calSqrtW(const API::FunctionValues_sptr &values) const {
   return sqrt(weight);
 }
 
+/**
+ * Validates current fit weights and raise errors when necessary
+ */
+void CostFuncRwp::updateValidateFitWeights() { validateNegativeFitWeights(); }
+
 } // namespace Mantid::CurveFitting::CostFunctions

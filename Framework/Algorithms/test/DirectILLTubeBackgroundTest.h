@@ -198,12 +198,14 @@ public:
     Algorithms::DirectILLTubeBackground alg;
     alg.setChild(true);
     alg.setRethrows(true);
+
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DiagnosticsWorkspace", diagnosticsWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInvalidData", true))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -276,6 +278,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInvalidData", true))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
