@@ -88,12 +88,12 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype:
 namespace NeXus {
 
 File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor() {
+    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor(m_filename) {
   this->initOpenFile(m_filename, m_access);
 }
 
 File::File(const char *filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor() {
+    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor(m_filename) {
   this->initOpenFile(m_filename, m_access);
 }
 

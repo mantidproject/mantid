@@ -26,7 +26,7 @@ public:
    */
   NexusDescriptor(std::string filename);
 
-  NexusDescriptor() = default;
+  NexusDescriptor() = delete;
 
   NexusDescriptor &operator=(NexusDescriptor const &nd) = default;
 
