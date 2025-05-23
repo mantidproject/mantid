@@ -1,12 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
 import os
+import sys
 import shutil
 import tempfile
 
@@ -25,8 +26,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     export_reflections,
     export_refined_instrument_parameters,
     export_lattice_parameters,
-    limited_rglob,
-    find_gsasii,
+    import_gsasii,
 )
 
 import numpy as np
@@ -35,6 +35,8 @@ from types import ModuleType
 
 
 class GSAS2ViewTest(unittest.TestCase):
+    temp_save_directory: str
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.temp_save_directory = tempfile.mkdtemp()
@@ -286,91 +288,45 @@ class TestLimitedRglob(unittest.TestCase):
             with open(file_path, "w") as f:
                 f.write("test")
 
-    def test_limited_rglob_match_at_parent_level(self):
-        files = ["file1.txt", "file2.log"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=0))
-        expected = [Path(self.test_dir) / "file1.txt"]
-        self.assertEqual(result, expected)
+    def test_import_gsasii_file_not_found(self):
+        """
+        Test that FileNotFoundError is raised when the specified file does not exist.
+        """
+        non_existent_path = Path("/non/existent/path/GSASIIscriptable.py")
+        with self.assertRaises(FileNotFoundError) as context:
+            import_gsasii(non_existent_path)
+        self.assertEqual(str(context.exception), f"The specified GSASIIscriptable.py file does not exist: {non_existent_path}")
 
-    def test_limited_rglob_single_level(self):
-        files = ["dir1/file1.txt", "dir1/file2.txt"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
-        expected = [Path(self.test_dir) / file for file in files]
-        self.assertCountEqual(result, expected)
+    def test_import_gsasii_import_error(self):
+        """
+        Test that ImportError is raised when the module cannot be imported.
+        """
+        gsasii_path = Path(self.test_dir) / "GSASIIscriptable.py"
+        gsasii_path.parent.mkdir(parents=True, exist_ok=True)
+        gsasii_path.touch()
 
-    def test_limited_rglob_exceeds_max_depth(self):
-        files = ["dir1/dir2/file1.txt", "dir1/dir2/dir3/file2.txt"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
-        self.assertCountEqual(result, [])
+        expected_message = f"GSASIIscriptable module found at {gsasii_path}, but it could not be imported."
+        with mock.patch("builtins.__import__", side_effect=ImportError(expected_message)):
+            with self.assertRaises(ImportError) as context:
+                import_gsasii(gsasii_path)
+        self.assertEqual(str(context.exception), expected_message)
 
-    def test_limited_rglob_no_match(self):
-        files = ["dir1/file1.txt", "dir1/file2.log"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.csv", max_depth=1))
-        self.assertEqual(result, [])
+    @mock.patch.object(sys, "path", new_callable=list)
+    @mock.patch("builtins.__import__", return_value=mock.Mock(spec=ModuleType))
+    def test_import_gsasii_success(self, mock_import, mock_sys_path):
+        """
+        Test that the GSASIIscriptable module is successfully imported.
+        """
+        gsasii_path = Path(self.test_dir) / "GSASIIscriptable.py"
+        gsasii_path.parent.mkdir(parents=True, exist_ok=True)
+        gsasii_path.touch()
 
-    def test_limited_rglob_multiple_levels(self):
-        files = ["dir1/dir2/dir3/file1.txt", "dir1/dir2/dir3/dir4/file2.txt", "dir1/dir2/dir3/dir4/dir5/file3.txt"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=4))
-        expected = [
-            Path(self.test_dir) / "dir1/dir2/dir3/file1.txt",
-            Path(self.test_dir) / "dir1/dir2/dir3/dir4/file2.txt",
-        ]
-        self.assertCountEqual(result, expected)
+        # Use mock_sys_path to simulate sys.path modification
+        mock_sys_path.append(str(gsasii_path.parent))
 
-    def test_limited_rglob_exact_max_depth(self):
-        files = ["dir1/dir2/file1.txt", "dir1/dir2/dir3/file2.txt"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=2))
-        expected = [Path(self.test_dir) / "dir1/dir2/file1.txt"]
-        self.assertCountEqual(result, expected)
-
-    def test_limited_rglob_different_patterns(self):
-        files = ["dir1/file1.txt", "dir1/file2.log", "dir1/file3.csv"]
-        self.create_test_files(files)
-        result_txt = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
-        result_log = list(limited_rglob(Path(self.test_dir), "*.log", max_depth=1))
-        result_csv = list(limited_rglob(Path(self.test_dir), "*.csv", max_depth=1))
-        self.assertCountEqual(result_txt, [Path(self.test_dir) / "dir1/file1.txt"])
-        self.assertCountEqual(result_log, [Path(self.test_dir) / "dir1/file2.log"])
-        self.assertCountEqual(result_csv, [Path(self.test_dir) / "dir1/file3.csv"])
-
-    def test_limited_rglob_empty_directory(self):
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
-        self.assertEqual(result, [])
-
-    def test_limited_rglob_similar_directory_names(self):
-        files = ["dir1/file1.txt", "dir1_2/file2.txt"]
-        self.create_test_files(files)
-        result = list(limited_rglob(Path(self.test_dir), "*.txt", max_depth=1))
-        expected = [
-            Path(self.test_dir) / "dir1/file1.txt",
-            Path(self.test_dir) / "dir1_2/file2.txt",
-        ]
-        self.assertCountEqual(result, expected)
-
-    def test_limited_rglob_invalid_directory(self):
-        with self.assertRaises(FileNotFoundError):
-            list(limited_rglob(Path("/invalid/directory"), "*.txt", max_depth=1))
-
-    def test_find_gsasii_success(self):
-        files = ["GSASIIscriptable.py"]
-        self.create_test_files(files)
-        with mock.patch("builtins.__import__", return_value=mock.Mock(spec=ModuleType)):
-            result = find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
-            self.assertIsInstance(result, ModuleType)
-
-    def test_find_gsasii_not_found(self):
-        with self.assertRaises(ImportError):
-            find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
-
-    def test_find_gsasii_import_error(self):
-        files = ["GSASIIscriptable.py"]
-        self.create_test_files(files)
-        with mock.patch("builtins.__import__", side_effect=ImportError):
-            with self.assertRaises(ImportError):
-                find_gsasii(Path(self.test_dir), "GSASIIscriptable.py")
+        result = import_gsasii(gsasii_path)
+        self.assertIsInstance(result, ModuleType)
+        self.assertIn(str(gsasii_path.parent), mock_sys_path)
+        mock_import.assert_called()
+        args = mock_import.call_args[0]
+        self.assertEqual(args[0], "GSASIIscriptable")
