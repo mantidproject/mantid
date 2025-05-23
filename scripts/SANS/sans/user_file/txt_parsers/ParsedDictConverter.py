@@ -1065,8 +1065,7 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_polarization(self) -> StatePolarization:
-        # The polarization settings are not supported for the legacy txt user file format. Return a blank object.
-        return StatePolarization()
+        return self._all_states.polarization if self._all_states else StatePolarization()
 
     def _set_single_entry(self, state_obj, attr_name, tag, apply_to_value=None):
         """

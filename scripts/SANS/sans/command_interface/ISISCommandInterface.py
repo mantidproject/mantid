@@ -534,6 +534,8 @@ def set_save(
                     save_algs.append(SaveType.CSV)
                 case "SaveNXcanSAS":
                     save_algs.append(SaveType.NX_CAN_SAS)
+                case "SavePolarizedNXcanSAS":
+                    save_algs.append(SaveType.POL_NX_CAN_SAS)
                 case _:
                     raise RuntimeError(f"The save format {key} is not known")
 
