@@ -48,9 +48,8 @@ public:
   void test_leak1() {
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
-    string const szFile("nexus_leak_test1.nxs");
-
-    removeFile(szFile); // in case it was left over from previous run
+    FileResource fr("nexus_leak_test1.nxs");
+    std::string const szFile(fr.fullPath());
 
     File file_obj(szFile, NXACC_CREATE5);
     file_obj.close();
@@ -64,7 +63,6 @@ public:
       file_obj.close();
     }
 
-    removeFile(szFile); // cleanup
     cout << "Leak Test 1 Success!\n";
   }
 
@@ -80,8 +78,8 @@ public:
     std::string strFile;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
-      strFile = strmakef("nexus_leak_test2_%03d.nxs", iFile);
-      removeFile(strFile);
+      FileResource fr(strmakef("nexus_leak_test2_%03d.nxs", iFile));
+      strFile = fr.fullPath();
       cout << "file " << strFile << "\n";
 
       File fileid(strFile, access_mode);
@@ -127,7 +125,9 @@ public:
     std::size_t const TEST_SIZE(512);
 #endif // WIN32
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
-    std::string const szFile("nexus_leak_test3.nxs");
+    FileResource fr("nexus_leak_test3.nxs");
+    std::string const szFile(fr.fullPath());
+
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers\n";
     fflush(stdout);
@@ -166,9 +166,6 @@ public:
       }
 
       fileid.close();
-
-      // Delete file
-      removeFile(szFile);
     }
     cout << "Leak Test 3 Success!\n";
   }
