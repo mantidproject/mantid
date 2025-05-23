@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -18,24 +18,24 @@ bool isIterable(PyObject *iterable) {
 }
 
 template <typename T>
-boost::optional<T> typeErrorIfNoneElseValue(boost::optional<T> const &maybeValue, std::string const &errorMessage) {
-  if (!maybeValue.is_initialized())
+std::optional<T> typeErrorIfNoneElseValue(std::optional<T> const &maybeValue, std::string const &errorMessage) {
+  if (!maybeValue.has_value())
     PyErr_SetString(PyExc_TypeError, errorMessage.c_str());
   return maybeValue;
 }
 
 template <typename T, typename ConversionFunction>
-boost::optional<boost::optional<T>> pythonObjectToOptional(PyObject *object, ConversionFunction pyObjectAsValue) {
+std::optional<std::optional<T>> pythonObjectToOptional(PyObject *object, ConversionFunction pyObjectAsValue) {
   if (object == Py_None)
-    return boost::none;
+    return std::nullopt;
   else
     return pyObjectAsValue(object);
 }
 
 template <typename T, typename ConversionFunction>
-PyObject *optionalToPyObject(boost::optional<T> const &item, ConversionFunction valueAsPyObject) {
-  if (item.is_initialized()) {
-    return valueAsPyObject(item.get());
+PyObject *optionalToPyObject(std::optional<T> const &item, ConversionFunction valueAsPyObject) {
+  if (item.has_value()) {
+    return valueAsPyObject(item.value());
   } else {
     return Py_None;
   }
@@ -62,7 +62,7 @@ PyObject *vectorToPythonList(std::vector<T> const &vector, ConversionFunction it
 }
 
 template <typename T, typename ConversionFunction>
-boost::optional<std::vector<T>> pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
+std::optional<std::vector<T>> pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
   auto length = static_cast<int>(PyObject_Size(pythonList));
   PyObject *iterator = PyObject_GetIter(pythonList);
   if (iterator != nullptr) {
@@ -71,26 +71,25 @@ boost::optional<std::vector<T>> pythonListToVector(PyObject *pythonList, Convers
     PyObject *pythonItem = nullptr;
     while ((pythonItem = PyIter_Next(iterator))) {
       auto item = pyObjectToItem(pythonItem);
-      if (item.is_initialized())
-        cppVector.emplace_back(std::move(item.get()));
+      if (item.has_value())
+        cppVector.emplace_back(std::move(item.value()));
       else {
         Py_DECREF(pythonItem);
         Py_DECREF(iterator);
-        return boost::none;
+        return std::nullopt;
       }
       Py_DECREF(pythonItem);
     }
     Py_DECREF(iterator);
     return cppVector;
   } else {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
-template <typename T>
-int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr, int *sipIsErr, int sipState) {
-  if (cppValue.is_initialized()) {
-    auto heapValue = ::std::make_unique<T>(std::move(cppValue.get()));
+template <typename T> int transferToSip(std::optional<T> const &cppValue, T **sipCppPtr, int *sipIsErr, int sipState) {
+  if (cppValue.has_value()) {
+    auto heapValue = ::std::make_unique<T>(std::move(cppValue.value()));
     *sipCppPtr = heapValue.release();
     return sipState;
   } else {
@@ -99,20 +98,20 @@ int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr, int *sipIsE
   }
 }
 
-template <typename T> boost::optional<T> asOptional(int *sipIsErr, T *sipCppPtr) {
+template <typename T> std::optional<T> asOptional(int *sipIsErr, T *sipCppPtr) {
   if (*sipIsErr)
-    return boost::none;
+    return std::nullopt;
   else
     return *sipCppPtr;
 }
 
-inline boost::optional<std::string> pythonStringToStdString(PyObject *pyString) {
+inline std::optional<std::string> pythonStringToStdString(PyObject *pyString) {
   if (PyBytes_Check(pyString)) {
     return std::string(PyBytes_AsString(pyString));
   } else if (STR_CHECK(pyString)) {
     return std::string(TO_CSTRING(pyString));
   } else {
-    return boost::none;
+    return std::nullopt;
   }
 }
 

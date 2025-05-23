@@ -800,8 +800,8 @@ public:
     Cell deadCell() const;
 
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
-    boost::optional<std::vector<std::vector<Row>>> selectedSubtrees() const;
-    boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> selectedSubtreeRoots() const;
+    std::optional<std::vector<std::vector<Row>>> selectedSubtrees() const;
+    std::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> selectedSubtreeRoots() const;
 };
 
 class Cell {

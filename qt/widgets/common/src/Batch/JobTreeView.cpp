@@ -87,7 +87,7 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger, QEvent *ev
 
 Cell JobTreeView::deadCell() const { return g_deadCell; }
 
-boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
+std::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
   auto selected = selectedRowLocations();
   std::sort(selected.begin(), selected.end());
 
@@ -101,7 +101,7 @@ boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
   return extractSubtrees(selectedRows);
 }
 
-boost::optional<std::vector<RowLocation>> JobTreeView::selectedSubtreeRoots() const {
+std::optional<std::vector<RowLocation>> JobTreeView::selectedSubtreeRoots() const {
   auto findSubtreeRoots = FindSubtreeRoots();
   return findSubtreeRoots(selectedRowLocations());
 }
@@ -553,8 +553,8 @@ QModelIndex JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult cons
     // `notifyRowInserted` hence we have to assume they did and try to get the
     // index again.
     auto maybeIndexOfNewRow = rowLocation().indexIfExistsAt(newRowLocation);
-    if (maybeIndexOfNewRow.is_initialized()) {
-      return expanded(mapToFilteredModel(maybeIndexOfNewRow.get())).untyped();
+    if (maybeIndexOfNewRow.has_value()) {
+      return expanded(mapToFilteredModel(maybeIndexOfNewRow.value())).untyped();
     } else {
       return QModelIndex();
     }

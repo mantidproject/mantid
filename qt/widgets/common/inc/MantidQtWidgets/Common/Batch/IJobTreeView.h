@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -81,8 +81,8 @@ public:
   virtual void collapseAll() = 0;
 
   virtual std::vector<RowLocation> selectedRowLocations() const = 0;
-  virtual boost::optional<std::vector<Subtree>> selectedSubtrees() const = 0;
-  virtual boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const = 0;
+  virtual std::optional<std::vector<Subtree>> selectedSubtrees() const = 0;
+  virtual std::optional<std::vector<RowLocation>> selectedSubtreeRoots() const = 0;
   virtual int currentColumn() const = 0;
   virtual Cell deadCell() const = 0;
   virtual ~IJobTreeView() = default;

@@ -19,10 +19,10 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
 
-Clipboard initializeClipboard(const boost::optional<std::vector<MantidWidgets::Batch::Subtree>> &subTrees,
-                              const boost::optional<std::vector<MantidWidgets::Batch::RowLocation>> &subtreeRoots) {
-  return subTrees.is_initialized() && subtreeRoots.is_initialized() ? Clipboard(subTrees.get(), subtreeRoots.get())
-                                                                    : Clipboard();
+Clipboard initializeClipboard(const std::optional<std::vector<MantidWidgets::Batch::Subtree>> &subTrees,
+                              const std::optional<std::vector<MantidWidgets::Batch::RowLocation>> &subtreeRoots) {
+  return subTrees.has_value() && subtreeRoots.has_value() ? Clipboard(subTrees.value(), subtreeRoots.value())
+                                                          : Clipboard();
 }
 
 void clearStateStyling(MantidWidgets::Batch::Cell &cell) {

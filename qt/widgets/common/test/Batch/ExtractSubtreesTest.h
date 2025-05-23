@@ -34,7 +34,7 @@ public:
   void testForSingleLocation() {
     auto extractSubtrees = ExtractSubtrees();
     auto region = std::vector<Row>({Row(RowLocation({1}), cells("Root"))});
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
 
     // clang-format off
     auto expectedSubtrees =
@@ -63,7 +63,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -81,7 +81,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -108,7 +108,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -135,7 +135,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -149,7 +149,7 @@ public:
     });
     // clang-format on
 
-    TS_ASSERT(!extractSubtrees(region).is_initialized());
+    TS_ASSERT(!extractSubtrees(region).has_value());
   }
 
   void testFailsForLevelGapBetweenSubtrees() {
@@ -165,7 +165,7 @@ public:
     });
     // clang-format on
 
-    TS_ASSERT(!extractSubtrees(region).is_initialized());
+    TS_ASSERT(!extractSubtrees(region).has_value());
   }
 
   void testForRealisticTree() {
@@ -212,7 +212,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region).get();
+    auto roots = extractSubtrees(region).value();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -231,7 +231,7 @@ public:
     // clang-format on
 
     auto subtrees = extractSubtrees(region);
-    TS_ASSERT(!subtrees.is_initialized())
+    TS_ASSERT(!subtrees.has_value())
   }
 
   void testFailsForDeepRoot() {
@@ -249,7 +249,7 @@ public:
     // clang-format on
 
     auto subtrees = extractSubtrees(region);
-    TS_ASSERT(!subtrees.is_initialized())
+    TS_ASSERT(!subtrees.has_value())
   }
 
   void testFailsForDeepRootImmediatelyAfterFirstRoot() {
@@ -262,7 +262,7 @@ public:
     // clang-format on
 
     auto roots = extractSubtrees(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testFailsForShallowRootImmediatelyAfterFirstRoot() {
@@ -275,6 +275,6 @@ public:
     // clang-format on
 
     auto roots = extractSubtrees(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 };

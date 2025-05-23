@@ -14,7 +14,7 @@ developer.mantidproject.org/BatchWidget/index.html
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 namespace MantidQt {
@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ExtractSubtrees {
 public:
   using RandomAccessRowIterator = std::vector<Row>::iterator;
   using RandomAccessConstRowIterator = std::vector<Row>::const_iterator;
-  boost::optional<std::vector<Subtree>> operator()(std::vector<Row> region) const;
+  std::optional<std::vector<Subtree>> operator()(std::vector<Row> region) const;
 
 private:
   RandomAccessConstRowIterator findEndOfSubtree(RandomAccessConstRowIterator subtreeBegin,
