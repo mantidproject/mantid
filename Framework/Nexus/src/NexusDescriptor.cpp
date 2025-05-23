@@ -166,6 +166,25 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
   return result;
 }
 
+std::map<std::string, std::string> NexusDescriptor::allPathsAtLevel(const std::string &level) const {
+  std::map<std::string, std::string> result;
+  for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend(); itClass++) {
+    for (auto itEntry = itClass->second.cbegin(); itEntry != itClass->second.cend(); itEntry++) {
+      if (itEntry->size() <= level.size()) {
+        continue;
+      }
+      if (itEntry->starts_with(level)) {
+        int offset = (level == "/" ? 0 : 1);
+        std::string path = itEntry->substr(level.size() + offset, itEntry->find("/", level.size() + offset));
+        if (itEntry->ends_with(path)) {
+          result[path] = itClass->first;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 bool NexusDescriptor::classTypeExists(const std::string &classType) const { return m_allEntries.contains(classType); }
 
 std::string NexusDescriptor::classTypeForName(std::string const &entryName) const {
