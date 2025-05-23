@@ -606,12 +606,6 @@ void LoadNexusLogs::execLoader() {
 
   if (!workspace->run().hasProperty(workspace->run().getProtonChargeLogName())) {
     try {
-      // For period data mark proton charge log value as unfiltered to enable subsequent filtering by period.
-      if (workspace->run().hasProperty("proton_charge_by_period")) {
-        Kernel::PropertyWithValue<bool> *pChargeUnfiltered =
-            new Kernel::PropertyWithValue<bool>(workspace->run().getProtonChargeUnfilteredName(), true);
-        workspace->mutableRun().addProperty(pChargeUnfiltered, true);
-      }
       // Try pulling proton charge from the main proton_charge entry
       file.openData("proton_charge");
       std::vector<double> values;
@@ -632,6 +626,12 @@ void LoadNexusLogs::execLoader() {
         // Ignore not found property error.
       }
     }
+  }
+  // For period data mark proton charge log value as unfiltered to enable subsequent filtering by period.
+  if (workspace->run().hasProperty("proton_charge_by_period")) {
+    Kernel::PropertyWithValue<int> *pChargeUnfiltered =
+        new Kernel::PropertyWithValue<int>(workspace->run().getProtonChargeUnfilteredName(), 1);
+    workspace->mutableRun().addProperty(pChargeUnfiltered, true);
   }
 
   if (!allow_list.empty()) {
