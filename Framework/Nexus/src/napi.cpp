@@ -33,7 +33,6 @@
 
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_internal.h"
-#include "MantidNexus/napiconfig.h"
 #include "MantidNexus/nxstack.h"
 
 // this has to be after the other napi includes

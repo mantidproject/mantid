@@ -26,8 +26,6 @@
 #include <string>
 #define H5Aiterate_vers 2
 
-#include "MantidNexus/napiconfig.h"
-
 #include <assert.h>
 #include <cstring>
 #include <map>
@@ -35,12 +33,11 @@
 #include <string.h>
 #include <time.h>
 
-// clang-format off
-#include "MantidNexus/napiconfig.h"
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_internal.h"
+
+// this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
-// clang-format on
 
 #ifdef H5_VERSION_GE
 #if !H5_VERSION_GE(1, 8, 0)

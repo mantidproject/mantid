@@ -25,7 +25,6 @@
 
 ----------------------------------------------------------------------------*/
 #include "MantidNexus/napi.h"
-#include "MantidNexus/napiconfig.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
