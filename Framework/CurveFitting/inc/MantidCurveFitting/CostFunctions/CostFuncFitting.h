@@ -80,6 +80,9 @@ public:
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
   void reset() const;
 
+  /// Set to ignore invalid data
+  void setIgnoreInvalidData(bool ignoreInvalidData) { m_ignoreInvalidData = ignoreInvalidData; }
+
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
   virtual void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);
@@ -92,10 +95,14 @@ protected:
                                   API::FunctionValues_sptr values, bool evalDeriv = true,
                                   bool evalHessian = true) const = 0;
 
+  /// Update or validate the fit weights in m_values when necessary
+  virtual void updateValidateFitWeights() {};
+
   bool isValid() const;
   void checkValidity() const;
   void calTransformationMatrixNumerically(EigenMatrix &tm);
   void setDirty();
+  void validateNegativeFitWeights();
 
   /// Shared pointer to the fitting function
   API::IFunction_sptr m_function;
@@ -125,6 +132,8 @@ protected:
   mutable bool m_pushed;
   mutable double m_pushedValue;
   mutable EigenVector m_pushedParams;
+
+  bool m_ignoreInvalidData;
 
   friend class CurveFitting::SeqDomain;
   friend class CurveFitting::ParDomain;

@@ -70,6 +70,8 @@ private:
   /// * sqrt(W))]**2
   double calSqrtW(const API::FunctionValues_sptr &values) const;
 
+  void updateValidateFitWeights() override;
+
   friend class CurveFitting::SeqDomain;
   friend class CurveFitting::ParDomain;
 };
