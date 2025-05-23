@@ -17,7 +17,6 @@ set(INC_FILES
     inc/MantidNexus/NeXusFile_fwd.h
     inc/MantidNexus/napi.h
     inc/MantidNexus/napi5.h
-    inc/MantidNexus/napiconfig.h
     inc/MantidNexus/napi_internal.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NeXusException.hpp

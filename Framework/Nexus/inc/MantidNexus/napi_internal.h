@@ -72,8 +72,6 @@ typedef struct {
   NXstatus (*nxnativeexternallink)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *externalfile, CONSTCHAR *remotetarget);
   NXstatus (*nxnativeinquirefile)(NXhandle handle, char *externalfile, const int filenamelength);
   NXstatus (*nxnativeisexternallink)(NXhandle handle, CONSTCHAR *name, char *url, int urllen);
-  int stripFlag;
-  int checkNameSyntax;
   NXaccess access_mode;
 } NexusFunction, *pNexusFunction;
 /*---------------------*/

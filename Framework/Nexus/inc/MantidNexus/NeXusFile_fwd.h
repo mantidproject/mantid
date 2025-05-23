@@ -44,17 +44,11 @@ typedef char NXname[128];
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.
- * \li NXACC_CREATEXML create a NeXus XML file -- this is no longer be supported, exists for legacy reasons
- * \li NXACC_CHECKNAMESYNTAX Check names conform to NeXus allowed characters.
  */
 typedef enum {
   NXACC_READ = 1,
   NXACC_RDWR = 2,
   NXACC_CREATE5 = 5,
-  NXACC_CREATEXML = 6,
-  NXACC_TABLE = 8,
-  NXACC_NOSTRIP = 128,
-  NXACC_CHECKNAMESYNTAX = 256
 } NXaccess_mode;
 
 /**
