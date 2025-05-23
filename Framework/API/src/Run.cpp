@@ -32,8 +32,8 @@ namespace {
 Kernel::Logger g_log("Run");
 
 auto addPeriodSeries = [](Property *left, const Property *right) {
-  auto *leftAP = dynamic_cast<ArrayProperty<double> *>(left);
-  const auto *rightAP = dynamic_cast<const ArrayProperty<double> *>(right);
+  auto *leftAP = dynamic_cast<PropertyWithValue<std::vector<double>> *>(left);
+  const auto *rightAP = dynamic_cast<const PropertyWithValue<std::vector<double>> *>(right);
   if (!leftAP || !rightAP) {
     throw std::runtime_error("Expected ArrayProperty<double> for both inputs.");
   }
