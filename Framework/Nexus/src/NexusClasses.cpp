@@ -160,15 +160,7 @@ void NXClass::readAllInfo() {
   }
 }
 
-bool NXClass::isValid(const std::string &path) const {
-  try {
-    m_fileID->openGroupPath(path);
-    m_fileID->closeGroup();
-    return true;
-  } catch (::NeXus::Exception const &) {
-    return false;
-  }
-}
+bool NXClass::isValid(const std::string &path) const { return m_fileID->hasPath(path); }
 
 void NXClass::open() {
   m_fileID->openGroupPath(m_path);

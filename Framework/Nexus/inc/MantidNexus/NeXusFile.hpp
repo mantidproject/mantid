@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -35,12 +36,20 @@ private:
   std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** nexus descriptor to track the file tree
+   * NOTE: in file write, the following cannot be relied upon:
+   * - hasRootAttr
+   * - firstEntryNameType
+   */
+  Mantid::Nexus::NexusDescriptor m_descriptor;
 
-public:
   /**
    * \return A pair of the next entry available in a listing.
+   * NOTE: this is to be deleted in 6.14.  do NOT make public
    */
   Entry getNextEntry();
+
+public:
   /**
    * \return Information about the next attribute.
    */
@@ -117,6 +126,10 @@ public:
 
   /** Flush the file. */
   void flush();
+
+  bool hasPath(std::string const &);
+  bool hasGroup(std::string const &, std::string const &);
+  bool hasData(std::string const &);
 
   /**
    * Create a new group.
@@ -507,6 +520,12 @@ public:
    */
   template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
+  /** Return the string name of the top-level entry
+   *
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
+
   /**
    * \return Information about all attributes on the data that is currently open.
    */
@@ -568,6 +587,10 @@ public:
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
+
+private:
+  std::string formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
 };
 
 /**

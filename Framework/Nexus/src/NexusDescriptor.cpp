@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
 
 #include <H5Cpp.h>
@@ -81,6 +82,9 @@ bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_roo
 const std::map<std::string, std::set<std::string>> &NexusDescriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
+
+void NexusDescriptor::addRootAttr(const std::string &name) { m_rootAttrs.insert(name); }
+
 void NexusDescriptor::addEntry(const std::string &entryName, const std::string &groupClass) {
   // simple checks
   if (entryName.empty())
@@ -106,35 +110,29 @@ void NexusDescriptor::addEntry(const std::string &entryName, const std::string &
 
 // PRIVATE
 std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
 
   std::map<std::string, std::set<std::string>> allEntries;
 
-  H5::H5File fileID;
-  try {
-    fileID = H5::H5File(m_filename, H5F_ACC_RDONLY, H5::FileCreatPropList::DEFAULT, access_plist);
-  } catch (const H5::FileIException &) {
-    try {
-      fileID.close();
-    } catch (const H5::FileIException &) { /* do nothing */
+  // if the file exists read it
+  if (std::filesystem::exists(m_filename)) {
+
+    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::Group groupID = fileID.openGroup("/");
+
+    // get root attributes
+    for (int i = 0; i < groupID.getNumAttrs(); ++i) {
+      H5::Attribute attr = groupID.openAttribute(i);
+      m_rootAttrs.insert(attr.getName());
     }
-    throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + m_filename + "\n");
+
+    // scan file recursively starting with root group "/"
+    getGroup(groupID, allEntries, m_firstEntryNameType, 0);
+
+    // handle going out of scope should automatically close
+    fileID.close();
+  } else {
+    // if the file does not exist, then leave allEntries empty
   }
-
-  H5::Group groupID = fileID.openGroup("/");
-
-  // get root attributes
-  for (int i = 0; i < groupID.getNumAttrs(); ++i) {
-    H5::Attribute attr = groupID.openAttribute(i);
-    m_rootAttrs.insert(attr.getName());
-  }
-
-  // scan file recursively starting with root group "/"
-  getGroup(groupID, allEntries, m_firstEntryNameType, 0);
-
-  // handle going out of scope should automatically close
-  fileID.close();
 
   // rely on move semantics
   return allEntries;
