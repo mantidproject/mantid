@@ -36,6 +36,9 @@
 #include "MantidNexus/napiconfig.h"
 #include "MantidNexus/nxstack.h"
 
+// this has to be after the other napi includes
+#include "MantidNexus/napi5.h"
+
 /*---------------------------------------------------------------------
  Recognized and handled napimount URLS
  -----------------------------------------------------------------------*/
@@ -220,10 +223,6 @@ NXstatus NXsetcache(long newVal) {
 
 void NXReportError(const char *string) { UNUSED_ARG(string); }
 
-/*----------------------------------------------------------------------*/
-#ifdef WITH_HDF5
-#include "MantidNexus/napi5.h"
-#endif
 /* ----------------------------------------------------------------------
 
    Definition of NeXus API
@@ -241,12 +240,12 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
     return -1;
   }
   fclose(fd);
-#ifdef WITH_HDF5
+
+  // check that this is indeed hdf5
   iRet = H5Fis_hdf5(static_cast<const char *>(filename));
   if (iRet > 0) {
     return NXACC_CREATE5;
   }
-#endif
   /*
      file type not recognized
    */
@@ -346,8 +345,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
 
   NXstatus retstat = NXstatus::NX_ERROR;
   if (backend_type == NXACC_CREATE5) {
-    /* HDF5 type */
-#ifdef WITH_HDF5
     NXhandle hdf5_handle = NULL;
     retstat = NX5open(filename, am, &hdf5_handle);
     if (retstat != NXstatus::NX_OK) {
@@ -359,10 +356,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
     pushFileStack(fileStack, fHandle, filename);
-#else
-    NXReportError("ERROR: Attempt to create HDF5 file when not linked with HDF5");
-    retstat = NXstatus::NX_ERROR;
-#endif /* HDF5 */
     free(filename);
     return retstat;
   } else {

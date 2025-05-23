@@ -28,8 +28,6 @@
 
 #include "MantidNexus/napiconfig.h"
 
-#ifdef WITH_HDF5
-
 #include <assert.h>
 #include <cstring>
 #include <map>
@@ -2444,5 +2442,3 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxnativeisexternallink = NX5nativeisexternallink;
   fHandle->nxgetnextattra = NX5getnextattra;
 }
-
-#endif /* HDF5 */

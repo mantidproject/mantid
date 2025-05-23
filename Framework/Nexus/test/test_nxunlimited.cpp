@@ -63,11 +63,10 @@ int test_unlimited(int file_type, const char *filename) {
 int main() {
   time_t tim;
 
-#ifdef WITH_HDF5
   printf("Testing HDF5\n");
   time(&tim);
   test_unlimited(NXACC_CREATE5, "test_unlimited.nx5");
   printf("Took %u seconds\n", (unsigned)(time(NULL) - tim));
-#endif
+
   return 0;
 }
