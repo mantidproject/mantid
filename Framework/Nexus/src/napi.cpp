@@ -313,11 +313,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
     strcpy(filename, userfilename);
-  } else if (my_am == NXACC_CREATEXML) {
-    snprintf(error, 1023, "xml backend not supported for %s", userfilename);
-    NXReportError(error);
-    free(fHandle);
-    return NXstatus::NX_ERROR;
   } else {
     filename = locateNexusFileInPath(const_cast<char *>(static_cast<const char *>(userfilename)));
     if (filename == NULL) {
@@ -370,12 +365,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
 #endif /* HDF5 */
     free(filename);
     return retstat;
-  } else if (backend_type == NXACC_CREATEXML) {
-    /*
-       XML type
-     */
-    NXReportError("ERROR: Attempt to create XML file when not linked with XML");
-    retstat = NXstatus::NX_ERROR;
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
