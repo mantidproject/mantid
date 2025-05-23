@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
+from sans.algorithm_detail.move_workspaces import move_component
 from sans.common.general_functions import (
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
@@ -17,7 +18,7 @@ from sans.common.general_functions import (
     get_transmission_output_name,
     get_wav_range_from_ws,
 )
-from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType
+from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType, CanonicalCoordinates
 from sans.common.constants import (
     TRANS_SUFFIX,
     SANS_SUFFIX,
@@ -1339,6 +1340,13 @@ def save_to_file(
     save_info = state.save
     scaled_bg_info = state.background_subtraction
     file_formats = save_info.file_format
+
+    if SaveType.POL_NX_CAN_SAS in file_formats:
+        save_group_to_file(reduction_packages, state, save_can, file_formats, additional_run_numbers, additional_metadata)
+        file_formats.remove(SaveType.POL_NX_CAN_SAS)
+        if not file_formats:
+            return
+
     for to_save in workspaces_names_to_save:
         if isinstance(to_save, tuple):
             for i, ws_name_to_save in enumerate(to_save[0]):
@@ -1359,11 +1367,131 @@ def save_to_file(
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
 
 
+def save_group_to_file(reduction_packages, state, save_can, file_formats, additional_run_numbers, additional_metadata):
+    polarization_state = state.polarization
+    groups_to_save = {}
+    for package in reduction_packages:
+        trans_runs = get_transmission_names_to_save(package, False)
+        trans_name = trans_runs[0] if trans_runs else ""
+        trans_can_runs = get_transmission_names_to_save(package, True) if save_can else []
+        trans_can_name = trans_can_runs[0] if trans_can_runs else ""
+        match package.reduction_mode:
+            case ReductionMode.HAB:
+                groups_to_save[package.reduced_hab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.LAB:
+                groups_to_save[package.reduced_lab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.BOTH:
+                groups_to_save[package.reduced_lab_base_name[0]] = (trans_name, trans_can_name)
+                groups_to_save[package.reduced_hab_base_name[0]] = (trans_name, trans_can_name)
+            case ReductionMode.MERGED:
+                groups_to_save[package.reduced_merged_base_name[0]] = (trans_name, trans_can_name)
+    for ws_name, trans_runs in groups_to_save.items():
+        ws = AnalysisDataService.retrieve(ws_name)
+        _add_polarization_metadata_if_relevant(polarization_state, additional_metadata, ws)
+        if not additional_metadata["PolarizationProps"]:
+            raise AttributeError(
+                f"A polarization section containing at least 'spin_configuration' must be defined in the user file to use "
+                f"SavePolarizedNXCanSAS. Current properties: {str(additional_metadata['PolarizationProps'])}"
+            )
+        save_workspace_to_file(ws_name, file_formats, ws_name, additional_run_numbers, additional_metadata, trans_runs[0], trans_runs[1])
+
+
 def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata: dict[str, Any]):
     if not ws_name.endswith(SCALED_BGSUB_SUFFIX):
         return
     metadata["BackgroundSubtractionWorkspace"] = str(bg_state.workspace)
     metadata["BackgroundSubtractionScaleFactor"] = float(bg_state.scale_factor)
+
+
+def _add_polarization_metadata_if_relevant(polarization_state, metadata: dict[str, Any], ws):
+    if isinstance(ws, WorkspaceGroup):
+        for sub_ws in ws:
+            _apply_polarization_component_adjustments(polarization_state, sub_ws)
+        ws = ws.getItem(0)
+    pol_props = {}
+    if polarization_state.spin_configuration:
+        pol_props["InputSpinStates"] = str(polarization_state.spin_configuration)
+    if polarization_state.polarizer is not None:
+        pol_props["PolarizerComponentName"] = str(polarization_state.polarizer.idf_component_name)
+    if polarization_state.analyzer is not None:
+        pol_props["AnalyzerComponentName"] = str(polarization_state.analyzer.idf_component_name)
+    flipper_component_names = []
+    for flipper in polarization_state.flippers:
+        if flipper.idf_component_name:
+            flipper_component_names.append(str(flipper.idf_component_name))
+    flipper_component_names_str = ",".join(flipper_component_names)
+    if flipper_component_names_str:
+        pol_props["FlipperComponentNames"] = flipper_component_names_str
+    mag_field = polarization_state.magnetic_field
+    if mag_field is not None:
+        if mag_field.sample_strength_log:
+            pol_props["MagneticFieldStrengthLog"] = polarization_state.magnetic_field.sample_strength_log
+        if mag_field.sample_direction_log:
+            pol_props["MagneticFieldDirection"] = ws.getRun().getProperty(mag_field.sample_direction_log).value
+        if mag_field.sample_direction_a is not None:  # We don't need to check for all axes, the schema enforces all or nothing.
+            pol_props["MagneticFieldDirection"] = ",".join(
+                [str(mag_field.sample_direction_a), str(mag_field.sample_direction_p), str(mag_field.sample_direction_d)]
+            )
+    metadata["PolarizationProps"] = pol_props
+
+
+def _apply_polarization_component_adjustments(polarization_state, ws):
+    def _update_component_parameters(idf_name, parameter_map):
+        for parameter_name, parameter_value in parameter_map.items():
+            if parameter_value is not None:
+                set_options = {
+                    "Workspace": ws,
+                    "ComponentName": idf_name,
+                    "ParameterName": parameter_name,
+                    "ParameterType": "String" if isinstance(parameter_value, str) else "Number",
+                    "Value": parameter_value,
+                }
+                alg = create_unmanaged_algorithm("SetInstrumentParameter", **set_options)
+                alg.execute()
+
+    def _move_pol_component(location_x, location_y, location_z, idf_pos, idf_name):
+        """
+        The position of polarizers, analyzers and flippers in polarized experiments can be moved
+        on an experiment to experiment basis. This means their position may be defined in the
+        user file rather than constantly updating the IDF. This methods performs that move to match
+        the user file for the supplied component.
+        :param location_x: The new X location.
+        :param location_y: The new Y location.
+        :param location_z: The new Z location.
+        :param idf_pos: The old component position from the workspace's Instrument object.
+        :param idf_name: The name defined in the IDF of the component to move.
+        """
+        location = {
+            CanonicalCoordinates.X: location_x if location_x is not None else idf_pos.getX(),
+            CanonicalCoordinates.Y: location_y if location_y is not None else idf_pos.getY(),
+            CanonicalCoordinates.Z: location_z if location_z is not None else idf_pos.getZ(),
+        }
+        move_component(ws, location, idf_name, False)
+
+    def _update_component_properties(component_state):
+        idf_name = component_state.idf_component_name
+        component = ws.getInstrument().getComponentByName(idf_name)
+        if component is None:
+            raise AttributeError(
+                f'The name "{idf_name}" is not present in the Instrument Definition File for {ws.getInstrument().getName()}. '
+                f'Please ensure any "idf_component_name" fields in the User File match an existing entry in the IDF for the '
+                f"component you wish to override."
+            )
+        _move_pol_component(
+            component_state.location_x, component_state.location_y, component_state.location_z, component.getPos(), idf_name
+        )
+        parameter_map = {"device_type": component_state.device_type}
+        if hasattr(component_state, "cell_length"):  # Only StateFilters (polarizers & analyzers) have these properties.
+            parameter_map["cell_length"] = component_state.cell_length
+            parameter_map["gas_pressure"] = component_state.gas_pressure
+        _update_component_parameters(idf_name, parameter_map)
+
+    if polarization_state.polarizer:
+        _update_component_properties(polarization_state.polarizer)
+    if polarization_state.analyzer:
+        _update_component_properties(polarization_state.analyzer)
+    for flipper in polarization_state.flippers:
+        _update_component_properties(flipper)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
@@ -1648,6 +1776,8 @@ def save_workspace_to_file(
         save_options.update({"CanSAS": True})
     if SaveType.NX_CAN_SAS in file_formats:
         save_options.update({"NXcanSAS": True})
+    if SaveType.POL_NX_CAN_SAS in file_formats:
+        save_options.update({"PolarizedNXcanSAS": True})
     if SaveType.NIST_QXY in file_formats:
         save_options.update({"NistQxy": True})
     if SaveType.RKH in file_formats:
