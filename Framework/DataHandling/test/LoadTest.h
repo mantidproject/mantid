@@ -23,7 +23,7 @@ using namespace Mantid::Kernel;
 class LoadTest : public CxxTest::TestSuite {
 
 private:
-  std::vector<std::string> m_dataSearchDirs;
+  std::vector<std::filesystem::path> m_dataSearchDirs;
   std::string m_instName;
 
 public:

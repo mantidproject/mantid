@@ -29,7 +29,7 @@ public:
     // Insert the directory of the properties file as a sitedir
     // to ensure the built copy of mantid gets picked up
     const py::object siteModule{py::handle<>(PyImport_ImportModule("site"))};
-    siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir());
+    siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir().string());
 
     // Use Agg backend for matplotlib
     py::object mpl{py::handle<>(PyImport_ImportModule("matplotlib"))};

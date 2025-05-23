@@ -17,8 +17,10 @@
 #include <Poco/Path.h>
 #include <fstream>
 #include <memory>
+#include <ranges>
 #include <regex>
 #include <string>
+#include <string_view>
 
 #include <Poco/NObserver.h>
 
@@ -218,13 +220,15 @@ public:
     TS_ASSERT_LESS_THAN(0, username.length());
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); // check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersionReadable().length());
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(
+        0, ConfigService::Instance().getCurrentDir().string().length()); // check that the string is not empty
     //        TS_ASSERT_LESS_THAN(0,
     //        ConfigService::Instance().getHomeDir().length()); //check that the
     //        string is not empty
-    TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); // check that the string is not empty
+    TS_ASSERT_LESS_THAN(0,
+                        ConfigService::Instance().getTempDir().string().length()); // check that the string is not empty
 
-    std::string appdataDir = ConfigService::Instance().getAppDataDir();
+    std::string appdataDir = ConfigService::Instance().getAppDataDir().string();
     TS_ASSERT_LESS_THAN(0, appdataDir.length());
 #ifdef _WIN32
     std::string::size_type index = appdataDir.find("\\AppData\\Roaming\\mantidproject\\mantid");
@@ -241,16 +245,17 @@ public:
     TS_ASSERT_LESS_THAN(1, directories.size());
     // the first entry should be the AppDataDir + instrument
     TSM_ASSERT_LESS_THAN("Could not find the appData directory in getInstrumentDirectories()[0]",
-                         directories[0].find(ConfigService::Instance().getAppDataDir()), directories[0].size());
+                         directories[0].string().find(ConfigService::Instance().getAppDataDir().string()),
+                         directories[0].string().size());
     TSM_ASSERT_LESS_THAN("Could not find the 'instrument' directory in "
                          "getInstrumentDirectories()[0]",
-                         directories[0].find("instrument"), directories[0].size());
+                         directories[0].string().find("instrument"), directories[0].string().size());
 
     if (directories.size() == 3) {
       // The middle entry should be /etc/mantid/instrument
       TSM_ASSERT_LESS_THAN("Could not find /etc/mantid/instrument path in "
                            "getInstrumentDirectories()[1]",
-                           directories[1].find("etc/mantid/instrument"), directories[1].size());
+                           directories[1].string().find("etc/mantid/instrument"), directories[1].string().size());
     }
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
@@ -258,15 +263,15 @@ public:
 
     // check all of the directory entries actually exist
     for (auto &directoryPath : directories) {
-      Poco::File directory(directoryPath);
-      TSM_ASSERT(directoryPath + " does not exist", directory.exists());
+      Poco::File directory(directoryPath.string());
+      TSM_ASSERT(directoryPath.string() + " does not exist", directory.exists());
     }
   }
 
   void testSetInstrumentDirectory() {
 
     auto originalDirectories = ConfigService::Instance().getInstrumentDirectories();
-    std::vector<std::string> testDirectories;
+    std::vector<std::filesystem::path> testDirectories;
     testDirectories.emplace_back("Test Directory 1");
     testDirectories.emplace_back("Test Directory 2");
     ConfigService::Instance().setInstrumentDirectories(testDirectories);
@@ -307,9 +312,9 @@ public:
   void testAppendProperties() {
 
     // This should clear out all old properties
-    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
-    const std::string propfile = propfilePath + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);
+    const std::filesystem::path propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
+    const std::filesystem::path propfile = propfilePath / "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile.string());
     // this should return an empty string
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
     // this should pass
@@ -317,7 +322,7 @@ public:
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
     // This should append a new properties file properties
-    ConfigService::Instance().updateConfig(propfilePath + "MantidTest.user.properties", true);
+    ConfigService::Instance().updateConfig((propfilePath / "MantidTest.user.properties").string(), true);
     // this should now be valid
     TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "5");
     // this should have been overridden
@@ -335,7 +340,8 @@ public:
   }
 
   void testSaveConfigCleanFile() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     const std::string filename("user.settings");
@@ -383,7 +389,8 @@ public:
     writer << "mantid.legs = " << value << "\n";
     writer.close();
 
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
     ConfigService::Instance().setString("mantid.legs", value);
     ConfigService::Instance().updateConfig(propfile, false, false);
@@ -406,7 +413,8 @@ public:
     } catch (Poco::Exception &) {
     }
 
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     settings.updateConfig(propfile);
     settings.setString("mantid.legs", "15");
 
@@ -591,7 +599,8 @@ public:
   }
 
   void testGetKeysWithValidInput() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all subkeys with the given root key
@@ -604,7 +613,8 @@ public:
   }
 
   void testGetKeysWithZeroSubKeys() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("mantid.legs");
@@ -614,7 +624,8 @@ public:
   }
 
   void testGetKeysWithEmptyPrefix() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     // Returns all *root* keys, i.e. unique keys left of the first period
@@ -623,9 +634,9 @@ public:
   }
 
   void testGetAllKeys() {
-    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
-    const std::string propfile = propfilePath + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);
+    const std::filesystem::path propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
+    const std::filesystem::path propfile = propfilePath / "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile.string());
 
     std::vector<std::string> keys = ConfigService::Instance().keys();
 
@@ -633,7 +644,8 @@ public:
   }
 
   void testRemovingProperty() {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile =
+        (ConfigService::Instance().getDirectoryOfExecutable() / "MantidTest.properties").string();
     ConfigService::Instance().updateConfig(propfile);
 
     std::string rootName = "mantid.legs";
@@ -661,31 +673,25 @@ public:
 
   void testsetDataSearchDirs() {
     std::string dirs;
-    std::string expected = "/test/a/;/test/b/;/test/c/";
+    std::vector<std::filesystem::path> expectedDirs{std::filesystem::absolute("/test/a/"),
+                                                    std::filesystem::absolute("/test/b/"),
+                                                    std::filesystem::absolute("/test/c/")};
 
     // separated all by ;
     dirs = "/test/a/;/test/b/;/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // separated all by ,
     dirs = "/test/a/,/test/b/,/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // separated all by , and ;
     dirs = "/test/a/,/test/b/;/test/c/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), expected);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(expectedDirs, dirs);
 
     // one path
     dirs = "/test/a/";
-    ConfigService::Instance().setDataSearchDirs(dirs);
-    TS_ASSERT_EQUALS(ConfigService::Instance().getString("datasearch.directories"), dirs);
-    ConfigService::Instance().reset();
+    compareConfigDirectories(std::vector<std::filesystem::path>{std::filesystem::absolute("/test/a/")}, dirs);
   }
 
 protected:
@@ -737,5 +743,28 @@ private:
   std::string readFile(const std::string &filename) {
     std::ifstream reader(filename.c_str());
     return std::string((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());
+  }
+
+  std::vector<std::filesystem::path> splitPathString(const std::string &path) {
+    std::vector<std::filesystem::path> paths;
+    for (auto part : std::views::split(path, ';')) {
+      paths.emplace_back(part.begin(), part.end());
+    }
+    return paths;
+  }
+
+  void compareConfigDirectories(const std::vector<std::filesystem::path> &expected, const std::string &dirs) {
+    ConfigService::Instance().setDataSearchDirs(dirs);
+    const auto configDirs = splitPathString(ConfigService::Instance().getString("datasearch.directories"));
+    TS_ASSERT_EQUALS(configDirs.size(), expected.size());
+    for (size_t i = 0; i < expected.size(); ++i) {
+      TS_ASSERT(arePathsEquivalent(configDirs[i], expected[i]));
+    }
+    ConfigService::Instance().reset();
+  }
+
+  bool arePathsEquivalent(const std::filesystem::path &path1, const std::filesystem::path &path2) {
+    // If the paths do not exist, we cannot compare them using canonical() or equivalent()
+    return std::filesystem::weakly_canonical(path1) == std::filesystem::weakly_canonical(path2);
   }
 };

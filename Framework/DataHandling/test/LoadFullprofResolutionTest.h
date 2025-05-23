@@ -19,7 +19,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/OptionalBool.h"
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::DataHandling::LoadFullprofResolution;
@@ -79,8 +79,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("TestBank1Table");
-    Poco::File("Test1Bank.irf").remove();
-
+    std::filesystem::remove("Test1Bank.irf");
     return;
   }
 
@@ -123,8 +122,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("TestBank3Table");
-    Poco::File("Test2Bank.irf").remove();
-
+    std::filesystem::remove("Test2Bank.irf");
     return;
   }
 
@@ -221,8 +219,7 @@ public:
     AnalysisDataService::Instance().remove("TestBank4Table");
     AnalysisDataService::Instance().remove("TestBank4TableFalse");
     AnalysisDataService::Instance().remove("TestBank4TableTrue");
-    Poco::File("Test2Bank.irf").remove();
-
+    std::filesystem::remove("Test2Bank.irf");
     return;
   }
 
@@ -265,8 +262,7 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("TestBank5Table");
-    Poco::File("Test3Bank.irf").remove();
-
+    std::filesystem::remove("Test3Bank.irf");
     return;
   }
 
@@ -314,8 +310,7 @@ public:
 
     // 4. Clean
     AnalysisDataService::Instance().remove("TestAGSTable");
-    Poco::File("TestAGS.irf").remove();
-
+    std::filesystem::remove("TestAGS.irf");
     return;
   }
 
@@ -402,8 +397,7 @@ public:
       TS_ASSERT_DELTA(formulaValueCantreAt10, 0.0, 0.0000001);
     }
 
-    // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -514,8 +508,7 @@ public:
       TS_ASSERT_DELTA(boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
     }
 
-    // Clean
-    Poco::File("TestMultiWorskpace.irf").remove();
+    std::filesystem::remove("TestMultiWorskpace.irf");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -589,8 +582,7 @@ public:
       TS_ASSERT_DELTA(formulaValueCantreAt2, 0.0251, 0.0001);
     }
 
-    // Clean
-    Poco::File("TestWorskpaceBBX.irf").remove();
+    std::filesystem::remove("TestWorskpaceBBX.irf");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -614,8 +606,7 @@ public:
     alg.execute();
     TS_ASSERT(!alg.isExecuted());
 
-    // Clean
-    Poco::File("TestNoOutput.irf").remove();
+    std::filesystem::remove("TestNoOutput.irf");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -656,7 +647,7 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("TestNPROFTable");
-    Poco::File("TestNPROF.irf").remove();
+    std::filesystem::remove("TestNPROF.irf");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -681,8 +672,7 @@ public:
     TS_ASSERT(!alg.isExecuted());
 
     // 4. Clean
-    Poco::File("Test2Bank.irf").remove();
-
+    std::filesystem::remove("Test2Bank.irf");
     return;
   }
 

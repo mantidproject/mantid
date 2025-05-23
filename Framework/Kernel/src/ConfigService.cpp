@@ -93,18 +93,18 @@ const std::string PATH_DELIMITERS = ";,";
  * @param path The path to split.
  * @returns vector containing the split path.
  */
-std::vector<std::string> splitPath(const std::string &path) {
-  std::vector<std::string> splitted;
+std::vector<std::filesystem::path> splitPath(const std::string &path) {
+  std::vector<std::filesystem::path> splitted;
 
   if (path.find_first_of(PATH_DELIMITERS) == std::string::npos) { // don't bother tokenizing
-    splitted.emplace_back(path);
+    splitted.emplace_back(std::filesystem::path(path));
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM + Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
     Mantid::Kernel::StringTokenizer tokenizer(path, PATH_DELIMITERS, options);
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
-        splitted.emplace_back(*itr);
+        splitted.emplace_back(std::filesystem::path(*itr));
       }
     }
   }
@@ -150,9 +150,9 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
-  std::string propertiesFilesList;
-  updateConfig(getPropertiesDir() + m_properties_file_name, false, false);
-  propertiesFilesList = getPropertiesDir() + m_properties_file_name;
+  std::filesystem::path propertiesFilePath(getPropertiesDir() / m_properties_file_name);
+  std::string propertiesFilesList = propertiesFilePath.string();
+  updateConfig(propertiesFilePath, false, false);
 
   // Load the local (machine) properties file, if it exists
   Poco::File localFile(getLocalFilename());
@@ -183,24 +183,23 @@ ConfigServiceImpl::ConfigServiceImpl()
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << '\n';
 
   // Assert that the appdata and the instrument subdirectory exists
-  std::string appDataDir = getAppDataDir();
-  Poco::Path path(appDataDir);
-  path.pushDirectory("instrument");
-  Poco::File file(path);
+  std::filesystem::path path(getAppDataDir());
+  path /= "instrument";
+  Poco::File file(path.string());
   // createDirectories will fail gracefully if it is already present - but will
   // throw an error if it cannot create the directory
   try {
     file.createDirectories();
   } catch (Poco::FileException &fe) {
-    g_log.error() << "Cannot create the local instrument cache directory [" << path.toString()
+    g_log.error() << "Cannot create the local instrument cache directory [" << path.string()
                   << "]. Mantid will not be able to update instrument definitions.\n"
                   << fe.what() << '\n';
   }
-  Poco::File vtpDir(getVTPFileDirectory());
+  Poco::File vtpDir(getVTPFileDirectory().string());
   try {
     vtpDir.createDirectories();
   } catch (Poco::FileException &fe) {
-    g_log.error() << "Cannot create the local instrument geometry cache directory [" << path.toString()
+    g_log.error() << "Cannot create the local instrument geometry cache directory [" << path.string()
                   << "]. Mantid will be slower at viewing complex instruments.\n"
                   << fe.what() << '\n';
   }
@@ -241,15 +240,15 @@ void ConfigServiceImpl::setBaseDirectory() {
   Poco::File f;
 
   // First directory: the current working
-  m_strBaseDir = Poco::Path::current();
-  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  m_strBaseDir = std::filesystem::current_path();
+  f = Poco::File((m_strBaseDir / m_properties_file_name).string());
   if (f.exists())
     return;
 
   // Check the executable directory to see if it includes a mantid.properties
   // file
   m_strBaseDir = getDirectoryOfExecutable();
-  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  f = Poco::File((m_strBaseDir / m_properties_file_name).string());
   if (f.exists())
     return;
 
@@ -266,7 +265,7 @@ void ConfigServiceImpl::setBaseDirectory() {
 #else
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
 #endif
-    f = Poco::File(m_strBaseDir + m_properties_file_name);
+    f = Poco::File((m_strBaseDir / m_properties_file_name).string());
     if (f.exists())
       return;
   }
@@ -274,8 +273,8 @@ void ConfigServiceImpl::setBaseDirectory() {
 #ifdef __APPLE__
   // Finally, on OSX check if we're in the package directory and the .properties
   // file just happens to be two directories up
-  auto path = Poco::Path(getDirectoryOfExecutable());
-  m_strBaseDir = path.parent().parent().parent().toString();
+  auto path = std::filesystem::path(getDirectoryOfExecutable());
+  m_strBaseDir = path.parent_path().parent_path().parent_path().string();
 #endif
 }
 
@@ -344,7 +343,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename, const bool appen
 
     // check if we have failed to open the file
     if ((!good) || (temp.empty())) {
-      if (filename == getUserPropertiesDir() + m_user_properties_file_name) {
+      if (filename == (getUserPropertiesDir() / m_user_properties_file_name).string()) {
         // write out a fresh file
         createUserPropertiesFile();
       } else {
@@ -431,7 +430,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
     auto splitted = splitPath(dir);
     auto iend = splitted.cend();
     for (auto itr = splitted.begin(); itr != iend;) {
-      std::string absolute = makeAbsolute(*itr, key);
+      std::string absolute = makeAbsolute((*itr).string(), key);
       if (absolute.empty()) {
         ++itr;
       } else {
@@ -444,38 +443,24 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
     return converted;
   }
 
-  // MG 05/10/09: When the Poco::FilePropertyConfiguration object reads its
-  // key/value pairs it
-  // treats a backslash as the start of an escape sequence. If the next
-  // character does not
-  // form a valid sequence then the backslash is removed from the stream. This
-  // has the effect
-  // of giving malformed paths when using Windows-style directories. E.g
-  // C:\Mantid ->C:Mantid
-  // and Poco::Path::isRelative throws an exception on this
   bool is_relative(false);
   try {
-    is_relative = Poco::Path(dir).isRelative();
-  } catch (Poco::PathSyntaxException &) {
+    is_relative = std::filesystem::path(dir).is_relative();
+  } catch (std::filesystem::filesystem_error &) {
     g_log.warning() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
     return "";
   }
   if (is_relative) {
-    const std::string propFileDir(getPropertiesDir());
-    converted = Poco::Path(propFileDir).resolve(dir).toString();
+    const std::filesystem::path propFileDir(getPropertiesDir());
+    converted = std::filesystem::absolute(propFileDir / dir).string();
   } else {
     converted = dir;
   }
-  if (Poco::Path(converted).getExtension() != "") {
-    converted = Poco::Path(converted).toString();
-  } else {
-    converted = Poco::Path(converted).makeDirectory().toString();
-  }
+
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445.
   // Ticket #2460 prompts a review of our path handling in the config service.
-  boost::replace_all(converted, "\\", "/");
-  return converted;
+  return std::filesystem::path(converted).generic_string();
 }
 
 /**
@@ -498,15 +483,9 @@ void ConfigServiceImpl::cacheDataSearchPaths() {
  *  @param path :: the absolute path name to search for
  *  @return true if the path was found
  */
-bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
-  // the path produced by poco will have \ on windows, but the searchdirs will
-  // always have /
-  std::string correctedPath = path;
-  replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
-
+bool ConfigServiceImpl::isInDataSearchList(const std::filesystem::path &path) const {
   using std::placeholders::_1;
-  auto it = std::find_if(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(),
-                         std::bind(std::equal_to<std::string>(), _1, correctedPath));
+  auto it = std::find(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(), path);
   return (it != m_dataSearchDirs.end());
 }
 
@@ -516,7 +495,7 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
  */
 void ConfigServiceImpl::createUserPropertiesFile() const {
   try {
-    std::fstream filestr((getUserPropertiesDir() + m_user_properties_file_name).c_str(), std::fstream::out);
+    std::fstream filestr((getUserPropertiesDir() / m_user_properties_file_name).string().c_str(), std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
                "installation.\n";
@@ -610,7 +589,7 @@ void ConfigServiceImpl::reset() {
   // Now load the original
   const bool append = false;
   const bool updateCaches = true;
-  updateConfig(getPropertiesDir() + m_properties_file_name, append, updateCaches);
+  updateConfig(getPropertiesDir() / m_properties_file_name, append, updateCaches);
 }
 
 /** Updates and existing configuration and restarts the logging
@@ -622,8 +601,9 @@ void ConfigServiceImpl::reset() {
  *  @param update_caches :: If true(default) then the various property caches
  * are updated
  */
-void ConfigServiceImpl::updateConfig(const std::string &filename, const bool append, const bool update_caches) {
-  loadConfig(filename, append);
+void ConfigServiceImpl::updateConfig(const std::filesystem::path &filename, const bool append,
+                                     const bool update_caches) {
+  loadConfig(filename.string(), append);
 
   // Ensure that the default save directory makes sense
   /*
@@ -993,7 +973,9 @@ std::string ConfigServiceImpl::getLocalFilename() const {
  * Return the full filename of the user properties file
  * @returns A string containing the full path to the user file
  */
-std::string ConfigServiceImpl::getUserFilename() const { return getUserPropertiesDir() + m_user_properties_file_name; }
+std::string ConfigServiceImpl::getUserFilename() const {
+  return (getUserPropertiesDir() / m_user_properties_file_name).string();
+}
 
 /** Searches for the string within the environment variables and returns the
  *  value as a string.
@@ -1208,41 +1190,46 @@ std::string ConfigServiceImpl::getUsername() {
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() { return m_pSysConfig->getString("system.currentDir"); }
+std::filesystem::path ConfigServiceImpl::getCurrentDir() {
+  return std::filesystem::path(m_pSysConfig->getString("system.currentDir"));
+}
 
 /** Gets the absolute path of the current directory containing the dll. Const
  *version.
  *
  * @returns The absolute path of the current directory containing the dll
  */
-std::string ConfigServiceImpl::getCurrentDir() const { return m_pSysConfig->getString("system.currentDir"); }
+std::filesystem::path ConfigServiceImpl::getCurrentDir() const {
+  return std::filesystem::path(m_pSysConfig->getString("system.currentDir"));
+}
 
 /** Gets the absolute path of the temp directory
  *
  * @returns The absolute path of the temp directory
  */
-std::string ConfigServiceImpl::getTempDir() { return m_pSysConfig->getString("system.tempDir"); }
+std::filesystem::path ConfigServiceImpl::getTempDir() {
+  return std::filesystem::path(m_pSysConfig->getString("system.tempDir"));
+}
 
 /** Gets the absolute path of the appdata directory
  *
  * @returns The absolute path of the appdata directory
  */
-std::string ConfigServiceImpl::getAppDataDir() {
+std::filesystem::path ConfigServiceImpl::getAppDataDir() const {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
   const std::string vendorName = "mantidproject";
   wchar_t *w_appdata = _wgetenv(L"APPDATA");
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   std::string appdata = converter.to_bytes(w_appdata);
-  Poco::Path path(appdata);
-  path.makeDirectory();
-  path.pushDirectory(vendorName);
-  path.pushDirectory(applicationName);
-  return path.toString();
+  std::filesystem::path path(appdata);
+  path /= vendorName;
+  path /= applicationName;
+  return path;
 #else // linux and mac
-  Poco::Path path(Poco::Path::home());
-  path.pushDirectory("." + applicationName);
-  return path.toString();
+  std::filesystem::path path(std::getenv("HOME"));
+  path /= "." + applicationName;
+  return path;
 #endif
 }
 
@@ -1251,8 +1238,8 @@ std::string ConfigServiceImpl::getAppDataDir() {
  * @returns A string containing the path of the directory
  * containing the executable, including a trailing slash
  */
-std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
-  return Poco::Path(getPathToExecutable()).parent().toString();
+std::filesystem::path ConfigServiceImpl::getDirectoryOfExecutable() const {
+  return getPathToExecutable().parent_path();
 }
 
 /**
@@ -1260,7 +1247,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
  * in)
  * @returns A string containing the full path the executable
  */
-std::string ConfigServiceImpl::getPathToExecutable() const {
+std::filesystem::path ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
   char pBuf[LEN];
@@ -1284,7 +1271,7 @@ std::string ConfigServiceImpl::getPathToExecutable() const {
     pBuf[bytes] = '\0';
     execpath = std::string(pBuf);
   }
-  return execpath;
+  return std::filesystem::path(execpath);
 }
 
 /**
@@ -1373,7 +1360,7 @@ bool ConfigServiceImpl::isNetworkDrive([[maybe_unused]] const std::string &path)
  * @returns The directory to consider as the base directory, including a
  * trailing slash
  */
-std::string ConfigServiceImpl::getPropertiesDir() const { return m_strBaseDir; }
+const std::filesystem::path &ConfigServiceImpl::getPropertiesDir() const { return m_strBaseDir; }
 
 /**
  * Return the directory that Mantid should use for writing any files it needs so
@@ -1382,15 +1369,15 @@ std::string ConfigServiceImpl::getPropertiesDir() const { return m_strBaseDir; }
  * so that filenames can more easily be concatenated with this
  * @return the directory that Mantid should use for writing files
  */
-std::string ConfigServiceImpl::getUserPropertiesDir() const {
+std::filesystem::path ConfigServiceImpl::getUserPropertiesDir() const {
 #ifdef _WIN32
   return m_strBaseDir;
 #else
-  Poco::Path datadir(m_pSysConfig->getString("system.homeDir"));
+  std::filesystem::path datadir(m_pSysConfig->getString("system.homeDir"));
   datadir.append(".mantid");
   // Create the directory if it doesn't already exist
-  Poco::File(datadir).createDirectory();
-  return datadir.toString() + "/";
+  std::filesystem::create_directories(datadir);
+  return datadir;
 #endif
 }
 
@@ -1398,15 +1385,23 @@ std::string ConfigServiceImpl::getUserPropertiesDir() const {
  * Return the list of search paths
  * @returns A vector of strings containing the defined search directories
  */
-const std::vector<std::string> &ConfigServiceImpl::getDataSearchDirs() const { return m_dataSearchDirs; }
+const std::vector<std::filesystem::path> &ConfigServiceImpl::getDataSearchDirs() const { return m_dataSearchDirs; }
 
 /**
- * Set a list of search paths via a vector
+ * Set a list of search paths via a vector of strings
  * @param searchDirs :: A list of search directories
  */
 void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::string> &searchDirs) {
   std::string searchPaths = boost::join(searchDirs, ";");
   setDataSearchDirs(searchPaths);
+}
+
+/**
+ * Set a list of search paths via a vector of paths
+ * @param searchDirs :: A list of search directories
+ */
+void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::filesystem::path> &searchDirs) {
+  setDataSearchDirs(pathVectorAsStrings(searchDirs));
 }
 
 /**
@@ -1427,27 +1422,28 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
   if (subdir.empty())
     return;
 
-  Poco::Path subDirPath;
+  std::filesystem::path subDirPath;
   try {
-    subDirPath = Poco::Path(subdir);
-  } catch (Poco::PathSyntaxException &) {
+    subDirPath = std::filesystem::path(subdir);
+  } catch (std::filesystem::filesystem_error &) {
     return;
   }
 
-  if (!subDirPath.isDirectory() || !subDirPath.isRelative()) {
+  if ((std::filesystem::exists(subDirPath) && !std::filesystem::is_directory(subDirPath)) ||
+      !subDirPath.is_relative()) {
     return;
   }
 
   auto newDataDirs = m_dataSearchDirs;
   for (const auto &path : m_dataSearchDirs) {
-    Poco::Path newDirPath;
+    std::filesystem::path newDirPath;
     try {
-      newDirPath = Poco::Path(path);
-      newDirPath.append(subDirPath);
+      newDirPath = std::filesystem::path(path);
+      newDirPath /= subDirPath;
       // only add new path if it isn't already there
-      if (std::find(newDataDirs.begin(), newDataDirs.end(), newDirPath.toString()) == newDataDirs.end())
-        newDataDirs.emplace_back(newDirPath.toString());
-    } catch (Poco::PathSyntaxException &) {
+      if (std::find(newDataDirs.begin(), newDataDirs.end(), newDirPath.string()) == newDataDirs.end())
+        newDataDirs.emplace_back(newDirPath);
+    } catch (std::filesystem::filesystem_error &) {
       continue;
     }
   }
@@ -1464,25 +1460,35 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   if (path.empty())
     return;
 
-  Poco::Path dirPath;
+  std::filesystem::path dirPath;
   try {
-    dirPath = Poco::Path(path);
-    dirPath.makeDirectory();
-  } catch (Poco::PathSyntaxException &) {
+    dirPath = std::filesystem::path(path);
+    if (!std::filesystem::is_directory(path)) {
+      dirPath.remove_filename();
+    }
+  } catch (std::filesystem::filesystem_error &) {
     return;
   }
-  if (!isInDataSearchList(dirPath.toString())) {
-    auto newSearchString = Strings::join(std::begin(m_dataSearchDirs), std::end(m_dataSearchDirs), ";");
+  if (!isInDataSearchList(dirPath)) {
+    auto dataSearchDirectoryStrings = pathVectorAsStrings(m_dataSearchDirs);
+    auto newSearchString =
+        Strings::join(std::begin(dataSearchDirectoryStrings), std::end(dataSearchDirectoryStrings), ";");
     newSearchString.append(";" + path);
     setString("datasearch.directories", newSearchString);
   }
+}
+
+std::vector<std::string> ConfigServiceImpl::pathVectorAsStrings(const std::vector<std::filesystem::path> &paths) const {
+  std::vector<std::string> directoriesAsStrings(paths.size());
+  std::transform(paths.cbegin(), paths.cend(), directoriesAsStrings.begin(), [](const auto &p) { return p.string(); });
+  return directoriesAsStrings;
 }
 
 /**
  * Sets the search directories for XML instrument definition files (IDFs)
  * @param directories An ordered list of paths for instrument searching
  */
-void ConfigServiceImpl::setInstrumentDirectories(const std::vector<std::string> &directories) {
+void ConfigServiceImpl::setInstrumentDirectories(const std::vector<std::filesystem::path> &directories) {
   m_instrumentDirs = directories;
 }
 
@@ -1490,29 +1496,30 @@ void ConfigServiceImpl::setInstrumentDirectories(const std::vector<std::string> 
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */
-const std::vector<std::string> &ConfigServiceImpl::getInstrumentDirectories() const { return m_instrumentDirs; }
+const std::vector<std::filesystem::path> &ConfigServiceImpl::getInstrumentDirectories() const {
+  return m_instrumentDirs;
+}
 
 /**
  * Return the base search directories for XML instrument definition files (IDFs)
  * @returns a last entry of getInstrumentDirectories
  */
-const std::string ConfigServiceImpl::getInstrumentDirectory() const { return m_instrumentDirs.back(); }
+const std::filesystem::path &ConfigServiceImpl::getInstrumentDirectory() const { return m_instrumentDirs.back(); }
 /**
  * Return the search directory for vtp files
  * @returns a path
  */
-const std::string ConfigServiceImpl::getVTPFileDirectory() {
+const std::filesystem::path ConfigServiceImpl::getVTPFileDirectory() {
   // Determine the search directory for XML instrument definition files (IDFs)
   std::string directoryName = getString("instrumentDefinition.vtp.directory");
-
-  if (directoryName.empty()) {
-    Poco::Path path(getAppDataDir());
-    path.makeDirectory();
-    path.pushDirectory("instrument");
-    path.pushDirectory("geometryCache");
-    directoryName = path.toString();
+  if (!directoryName.empty()) {
+    return std::filesystem::path(directoryName);
   }
-  return directoryName;
+
+  std::filesystem::path path(getAppDataDir());
+  path /= "instrument";
+  path /= "geometryCache";
+  return path;
 }
 /**
  * Fills the internal cache of instrument definition directories and creates
@@ -1527,23 +1534,21 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_instrumentDirs.clear();
 
-  Poco::Path path(getAppDataDir());
-  path.makeDirectory();
-  path.pushDirectory("instrument");
-  const std::string appdatadir = path.toString();
-  addDirectoryifExists(appdatadir, m_instrumentDirs);
+  std::filesystem::path path(getAppDataDir());
+  path /= "instrument";
+  addDirectoryifExists(path, m_instrumentDirs);
 
 #ifndef _WIN32
   addDirectoryifExists("/etc/mantid/instrument", m_instrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getString("instrumentDefinition.directory", true);
+  std::filesystem::path directoryName(getString("instrumentDefinition.directory", true));
   if (directoryName.empty()) {
     // This is the assumed deployment directory for IDFs, where we need to be
     // relative to the
     // directory of the executable, not the current working directory.
-    directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
+    directoryName = std::filesystem::relative("../instrument", getPropertiesDir());
   }
   addDirectoryifExists(directoryName, m_instrumentDirs);
 }
@@ -1555,21 +1560,13 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
  * @param directoryList the list to add the directory to
  * @returns true if the directory was valid and added to the list
  */
-bool ConfigServiceImpl::addDirectoryifExists(const std::string &directoryName,
-                                             std::vector<std::string> &directoryList) {
-  try {
-    if (Poco::File(directoryName).isDirectory()) {
-      directoryList.emplace_back(directoryName);
-      return true;
-    } else {
-      g_log.information("Unable to locate directory at: " + directoryName);
-      return false;
-    }
-  } catch (Poco::PathNotFoundException &) {
-    g_log.information("Unable to locate directory at: " + directoryName);
-    return false;
-  } catch (Poco::FileNotFoundException &) {
-    g_log.information("Unable to locate directory at: " + directoryName);
+bool ConfigServiceImpl::addDirectoryifExists(const std::filesystem::path &directoryName,
+                                             std::vector<std::filesystem::path> &directoryList) {
+  if (std::filesystem::is_directory(directoryName)) {
+    directoryList.emplace_back(directoryName);
+    return true;
+  } else {
+    g_log.information("Unable to locate directory at: " + directoryName.string());
     return false;
   }
 }
@@ -1604,9 +1601,9 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityFilenames(const std
 
   // look through all the possible files
   for (; instrDir != directoryNames.end(); ++instrDir) {
-    Poco::Path p(*instrDir);
-    p.append("Facilities.xml");
-    std::string filename = p.toString();
+    std::filesystem::path p(*instrDir);
+    p /= "Facilities.xml";
+    std::string filename = p.string();
     Poco::File fileObj(filename);
 
     if (fileObj.exists())
@@ -1618,8 +1615,11 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityFilenames(const std
   }
 
   // getting this far means the file was not found
-  std::string directoryNamesList = boost::algorithm::join(directoryNames, ", ");
-  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " + directoryNamesList);
+  std::vector<std::string> directoryNameStrings(directoryNames.size());
+  std::transform(directoryNames.cbegin(), directoryNames.cend(), directoryNameStrings.begin(),
+                 [](const std::filesystem::path &p) { return p.string(); });
+  std::string directoryNamesAsCommaSeparatedList = boost::algorithm::join(directoryNameStrings, ", ");
+  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " + directoryNamesAsCommaSeparatedList);
 }
 
 /**
@@ -1860,14 +1860,14 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
   std::string fName = Kernel::Strings::strip(filename);
   g_log.debug() << "getFullPath(" << fName << ")\n";
   // If this is already a full path, nothing to do
-  if (Poco::Path(fName).isAbsolute())
+  if (std::filesystem::path(fName).is_absolute())
     return fName;
   // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
-    Poco::File fullPath(Poco::Path().resolve(fName));
-    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
-      return fullPath.path();
+    std::filesystem::path fullPath = std::filesystem::absolute(fName);
+    if (std::filesystem::exists(fullPath) && (!ignoreDirs || !std::filesystem::is_directory(fullPath)))
+      return fullPath.string();
   } catch (std::exception &) {
   }
 
@@ -1883,22 +1883,22 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
 #ifdef _WIN32
     if (fName.find("*") != std::string::npos) {
 #endif
-      Poco::Path path(searchPath, fName);
+      std::filesystem::path path(searchPath);
+      path /= fName;
       std::set<std::string> files;
       Kernel::Glob::glob(path, files, options);
       if (!files.empty()) {
-        Poco::File matchPath(*files.begin());
-        if (ignoreDirs && matchPath.isDirectory()) {
+        std::filesystem::path matchPath(*files.begin());
+        if (ignoreDirs && std::filesystem::is_directory(matchPath)) {
           continue;
         }
         return *files.begin();
       }
 #ifdef _WIN32
     } else {
-      Poco::Path path(searchPath, fName);
-      Poco::File file(path);
-      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
-        return path.toString();
+      std::filesystem::path path(searchPath / fName);
+      if (std::filesystem::exists(path) && !(ignoreDirs && std::filesystem::is_directory(path))) {
+        return path.string();
       }
     }
 #endif

@@ -13,6 +13,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::API::FileFinder;
@@ -174,15 +175,15 @@ public:
   }
 
   void testDirectoryPasses() {
-    std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
-    Poco::File dir(TestDir);
+    std::filesystem::path TestDir(ConfigService::Instance().getDirectoryOfExecutable() / "MyTestFolder");
+    Poco::File dir(TestDir.string());
     dir.createDirectory();
 
     FileProperty fp("SavePath", "", FileProperty::Directory);
     TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
 
     // The directory exists, so no failure
-    std::string msg = fp.setValue(TestDir);
+    std::string msg = fp.setValue(TestDir.string());
     TS_ASSERT_EQUALS(msg, "");
 
     dir.remove(); // clean up your folder

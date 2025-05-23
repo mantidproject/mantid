@@ -18,6 +18,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusFile.hpp"

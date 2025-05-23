@@ -19,7 +19,7 @@ namespace ScopedFileHelper {
 Constructor generates the file. Sets location to be the temp directory
 */
 ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileName) {
-  Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+  Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().string());
   path.append(fileName);
   doCreateFile(fileContents, path);
 }

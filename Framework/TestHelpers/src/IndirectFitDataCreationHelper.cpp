@@ -7,6 +7,8 @@
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include <filesystem>
+
 namespace Mantid::IndirectFitDataCreationHelper {
 using namespace Mantid::API;
 
@@ -112,9 +114,10 @@ MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength) 
 MatrixWorkspace_sptr createWorkspaceWithIndirectInstrumentAndParameters(std::string const &analyser) {
 
   auto testWorkspace = createWorkspace(1, 5);
-  std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+  std::filesystem::path idfdirectory =
+      Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   // IRIS instrument with graphite detector.
-  auto const ipfFilename = idfdirectory + "IRIS" + "_" + analyser + "_" + "002" + "_Parameters.xml";
+  auto const ipfFilename = idfdirectory / std::filesystem::path("IRIS_" + analyser + "_002_Parameters.xml");
 
   auto loadInst = AlgorithmManager::Instance().create("LoadInstrument");
   loadInst->setLogging(true);
@@ -129,7 +132,7 @@ MatrixWorkspace_sptr createWorkspaceWithIndirectInstrumentAndParameters(std::str
   loadParams->setLogging(true);
   loadParams->initialize();
   loadParams->setProperty("Workspace", testWorkspace);
-  loadParams->setProperty("Filename", ipfFilename);
+  loadParams->setProperty("Filename", ipfFilename.string());
   loadParams->execute();
 
   return testWorkspace;

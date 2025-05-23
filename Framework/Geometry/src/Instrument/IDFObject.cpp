@@ -22,7 +22,7 @@ const std::string AbstractIDFObject::expectedExtension() { return ".xml"; }
  */
 IDFObject::IDFObject(const std::string &fileName)
     : m_defFile(fileName), m_hasFileName(!fileName.empty()), m_cachePath(m_defFile.path()),
-      m_cacheParentDirectory(m_cachePath.parent()), m_cachePathStr(m_cachePath.toString())
+      m_cacheParentDirectory(m_cachePath.parent_path()), m_cachePathStr(m_cachePath.string())
 
 {}
 
@@ -30,13 +30,13 @@ IDFObject::IDFObject(const std::string &fileName)
 Gets the parent directory of the file.
 @return Parent directory path.
 */
-const Poco::Path IDFObject::getParentDirectory() const { return m_cacheParentDirectory; }
+const std::filesystem::path IDFObject::getParentDirectory() const { return m_cacheParentDirectory; }
 
 /**
 Getter for the full file path.
 @return Full file path.
 */
-const Poco::Path &IDFObject::getFileFullPath() const { return m_cachePath; }
+const std::filesystem::path &IDFObject::getFileFullPath() const { return m_cachePath; }
 
 const std::string &IDFObject::getFileFullPathStr() const { return m_cachePathStr; }
 
@@ -44,19 +44,13 @@ const std::string &IDFObject::getFileFullPathStr() const { return m_cachePathStr
 Gets the filename for the FileObject.
 @return filename only.
 */
-std::string IDFObject::getFileNameOnly() const { return m_cachePath.getFileName(); }
+std::string IDFObject::getFileNameOnly() const { return m_cachePath.filename().string(); }
 
 /**
  * Gets the extension of this IDF file, including the leading period
  * @return A string containing the extension for this file
  */
-std::string IDFObject::getExtension() const {
-  std::string ext = m_cachePath.getExtension();
-  if (ext.empty())
-    return ext;
-  else
-    return "." + ext;
-}
+std::string IDFObject::getExtension() const { return m_cachePath.extension().string(); }
 
 /**
 Gets the idf file as a mangled name.

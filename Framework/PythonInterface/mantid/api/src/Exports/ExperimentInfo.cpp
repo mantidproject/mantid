@@ -38,9 +38,9 @@ GET_POINTER_SPECIALIZATION(ExperimentInfo)
 // user
 list getResourceFilenames(const std::string &prefix, const list &fileFormats, const list &directoryNames,
                           const std::string &date) {
-  return Converters::ToPyList<std::string>()(
-      InstrumentFileFinder::getResourceFilenames(prefix, Converters::PySequenceToVector<std::string>(fileFormats)(),
-                                                 Converters::PySequenceToVector<std::string>(directoryNames)(), date));
+  return Converters::ToPyList<std::string>()(InstrumentFileFinder::getResourceFilenames(
+      prefix, Converters::PySequenceToVector<std::string>(fileFormats)(),
+      Converters::PySequenceToVector<std::filesystem::path>(directoryNames)(), date));
 }
 
 std::string getInstrumentFilenameWarn(const std::string &instName, const std::string &date = "") {

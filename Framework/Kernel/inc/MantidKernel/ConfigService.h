@@ -14,6 +14,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <optional>
 
+#include <filesystem>
 #include <map>
 #include <set>
 #include <string>
@@ -105,7 +106,7 @@ public:
   /// Reset to "factory" settings. Removes current user properties
   void reset();
   /// Wipe out the current configuration and load a new one
-  void updateConfig(const std::string &filename, const bool append = false, const bool update_caches = true);
+  void updateConfig(const std::filesystem::path &filename, const bool append = false, const bool update_caches = true);
   /// Save the configuration to the user file
   void saveConfig(const std::string &filename) const;
   /// Searches for a configuration property
@@ -148,33 +149,35 @@ public:
   /// Returns the username
   std::string getUsername();
   /// Returns the current directory
-  std::string getCurrentDir();
+  std::filesystem::path getCurrentDir();
   /// Returns the current directory
-  std::string getCurrentDir() const;
+  std::filesystem::path getCurrentDir() const;
   /// Returns the system's temp directory
-  std::string getTempDir();
+  std::filesystem::path getTempDir();
   /// Returns the system's appdata directory
-  std::string getAppDataDir();
+  std::filesystem::path getAppDataDir() const;
   // Return the executable path
-  std::string getDirectoryOfExecutable() const;
+  std::filesystem::path getDirectoryOfExecutable() const;
   // Return the full path to the executable
-  std::string getPathToExecutable() const;
+  std::filesystem::path getPathToExecutable() const;
   // Check if the path is on a network drive
   bool isNetworkDrive([[maybe_unused]] const std::string &path);
   //@}
 
   /// Returns the directory where the Mantid.properties file is found.
-  std::string getPropertiesDir() const;
+  const std::filesystem::path &getPropertiesDir() const;
   /// Returns a directory to use to write out Mantid information. Needs to be
   /// writable
-  std::string getUserPropertiesDir() const;
+  std::filesystem::path getUserPropertiesDir() const;
 
   /** @name Search paths handling */
   //@{
   /// Get the list of search paths
-  const std::vector<std::string> &getDataSearchDirs() const;
-  /// Set a list of search paths via a vector
+  const std::vector<std::filesystem::path> &getDataSearchDirs() const;
+  /// Set a list of search paths via a vector of strings
   void setDataSearchDirs(const std::vector<std::string> &searchDirs);
+  /// Set a list of search paths via a vector of paths
+  void setDataSearchDirs(const std::vector<std::filesystem::path> &searchDirs);
   /// Set a list of search paths via a string
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
@@ -182,13 +185,13 @@ public:
   /// Appends subdirectory to each of the specified data search directories
   void appendDataSearchSubDir(const std::string &subdir);
   /// Sets instrument directories
-  void setInstrumentDirectories(const std::vector<std::string> &directories);
+  void setInstrumentDirectories(const std::vector<std::filesystem::path> &directories);
   /// Get instrument search directories
-  const std::vector<std::string> &getInstrumentDirectories() const;
+  const std::vector<std::filesystem::path> &getInstrumentDirectories() const;
   /// Get instrument search directory
-  const std::string getInstrumentDirectory() const;
+  const std::filesystem::path &getInstrumentDirectory() const;
   /// get the vtp file directory
-  const std::string getVTPFileDirectory();
+  const std::filesystem::path getVTPFileDirectory();
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
@@ -253,7 +256,7 @@ private:
   /// Create the storage of the instrument directories
   void cacheInstrumentPaths();
   /// Returns true if the path is in the data search list
-  bool isInDataSearchList(const std::string &path) const;
+  bool isInDataSearchList(const std::filesystem::path &path) const;
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
@@ -261,9 +264,12 @@ private:
   const std::vector<std::string> getFacilityFilenames(const std::string &fName);
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
-  bool addDirectoryifExists(const std::string &directoryName, std::vector<std::string> &directoryList);
+  bool addDirectoryifExists(const std::filesystem::path &directoryName,
+                            std::vector<std::filesystem::path> &directoryList);
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const;
+
+  std::vector<std::string> pathVectorAsStrings(const std::vector<std::filesystem::path> &paths) const;
 
   /// the POCO file config object
   Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_pConf;
@@ -274,7 +280,7 @@ private:
   mutable std::set<std::string> m_changed_keys;
 
   /// The directory that is considered to be the base directory
-  std::string m_strBaseDir;
+  std::filesystem::path m_strBaseDir;
   /// The configuration properties in string format
   std::string m_propertyString;
   /// The filename of the Mantid properties file
@@ -282,9 +288,9 @@ private:
   /// The filename of the Mantid user properties file
   const std::string m_user_properties_file_name;
   /// Store a list of data search paths
-  std::vector<std::string> m_dataSearchDirs;
+  std::vector<std::filesystem::path> m_dataSearchDirs;
   /// Store a list of instrument directory paths
-  std::vector<std::string> m_instrumentDirs;
+  std::vector<std::filesystem::path> m_instrumentDirs;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;

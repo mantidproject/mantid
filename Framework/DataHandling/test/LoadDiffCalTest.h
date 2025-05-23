@@ -16,7 +16,7 @@
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "SaveDiffCalTest.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using Mantid::DataHandling::LoadDiffCal;
 using Mantid::DataHandling::SaveDiffCal;
@@ -80,9 +80,7 @@ public:
       AnalysisDataService::Instance().remove(outWSName + "_cal");
     }
 
-    // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    removeFileIfItExists(filename);
   }
 
   // Override a grouping definition specified by LoadDiffCal "Filename" property.
@@ -163,11 +161,8 @@ public:
       AnalysisDataService::Instance().remove(outWSName + "_group");
     }
 
-    // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-    if (Poco::File(groupingfile).exists())
-      Poco::File(groupingfile).remove();
+    removeFileIfItExists(filename);
+    removeFileIfItExists(groupingfile);
   }
 
   // Create a zero calibration workspace consistent with an input grouping workspace.
@@ -281,10 +276,14 @@ public:
       AnalysisDataService::Instance().remove(outWSName + "_group");
     }
 
-    // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-    if (Poco::File(groupingfile).exists())
-      Poco::File(groupingfile).remove();
+    removeFileIfItExists(filename);
+    removeFileIfItExists(groupingfile);
+  }
+
+private:
+  void removeFileIfItExists(const std::string &filename) {
+    if (std::filesystem::exists(filename)) {
+      std::filesystem::remove(filename);
+    }
   }
 };

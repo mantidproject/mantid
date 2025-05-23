@@ -2516,8 +2516,10 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
 
   g_log.notice("Geometry cache is not available");
   try {
-    Poco::File dir = usedCache->getParentDirectory();
-    if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
+    const auto dir = usedCache->getParentDirectory();
+    if (dir.empty() || !std::filesystem::exists(dir) ||
+        (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) ==
+            std::filesystem::perms::none) {
       usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information() << "Geometrycache directory is read only, writing cache "
@@ -2554,7 +2556,7 @@ InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeome
   // temporary
   // directory.
   IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(
-      Poco::Path(ConfigService::Instance().getTempDir()).append(this->getMangledName() + ".vtp").toString());
+      Poco::Path(ConfigService::Instance().getTempDir().string()).append(this->getMangledName() + ".vtp").toString());
   CachingOption cachingOption = NoneApplied;
   if (m_cacheFile->exists()) {
     applyCache(m_cacheFile);
@@ -2964,7 +2966,7 @@ const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
   if (!filename.empty()) {
-    Poco::Path path(ConfigService::Instance().getVTPFileDirectory());
+    Poco::Path path(ConfigService::Instance().getVTPFileDirectory().string());
     path.makeDirectory();
     path.append(filename + ".vtp");
     retVal = path.toString();
