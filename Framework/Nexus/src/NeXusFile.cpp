@@ -1,14 +1,20 @@
-#include <cstring>
-// REMOVE
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/napi.h"
+#include "MantidNexus/H5Util.h"
+#include "MantidNexus/NeXusException.hpp"
+#include <H5Exception.h>
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstring>
 #include <iostream>
 #include <numeric>
 #include <sstream>
 #include <typeinfo>
 
+#define NXEXCEPTION(message) Exception((message), __func__, m_filename);
+
 using namespace NeXus;
+using namespace Mantid::NeXus;
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -20,6 +26,7 @@ using std::vector;
   if (tmp != NXstatus::NX_OK) {                                                                                        \
     throw NXEXCEPTION(msg);                                                                                            \
   }
+typedef std::array<hsize_t, NX_MAXRANK> DimArray;
 
 /**
  * \file NeXusFile.cpp
@@ -27,7 +34,13 @@ using std::vector;
  */
 
 namespace { // anonymous namespace to keep it in the file
-template <typename NumT> static string toString(const vector<NumT> &data) {
+
+std::string const group_class_spec("NX_class");
+std::string const target_attr_name("target");
+std::string const scientific_data_set("SDS");
+constexpr int default_deflate_level(6);
+
+template <typename NumT> static std::string toString(vector<NumT> const &data) {
   stringstream result;
   result << "[";
   size_t size = data.size();
@@ -40,6 +53,129 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   result << "]";
   return result.str();
 }
+
+template <typename T> static DimArray toDimArray(vector<T> const &small_v) {
+  DimArray ret;
+  size_t i = 0;
+  // fill in all values from vector
+  for (; i < small_v.size(); i++) {
+    ret.at(i) = static_cast<hsize_t>(small_v[i]);
+  }
+  // pad rest with zero
+  for (; i < ret.size(); i++) {
+    ret.at(i) = 0;
+  }
+  return ret;
+}
+
+static std::map<int, void const *> const nxToHDF5Map{
+    std::pair<int, void const *>(NXnumtype::CHAR, &H5::PredType::C_S1),
+    std::pair<int, void const *>(NXnumtype::INT8, &H5::PredType::NATIVE_CHAR),
+    std::pair<int, void const *>(NXnumtype::UINT8, &H5::PredType::NATIVE_UCHAR),
+    std::pair<int, void const *>(NXnumtype::INT16, &H5::PredType::NATIVE_INT16),
+    std::pair<int, void const *>(NXnumtype::UINT16, &H5::PredType::NATIVE_UINT16),
+    std::pair<int, void const *>(NXnumtype::INT32, &H5::PredType::NATIVE_INT32),
+    std::pair<int, void const *>(NXnumtype::UINT32, &H5::PredType::NATIVE_UINT32),
+    std::pair<int, void const *>(NXnumtype::INT64, &H5::PredType::NATIVE_INT64),
+    std::pair<int, void const *>(NXnumtype::UINT64, &H5::PredType::NATIVE_UINT64),
+    std::pair<int, void const *>(NXnumtype::FLOAT32, &H5::PredType::NATIVE_FLOAT),
+    std::pair<int, void const *>(NXnumtype::FLOAT64, &H5::PredType::NATIVE_DOUBLE),
+    std::pair<int, void const *>(NXnumtype::BOOLEAN, &H5::PredType::NATIVE_HBOOL)};
+
+static H5::DataType nxToHDF5Type(NXnumtype const &datatype) {
+  H5::DataType type;
+  if (auto const value = nxToHDF5Map.find(datatype); value != nxToHDF5Map.end()) {
+    type = *static_cast<H5::PredType const *>(value->second);
+  } else {
+    type = H5::PredType::NATIVE_HERR;
+  }
+  return type;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: hdf5ToNXType
+ *
+ * Purpose:	Convert a HDF5 class to a NeXus type;  it handles the following HDF5 classes
+ *  H5T_STRING
+ *  H5T_INTEGER
+ *  H5T_FLOAT
+ *
+ * Return: the NeXus type
+ *
+ *-------------------------------------------------------------------------
+ */
+static NXnumtype hdf5ToNXType(H5::DataType const &dt) {
+  NXnumtype iPtype = NXnumtype::BAD;
+
+  H5T_class_t tclass = dt.getClass();
+  if (tclass == H5T_STRING) {
+    // first check for string types -- due to the double-meaning of NXnumtype::CHAR
+    // as both an integer and a marker for strings, it is important to do this first.
+    iPtype = NXnumtype::CHAR;
+  } else {
+    // if the type is one of the predefined datatypes used by us, just get it
+    auto findit = std::find_if(nxToHDF5Map.begin(), nxToHDF5Map.end(), [dt](auto const &x) -> bool {
+      return *static_cast<H5::DataType const *>(x.second) == dt;
+    });
+
+    if (findit != nxToHDF5Map.end()) {
+      iPtype = findit->first;
+    }
+    // if it's not a usual type, try to deduce the type from the datatype object
+    // check the class, if either H5T_INTEGER or H5T_FLOAT, then match by size and sign
+    // NOTE theseblocks were copied from napi5.cpp
+    else if (tclass == H5T_INTEGER) {
+      size_t size = dt.getSize();
+      H5T_sign_t sign = H5T_SGN_2;
+      // NOTE H5Cpp only defines the getSign method for IntType objects
+      // Can cause segfault if used on any other object.  Therefore we
+      // have to default to assuming signed int and only go to unsigned
+      // if we are able to deduce otherwise
+      H5::IntType const *it = dynamic_cast<H5::IntType const *>(&dt);
+      if (it != nullptr) {
+        sign = it->getSign();
+      }
+      // signed integers
+      if (sign == H5T_SGN_2) { // NOTE: the "2" means 2's-complement
+        if (size == 1) {
+          iPtype = NXnumtype::INT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::INT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::INT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::INT64;
+        }
+      }
+      // unsigned integers
+      else {
+        if (size == 1) {
+          iPtype = NXnumtype::UINT8;
+        } else if (size == 2) {
+          iPtype = NXnumtype::UINT16;
+        } else if (size == 4) {
+          iPtype = NXnumtype::UINT32;
+        } else if (size == 8) {
+          iPtype = NXnumtype::UINT64;
+        }
+      }
+    } else if (tclass == H5T_FLOAT) {
+      size_t size = dt.getSize();
+      if (size == 4) {
+        iPtype = NXnumtype::FLOAT32;
+      } else if (size == 8) {
+        iPtype = NXnumtype::FLOAT64;
+      }
+    }
+  }
+  if (iPtype == NXnumtype::BAD) {
+    std::stringstream msg;
+    msg << "cannot convert type=" << dt.getId();
+    throw Exception(msg.str(), "hdf5ToNXtype");
+  }
+  return iPtype;
+}
+
 } // end of anonymous namespace
 
 namespace NeXus {
@@ -76,167 +212,292 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
+template <> MANTID_NEXUS_DLL NXnumtype getType(bool const) { return NXnumtype::BOOLEAN; }
+
 } // namespace NeXus
 
 namespace NeXus {
 
-File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(std::string const &filename, NXaccess const access)
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path(),
+      m_current(nullptr), m_close_handle(true), m_descriptor(filename) {};
 
-File::File(const char *filename, const NXaccess access) : m_filename(filename), m_access(access), m_close_handle(true) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(char const *filename, NXaccess const access)
+    : H5File(filename, access, H5Util::defaultFileAcc()), m_filename(filename), m_access(access), m_path(),
+      m_current(nullptr), m_close_handle(true), m_descriptor(std::string(filename)) {};
+
+// copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false) {}
+    : H5File(f), m_filename(f.m_filename), m_access(f.m_access), m_path(f.m_path), m_current(f.m_current),
+      m_close_handle(false), m_descriptor(f.m_descriptor) {}
 
-File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+File::File(File const *pf)
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
+      m_close_handle(false), m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false) {}
+    : H5File(*pf), m_filename(pf->m_filename), m_access(pf->m_access), m_path(pf->m_path), m_current(pf->m_current),
+      m_close_handle(false), m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
-    this->m_pfile_id = f.m_pfile_id;
+    this->m_path = f.m_path;
+    this->m_current = f.m_current;
     this->m_close_handle = f.m_close_handle;
+    this->m_descriptor = f.m_descriptor;
   }
   return *this;
 }
 
-void File::initOpenFile(const string &filename, const NXaccess access) {
-  if (filename.empty()) {
-    throw Exception("Filename specified is empty constructor", "");
-  }
-
-  NXhandle temp;
-  NXstatus status = NXopen(filename.c_str(), access, &(temp));
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXopen(" << filename << ", " << access << ") failed";
-    throw Exception(msg.str(), filename);
-  } else {
-    this->m_pfile_id = std::make_shared<NXhandle>(temp);
-  }
-}
+// deconstructor
 
 // deconstructor
 
 File::~File() {
-  if (m_close_handle && m_pfile_id != NULL) {
-    NXstatus status = NXclose(&(*this->m_pfile_id));
-    this->m_pfile_id = NULL;
-    if (status != NXstatus::NX_OK) {
-      stringstream msg;
-      msg << "NXclose failed for file " << m_filename << "\n";
-      NXReportError(const_cast<char *>(msg.str().c_str()));
+  if (this->m_close_handle) {
+    H5::H5File::close();
+  }
+}
+
+void File::close() { H5::H5File::close(); }
+
+void File::flush(H5F_scope_t scope) const { H5::H5File::flush(scope); }
+
+H5::H5File File::getRoot() { return *this; }
+
+namespace {
+// methods for better exception messages
+template <typename T> std::string H5TypeAsString() { return "unknown"; }
+template <> std::string H5TypeAsString<H5::H5Object>() { return "H5Object"; }
+template <> std::string H5TypeAsString<H5::Group>() { return "Group"; }
+template <> std::string H5TypeAsString<H5::DataSet>() { return "DataSet"; }
+template <> std::string H5TypeAsString<H5::H5File>() { return "H5File"; }
+} // namespace
+
+/** Return a pointer corresponding to current location in file stack,
+ * cast to pointer of indicated type.
+ */
+template <typename T> std::shared_ptr<T> File::getCurrentLocationAs() {
+  std::shared_ptr<T> loc;
+  if (m_path.isRoot()) {
+    std::shared_ptr<H5::H5File> proot = std::make_shared<H5::H5File>(getRoot().getId());
+    loc = std::dynamic_pointer_cast<T>(proot);
+  } else {
+    loc = std::dynamic_pointer_cast<T>(m_current);
+  }
+  if (loc.get() == nullptr) {
+    std::stringstream msg;
+    msg << "Could not cast current location to needed H5Cpp type (requested=" << H5TypeAsString<T>() << ") at "
+        << getPath();
+    throw NXEXCEPTION(msg.str());
+  }
+  return loc;
+}
+
+bool File::hasPath(std::string const &name) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path);
+}
+
+bool File::hasGroup(std::string const &name, std::string const &class_type) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, class_type);
+}
+
+bool File::hasData(std::string const &name) {
+  std::string const path = formAbsolutePath(name);
+  return m_descriptor.isEntry(path, scientific_data_set);
+}
+
+/**
+ * napi used to allow opening datasets at same level without closing previous
+ * many client codes follow this (bad) usage, therefore it needs to be enabled
+ */
+NexusPath File::formAbsolutePath(std::string const &name) {
+  NexusPath new_path(name);
+  if (new_path.isAbsolute()) {
+    // the path is already absolute
+  } else {
+    // if not already absolute path, make relative to current location
+    // continue checking path relative to parent, until something exists
+    NexusPath from_root = m_path;
+    do {
+      new_path = (from_root / name);
+      from_root = from_root.parent_path();
+    } while (!m_descriptor.isEntry(new_path) && !from_root.isRoot());
+    if (!m_descriptor.isEntry(new_path)) {
+      new_path = NexusPath(name).fromRoot();
+    }
+  }
+  // the caller is responsible for checking that it exists
+  return new_path;
+}
+
+void File::registerEntry(NexusPath const &path, std::string const &name) {
+  if (!path.isAbsolute()) {
+    throw NXEXCEPTION("Paths must be absolute: " + path);
+  } else if (!this->nameExists(path)) {
+    throw NXEXCEPTION("Attempt to register non-existent entry: " + path + " | " + name);
+  } else {
+    m_descriptor.addEntry(path, name);
+  }
+}
+
+void File::makeGroup(std::string const &name, std::string const &class_name, bool open_group) {
+  if (name.empty()) {
+    throw NXEXCEPTION("Supplied empty name");
+  }
+  if (class_name.empty()) {
+    throw NXEXCEPTION("Supplied empty class name");
+  }
+  // make the group
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
+  H5::Group newGrp = H5Util::createGroupNXS(*current, name, class_name);
+  registerEntry(m_path / name, class_name);
+  if (open_group) {
+    m_path /= name;
+    m_current = std::make_shared<H5::Group>(newGrp);
+  }
+}
+
+void File::openGroup(std::string const &name, std::string const &class_name) {
+  if (name.empty()) {
+    throw NXEXCEPTION("Supplied empty name");
+  }
+  if (class_name.empty()) {
+    throw NXEXCEPTION("Supplied empty class name");
+  }
+  NexusPath const new_path = formAbsolutePath(name);
+  if (new_path == m_path) {
+    return;
+  }
+  if (m_descriptor.isEntry(new_path, class_name)) {
+    m_path = new_path;
+    m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
+  } else {
+    throw NXEXCEPTION("The supplied group name=" + name + " does not exist");
+  }
+}
+
+/// This is the implementation of openPath("/")
+void File::resetToFileRoot() {
+  m_path = NexusPath::root();
+  m_current = std::make_shared<H5::Group>(getRoot());
+}
+
+void File::openPath(std::string const &pathname) {
+  if (pathname.empty()) {
+    throw NXEXCEPTION("Supplied empty path");
+  } else if (pathname == m_path) {
+    return;
+  } else if (pathname == NexusPath::root()) {
+    this->resetToFileRoot();
+  } else {
+    NexusPath const new_path = formAbsolutePath(pathname);
+    if (m_descriptor.isEntry(new_path)) {
+      // if the path exists:
+      // -- check the type of the entry, Group or DataSet
+      // -- open with appropriate method
+      if (m_descriptor.isEntry(new_path, scientific_data_set)) {
+        m_current = std::make_shared<H5::DataSet>(H5::H5File::openDataSet(new_path));
+      } else {
+        m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
+      }
+      m_path = new_path;
+    } else {
+      throw NXEXCEPTION("Attempted to open invalid path: " + new_path + " from " + m_path);
     }
   }
 }
 
-void File::close() {
-  if (this->m_pfile_id != NULL) {
-    NAPI_CALL(NXclose(&(*this->m_pfile_id)), "NXclose failed");
-    this->m_pfile_id = NULL;
+void File::openGroupPath(std::string const &pathname) {
+  if (pathname.empty()) {
+    throw NXEXCEPTION("Supplied empty path");
+  }
+  NexusPath new_path = formAbsolutePath(pathname);
+  if (new_path == m_path) {
+    // intentionally do nothing if the path is not changingg
+  } else if (new_path.isRoot()) {
+    this->resetToFileRoot();
+  } else if (m_descriptor.isEntry(new_path)) {
+    // if this refers to an SDS, open the parent group
+    // otherwise, this is a group: open it
+    if (m_descriptor.isEntry(new_path, scientific_data_set)) {
+      new_path = new_path.parent_path();
+    }
+    if (new_path.isRoot()) {
+      this->resetToFileRoot();
+    } else if (new_path != m_path) {
+      m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(new_path));
+      m_path = new_path;
+    }
+    // intentionally do nothing if the path is not changing
+  } else {
+    throw NXEXCEPTION("Attempted to open invalid path: " + new_path);
   }
 }
 
-void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
+string File::getPath() { return std::string(m_path); }
 
-void File::makeGroup(const string &name, const string &class_name, bool open_group) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to makeGroup", m_filename);
-  }
-  if (class_name.empty()) {
-    throw Exception("Supplied empty class name to makeGroup", m_filename);
-  }
-  NAPI_CALL(NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
-            "NXmakegroup(" + name + ", " + class_name + ") failed");
-  if (open_group) {
-    this->openGroup(name, class_name);
+void File::closeGroup() {
+  if (m_path.isRoot()) {
+    // do nothing in the root -- this preserves behavior from napi
+    return;
+  } else {
+    try {
+      std::shared_ptr<H5::Group> grp = this->getCurrentLocationAs<H5::Group>();
+      grp->close();
+      m_path = m_path.parent_path();
+      if (m_path.isRoot()) {
+        this->resetToFileRoot();
+      } else {
+        m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+      }
+    } catch (...) {
+    }
   }
 }
 
-void File::openGroup(const string &name, const string &class_name) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to openGroup", m_filename);
-  }
-  if (class_name.empty()) {
-    throw Exception("Supplied empty class name to openGroup", m_filename);
-  }
-  NAPI_CALL(NXopengroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
-            "NXopengroup(" + name + ", " + class_name + ") failed");
-}
-
-void File::openPath(const string &path) {
-  if (path.empty()) {
-    throw Exception("Supplied empty path to openPath", m_filename);
-  }
-  NAPI_CALL(NXopenpath(*(this->m_pfile_id), path.c_str()), "NXopenpath(" + path + ") failed");
-}
-
-void File::openGroupPath(const string &path) {
-  if (path.empty()) {
-    throw Exception("Supplied empty path to openGroupPath", m_filename);
-  }
-  NAPI_CALL(NXopengrouppath(*(this->m_pfile_id), path.c_str()), "NXopengrouppath(" + path + ") failed");
-}
-
-std::string File::getPath() {
-  char cPath[2048];
-
-  memset(cPath, 0, sizeof(cPath));
-  NAPI_CALL(NXgetpath(*(this->m_pfile_id), cPath, sizeof(cPath) - 1), "NXgetpath() failed");
-  std::string path(cPath);
-  // openPath expects "/" to open root
-  // for consitency, this should return "/" at the root
-  if (path == "") {
-    path = "/";
-  }
-  return path;
-}
-
-void File::closeGroup() { NAPI_CALL(NXclosegroup(*(this->m_pfile_id.get())), "NXclosegroup failed"); }
-
-void File::makeData(const string &name, NXnumtype type, const DimVector &dims, bool open_data) {
+void File::makeData(std::string const &name, NXnumtype datatype, DimVector const &dims, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("Supplied empty label to makeData", m_filename);
+    throw NXEXCEPTION("Supplied empty label");
   }
   if (dims.empty()) {
-    throw Exception("Supplied empty dimensions to makeData", m_filename);
+    throw NXEXCEPTION("Supplied empty dimensions");
+  }
+  // ensure we are not at root -- NeXus should not allow datsets at root
+  if (m_path.isRoot()) {
+    throw NXEXCEPTION("Cannot create dataset at root level in NeXus");
   }
 
-  // do the work
-  NXstatus status = NXmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
-                                 const_cast<int64_t *>(dims.data()));
-  // report errors
-  NAPI_CALL(status, "NXmakedata(" + name + ", " + (string)type + ", " + std::to_string(dims.size()) + ", " +
-                        toString(dims) + ") failed");
+  // ensure we are in a group -- we cannot make data inside a dataset
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
 
-  if (open_data) {
-    this->openData(name);
+  DimSizeVector chunk_size(dims.size());
+  for (std::size_t i = 0; i < dims.size(); i++) {
+    chunk_size[i] = (dims[i] == NX_UNLIMITED || dims[i] <= 0 ? 1 : dims[i]);
   }
+  this->makeCompData(name, datatype, dims, NXcompression::NONE, chunk_size, open_data);
 }
 
 void File::makeData(const string &name, const NXnumtype type, const dimsize_t length, bool open_data) {
   this->makeData(name, type, DimVector({length}), open_data);
 }
 
-template <typename NumT> void File::writeData(const string &name, const NumT &value) {
+template <typename NumT> void File::writeData(std::string const &name, NumT const &value) {
   std::vector<NumT> v(1, value);
   this->writeData(name, v);
 }
 
-void File::writeData(const string &name, const char *value) { this->writeData(name, std::string(value)); }
+void File::writeData(std::string const &name, char const *value) { this->writeData(name, std::string(value)); }
 
-void File::writeData(const string &name, const string &value) {
-  string my_value(value);
+void File::writeData(std::string const &name, std::string const &value) {
+  std::string my_value(value);
   // Allow empty strings by defaulting to a space
   if (my_value.empty())
     my_value = " ";
@@ -248,40 +509,41 @@ void File::writeData(const string &name, const string &value) {
   this->closeData();
 }
 
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-  const DimVector dims(1, static_cast<dimsize_t>(value.size()));
+template <typename NumT> void File::writeData(std::string const &name, vector<NumT> const &value) {
+  DimVector dims(1, static_cast<dimsize_t>(value.size()));
   this->writeData(name, value, dims);
 }
 
-template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value, const DimVector &dims) {
+template <typename NumT>
+void File::writeData(std::string const &name, vector<NumT> const &value, DimVector const &dims) {
   this->makeData(name, getType<NumT>(), dims, true);
   this->putData(value);
   this->closeData();
 }
 
-template <typename NumT> void File::writeExtendibleData(const string &name, vector<NumT> const &value) {
+template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> const &value) {
   // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
   writeExtendibleData(name, value, 4096);
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> const &value, const dimsize_t chunk) {
-  DimVector dims(1, NX_UNLIMITED);
-  DimSizeVector chunk_dims(1, chunk);
+void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, dimsize_t const chunk) {
+  DimVector dims{NX_UNLIMITED};
+  DimSizeVector chunk_dims{chunk};
   // Use chunking without using compression
-  this->makeCompData(name, getType<NumT>(), dims, NONE, chunk_dims, true);
+  this->makeCompData(name, getType<NumT>(), dims, NXcompression::NONE, chunk_dims, true);
   this->putSlab(value, dimsize_t(0), dimsize_t(value.size()));
   this->closeData();
 }
 
 template <typename NumT>
-void File::writeExtendibleData(const string &name, vector<NumT> const &value, DimVector const &dims,
+void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, DimVector const &dims,
                                DimSizeVector const &chunk) {
   // Create the data with unlimited 0th dimensions
   DimVector unlim_dims(dims);
   unlim_dims[0] = NX_UNLIMITED;
   // Use chunking without using compression
-  this->makeCompData(name, getType<NumT>(), unlim_dims, NONE, chunk, true);
+  this->makeCompData(name, getType<NumT>(), unlim_dims, NXcompression::NONE, chunk, true);
   // And put that slab of that of that given size in there
   DimSizeVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
@@ -295,44 +557,115 @@ template <typename NumT> void File::writeUpdatedData(std::string const &name, st
 }
 
 template <typename NumT>
-void File::writeUpdatedData(const std::string &name, std::vector<NumT> const &value, DimVector const &dims) {
+void File::writeUpdatedData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims) {
   this->openData(name);
   DimSizeVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
   this->closeData();
 }
 
-void File::makeCompData(const string &name, const NXnumtype type, const DimVector &dims, const NXcompression comp,
-                        const DimSizeVector &bufsize, bool open_data) {
+void File::makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
+                        DimSizeVector const &chunk, bool open_data) {
   // error check the parameters
   if (name.empty()) {
-    throw Exception("Supplied empty name to makeCompData", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
   if (dims.empty()) {
-    throw Exception("Supplied empty dimensions to makeCompData", m_filename);
+    throw NXEXCEPTION("Supplied empty dimensions name=" + name);
   }
-  if (bufsize.empty()) {
-    throw Exception("Supplied empty bufsize to makeCompData", m_filename);
+  if (chunk.empty()) {
+    throw NXEXCEPTION("Supplied empty bufsize name=" + name);
   }
-  if (dims.size() != bufsize.size()) {
+  if (dims.size() != chunk.size()) {
     stringstream msg;
-    msg << "Supplied dims rank=" << dims.size() << " must match supplied bufsize rank=" << bufsize.size()
-        << "in makeCompData";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied dims rank=" << dims.size() << " must match supplied bufsize rank=" << chunk.size()
+        << " name=" << name;
+    throw NXEXCEPTION(msg.str());
+  }
+  std::set<NXcompression> const supported_comp{NXcompression::LZW, NXcompression::CHUNK, NXcompression::NONE};
+  if (supported_comp.count(comp) == 0) {
+    std::cerr << "HDF5 doesn't support selected compression method " << int(comp) << "!  Using NONE.\n";
+    comp = NXcompression::NONE;
+  }
+  // ensure current location is a group
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
+
+  // check if any data is unlimited
+  bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](auto x) -> bool { return x == NX_UNLIMITED; });
+
+  // set the dimensions for use
+  std::size_t rank = dims.size();
+  DimArray mydims{0}, maxdims{0};
+  DimArray chunkdims = toDimArray(chunk);
+  mydims = maxdims = toDimArray(dims);
+  // handle unlimited data
+  if (unlimited) {
+    for (std::size_t i = 0; i < rank; i++) {
+      if (dims[i] == NX_UNLIMITED) {
+        mydims[i] = 1;
+        maxdims[i] = H5S_UNLIMITED;
+      }
+    }
   }
 
-  // do the work
-  int i_type = static_cast<int>(type);
-  int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
-                                     const_cast<int64_t *>(&(dims[0])), i_comp, const_cast<int64_t *>(&(bufsize[0])));
+  H5::DataType datatype = nxToHDF5Type(type);
 
-  // report errors
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", "
-        << comp << ", " << toString(bufsize) << ") failed";
-    throw Exception(msg.str(), m_filename);
+  // create a dataspace
+  H5::DataSpace dataspace;
+  if (type == NXnumtype::CHAR) {
+    std::size_t byte_zahl = mydims[rank - 1];
+    DimArray mydim1(mydims);
+    if (unlimited) {
+      mydim1[0] = 1;
+      maxdims[0] = H5S_UNLIMITED;
+    }
+    mydim1[rank - 1] = 1;
+    if (mydims[rank - 1] > 1) {
+      mydims[rank - 1] = maxdims[rank - 1] = 1;
+    }
+    if (chunkdims[rank - 1] > 1) {
+      chunkdims[rank - 1] = 1;
+    }
+    dataspace = H5::DataSpace((int)rank, mydim1.data(), maxdims.data());
+    // NOTE there is no corresponding DataType::setSize method in current H5Cpp
+    // must use underlying C method to set the proper size
+    H5Tset_size(datatype.getId(), byte_zahl);
+  } else {
+    if (unlimited) {
+      dataspace = H5::DataSpace((int)rank, mydims.data(), maxdims.data());
+    } else {
+      dataspace = H5::DataSpace((int)rank, mydims.data(), NULL);
+    }
+  }
+
+  // set the compression parameters
+  H5::DSetCreatPropList cparms(H5P_DATASET_CREATE);
+  if (comp == NXcompression::LZW) {
+    cparms.setChunk((int)rank, chunkdims.data());
+    cparms.setShuffle();
+    cparms.setDeflate(default_deflate_level);
+  }
+  // NOTE if compression is NONE but a dimension is unlimited,
+  // then it still compresses by CHUNK.
+  // this behavior is inherited from napi
+  else if (comp == NXcompression::NONE) {
+    if (unlimited) {
+      cparms.setChunk((int)rank, chunkdims.data());
+    } else {
+      cparms = H5::DSetCreatPropList::DEFAULT;
+    }
+  } else if (comp == NXcompression::CHUNK) {
+    cparms.setChunk((int)rank, chunkdims.data());
+  } else {
+    cparms = H5::DSetCreatPropList::DEFAULT;
+  }
+
+  // create the dataset with the compression parameters
+  H5::DataSet dataset = current->createDataSet(name, datatype, dataspace, cparms);
+  registerEntry(m_path / name, scientific_data_set);
+
+  if (unlimited) {
+    dataset.extend(mydims.data());
   }
   if (open_data) {
     this->openData(name);
@@ -349,100 +682,205 @@ void File::writeCompData(std::string const &name, vector<NumT> const &value, Dim
 
 void File::openData(std::string const &name) {
   if (name.empty()) {
-    throw Exception("Supplied empty name to openData", m_filename);
+    throw NXEXCEPTION("Supplied empty name");
   }
-  NAPI_CALL(NXopendata(*(this->m_pfile_id), name.c_str()), "NXopendata(" + name + ") failed");
+  NexusPath const new_path = formAbsolutePath(name);
+  if (m_descriptor.isEntry(new_path, scientific_data_set)) {
+    m_path = new_path;
+    m_current = std::make_shared<H5::DataSet>(this->openDataSet(m_path));
+  } else {
+    throw NXEXCEPTION("The dataset " + name + " cannot be opened from " + m_path + "|  tried to open " + new_path);
+  }
 }
 
-void File::closeData() { NAPI_CALL(NXclosedata(*(this->m_pfile_id).get()), "NXclosedata() failed"); }
+void File::closeData() {
+  if (m_path.isRoot()) {
+    // do nothing in the root -- this preserves behavior from napi
+    return;
+  } else if (!isDataSetOpen()) {
+    throw NXEXCEPTION("Attempting to close a data set while within group at " + m_path + " of class " +
+                      m_descriptor.classTypeForName(m_path));
+  } else {
+    try {
+      std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+      dataset->close();
+      m_path = m_path.parent_path();
+      if (m_path.isRoot()) {
+        this->resetToFileRoot();
+      } else {
+        m_current = std::make_shared<H5::Group>(H5::H5File::openGroup(m_path));
+      }
+    } catch (...) {
+    }
+  }
+}
 
 template <typename NumT> void File::putData(NumT const *data) {
   if (data == NULL) {
     throw NXEXCEPTION("Data specified as null");
   }
-  NAPI_CALL(NXputdata(*(this->m_pfile_id), data), "NXputdata failed");
+
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  DimArray dims{0}, maxdims{0}, start{0}, size{0};
+
+  auto ds = dataset->getSpace();
+  auto rank = ds.getSimpleExtentNdims();
+  bool unlimited = false;
+  ds.getSimpleExtentDims(dims.data(), maxdims.data());
+
+  for (int i = 0; i < rank; i++) {
+    if (maxdims[i] == H5S_UNLIMITED) {
+      unlimited = true;
+      start[i] = static_cast<hsize_t>(dims[i] + 1);
+      size[i] = 1;
+    } else {
+      start[i] = 0;
+      size[i] = static_cast<hsize_t>(dims[i]);
+    }
+  }
+  if (unlimited) {
+    DimSizeVector slab_start(rank), slab_size(rank);
+    for (int i = 0; i < rank; i++) {
+      slab_start[i] = start[i];
+      slab_size[i] = size[i];
+    }
+    this->putSlab(data, slab_start, slab_size);
+  } else {
+    try {
+      dataset->write(data, dataset->getDataType());
+    } catch (...) {
+      throw NXEXCEPTION("Failed to write data");
+    }
+  }
 }
 
-template <typename NumT> void File::putData(const vector<NumT> &data) {
+template <typename NumT> void File::putData(vector<NumT> const &data) {
   if (data.empty()) {
-    throw Exception("Supplied empty data to putData", m_filename);
+    throw NXEXCEPTION("Supplied empty data");
   }
-  this->putData(data.data());
+  this->putData<NumT>(data.data());
 }
 
-template <> MANTID_NEXUS_DLL void File::putData(std::string const *data) { this->putData(*data); }
+void File::putData(std::string const &data) { this->putData(data.c_str()); }
 
-void File::putData(std::string const &data) {
-  if (data.empty()) {
-    throw Exception("Supplied empty stirng to putData", "putData(str)", m_filename);
-  }
-  this->putData<char>(data.c_str());
-}
-
-template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *data) {
-  if (info.name == NULL_STR) {
-    throw Exception("Supplied bad attribute name \"" + NULL_STR + "\"", m_filename);
-  }
-  if (info.name.empty()) {
-    throw Exception("Supplied empty name to putAttr", m_filename);
-  }
-  NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
-            "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
-                ") failed");
-}
+template <> MANTID_NEXUS_DLL void File::putData<std::string>(std::string const *data) { this->putData(data->c_str()); }
 
 template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
-  AttrInfo info;
-  info.name = name;
-  info.length = 1;
-  info.type = getType<NumT>();
-  this->putAttr(info, &value);
+  if (name.empty()) {
+    throw NXEXCEPTION("Supplied empty name to putAttr");
+  }
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
+  }
+  H5Util::writeNumAttribute<NumT>(*current, name, value);
 }
 
-void File::putAttr(const char *name, const char *value) {
-  if (name == NULL) {
-    throw Exception("Specified name as null to putAttr", m_filename);
+void File::putAttr(std::string const &name, std::string const &value, bool const empty_add_space) {
+  if (name.empty()) {
+    throw NXEXCEPTION("Supplied empty name");
   }
-  if (value == NULL) {
-    throw Exception("Specified value as null to putAttr", m_filename);
-  }
-  string s_name(name);
-  string s_value(value);
-  this->putAttr(s_name, s_value);
-}
-
-void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
-  string my_value(value);
-  if (my_value.empty() && empty_add_space)
+  std::string my_value(value);
+  if (my_value.empty() && empty_add_space) {
     my_value = " "; // Make a default "space" to avoid errors.
-  AttrInfo info;
-  info.name = name;
-  info.length = static_cast<unsigned int>(my_value.size());
-  info.type = NXnumtype::CHAR;
-  this->putAttr(info, my_value.data());
+  }
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
+  }
+  H5Util::writeStrAttribute(*current, name, my_value);
 }
 
-template <typename NumT> void File::putSlab(const NumT *data, const DimSizeVector &start, const DimSizeVector &size) {
+// this will handle string literals, which is the preferred way to pass string attributes
+void File::putAttr(std::string const &name, char const *value) {
+  if (value == nullptr) {
+    throw NXEXCEPTION("cannot write null data to attribute " + name);
+  } else {
+    putAttr(name, std::string(value), false);
+  }
+}
+
+template <typename NumT> void File::putSlab(NumT const *data, const DimSizeVector &start, const DimSizeVector &size) {
   if (data == NULL) {
-    throw Exception("Data specified as null in putSlab", m_filename);
+    throw NXEXCEPTION("Data specified as null");
   }
   if (start.empty()) {
-    throw Exception("Supplied empty start to putSlab", m_filename);
+    throw NXEXCEPTION("Supplied empty start");
   }
   if (size.empty()) {
-    throw Exception("Supplied empty size to putSlab", m_filename);
+    throw NXEXCEPTION("Supplied empty size");
   }
   if (start.size() != size.size()) {
     stringstream msg;
-    msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size() << "in putSlab";
-    throw Exception(msg.str(), m_filename);
+    msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
+    throw NXEXCEPTION(msg.str());
   }
-  NXstatus status = NXputslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0]));
-  if (status != NXstatus::NX_OK) {
+  if (start.size() > NX_MAXRANK) {
     stringstream msg;
-    msg << "NXputslab64(data, " << toString(start) << ", " << toString(size) << ") failed";
-    throw Exception(msg.str(), m_filename);
+    msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
+    throw NXEXCEPTION(msg.str());
   }
+  // check if there is a dataset open
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+
+  // get the datatype, dataspace, and dimensions
+  auto iCurrentT = iCurrentD->getDataType();
+  auto iCurrentS = iCurrentD->getSpace();
+  auto rank = iCurrentS.getSimpleExtentNdims();
+  DimArray dims{0}, maxdims{0};
+  iCurrentS.getSimpleExtentDims(dims.data(), maxdims.data());
+
+  // copy input dimension vectors into dimension arrays
+  DimArray myStart = toDimArray(start);
+  DimArray mySize = toDimArray(size);
+  DimArray mSize{0};
+  std::transform(start.cbegin(), start.cend(), size.cbegin(), mSize.begin(), std::plus<hsize_t>());
+  bool unlimiteddim =
+      std::any_of(maxdims.cbegin(), maxdims.cend(), [](hsize_t const x) -> bool { return x == H5S_UNLIMITED; });
+
+  // strings have one less dimension than otherwise indicated
+  if (iCurrentT.getClass() == H5T_STRING) {
+    mySize.back() = 1;
+    myStart.back() = 0;
+    mSize.back() = 1;
+  }
+
+  // make a new dataspace for reasons -- good reasons, most assuredly
+  H5::DataSpace dataspace(rank, mySize.data(), NULL);
+
+  // if we have unlimited data in any dimension
+  if (unlimiteddim) {
+    // in each dimension, set the size to the max of mSize or dims
+    std::transform(mSize.cbegin(), mSize.cend(), dims.cbegin(), mSize.begin(),
+                   [](hsize_t const a, hsize_t const b) -> hsize_t { return std::max(a, b); });
+
+    // extend the slab by the new dimensions
+    iCurrentD->extend(mSize.data());
+
+    // filespace
+    auto filespace = iCurrentD->getSpace();
+
+    // define slab
+    filespace.selectHyperslab(H5S_SELECT_SET, mySize.data(), myStart.data(), NULL, NULL);
+    // write slab
+    iCurrentD->write(data, iCurrentT, dataspace, filespace, H5::DSetMemXferPropList::DEFAULT);
+    // close
+    iCurrentS.close();
+    // update with new size
+    // TODO pointer magic to replace pFile->iCurrentS = filespace;
+    iCurrentS = filespace; // ???
+  } else {
+    // define slab
+    iCurrentS.selectHyperslab(H5S_SELECT_SET, mySize.data(), myStart.data(), NULL, NULL);
+    // write slab
+    iCurrentD->write(data, iCurrentT, dataspace, iCurrentS, H5::DSetMemXferPropList::DEFAULT);
+  }
+
+  dataspace.close();
 }
 
 template <typename NumT>
@@ -460,28 +898,84 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 }
 
 NXlink File::getDataID() {
+  // make sure current location is a dataset
+  std::shared_ptr<H5::DataSet> current = this->getCurrentLocationAs<H5::DataSet>();
+
+  /*
+    this means: if the item is already linked: use the target attribute;
+    else, use the path to the current node
+  */
   NXlink link;
-  NAPI_CALL(NXgetdataID(*(this->m_pfile_id), &link), "NXgetdataID failed");
+  try {
+    link.targetPath = this->getAttr<std::string>(target_attr_name);
+  } catch (Exception &) {
+    link.targetPath = current->getObjName();
+  }
+  link.linkType = NXentrytype::sds;
   return link;
 }
 
-bool File::isDataSetOpen() {
-  NXlink id;
-  if (NXgetdataID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
-    return false;
-  } else {
-    return true;
-  }
-}
+bool File::isDataSetOpen() { return m_descriptor.isEntry(m_path, scientific_data_set); }
 /*----------------------------------------------------------------------*/
 
-void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
+void File::makeLink(NXlink &link) {
+  // construct a path to the target
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  NexusPath linkTarget(m_path);
+  linkTarget /= NexusPath(link.targetPath).stem();
+
+  // create link
+  current->link(link.targetPath, H5L_SAME_LOC, linkTarget);
+  registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetPath));
+  // set a target attribute on the target
+  std::string here = this->getPath();
+  this->openPath(linkTarget);
+  this->putAttr(target_attr_name, link.targetPath);
+  this->openPath(here);
+}
 
 template <typename NumT> void File::getData(NumT *data) {
   if (data == NULL) {
-    throw Exception("Supplied null pointer to getData", m_filename);
+    throw NXEXCEPTION("Supplied null pointer to write data to");
   }
-  NAPI_CALL(NXgetdata(*(this->m_pfile_id), data), "NXgetdata failed");
+
+  // make sure this is a data set
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+  H5::DataType iCurrentT = iCurrentD->getDataType();
+
+  // now try to read
+  try {
+    H5::DataSpace iCurrentS = iCurrentD->getSpace();
+    int rank = iCurrentS.getSimpleExtentNdims();
+    if (rank == 0) { /* SCALAR dataset*/
+      H5::DataSpace memtype_id(H5S_SCALAR);
+      iCurrentS.selectAll();
+      iCurrentD->read(data, iCurrentT, memtype_id, iCurrentS);
+    } else {
+      iCurrentD->read(data, iCurrentT);
+    }
+  } catch (...) {
+    throw NXEXCEPTION("Failed to get data");
+  }
+}
+
+template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::string *data) {
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  H5::DataType datatype = dataset->getDataType();
+  H5T_class_t typeclass = datatype.getClass();
+  if (datatype != H5::PredType::NATIVE_CHAR && typeclass != H5T_STRING) {
+    stringstream msg;
+    msg << "Cannot use on-character data. Found type=" << typeclass;
+    throw NXEXCEPTION(msg.str());
+  }
+  H5::DataSpace dataspace = dataset->getSpace();
+  int rank = dataspace.getSimpleExtentNdims();
+  if (rank > 1) {
+    stringstream msg;
+    msg << "Only understand rank=1 data. Found rank=" << rank;
+    throw NXEXCEPTION(msg.str());
+  }
+  *data = H5Util::readString(*dataset);
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -505,71 +999,111 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   this->getData<NumT>(data.data());
 }
 
-void File::getDataCoerce(vector<int> &data) {
-  Info info = this->getInfo();
-  if (info.type == NXnumtype::INT8) {
-    vector<int8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT8) {
-    vector<uint8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT16) {
-    vector<int16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT16) {
-    vector<uint16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT32) {
-    vector<int32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT32) {
-    vector<uint32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
+template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::string> &data) {
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  std::vector<std::string> res = H5Util::readStringVector(*dataset);
+  data.assign(res.cbegin(), res.cend());
+}
+
+std::string File::getStrData() {
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  const std::string value = H5Util::readString(*dataset);
+  if (value == " ") {
+    return "";
   } else {
-    throw Exception("NexusFile::getDataCoerce(): Could not coerce to int.", m_filename);
+    return value;
   }
 }
 
-void File::getDataCoerce(vector<double> &data) {
-  Info info = this->getInfo();
-  if (info.type == NXnumtype::INT8) {
-    vector<int8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT8) {
-    vector<uint8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT16) {
-    vector<int16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT16) {
-    vector<uint16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT32) {
-    vector<int32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT32) {
-    vector<uint32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::FLOAT32) {
-    vector<float> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::FLOAT64) {
-    this->getData(data);
+template <typename NumT> void File::getDataCoerce(vector<NumT> &data) {
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  H5Util::readArray1DCoerce(*dataset, data);
+}
+
+template <typename NumT> void File::getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size) {
+  if (data == NULL) {
+    throw NXEXCEPTION("Supplied null pointer for data");
+  }
+  if (start.size() == 0) {
+    stringstream msg;
+    msg << "Supplied empty start offset, rank = " << start.size();
+    throw NXEXCEPTION(msg.str());
+  }
+  if (start.size() != size.size()) {
+    stringstream msg;
+    msg << "start rank=" << start.size() << " must match size rank=" << size.size();
+    throw NXEXCEPTION(msg.str());
+  }
+
+  // check if there is a dataset open
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+
+  // get the datatype, dataspace, and dimensions
+  auto iCurrentT = iCurrentD->getDataType();
+  auto iCurrentS = iCurrentD->getSpace();
+  auto rank = iCurrentS.getSimpleExtentNdims();
+
+  // check the class
+  H5::DataType memtype_id = H5Util::getType<NumT>();
+
+  if (rank == 0) {
+    // this is an unslabbable SCALAR
+    H5::DataSpace filespace = iCurrentD->getSpace();
+    H5::DataSpace memspace(H5S_SCALAR);
+    filespace.selectAll();
+    iCurrentD->read(data, memtype_id, memspace, filespace, H5::DSetMemXferPropList::DEFAULT);
+    filespace.close();
   } else {
-    throw Exception("NexusFile::getDataCoerce(): Could not coerce to double.", m_filename);
+    DimArray mySize = toDimArray(size), myStart = toDimArray(start), mStart{0};
+    iCurrentS.selectHyperslab(H5S_SELECT_SET, mySize.data(), myStart.data(), NULL, NULL);
+    auto memspace = H5::DataSpace(rank, mySize.data(), NULL);
+    memspace.selectHyperslab(H5S_SELECT_SET, mySize.data(), mStart.data(), NULL, NULL);
+    iCurrentD->read(data, memtype_id, memspace, iCurrentS, H5::DSetMemXferPropList::DEFAULT);
+  }
+}
+
+template <>
+MANTID_NEXUS_DLL void File::getSlab<std::string>(std::string *data, const DimSizeVector &start,
+                                                 const DimSizeVector &size) {
+  if (data == NULL) {
+    throw NXEXCEPTION("Supplied null pointer for data");
+  }
+  if (start.size() == 0) {
+    stringstream msg;
+    msg << "Supplied empty start offset, rank = " << start.size();
+    throw NXEXCEPTION(msg.str());
+  }
+  if (start.size() != size.size()) {
+    stringstream msg;
+    msg << "start rank=" << start.size() << " must match size rank=" << size.size();
+    throw NXEXCEPTION(msg.str());
+  }
+
+  // check if there is a dataset open
+  std::shared_ptr<H5::DataSet> iCurrentD = this->getCurrentLocationAs<H5::DataSet>();
+
+  // get the datatype, dataspace, and dimensions
+  auto iCurrentT = iCurrentD->getDataType();
+  auto iCurrentS = iCurrentD->getSpace();
+  auto rank = iCurrentS.getSimpleExtentNdims();
+
+  // check the class
+  H5::DataType memtype_id = H5Util::getType<string>();
+
+  if (rank == 0) {
+    // this is an unslabbable SCALAR
+    H5::DataSpace filespace = iCurrentD->getSpace();
+    H5::DataSpace memspace(H5S_SCALAR);
+    filespace.selectAll();
+    iCurrentD->read(data, memtype_id, memspace, filespace, H5::DSetMemXferPropList::DEFAULT);
+    filespace.close();
+  } else {
+    DimArray mySize = toDimArray(size), mStart{0};
+    if (mySize[0] == 1) {
+      mySize[0] = iCurrentT.getSize();
+    }
+    iCurrentS.selectHyperslab(H5S_SELECT_SET, mySize.data(), mStart.data(), NULL, NULL);
+    iCurrentD->read(data, iCurrentT, H5S_ALL, H5S_ALL, H5::DSetMemXferPropList::DEFAULT);
   }
 }
 
@@ -583,8 +1117,9 @@ template <typename NumT> void File::readData(std::string const &dataName, NumT &
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (!dataVector.empty())
+  if (!dataVector.empty()) { // cppcheck-suppress knownConditionTrueFalse
     data = dataVector[0];
+  }
   this->closeData();
 }
 
@@ -595,73 +1130,57 @@ void File::readData(std::string const &dataName, std::string &data) {
 }
 
 bool File::isDataInt() {
-  Info info = this->getInfo();
-  switch (info.type) {
-  case NXnumtype::INT8:
-  case NXnumtype::UINT8:
-  case NXnumtype::INT16:
-  case NXnumtype::UINT16:
-  case NXnumtype::INT32:
-  case NXnumtype::UINT32:
-    return true;
-  default:
-    return false;
-  }
-}
-
-string File::getStrData() {
-  string res;
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-    throw Exception(msg.str(), m_filename);
-  }
-  if (info.dims.size() != 1) {
-    stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-    throw Exception(msg.str(), m_filename);
-  }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
-  try {
-    this->getData(value);
-  } catch (const Exception &) {
-    delete[] value;
-    throw; // rethrow the original exception
-  }
-  res = string(value, static_cast<size_t>(info.dims[0]));
-  delete[] value;
-  return res;
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+  H5::DataType datatype = dataset->getDataType();
+  return datatype.getClass() == H5T_INTEGER;
 }
 
 Info File::getInfo() {
-  int64_t dims[NX_MAXRANK];
-  NXnumtype type;
-  int rank;
-  NAPI_CALL(NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type), "NXgetinfo failed");
+  // ensure current location is a dataset
+  std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
+
+  // get the datatype
+  auto dt = dataset->getDataType();
+  auto ds = dataset->getSpace();
+  std::size_t rank = ds.getSimpleExtentNdims();
+  DimArray dims{0};
+
+  /* NOTE: the below was copied from napi to properly set lengths for string arrays.
+    Unless you were there when the Deep Magic was written, and can look back further into the stillness
+    and the darkness before Time dawned to read a different incantation,
+    then do not try to edit this.
+  */
+  if (rank == 0) {
+    rank = 1; /* we pretend */
+    dims[0] = 1;
+  } else {
+    ds.getSimpleExtentDims(dims.data());
+  }
+  if (dt.getClass() == H5T_STRING && dims[rank - 1] == 1) {
+    if (dt.isVariableStr()) {
+      /* this will not work for arrays of strings */
+      hid_t memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      char *vlData = NULL;
+      H5Dread(dataset->getId(), memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        dims[rank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, ds.getId(), H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
+    } else {
+      dims[rank - 1] = H5Tget_size(dt.getId());
+    }
+  }
+
+  // Now prepare the info to be returned
   Info info;
-  info.type = static_cast<NXnumtype>(type);
-  for (int i = 0; i < rank; i++) {
+  info.type = hdf5ToNXType(dt);
+  info.dims.push_back(dims.front()); // include rank=0
+  for (std::size_t i = 1; i < rank; i++) {
     info.dims.push_back(dims[i]);
   }
   return info;
-}
-
-Entry File::getNextEntry() {
-  // set up temporary variables to get the information
-  NXname name, class_name;
-  NXnumtype datatype;
-
-  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, &datatype);
-  if (status == NXstatus::NX_OK) {
-    string str_name(name);
-    string str_class(class_name);
-    return Entry(str_name, str_class);
-  } else if (status == NXstatus::NX_EOD) {
-    return EOD_ENTRY;
-  } else {
-    throw Exception("NXgetnextentry failed", m_filename);
-  }
 }
 
 Entries File::getEntries() {
@@ -672,197 +1191,163 @@ Entries File::getEntries() {
 
 void File::getEntries(Entries &result) {
   result.clear();
-  this->initGroupDir();
-  Entry temp;
-  while (true) {
-    temp = this->getNextEntry();
-    if (temp == EOD_ENTRY) {
-      break;
-    } else {
-      result.insert(temp);
-    }
-  }
-}
-
-template <typename NumT> void File::getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size) {
-  if (data == NULL) {
-    throw Exception("Supplied null pointer to getSlab", m_filename);
-  }
-  if (start.size() == 0) {
-    stringstream msg;
-    msg << "Supplied empty start offset, rank = " << start.size() << " in getSlab";
-    throw Exception(msg.str(), m_filename);
-  }
-  if (start.size() != size.size()) {
-    stringstream msg;
-    msg << "In getSlab start rank=" << start.size() << " must match size rank=" << size.size();
-    throw Exception(msg.str(), m_filename);
-  }
-
-  NAPI_CALL(NXgetslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0])), "NXgetslab failed");
-}
-
-AttrInfo File::getNextAttr() {
-  // string & name, int & length, NXnumtype type) {
-  NXname name;
-  NXnumtype type;
-
-  int rank;
-  int dim[NX_MAXRANK];
-  NXstatus status = NXgetnextattra(*(this->m_pfile_id), name, &rank, dim, &type);
-  if (status == NXstatus::NX_OK) {
-    AttrInfo info;
-    info.type = type;
-    info.name = string(name);
-
-    // scalar value
-    if (rank == 0 || (rank == 1 && dim[0] == 1)) {
-      info.length = 1;
-      return info;
-    }
-
-    // char (=string) or number array (1 dim)
-    if (rank == 1) {
-      info.length = static_cast<unsigned int>(dim[0]);
-      return info;
-    }
-
-    // string array (2 dim char array)
-    if (rank == 2 && type == NXnumtype::CHAR) {
-      info.length = 1;
-      for (int d = 0; d < rank; ++d) {
-        info.length *= static_cast<std::size_t>(dim[d]);
+  auto current = this->getCurrentLocationAs<H5::Group>();
+  for (size_t i = 0; i < current->getNumObjs(); i++) {
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
+    H5G_obj_t type = current->getObjTypeByIdx(i);
+    if (type == H5G_GROUP) {
+      H5::Group grp = current->openGroup(name);
+      if (grp.attrExists(group_class_spec)) {
+        H5::Attribute attr = grp.openAttribute(group_class_spec);
+        attr.read(attr.getDataType(), className);
       }
-      return info;
+    } else if (type == H5G_DATASET) {
+      className = scientific_data_set;
     }
+    if (!className.empty())
+      result[name] = className;
+  }
+}
 
-    // TODO - AttrInfo cannot handle more complex ranks/dimensions, we need to throw an error
-    std::cerr << "ERROR iterating through attributes found array attribute not understood by this api" << std::endl;
-    throw Exception("getNextAttr failed", m_filename);
+void File::getEntryDirectory(Entries &result) {
+  result.clear();
+  auto allEntries = m_descriptor.getAllEntries();
+  for (auto ikey = allEntries.cbegin(); ikey != allEntries.cend(); ikey++) {
+    auto values = ikey->second;
+    for (auto iname = values.cbegin(); iname != values.cend(); iname++) {
+      result[*iname] = ikey->first;
+    }
+  }
+}
 
-  } else if (status == NXstatus::NX_EOD) {
-    AttrInfo info;
-    info.name = NULL_STR;
-    info.length = 0;
-    info.type = NXnumtype::BINARY; // junk value that shouldn't be checked for
-    return info;
+std::string File::getTopLevelEntryName() {
+  std::string top("");
+  Entry firstEntry = m_descriptor.firstEntryNameType();
+  if (firstEntry.second == "NXentry") {
+    top = firstEntry.first;
   } else {
-    throw Exception("NXgetnextattra failed", m_filename);
+    // check all of the
+    auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
+    auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
+                                 [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
+    if (iTopPath != allEntryPaths.cend()) {
+      top = *iTopPath;
+    }
   }
+  if (top.empty()) {
+    throw NXEXCEPTION("unable to find top-level entry, no valid groups");
+  }
+  return top;
 }
 
-void File::getAttr(const AttrInfo &info, void *data, int length) {
-  char name[NX_MAXNAMELEN];
-  strcpy(name, info.name.c_str());
-  NXnumtype type = info.type;
-  if (length < 0) {
-    length = static_cast<int>(info.length);
+template <typename NumT> void File::getAttr(std::string const &name, NumT &value) {
+  // verify the current location can hold an attribute, and has the attribute named
+  std::shared_ptr<H5::H5Object const> const current = this->getCurrentLocationAs<H5::H5Object>();
+  if (!current->attrExists(name)) {
+    throw NXEXCEPTION("Could not find attribute " + name + " at " + m_path);
   }
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name, data, &length, &type), "NXgetattr(" + info.name + ") failed");
-  if (type != info.type) {
-    stringstream msg;
-    msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
-    throw Exception(msg.str(), m_filename);
-  }
-  // char attributes are always NULL terminated and so may change length
-  if (static_cast<unsigned>(length) != info.length && type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
-    throw Exception(msg.str(), m_filename);
-  }
+
+  // now open the attribute, read it, and close
+  H5::Attribute attr = current->openAttribute(name);
+  auto dt = attr.getDataType();
+  attr.read(dt, &value);
+  attr.close();
 }
 
-template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
-  NumT value;
-  this->getAttr(info, &value);
-  return value;
+// for string case, use H5::Attribute::read(const DataType &mem_type, H5std_string &strg)
+template <> MANTID_NEXUS_DLL void File::getAttr(std::string const &name, std::string &value) {
+  // verify the current location can hold an attribute, and has the attribute named
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  if (!current->attrExists(name)) {
+    throw NXEXCEPTION("Could not find string attribute " + name + " at " + m_path);
+  }
+
+  // open the attribute, and read it
+  H5::Attribute attr = current->openAttribute(name);
+  attr.read(attr.getDataType(), value);
+  attr.close();
 }
 
 template <typename NumT> NumT File::getAttr(std::string const &name) {
-  NumT value;
-  this->getAttr<NumT>(name, value);
-  return value;
+  NumT ret;
+  this->getAttr<NumT>(name, ret);
+  return ret;
 }
 
-template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
-  AttrInfo info;
-  info.type = getType<char>();
-  info.length = 2000; ///< @todo need to find correct length of attribute
-  info.name = name;
-  value = this->getStrAttr(info);
-}
-
-template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-  AttrInfo info;
-  info.type = getType<NumT>();
-  info.length = 1;
-  info.name = name;
-  value = this->getAttr<NumT>(info);
-}
-
-string File::getStrAttr(const AttrInfo &info) {
-  string res;
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
-    throw Exception(msg.str(), m_filename);
-  }
-  char *value = new char[info.length + 1];
-  try {
-    this->getAttr(info, value, static_cast<int>(info.length) + 1);
-  } catch (const Exception &) {
-    // Avoid memory leak
-    delete[] value;
-    throw; // rethrow original exception
-  }
-
-  // res = string(value, info.length);
-  // allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
-  res = string(value);
-  delete[] value;
-
-  return res;
-}
-
-vector<AttrInfo> File::getAttrInfos() {
-  vector<AttrInfo> infos;
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
+std::vector<AttrInfo> File::getAttrInfos() {
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  int num_attr = current->getNumAttrs();
+  std::vector<AttrInfo> infos;
+  infos.reserve(num_attr);
+  for (int i = 0; i < num_attr; i++) {
+    H5::Attribute attr = current->openAttribute(i);
+    std::string name = attr.getName();
+    // do not include the group class spec, as that is for internal use only
+    if (name == group_class_spec) {
+      continue;
     }
-    infos.push_back(temp);
+    NXnumtype type = hdf5ToNXType(attr.getDataType());
+    // all of this is just to set the length...
+    auto ds = attr.getSpace();
+    int rank = ds.getSimpleExtentNdims();
+    // TODO - AttrInfo cannot handle more complex ranks/dimensions, we need to throw an error
+    if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      throw Exception("ERROR iterating through attributes found array attribute not understood by this api",
+                      "getAttrInfos", m_filename);
+    }
+    DimArray dims{0};
+    ds.getSimpleExtentDims(dims.data());
+    std::size_t length = 1;
+    for (int d = 0; d < rank; ++d) {
+      length *= dims[d];
+    }
+    // now add attribute info to vector
+    infos.emplace_back(type, length, name);
+    attr.close();
   }
   return infos;
 }
 
-bool File::hasAttr(const std::string &name) {
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
+std::set<std::string> File::getAttrNames() {
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  int num_attr = current->getNumAttrs();
+  std::set<std::string> infos;
+  for (int i = 0; i < num_attr; i++) {
+    H5::Attribute attr = current->openAttribute(i);
+    std::string name = attr.getName();
+    // do not include the group class spec, as that is for internal use only
+    if (name == group_class_spec) {
+      continue;
     }
-    if (temp.name == name)
-      return true;
+    infos.insert(name);
+    attr.close();
   }
-  return false;
+  return infos;
+}
+
+bool File::hasAttr(std::string const &name) {
+  std::shared_ptr<H5::H5Object> current = this->getCurrentLocationAs<H5::H5Object>();
+  return current->attrExists(name);
 }
 
 NXlink File::getGroupID() {
+  // make sure current location is a group
+  std::shared_ptr<H5::Group> current = this->getCurrentLocationAs<H5::Group>();
+
+  /*
+    this means: if the item is already linked: use the target attribute;
+    else, use the path to the current node
+  */
   NXlink link;
-  NAPI_CALL(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
+  if (current->attrExists(target_attr_name)) {
+    link.targetPath = this->getAttr<std::string>(target_attr_name);
+  } else {
+    link.targetPath = current->getObjName();
+  }
+  link.linkType = NXentrytype::group;
   return link;
 }
-
-void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(*(this->m_pfile_id)), "NXinitgroupdir failed"); }
-
-void File::initAttrDir() { NAPI_CALL(NXinitattrdir(*(this->m_pfile_id)), "NXinitattrdir failed"); }
-
-NXstatus setCache(long newVal) { return NXsetcache(newVal); }
 
 } // namespace NeXus
 
@@ -931,6 +1416,11 @@ std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
 /* Concrete instantiations of template definitions.                 */
 /* ---------------------------------------------------------------- */
 
+template MANTID_NEXUS_DLL std::shared_ptr<H5::H5File> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::H5Object> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::Group> File::getCurrentLocationAs();
+template MANTID_NEXUS_DLL std::shared_ptr<H5::DataSet> File::getCurrentLocationAs();
+
 // PUT / GET ATTR
 
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, float const &value);
@@ -944,18 +1434,6 @@ template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint32_t c
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, int64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, char const &value);
-
-template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
 
 template MANTID_NEXUS_DLL int16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL uint16_t File::getAttr(std::string const &name);
@@ -1224,6 +1702,9 @@ template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vect
                                                    DimVector const &dims, NXcompression const comp,
                                                    DimSizeVector const &bufsize);
 
+template MANTID_NEXUS_DLL void File::getDataCoerce(vector<int> &data);
+template MANTID_NEXUS_DLL void File::getDataCoerce(vector<double> &data);
+
 // READ / WRITE DATA -- SLAB / EXTENDIBLE
 
 template MANTID_NEXUS_DLL void File::getSlab(float *data, const DimSizeVector &start, const DimSizeVector &size);
@@ -1279,23 +1760,7 @@ template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, c
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
                                              const DimSizeVector &size);
 
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<double> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const dimsize_t start,
-                                             const dimsize_t size);
+template MANTID_NEXUS_DLL void File::putSlab(std::vector<int32_t> const &data, dimsize_t const start,
+                                             dimsize_t const size);
+template MANTID_NEXUS_DLL void File::putSlab(std::vector<double> const &data, dimsize_t const start,
+                                             dimsize_t const size);

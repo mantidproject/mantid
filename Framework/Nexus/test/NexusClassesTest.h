@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
 #include "test_helper.h"
 #include <cxxtest/TestSuite.h>
@@ -31,12 +32,14 @@ public:
     // check NXChar
     auto definition = root.openNXChar("entry/definition"); // relative path
     definition.load();
-    TS_ASSERT_EQUALS(std::string(definition(), definition.dim0()), "NXsnsevent");
+    TS_ASSERT_EQUALS(std::string(definition()), "NXsnsevent");
     // and from getString
     TS_ASSERT_EQUALS(root.getString("entry/definition"), "NXsnsevent");
 
     TS_ASSERT(!entry.containsGroup("bank91_events")); // there aren't that many groups
     TS_ASSERT(entry.containsGroup("bank19_events"));
+
+    TS_ASSERT_THROWS(entry.openNXGroup("bank91_events"), const ::NeXus::Exception &); // next call should be fine
 
     auto bank19 = entry.openNXGroup("bank19_events");
     TS_ASSERT_EQUALS(bank19.name(), "bank19_events");
@@ -52,6 +55,18 @@ public:
     TS_ASSERT_DELTA(time_of_flight[0], 16681.5, .01);
     TS_ASSERT_DELTA(time_of_flight[255], 958.1, .01);
     TS_ASSERT_THROWS_ANYTHING(time_of_flight[256]); // out of bounds
+
+    TS_ASSERT_THROWS(bank19.openNXFloat("timeofflight"), const ::NeXus::Exception &); // next call should be fine
+
+    // load detector ids without letting previous data go out of scope
+    auto detid = bank19.openNXDataSet<uint32_t>("event_id"); // type does not have a convenience function
+    TS_ASSERT_EQUALS(detid.dim0(), 256);                     // same as number of time-of-flight
+    TS_ASSERT_EQUALS(detid.attributes.n(), 1);
+    TS_ASSERT_EQUALS(detid.attributes("target"), "/entry/instrument/bank19/event_id");
+    detid.load();
+    TS_ASSERT_EQUALS(detid[0], 37252);
+    TS_ASSERT_EQUALS(detid[255], 37272);
+    TS_ASSERT_THROWS_ANYTHING(detid[256]); // out of bounds
 
     auto duration = root.openNXFloat("/entry/duration"); // absolute path
     TS_ASSERT_EQUALS(duration.attributes.n(), 1);

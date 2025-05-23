@@ -176,9 +176,9 @@ private:
 
     // real flush test
     file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
-    vector<int> slab_array;
+    vector<int32_t> slab_array;
     slab_array.push_back(0);
-    for (int i = 0; i < 7; i++) {
+    for (int32_t i = 0; i < 7; i++) {
       slab_array[0] = i;
       file.putSlab(slab_array, i, 1);
       file.flush();
@@ -247,10 +247,12 @@ private:
     TS_ASSERT_EQUALS(doubles[1], 21.0)
     file.closeData();
 
-    // Throws when you coerce to int from a real/double source
+    // No problem coercing to int from a real/double source
     ints.clear();
     file.openData("r8_data");
-    TS_ASSERT_THROWS_ANYTHING(file.getDataCoerce(ints));
+    file.getDataCoerce(ints);
+    TS_ASSERT_EQUALS(ints.size(), 20);
+    TS_ASSERT_EQUALS(ints[1], 21);
     file.closeData();
 
     // Close the "entry" group

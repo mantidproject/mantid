@@ -222,14 +222,9 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     return tsp;
   } else if (info.type == NXnumtype::CHAR) {
     std::string values;
-    const int64_t item_length = info.dims[1];
     try {
-      const int64_t nitems = info.dims[0];
-      const std::size_t total_length = std::size_t(nitems * item_length);
-      boost::scoped_array<char> val_array(new char[total_length]);
-      file.getData(val_array.get());
+      values = file.getStrData();
       file.closeData();
-      values = std::string(val_array.get(), total_length);
     } catch (::NeXus::Exception &) {
       file.closeData();
       throw;
@@ -239,7 +234,8 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
-    const size_t ntimes = times.size();
+    const size_t ntimes = info.dims.front();
+    const size_t item_length = (values.size()) / ntimes;
     for (size_t i = 0; i < ntimes; ++i) {
       std::string value_i = std::string(values.data() + i * item_length, item_length);
       tsp->addValue(times[i], value_i);
@@ -286,29 +282,28 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
   // Now the validity of the values
   // this should be a match int array to the data values (or times)
   // If not present assume all data is valid
-  try {
+  if (file.hasData("value_valid")) {
     file.openData("value_valid");
-
-    // Now the validity data
-    ::NeXus::Info info = file.getInfo();
-    // Check the size
-    if (size_t(info.dims[0]) != times.size()) {
-      throw ::NeXus::Exception("Invalid value entry for validity data");
-    }
-    if (file.isDataInt()) // Int type
-    {
-      try {
-        file.getDataCoerce(values);
-        file.closeData();
-      } catch (::NeXus::Exception &) {
-        throw;
+    try {
+      // Now the validity data
+      ::NeXus::Info info = file.getInfo();
+      // Check the size
+      if (size_t(info.dims[0]) != times.size()) {
+        throw ::NeXus::Exception("Invalid value entry for validity data");
       }
-    } else {
-      throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
-    }
-  } catch (::NeXus::Exception &ex) {
-    std::string error_msg = ex.what();
-    if (error_msg != "NXopendata(value_valid) failed") {
+      if (file.isDataInt()) // Int type
+      {
+        try {
+          file.getDataCoerce(values);
+        } catch (::NeXus::Exception &) {
+          throw;
+        }
+        file.closeData();
+      } else {
+        throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
+      }
+    } catch (std::exception const &ex) {
+      std::string error_msg = ex.what();
       log.warning() << error_msg << "\n";
       file.closeData();
       // no data found

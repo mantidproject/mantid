@@ -644,9 +644,23 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot &root, const std::strin
  */
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
                                                              const double &progressStart, const double &progressRange) {
-  NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
-  indices_data.load();
-  size_t numspec = indices_data.dim0() - 1;
+  // indices of events
+  std::vector<int64_t> indices;
+  size_t numspec;
+  std::string units;
+  std::string unitLabel;
+  { // scope the variable so the node gets closed
+    NXInt64 indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
+    indices_data.load();
+    numspec = indices_data.dim0() - 1;
+    indices = indices_data.vecBuffer();
+
+    // Set the YUnit label
+    units = indices_data.attributes("units");
+    unitLabel = indices_data.attributes("unit_label");
+    if (unitLabel.empty())
+      unitLabel = units;
+  }
 
   // process optional spectrum parameters, if set
   checkOptionalProperties(numspec);
@@ -664,10 +678,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
       WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins, num_xbins - 1));
 
   // Set the YUnit label
-  ws->setYUnit(indices_data.attributes("units"));
-  std::string unitLabel = indices_data.attributes("unit_label");
-  if (unitLabel.empty())
-    unitLabel = indices_data.attributes("units");
+  ws->setYUnit(units);
   ws->setYUnitLabel(unitLabel);
 
   // Handle optional fields.
@@ -711,8 +722,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
   else
     throw std::runtime_error("Could not figure out the type of event list!");
 
-  // indices of events
-  std::vector<int64_t> indices = indices_data.vecBuffer();
   // Create all the event lists
   auto max = static_cast<int64_t>(m_filtered_spec_idxs.size());
   Progress progress(this, progressStart, progressStart + progressRange, max);
@@ -1835,8 +1844,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   }
 
   // MatrixWorkspace axis 1
-  NXDouble axis2 = wksp_cls.openNXDouble("axis2");
-  std::string unit2 = axis2.attributes("units");
+  std::string unit2;
+  { // limit scope so dataset closes
+    NXDouble axis2 = wksp_cls.openNXDouble("axis2");
+    unit2 = axis2.attributes("units");
+  }
 
   // --- Load workspace (as event_workspace or workspace2d) ---
   API::MatrixWorkspace_sptr local_workspace;
@@ -1858,9 +1870,8 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
       label->setLabel(ax.attributes("caption"), ax.attributes("label"));
     }
 
-    // If this doesn't throw then it is a numeric access so grab the data so
-    // we
-    // can set it later
+    // If this doesn't throw then it is a numeric access so grab the data so we can set it later
+    NXDouble axis2 = wksp_cls.openNXDouble("axis2");
     axis2.load();
     if (static_cast<size_t>(axis2.size()) == nspectra + 1)
       verticalHistogram = true;
@@ -2043,13 +2054,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &loc
       axis->setValue(i, axisData[i]);
     }
   } else if (axis->isText()) {
+    std::string axisLabels("");
     NXChar axisData = data.openNXChar("axis2");
-    std::string axisLabels;
     try {
       axisData.load();
       axisLabels = std::string(axisData(), axisData.dim0());
-    } catch (std::runtime_error &) {
-      axisLabels = "";
+    } catch (const std::runtime_error &) {
+      // let it drop on the floor
     }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
