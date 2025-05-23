@@ -69,6 +69,8 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 }
 } // namespace
 
+// PUBLIC
+
 NexusDescriptor::NexusDescriptor(std::string filename)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
