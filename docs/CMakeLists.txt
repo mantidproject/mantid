@@ -158,7 +158,7 @@ add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
 # Installation settings
 option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the package" OFF)
 if(PACKAGE_DOCS)
-  set(HTML_DOCS_DEST share/doc/html)
+  set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
 <<<<<<< HEAD
     if(ENABLE_QTASSISTANT
