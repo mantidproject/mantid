@@ -304,12 +304,10 @@ public:
       auto wsOut = do_load_v2(filename);
       TS_FAIL("Should not be able to load corrupt file: " + filename);
     } catch (const std::invalid_argument &e) {
-      const std::string front("Cannot open file ");
-      const std::string back(filename + " using HDF5");
+      const std::string expected("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file");
 
       const std::string msg = e.what();
-      TS_ASSERT(msg.starts_with(front));
-      TS_ASSERT(msg.ends_with(back));
+      TS_ASSERT(msg.starts_with(expected));
     }
   }
 };
