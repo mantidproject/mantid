@@ -661,6 +661,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._subtract_workspace(van_bkgd_ws_name, van_bkgd_name_can)
                 self._subtract_workspace(sam_ws_name, can_run_ws_name)
                 self._subtract_workspace(sam_ws_name, van_bkgd_name_can)
+                if mtd.doesExist(van_bkgd_name_can):
+                    api.DeleteWorkspace(Workspace=van_bkgd_name_can)
 
             elif (can_run_ws_name is not None and self._containerScaleFactor != 0) or self._absMethod == "SampleAndContainer":
                 # I_S = (I_{S+C}^E - I_C) / A_SS
@@ -668,6 +670,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 self.log().notice("No absorption correction applied to sample run %s." % sam_ws_name)
             # ENDIF (absorption correction)
+
+            if mtd.doesExist(van_bkgd_ws_name):
+                api.DeleteWorkspace(Workspace=van_bkgd_ws_name)
 
             if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
                 api.CompressEvents(
