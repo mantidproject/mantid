@@ -163,11 +163,3 @@ if(PACKAGE_DOCS)
     endif()
   endforeach()
 endif(PACKAGE_DOCS)
-
-if(ENABLE_DOCS)
-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py")
-    message(FATAL_ERROR "Sphinx configuration file 'source/conf.py' not found. Documentation cannot be built.")
-  endif()
-
-  find_package(Sphinx REQUIRED)
-  set(HTML_DOCS_DEST share/doc/html)
