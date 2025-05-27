@@ -29,10 +29,7 @@ using std::vector;
 
 namespace { // anonymous namespace to keep it in the file
 
-std::string const group_class_spec("NX_class");
-std::string const target_attr_name("target");
 std::string const scientific_data_set("SDS");
-constexpr int default_deflate_level(6);
 
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
