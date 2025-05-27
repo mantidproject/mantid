@@ -42,6 +42,12 @@ namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
+// Default constructor
+SCDCalibratePanels::SCDCalibratePanels() {
+  useAlgorithm("SCDCalibratePanels", 2);
+  deprecatedDate("2025-05-27");
+}
+
 const std::string SCDCalibratePanels::name() const { return "SCDCalibratePanels"; }
 
 int SCDCalibratePanels::version() const { return 1; }
