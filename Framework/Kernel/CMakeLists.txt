@@ -609,7 +609,7 @@ set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
-set(HTML_ROOT ../share/doc/html)
+set(HTML_ROOT ../share/doc)
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should be left empty to avoid warnings on
 # starting Mantid

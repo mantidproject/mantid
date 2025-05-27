@@ -43,8 +43,8 @@ requirements:
 
 test:
   files:
-    - share/doc/html/index.html
-    - share/doc/html/mantid.png
+    - share/doc/index.html
+    - share/doc/mantid.png
 
 about:
   home: https://github.com/mantidproject/mantid
