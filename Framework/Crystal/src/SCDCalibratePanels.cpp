@@ -112,7 +112,7 @@ void SCDCalibratePanels::exec() {
   std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(), "fit_");
   std::vector<std::string> parameter_workspaces(MyBankNames.size() + MyPanels.size(), "params_");
   int bankAndPanelCount = 0;
-  for (auto &MyPanel : MyPanels) {
+  for (const auto &MyPanel : MyPanels) {
     fit_workspaces[bankAndPanelCount] += MyPanel;
     parameter_workspaces[bankAndPanelCount] += MyPanel;
     bankAndPanelCount++;
@@ -127,7 +127,7 @@ void SCDCalibratePanels::exec() {
     g_log.notice() << "For east rotation change det_arc2 " << delta << " degrees\n";
   }
 
-  for (auto &MyBankName : MyBankNames) {
+  for (const auto &MyBankName : MyBankNames) {
     fit_workspaces[bankAndPanelCount] += MyBankName;
     parameter_workspaces[bankAndPanelCount] += MyBankName;
     bankAndPanelCount++;
@@ -192,11 +192,11 @@ void SCDCalibratePanels::exec() {
   // Save as DetCal and XML if requested
   string DetCalFileName = getProperty("DetCalFilename");
   API::Run &run = peaksWs->mutableRun();
-  double mT0 = 0.0;
+  double T0 = 0.0;
   if (run.hasProperty("T0")) {
-    mT0 = run.getPropertyValueAsType<double>("T0");
+    T0 = run.getPropertyValueAsType<double>("T0");
   }
-  saveIsawDetCal(inst2, MyBankNames, mT0, DetCalFileName);
+  saveIsawDetCal(inst2, MyBankNames, T0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, MyBankNames, *inst2);
   // create table of theoretical vs calculated
