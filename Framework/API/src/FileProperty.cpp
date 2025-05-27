@@ -114,13 +114,11 @@ std::string expandUser(const std::string &filepath) {
  */
 std::string createDirectory(const std::filesystem::path &path) {
   std::filesystem::path stempath(path);
-  // If the path exists and it's a directory, then use that, otherwise we're pointing to
-  // a file and need the parent path
-  if (!(std::filesystem::exists(stempath) && std::filesystem::is_directory(stempath))) {
+  if (stempath.has_extension()) {
     stempath = stempath.parent_path();
   }
 
-  if (!stempath.string().empty()) {
+  if (!stempath.empty()) {
     Poco::File stem(stempath.string());
     if (!stem.exists()) {
       try {
@@ -385,7 +383,7 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   }
   errorMsg = createDirectory(save_dir);
   if (errorMsg.empty()) {
-    std::filesystem::path fullpath = std::filesystem::absolute(save_dir / propValue);
+    std::filesystem::path fullpath = save_dir / propValue;
     errorMsg = PropertyWithValue<std::string>::setValue(fullpath.string());
   }
   return errorMsg;

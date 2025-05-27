@@ -452,7 +452,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   }
   if (is_relative) {
     const std::filesystem::path propFileDir(getPropertiesDir());
-    converted = std::filesystem::absolute(propFileDir / dir).string();
+    converted = (propFileDir / dir).string();
   } else {
     converted = dir;
   }
