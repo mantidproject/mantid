@@ -1,4 +1,4 @@
-This release has replaced use of the `NeXus API <https://github.com/nexusformat/code>`_ with its own implementation that is heavily influenced from that code. There are two main purposes in no longer depending on the NeXus-API
+- This release has replaced use of the `NeXus API <https://github.com/nexusformat/code>`_ with its own implementation that is heavily influenced from that code. There are two main purposes in no longer depending on the NeXus-API
 
   1. The API was `announced as only undergoing bugfixes as of 2014 <https://www.nexusformat.org/content/NIACAPI.html>`_ . The last release was `v4.4.3 <https://github.com/nexusformat/code/releases/tag/v4.4.3>`_ on 2016-09-12.
   2. In order to make changes to improve performance, mantid needs to change the underlying implementation calling hdf5.
