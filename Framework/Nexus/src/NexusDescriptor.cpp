@@ -115,6 +115,11 @@ std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
 
   // if the file exists read it
   if (std::filesystem::exists(m_filename)) {
+    // if the file exists but cannot be opened, throw invalid
+    // NOTE must be std::invalid_argument for NXRoot to properly interpret
+    if (!H5::H5File::isAccessible(m_filename, Mantid::NeXus::H5Util::defaultFileAcc())) {
+      throw std::invalid_argument("Cannot open file " + m_filename + " using HDF5");
+    }
 
     H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
     H5::Group groupID = fileID.openGroup("/");

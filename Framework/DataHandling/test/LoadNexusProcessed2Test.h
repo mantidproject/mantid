@@ -297,4 +297,19 @@ public:
     // input. i.e. No geometry
     TS_ASSERT(!wsOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
   }
+
+  void test_non_hdf5_file() {
+    const std::string filename("WISH00043350.mat");
+    try {
+      auto wsOut = do_load_v2(filename);
+      TS_FAIL("Should not be able to load corrupt file: " + filename);
+    } catch (const std::invalid_argument &e) {
+      const std::string front("Cannot open file ");
+      const std::string back(filename + " using HDF5");
+
+      const std::string msg = e.what();
+      TS_ASSERT(msg.starts_with(front));
+      TS_ASSERT(msg.ends_with(back));
+    }
+  }
 };

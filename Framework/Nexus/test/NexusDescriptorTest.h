@@ -10,6 +10,7 @@
 #include "MantidNexus/NexusDescriptor.h"
 
 #include <filesystem>
+#include <fstream>
 
 #include <cstddef> // std::size_t
 
@@ -92,6 +93,18 @@ public:
     // test hasRootAttr
     TS_ASSERT(nexusHDF5Descriptor.hasRootAttr("file_name"));
     TS_ASSERT(!nexusHDF5Descriptor.hasRootAttr("not_attr"));
+  }
+
+  void test_fails_bad_file() {
+    // test opening a file that exists, but is unreadable
+    std::string filename = getFullPath("Test_characterizations_char.txt");
+    TS_ASSERT_THROWS(Mantid::Nexus::NexusDescriptor nd(filename), std::invalid_argument const &);
+
+    filename = "fake_empty_file.nxs.h5";
+    std::ofstream file(filename);
+    file << "mock";
+    file.close();
+    TS_ASSERT_THROWS(Mantid::Nexus::NexusDescriptor nd(filename), std::invalid_argument const &);
   }
 
   void test_AddEntry() {
