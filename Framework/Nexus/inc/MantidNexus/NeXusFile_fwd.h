@@ -28,7 +28,7 @@ typedef const char CONSTCHAR;
  */
 constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
 
-constexpr int NX_UNLIMITED = -1; // cppcheck-suppress syntaxError
+constexpr int NX_UNLIMITED = -1;
 
 constexpr int NX_MAXRANK = 32;
 constexpr int NX_MAXNAMELEN = 64;

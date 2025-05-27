@@ -8,13 +8,14 @@
 
 #include "MantidNexus/DllConfig.h"
 
-#include "MantidNexus/NeXusFile_fwd.h"
-
 #include <map>
 #include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+// from NeXusFile_fwd.h
+typedef int NXaccess;
 
 namespace Mantid {
 namespace Nexus {
