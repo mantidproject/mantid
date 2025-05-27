@@ -94,6 +94,20 @@ public:
     TS_ASSERT_THROWS_ANYTHING(NeXus::File file(resource.fullPath(), NXACC_READ));
   }
 
+  void test_clear_on_create() {
+    // create an empty file
+    FileResource resource("fake_empty_file.nxs.h5");
+    std::ofstream file(resource.fullPath());
+    file << "mock";
+    file.close();
+
+    // this file cannot be opened for read
+    TS_ASSERT_THROWS_ANYTHING(NeXus::File file(resource.fullPath(), NXACC_READ));
+
+    // but no issue if opened for create
+    TS_ASSERT_THROWS_NOTHING(NeXus::File file(resource.fullPath(), NXACC_CREATE5));
+  }
+
   void test_flush() {
     cout << "\ntest flush\n";
     // make sure flush works

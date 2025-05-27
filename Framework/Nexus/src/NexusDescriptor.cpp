@@ -75,6 +75,18 @@ NexusDescriptor::NexusDescriptor(std::string filename)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
+NexusDescriptor::NexusDescriptor(std::string filename, NXaccess access)
+    : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
+      m_firstEntryNameType() {
+  // if we are creating a file and it already exists, then delete it first
+  if (access == NXaccess_mode::NXACC_CREATE5) {
+    if (std::filesystem::exists(m_filename)) {
+      std::filesystem::remove(m_filename);
+    }
+  }
+  m_allEntries = initAllEntries();
+}
+
 const std::string &NexusDescriptor::filename() const noexcept { return m_filename; }
 
 bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
@@ -116,9 +128,9 @@ std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
   // if the file exists read it
   if (std::filesystem::exists(m_filename)) {
     // if the file exists but cannot be opened, throw invalid
-    // NOTE must be std::invalid_argument for NXRoot to properly interpret
+    // NOTE must be std::invalid_argument for expected errors to be raised in python API
     if (!H5::H5File::isAccessible(m_filename, Mantid::NeXus::H5Util::defaultFileAcc())) {
-      throw std::invalid_argument("Cannot open file " + m_filename + " using HDF5");
+      throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + m_filename + "\n");
     }
 
     H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());

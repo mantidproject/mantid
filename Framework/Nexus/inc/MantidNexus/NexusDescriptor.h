@@ -8,6 +8,8 @@
 
 #include "MantidNexus/DllConfig.h"
 
+#include "MantidNexus/NeXusFile_fwd.h"
+
 #include <map>
 #include <set>
 #include <string>
@@ -25,6 +27,8 @@ public:
    * @param filename input HDF5 Nexus file name
    */
   NexusDescriptor(std::string filename);
+
+  NexusDescriptor(std::string filename, NXaccess access);
 
   NexusDescriptor() = delete;
 
