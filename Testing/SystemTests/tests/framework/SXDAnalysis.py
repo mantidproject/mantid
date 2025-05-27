@@ -196,7 +196,7 @@ class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
 
     def validate(self):
         intens_over_sigma = [0.0, 0.0, 27.47, 131.576, 0.0]
-        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+        np.testing.assert_allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, rtol=1e-2)
 
 
 def _load_data_and_add_peaks(sxd, runno):
