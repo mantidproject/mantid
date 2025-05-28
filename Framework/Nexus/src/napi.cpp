@@ -38,7 +38,6 @@
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 
-
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
