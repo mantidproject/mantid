@@ -67,8 +67,8 @@ public:
   }
 
   MOCK_CONST_METHOD0(selectedRowLocations, std::vector<RowLocation>());
-  MOCK_CONST_METHOD0(selectedSubtrees, boost::optional<std::vector<Subtree>>());
-  MOCK_CONST_METHOD0(selectedSubtreeRoots, boost::optional<std::vector<RowLocation>>());
+  MOCK_CONST_METHOD0(selectedSubtrees, std::optional<std::vector<Subtree>>());
+  MOCK_CONST_METHOD0(selectedSubtreeRoots, std::optional<std::vector<RowLocation>>());
   MOCK_CONST_METHOD0(currentColumn, int());
   MOCK_CONST_METHOD0(deadCell, Cell());
 

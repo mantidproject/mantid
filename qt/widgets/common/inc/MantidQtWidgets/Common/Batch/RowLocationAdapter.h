@@ -23,7 +23,7 @@ public:
   RowLocationAdapter(QStandardItemModel const &model);
 
   RowLocation atIndex(QModelIndexForMainModel const &index) const;
-  boost::optional<QModelIndexForMainModel> indexIfExistsAt(RowLocation const &location, int column = 0) const;
+  std::optional<QModelIndexForMainModel> indexIfExistsAt(RowLocation const &location, int column = 0) const;
   QModelIndexForMainModel indexAt(RowLocation const &location, int column = 0) const;
 
 private:
