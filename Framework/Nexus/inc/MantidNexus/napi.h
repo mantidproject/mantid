@@ -116,10 +116,6 @@
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
 #define NXinquirefile MANGLE(nxiinquirefile)
-#define NXisexternalgroup MANGLE(nxiisexternalgroup)
-#define NXisexternaldataset MANGLE(nxiisexternaldataset)
-#define NXlinkexternal MANGLE(nxilinkexternal)
-#define NXlinkexternaldataset MANGLE(nxilinkexternaldataset)
 #define NXgetversion MANGLE(nxigetversion)
 
 /*
@@ -538,59 +534,6 @@ MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
  * \ingroup c_metadata
  */
 MANTID_NEXUS_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength);
-
-/**
- * Test if a group is actually pointing to an external file. If so, retrieve the URL of the
- * external file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the group to test.
- * \param nxclass The class name of the group to test.
- * \param url A buffer to copy the URL too.
- * \param urlLen The length of the Url buffer. At maximum urlLen bytes will be copied to url.
- * \return NX_OK when the group is pointing to an external file, NX_ERROR else.
- * \ingroup c_external
- */
-MANTID_NEXUS_DLL NXstatus NXisexternalgroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, char *url,
-                                            int urlLen);
-
-/**
- * Test if a dataset is actually pointing to an external file. If so, retrieve the URL of the
- * external file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the dataset to test.
- * \param url A buffer to copy the URL too.
- * \param urlLen The length of the Url buffer. At maximum urlLen bytes will be copied to url.
- * \return NX_OK when the dataset is pointing to an external file, NX_ERROR else.
- * \ingroup c_external
- */
-MANTID_NEXUS_DLL NXstatus NXisexternaldataset(NXhandle handle, CONSTCHAR *name, char *url, int urlLen);
-
-/**
- * Create a link to a group in an external file. This works by creating a NeXus group under the current level in
- * the hierarchy which actually points to a group in another file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the group which points to the external file.
- * \param nxclass The class name of the group which points to the external file.
- * \param url The URL of the external file. Currently only one URL format is supported:
- * nxfile://path-tofile\#path-in-file. This consists of two parts: the first part is of course the path to the file. The
- * second part, path-in-file, is the path to the group in the external file which appears in the first file.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_external
- */
-MANTID_NEXUS_DLL NXstatus NXlinkexternal(NXhandle handle, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url);
-
-/**
- * Create a link to a dataset in an external file. This works by creating a dataset under the current level in
- * the hierarchy which actually points to a dataset in another file.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the dataset which points to the external file.
- * \param url The URL of the external file. Currently only one URL format is supported:
- * nxfile://path-tofile\#path-in-file. This consists of two parts: the first part is of course the path to the file. The
- * second part, path-in-file, is the path to the dataset in the external file which appears in the first file.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_external
- */
-MANTID_NEXUS_DLL NXstatus NXlinkexternaldataset(NXhandle handle, CONSTCHAR *name, CONSTCHAR *url);
 
 /**
  * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.

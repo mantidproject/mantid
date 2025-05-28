@@ -65,8 +65,7 @@ typedef struct {
   NXstatus (*nxinitgroupdir)(NXhandle handle);
   NXstatus (*nxinitattrdir)(NXhandle handle);
   NXstatus (*nxprintlink)(NXhandle handle, NXlink const *link);
-  NXstatus (*nxnativeexternallink)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *externalfile, CONSTCHAR *remotetarget);
   NXstatus (*nxnativeinquirefile)(NXhandle handle, char *externalfile, const int filenamelength);
-  NXstatus (*nxnativeisexternallink)(NXhandle handle, CONSTCHAR *name, char *url, int urllen);
+
   NXaccess access_mode;
 } NexusFunction, *pNexusFunction;
