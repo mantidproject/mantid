@@ -196,6 +196,7 @@ class FittingPlotModel(object):
         """
         run_to_banks = defaultdict(list)
         run_to_prefix = {}
+        run_to_group = {}
 
         for wsname in active_ws_list:
             try:
@@ -207,9 +208,15 @@ class FittingPlotModel(object):
                 run_number = "unknown"
                 prefix = ""
                 bank_id = 9999
+            try:
+                ws = ADS.retrieve(wsname)
+                grouping = str(ws.getRun().getLogData("Grouping").value)
+            except RuntimeError:
+                grouping = ""
 
             run_to_banks[run_number].append((bank_id, wsname))
             run_to_prefix[run_number] = prefix
+            run_to_group[run_number] = grouping
 
         summary_tables = {}
 
@@ -238,7 +245,8 @@ class FittingPlotModel(object):
                     param_labels.append(param)
 
             prefix = run_to_prefix[run]
-            table_name = f"{prefix}{run}_{fit_peak}_Fit_Parameters"
+            grouping = run_to_group[run]
+            table_name = f"{prefix}{run}_{fit_peak}_{grouping}_Fit_Parameters"
 
             table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
             table.addColumn("str", "Bank")
@@ -264,16 +272,19 @@ class FittingPlotModel(object):
 
                 table.addRow(row)
 
-            self._save_files(table_name, "FitParameters")
+            self._save_files(table_name, "FitParameters", grouping)
             summary_tables[run] = table
 
         return summary_tables
 
-    def _save_files(self, ws, dir_name):
+    def _save_files(self, ws, dir_name, grouping=""):
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name)]
         if self.rb_num:
-            save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name))
+            if grouping == "":
+                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name))
+            else:
+                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, grouping))
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)

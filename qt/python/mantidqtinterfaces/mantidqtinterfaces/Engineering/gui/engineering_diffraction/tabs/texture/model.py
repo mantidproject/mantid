@@ -57,6 +57,7 @@ class TextureProjection:
         rb_num: Optional[str] = None,
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
+        grouping: str = "GROUP",
     ) -> None:
         flat_ax_transform = np.reshape(ax_transform, (9,))
         table_workspaces = []
@@ -96,7 +97,7 @@ class TextureProjection:
         CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
         for tw in table_workspaces[1:]:
             CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
-        self._save_files(out_ws, "PoleFigureTables", rb_num)
+        self._save_files(out_ws, "PoleFigureTables", rb_num, grouping)
 
     def create_default_parameter_table_with_value(self, ws_name, val, out_ws):
         tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
@@ -130,7 +131,7 @@ class TextureProjection:
 
         fig = plt.figure() if not fig else fig
         ax = fig.add_subplot(1, 1, 1)
-        ax.scatter(pfi[:, 1], pfi[:, 0], c=np.log(pfi[:, 2]), s=20, cmap="jet", **kwargs)
+        ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
         ax.plot(eq[0], eq[1], c="grey")
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -141,16 +142,24 @@ class TextureProjection:
 
     def get_pf_table_name(self, wss, fit_params, hkl):
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
-        run_range = f"{fws.run().getLogData('run_number').value}-{lws.run().getLogData('run_number').value}"
-        instr = fws.getInstrument().getName()
+        try:
+            run_range = f"{fws.run().getLogData('run_number').value}-{lws.run().getLogData('run_number').value}"
+            instr = fws.getInstrument().getName()
+        except RuntimeError:
+            instr = "UNKNOWN"
+            run_range = "XXXXXX-XXXXXX"
+        try:
+            grouping = fws.getRun().getLogData("Grouping").value
+        except RuntimeError:
+            grouping = "GROUP"
         try:
             # try and get a peak reference either from hkl or from the X0 column of param
             peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
-            table_name = f"{instr}_{run_range}_{peak}_pf_table"
+            table_name = f"{instr}_{run_range}_{peak}_{grouping}_pf_table"
         except Exception:
             # if no param table given, no peak reference
-            table_name = f"{instr}_{run_range}_pf_table"
-        return table_name
+            table_name = f"{instr}_{run_range}_{grouping}_pf_table"
+        return table_name, grouping
 
     def _parse_hkl(self, H, K, L):
         try:
@@ -172,11 +181,11 @@ class TextureProjection:
         for ws in wss:
             ADS.retrieve(ws).sample().setCrystalStructure(xtal)
 
-    def _save_files(self, ws, dir_name, rb_num=None):
+    def _save_files(self, ws, dir_name, rb_num=None, grouping="GROUP"):
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
-            save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
+            save_dirs.append(path.join(root_dir, "User", rb_num, dir_name, grouping))
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)

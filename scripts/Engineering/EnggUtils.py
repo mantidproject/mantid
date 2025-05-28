@@ -467,9 +467,12 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     # directories for saved focused data
     focus_dirs = [path.join(save_dir, "Focus")]
     if rb_num:
-        focus_dirs.append(path.join(save_dir, "User", rb_num, "Focus"))
         if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+            focus_dir = path.join(save_dir, "User", rb_num, "Focus", calibration.get_foc_ws_suffix())
             focus_dirs.pop(0)  # only save to RB directory to limit number files saved
+        else:
+            focus_dir = path.join(save_dir, "User", rb_num, "Focus")
+        focus_dirs.append(focus_dir)
 
     # Loop over runs and focus
     focused_files_list = []
@@ -482,6 +485,9 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
             _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc)
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
+            # add grouping to log data
+            ws_foc.getRun().addProperty("Grouping", calibration.get_foc_ws_suffix(), False)
+            # save files
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
