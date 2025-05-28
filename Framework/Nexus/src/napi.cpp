@@ -115,19 +115,6 @@ static char *locateNexusFileInPath(char const *const startName) {
   return strdup(startName);
 }
 
-/*------------------------------------------------------------------------
-  HDF-5 cache size special stuff
-  -------------------------------------------------------------------------*/
-long nx_cacheSize = 1024000; /* 1MB, HDF-5 default */
-
-NXstatus NXsetcache(long newVal) {
-  if (newVal > 0) {
-    nx_cacheSize = newVal;
-    return NXstatus::NX_OK;
-  }
-  return NXstatus::NX_ERROR;
-}
-
 /*----------------------------------------------------------------------*/
 
 void NXReportError(const char *string) { UNUSED_ARG(string); }

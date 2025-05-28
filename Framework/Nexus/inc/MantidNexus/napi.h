@@ -115,7 +115,6 @@
 #define NXsameID MANGLE(nxisameid)
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXsetcache MANGLE(nxisetcache)
 #define NXinquirefile MANGLE(nxiinquirefile)
 #define NXgetversion MANGLE(nxigetversion)
 
@@ -596,12 +595,6 @@ MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
 MANTID_NEXUS_DLL char *NXIformatNeXusTime();
-
-/**
- * A function for setting the default cache size for HDF-5
- * \ingroup c_init
- */
-MANTID_NEXUS_DLL NXstatus NXsetcache(long newVal);
 
 #ifdef __cplusplus
 };

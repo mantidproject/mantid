@@ -69,5 +69,3 @@ typedef struct {
 
   NXaccess access_mode;
 } NexusFunction, *pNexusFunction;
-/*---------------------*/
-extern long nx_cacheSize;
