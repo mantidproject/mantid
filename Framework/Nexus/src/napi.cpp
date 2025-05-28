@@ -33,8 +33,10 @@
 
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_internal.h"
-#include "MantidNexus/napiconfig.h"
 #include "MantidNexus/nxstack.h"
+
+// this has to be after the other napi includes
+#include "MantidNexus/napi5.h"
 
 /*---------------------------------------------------------------------
  Recognized and handled napimount URLS
@@ -138,27 +140,6 @@ static NXstatus nxiunlock(NXstatus ret) {
 
 #endif /* _WIN32 */
 
-/**
- * valid NeXus names
- */
-int validNXName(const char *name, int allow_colon) {
-  int i;
-  if (name == NULL) {
-    return 0;
-  }
-  for (i = 0; i < (int)strlen(name); ++i) {
-    if ((name[i] >= 'a' && name[i] <= 'z') || (name[i] >= 'A' && name[i] <= 'Z') ||
-        (name[i] >= '0' && name[i] <= '9') || (name[i] == '_')) {
-      ;
-    } else if (allow_colon && name[i] == ':') {
-      ;
-    } else {
-      return 0;
-    }
-  }
-  return 1;
-}
-
 static int64_t *dupDimsArray(int const *dims_array, int rank) {
   int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
   if (dims64 != NULL) {
@@ -241,40 +222,29 @@ NXstatus NXsetcache(long newVal) {
 
 void NXReportError(const char *string) { UNUSED_ARG(string); }
 
-/*----------------------------------------------------------------------*/
-#ifdef WITH_HDF5
-#include "MantidNexus/napi5.h"
-#endif
 /* ----------------------------------------------------------------------
 
    Definition of NeXus API
 
    --------------------------------------------------------------------- */
-static int determineFileTypeImpl(CONSTCHAR *filename) {
-  FILE *fd = NULL;
-  int iRet;
 
-  /*
-     this is for reading, check for existence first
-   */
+static int determineFileType(CONSTCHAR *filename) {
+  // this is for reading, check for existence first
+  FILE *fd = NULL;
   fd = fopen(filename, "r");
   if (fd == NULL) {
     return -1;
   }
   fclose(fd);
-#ifdef WITH_HDF5
-  iRet = H5Fis_hdf5(static_cast<const char *>(filename));
-  if (iRet > 0) {
-    return NXACC_CREATE5;
-  }
-#endif
-  /*
-     file type not recognized
-   */
-  return 0;
-}
 
-static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
+  // check that this is indeed hdf5
+  if (H5Fis_hdf5(static_cast<const char *>(filename)) > 0) {
+    return NXACC_CREATE5;
+  } else {
+    // file type not recognized
+    return 0;
+  }
+}
 
 /*---------------------------------------------------------------------*/
 static pNexusFunction handleToNexusFunc(NXhandle fid) {
@@ -308,9 +278,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 
 /*-----------------------------------------------------------------------*/
 static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  int backend_type, iRet;
   pNexusFunction fHandle = NULL;
-  char error[1024];
   char *filename = NULL;
   int my_am = (am & NXACCMASK_REMOVEFLAGS);
 
@@ -329,30 +297,12 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
   memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
 
-  /*
-     test the strip flag. Elimnate it for the rest of the tests to work
-   */
-  fHandle->stripFlag = 1;
-  if (am & NXACC_NOSTRIP) {
-    fHandle->stripFlag = 0;
-    am = (NXaccess)(am & ~NXACC_NOSTRIP);
-  }
-  fHandle->checkNameSyntax = 0;
-  if (am & NXACC_CHECKNAMESYNTAX) {
-    fHandle->checkNameSyntax = 1;
-    am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
-  }
-
+  int backend_type;
   if (my_am == NXACC_CREATE5) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
     strcpy(filename, userfilename);
-  } else if (my_am == NXACC_CREATEXML) {
-    snprintf(error, 1023, "xml backend not supported for %s", userfilename);
-    NXReportError(error);
-    free(fHandle);
-    return NXstatus::NX_ERROR;
   } else {
     filename = locateNexusFileInPath(const_cast<char *>(static_cast<const char *>(userfilename)));
     if (filename == NULL) {
@@ -360,23 +310,22 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
       free(fHandle);
       return NXstatus::NX_ERROR;
     }
-    /* check file type hdf4/hdf5/XML for reading */
-    iRet = determineFileType(filename);
-    if (iRet < 0) {
-      snprintf(error, 1023, "failed to open %s for reading", filename);
+    // check file type is hdf5 for reading
+    const int iRet = determineFileType(filename);
+    if (iRet == NXACC_CREATE5) {
+      backend_type = NXACC_CREATE5;
+    } else {
+      char error[1024];
+      if (iRet < 0) {
+        snprintf(error, 1023, "failed to open %s for reading", filename);
+      } else if (iRet == 0) {
+        snprintf(error, 1023, "failed to determine filetype for %s ", filename);
+      }
       NXReportError(error);
       free(filename);
       free(fHandle);
       return NXstatus::NX_ERROR;
     }
-    if (iRet == 0) {
-      snprintf(error, 1023, "failed to determine filetype for %s ", filename);
-      NXReportError(error);
-      free(filename);
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-    backend_type = iRet;
   }
   if (filename == NULL) {
     NXReportError("Out of memory in NeXus-API");
@@ -386,8 +335,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
 
   NXstatus retstat = NXstatus::NX_ERROR;
   if (backend_type == NXACC_CREATE5) {
-    /* HDF5 type */
-#ifdef WITH_HDF5
     NXhandle hdf5_handle = NULL;
     retstat = NX5open(filename, am, &hdf5_handle);
     if (retstat != NXstatus::NX_OK) {
@@ -399,18 +346,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
     pushFileStack(fileStack, fHandle, filename);
-#else
-    NXReportError("ERROR: Attempt to create HDF5 file when not linked with HDF5");
-    retstat = NXstatus::NX_ERROR;
-#endif /* HDF5 */
     free(filename);
     return retstat;
-  } else if (backend_type == NXACC_CREATEXML) {
-    /*
-       XML type
-     */
-    NXReportError("ERROR: Attempt to create XML file when not linked with XML");
-    retstat = NXstatus::NX_ERROR;
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
@@ -490,12 +427,6 @@ NXstatus NXclose(NXhandle *fid) {
 
 NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && (nxclass != NULL) /* && !strncmp("NX", nxclass, 2) */ && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in group name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
   return LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
 }
 
@@ -624,12 +555,6 @@ NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
 
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
   return LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions));
 }
 
@@ -649,12 +574,6 @@ NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int r
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
   return LOCKED_CALL(
       pFunc->nxcompmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions, compress_type, chunk_size));
 }
@@ -749,12 +668,6 @@ NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen,
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
     return NXstatus::NX_ERROR;
   }
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in attribute name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
   return LOCKED_CALL(pFunc->nxputattr(pFunc->pNexusData, name, data, datalen, iType));
 }
 
@@ -797,12 +710,6 @@ NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(newname, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in link name \"%s\"", newname);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
   return LOCKED_CALL(pFunc->nxmakenamedlink(pFunc->pNexusData, newname, sLink));
 }
 
@@ -937,7 +844,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
   /* only strip one dimensional strings */
-  if ((type == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (rank == 1)) {
+  if ((type == NXnumtype::CHAR) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
     memset(pPtr, 0, (size_t)iDim[0] + 5);
@@ -1000,7 +907,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
      the length of a string may be trimmed....
    */
   /* only strip one dimensional strings */
-  if ((*iType == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (*rank == 1)) {
+  if ((*iType == NXnumtype::CHAR) && (*rank == 1)) {
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
