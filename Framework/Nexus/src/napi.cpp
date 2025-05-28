@@ -46,11 +46,9 @@
 #ifdef _WIN32
 #define LIBSEP ";"
 #define PATHSEP "\\"
-#define THREAD_LOCAL __declspec(thread)
 #else
 #define LIBSEP ":"
 #define PATHSEP "/"
-#define THREAD_LOCAL __thread
 #endif
 
 #ifdef WIN32
