@@ -38,11 +38,13 @@ class TextureCorrectionModel:
                         SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
                 else:
                     axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
+                    ENGINX_SENSE = [1, -1, 1]
                     for iws, ws in enumerate(wss):
                         angles = goniometer_strings[iws].split(",")
                         kwargs = {}
                         for iang, angle in enumerate(angles):
-                            kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},1"
+                            sense = ENGINX_SENSE[iang]
+                            kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},{sense}"
                         SetGoniometer(ws, **kwargs)
             except BaseException as e:
                 logger.error(
