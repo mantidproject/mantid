@@ -60,79 +60,7 @@
 
 #include "MantidNexus/nx_stptok.h"
 
-#if HAVE_LIBPTHREAD
-
-#include <pthread.h>
-
-static pthread_mutex_t nx_mutex;
-
-#if defined(PTHREAD_MUTEX_RECURSIVE) || defined(__FreeBSD__)
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE
-#else
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE_NP
-#endif /* PTHREAD_MUTEX_RECURSIVE */
-
-static void nx_pthread_init() {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  pthread_mutexattr_settype(&attr, RECURSIVE_LOCK);
-  pthread_mutex_init(&nx_mutex, &attr);
-}
-
-static NXstatus nxilock() {
-  static pthread_once_t once_control = PTHREAD_ONCE_INIT;
-  if (pthread_once(&once_control, nx_pthread_init) != 0) {
-    NXReportError("pthread_once failed");
-    return NXstatus::NX_ERROR;
-  }
-  if (pthread_mutex_lock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_lock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(int ret) {
-  if (pthread_mutex_unlock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_unlock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#elif defined(WIN32)
-/*
- *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
- *  Freddie Akeroyd, 16/06/2011
- */
-#include <windows.h>
-
-static CRITICAL_SECTION nx_critical;
-
-static NXstatus nxilock() {
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-    InitializeCriticalSection(&nx_critical);
-  }
-  EnterCriticalSection(&nx_critical);
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(NXstatus ret) {
-  LeaveCriticalSection(&nx_critical);
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#else
-
 #define LOCKED_CALL(__call) __call
-
-#endif /* _WIN32 */
 
 static int64_t *dupDimsArray(int const *dims_array, int rank) {
   int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
