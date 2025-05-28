@@ -35,26 +35,25 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  * Structure for keeping information about a Nexus data set, such as the dimensions and the type
  */
 struct NXInfo {
-  NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
+  NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), allGood(false) {}
   NXInfo(::NeXus::Info const &info, std::string const &name);
-  std::string nxname; ///< name of the object
-  std::size_t rank;   ///< number of dimensions of the data
-  NXDimArray dims;    ///< sizes along each dimension
-  NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
-  NXstatus stat;      ///< return status
-  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
+  std::string nxname;                 ///< name of the object
+  std::size_t rank;                   ///< number of dimensions of the data
+  NXDimArray dims;                    ///< sizes along each dimension
+  NXnumtype type;                     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
+  bool allGood;                       ///< return status
+  operator bool() { return allGood; } ///< returns success of an operation
 };
 
 /// Information about a Nexus class
 struct NXClassInfo {
-  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), stat(NXstatus::NX_OK) {}
-  NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
-  std::string nxname;  ///< name of the object
-  std::string nxclass; ///< NX class of the object or "SDS" if a dataset
-  NXnumtype datatype;  ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
-  /// napi.h
-  NXstatus stat;                                      ///< return status
-  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
+  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
+  NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), allGood(false) {}
+  std::string nxname;                 ///< name of the object
+  std::string nxclass;                ///< NX class of the object or "SDS" if a dataset
+  NXnumtype datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
+  bool allGood;                       ///< return status
+  operator bool() { return allGood; } ///< returns success of an operation
 };
 
 /*
@@ -570,7 +569,7 @@ public:
   /**
    * Returns NXInfo for a dataset
    * @param name :: The name of the dataset
-   * @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
+   * @return NXInfo::allGood is set to false if the dataset does not exist
    */
   NXInfo getDataSetInfo(const std::string &name) const;
   /// Returns whether an individual dataset is present
@@ -595,7 +594,7 @@ protected:
   void readAllInfo();                                 ///< Fills in m_groups and m_datasets.
   void clear();                                       ///< Deletes content of m_groups and m_datasets
 private:
-  /// Pricate constructor.
+  /// Private constructor.
   NXClass() : NXObject() { clear(); }
 };
 
@@ -618,8 +617,6 @@ public:
     for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();
-      // std::cerr << "NXData signal of " << it->nxname << " = " <<
-      // dset.attributes("signal") << "\n";
       if (dset.attributes("signal") == "1") {
         return openNXDataSet<T>(it->nxname);
       }
@@ -627,8 +624,6 @@ public:
     // You failed to find the signal.
     // So try to just open the "data" entry directly
     return openNXDataSet<T>("data");
-    // throw std::runtime_error("NXData does not seem to contain the data");
-    // return NXDataSetTyped<T>(*this,"");
   }
   /// Opens data of double type
   NXDouble openDoubleData() { return openData<double>(); }

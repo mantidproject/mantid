@@ -122,18 +122,15 @@ std::string GetNeXusValue<std::string>(const NeXus::NXEntry &entry, const std::s
                                        int32_t /*unused*/) {
 
   try {
-    NeXus::NXChar dataSet = entry.openNXChar(path);
-    dataSet.load();
-
-    return std::string(dataSet(), dataSet.dim0());
+    return entry.getString(path);
   } catch (std::runtime_error &) {
     return defval;
   }
 }
 
 template <typename T>
-void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path, const T &defval, API::LogManager &logManager,
-                        const std::string &name, const T &factor, int32_t index) {
+void MapNeXusToProperty(const NeXus::NXEntry &entry, const std::string &path, const T &defval,
+                        API::LogManager &logManager, const std::string &name, const T &factor, int32_t index) {
 
   T value = GetNeXusValue<T>(entry, path, defval, index);
   logManager.addProperty<T>(name, value * factor);
@@ -141,11 +138,11 @@ void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path, const T 
 
 // sting is a special case
 template <>
-void MapNeXusToProperty<std::string>(NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+void MapNeXusToProperty<std::string>(NeXus::NXEntry const &entry, const std::string &path, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
                                      const std::string & /*unused*/, int32_t index) {
 
-  std::string value = GetNeXusValue<std::string>(entry, path, defval, index);
+  std::string const value = GetNeXusValue<std::string>(entry, path, defval, index);
   logManager.addProperty<std::string>(name, value);
 }
 
@@ -986,10 +983,10 @@ void LoadEMU<FD>::calibrateDopplerPhase(const std::vector<size_t> &eventCounts,
 /// Convert the doppler time to TOF for all the events in \p eventVectors and
 /// time of flight range as \p minTOF and \p maxTOF.
 template <typename FD>
-void LoadEMU<FD>::dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors, double &minTOF, double &maxTOF) {
+void LoadEMU<FD>::dopplerTimeToTOF(std::vector<EventVector_pt> const &eventVectors, double &minTOF, double &maxTOF) {
 
   // get the doppler parameters and initialise TOD converter
-  auto instr = m_localWorkspace->getInstrument();
+  auto const instr = m_localWorkspace->getInstrument();
   double v2 = instr->getNumberParameter("AnalysedV2")[0];
   double l1 = instr->getNumberParameter("SourceSample")[0];
   ConvertTOF convTOF(m_dopplerAmpl * m_dopplerRun, m_dopplerFreq, m_dopplerPhase, l1, v2, m_detectorL2);

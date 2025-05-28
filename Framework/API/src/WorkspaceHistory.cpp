@@ -256,18 +256,16 @@ void getWordsInString(const std::string &words4, std::string &w1, std::string &w
  * @param file :: previously opened NXS file.
  */
 void WorkspaceHistory::loadNexus(::NeXus::File *file) {
-  // Warn but continue if the group does not exist.
-  try {
+  if (file->hasGroup("process", "NXprocess")) {
     file->openGroup("process", "NXprocess");
-  } catch (std::exception &) {
+    loadNestedHistory(file);
+    file->closeGroup();
+  } else {
+    // Warn but continue if the group does not exist.
     g_log.warning() << "Error opening the algorithm history field 'process'. "
                        "Workspace will have no history."
                     << "\n";
-    return;
   }
-
-  loadNestedHistory(file);
-  file->closeGroup();
 }
 
 /** Load every algorithm history object at this point in the hierarchy.
@@ -318,7 +316,7 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto &entry : entries) {
+  for (auto const &entry : entries) {
     std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
@@ -347,6 +345,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
     PARAMS = 4     //< the algorithm's parameters
   };
 
+  // split on lines
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
 

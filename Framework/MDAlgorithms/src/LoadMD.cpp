@@ -253,8 +253,10 @@ void LoadMD::execLoader() {
 template <typename NumT>
 void LoadMD::loadSlab(const std::string &name, NumT *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
   m_file->openData(name);
-  if (m_file->getInfo().type != dataType)
-    throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
+  auto info = m_file->getInfo();
+  if (info.type != dataType)
+    throw std::runtime_error("Unexpected data type " + std::string(dataType) + " for '" + name +
+                             "' data set with type " + std::string(info.type) + ".");
 
   // verify that the number of points is correct
   const auto dataDims = m_file->getInfo().dims;

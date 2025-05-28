@@ -234,8 +234,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
       file.closeData();
       throw;
     }
-    // The string may contain non-printable (i.e. control) characters, replace
-    // these
+    // The string may contain non-printable (i.e. control) characters, replace these
     std::replace_if(values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
@@ -287,29 +286,28 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
   // Now the validity of the values
   // this should be a match int array to the data values (or times)
   // If not present assume all data is valid
-  try {
+  if (file.hasData("value_valid")) {
     file.openData("value_valid");
-
-    // Now the validity data
-    ::NeXus::Info info = file.getInfo();
-    // Check the size
-    if (size_t(info.dims[0]) != times.size()) {
-      throw ::NeXus::Exception("Invalid value entry for validity data");
-    }
-    if (file.isDataInt()) // Int type
-    {
-      try {
-        file.getDataCoerce(values);
-        file.closeData();
-      } catch (::NeXus::Exception &) {
-        throw;
+    try {
+      // Now the validity data
+      ::NeXus::Info info = file.getInfo();
+      // Check the size
+      if (size_t(info.dims[0]) != times.size()) {
+        throw ::NeXus::Exception("Invalid value entry for validity data");
       }
-    } else {
-      throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
-    }
-  } catch (::NeXus::Exception &ex) {
-    std::string error_msg = ex.what();
-    if (error_msg != "NXopendata(value_valid) failed") {
+      if (file.isDataInt()) // Int type
+      {
+        try {
+          file.getDataCoerce(values);
+          file.closeData();
+        } catch (::NeXus::Exception &) {
+          throw;
+        }
+      } else {
+        throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
+      }
+    } catch (std::exception const &ex) {
+      std::string error_msg = ex.what();
       log.warning() << error_msg << "\n";
       file.closeData();
       // no data found

@@ -106,10 +106,7 @@ std::string GetNeXusValue<std::string>(const NeXus::NXEntry &entry, const std::s
                                        int32_t /*unused*/) {
 
   try {
-    NeXus::NXChar dataSet = entry.openNXChar(path);
-    dataSet.load();
-
-    return std::string(dataSet(), dataSet.dim0());
+    return entry.getString(path);
   } catch (std::runtime_error &) {
     return defval;
   }

@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -35,12 +36,20 @@ private:
   std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** nexus descriptor to track the file tree
+   * NOTE: in file write, the following cannot be relied upon:
+   * - hasRootAttr
+   * - firstEntryNameType
+   */
+  Mantid::Nexus::NexusDescriptor m_descriptor;
 
-public:
   /**
    * \return A pair of the next entry available in a listing.
+   * NOTE: this is to be deleted in 6.14.  do NOT make public
    */
   Entry getNextEntry();
+
+public:
   /**
    * \return Information about the next attribute.
    */
@@ -71,7 +80,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const std::string &filename, const NXaccess access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXACC_READ);
 
   /**
    * Create a new File.
@@ -79,7 +88,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(const char *filename, const NXaccess access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXACC_READ);
 
   /**
    * Copy constructor
@@ -117,6 +126,10 @@ public:
 
   /** Flush the file. */
   void flush();
+
+  bool hasPath(std::string const &);
+  bool hasGroup(std::string const &, std::string const &);
+  bool hasData(std::string const &);
 
   /**
    * Create a new group.
@@ -452,7 +465,7 @@ public:
    * @param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, std::vector<NumT> &data);
+  template <typename NumT> void readData(std::string const &dataName, std::vector<NumT> &data);
 
   /** Put data into the supplied value.
    *
@@ -462,7 +475,7 @@ public:
    * \param data :: Where to put the data.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT> void readData(const std::string &dataName, NumT &data);
+  template <typename NumT> void readData(std::string const &dataName, NumT &data);
 
   /** Put data into the supplied string. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -473,7 +486,7 @@ public:
    * @param dataName :: name of the data to open.
    * @param data :: Where to put the data.
    */
-  void readData(const std::string &dataName, std::string &data);
+  void readData(std::string const &dataName, std::string &data);
 
   /**
    * \return String data from the file.
@@ -507,9 +520,14 @@ public:
    */
   template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
 
+  /** Return the string name of the top-level entry
+   *
+   * \return a string with the name (not abs path) of the top-level entry
+   */
+  std::string getTopLevelEntryName();
+
   /**
-   * \return Information about all attributes on the data that is
-   * currently open.
+   * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();
 
@@ -548,7 +566,7 @@ public:
    * \param[out] value The read attribute value.
    * \tparam NumT numeric data type of \a value
    */
-  template <typename NumT> void getAttr(const std::string &name, NumT &value);
+  template <typename NumT> void getAttr(std::string const &name, NumT &value);
 
   /**
    * Get the value of a string attribute.
@@ -569,6 +587,10 @@ public:
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
+
+private:
+  std::string formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
 };
 
 /**
