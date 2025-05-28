@@ -80,7 +80,7 @@ def __get_collection_file(collection_file: str) -> str:
         if not __mtd_bin_dir:
             return "HELP COLLECTION FILE NOT FOUND"
         else:
-            collection_file = os.path.join(__mtd_bin_dir, "../docs/qthelp/MantidProject.qhc")
+            collection_file = os.path.join(__mtd_bin_dir, "..", "share", "doc", "html", "MantidProject.qhc")
 
     return os.path.abspath(collection_file)
 
