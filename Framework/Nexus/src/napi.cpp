@@ -199,15 +199,10 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
+static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
   pNexusFunction fHandle = NULL;
   char *filename = NULL;
   int my_am = (am & NXACCMASK_REMOVEFLAGS);
-
-  /* configure fortify
-     iFortifyScope = Fortify_EnterScope();
-     Fortify_CheckAllMemory();
-   */
 
   /*
      allocate data
@@ -281,10 +276,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     free(fHandle);
   }
   return retstat;
-}
-
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  return LOCKED_CALL(NXinternalopenImpl(userfilename, am, fileStack));
 }
 
 NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
