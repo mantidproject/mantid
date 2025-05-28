@@ -114,7 +114,7 @@ std::string expandUser(const std::string &filepath) {
  */
 std::string createDirectory(const std::filesystem::path &path) {
   std::filesystem::path stempath(path);
-  if (stempath.has_extension()) {
+  if (stempath.has_filename()) {
     stempath = stempath.parent_path();
   }
 
