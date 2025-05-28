@@ -43,74 +43,23 @@
 /*----------------------------------------------------------------------
   This is a section with code for searching the NX_LOAD_PATH
   -----------------------------------------------------------------------*/
-#ifdef _WIN32
-#define LIBSEP ";"
-#define PATHSEP "\\"
-#else
-#define LIBSEP ":"
-#define PATHSEP "/"
-#endif
 
 #ifdef WIN32
 #define snprintf _snprintf
 #define strdup _strdup
 #endif
 
-#include "MantidNexus/nx_stptok.h"
-
-/*---------------------------------------------------------------------
- wrapper for getenv. This is a future proofing thing for porting to OS
- which have different ways of accessing environment variables
- --------------------------------------------------------------------*/
-static char *nxgetenv(const char *name) { return getenv(name); }
-
 /*----------------------------------------------------------------------*/
-static int canOpen(char const *filename) {
+static bool canOpen(char const *filename) {
   FILE *fd = NULL;
 
   fd = fopen(filename, "r");
   if (fd != NULL) {
     fclose(fd);
-    return 1;
+    return true;
   } else {
-    return 0;
+    return false;
   }
-}
-
-/*--------------------------------------------------------------------*/
-static char *locateNexusFileInPath(char const *const startName) {
-  char const *loadPath = NULL, *pPtr = NULL;
-  char *testPath = NULL;
-  char pathPrefix[256];
-
-  if (canOpen(startName)) {
-    return strdup(startName);
-  }
-
-  loadPath = nxgetenv("NX_LOAD_PATH");
-  if (loadPath == NULL) {
-    // file not found will be issued by upper level code
-    return strdup(startName);
-  }
-
-  pPtr = stptok(loadPath, pathPrefix, 255, LIBSEP);
-  while (pPtr != NULL) {
-    auto length = strlen(pathPrefix) + strlen(startName) + strlen(PATHSEP) + 2;
-    testPath = static_cast<char *>(malloc(length * sizeof(char)));
-    if (testPath == NULL) {
-      return strdup(startName);
-    }
-    memset(testPath, 0, length * sizeof(char));
-    strcpy(testPath, pathPrefix);
-    strcat(testPath, PATHSEP);
-    strcat(testPath, startName);
-    if (canOpen(testPath)) {
-      return (testPath);
-    }
-    free(testPath);
-    pPtr = stptok(pPtr, pathPrefix, 255, LIBSEP);
-  }
-  return strdup(startName);
 }
 
 /*----------------------------------------------------------------------*/
@@ -125,12 +74,8 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
 
 static int determineFileType(CONSTCHAR *filename) {
   // this is for reading, check for existence first
-  FILE *fd = NULL;
-  fd = fopen(filename, "r");
-  if (fd == NULL) {
+  if (!canOpen(filename))
     return -1;
-  }
-  fclose(fd);
 
   // check that this is indeed hdf5
   if (H5Fis_hdf5(static_cast<const char *>(filename)) > 0) {
@@ -173,51 +118,30 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 
 /*-----------------------------------------------------------------------*/
 static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  pNexusFunction fHandle = NULL;
-  char *filename = NULL;
-  int my_am = (am & NXACCMASK_REMOVEFLAGS);
-
-  /*
-     allocate data
-   */
-  fHandle = static_cast<pNexusFunction>(malloc(sizeof(NexusFunction)));
+  pNexusFunction fHandle = static_cast<pNexusFunction>(malloc(sizeof(NexusFunction)));
   if (fHandle == NULL) {
     NXReportError("ERROR: no memory to create Function structure");
     return NXstatus::NX_ERROR;
   }
   memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
 
-  int backend_type;
-  if (my_am == NXACC_CREATE5) {
-    /* HDF5 will be used ! */
-    backend_type = NXACC_CREATE5;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else {
-    filename = locateNexusFileInPath(const_cast<char *>(static_cast<const char *>(userfilename)));
-    if (filename == NULL) {
-      NXReportError("Out of memory in NeXus-API");
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
+  const int my_am = (am & NXACCMASK_REMOVEFLAGS); // remove high bits
+  const int backend_type = NXACC_CREATE5;
+  if (my_am != NXACC_CREATE5) {
     // check file type is hdf5 for reading
-    const int iRet = determineFileType(filename);
-    if (iRet == NXACC_CREATE5) {
-      backend_type = NXACC_CREATE5;
-    } else {
+    if (const int iRet = determineFileType(userfilename) != NXACC_CREATE5) {
       char error[1024];
       if (iRet < 0) {
-        snprintf(error, 1023, "failed to open %s for reading", filename);
+        snprintf(error, 1023, "failed to open %s for reading", userfilename);
       } else if (iRet == 0) {
-        snprintf(error, 1023, "failed to determine filetype for %s ", filename);
+        snprintf(error, 1023, "failed to determine filetype for %s ", userfilename);
       }
       NXReportError(error);
-      free(filename);
       free(fHandle);
       return NXstatus::NX_ERROR;
     }
   }
-  if (filename == NULL) {
+  if (userfilename == NULL) {
     NXReportError("Out of memory in NeXus-API");
     free(fHandle);
     return NXstatus::NX_ERROR;
@@ -226,24 +150,19 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
   NXstatus retstat = NXstatus::NX_ERROR;
   if (backend_type == NXACC_CREATE5) {
     NXhandle hdf5_handle = NULL;
-    retstat = NX5open(filename, am, &hdf5_handle);
+    retstat = NX5open(userfilename, am, &hdf5_handle);
     if (retstat != NXstatus::NX_OK) {
       free(fHandle);
-      free(filename);
       return retstat;
     }
     fHandle->pNexusData = hdf5_handle;
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
-    free(filename);
+    pushFileStack(fileStack, fHandle, userfilename);
     return retstat;
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NXstatus::NX_ERROR;
-  }
-  if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
-    free(filename);
   }
   if (fHandle != NULL) {
     free(fHandle);
