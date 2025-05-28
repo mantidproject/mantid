@@ -35,7 +35,6 @@
 #include <string>
 
 static int testLoadPath();
-static int testExternal(const std::string &progName);
 
 using NexusNapiTest::print_data;
 using NexusNapiTest::removeFile;
@@ -439,9 +438,6 @@ int main(int argc, char *argv[]) {
   if (testLoadPath() != TEST_SUCCEED)
     return TEST_FAILED;
 
-  std::cout << "before external link tests\n";
-  if (testExternal(argv[0]) != TEST_SUCCEED)
-    return TEST_FAILED;
   // cleanup and return
   std::cout << "all ok - done\n";
   removeFile(nxFile);
@@ -466,155 +462,4 @@ int testLoadPath() {
     std::cout << "NX_LOAD_PATH is not defined\n";
   }
   return TEST_SUCCEED;
-}
-
-/*---------------------------------------------------------------------*/
-static int testExternal(const std::string &progName) {
-#ifdef WIN32 // these have issues on windows
-  UNUSED_ARG(progName);
-  return TEST_SUCCEED;
-#else
-  const std::string PROTOCOL("nxfile://");
-  int dummylen = 1;
-  float dummyfloat = 1;
-  float temperature;
-
-  if (strstr(progName.c_str(), "hdf4") != NULL) {
-    std::cout << "Skipping external linking in hdf4\n";
-    return TEST_SUCCEED;
-  } else if (strstr(progName.c_str(), "hdf5") != NULL) {
-    // this only works for hdf5 backed files
-  } else if (strstr(progName.c_str(), "xml") != NULL) {
-    std::cout << "XML backend is not supported\n";
-    return TEST_FAILED;
-  } else {
-    std::cout << "Failed to recognise napi_test program in testExternal\n";
-    return TEST_FAILED;
-  }
-  const NXaccess_mode create(NXACC_CREATE5);
-  const std::string ext("h5");
-
-  // create external files
-  const std::string extFile1 = "dmc01c." + ext;
-  removeFile(extFile1); // in case it was left over from previous run
-  write_dmc01(extFile1);
-  if (!std::filesystem::exists(extFile1)) {
-    std::cerr << "Cannot find \"" << extFile1 << "\" to use for external linking\n";
-    return TEST_FAILED;
-  }
-  const std::string extFile2 = "dmc02c." + ext;
-  removeFile(extFile2); // in case it was left over from previous run
-  write_dmc02(extFile2);
-  if (!std::filesystem::exists(extFile2)) {
-    std::cerr << "Cannot find \"" << extFile2 << "\" to use for external linking\n";
-    return TEST_FAILED;
-  }
-  std::cout << "using external files: \"" << extFile1 << "\" and \"" << extFile2 << "\"\n";
-
-  const std::string testFile = "nxexternal." + ext;
-  std::cout << "Creating testfile \"" << testFile << "\"\n";
-  removeFile(testFile); // in case previous run didn't clean up
-
-  // create the test file
-  NXhandle hfil;
-  ASSERT_NO_ERROR(NXopen(testFile.c_str(), create, &hfil), "Failed to open \"" + testFile + "\" for writing");
-  /*if(NXmakegroup(hfil,"entry1","NXentry") != NXstatus::NX_OK){
-    return TEST_FAILED;
-  }*/
-  const std::string extFile1EntryPath = PROTOCOL + extFile1 + "#/entry1";
-  ASSERT_NO_ERROR(NXlinkexternal(hfil, "entry1", "NXentry", extFile1EntryPath.c_str()),
-                  "Failed to NXlinkexternal(hfil, \"entry1\", \"NXentry\", \"" + extFile1EntryPath + "\")");
-  /*if(NXmakegroup(hfil,"entry2","NXentry") != NXstatus::NX_OK){
-    return TEST_FAILED;
-  }*/
-  const std::string extFile2EntryPath = PROTOCOL + extFile2 + "#/entry1";
-  ASSERT_NO_ERROR(NXlinkexternal(hfil, "entry2", "NXentry", extFile2EntryPath.c_str()),
-                  "Failed to NXlinkexternal(hfil, \"entry2\", \"NXentry\", \"" + extFile2EntryPath + "\")");
-  ASSERT_NO_ERROR(NXmakegroup(hfil, "entry3", "NXentry"), "");
-  ASSERT_NO_ERROR(NXopengroup(hfil, "entry3", "NXentry"), "");
-  /* force create old style external link */
-  ASSERT_NO_ERROR(NXmakedata(hfil, "extlinkdata", NXnumtype::FLOAT32, 1, &dummylen), "");
-  ASSERT_NO_ERROR(NXopendata(hfil, "extlinkdata"), "");
-  ASSERT_NO_ERROR(NXputdata(hfil, &dummyfloat), "");
-  std::string temperaturePath(PROTOCOL + extFile1 + "#/entry1/sample/temperature_mean");
-  if (NXputattr(hfil, "napimount", temperaturePath.c_str(), static_cast<int>(strlen(temperaturePath.c_str())),
-                NXnumtype::CHAR) != NXstatus::NX_OK)
-    return TEST_FAILED;
-  /* this would segfault because we are tricking the napi stack
-  if(NXclosedata(&hfil) != NXstatus::NX_OK){
-    return TEST_FAILED;
-  }
-  */
-  ASSERT_NO_ERROR(NXopenpath(hfil, "/entry3"), "Failed to NXopenpath(hfil, \"/entry3\") during write");
-  /* create new style external link on hdf5 , equivalent to the above on other backends */
-  ASSERT_NO_ERROR(NXlinkexternaldataset(hfil, "extlinknative", temperaturePath.c_str()),
-                  "Failed to NXlinkexternaldataset(hfil, \"extlinknative\", \"" + temperaturePath + "\")");
-
-  ASSERT_NO_ERROR(NXclose(&hfil), "");
-
-  // actually test linking
-  ASSERT_NO_ERROR(NXopen(testFile.c_str(), NXACC_RDWR, &hfil), "Failed to open \"" + testFile + "\" for read/write");
-  ASSERT_NO_ERROR(NXopenpath(hfil, "/entry1/start_time"), "");
-  char time[132];
-  memset(time, 0, 132);
-  ASSERT_NO_ERROR(NXgetdata(hfil, time), "");
-  printf("First file time: %s\n", time);
-
-  char filename[256];
-  ASSERT_NO_ERROR(NXinquirefile(hfil, filename, 256), "");
-  std::cout << "NXinquirefile found: " << relativePathOf(filename) << "\n";
-
-  ASSERT_NO_ERROR(NXopenpath(hfil, "/entry2/sample/sample_name"), "");
-  memset(time, 0, 132);
-  ASSERT_NO_ERROR(NXgetdata(hfil, time), "");
-  printf("Second file sample: %s\n", time);
-  ASSERT_NO_ERROR(NXinquirefile(hfil, filename, 256), "");
-  std::cout << "NXinquirefile found: " << relativePathOf(filename) << "\n";
-
-  ASSERT_NO_ERROR(NXopenpath(hfil, "/entry2/start_time"), "");
-  memset(time, 0, 132);
-  ASSERT_NO_ERROR(NXgetdata(hfil, time), "");
-  printf("Second file time: %s\n", time);
-  NXopenpath(hfil, "/");
-  if (NXisexternalgroup(hfil, "entry1", "NXentry", filename, 255) != NXstatus::NX_OK) {
-    return TEST_FAILED;
-  } else {
-    printf("entry1 external URL = %s\n", filename);
-  }
-  printf("testing link to external data set\n");
-  if (NXopenpath(hfil, "/entry3") != NXstatus::NX_OK) {
-    std::cerr << "failed to step into external file in \"/entry3\"\n";
-    return TEST_FAILED;
-  }
-  if (NXisexternaldataset(hfil, "extlinkdata", filename, 255) != NXstatus::NX_OK) {
-    printf("extlinkdata should be external link\n");
-    return TEST_FAILED;
-  } else {
-    printf("extlinkdata external URL = %s\n", filename);
-  }
-  ASSERT_NO_ERROR(NXopendata(hfil, "extlinkdata"), "");
-  memset(&temperature, 0, 4);
-  ASSERT_NO_ERROR(NXgetdata(hfil, &temperature), "");
-  printf("value retrieved: %4.2f\n", temperature);
-
-  ASSERT_NO_ERROR(NXopenpath(hfil, "/entry3"), "");
-  if (NXisexternaldataset(hfil, "extlinknative", filename, 255) != NXstatus::NX_OK) {
-    ON_ERROR("extlinknative should be external link");
-  } else {
-    printf("extlinknative external URL = %s\n", filename);
-  }
-  ASSERT_NO_ERROR(NXopendata(hfil, "extlinknative"), "");
-  memset(&temperature, 0, 4);
-  ASSERT_NO_ERROR(NXgetdata(hfil, &temperature), "");
-  printf("value retrieved: %4.2f\n", temperature);
-  NXclose(&hfil);
-  printf("External File Linking tested OK\n");
-
-  // remove file that was created
-  removeFile(testFile);
-  removeFile(extFile1);
-  removeFile(extFile2);
-
-  return TEST_SUCCEED;
-#endif
 }

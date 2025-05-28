@@ -38,12 +38,6 @@
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 
-/*---------------------------------------------------------------------
- Recognized and handled napimount URLS
- -----------------------------------------------------------------------*/
-#define NXBADURL 0
-#define NXFILE 1
-
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
@@ -431,53 +425,9 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 }
 
 /*------------------------------------------------------------------------*/
-static int analyzeNapimount(char *napiMount, char *extFile, int extFileLen, char *extPath, int extPathLen) {
-  char *pPtr = NULL;
-  char const *path = NULL;
-
-  memset(extFile, 0, static_cast<size_t>(extFileLen));
-  memset(extPath, 0, static_cast<size_t>(extPathLen));
-  pPtr = strstr(napiMount, "nxfile://");
-  if (pPtr == NULL) {
-    return NXBADURL;
-  }
-  path = strrchr(napiMount, '#');
-  if (path == NULL) {
-    const auto length = strlen(napiMount) - 9;
-    if (length > static_cast<size_t>(extFileLen)) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr + 9, length);
-    strcpy(extPath, "/");
-    return NXFILE;
-  } else {
-    pPtr += 9;
-    int length = static_cast<int>(path - pPtr);
-    if (length > extFileLen) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr, static_cast<size_t>(length));
-    length = static_cast<int>(strlen(path - 1));
-    if (length > extPathLen) {
-      NXReportError("ERROR: internal error with external linking");
-      return NXBADURL;
-    }
-    strcpy(extPath, path + 1);
-    return NXFILE;
-  }
-  return NXBADURL;
-}
-
-/*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
+  NXstatus status;
   pFileStack fileStack;
   pNexusFunction pFunc = NULL;
 
@@ -487,24 +437,6 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
   if (status == NXstatus::NX_OK) {
     pushPath(fileStack, name);
-  }
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int const napistat = static_cast<int>(analyzeNapimount(nxurl, exfile, 511, expath, 511));
-    if (napistat == NXBADURL) {
-      return NXstatus::NX_ERROR;
-    }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-    status = NXopenpath(fid, expath);
-    NXgetgroupID(fid, &breakID);
-    setCloseID(fileStack, breakID);
   }
 
   return status;
@@ -581,11 +513,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
 /* --------------------------------------------------------------------- */
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
+  NXstatus status;
   pFileStack fileStack;
   pNexusFunction pFunc = NULL;
 
@@ -595,25 +523,6 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
 
   if (status == NXstatus::NX_OK) {
     pushPath(fileStack, name);
-  }
-
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat == NXBADURL) {
-      return NXstatus::NX_ERROR;
-    }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-    status = NXopenpath(fid, expath);
-    NXgetdataID(fid, &breakID);
-    setCloseID(fileStack, breakID);
   }
 
   return status;
@@ -1018,172 +927,6 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
   } else {
     return NXstatus::NX_ERROR;
   }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternalgroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  int length = 1023;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = (int)strlen(nxurl);
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  int length = 1023;
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = static_cast<int>(strlen(nxurl));
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url) {
-  NXstatus status;
-  NXnumtype type = NXnumtype::CHAR;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    size_t urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen >= length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
-      return NXstatus::NX_ERROR;
-    }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
-  }
-
-  LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-  return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
-  NXnumtype type = NXnumtype::CHAR;
-  NXstatus status;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  int rank = 1;
-  int64_t dims[1] = {1};
-
-  // TODO cut and paste
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    auto urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen > length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
-      return NXstatus::NX_ERROR;
-    }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
-  }
-
-  status = LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, NXnumtype::CHAR, rank, dims));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  return NXstatus::NX_OK;
 }
 
 /*------------------------------------------------------------------------
