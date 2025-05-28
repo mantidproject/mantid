@@ -661,7 +661,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._subtract_workspace(van_bkgd_ws_name, van_bkgd_name_can)
                 self._subtract_workspace(sam_ws_name, can_run_ws_name)
                 self._subtract_workspace(sam_ws_name, van_bkgd_name_can)
-                if mtd.doesExist(van_bkgd_name_can):
+                if van_bkgd_name_can and mtd.doesExist(van_bkgd_name_can):
                     api.DeleteWorkspace(Workspace=van_bkgd_name_can)
 
             elif (can_run_ws_name is not None and self._containerScaleFactor != 0) or self._absMethod == "SampleAndContainer":
@@ -671,7 +671,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().notice("No absorption correction applied to sample run %s." % sam_ws_name)
             # ENDIF (absorption correction)
 
-            if mtd.doesExist(van_bkgd_ws_name):
+            if van_bkgd_ws_name and mtd.doesExist(van_bkgd_ws_name):
                 api.DeleteWorkspace(Workspace=van_bkgd_ws_name)
 
             if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
@@ -1504,8 +1504,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         IgnoreXBins=True,
                         AllSpectra=True,
                     )
-        if samRunIndex == 0:
-            api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
+            if samRunIndex == 0 and self._containerScaleFactor != 0:
+                api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
 
             # END-IF-ELSE
         # END-IF (can run)
@@ -1660,7 +1660,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         Purpose: subtract two workspaces
         :param lhs_ws_name: left hand side workspace
         :param rhs_ws_name: right hand side workspace
-        :return:
         """
         if not allEventWorkspaces(rhs_ws_name, lhs_ws_name):
             api.ConvertToMatrixWorkspace(InputWorkspace=lhs_ws_name, OutputWorkspace=lhs_ws_name)
@@ -1671,10 +1670,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _process_vanadium_background_runs(self, samRunIndex, absorptionWksp):
         """
         Purpose: process vanadium background runs
-        :param van_bkgd_run_number_list: list of vanadium background run
         :param samRunIndex: sample run index
         :param abs_workspace: absorption workspace
-        :return:
+        :return: van_bkgd_ws_name or None if no vanadium background run is specified
         """
         van_bkgd_run_number_list = self._info["vanadium_background"].value
         van_bkgd_run_number_list = ["%s_%d" % (self._instrument, value) for value in van_bkgd_run_number_list]
