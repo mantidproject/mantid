@@ -15,11 +15,11 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/SpinStateValidator.h"
 
-#include <memory>
-
 #include <algorithm>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -133,10 +133,8 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::string &inputSta
                                       "WorkspaceGroup.");
         }
 
-        const auto inputStates =
-            Mantid::Algorithms::PolarizationCorrectionsHelpers::splitSpinStateString(inputStatesStr);
-        const auto outputStates =
-            Mantid::Algorithms::PolarizationCorrectionsHelpers::splitSpinStateString(outputStatesStr);
+        const auto inputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(inputStatesStr);
+        const auto outputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(outputStatesStr);
 
         if (!isValidSpinState(inputStates, analysisMode)) {
           throw std::invalid_argument("Invalid input spin state: " + inputStatesStr + " for " + analysisMode +
@@ -478,8 +476,8 @@ void PolarizationCorrectionFredrikze::exec() {
   const std::string outputStatesStr = getProperty(Prop::OUTPUT_SPIN_STATES);
   const bool addSpinStateLog = getProperty(Prop::ADD_SPIN_STATE_LOG);
 
-  const auto inputStates = PolarizationCorrectionsHelpers::splitSpinStateString(inputStatesStr);
-  const auto outputStates = PolarizationCorrectionsHelpers::splitSpinStateString(outputStatesStr);
+  const auto inputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(inputStatesStr);
+  const auto outputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(outputStatesStr);
 
   validateInputWorkspace(inWS, inputStatesStr, outputStatesStr, analysisMode);
 

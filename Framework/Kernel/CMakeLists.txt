@@ -77,6 +77,7 @@ set(SRC_FILES
     src/LegacyNexusDescriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
+    src/SpinStateHelpers.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHistory.cpp
@@ -237,6 +238,7 @@ set(INC_FILES
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
+    inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/ProgressBase.h
     inc/MantidKernel/Property.h
     inc/MantidKernel/PropertyHelper.h
@@ -392,6 +394,7 @@ set(TEST_FILES
     LegacyNexusDescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
+    SpinStateHelpersTest.h
     ProgressBaseTest.h
     PropertyHistoryTest.h
     PropertyManagerDataServiceTest.h
