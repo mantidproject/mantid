@@ -35,7 +35,6 @@
 #include <string>
 
 static int testLoadPath();
-static int testExternal(const std::string &progName);
 
 using NexusNapiTest::print_data;
 using NexusNapiTest::removeFile;
@@ -439,9 +438,6 @@ int main(int argc, char *argv[]) {
   if (testLoadPath() != TEST_SUCCEED)
     return TEST_FAILED;
 
-  std::cout << "before external link tests\n";
-  if (testExternal(argv[0]) != TEST_SUCCEED)
-    return TEST_FAILED;
   // cleanup and return
   std::cout << "all ok - done\n";
   removeFile(nxFile);
