@@ -700,14 +700,9 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     file.getDataCoerce(duration);
     if (duration.size() == 1) {
       // get the units
-      std::vector<::NeXus::AttrInfo> infos = file.getAttrInfos();
       std::string units;
-      for (auto it = infos.begin(); it != infos.end(); ++it) {
-        // cppcheck-suppress useStlAlgorithm
-        if (it->name == "units") {
-          units = file.getStrAttr(*it);
-          break;
-        }
+      if (file.hasAttr("units")) {
+        file.getAttr<std::string>("units", units);
       }
 
       // set the property
