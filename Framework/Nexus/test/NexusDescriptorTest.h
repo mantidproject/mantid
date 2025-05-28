@@ -10,6 +10,7 @@
 #include "MantidNexus/NexusDescriptor.h"
 
 #include <filesystem>
+#include <fstream>
 
 #include <cstddef> // std::size_t
 
@@ -94,6 +95,18 @@ public:
     TS_ASSERT(!nexusHDF5Descriptor.hasRootAttr("not_attr"));
   }
 
+  void test_fails_bad_file() {
+    // test opening a file that exists, but is unreadable
+    std::string filename = getFullPath("Test_characterizations_char.txt");
+    TS_ASSERT_THROWS(Mantid::Nexus::NexusDescriptor nd(filename), std::invalid_argument const &);
+
+    filename = "fake_empty_file.nxs.h5";
+    std::ofstream file(filename);
+    file << "mock";
+    file.close();
+    TS_ASSERT_THROWS(Mantid::Nexus::NexusDescriptor nd(filename), std::invalid_argument const &);
+  }
+
   void test_AddEntry() {
     // create a descriptor with the correct values
     const std::string filename = getFullPath("EQSANS_89157.nxs.h5");
@@ -116,5 +129,62 @@ public:
     // add a field correctly
     TS_ASSERT_THROWS_NOTHING(nexusHDF5Descriptor.addEntry("/entry/DASlogs/OmikronRequest", "NXlog"));
     TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs/OmikronRequest", "NXlog"), true);
+  }
+
+  void test_allPathsAtLevel() {
+
+    typedef std::pair<std::string, std::string> Entry;
+    typedef std::map<std::string, std::string> Entries;
+
+    // setup a recursive group tree
+    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
+                            Entry{"/entry1/layer2a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+                            Entry{"/entry1/layer2a/data1_vec_1", "SDS"},
+                            Entry{"/entry1/layer2b", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
+                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
+                            Entry{"/entry2", "NXentry"},
+                            Entry{"/entry2/layer2c", "NXentry"},
+                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+
+    std::string nonexistent("not_a_real_file.egg");
+    Mantid::Nexus::NexusDescriptor nd(nonexistent);
+    for (auto it = tree.begin(); it != tree.end(); it++) {
+      nd.addEntry(it->first, it->second);
+    }
+
+    // at root level, should be entry1, entry2
+    Entries actual = nd.allPathsAtLevel("/");
+    Entries expected = {Entry{"entry1", "NXentry"}, Entry{"entry2", "NXentry"}};
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1, should be layer2a, layer2b
+    actual = nd.allPathsAtLevel("/entry1");
+    expected = Entries({Entry{"layer2a", "NXentry"}, Entry{"layer2b", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry1/layer2a, should be layer3a, layer3b, data1
+    actual = nd.allPathsAtLevel("/entry1/layer2a");
+    expected = Entries({Entry{"layer3a", "NXentry"}, Entry{"layer3b", "NXentry"}, Entry{"data1_vec_1", "SDS"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // within entry2/layer2c, should be layer3c
+    actual = nd.allPathsAtLevel("/entry2/layer2c");
+    expected = Entries({Entry{"layer3c", "NXentry"}});
+    for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
   }
 };

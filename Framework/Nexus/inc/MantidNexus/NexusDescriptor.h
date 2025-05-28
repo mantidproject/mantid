@@ -14,6 +14,9 @@
 #include <unordered_set>
 #include <vector>
 
+// from NeXusFile_fwd.h
+typedef int NXaccess;
+
 namespace Mantid {
 namespace Nexus {
 
@@ -25,6 +28,8 @@ public:
    * @param filename input HDF5 Nexus file name
    */
   NexusDescriptor(std::string filename);
+
+  NexusDescriptor(std::string filename, NXaccess access);
 
   NexusDescriptor() = delete;
 
@@ -91,6 +96,13 @@ public:
    */
   std::vector<std::string> allPathsOfType(const std::string &type) const;
 
+  /**
+   * @param level A string specifying the parent path
+   * @return path A map of strings giving names within parent (mapped to class type)
+   * e.g. group1 : NXentry, group2 : NXentry, data : NXdata
+   */
+  std::map<std::string, std::string> allPathsAtLevel(const std::string &level) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(const std::string &classType) const;
 
@@ -108,6 +120,8 @@ public:
    * @param groupClass NXclass (for group) or SDS (for dataset)
    */
   void addEntry(const std::string &entryName, const std::string &groupClass);
+
+  void addRootAttr(const std::string &name);
 
 private:
   /**

@@ -256,18 +256,16 @@ void getWordsInString(const std::string &words4, std::string &w1, std::string &w
  * @param file :: previously opened NXS file.
  */
 void WorkspaceHistory::loadNexus(::NeXus::File *file) {
-  // Warn but continue if the group does not exist.
-  try {
+  if (file->hasGroup("process", "NXprocess")) {
     file->openGroup("process", "NXprocess");
-  } catch (std::exception &) {
+    loadNestedHistory(file);
+    file->closeGroup();
+  } else {
+    // Warn but continue if the group does not exist.
     g_log.warning() << "Error opening the algorithm history field 'process'. "
                        "Workspace will have no history."
                     << "\n";
-    return;
   }
-
-  loadNestedHistory(file);
-  file->closeGroup();
 }
 
 /** Load every algorithm history object at this point in the hierarchy.
