@@ -60,16 +60,6 @@
 
 #include "MantidNexus/nx_stptok.h"
 
-static int64_t *dupDimsArray(int const *dims_array, int rank) {
-  int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
-  if (dims64 != NULL) {
-    for (int i = 0; i < rank; ++i) {
-      dims64[i] = dims_array[i];
-    }
-  }
-  return dims64;
-}
-
 /*---------------------------------------------------------------------
  wrapper for getenv. This is a future proofing thing for porting to OS
  which have different ways of accessing environment variables
@@ -393,32 +383,12 @@ NXstatus NXclosegroup(NXhandle fid) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                    int dimensions[]) { // cppcheck-suppress constParameter
-  NXstatus status;
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  status = NXmakedata64(fid, name, datatype, rank, dims64);
-  free(dims64);
-  return status;
-}
-
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   return pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions);
 }
 
 /* --------------------------------------------------------------------- */
-
-NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                        int dimensions[], // cppcheck-suppress constParameter
-                        int compress_type, int const chunk_size[]) {
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  int64_t *chunk64 = dupDimsArray(chunk_size, rank);
-  NXstatus const status = NXcompmakedata64(fid, name, datatype, rank, dims64, compress_type, chunk64);
-  free(dims64);
-  free(chunk64);
-  return status;
-}
 
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
@@ -571,6 +541,16 @@ NXstatus NXflush(NXhandle *pHandle) {
 
 /*-------------------------------------------------------------------------*/
 
+static int64_t *dupDimsArray(int const *dims_array, int rank) {
+  int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
+  if (dims64 != NULL) {
+    for (int i = 0; i < rank; ++i) {
+      dims64[i] = dims_array[i];
+    }
+  }
+  return dims64;
+}
+
 NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype) {
   int64_t *dims64 = dupDimsArray(static_cast<const int *>(dimensions), rank);
   NXstatus status = NXmalloc64(data, rank, dims64, datatype);
@@ -697,30 +677,7 @@ NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype 
   return pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType);
 }
 
-NXstatus NXgetrawinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  status = pFunc->nxgetinfo64(pFunc->pNexusData, rank, dims64, iType);
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
-  }
-  return status;
-}
-
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  status = NXgetinfo64(fid, rank, dims64, iType);
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
-  }
-  return status;
-}
 
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
@@ -745,20 +702,6 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetslab(NXhandle fid, void *data, const int iStart[], const int iSize[]) {
-  int i, rank;
-  NXnumtype iType;
-  int64_t iStart64[NX_MAXRANK], iSize64[NX_MAXRANK];
-  if (NXgetinfo64(fid, &rank, iStart64, &iType) != NXstatus::NX_OK) {
-    return NXstatus::NX_ERROR;
-  }
-  for (i = 0; i < rank; ++i) {
-    iStart64[i] = iStart[i];
-    iSize64[i] = iSize[i];
-  }
-  return NXgetslab64(fid, data, iStart64, iSize64);
-}
 
 NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
