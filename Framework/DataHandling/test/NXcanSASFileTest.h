@@ -412,8 +412,12 @@ protected:
   }
 
   void do_assert(const NXcanSASTestParameters &parameters) {
-    const auto filename = parameters.filename;
-    H5::H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
+    const auto filePath = parameters.filePath;
+    if (filePath.empty()) {
+      throw std::runtime_error("Error in test - no file path set in parameters");
+    }
+
+    H5::H5File file(filePath, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     // Check sasentry
     const auto entry = file.openGroup(sasEntryGroupName + sasEntryDefaultSuffix);
