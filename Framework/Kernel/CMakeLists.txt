@@ -658,9 +658,11 @@ else()
     set(UPDATE_SCRIPT_PATH ${CMAKE_INSTALL_PREFIX}/bin)
     set(MUON_CULTURED_GUESS_CSV ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/muon/MuonCulturedGuess.csv)
     set(MUON_INSTRUMENT_CYCLE_MAP ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/muon/MuonInstrumentCycleMapping.json)
-    set(REFL_BEAMLINE_COMPONENTS ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/reflectometry/ReflectometryConfiguration.json)
+    set(REFL_BEAMLINE_COMPONENTS
+        ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/reflectometry/ReflectometryConfiguration.json
+    )
   else()
-    set(HTML_ROOT "\${Mantid_HTML_ROOT}") 
+    set(HTML_ROOT "\${Mantid_HTML_ROOT}")
     set(QLOCATION_SETTINGS_PATH "\${Mantid_QLOCATION_SETTINGS_PATH}")
     set(EXT_PROPS_PATH "\${Mantid_EXT_PROPS_PATH}")
     set(UPDATE_SCRIPT_PATH "\${Mantid_UPDATE_SCRIPT_PATH}")
