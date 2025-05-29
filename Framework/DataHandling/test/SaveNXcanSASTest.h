@@ -21,7 +21,6 @@
 #include "NXcanSASTestHelper.h"
 
 #include <filesystem>
-#include <random>
 
 using Mantid::DataHandling::SaveNXcanSAS;
 using namespace Mantid::DataHandling::NXcanSAS;
