@@ -5,9 +5,9 @@
 
 namespace NexusNapiTest {
 void print_data(const std::string &prefix, std::ostream &stream, const void *data, const NXnumtype type,
-                const int num) {
+                const int64_t num) {
   stream << prefix << " ";
-  for (int i = 0; i < num; i++) {
+  for (int64_t i = 0; i < num; i++) {
     switch (type) {
     case NXnumtype::CHAR:
       stream << (static_cast<const char *>(data))[i];

@@ -31,10 +31,6 @@
     NAPI internals
 ------------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 typedef struct {
   NXhandle pNexusData;
   NXstatus (*nxreopen)(NXhandle pOrigHandle, NXhandle *pNewHandle);
@@ -73,9 +69,3 @@ typedef struct {
 
   NXaccess access_mode;
 } NexusFunction, *pNexusFunction;
-/*---------------------*/
-extern long nx_cacheSize;
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */

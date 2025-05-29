@@ -79,9 +79,7 @@
 #define NXgetpath MANGLE(nxigetpath)
 #define NXopengrouppath MANGLE(nxiopengrouppath)
 #define NXclosegroup MANGLE(nxiclosegroup)
-#define NXmakedata MANGLE(nximakedata)
 #define NXmakedata64 MANGLE(nximakedata64)
-#define NXcompmakedata MANGLE(nxicompmakedata)
 #define NXcompmakedata64 MANGLE(nxicompmakedata64)
 #define NXcompress MANGLE(nxicompress)
 #define NXopendata MANGLE(nxiopendata)
@@ -100,14 +98,11 @@
 #define NXfree MANGLE(nxifree)
 #define NXflush MANGLE(nxiflush)
 
-#define NXgetinfo MANGLE(nxigetinfo)
 #define NXgetinfo64 MANGLE(nxigetinfo64)
-#define NXgetrawinfo MANGLE(nxigetrawinfo)
 #define NXgetrawinfo64 MANGLE(nxigetrawinfo64)
 #define NXgetnextentry MANGLE(nxigetnextentry)
 #define NXgetdata MANGLE(nxigetdata)
 
-#define NXgetslab MANGLE(nxigetslab)
 #define NXgetslab64 MANGLE(nxigetslab64)
 #define NXgetnextattr MANGLE(nxigetnextattr)
 #define NXgetattr MANGLE(nxigetattr)
@@ -120,7 +115,6 @@
 #define NXsameID MANGLE(nxisameid)
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXsetcache MANGLE(nxisetcache)
 #define NXinquirefile MANGLE(nxiinquirefile)
 #define NXgetversion MANGLE(nxigetversion)
 
@@ -255,11 +249,6 @@ MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[]);
-
-/**
- * @copydoc NXmakedata()
- */
 MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
 
 /**
@@ -281,12 +270,6 @@ MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumt
  * should be the same as the data dimension. If you write it in slabs, this is your preferred slab size.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXcompmakedata(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int dim[],
-                                         int comp_typ, int const bufsize[]);
-
-/**
- * @copydoc NXcompmakedata()
  */
 MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
                                            int64_t dim[], int comp_typ, int64_t const chunk_size[]);
@@ -417,11 +400,6 @@ MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle handle, void *data);
  * \param datatype A pointer to an integer which be set to the NeXus data type code for this dataset.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
-
-/**
- * @copydoc NXgetinfo()
  */
 MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
@@ -617,12 +595,6 @@ MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
 MANTID_NEXUS_DLL char *NXIformatNeXusTime();
-
-/**
- * A function for setting the default cache size for HDF-5
- * \ingroup c_init
- */
-MANTID_NEXUS_DLL NXstatus NXsetcache(long newVal);
 
 #ifdef __cplusplus
 };

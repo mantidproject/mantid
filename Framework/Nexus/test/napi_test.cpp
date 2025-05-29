@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
 #else  // WIN32
   // ------------------------------------------> TODO fine up to here "nexuscpptest-c-hdf5-test"
   int i, j, NXlen;
+  int64_t NXlen64;
   float r;
   const unsigned char i1_array[4] = {1, 2, 3, 4};
   const short int i2_array[4] = {1000, 2000, 3000, 4000};
@@ -75,10 +76,9 @@ int main(int argc, char *argv[]) {
       {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
   double r8_array[5][4] = {
       {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
-  int array_dims[2] = {5, 4};
-  int unlimited_dims[1] = {NX_UNLIMITED};
-  int chunk_size[2] = {5, 4};
-  int slab_start[2], slab_size[2];
+  int64_t array_dims[2] = {5, 4};
+  int64_t chunk_size[2] = {5, 4};
+  int64_t slab_start[2], slab_size[2];
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
   NXhandle fileid;
@@ -101,46 +101,54 @@ int main(int argc, char *argv[]) {
                   "NXputattr(fileid, \"hugo\", \"namenlos\", strlen, NXnumtype::CHAR)");
   ASSERT_NO_ERROR(NXputattr(fileid, "cucumber", "passion", static_cast<int>(strlen("passion")), NXnumtype::CHAR),
                   "NXputattr(fileid, \"cucumber\", \"passion\", strlen, NXnumtype::CHAR)");
-  NXlen = static_cast<int>(strlen(ch_test_data));
-  ASSERT_NO_ERROR(NXmakedata(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen), "");
+  NXlen64 = static_cast<int>(strlen(ch_test_data));
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen64, NXcompression::NONE, &NXlen64), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "ch_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, ch_test_data), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXmakedata(fileid, "c1_data", NXnumtype::CHAR, 2, array_dims), "");
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "c1_data", NXnumtype::CHAR, 2, array_dims, NXcompression::NONE, array_dims),
+                  "");
   ASSERT_NO_ERROR(NXopendata(fileid, "c1_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, c1_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXmakedata(fileid, "i1_data", NXnumtype::INT8, 1, &array_dims[1]), "");
+  ASSERT_NO_ERROR(
+      NXcompmakedata64(fileid, "i1_data", NXnumtype::INT8, 1, &array_dims[1], NXcompression::NONE, &array_dims[1]), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "i1_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, i1_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXmakedata(fileid, "i2_data", NXnumtype::INT16, 1, &array_dims[1]), "");
+  ASSERT_NO_ERROR(
+      NXcompmakedata64(fileid, "i2_data", NXnumtype::INT16, 1, &array_dims[1], NXcompression::NONE, &array_dims[1]),
+      "");
   ASSERT_NO_ERROR(NXopendata(fileid, "i2_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, i2_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXmakedata(fileid, "i4_data", NXnumtype::INT32, 1, &array_dims[1]), "");
+  ASSERT_NO_ERROR(
+      NXcompmakedata64(fileid, "i4_data", NXnumtype::INT32, 1, &array_dims[1], NXcompression::NONE, &array_dims[1]),
+      "");
   ASSERT_NO_ERROR(NXopendata(fileid, "i4_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, i4_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXcompmakedata(fileid, "r4_data", NXnumtype::FLOAT32, 2, array_dims, NX_COMP_LZW, chunk_size), "");
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "r4_data", NXnumtype::FLOAT32, 2, array_dims, NX_COMP_LZW, chunk_size), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "r4_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, r4_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
 
-  // BEGIN DOUBLE SLAB
-  ASSERT_NO_ERROR(NXmakedata(fileid, "r8_data", NXnumtype::FLOAT64, 2, array_dims), "");
+  std::cout << "BEGIN DOUBLE SLAB\n";
+
+  ASSERT_NO_ERROR(
+      NXcompmakedata64(fileid, "r8_data", NXnumtype::FLOAT64, 2, array_dims, NXcompression::NONE, array_dims), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "r8_data"), "");
   slab_start[0] = 4;
   slab_start[1] = 0;
   slab_size[0] = 1;
   slab_size[1] = 4;
   // cppcheck-suppress cstyleCast
-  ASSERT_NO_ERROR(NXputslab(fileid, (double *)r8_array + 16, slab_start, slab_size), "");
+  ASSERT_NO_ERROR(NXputslab64(fileid, (double *)r8_array + 16, slab_start, slab_size), "");
   slab_start[0] = 0;
   slab_start[1] = 0;
   slab_size[0] = 4;
   slab_size[1] = 4;
-  ASSERT_NO_ERROR(NXputslab(fileid, r8_array, slab_start, slab_size), "");
+  ASSERT_NO_ERROR(NXputslab64(fileid, r8_array, slab_start, slab_size), "");
   ASSERT_NO_ERROR(
       NXputattr(fileid, "ch_attribute", ch_test_data, static_cast<int>(strlen(ch_test_data)), NXnumtype::CHAR), "");
   i = 42;
@@ -151,29 +159,33 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
   // END DOUBLE SLAB
 
-  // BEGIN LINK TEST
+  std::cout << "BEGIN LINK TEST\n";
+
   // open group entry/data
   ASSERT_NO_ERROR(NXmakegroup(fileid, "data", "NXdata"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "data", "NXdata"), "");
   ASSERT_NO_ERROR(NXmakelink(fileid, &dlink), "");
-  int dims[2] = {100, 20};
+  int64_t dims[2] = {100, 20};
   for (i = 0; i < 100; i++) {
     for (j = 0; j < 20; j++) {
       comp_array[i][j] = i;
     }
   }
-  int cdims[2] = {20, 20};
-  ASSERT_NO_ERROR(NXcompmakedata(fileid, "comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, cdims), "");
-  ASSERT_NO_ERROR(NXopendata(fileid, "comp_data"), "");
-  ASSERT_NO_ERROR(NXputdata(fileid, comp_array), "");
-  ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXflush(&fileid), "");
-  ASSERT_NO_ERROR(NXmakedata(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims), "");
+  int64_t cdims[2] = {20, 20};
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, cdims),
+                  "NXcompmakedata64 comp_data");
+  ASSERT_NO_ERROR(NXopendata(fileid, "comp_data"), "NXopendata comp_data");
+  ASSERT_NO_ERROR(NXputdata(fileid, comp_array), "NXputdata comp_data");
+  ASSERT_NO_ERROR(NXclosedata(fileid), "NXclosedata comp_data");
+  ASSERT_NO_ERROR(NXflush(&fileid), "NXflush comp_data");
+  int64_t unlimited_dims[1] = {NX_UNLIMITED};
+  // NXcompmakedata64 has a hard time with unlimited dimensions
+  ASSERT_NO_ERROR(NXmakedata64(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims), "NXmakedata64 flush_data");
   slab_size[0] = 1;
   for (i = 0; i < 7; i++) {
     slab_start[0] = i;
     ASSERT_NO_ERROR(NXopendata(fileid, "flush_data"), "");
-    ASSERT_NO_ERROR(NXputslab(fileid, &i, slab_start, slab_size), "");
+    ASSERT_NO_ERROR(NXputslab64(fileid, &i, slab_start, slab_size), "");
     ASSERT_NO_ERROR(NXflush(&fileid), "");
   }
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
@@ -181,8 +193,8 @@ int main(int argc, char *argv[]) {
   // open group entry/sample
   ASSERT_NO_ERROR(NXmakegroup(fileid, "sample", "NXsample"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "sample", "NXsample"), "");
-  NXlen = 12;
-  ASSERT_NO_ERROR(NXmakedata(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen), "");
+  NXlen64 = 12;
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen64, NXcompression::NONE, &NXlen64), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "ch_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, "NeXus sample"), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
@@ -224,6 +236,7 @@ int main(int argc, char *argv[]) {
   NXnumtype NXtype;
   NXstatus entry_status, attr_status;
   int NXrank, NXdims[32];
+  int64_t NXdims64[32];
   do {
     // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
@@ -281,13 +294,13 @@ int main(int argc, char *argv[]) {
         ASSERT_NO_ERROR(NXopendata(fileid, name), "");
         ASSERT_NO_ERROR(NXgetpath(fileid, path, 512), "");
         printf("Data path %s\n", path);
-        ASSERT_NO_ERROR(NXgetinfo(fileid, &NXrank, NXdims, &NXtype), "");
+        ASSERT_NO_ERROR(NXgetinfo64(fileid, &NXrank, NXdims64, &NXtype), "");
         printf("   %s(%d)", name, (int)NXtype);
         // cppcheck-suppress cstyleCast
-        ASSERT_NO_ERROR(NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype), "");
-        int n = 1;
+        ASSERT_NO_ERROR(NXmalloc64((void **)&data_buffer, NXrank, NXdims64, NXtype), "");
+        int64_t n = 1;
         for (int k = 0; k < NXrank; k++) {
-          n *= NXdims[k];
+          n *= NXdims64[k];
         }
         if (NXtype == NXnumtype::CHAR) {
           ASSERT_NO_ERROR(NXgetdata(fileid, data_buffer), "");
@@ -300,19 +313,19 @@ int main(int argc, char *argv[]) {
           slab_start[1] = 0;
           slab_size[0] = 1;
           slab_size[1] = 4;
-          ASSERT_NO_ERROR(NXgetslab(fileid, data_buffer, slab_start, slab_size), "");
+          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("\n      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = TEST_FAILED;
-          ASSERT_NO_ERROR(NXgetslab(fileid, data_buffer, slab_start, slab_size), "");
+          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 2;
-          ASSERT_NO_ERROR(NXgetslab(fileid, data_buffer, slab_start, slab_size), "");
+          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 3;
-          ASSERT_NO_ERROR(NXgetslab(fileid, data_buffer, slab_start, slab_size), "");
+          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 4;
-          ASSERT_NO_ERROR(NXgetslab(fileid, data_buffer, slab_start, slab_size), "");
+          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           ASSERT_NO_ERROR(NXgetattrinfo(fileid, &i), "");
           if (i > 0) {
