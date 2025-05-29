@@ -193,7 +193,7 @@ private:
 
     // make more links
     NXlink glink = file.getGroupID();
-    file.openPath("/");
+    file.openAddress("/");
     file.makeGroup("link", "NXentry", true);
     file.makeLink(glink);
     cout << "writeTest(" << filename << ") successful\n";
@@ -256,11 +256,11 @@ private:
     // Close the "entry" group
     file.closeGroup();
 
-    // openpath checks
-    file.openPath("/entry/data/comp_data");
-    file.openPath("/entry/data/comp_data");
-    file.openPath("../r8_data");
-    cout << "NXopenpath checks OK\n";
+    // openAddress checks
+    file.openAddress("/entry/data/comp_data");
+    file.openAddress("/entry/data/comp_data");
+    file.openAddress("../r8_data");
+    cout << "NXopenaddress checks OK\n";
 
     // everything went fine
     cout << "readTest(" << filename << ") successful\n";

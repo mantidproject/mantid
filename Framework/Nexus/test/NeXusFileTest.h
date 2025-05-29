@@ -381,6 +381,29 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
+  void test_check_str_length() {
+    FileResource resource("test_nexus_str_len.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    std::string testStr("some_str_data");
+    std::string padded(128, '\0');
+    std::copy(testStr.begin(), testStr.end(), padded.begin());
+    file.makeData("string_data", NXnumtype::CHAR, padded.size(), true);
+    file.putData(&padded);
+    file.closeData();
+
+    file.openAddress("/entry/string_data");
+    Info info = file.getInfo();
+    auto data = file.getStrData();
+
+    TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(info.dims[0], 128);
+    TS_ASSERT_EQUALS(data.length(), testStr.length());
+    TS_ASSERT_EQUALS(data, testStr);
+  }
+
   void test_data_putget_array() {
     cout << "\ntest dataset read/write -- arrays\n";
 
@@ -485,61 +508,61 @@ public:
   }
 
   // #################################################################################################################
-  // TEST PATH METHODS
+  // TEST ADDRESS METHODS
   // #################################################################################################################
 
   /* NOTE for historical reasons, additional tests exist in NeXusFileReadWriteTest.h*/
 
-  void test_getPath_groups() {
-    cout << "\ntest get_path -- groups only\n";
+  void test_getAddress_groups() {
+    cout << "\ntest get_address -- groups only\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
-    // at root, path should be "/"
-    TS_ASSERT_EQUALS("/", file.getPath());
+    // at root, address should be "/"
+    TS_ASSERT_EQUALS("/", file.getAddress());
 
     // make and open a group -- now at "/abc"
     file.makeGroup("abc", "NXclass", true);
-    TS_ASSERT_EQUALS("/abc", file.getPath());
+    TS_ASSERT_EQUALS("/abc", file.getAddress());
 
     // make another layer -- at "/acb/def"
     file.makeGroup("def", "NXentry", true);
-    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    TS_ASSERT_EQUALS("/abc/def", file.getAddress());
 
     // go down a step -- back to "/abc"
     file.closeGroup();
-    TS_ASSERT_EQUALS("/abc", file.getPath());
+    TS_ASSERT_EQUALS("/abc", file.getAddress());
 
     // go up a different step -- at "/abc/ghi"
     file.makeGroup("ghi", "NXfunsicle", true);
-    TS_ASSERT_EQUALS("/abc/ghi", file.getPath());
+    TS_ASSERT_EQUALS("/abc/ghi", file.getAddress());
   }
 
-  void test_getPath_data() {
-    cout << "\ntest get_path -- groups and data!\n";
+  void test_getAddress_data() {
+    cout << "\ntest get_address -- groups and data!\n";
     FileResource resource("test_nexus_file_grpdata.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
-    // at root, path should be "/"
-    TS_ASSERT_EQUALS("/", file.getPath());
+    // at root, address should be "/"
+    TS_ASSERT_EQUALS("/", file.getAddress());
 
     // make and open a group -- now at "/abc"
     file.makeGroup("abc", "NXentry", true);
-    TS_ASSERT_EQUALS("/abc", file.getPath());
+    TS_ASSERT_EQUALS("/abc", file.getAddress());
 
     // make another layer -- at "/acb/def"
     file.makeData("def", Mantid::Nexus::getType<int32_t>(), 1, true);
     int in = 17;
     file.putData(&in);
-    TS_ASSERT_EQUALS("/abc/def", file.getPath());
+    TS_ASSERT_EQUALS("/abc/def", file.getAddress());
     file.closeData();
   }
 
-  void test_openPath() {
+  void test_openAddress() {
     using Mantid::Nexus::Entry;
-    cout << "\ntest openPath\n";
+    cout << "\ntest openAddress\n";
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
@@ -560,13 +583,13 @@ public:
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
-      current = file.getPath();
-      string path = it->first;
-      while (path.find(current) == path.npos) {
+      current = file.getAddress();
+      string address = it->first;
+      while (address.find(current) == address.npos) {
         file.closeGroup();
-        current = file.getPath();
+        current = file.getAddress();
       }
-      string name = path.substr(path.find_last_of("/") + 1, path.npos);
+      string name = address.substr(address.find_last_of("/") + 1, address.npos);
       if (it->second == "NXentry") {
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
@@ -581,28 +604,28 @@ public:
     file.closeGroup();
 
     // tests invalid cases
-    TS_ASSERT_THROWS(file.openPath(""), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openPath("/pants"), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openAddress(""), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), Mantid::Nexus::Exception const &);
 
     // make sure we are at root
-    file.openPath("/");
+    file.openAddress("/");
 
     // open the root
     file.openGroup("entry1", "NXentry");
     std::string actual, expected = "/";
-    file.openPath(expected);
-    actual = file.getPath();
+    file.openAddress(expected);
+    actual = file.getAddress();
     TS_ASSERT_EQUALS(actual, expected);
 
     expected = "/entry1/layer2b/layer3a";
-    file.openPath(expected);
-    actual = file.getPath();
+    file.openAddress(expected);
+    actual = file.getAddress();
     TS_ASSERT_EQUALS(actual, expected);
 
     expected = "/entry1/layer2a/data1";
-    file.openPath(expected);
-    actual = file.getPath();
+    file.openAddress(expected);
+    actual = file.getAddress();
     TS_ASSERT_EQUALS(actual, expected);
   }
 
@@ -755,13 +778,13 @@ public:
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
-      current = file.getPath();
-      string path = it->first;
-      while (path.find(current) == path.npos) {
+      current = file.getAddress();
+      string address = it->first;
+      while (address.find(current) == address.npos) {
         file.closeGroup();
-        current = file.getPath();
+        current = file.getAddress();
       }
-      string name = path.substr(path.find_last_of("/") + 1, path.npos);
+      string name = address.substr(address.find_last_of("/") + 1, address.npos);
       if (it->second == "NXentry") {
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
@@ -773,7 +796,7 @@ public:
     }
 
     // at root level, should be entry1, entry2
-    file.openPath("/");
+    file.openAddress("/");
     Entries actual = file.getEntries();
     Entries expected = {Entry{"entry1", "NXentry"}, Entry{"entry2", "NXentry"}};
     for (auto it = expected.begin(); it != expected.end(); it++) {
@@ -782,7 +805,7 @@ public:
     }
 
     // within entry1, should be layer2a, layer2b
-    file.openPath("/entry1");
+    file.openAddress("/entry1");
     actual = file.getEntries();
     expected = Entries({Entry{"layer2a", "NXentry"}, Entry{"layer2b", "NXentry"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {
@@ -791,7 +814,7 @@ public:
     }
 
     // within entry1/layer2a, should be layer3a, layer3b, data1
-    file.openPath("/entry1/layer2a");
+    file.openAddress("/entry1/layer2a");
     actual = file.getEntries();
     expected = Entries({Entry{"layer3a", "NXentry"}, Entry{"layer3b", "NXentry"}, Entry{"data1", "SDS"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {
@@ -800,7 +823,7 @@ public:
     }
 
     // within entry2/layer2a, should be layer3a, layer3b, data1
-    file.openPath("/entry2/layer2c");
+    file.openAddress("/entry2/layer2c");
     actual = file.getEntries();
     expected = Entries({Entry{"layer3c", "NXentry"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {

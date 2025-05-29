@@ -430,16 +430,16 @@ void LoadMD::loadCoordinateSystem() {
     m_file->readData("coordinate_system", readCoord);
     m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
   } catch (Nexus::Exception const &) {
-    auto pathOnEntry = m_file->getPath();
+    auto addressOnEntry = m_file->getAddress();
     try {
-      m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
+      m_file->openAddress(addressOnEntry + "/experiment0/logs/CoordinateSystem");
       int readCoord(0);
       m_file->readData("value", readCoord);
       m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
     } catch (Nexus::Exception const &) {
     }
     // return to where we started
-    m_file->openPath(pathOnEntry);
+    m_file->openAddress(addressOnEntry);
   }
 }
 

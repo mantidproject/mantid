@@ -168,50 +168,50 @@ void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed");
 // FILE NAVIGATION METHODS
 //------------------------------------------------------------------------------------------------------------------
 
-void File::openPath(std::string const &path) {
-  if (path.empty()) {
-    throw NXEXCEPTION("Supplied empty path");
+void File::openAddress(std::string const &address) {
+  if (address.empty()) {
+    throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopenpath(*(this->m_pfile_id), path.c_str()), "NXopenpath(" + path + ") failed");
+  NAPI_CALL(NXopenaddress(*(this->m_pfile_id), address.c_str()), "NXopenaddress(" + address + ") failed");
 }
 
-void File::openGroupPath(std::string const &path) {
-  if (path.empty()) {
-    throw NXEXCEPTION("Supplied empty path");
+void File::openGroupAddress(std::string const &address) {
+  if (address.empty()) {
+    throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopengrouppath(*(this->m_pfile_id), path.c_str()), "NXopengrouppath(" + path + ") failed");
+  NAPI_CALL(NXopengroupaddress(*(this->m_pfile_id), address.c_str()), "NXopengroupaddress(" + address + ") failed");
 }
 
-std::string File::getPath() {
-  char cPath[2048];
+std::string File::getAddress() {
+  char cAddress[2048];
 
-  memset(cPath, 0, sizeof(cPath));
-  NAPI_CALL(NXgetpath(*(this->m_pfile_id), cPath, sizeof(cPath) - 1), "NXgetpath() failed");
-  std::string path(cPath);
-  // openPath expects "/" to open root
+  memset(cAddress, 0, sizeof(cAddress));
+  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), cAddress, sizeof(cAddress) - 1), "NXgetaddress() failed");
+  std::string address(cAddress);
+  // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
-  if (path == "") {
-    path = "/";
+  if (address == "") {
+    address = "/";
   }
-  return path;
+  return address;
 }
 
-bool File::hasPath(std::string const &name) {
+bool File::hasAddress(std::string const &name) {
   if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
     return true;
   }
-  std::string const path = formAbsolutePath(name);
-  return m_descriptor.isEntry(path);
+  std::string const address = formAbsoluteAddress(name);
+  return m_descriptor.isEntry(address);
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) {
-  std::string const path = formAbsolutePath(name);
-  return m_descriptor.isEntry(path, class_type);
+  std::string const address = formAbsoluteAddress(name);
+  return m_descriptor.isEntry(address, class_type);
 }
 
 bool File::hasData(std::string const &name) {
-  std::string const path = formAbsolutePath(name);
-  return m_descriptor.isEntry(path, scientific_data_set);
+  std::string const address = formAbsoluteAddress(name);
+  return m_descriptor.isEntry(address, scientific_data_set);
 }
 
 bool File::isDataSetOpen() {
@@ -238,12 +238,12 @@ bool File::isDataInt() {
   }
 }
 
-std::string File::formAbsolutePath(std::string const &name) {
+std::string File::formAbsoluteAddress(std::string const &name) {
   std::string new_name;
   if (name.front() == '/') {
     new_name = name;
   } else {
-    std::string to_root = this->getPath();
+    std::string to_root = this->getAddress();
     if (to_root == "/") {
       to_root = "";
     }
@@ -253,14 +253,14 @@ std::string File::formAbsolutePath(std::string const &name) {
   return new_name;
 }
 
-void File::registerEntry(std::string const &path, std::string const &name) {
-  if (m_descriptor.isEntry(path, name)) {
+void File::registerEntry(std::string const &address, std::string const &name) {
+  if (m_descriptor.isEntry(address, name)) {
     // do nothing
-  } else if (path.front() != '/') {
-    throw NXEXCEPTION("Paths must be absolute: " + path);
+  } else if (address.front() != '/') {
+    throw NXEXCEPTION("Address must be absolute: " + address);
   } else {
-    // NOTE the caller is responsible for only registering valid paths
-    m_descriptor.addEntry(path, name);
+    // NOTE the caller is responsible for only registering valid address
+    m_descriptor.addEntry(address, name);
   }
 }
 
@@ -277,7 +277,7 @@ void File::makeGroup(const std::string &name, const std::string &class_name, boo
   }
   NAPI_CALL(NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
             "NXmakegroup(" + name + ", " + class_name + ") failed");
-  registerEntry(formAbsolutePath(name), class_name);
+  registerEntry(formAbsoluteAddress(name), class_name);
   if (open_group) {
     this->openGroup(name, class_name);
   }
@@ -440,7 +440,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
         << comp << ", " << toString(chunk) << ") failed";
     throw NXEXCEPTION(msg.str());
   }
-  registerEntry(formAbsolutePath(name), scientific_data_set);
+  registerEntry(formAbsoluteAddress(name), scientific_data_set);
   if (open_data) {
     this->openData(name);
   }
@@ -743,11 +743,11 @@ void File::getEntries(Entries &result) {
 std::string File::getTopLevelEntryName() {
   std::string top("");
   // check all of the NXentry's for one at top-level
-  auto allEntryPaths = m_descriptor.allPathsOfType("NXentry");
-  auto iTopPath = std::find_if(allEntryPaths.cbegin(), allEntryPaths.cend(),
-                               [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
-  if (iTopPath != allEntryPaths.cend()) {
-    top = *iTopPath;
+  auto allEntryAddresses = m_descriptor.allAddressesOfType("NXentry");
+  auto iTopAddress = std::find_if(allEntryAddresses.cbegin(), allEntryAddresses.cend(),
+                                  [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
+  if (iTopAddress != allEntryAddresses.cend()) {
+    top = *iTopAddress;
   }
   if (top.empty()) {
     throw NXEXCEPTION("unable to find top-level entry, no valid groups");

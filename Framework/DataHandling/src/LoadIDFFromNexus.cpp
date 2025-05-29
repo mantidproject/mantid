@@ -80,7 +80,7 @@ void LoadIDFFromNexus::exec() {
   // Get the instrument group in the Nexus file
   Nexus::File nxfile(filename);
   // Assume one level in instrument path
-  nxfile.openPath(instrumentParentPath);
+  nxfile.openAddress(instrumentParentPath);
 
   // Take instrument info from nexus file.
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile);

@@ -29,7 +29,7 @@ public:
     // entry.NX_class() returns the type in "NexusClasses" (i.e. NXentry) rather than what is in the file
 
     // check NXChar
-    auto definition = root.openNXChar("entry/definition"); // relative path
+    auto definition = root.openNXChar("entry/definition"); // relative address
     definition.load();
     TS_ASSERT_EQUALS(std::string(definition(), definition.dim0()), "NXsnsevent");
     // and from getString
@@ -53,7 +53,7 @@ public:
     TS_ASSERT_DELTA(time_of_flight[255], 958.1, .01);
     TS_ASSERT_THROWS_ANYTHING(time_of_flight[256]); // out of bounds
 
-    auto duration = root.openNXFloat("/entry/duration"); // absolute path
+    auto duration = root.openNXFloat("/entry/duration"); // absolute address
     TS_ASSERT_EQUALS(duration.attributes.n(), 1);
     TS_ASSERT_EQUALS(duration.attributes("units"), "second");
     duration.load();

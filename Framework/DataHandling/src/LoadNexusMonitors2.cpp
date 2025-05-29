@@ -226,7 +226,7 @@ void LoadNexusMonitors2::exec() {
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
   // cache path to entry for later
-  const std::string entryPath = file.getPath();
+  const std::string entryPath = file.getAddress();
 
   // TODO-NEXT: load event monitor if it is required to do so
   //            load histogram monitor if it is required to do so
@@ -282,9 +282,9 @@ void LoadNexusMonitors2::exec() {
     eventWS->setAllX(axis); // Set the binning axis using this.
 
     // a certain generation of ISIS files modify the time-of-flight
-    const std::string currentPath = file.getPath();
+    const std::string currentPath = file.getAddress();
     adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
-    file.openPath(currentPath); // reset to where it was earlier
+    file.openAddress(currentPath); // reset to where it was earlier
   }
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
@@ -298,7 +298,7 @@ void LoadNexusMonitors2::exec() {
 
   // Need to get the instrument name from the file
   std::string instrumentName;
-  file.openPath(entryPath); // reset path in case of unusual behavior
+  file.openAddress(entryPath); // reset path in case of unusual behavior
   file.openGroup("instrument", "NXinstrument");
   try {
     file.openData("name");

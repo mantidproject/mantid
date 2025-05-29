@@ -242,9 +242,9 @@ template <typename NumT> void writeArray1D(Group &group, const std::string &name
 // read methods
 // -------------------------------------------------------------------
 
-std::string readString(H5::H5File &file, const std::string &path) {
+std::string readString(H5::H5File &file, const std::string &address) {
   try {
-    auto data = file.openDataSet(path);
+    auto data = file.openDataSet(address);
     return readString(data);
   } catch (const H5::FileIException &e) {
     UNUSED_ARG(e);
@@ -464,11 +464,11 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
 }
 
 /// Test if a group exists in an HDF5 file or parent group.
-bool groupExists(H5::H5Object const &h5, const std::string &groupPath) {
+bool groupExists(H5::H5Object const &h5, const std::string &groupAddress) {
   bool status = true;
   // Unfortunately, this is actually the approach recommended by the HDF Group.
   try {
-    h5.openGroup(groupPath);
+    h5.openGroup(groupAddress);
   } catch (const H5::Exception &) {
     status = false;
   }
@@ -490,12 +490,12 @@ bool keyHasValue(H5::H5Object const &h5, const std::string &key, const std::stri
   return status;
 }
 
-void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Object &src,
-               const std::string &srcGroupPath) {
+void copyGroup(H5::H5Object &dest, const std::string &destGroupAddress, H5::H5Object &src,
+               const std::string &srcGroupAddress) {
   // Source group must exist, and destination group must not exist.
-  if (!groupExists(src, srcGroupPath) || groupExists(dest, destGroupPath))
-    throw std::invalid_argument(std::string("H5Util::copyGroup: source group '") + srcGroupPath + "' must exist and " +
-                                "destination group '" + destGroupPath + "' must not exist.");
+  if (!groupExists(src, srcGroupAddress) || groupExists(dest, destGroupAddress))
+    throw std::invalid_argument(std::string("H5Util::copyGroup: source group '") + srcGroupAddress +
+                                "' must exist and " + "destination group '" + destGroupAddress + "' must not exist.");
 
   // TODO: check that source file must have at least read access and destination file must have write access.
 
@@ -507,7 +507,7 @@ void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Objec
   if (H5Pset_create_intermediate_group(lcpl, 1) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Pset_create_intermediate_group' error return.");
 
-  if (H5Ocopy(src.getId(), srcGroupPath.c_str(), dest.getId(), destGroupPath.c_str(), H5P_DEFAULT, lcpl) < 0)
+  if (H5Ocopy(src.getId(), srcGroupAddress.c_str(), dest.getId(), destGroupAddress.c_str(), H5P_DEFAULT, lcpl) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Ocopy' error return.");
   H5Pclose(lcpl);
 }

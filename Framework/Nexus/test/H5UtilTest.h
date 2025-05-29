@@ -547,12 +547,12 @@ private:
   }
 
   // test that a group exists in an HDF5 file
-  static bool _groupExists(H5::H5File &file, const std::string &groupPath) {
+  static bool _groupExists(H5::H5File &file, const std::string &groupAddress) {
     // for testing use: duplicates: `H5Util::groupExists`
 
     bool status = true;
     try {
-      file.openGroup(groupPath);
+      file.openGroup(groupAddress);
     } catch (const H5::Exception &x) {
       UNUSED_ARG(x);
       status = false;
@@ -561,9 +561,9 @@ private:
   }
 
   // test that multiple groups exist in an HDF5 file at the expected locations
-  void _assert_group_structure(H5::H5File &file, const std::vector<std::string> &paths, const std::string &msg) {
-    for (const auto &path : paths) {
-      TSM_ASSERT((msg + ": '" + path + "'").c_str(), _groupExists(file, path));
+  void _assert_group_structure(H5::H5File &file, const std::vector<std::string> &addresses, const std::string &msg) {
+    for (const auto &address : addresses) {
+      TSM_ASSERT((msg + ": '" + address + "'").c_str(), _groupExists(file, address));
     }
   }
 };

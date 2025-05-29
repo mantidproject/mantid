@@ -98,8 +98,8 @@ void LoadFlexiNexus::readData(Nexus::File *fin) {
   }
 
   // inspect the data element and create WS matching dims
-  if (!safeOpenpath(fin, it->second)) {
-    throw std::runtime_error("data NeXus path not found!");
+  if (!safeOpenAddress(fin, it->second)) {
+    throw std::runtime_error("data NeXus address not found!");
   }
 
   Nexus::Info inf = fin->getInfo();
@@ -140,7 +140,7 @@ void LoadFlexiNexus::load2DWorkspace(Nexus::File *fin) {
       xData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(xData);
     }
   }
@@ -153,7 +153,7 @@ void LoadFlexiNexus::load2DWorkspace(Nexus::File *fin) {
       yData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(yData);
     }
   }
@@ -278,7 +278,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(Nexus::File *fin, int index,
       dData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(dData);
     } else {
       dData.resize(length);
@@ -310,7 +310,7 @@ void LoadFlexiNexus::addMetaData(Nexus::File *fin, const Workspace_sptr &ws, con
       const std::string title(it->second);
       ws->setTitle(title);
     } else {
-      if (safeOpenpath(fin, it->second)) {
+      if (safeOpenAddress(fin, it->second)) {
         const std::string title = fin->getStrData();
         ws->setTitle(title);
       }
@@ -325,7 +325,7 @@ void LoadFlexiNexus::addMetaData(Nexus::File *fin, const Workspace_sptr &ws, con
     if (it->second.find('/') == it->second.npos) {
       sample = it->second;
     } else {
-      if (safeOpenpath(fin, it->second)) {
+      if (safeOpenAddress(fin, it->second)) {
         Nexus::Info inf = fin->getInfo();
         if (inf.dims.size() == 1) {
           sample = fin->getStrData();
@@ -336,7 +336,7 @@ void LoadFlexiNexus::addMetaData(Nexus::File *fin, const Workspace_sptr &ws, con
           sample = std::string(val_array.begin(), val_array.end());
         }
       } else {
-        sample = "Sample path not found";
+        sample = "Sample address not found";
       }
     }
   }
@@ -353,7 +353,7 @@ void LoadFlexiNexus::addMetaData(Nexus::File *fin, const Workspace_sptr &ws, con
       if (it->second.find('/') == it->second.npos) {
         r.addProperty(it->first, it->second, true);
       } else {
-        if (safeOpenpath(fin, it->second)) {
+        if (safeOpenAddress(fin, it->second)) {
           Nexus::Info inf = fin->getInfo();
           if (inf.type == NXnumtype::CHAR) {
             std::string data = fin->getStrData();
@@ -388,11 +388,11 @@ std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
   return specialMap;
 }
 
-int LoadFlexiNexus::safeOpenpath(Nexus::File *fin, const std::string &path) {
+int LoadFlexiNexus::safeOpenAddress(Nexus::File *fin, const std::string &address) {
   try {
-    fin->openPath(path);
+    fin->openAddress(address);
   } catch (Nexus::Exception const &) {
-    g_log.error("NeXus path " + path + " kaputt");
+    g_log.error("NeXus address " + address + " kaputt");
     return 0;
   }
   return 1;

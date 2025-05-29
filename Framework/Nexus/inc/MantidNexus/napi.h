@@ -75,9 +75,9 @@
 #define NXclose MANGLE(nxiclose)
 #define NXmakegroup MANGLE(nximakegroup)
 #define NXopengroup MANGLE(nxiopengroup)
-#define NXopenpath MANGLE(nxiopenpath)
-#define NXgetpath MANGLE(nxigetpath)
-#define NXopengrouppath MANGLE(nxiopengrouppath)
+#define NXopenaddress MANGLE(nxiopenpath)
+#define NXgetaddress MANGLE(nxigetpath)
+#define NXopengroupaddress MANGLE(nxiopengrouppath)
 #define NXclosegroup MANGLE(nxiclosegroup)
 #define NXmakedata64 MANGLE(nximakedata64)
 #define NXcompmakedata64 MANGLE(nxicompmakedata64)
@@ -199,36 +199,36 @@ MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle handle, CONSTCHAR *name, CONSTCHA
 MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
 
 /**
- * Open the NeXus object with the path specified
+ * Open the NeXus object with the address specified
  * \param handle A NeXus file handle as returned from NXopen.
- * \param path A unix like path string to a NeXus group or dataset. The path string
+ * \param address A unix like address string to a NeXus group or dataset. The address string
  * is a list of group names and SDS names separated with / (slash).
  * Example: /entry1/sample/name
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUS_DLL NXstatus NXopenpath(NXhandle handle, CONSTCHAR *path);
+MANTID_NEXUS_DLL NXstatus NXopenaddress(NXhandle handle, CONSTCHAR *address);
 
 /**
- * Opens the group in which the NeXus object with the specified path exists
+ * Opens the group in which the NeXus object with the specified address exists
  * \param handle A NeXus file handle as initialized by NXopen.
- * \param path A unix like path string to a NeXus group or dataset. The path string
+ * \param address A unix like address string to a NeXus group or dataset. The address string
  * is a list of group names and SDS names separated with / (slash).
  * Example: /entry1/sample/name
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUS_DLL NXstatus NXopengrouppath(NXhandle handle, CONSTCHAR *path);
+MANTID_NEXUS_DLL NXstatus NXopengroupaddress(NXhandle handle, CONSTCHAR *address);
 
 /**
- * Retrieve the current path in the NeXus file
+ * Retrieve the current address in the NeXus file
  * \param handle a NeXus file handle
- * \param path A buffer to copy the path too
- * \param  pathlen The maximum number of characters to copy into path
+ * \param address A buffer to copy the address too
+ * \param  addresslen The maximum number of characters to copy into address
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
-MANTID_NEXUS_DLL NXstatus NXgetpath(NXhandle handle, char *path, int pathlen);
+MANTID_NEXUS_DLL NXstatus NXgetaddress(NXhandle handle, char *address, int addresslen);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file

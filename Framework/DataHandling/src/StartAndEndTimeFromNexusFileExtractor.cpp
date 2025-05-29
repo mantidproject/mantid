@@ -22,7 +22,7 @@ enum class TimeType { StartTime, EndTime };
 
 Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &abspath) {
   Nexus::File nxfile(filename, NXACC_READ);
-  nxfile.openPath(abspath);
+  nxfile.openAddress(abspath);
   const auto valueStr = nxfile.getStrData();
   g_log.debug(valueStr + " from " + abspath + " in " + filename);
   return Mantid::Types::Core::DateAndTime(valueStr);
@@ -58,7 +58,7 @@ NexusType whichNexusType(const std::string &filename) {
     const auto entries = nxfile.getEntries();
     const auto firstEntryName = entries.begin()->first;
     try {
-      nxfile.openPath("/" + firstEntryName + "/instrument/SNSdetector_calibration_id");
+      nxfile.openAddress("/" + firstEntryName + "/instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + filename + " is a currently unsupported type of NeXus file");
       throw Mantid::Kernel::Exception::FileError("Unable to read File:", filename);

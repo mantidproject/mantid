@@ -456,7 +456,7 @@ void LoadNexusLogs::execLoader() {
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
   /// SNAP
   try {
-    file.openPath("DASlogs");
+    file.openAddress("DASlogs");
     try {
       file.openGroup("frequency", "NXlog");
       try {
@@ -560,7 +560,7 @@ void LoadNexusLogs::execLoader() {
     try {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
-      file.openPath("/" + entry_name);
+      file.openAddress("/" + entry_name);
       auto itEventData = allEntries.find("NXevent_data");
       if (itEventData != allEntries.end()) {
         const std::set<std::string> &events = itEventData->second;
@@ -570,7 +570,7 @@ void LoadNexusLogs::execLoader() {
           this->getLogger().debug() << "Opening"
                                     << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
                                     << " to find the event_frame_number\n";
-          file.openPath("/" + entry_name + "/" + eventEntry + "/event_frame_number");
+          file.openAddress("/" + entry_name + "/" + eventEntry + "/event_frame_number");
           file.getData(event_frame_number);
         }
       }
@@ -578,7 +578,7 @@ void LoadNexusLogs::execLoader() {
       this->getLogger().warning() << "Unable to load event_frame_number - "
                                      "filtering events by time will not work \n";
     }
-    file.openPath("/" + entry_name);
+    file.openAddress("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
       Kernel::TimeSeriesProperty<double> const *plog =

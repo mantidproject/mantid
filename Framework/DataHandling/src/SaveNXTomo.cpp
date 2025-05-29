@@ -269,7 +269,7 @@ void SaveNXTomo::setupFile() {
  */
 void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/data");
+    m_nxFile->openAddress("/entry1/tomo_entry/data");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -335,7 +335,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
 void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/instrument/detector");
+    m_nxFile->openAddress("/entry1/tomo_entry/instrument/detector");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -364,7 +364,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
   // Unable to add multidimensional string data, storing strings as
   // multidimensional data set of uint8 values
   try {
-    m_nxFile->openPath("/entry1/log_info");
+    m_nxFile->openAddress("/entry1/log_info");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -404,7 +404,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
 void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/control");
+    m_nxFile->openAddress("/entry1/tomo_entry/control");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }

@@ -364,7 +364,7 @@ void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std
                                   const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
-  file.openPath("/");
+  file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
   // NexusDescriptor
@@ -761,7 +761,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
   // Test if IDF exists in file, move on quickly if not
   try {
     Nexus::File nxsfile(nexusfilename);
-    nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
+    nxsfile.openAddress(top_entry_name + "/instrument/instrument_xml");
   } catch (Nexus::Exception const &) {
     alg->getLogger().information("No instrument XML definition found in " + nexusfilename + " at " + top_entry_name +
                                  "/instrument");

@@ -236,7 +236,7 @@ private:
     Mantid::Nexus::File nxFile(m_outputFile);
 
     // Check for entry1/tomo_entry/control { and data dataset within }
-    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/control"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openAddress("/entry1/tomo_entry/control"));
     TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
     try {
       nxFile.closeData();
@@ -245,7 +245,7 @@ private:
 
     // Check for entry1/tomo_entry/data { and data / rotation_angle dataset
     // links within }
-    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/data"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openAddress("/entry1/tomo_entry/data"));
     TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
     try {
       nxFile.closeData();
@@ -259,7 +259,7 @@ private:
 
     // Check for entry1/tomo_entry/instrument/detector { data and image_key
     // dataset link within }
-    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/instrument/detector"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openAddress("/entry1/tomo_entry/instrument/detector"));
     TS_ASSERT_THROWS_NOTHING(nxFile.openData("data"));
     try {
       nxFile.closeData();
@@ -273,7 +273,7 @@ private:
 
     // Check for entry1/tomo_entry/instrument/sample { and rotation_angle
     // dataset link within }
-    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/sample"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openAddress("/entry1/tomo_entry/sample"));
     TS_ASSERT_THROWS_NOTHING(nxFile.openData("rotation_angle"));
     try {
       nxFile.closeData();
@@ -281,7 +281,7 @@ private:
     }
 
     // Check for entry1/log_info { and run_title dataset link within }
-    TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/log_info"));
+    TS_ASSERT_THROWS_NOTHING(nxFile.openAddress("/entry1/log_info"));
     TS_ASSERT_THROWS_NOTHING(nxFile.openData("run_title"));
     try {
       nxFile.closeData();
@@ -310,7 +310,7 @@ private:
     // workspaces
     Mantid::Nexus::File nxFile(m_outputFile);
 
-    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openAddress("/entry1/tomo_entry/data");
     nxFile.openData("data");
     TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
     TS_ASSERT_EQUALS(nxFile.getInfo().dims[1], m_axisSize);
@@ -320,12 +320,12 @@ private:
     TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
     nxFile.closeData();
 
-    nxFile.openPath("/entry1/tomo_entry/instrument/detector");
+    nxFile.openAddress("/entry1/tomo_entry/instrument/detector");
     nxFile.openData("image_key");
     TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
     nxFile.closeData();
 
-    nxFile.openPath("/entry1/log_info");
+    nxFile.openAddress("/entry1/log_info");
     nxFile.openData("run_title");
     TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
     nxFile.closeData();
@@ -339,7 +339,7 @@ private:
 
     Mantid::Nexus::File nxFile(m_outputFile);
 
-    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openAddress("/entry1/tomo_entry/data");
     nxFile.openData("rotation_angle");
     std::vector<double> data;
     nxFile.getData(data);
@@ -356,7 +356,7 @@ private:
     // value 2.0
     Mantid::Nexus::File nxFile(m_outputFile);
 
-    nxFile.openPath("/entry1/tomo_entry/data");
+    nxFile.openAddress("/entry1/tomo_entry/data");
     nxFile.openData("data");
     std::vector<double> data;
     nxFile.getData(data);

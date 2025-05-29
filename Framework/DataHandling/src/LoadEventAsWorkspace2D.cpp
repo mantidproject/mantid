@@ -242,7 +242,7 @@ void LoadEventAsWorkspace2D::exec() {
 
   Nexus::File h5file(filename);
 
-  h5file.openPath("/");
+  h5file.openAddress("/");
   h5file.openGroup("entry", "NXentry");
 
   // Now we want to go through all the bankN_event entries
