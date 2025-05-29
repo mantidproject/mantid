@@ -24,7 +24,7 @@
   $Id$
 
 ----------------------------------------------------------------------------*/
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include "napi_test_util.h"
 #include <filesystem>

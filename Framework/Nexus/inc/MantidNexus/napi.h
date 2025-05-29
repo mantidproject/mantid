@@ -48,7 +48,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <stdint.h>
 
 /* NeXus HDF45 */

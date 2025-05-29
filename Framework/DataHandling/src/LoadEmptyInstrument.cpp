@@ -19,7 +19,7 @@
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <filesystem>
@@ -237,7 +237,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
   // Test if instrument XML definition exists in the file
   bool foundIDF{false};
   try {
-    ::NeXus::File nxsfile(filename);
+    Nexus::File nxsfile(filename);
     nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
     foundIDF = true;
   } catch (::NeXus::Exception &) {
@@ -246,7 +246,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
   if (!foundIDF) {
     instrumentParentEntryName = instrumentParentEntryName_2;
     try {
-      ::NeXus::File nxsfile(filename);
+      Nexus::File nxsfile(filename);
       nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
       foundIDF = true;
     } catch (::NeXus::Exception &) {

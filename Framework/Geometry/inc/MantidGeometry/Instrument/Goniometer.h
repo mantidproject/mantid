@@ -9,7 +9,7 @@
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <string>
 #include <utility>
 
@@ -48,8 +48,8 @@ struct GoniometerAxis {
         angleunit(initangleunit) {}
   GoniometerAxis() : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  void loadNexus(Nexus::File *file, const std::string &group);
 };
 
 class MANTID_GEOMETRY_DLL Goniometer {
@@ -93,8 +93,8 @@ public:
   // determine the convention from the motor axes
   std::string getConventionFromMotorAxes() const;
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  void loadNexus(Nexus::File *file, const std::string &group);
   /// the method reports if the goniometer was defined with some parameters
   bool isDefined() const;
   bool operator==(const Goniometer &other) const;

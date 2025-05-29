@@ -202,7 +202,7 @@ private:
   std::vector<int> m_filtered_spec_idxs;
 
   // Handle to the NeXus file
-  std::unique_ptr<::NeXus::File> m_nexusFile;
+  std::unique_ptr<Nexus::File> m_nexusFile;
 };
 /// to sort the algorithmhistory vector
 bool UDlesserExecCount(const Mantid::Nexus::NXClassInfo &elem1, const Mantid::Nexus::NXClassInfo &elem2);

@@ -74,10 +74,10 @@ public:
 protected: // for testing
 private:
   /**Load flat box structure from a nexus file*/
-  void loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo = false);
+  void loadBoxStructure(Mantid::Nexus::File *hFile, bool onlyEventInfo = false);
   /**Load the part of the box structure, responsible for locating events only*/
   /**Save flat box structure into properly open nexus file*/
-  void saveBoxStructure(::NeXus::File *hFile);
+  void saveBoxStructure(Mantid::Nexus::File *hFile);
   //----------------------------------------------------------------------------------------------
   int m_nDim;
   // The name of the file the class will be working with
@@ -107,33 +107,33 @@ private:
   std::shared_ptr<API::MultipleExperimentInfos> m_mEI;
 
 public:
-  static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName, int &nDims, const std::string &WSEventType,
-                                              bool readOnly, bool &alreadyExists);
+  static Mantid::Nexus::File *createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
+                                                    const std::string &WSEventType, bool readOnly, bool &alreadyExists);
   // save each experiment info into its own NeXus group within an existing
   // opened group
-  static void saveExperimentInfos(::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws);
+  static void saveExperimentInfos(Mantid::Nexus::File *const file, const API::IMDEventWorkspace_const_sptr &ws);
 
   // load experiment infos, previously saved through the saveExperimentInfo
   // function. Overload version that uses NexusDescriptor for LoadMD
-  static void loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+  static void loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                   std::shared_ptr<API::MultipleExperimentInfos> mei,
                                   const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &currentGroup,
                                   bool lazy = false);
 
   // load experiment infos, previously saved through the saveExperimentInfo
   // function
-  static void loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+  static void loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                   const std::shared_ptr<API::MultipleExperimentInfos> &mei, bool lazy = false);
 
-  static void saveAffineTransformMatricies(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws);
-  static void saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform const *transform,
+  static void saveAffineTransformMatricies(Mantid::Nexus::File *const file, const API::IMDWorkspace_const_sptr &ws);
+  static void saveAffineTransformMatrix(Mantid::Nexus::File *const file, API::CoordTransform const *transform,
                                         const std::string &entry_name);
 
-  static void saveWSGenericInfo(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws);
+  static void saveWSGenericInfo(Mantid::Nexus::File *const file, const API::IMDWorkspace_const_sptr &ws);
 };
 
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
+void saveMatrix(Mantid::Nexus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
                 const std::string &tag);
 } // namespace DataObjects
 } // namespace Mantid

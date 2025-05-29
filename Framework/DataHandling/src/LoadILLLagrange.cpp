@@ -17,8 +17,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 
@@ -173,7 +173,7 @@ void LoadILLLagrange::loadMetaData() {
 
   // Open NeXus file
   try {
-    ::NeXus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
+    Nexus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
   } catch (const ::NeXus::Exception &e) {
     g_log.debug() << "Failed to open nexus file \"" << getPropertyValue("Filename") << "\" in read mode: " << e.what()

@@ -142,7 +142,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
   auto nDims = static_cast<int>(this->m_bc->getNDims());
 
   bool group_exists;
-  m_File = std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(
+  m_File = std::unique_ptr<Mantid::Nexus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(
       m_fileName, nDims, m_EventsTypesSupported[m_EventType], m_ReadOnly, group_exists));
 
   // we are in MD workspace Class  group now
@@ -237,8 +237,8 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Now the chunk size.
     // m_Blocksize == (number_events_to_write_at_a_time, data_items_per_event)
-    ::NeXus::DimSizeVector chunk(m_BlockSize);
-    chunk[0] = static_cast<::NeXus::dimsize_t>(m_dataChunk);
+    Nexus::DimSizeVector chunk(m_BlockSize);
+    chunk[0] = static_cast<Nexus::dimsize_t>(m_dataChunk);
 
     // Make and open the data
     if (m_CoordSize == 4)
@@ -258,7 +258,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   // Open the data
   m_File->openData("event_data");
 
-  NeXus::Info info = m_File->getInfo();
+  Nexus::Info info = m_File->getInfo();
   NXnumtype Type = info.type;
 
   m_ReadConversion = noConversion;
@@ -296,9 +296,9 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
     freeSpaceBlocks.resize(2, 0); // Needs a minimum size
 
   //    // Get a vector of the free space blocks to save to the file
-  ::NeXus::DimVector free_dims(2, 2);
+  Nexus::DimVector free_dims(2, 2);
   free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
-  ::NeXus::DimSizeVector free_chunk(2, 2);
+  Nexus::DimSizeVector free_chunk(2, 2);
   free_chunk[0] = int64_t(m_dataChunk);
 
   std::map<std::string, std::string> groupEntries;

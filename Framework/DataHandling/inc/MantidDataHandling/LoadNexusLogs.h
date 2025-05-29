@@ -8,7 +8,7 @@
 
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <vector>
 
 namespace Mantid {
@@ -61,12 +61,12 @@ private:
   void execLoader() override;
 
   /// Load log data from a group
-  void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
+  void loadLogs(Nexus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                 const std::shared_ptr<API::MatrixWorkspace> &workspace, const std::vector<std::string> &allow_list,
                 const std::vector<std::string> &block_list) const;
 
   /// Load an NXlog entry
-  void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
+  void loadNXLog(Nexus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /**
@@ -75,11 +75,11 @@ private:
    * @param absolute_entry_name full entry name in Nexus
    * @param workspace input workspace
    */
-  void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
+  void loadSELog(Nexus::File &file, const std::string &absolute_entry_name,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  void loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadVetoPulses(Nexus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
   /// For ISIS logs containing periods, retrieve the total proton charge for each period if stored in the logs.
-  void loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadNPeriods(Nexus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;

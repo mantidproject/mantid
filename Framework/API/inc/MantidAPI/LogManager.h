@@ -184,13 +184,13 @@ public:
   virtual void setTimeROI(const Kernel::TimeROI &timeroi);
 
   /// Save the run to a NeXus file with a given group name
-  virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;
+  virtual void saveNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) const;
 
   /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster
-  virtual void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
+  virtual void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
                          const std::string &prefix, bool keepOpen = false);
   /// Load the run from a NeXus file with a given group name
-  virtual void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false);
+  virtual void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen = false);
   /// Clear the logs
   void clearLogs();
 
@@ -211,9 +211,9 @@ protected:
   bool hasEndTime() const;
   bool hasValidProtonChargeLog(std::string &error) const;
 
-  void loadNexus(::NeXus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+  void loadNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
-  void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);
+  void loadNexus(Nexus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
   std::unique_ptr<Kernel::PropertyManager> m_manager;
   std::unique_ptr<Kernel::TimeROI> m_timeroi;

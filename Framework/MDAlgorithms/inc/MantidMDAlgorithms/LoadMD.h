@@ -86,7 +86,7 @@ private:
   std::vector<double> qDimensions(const API::IMDWorkspace_sptr &ws);
 
   /// Open file handle
-  boost::scoped_ptr<::NeXus::File> m_file;
+  boost::scoped_ptr<Nexus::File> m_file;
 
   /// Name of that file
   std::string m_filename;

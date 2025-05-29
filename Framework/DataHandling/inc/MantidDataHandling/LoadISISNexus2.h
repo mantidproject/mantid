@@ -15,9 +15,9 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses_fwd.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -168,7 +168,7 @@ private:
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
   // Handle to the NeXus file
-  boost::scoped_ptr<::NeXus::File> m_nexusFile;
+  boost::scoped_ptr<Nexus::File> m_nexusFile;
 
   bool findSpectraDetRangeInFile(const Nexus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
                                  int64_t n_vms_compat_spectra, const std::map<specnum_t, std::string> &monitors,

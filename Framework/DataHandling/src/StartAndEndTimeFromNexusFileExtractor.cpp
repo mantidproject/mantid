@@ -9,7 +9,7 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <vector>
 
 namespace Mantid::DataHandling {
@@ -21,7 +21,7 @@ enum class NexusType { Muon, Processed, ISIS, TofRaw };
 enum class TimeType { StartTime, EndTime };
 
 Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &abspath) {
-  ::NeXus::File nxfile(filename, NXACC_READ);
+  Nexus::File nxfile(filename, NXACC_READ);
   nxfile.openPath(abspath);
   const auto valueStr = nxfile.getStrData();
   g_log.debug(valueStr + " from " + abspath + " in " + filename);
@@ -54,7 +54,7 @@ NexusType whichNexusType(const std::string &filename) {
   } else if (entryName[0] == "raw_data_1") {
     nexusType = NexusType::ISIS;
   } else {
-    ::NeXus::File nxfile(filename, NXACC_READ);
+    Nexus::File nxfile(filename, NXACC_READ);
     const auto entries = nxfile.getEntries();
     const auto firstEntryName = entries.begin()->first;
     try {

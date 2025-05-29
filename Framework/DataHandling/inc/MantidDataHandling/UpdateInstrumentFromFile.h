@@ -72,7 +72,7 @@ private:
   /// Assumes the file is a raw file
   void updateFromRaw(const std::string &filename);
   /// Assumes the file is an ISIS NeXus file
-  void updateFromNeXus(::NeXus::File &nxFile);
+  void updateFromNeXus(Nexus::File &nxFile);
   /// Updates from a more generic ascii file
   void updateFromAscii(const std::string &filename);
 

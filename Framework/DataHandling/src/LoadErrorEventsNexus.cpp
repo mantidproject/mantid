@@ -84,7 +84,7 @@ void LoadErrorEventsNexus::exec() {
   }
 
   // load the data
-  ::NeXus::File file(filename);
+  Nexus::File file(filename);
 
   file.openPath("/");
   file.openGroup("entry", "NXentry");

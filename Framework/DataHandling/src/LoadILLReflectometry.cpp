@@ -30,8 +30,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace {
 
@@ -505,7 +505,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   try {
-    ::NeXus::File nxfileID(filename, NXACC_READ);
+    Nexus::File nxfileID(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const ::NeXus::Exception &) {
     throw Kernel::Exception::FileError("Unable to open File:", filename);

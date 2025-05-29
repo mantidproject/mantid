@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <iosfwd>
 #include <stdexcept>
 #include <string>

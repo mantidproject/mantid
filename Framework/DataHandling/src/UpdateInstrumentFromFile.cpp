@@ -17,8 +17,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
 #include <algorithm>
@@ -98,7 +98,7 @@ void UpdateInstrumentFromFile::exec() {
 
     if (isisNexus.confidence(*descriptorNexusHDF5) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       const auto &rootEntry = descriptorNexusHDF5->firstEntryNameType();
-      ::NeXus::File nxFile(filename);
+      Nexus::File nxFile(filename);
       nxFile.openGroup(rootEntry.first, rootEntry.second);
       updateFromNeXus(nxFile);
       return;
@@ -158,7 +158,7 @@ void UpdateInstrumentFromFile::updateFromRaw(const std::string &filename) {
  * Update the detector information from a NeXus file
  * @param nxFile :: Handle to a NeXus file where the root group has been opened
  */
-void UpdateInstrumentFromFile::updateFromNeXus(::NeXus::File &nxFile) {
+void UpdateInstrumentFromFile::updateFromNeXus(Nexus::File &nxFile) {
   try {
     nxFile.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {

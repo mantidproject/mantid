@@ -240,7 +240,7 @@ void LoadEventAsWorkspace2D::exec() {
   // vector to stored to integrated counts by detector ID
   std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
 
-  ::NeXus::File h5file(filename);
+  Nexus::File h5file(filename);
 
   h5file.openPath("/");
   h5file.openGroup("entry", "NXentry");

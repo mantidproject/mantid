@@ -68,7 +68,7 @@ int LoadMuonNexusV2::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
 
-  ::NeXus::File file(descriptor.filename());
+  Nexus::File file(descriptor.filename());
   file.openPath(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {

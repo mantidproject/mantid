@@ -329,7 +329,7 @@ public:
     if (!loader)
       return;
 
-    ::NeXus::File *file = loader->getFile();
+    Nexus::File *file = loader->getFile();
     TSM_ASSERT_LESS_THAN("The event_data field in the file must be at least 10002 long.", 10002,
                          file->getInfo().dims[0]);
 

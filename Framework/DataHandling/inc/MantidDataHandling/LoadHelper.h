@@ -10,8 +10,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Quat.h"
-#include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 
 namespace Mantid {
 
@@ -28,7 +28,7 @@ std::vector<double> getTimeBinningFromNexusPath(const Mantid::Nexus::NXEntry &, 
 double calculateEnergy(double);
 double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
-void addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName = "",
+void addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &entryName = "",
                            bool useFullPath = false);
 std::string dateTimeInIsoFormat(const std::string &);
 
@@ -58,7 +58,7 @@ Nexus::NXDouble getDoubleDataset(const Nexus::NXEntry &, const std::string &);
 
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
-void recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &parent_name,
+void recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &parent_name,
                                      const std::string &parent_class, int level, bool useFullPath);
 } // namespace LoadHelper
 } // namespace DataHandling

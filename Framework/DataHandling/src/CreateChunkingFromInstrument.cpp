@@ -19,7 +19,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 
@@ -297,7 +297,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
 
     // read information from the nexus file itself
     try {
-      NeXus::File nxsfile(filename);
+      Nexus::File nxsfile(filename);
 
       // get the run start time
       string start_time;

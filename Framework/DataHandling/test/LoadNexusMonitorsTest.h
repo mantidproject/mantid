@@ -18,7 +18,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
@@ -269,7 +269,7 @@ public:
   }
 
   void createFakeFile(const std::string &filename) {
-    NeXus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
     const bool openGroup = true;
     file.makeGroup("raw_data_1", "NXentry", openGroup);
@@ -286,14 +286,14 @@ public:
     file.close();
   }
 
-  void addMonitor(NeXus::File &file, int i) {
+  void addMonitor(Mantid::Nexus::File &file, int i) {
     const size_t nbins = 3;
     std::string monitorName = "monitor_" + boost::lexical_cast<std::string>(i);
     const bool openGroup = true;
     file.makeGroup(monitorName, "NXmonitor", openGroup);
     file.writeData("monitor_number", i);
     file.writeData("spectrum_index", i);
-    ::NeXus::DimVector dims(3, 1);
+    Mantid::Nexus::DimVector dims(3, 1);
     dims[2] = nbins;
     std::vector<int> data(nbins, i);
     file.writeData("data", data, dims);
