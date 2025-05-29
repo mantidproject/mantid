@@ -126,10 +126,10 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
   memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
 
   const int my_am = (am & NXACCMASK_REMOVEFLAGS); // remove high bits
-  const int backend_type = NXACC_CREATE5;
   if (my_am != NXACC_CREATE5) {
     // check file type is hdf5 for reading
-    if (const int iRet = determineFileType(userfilename) != NXACC_CREATE5) {
+    const int iRet = determineFileType(userfilename);
+    if (iRet != NXACC_CREATE5) {
       char error[1024];
       if (iRet < 0) {
         snprintf(error, 1023, "failed to open %s for reading", userfilename);
@@ -147,25 +147,16 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
     return NXstatus::NX_ERROR;
   }
 
-  NXstatus retstat = NXstatus::NX_ERROR;
-  if (backend_type == NXACC_CREATE5) {
-    NXhandle hdf5_handle = NULL;
-    retstat = NX5open(userfilename, am, &hdf5_handle);
-    if (retstat != NXstatus::NX_OK) {
-      free(fHandle);
-      return retstat;
-    }
+  NXhandle hdf5_handle = NULL;
+  NXstatus retstat = NX5open(userfilename, am, &hdf5_handle);
+  if (retstat != NXstatus::NX_OK) {
+    free(fHandle);
+  } else {
     fHandle->pNexusData = hdf5_handle;
+    const int backend_type = NXACC_CREATE5; // to get past compiler warning
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
     pushFileStack(fileStack, fHandle, userfilename);
-    return retstat;
-  } else {
-    NXReportError("ERROR: Format not readable by this NeXus library");
-    retstat = NXstatus::NX_ERROR;
-  }
-  if (fHandle != NULL) {
-    free(fHandle);
   }
   return retstat;
 }
