@@ -12,9 +12,9 @@
 
 using ::NeXus::dimsize_t;
 
-namespace Mantid::NeXus {
+namespace Mantid::Nexus {
 
-static NXDimArray nxdimArray(::NeXus::DimVector xd) {
+static NXDimArray nxdimArray(const ::NeXus::DimVector &xd) {
   NXDimArray ret{0};
   for (std::size_t i = 0; i < xd.size(); i++) {
     ret[i] = xd[i];
@@ -405,4 +405,4 @@ nxdimsize_t NXDataSet::dim3() const {
 
 NXData::NXData(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
 
-} // namespace Mantid::NeXus
+} // namespace Mantid::Nexus

@@ -28,7 +28,7 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
@@ -111,7 +111,7 @@ void LoadSINQFocus::exec() {
  * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
  *
  */
-void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
+void LoadSINQFocus::setInstrumentName(const Nexus::NXEntry &entry) {
 
   m_instrumentPath = LoadHelper::findInstrumentNexusPath(entry);
 
@@ -123,7 +123,7 @@ void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
   m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
 
-void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {
+void LoadSINQFocus::initWorkSpace(const Nexus::NXEntry &entry) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("merged");
@@ -153,7 +153,7 @@ void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
-void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
+void LoadSINQFocus::loadDataIntoTheWorkSpace(Nexus::NXEntry &entry) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("merged");

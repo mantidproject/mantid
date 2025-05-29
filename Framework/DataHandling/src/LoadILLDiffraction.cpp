@@ -38,7 +38,7 @@ using namespace API;
 using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
-using namespace NeXus;
+using namespace Nexus;
 using Types::Core::DateAndTime;
 
 namespace {
@@ -511,9 +511,9 @@ void LoadILLDiffraction::loadScanVars() {
   Group scanVar = dataScan.openGroup("scanned_variables");
   Group varNames = scanVar.openGroup("variables_names");
 
-  const auto names = H5Util::readStringVector(varNames, "name");
-  const auto properties = H5Util::readStringVector(varNames, "property");
-  const auto units = H5Util::readStringVector(varNames, "unit");
+  const auto names = NeXus::H5Util::readStringVector(varNames, "name");
+  const auto properties = NeXus::H5Util::readStringVector(varNames, "property");
+  const auto units = NeXus::H5Util::readStringVector(varNames, "unit");
 
   for (size_t i = 0; i < names.size(); ++i) {
     m_scanVar.emplace_back(ScannedVariables(names[i], properties[i], units[i]));
