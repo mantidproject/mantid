@@ -110,8 +110,8 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(Nexu
   // the event list for that pulse) as a uint64 vector.
   // The Nexus standard does not specify if this is to be 32-bit or 64-bit
   // integers, so we use the NeXusIOHelper to do the conversion on the fly.
-  auto event_index = std::make_unique<std::vector<uint64_t>>(
-      Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index"));
+  auto event_index =
+      std::make_unique<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(file, "event_index"));
 
   // Look for the sign that the bank is empty
   if (event_index->size() == 1) {
@@ -184,8 +184,8 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::
   auto event_id = std::make_unique<std::vector<uint32_t>>(dim0);
 
   if (!m_loadError) {
-    Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::Narrowing::Prevent>(
-        *event_id, file, m_detIdFieldName, m_loadStart, m_loadSize);
+    Nexus::IOHelper::readNexusSlab<uint32_t, Nexus::IOHelper::Narrowing::Prevent>(*event_id, file, m_detIdFieldName,
+                                                                                  m_loadStart, m_loadSize);
     file.closeData();
 
     // determine the range of pixel ids
@@ -248,7 +248,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
   // explicitly allow downcasting using the additional AllowDowncasting
   // template argument.
   // the memory is allocated earlier in the function
-  Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::Narrowing::Allow>(
+  Nexus::IOHelper::readNexusSlab<float, Nexus::IOHelper::Narrowing::Allow>(
       *event_time_of_flight, file, m_timeOfFlightFieldName, m_loadStart, m_loadSize);
   std::string tof_unit;
   try {
@@ -273,7 +273,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(Nexus
   try {
     // First, get info about the event_weight field in this bank
     file.openData("event_weight");
-  } catch (const Nexus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Field not found error is most likely.
     m_have_weight = false;
     return std::unique_ptr<std::vector<float>>();

@@ -12,7 +12,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-namespace Nioh = Mantid::NeXus::NeXusIOHelper;
+namespace Nioh = Mantid::Nexus::IOHelper;
 
 class NexusIOHelperTest : public CxxTest::TestSuite {
 

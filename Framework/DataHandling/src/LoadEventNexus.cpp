@@ -502,7 +502,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(Nexus::File &file, Kerne
   if (file.hasAttr("units"))
     file.getAttr("units", units);
   // Read in the pulse times
-  auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
+  auto pulse_times = Nexus::IOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
   if (pulse_times.empty()) {
