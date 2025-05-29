@@ -98,16 +98,16 @@ private:
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr &);
   /// Load in details about the run
-  void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, Mantid::NeXus::NXEntry &entry);
+  void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, Mantid::Nexus::NXEntry &entry);
   /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr &, const Mantid::NeXus::NXEntry &entry);
+  void loadSampleData(DataObjects::Workspace2D_sptr &, const Mantid::Nexus::NXEntry &entry);
   /// Load log data from the nexus file
   void loadLogs(DataObjects::Workspace2D_sptr &ws);
   // Load a given period into the workspace
-  void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry, DataObjects::Workspace2D_sptr &local_workspace,
+  void loadPeriodData(int64_t period, Mantid::Nexus::NXEntry &entry, DataObjects::Workspace2D_sptr &local_workspace,
                       bool update_spectra2det_mapping = false);
   // Load a data block
-  void loadBlock(NeXus::NXInt &data, int64_t blocksize, int64_t period, int64_t start, int64_t &hist, int64_t &spec_num,
+  void loadBlock(Nexus::NXInt &data, int64_t blocksize, int64_t period, int64_t start, int64_t &hist, int64_t &spec_num,
                  DataObjects::Workspace2D_sptr &local_workspace);
 
   // Create period logs
@@ -170,12 +170,12 @@ private:
   // Handle to the NeXus file
   boost::scoped_ptr<::NeXus::File> m_nexusFile;
 
-  bool findSpectraDetRangeInFile(const NeXus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
+  bool findSpectraDetRangeInFile(const Nexus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
                                  int64_t n_vms_compat_spectra, const std::map<specnum_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file
-  bool isMultipleTimeRegimeFile(const NeXus::NXEntry &entry) const;
+  bool isMultipleTimeRegimeFile(const Nexus::NXEntry &entry) const;
 };
 
 } // namespace DataHandling

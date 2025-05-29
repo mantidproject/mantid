@@ -20,7 +20,7 @@ public:
 
   void test_EQSANS_89157() {
     const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
-    Mantid::NeXus::NXRoot root(filename);
+    Mantid::Nexus::NXRoot root(filename);
 
     // groups don't load their attributes
 

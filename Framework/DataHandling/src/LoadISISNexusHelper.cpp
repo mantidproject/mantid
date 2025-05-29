@@ -15,7 +15,7 @@ static constexpr std::size_t RUN_TIME_STRING_LENGTH = 19;
 namespace Mantid::DataHandling::LoadISISNexusHelper {
 
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 
 /**
  * Find total number of spectra in the nexus file

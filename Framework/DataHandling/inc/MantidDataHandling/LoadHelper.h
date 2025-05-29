@@ -21,10 +21,10 @@ namespace DataHandling {
  */
 namespace LoadHelper {
 
-std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry &);
-std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry &, const std::string &);
-double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &, const std::string &);
-std::vector<double> getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &, const std::string &);
+std::string findInstrumentNexusPath(const Mantid::Nexus::NXEntry &);
+std::string getStringFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
+double getDoubleFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
+std::vector<double> getTimeBinningFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
 double calculateEnergy(double);
 double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
@@ -39,13 +39,13 @@ Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws, const std:
 void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
                          const std::string &instrumentPath = "");
 
-void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::Nexus::NXInt &,
                          const std::vector<double> &xAxis, int64_t initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
-void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::Nexus::NXInt &,
                          const std::vector<double> &xAxis, int64_t initialSpectrum = 0,
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::vector<int> &customID = std::vector<int>(),
@@ -53,8 +53,8 @@ void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus:
 
 void loadingOrder(const std::tuple<short, short, short> &axisOrder, int *dataIndices);
 
-NeXus::NXInt getIntDataset(const NeXus::NXEntry &, const std::string &);
-NeXus::NXDouble getDoubleDataset(const NeXus::NXEntry &, const std::string &);
+Nexus::NXInt getIntDataset(const Nexus::NXEntry &, const std::string &);
+Nexus::NXDouble getDoubleDataset(const Nexus::NXEntry &, const std::string &);
 
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
