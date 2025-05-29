@@ -643,32 +643,11 @@ mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGE
 # For a local build using documentation built in the tree
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   set(HTML_ROOT ${DOCS_BUILDDIR}/html)
-  set(QLOCATION_SETTINGS_PATH ${CMAKE_BINARY_DIR}/config)
-  set(EXT_PROPS_PATH ${CMAKE_SOURCE_DIR}/ExternalData)
-  set(UPDATE_SCRIPT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
-  set(MUON_CULTURED_GUESS_CSV ${CMAKE_SOURCE_DIR}/instrument/muon/MuonCulturedGuess.csv)
-  set(MUON_INSTRUMENT_CYCLE_MAP ${CMAKE_SOURCE_DIR}/instrument/muon/MuonInstrumentCycleMapping.json)
-  set(REFL_BEAMLINE_COMPONENTS ${CMAKE_SOURCE_DIR}/instrument/reflectometry/ReflectometryConfiguration.json)
 else()
-
   if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
-    set(QLOCATION_SETTINGS_PATH ${CMAKE_INSTALL_PREFIX}/etc/mantid)
-    set(EXT_PROPS_PATH ${CMAKE_INSTALL_PREFIX}/share/mantid/ExternalData)
-    set(UPDATE_SCRIPT_PATH ${CMAKE_INSTALL_PREFIX}/bin)
-    set(MUON_CULTURED_GUESS_CSV ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/muon/MuonCulturedGuess.csv)
-    set(MUON_INSTRUMENT_CYCLE_MAP ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/muon/MuonInstrumentCycleMapping.json)
-    set(REFL_BEAMLINE_COMPONENTS
-        ${CMAKE_INSTALL_PREFIX}/share/mantid/instrument/reflectometry/ReflectometryConfiguration.json
-    )
   else()
-    set(HTML_ROOT "\${Mantid_HTML_ROOT}")
-    set(QLOCATION_SETTINGS_PATH "\${Mantid_QLOCATION_SETTINGS_PATH}")
-    set(EXT_PROPS_PATH "\${Mantid_EXT_PROPS_PATH}")
-    set(UPDATE_SCRIPT_PATH "\${Mantid_UPDATE_SCRIPT_PATH}")
-    set(MUON_CULTURED_GUESS_CSV "\${Mantid_MUON_CULTURED_GUESS_CSV}")
-    set(MUON_INSTRUMENT_CYCLE_MAP "\${Mantid_MUON_INSTRUMENT_CYCLE_MAP}")
-    set(REFL_BEAMLINE_COMPONENTS "\${Mantid_REFL_BEAMLINE_COMPONENTS}")
+    set(HTML_ROOT "\\${Mantid_HTML_ROOT}")
   endif()
 endif()
 
