@@ -230,8 +230,8 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
 
         # create the table to hold the data
         table_ws = self.exec_child_alg("CreateEmptyTableWorkspace", OutputWorkspace="_tmp")
-        table_ws.addColumn(type="double", name="Alpha", plottype=2)
         table_ws.addColumn(type="double", name="Beta", plottype=2)
+        table_ws.addColumn(type="double", name="Alpha", plottype=2)
         table_ws.addColumn(type="double", name=readout_column, plottype=2)
 
         # check which spectra meet inclusion thresholds
@@ -241,7 +241,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 # amend intensity for any scattering correction
                 intensity = intensities[spec_index] / scat_power if not use_default_intensity else default_intensity
                 # add data to table
-                table_ws.addRow({"Alpha": ab_arr[spec_index, 0], "Beta": ab_arr[spec_index, 1], readout_column: intensity})
+                table_ws.addRow({"Beta": ab_arr[spec_index, 1], "Alpha": ab_arr[spec_index, 0], readout_column: intensity})
 
         self.setProperty("OutputWorkspace", table_ws)
 

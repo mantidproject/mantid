@@ -5,6 +5,7 @@ from mantid.simpleapi import (
     logger,
     SaveNexus,
     CreateEmptyTableWorkspace,
+    SaveAscii,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -13,6 +14,8 @@ import matplotlib.pyplot as plt
 from mantid.geometry import CrystalStructure
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from os import path, makedirs
+from scipy.interpolate import griddata
+from scipy.ndimage import gaussian_filter
 
 
 class TextureProjection:
@@ -54,10 +57,9 @@ class TextureProjection:
         scat_vol_pos: Sequence[float],
         chi2_thresh: Optional[float],
         peak_thresh: Optional[float],
-        rb_num: Optional[str] = None,
+        save_dirs: Optional[Sequence[str]] = None,
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
-        grouping: str = "GROUP",
     ) -> None:
         flat_ax_transform = np.reshape(ax_transform, (9,))
         table_workspaces = []
@@ -97,7 +99,7 @@ class TextureProjection:
         CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
         for tw in table_workspaces[1:]:
             CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
-        self._save_files(out_ws, "PoleFigureTables", rb_num, grouping)
+        self._save_files(out_ws, save_dirs)
 
     def create_default_parameter_table_with_value(self, ws_name, val, out_ws):
         tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
@@ -110,19 +112,31 @@ class TextureProjection:
                 ]
             )
 
-    def plot_pole_figure(self, ws, projection: str, fig=None, readout_col="I", **kwargs) -> None:
+    def get_pole_figure_data(self, ws_name: str, projection: str, readout_col="I"):
         if projection.lower() == "stereographic":
             proj = ster_proj
         else:
             proj = azim_proj
-        if isinstance(ws, str):
-            ws = ADS.retrieve(ws)
+        ws = ADS.retrieve(ws_name)
         alphas = np.asarray(ws.column("Alpha"))
         betas = np.asarray(ws.column("Beta"))
         i = np.asarray(ws.column(readout_col))
+        return proj(alphas, betas, i)
 
-        pfi = proj(alphas, betas, i)
+    def plot_pole_figure(
+        self, ws_name: str, projection: str, fig=None, readout_col="I", save_dirs=None, plot_exp=True, contour_kernel=2.0, **kwargs
+    ) -> None:
+        pfi = self.get_pole_figure_data(ws_name, projection, readout_col)
 
+        if plot_exp:
+            fig = self.plot_exp_pf(pfi, fig, **kwargs)
+        else:
+            fig = self.plot_contour_pf(pfi, fig, contour_kernel, **kwargs)
+        if save_dirs:
+            for save_dir in save_dirs:
+                fig.savefig(str(path.join(save_dir, ws_name + ".png")))
+
+    def plot_exp_pf(self, pfi, fig=None, **kwargs):
         u = np.linspace(0, 2 * np.pi, 100)
         x = np.cos(u)
         y = np.sin(u)
@@ -139,6 +153,38 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, "TD", fontsize=10)
         ax.text(-0.95, -0.8, "RD", fontsize=10)
+        return fig
+
+    def plot_contour_pf(self, pfi, fig=None, contour_kernel=2.0, **kwargs):
+        x, y, z = pfi[:, 1], pfi[:, 0], pfi[:, 2]
+        # Grid definition
+        R = 1
+        grid_x, grid_y = np.mgrid[-R:R:200j, -R:R:200j]
+
+        # Mask to keep only points inside the circle of radius R
+        mask = grid_x**2 + grid_y**2 <= R**2
+
+        # Interpolate z-values on the grid
+        grid_z = np.asarray(griddata((x, y), z, (grid_x, grid_y), method="nearest"))
+        grid_z = np.asarray(gaussian_filter(grid_z, sigma=contour_kernel))
+
+        # Apply the mask
+        grid_z[~mask] = np.nan
+
+        # Plotting
+        fig = plt.figure() if not fig else fig
+        ax = fig.add_subplot(1, 1, 1)
+        ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet")
+        # ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
+        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
+        ax.add_patch(circle)
+        ax.set_aspect("equal")
+        ax.set_axis_off()
+        ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
+        ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
+        ax.text(-0.8, -0.95, "TD", fontsize=10)
+        ax.text(-0.95, -0.8, "RD", fontsize=10)
+        return fig
 
     def get_pf_table_name(self, wss, fit_params, hkl):
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
@@ -181,7 +227,7 @@ class TextureProjection:
         for ws in wss:
             ADS.retrieve(ws).sample().setCrystalStructure(xtal)
 
-    def _save_files(self, ws, dir_name, rb_num=None, grouping="GROUP"):
+    def _get_save_dirs(self, dir_name, rb_num, grouping="GROUP"):
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
@@ -189,7 +235,12 @@ class TextureProjection:
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)
+        return save_dirs
+
+    def _save_files(self, ws, save_dirs):
+        for save_dir in save_dirs:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
+            SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
 
     def read_param_cols(self, ws_name, target_default="I"):
         ws = ADS.retrieve(ws_name)
