@@ -76,9 +76,9 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 // Utility functions for loading values with defaults
 // Single value properties only support int, double, string and bool
 template <typename Type>
-Type GetNeXusValue(const Nexus::NXEntry &entry, const std::string &path, const Type &defval, int32_t index) {
+Type GetNeXusValue(const Nexus::NXEntry &entry, const std::string &address, const Type &defval, int32_t index) {
   try {
-    Nexus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(path);
+    Nexus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(address);
     dataSet.load();
 
     return dataSet()[index];
@@ -89,10 +89,10 @@ Type GetNeXusValue(const Nexus::NXEntry &entry, const std::string &path, const T
 
 // string and double are special cases
 template <>
-double GetNeXusValue<double>(const Nexus::NXEntry &entry, const std::string &path, const double &defval,
+double GetNeXusValue<double>(const Nexus::NXEntry &entry, const std::string &address, const double &defval,
                              int32_t index) {
   try {
-    Nexus::NXFloat dataSet = entry.openNXDataSet<float>(path);
+    Nexus::NXFloat dataSet = entry.openNXDataSet<float>(address);
     dataSet.load();
 
     return dataSet()[index];
@@ -102,40 +102,40 @@ double GetNeXusValue<double>(const Nexus::NXEntry &entry, const std::string &pat
 }
 
 template <>
-std::string GetNeXusValue<std::string>(const Nexus::NXEntry &entry, const std::string &path, const std::string &defval,
-                                       int32_t /*unused*/) {
+std::string GetNeXusValue<std::string>(const Nexus::NXEntry &entry, const std::string &address,
+                                       const std::string &defval, int32_t /*unused*/) {
 
   try {
-    return entry.getString(path);
+    return entry.getString(address);
   } catch (std::runtime_error &) {
     return defval;
   }
 }
 
 template <typename T>
-void MapNeXusToProperty(const Nexus::NXEntry &entry, const std::string &path, const T &defval,
+void MapNeXusToProperty(const Nexus::NXEntry &entry, const std::string &address, const T &defval,
                         API::LogManager &logManager, const std::string &name, const T &factor, int32_t index) {
 
-  T value = GetNeXusValue<T>(entry, path, defval, index);
+  T value = GetNeXusValue<T>(entry, address, defval, index);
   logManager.addProperty<T>(name, value * factor);
 }
 
 // string is a special case
 template <>
-void MapNeXusToProperty<std::string>(const Nexus::NXEntry &entry, const std::string &path, const std::string &defval,
+void MapNeXusToProperty<std::string>(const Nexus::NXEntry &entry, const std::string &address, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
                                      const std::string & /*unused*/, int32_t index) {
 
-  std::string value = GetNeXusValue<std::string>(entry, path, defval, index);
+  std::string value = GetNeXusValue<std::string>(entry, address, defval, index);
   logManager.addProperty<std::string>(name, value);
 }
 
 template <typename T>
-void MapNeXusToSeries(const Nexus::NXEntry &entry, const std::string &path, const T &defval,
+void MapNeXusToSeries(const Nexus::NXEntry &entry, const std::string &address, const T &defval,
                       API::LogManager &logManager, const std::string &time, const std::string &name, const T &factor,
                       int32_t index) {
 
-  auto value = GetNeXusValue<T>(entry, path, defval, index);
+  auto value = GetNeXusValue<T>(entry, address, defval, index);
   AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 

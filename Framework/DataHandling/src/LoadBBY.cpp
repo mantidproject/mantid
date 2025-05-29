@@ -688,9 +688,9 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
 }
 
 // load nx dataset
-template <class T> bool LoadBBY::loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value) {
+template <class T> bool LoadBBY::loadNXDataSet(const Nexus::NXEntry &entry, const std::string &address, T &value) {
   try {
-    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(address);
     dataSet.load();
 
     value = *dataSet();
@@ -699,9 +699,9 @@ template <class T> bool LoadBBY::loadNXDataSet(const Nexus::NXEntry &entry, cons
     return false;
   }
 }
-bool LoadBBY::loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value) {
+bool LoadBBY::loadNXString(const Nexus::NXEntry &entry, const std::string &address, std::string &value) {
   try {
-    value = entry.getString(path);
+    value = entry.getString(address);
     return true;
   } catch (const std::runtime_error &) {
     return false;

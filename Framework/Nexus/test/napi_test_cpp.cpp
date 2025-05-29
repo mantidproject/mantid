@@ -178,7 +178,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // make more links
   NXlink glink = file.getGroupID();
-  file.openPath("/");
+  file.openAddress("/");
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
   std::cout << "writeTest(" << filename << ") successful\n";
@@ -286,7 +286,7 @@ int readTest(const string &filename) {
         cout << toString(result);
       }
       cout << endl;
-      cout << "   Path = " << file.getPath() << endl;
+      cout << "   Address = " << file.getAddress() << endl;
       file.closeData();
     } else {
       cout << ":" << it->second << endl;
@@ -361,11 +361,11 @@ int readTest(const string &filename) {
   // Close the "entry" group
   file.closeGroup();
 
-  // openpath checks
-  file.openPath("/entry/data/comp_data");
-  file.openPath("/entry/data/comp_data");
-  file.openPath("../r8_data");
-  printf("NXopenpath checks OK\n");
+  // openaddress checks
+  file.openAddress("/entry/data/comp_data");
+  file.openAddress("/entry/data/comp_data");
+  file.openAddress("../r8_data");
+  printf("NXopenaddress checks OK\n");
 
   // everything went fine
   std::cout << "readTest(" << filename << ") successful\n";

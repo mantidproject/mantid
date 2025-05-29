@@ -996,12 +996,12 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
 
   // Hop to the right point /mantid_workspace_1
   try {
-    m_nexusFile->openPath(entry.path()); // This is
+    m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
                              "Nexus processed file. "
-                             "This path is wrong: " +
-                             entry.path() + ". Lower level error description: " + re.what());
+                             "This address is wrong: " +
+                             entry.address() + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1276,12 +1276,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 
   // Hop to the right point /mantid_workspace_1
   try {
-    m_nexusFile->openPath(entry.path()); // This is
+    m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
                              "Nexus processed file. "
-                             "This path is wrong: " +
-                             entry.path() + ". Lower level error description: " + re.what());
+                             "This address is wrong: " +
+                             entry.address() + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1901,7 +1901,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   progress(progressStart + 0.05 * progressRange, "Reading the sample details...");
 
   // Hop to the right point
-  m_nexusFile->openPath(mtd_entry.path());
+  m_nexusFile->openAddress(mtd_entry.address());
   try {
     // Get information from all but data group
     std::string parameterStr;
@@ -1934,7 +1934,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   }
 
   progress(progressStart + 0.15 * progressRange, "Reading the workspace history...");
-  m_nexusFile->openPath(mtd_entry.path());
+  m_nexusFile->openAddress(mtd_entry.address());
   try {
     bool load_history = getProperty("LoadHistory");
     if (load_history)

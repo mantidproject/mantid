@@ -46,7 +46,7 @@ private:
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
-  /// NXS path to bank
+  /// NXS address to bank
   std::string entry_name;
   /// NXS type
   std::string entry_type;

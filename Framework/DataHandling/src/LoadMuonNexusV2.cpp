@@ -69,7 +69,7 @@ int LoadMuonNexusV2::confidence(Nexus::NexusDescriptor &descriptor) const {
     return 0;
 
   Nexus::File file(descriptor.filename());
-  file.openPath(NeXusEntry::DEFINITION);
+  file.openAddress(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {
     return 82; // have to return 82 to "beat" the LoadMuonNexus2 algorithm,

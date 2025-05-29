@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 
   char name[NX_MAXNAMELEN], char_class[NX_MAXNAMELEN], char_buffer[128];
   char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
-  char path[512];
+  char address[512];
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
@@ -260,8 +260,8 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   NXgetattrinfo(fileid, &i);
   std::cout << "Number of group attributes: " << i << std::endl;
-  ASSERT_NO_ERROR(NXgetpath(fileid, path, 512), "");
-  std::cout << "NXentry path " << path << std::endl;
+  ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
+  std::cout << "NXentry address " << address << std::endl;
   do {
     // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
@@ -292,8 +292,8 @@ int main(int argc, char *argv[]) {
       void *data_buffer;
       if (entry_status == NXstatus::NX_OK) {
         ASSERT_NO_ERROR(NXopendata(fileid, name), "");
-        ASSERT_NO_ERROR(NXgetpath(fileid, path, 512), "");
-        printf("Data path %s\n", path);
+        ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
+        printf("Data address %s\n", address);
         ASSERT_NO_ERROR(NXgetinfo64(fileid, &NXrank, NXdims64, &NXtype), "");
         printf("   %s(%d)", name, (int)NXtype);
         // cppcheck-suppress cstyleCast
@@ -393,8 +393,8 @@ int main(int argc, char *argv[]) {
 
   ASSERT_NO_ERROR(NXopengroup(fileid, "link", "NXentry"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "sample", "NXsample"), "");
-  ASSERT_NO_ERROR(NXgetpath(fileid, path, 512), "");
-  std::cout << "Group path " << path << "\n";
+  ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
+  std::cout << "Group address " << address << "\n";
   ASSERT_NO_ERROR(NXgetgroupID(fileid, &blink), "");
   if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
     std::cout << "Link check FAILED (sample)\n"
@@ -435,14 +435,14 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   std::cout << "Link check OK\n";
 
-  // tests for NXopenpath
-  std::cout << "tests for NXopenpath\n";
-  ASSERT_NO_ERROR(NXopenpath(fileid, "/entry/data/comp_data"), "Failure on NXopenpath\n");
-  ASSERT_NO_ERROR(NXopenpath(fileid, "/entry/data/comp_data"), "Failure on NXopenpath\n");
-  ASSERT_NO_ERROR(NXopenpath(fileid, "../r8_data"), "Failure on NXopenpath\n");
-  ASSERT_NO_ERROR(NXopengrouppath(fileid, "/entry/data/comp_data"), "Failure on NXopengrouppath\n");
-  ASSERT_NO_ERROR(NXopenpath(fileid, "/entry/data/r8_data"), "Failure on NXopenpath\n");
-  std::cout << "NXopenpath checks OK\n";
+  // tests for NXopenaddress
+  std::cout << "tests for NXopenaddress\n";
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failure on NXopenaddress\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failure on NXopenaddress\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "../r8_data"), "Failure on NXopenaddress\n");
+  ASSERT_NO_ERROR(NXopengroupaddress(fileid, "/entry/data/comp_data"), "Failure on NXopengroupaddress\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/r8_data"), "Failure on NXopenaddress\n");
+  std::cout << "NXopenaddress checks OK\n";
 
   ASSERT_NO_ERROR(NXclose(&fileid), "");
 #endif // WIN32

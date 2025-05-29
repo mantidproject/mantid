@@ -50,7 +50,7 @@ void FileBackedExperimentInfo::populateIfNotLoaded() const {
 void FileBackedExperimentInfo::populateFromFile() const {
   try {
     Nexus::File nxFile(m_filename);
-    nxFile.openPath(m_nxpath);
+    nxFile.openAddress(m_nxpath);
     // The loadExperimentInfo calls things such as mutableSample()
     // and if m_loaded is not true then this function is
     // will be called recursively.

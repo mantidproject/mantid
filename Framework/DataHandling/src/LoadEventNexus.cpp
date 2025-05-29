@@ -952,7 +952,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     g_log.information() << "Skipping the loading of sample logs!\n"
                         << "Reading the start time directly from /" << m_top_entry_name << "/start_time\n";
     // start_time is read and set
-    m_file->openPath("/");
+    m_file->openAddress("/");
     m_file->openGroup(m_top_entry_name, "NXentry");
     std::string tmp;
     m_file->readData("start_time", tmp);
@@ -1000,7 +1000,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   }
 
   // top level file information
-  m_file->openPath("/");
+  m_file->openAddress("/");
   // Start with the base entry
   m_file->openGroup(m_top_entry_name, "NXentry");
 
@@ -1551,7 +1551,7 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '" << entry_name << vms_str << "'.\n";
-    m_file->openPath("/" + entry_name + vms_str);
+    m_file->openAddress("/" + entry_name + vms_str);
   } catch (Nexus::Exception const &) {
     return nullptr; // Doesn't exist
   }

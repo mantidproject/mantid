@@ -18,10 +18,10 @@
 namespace Mantid::DataHandling::ANSTO {
 
 // Extract datasets from the group that match a regex filter
-std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::string &groupPath,
+std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::string &groupAddress,
                                         const std::string &regexFilter) {
   std::vector<std::string> fvalues;
-  auto group = entry.openNXGroup(groupPath);
+  auto group = entry.openNXGroup(groupAddress);
   auto datasets = group.datasets();
   for (auto nxi : datasets) {
     if (std::regex_match(nxi.nxname, std::regex(regexFilter))) {

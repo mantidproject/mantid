@@ -30,7 +30,7 @@ namespace DataHandling {
 namespace ANSTO {
 
 /// extract datasets from a group that match a regex filter
-std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::string &groupPath,
+std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::string &groupAddress,
                                         const std::string &regexFilter);
 
 /// pointer to the vector of events

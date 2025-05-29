@@ -228,8 +228,8 @@ void LoadILLReflectometry::exec() {
  * @param entry :: the NeXus file entry
  */
 void LoadILLReflectometry::initNames(const Nexus::NXEntry &entry) {
-  std::string instrumentNamePath = LoadHelper::findInstrumentNexusPath(entry);
-  std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
+  std::string instrumentNameAddress = LoadHelper::findInstrumentNexusAddress(entry);
+  std::string instrumentName = entry.getString(instrumentNameAddress.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   boost::to_lower(instrumentName);
@@ -350,7 +350,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
 std::vector<std::string> LoadILLReflectometry::getMonitorNames() {
-  // vector of paths to monitor data
+  // vector of addresses to monitor data
   const std::vector<std::string> monitors{"monitor1/data", "monitor2/data"};
   return monitors;
 }
