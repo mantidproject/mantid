@@ -182,7 +182,7 @@ LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false), m_interval(false), m_spec_min(0),
       m_spec_max(Mantid::EMPTY_INT()), m_spec_list(), m_filtered_spec_idxs(), m_nexusFile() {}
 
-/// Destructor defined here so that NeXus::File can be forward declared
+/// Destructor defined here so that Nexus::File can be forward declared
 /// in header
 LoadNexusProcessed::~LoadNexusProcessed() = default;
 
@@ -391,7 +391,7 @@ void LoadNexusProcessed::execLoader() {
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
-    m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
+    m_nexusFile = std::make_unique<Nexus::File>(root.m_fileID);
 
     // Find out how many NXentry groups there are in the file.
     nWorkspaceEntries = std::count_if(root.groups().cbegin(), root.groups().cend(),

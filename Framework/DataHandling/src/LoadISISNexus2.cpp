@@ -25,8 +25,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 #include <cctype>
@@ -148,7 +148,7 @@ void LoadISISNexus2::exec() {
   NXRoot root(m_filename);
 
   // "Open" the same file but with the C++ interface
-  m_nexusFile.reset(new ::NeXus::File(root.m_fileID));
+  m_nexusFile.reset(new Nexus::File(root.m_fileID));
 
   // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");

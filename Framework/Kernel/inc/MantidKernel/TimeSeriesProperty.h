@@ -164,7 +164,7 @@ public:
   /// property
   std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
 
-  void saveProperty(::NeXus::File *file) override;
+  void saveProperty(Nexus::File *file) override;
   Json::Value valueAsJson() const override;
 
   /// "Virtual" copy constructor with a time shift in seconds
@@ -364,7 +364,7 @@ private:
 protected:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
-  void saveTimeVector(::NeXus::File *file);
+  void saveTimeVector(Nexus::File *file);
   /// Sort the property into increasing times, if not already sorted
   void sortIfNecessary() const;
   ///  Find the index of the entry of time t in the mP vector (sorted)

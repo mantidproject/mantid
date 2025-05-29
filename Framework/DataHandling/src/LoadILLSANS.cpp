@@ -28,8 +28,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 
@@ -1001,7 +1001,7 @@ void LoadILLSANS::loadMetaData(const Nexus::NXEntry &entry, const std::string &i
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   try {
-    ::NeXus::File nxHandle(filename, NXACC_READ);
+    Nexus::File nxHandle(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
   } catch (const ::NeXus::Exception &e) {
     g_log.debug() << "Failed to open nexus file \"" << filename << "\" in read mode: " << e.what() << "\n";

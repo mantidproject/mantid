@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/NexusIOHelper.h"
 #include "test_helper.h"
 
@@ -19,7 +19,7 @@ class NexusIOHelperTest : public CxxTest::TestSuite {
 public:
   void test_nexus_io_helper_readNexusVector() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusVector<uint64_t>(file, "event_index");
@@ -40,7 +40,7 @@ public:
 
   void test_nexus_io_helper_readNexusVector_out_buffer() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     file.openData("event_index");
@@ -69,7 +69,7 @@ public:
 
   void test_nexus_io_helper_readNexusVector_throws_when_narrowing() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusVector<uint64_t>(file, "event_index");
@@ -88,7 +88,7 @@ public:
 
   void test_nexus_io_helper_readNexusVector_allow_narrowing() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusVector<uint32_t, Nioh::Narrowing::Allow>(file, "event_index");
@@ -109,7 +109,7 @@ public:
 
   void test_nexus_io_helper_readNexusVector_v20_ess_integration_2018() {
     const std::string filename = NexusTest::getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("event_data", "NXevent_data");
     auto event_index = Nioh::readNexusVector<uint64_t>(file, "event_index");
@@ -126,7 +126,7 @@ public:
 
   void test_nexus_io_helper_readNexusSlab() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusSlab<uint64_t>(file, "event_index", {10}, {200});
@@ -143,7 +143,7 @@ public:
 
   void test_nexus_io_helper_readNexusSlab_out_buffer() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     std::vector<uint64_t> event_index(200);
@@ -164,7 +164,7 @@ public:
 
   void test_nexus_io_helper_readNexusSlab_throws_when_Narrowing() {
     const std::string filename = NexusTest::getFullPath("V20_ESS_example.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("raw_event_data", "NXevent_data");
     auto event_index = Nioh::readNexusSlab<uint64_t>(file, "event_index", {111}, {222});
@@ -184,7 +184,7 @@ public:
 
   void test_nexus_io_helper_readNexusSlab_v20_ess_integration_2018() {
     const std::string filename = NexusTest::getFullPath("V20_ESSIntegration_2018-12-13_0942.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
     file.openGroup("event_data", "NXevent_data");
     auto event_index = Nioh::readNexusSlab<uint64_t>(file, "event_index", {111}, {222});
@@ -201,7 +201,7 @@ public:
 
   void test_nexus_io_helper_readNexusValue() {
     const std::string filename = NexusTest::getFullPath("LARMOR00003368.nxs");
-    ::NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("raw_data_1", "NXentry");
     file.openGroup("monitor_1", "NXmonitor");
     auto monitor_number = Nioh::readNexusValue<int32_t>(file, "monitor_number");

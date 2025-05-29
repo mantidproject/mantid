@@ -1,7 +1,7 @@
 #include <cstring>
 // REMOVE
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include <algorithm>
 #include <iostream>
@@ -23,7 +23,7 @@ using std::vector;
   }
 
 /**
- * \file NeXusFile.cpp
+ * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
  */
 
@@ -46,7 +46,7 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
 }
 } // end of anonymous namespace
 
-namespace NeXus {
+namespace Mantid::Nexus {
 
 // catch for undefined types
 template <typename NumT> NXnumtype getType(NumT const number) {
@@ -80,9 +80,9 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
-} // namespace NeXus
+} // namespace Mantid::Nexus
 
-namespace NeXus {
+namespace Mantid::Nexus {
 
 //------------------------------------------------------------------------------------------------------------------
 // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -977,10 +977,10 @@ NXlink File::getDataID() {
 
 void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
 
-} // namespace NeXus
+} // namespace Mantid::Nexus
 
 // -------------------------- NXnumtype ----------------------------------------------------------------------------//
-
+using namespace Mantid::Nexus;
 int NXnumtype::validate_val(int const x) {
   int val = BAD;
   if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||

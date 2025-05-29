@@ -21,7 +21,7 @@ void export_Citation() {
   class_<Citation, boost::noncopyable>("Citation",
                                        init<optional<const std::string &, const std::string &, const std::string &,
                                                      const std::string &, const std::string &>>())
-      .def(init<NeXus::File *, const std::string &>())
+      .def(init<Mantid::Nexus::File *, const std::string &>())
       .def("description", &Citation::description, arg("self"), return_copy(),
            "Returns the description on the citation object")
       .def("url", &Citation::url, arg("self"), return_copy(), "Returns the url on the citation object")

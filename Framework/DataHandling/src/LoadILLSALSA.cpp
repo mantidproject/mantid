@@ -15,7 +15,7 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <iterator>
 #include <sstream>
@@ -257,7 +257,7 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
 void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
 
-  ::NeXus::File nxHandle(filename, NXACC_READ);
+  Nexus::File nxHandle(filename, NXACC_READ);
   LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
 }
 } // namespace Mantid::DataHandling

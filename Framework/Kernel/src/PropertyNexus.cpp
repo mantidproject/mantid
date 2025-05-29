@@ -11,7 +11,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.hxx"
@@ -40,7 +40,7 @@ namespace {
  * @return Property *
  */
 template <typename NumT>
-std::unique_ptr<Property> makeProperty(::NeXus::File *file, const std::string &name,
+std::unique_ptr<Property> makeProperty(Nexus::File *file, const std::string &name,
                                        const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
@@ -64,7 +64,7 @@ std::unique_ptr<Property> makeProperty(::NeXus::File *file, const std::string &n
  * @param times :: vector of times, empty = single property with value
  * @return Property *
  */
-std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
+std::unique_ptr<Property> makeTimeSeriesBoolProperty(Nexus::File *file, const std::string &name,
                                                      const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
@@ -79,7 +79,7 @@ std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const 
 }
 
 /** Make a string/vector\<string\> property */
-std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::string &name,
+std::unique_ptr<Property> makeStringProperty(Nexus::File *file, const std::string &name,
                                              const std::vector<Types::Core::DateAndTime> &times) {
   if (times.empty()) {
     std::string bigString = file->getStrData();
@@ -104,7 +104,7 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
 /**
  * Common function to populate "time" and "start" entries from NeXus file
  */
-void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::string &startStr) {
+void getTimeAndStart(Nexus::File *file, std::vector<double> &timeSec, std::string &startStr) {
   file->openData("time");
   file->getData(timeSec);
   // Optionally get a start
@@ -124,7 +124,7 @@ void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::str
  * @param unitsStr  out
  * @return std::unique_ptr<Property>
  */
-std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
+std::unique_ptr<Property> loadPropertyCommon(Nexus::File *file, const std::string &group,
                                              const std::vector<double> &timeSec, std::string &startStr) {
   std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
@@ -202,7 +202,7 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
 } // namespace
 //----------------------------------------------------------------------------------------------
 
-std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group,
                                        const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
   file->openGroup(group, "NXlog");
 
@@ -226,7 +226,7 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &g
  * @param group :: name of NXlog group to open
  * @return Property pointer
  */
-std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group) {
+std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets

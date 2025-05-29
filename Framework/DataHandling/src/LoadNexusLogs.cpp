@@ -44,7 +44,7 @@ namespace {
  * @param workspace : Pointer to the workspace to set logs on
  * @return True only if reading and execution successful.
  */
-bool loadAndApplyMeasurementInfo(::NeXus::File *const file, API::MatrixWorkspace &workspace) {
+bool loadAndApplyMeasurementInfo(Nexus::File *const file, API::MatrixWorkspace &workspace) {
 
   bool successfullyApplied = false;
   try {
@@ -82,7 +82,7 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file, API::MatrixWorkspace
  * @param workspace : Pointer to the workspace to set logs on
  * @return True only if reading and execution successful.
  */
-bool loadAndApplyRunTitle(::NeXus::File *const file, API::MatrixWorkspace &workspace) {
+bool loadAndApplyRunTitle(Nexus::File *const file, API::MatrixWorkspace &workspace) {
 
   bool successfullyApplied = false;
   try {
@@ -136,7 +136,7 @@ bool isControlValue(const char &c, const std::string &propName, Kernel::Logger &
  * @param log :: Reference to logger to print out to
  * @returns A pointer to a new property containing the time series
  */
-std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const std::string &propName,
+std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std::string &propName,
                                                    const std::string &freqStart, Kernel::Logger &log) {
   file.openData("time");
   //----- Start time is an ISO8601 string date and time. ------
@@ -198,7 +198,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
   }
 
   // Now the actual data
-  ::NeXus::Info info = file.getInfo();
+  Nexus::Info info = file.getInfo();
   // Check the size
   if (size_t(info.dims[0]) != time_double.size()) {
     file.closeData();
@@ -277,7 +277,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
  * @returns A pointer to a new property containing the time series filter or
  * null
  */
-std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &file, const Kernel::Property &prop,
+std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(Nexus::File &file, const Kernel::Property &prop,
                                                                  Kernel::Logger &log) {
   const auto tsProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(&prop);
   const auto times = tsProp->timesAsVector();
@@ -290,7 +290,7 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
     file.openData("value_valid");
     try {
       // Now the validity data
-      ::NeXus::Info info = file.getInfo();
+      Nexus::Info info = file.getInfo();
       // Check the size
       if (size_t(info.dims[0]) != times.size()) {
         throw ::NeXus::Exception("Invalid value entry for validity data");
@@ -381,7 +381,7 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
  * @param file :: handle to the nexus file to read from.
  * @param run :: handle to the run object to set the start & end time for.
  */
-void readStartAndEndTime(::NeXus::File &file, API::Run &run) {
+void readStartAndEndTime(Nexus::File &file, API::Run &run) {
   try {
     // Read the start and end time strings
     file.openData("start_time");
@@ -444,7 +444,7 @@ void LoadNexusLogs::execLoader() {
   if (entry_name.empty()) {
     entry_name = LoadTOFRawNexus::getEntryName(filename);
   }
-  ::NeXus::File file(filename);
+  Nexus::File file(filename);
   // Find the root entry
   try {
     file.openGroup(entry_name, "NXentry");
@@ -665,7 +665,7 @@ void LoadNexusLogs::execLoader() {
  * @param file :: open nexus file at the DASLogs group
  * @param workspace :: workspace to add to.
  */
-void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadVetoPulses(Nexus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   try {
     file.openGroup("Veto_pulse", "NXgroup");
   } catch (::NeXus::Exception &) {
@@ -704,7 +704,7 @@ void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<AP
  * @param file :: open nexus file at the DASLogs group
  * @param workspace :: workspace to add to.
  */
-void LoadNexusLogs::loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadNPeriods(Nexus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   int value = 1; // Default to 1-period unless
   try {
     file.openGroup("periods", "IXperiods");
@@ -767,8 +767,8 @@ void LoadNexusLogs::loadNPeriods(::NeXus::File &file, const std::shared_ptr<API:
  * @param allow_list :: Names of specific log entries to load
  * @param block_list :: Names of specific log entries or patterns skip when loading
  */
-void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
-                             const std::string &entry_class, const std::shared_ptr<API::MatrixWorkspace> &workspace,
+void LoadNexusLogs::loadLogs(Nexus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
+                             const std::shared_ptr<API::MatrixWorkspace> &workspace,
                              const std::vector<std::string> &allow_list,
                              const std::vector<std::string> &block_list) const {
 
@@ -854,8 +854,7 @@ void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_en
  * @param entry_class :: The type of the entry
  * @param workspace :: A pointer to the workspace to store the logs
  */
-void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name,
-                              const std::string &entry_class,
+void LoadNexusLogs::loadNXLog(Nexus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                               const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
 
   const std::string entry_name = absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
@@ -920,7 +919,7 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
   file.closeGroup();
 }
 
-void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
+void LoadNexusLogs::loadSELog(Nexus::File &file, const std::string &absolute_entry_name,
                               const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   // Open the entry
   const std::string entry_name = absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
@@ -986,7 +985,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
       // This may have a larger dimension than 1 bit it has no time field so
       // take the first entry
       file.openData("value");
-      ::NeXus::Info info = file.getInfo();
+      Nexus::Info info = file.getInfo();
       if (info.type == NXnumtype::FLOAT32) {
         boost::scoped_array<float> value(new float[info.dims[0]]);
         file.getData(value.get());

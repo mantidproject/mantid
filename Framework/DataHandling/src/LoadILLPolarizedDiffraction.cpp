@@ -27,8 +27,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 
@@ -212,7 +212,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
   try {
-    ::NeXus::File nxHandle(m_fileName, NXACC_READ);
+    Nexus::File nxHandle(m_fileName, NXACC_READ);
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);

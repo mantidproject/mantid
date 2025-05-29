@@ -28,7 +28,7 @@ using Kernel::V3D;
 
 Mantid::Kernel::Logger g_log("Goniometer");
 
-void GoniometerAxis::saveNexus(::NeXus::File *file, const std::string &group) const {
+void GoniometerAxis::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXmotor", true);
   file->writeData("name", name);
   file->writeData("angle", angle);
@@ -42,7 +42,7 @@ void GoniometerAxis::saveNexus(::NeXus::File *file, const std::string &group) co
   file->closeGroup();
 }
 
-void GoniometerAxis::loadNexus(::NeXus::File *file, const std::string &group) {
+void GoniometerAxis::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXmotor");
   file->readData("name", name);
   file->readData("angle", angle);
@@ -348,6 +348,7 @@ void Goniometer::recalculateR() {
                     << "recalculation from motors will be done.\n";
     return;
   }
+
   std::vector<GoniometerAxis>::iterator it;
   std::vector<double> elements;
   Quat QGlobal, QCurrent;
@@ -368,7 +369,7 @@ void Goniometer::recalculateR() {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Goniometer::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXpositioner", true);
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written
@@ -384,7 +385,7 @@ void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const 
  * @param file :: open NeXus file
  * @param group :: name of the group to open
  */
-void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
+void Goniometer::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXpositioner");
   int num_axes;
   file->readData("num_axes", num_axes);

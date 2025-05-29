@@ -23,7 +23,7 @@
 
 #include "MantidNexus/NeXusException.hpp"
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -171,7 +171,7 @@ void SaveNXTomo::setupFile() {
   // if we can overwrite, try to open the file
   if (!m_overwriteFile) {
     try {
-      m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_RDWR);
+      m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_RDWR);
       return;
     } catch (NeXus::Exception &) {
     }
@@ -179,7 +179,7 @@ void SaveNXTomo::setupFile() {
 
   // If not overwriting, or no existing file found above, create new file
   if (!m_nxFile) {
-    m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_CREATE5);
+    m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_CREATE5);
   }
   // Make the top level entry (and open it)
   m_nxFile->makeGroup("entry1", "NXentry", true);
@@ -301,7 +301,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   }
 
   m_nxFile->openData("rotation_angle");
-  m_nxFile->putSlab(rotValue, static_cast<::NeXus::dimsize_t>(numFiles), 1);
+  m_nxFile->putSlab(rotValue, static_cast<Nexus::dimsize_t>(numFiles), 1);
   m_nxFile->closeData();
 
   // Copy data out, remake data with dimension of old size plus new elements.
@@ -359,7 +359,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   }
 
   m_nxFile->openData("image_key");
-  m_nxFile->putSlab(keyValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(keyValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 
   m_nxFile->closeGroup();
@@ -397,8 +397,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       // it won't be greater than this. Otherwise Shorten it
       if (strSize > 80)
         strSize = 80;
-      const ::NeXus::DimVector start = {thisFileInd, 0};
-      const ::NeXus::DimSizeVector size = {1, static_cast<::NeXus::dimsize_t>(strSize)};
+      const Nexus::DimVector start = {thisFileInd, 0};
+      const Nexus::DimSizeVector size = {1, static_cast<Nexus::dimsize_t>(strSize)};
       // single item
       m_nxFile->putSlab(valueAsStr.data(), start, size);
 
@@ -428,7 +428,7 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
   }
 
   m_nxFile->openData("data");
-  m_nxFile->putSlab(intensityValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(intensityValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 }
 

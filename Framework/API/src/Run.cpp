@@ -13,7 +13,7 @@
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/lexical_cast.hpp>
 #include <memory>
@@ -648,7 +648,7 @@ const std::vector<Kernel::Matrix<double>> Run::getGoniometerMatrices() const {
  * @param group :: name of the group to create
  * @param keepOpen :: If true, leave the file open after saving
  */
-void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen) const {
+void Run::saveNexus(Nexus::File *file, const std::string &group, bool keepOpen) const {
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
@@ -701,7 +701,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
  * @param prefix indicates current group location in file (absolute name)
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group, const Nexus::NexusDescriptor &fileInfo,
+void Run::loadNexus(Nexus::File *file, const std::string &group, const Nexus::NexusDescriptor &fileInfo,
                     const std::string &prefix, bool keepOpen) {
 
   if (!group.empty()) {
@@ -766,7 +766,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, const Nexus::
  * load any NXlog in the current open group.
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen) {
+void Run::loadNexus(Nexus::File *file, const std::string &group, bool keepOpen) {
 
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
@@ -894,7 +894,7 @@ void Run::copyGoniometers(const Run &other) {
   }
 }
 
-void Run::loadNexusCommon(::NeXus::File *file, const std::string &nameClass) {
+void Run::loadNexusCommon(Nexus::File *file, const std::string &nameClass) {
   if (nameClass == GONIOMETER_LOG_NAME) {
     // Goniometer class
     m_goniometers[0]->loadNexus(file, nameClass);

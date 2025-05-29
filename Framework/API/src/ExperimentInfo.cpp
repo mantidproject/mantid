@@ -902,7 +902,7 @@ void ExperimentInfo::invalidateAllSpectrumDefinitions() {
  * @param file :: open NeXus file
  * @param saveLegacyInstrument : defaults to true, otherwise not in file output
  */
-void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveLegacyInstrument) const {
+void ExperimentInfo::saveExperimentInfoNexus(Nexus::File *file, bool saveLegacyInstrument) const {
   Instrument_const_sptr instrument = getInstrument();
   if (saveLegacyInstrument) {
     instrument->saveNexus(file, "instrument");
@@ -917,7 +917,7 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveLegac
  * @param saveSample :: option to save Sample
  * @param saveLogs :: option to save Logs
  */
-void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample,
+void ExperimentInfo::saveExperimentInfoNexus(Nexus::File *file, bool saveInstrument, bool saveSample,
                                              bool saveLogs) const {
   Instrument_const_sptr instrument = getInstrument();
 
@@ -934,7 +934,7 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
  * @param fileInfo :: The file info descriptor corresponding to the provided file
  * @param prefix :: The prefix of the file
  */
-void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Nexus::NexusDescriptor &fileInfo,
+void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file, const Nexus::NexusDescriptor &fileInfo,
                                                const std::string &prefix) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
@@ -953,7 +953,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Nexus:
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file
  */
-void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
+void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
   if (sampleVersion == 0) {
@@ -968,7 +968,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
   }
 }
 
-void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
+void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file,
                                              std::string &parameterStr, const Nexus::NexusDescriptor &fileInfo,
                                              const std::string &prefix) {
   // TODO
@@ -988,7 +988,7 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::Ne
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
+void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file,
                                              std::string &parameterStr) {
   // load sample and log info
   loadSampleAndLogInfoNexus(file);
@@ -1006,7 +1006,7 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::Ne
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file,
                                              std::string &parameterStr) {
 
   // Open instrument group
@@ -1036,7 +1036,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::Ne
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file) {
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file) {
 
   // Open instrument group
   file->openGroup("instrument", "NXinstrument");
@@ -1059,7 +1059,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, ::Ne
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file, std::string &instrumentName,
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName,
                                                      std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
@@ -1153,7 +1153,7 @@ std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.
  */
-void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr) {
+void ExperimentInfo::loadInstrumentParametersNexus(Nexus::File *file, std::string &parameterStr) {
   try {
     file->openGroup("instrument_parameter_map", "NXnote");
     file->readData("data", parameterStr);

@@ -1,5 +1,5 @@
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <ostream>
 
 /**

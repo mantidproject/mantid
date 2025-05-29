@@ -20,8 +20,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -339,7 +339,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   try {
-    ::NeXus::File nxfileID(nexusfilename, NXACC_READ);
+    Nexus::File nxfileID(nexusfilename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const ::NeXus::Exception &e) {
     g_log.debug() << "convertNexusToProperties: Error loading  \"" << nexusfilename << "\" in read mode: " << e.what()

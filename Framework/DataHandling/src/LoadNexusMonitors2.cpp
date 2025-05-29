@@ -47,7 +47,7 @@ namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(LoadNexusMonitors2)
 
 namespace {
-void loadSampleDataISIScompatibilityInfo(::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
+void loadSampleDataISIScompatibilityInfo(Nexus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -92,19 +92,19 @@ bool keyExists(std::string const &key, std::map<std::string, std::string> const 
 
 // returns true if all of the entries necessary for a histogram exist monitor in
 // the currently open group
-bool isHistoMonitor(::NeXus::File &monitorFileHandle) {
+bool isHistoMonitor(Nexus::File &monitorFileHandle) {
   const auto fields = monitorFileHandle.getEntries();
   return keyExists("data", fields) && keyExists("time_of_flight", fields);
 }
 
-std::size_t sizeOfUnopenedSDS(::NeXus::File &file, const std::string &fieldName) {
+std::size_t sizeOfUnopenedSDS(Nexus::File &file, const std::string &fieldName) {
   file.openData(fieldName);
   auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
   file.closeData();
   return size;
 }
 
-bool eventIdNotEmptyIfExists(::NeXus::File &file, std::map<std::string, std::string> const &fields) {
+bool eventIdNotEmptyIfExists(Nexus::File &file, std::map<std::string, std::string> const &fields) {
   if (keyExists("event_id", fields))
     return sizeOfUnopenedSDS(file, "event_id") > 1;
   else
@@ -113,7 +113,7 @@ bool eventIdNotEmptyIfExists(::NeXus::File &file, std::map<std::string, std::str
 
 // returns true if all of the entries necessary for an event monitor exist in
 // the currently open group
-bool isEventMonitor(::NeXus::File &file) {
+bool isEventMonitor(Nexus::File &file) {
   const auto fields = file.getEntries();
   return keyExists("event_index", fields) && keyExists("event_time_offset", fields) &&
          keyExists("event_time_zero", fields) && eventIdNotEmptyIfExists(file, fields);
@@ -167,12 +167,12 @@ void LoadNexusMonitors2::exec() {
   }
 
   m_top_entry_name = this->getPropertyValue("NXentryName");
-  // must be done here before the NeXus::File, HDF5 files can't have 2
+  // must be done here before the Nexus::File, HDF5 files can't have 2
   // simultaneous handlers
   Nexus::NexusDescriptor descriptor(m_filename);
 
   // top level file information
-  ::NeXus::File file(m_filename);
+  Nexus::File file(m_filename);
 
   // open the correct entry
   using string_map_t = std::map<std::string, std::string>;
@@ -364,7 +364,7 @@ void LoadNexusMonitors2::exec() {
  *
  * @param file :: A reference to the NeXus file opened at the root entry
  */
-void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
+void LoadNexusMonitors2::fixUDets(Nexus::File &file) {
   const size_t nmonitors = m_monitorInfo.size();
   boost::scoped_array<detid_t> det_ids(new detid_t[nmonitors]);
   boost::scoped_array<specnum_t> spec_ids(new specnum_t[nmonitors]);
@@ -446,9 +446,9 @@ void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::Mat
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  std::unique_ptr<::NeXus::File> filePointer;
+  std::unique_ptr<Nexus::File> filePointer;
   try {
-    filePointer = std::make_unique<::NeXus::File>(fname);
+    filePointer = std::make_unique<Nexus::File>(fname);
     filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
@@ -514,7 +514,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
-size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file, size_t &numPeriods) {
+size_t LoadNexusMonitors2::getMonitorInfo(Nexus::File &file, size_t &numPeriods) {
   // should already be open to the correct NXentry
 
   m_monitorInfo.clear();
@@ -675,7 +675,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(std::vector<bool> &loadMonitorFla
   return useEventMon;
 }
 
-void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_index) {
+void LoadNexusMonitors2::readEventMonitorEntry(Nexus::File &file, size_t ws_index) {
   // setup local variables
   EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
   std::string tof_units, event_time_zero_units;
@@ -734,7 +734,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file, size_t ws_index, size_t numPeriods) {
+void LoadNexusMonitors2::readHistoMonitorEntry(Nexus::File &file, size_t ws_index, size_t numPeriods) {
   // Now, actually retrieve the necessary data
   file.openData("data");
   MantidVec data;

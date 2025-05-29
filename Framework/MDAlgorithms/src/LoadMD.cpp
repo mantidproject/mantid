@@ -128,10 +128,10 @@ void LoadMD::execLoader() {
   if (fileBacked) {
 
     for_access = "for Read/Write access";
-    m_file.reset(new ::NeXus::File(m_filename, NXACC_RDWR));
+    m_file.reset(new Nexus::File(m_filename, NXACC_RDWR));
   } else {
     for_access = "for Read access";
-    m_file.reset(new ::NeXus::File(m_filename, NXACC_READ));
+    m_file.reset(new Nexus::File(m_filename, NXACC_READ));
   }
 
   if (!m_file)

@@ -18,7 +18,7 @@
 #include <vector>
 
 // Forward Declares
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -166,8 +166,8 @@ public:
   double totalScatterLengthSqrd(const double lambda = PhysicalConstants::NeutronAtom::ReferenceLambda) const;
   //@}
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  void loadNexus(Nexus::File *file, const std::string &group);
 
   bool hasValidXRayAttenuationProfile();
 
