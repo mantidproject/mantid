@@ -113,12 +113,12 @@ void LoadSINQFocus::exec() {
  */
 void LoadSINQFocus::setInstrumentName(const Nexus::NXEntry &entry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(entry);
+  m_instrumentPath = LoadHelper::findInstrumentNexusAddress(entry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(entry, m_instrumentPath + "/name");
   size_t pos = m_instrumentName.find(' ');
   m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
@@ -160,7 +160,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(Nexus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  std::vector<double> timeBinning = LoadHelper::getTimeBinningFromNexusPath(entry, "merged/time_binning");
+  std::vector<double> timeBinning = LoadHelper::getTimeBinningFromNexusAddress(entry, "merged/time_binning");
   auto &x = m_localWorkspace->mutableX(0);
   x.assign(timeBinning.begin(), timeBinning.end());
 

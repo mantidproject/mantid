@@ -141,13 +141,13 @@ std::vector<std::string> LoadILLTOF3::getMonitorInfo(const Nexus::NXEntry &first
  */
 void LoadILLTOF3::loadInstrumentDetails(const Nexus::NXEntry &firstEntry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  m_instrumentAddress = LoadHelper::findInstrumentNexusAddress(firstEntry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, m_instrumentAddress + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {

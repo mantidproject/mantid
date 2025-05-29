@@ -113,7 +113,7 @@ void LoadILLIndirect2::exec() {
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
-  const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath = LoadHelper::findInstrumentNexusAddress(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
 
   initWorkSpace();
@@ -154,12 +154,12 @@ void LoadILLIndirect2::setInstrumentName(const Nexus::NXEntry &firstEntry, const
     g_log.error(message);
     throw std::runtime_error(message);
   }
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, instrumentNamePath + "/name");
   boost::to_upper(m_instrumentName); // "IN16b" in file, keep it upper case.
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
-std::string LoadILLIndirect2::getDataPath(const Nexus::NXEntry &entry) {
+std::string LoadILLIndirect2::getDataAddress(const Nexus::NXEntry &entry) {
   Nexus::NXClass instrument = entry.openNXGroup("instrument");
   if (m_loadOption == "Diffractometer") {
 
@@ -183,7 +183,7 @@ std::string LoadILLIndirect2::getDataPath(const Nexus::NXEntry &entry) {
 void LoadILLIndirect2::loadDataDetails(const Nexus::NXEntry &entry) {
 
   // read in the data
-  auto data = LoadHelper::getIntDataset(entry, getDataPath(entry));
+  auto data = LoadHelper::getIntDataset(entry, getDataAddress(entry));
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
@@ -292,7 +292,7 @@ void LoadILLIndirect2::loadDiffractionData(Nexus::NXEntry &entry) {
   // first, determine version
   bool newVersion = instrument.containsDataSet("version");
 
-  auto data = LoadHelper::getIntDataset(entry, getDataPath(entry));
+  auto data = LoadHelper::getIntDataset(entry, getDataAddress(entry));
   data.load();
 
   auto dataMon = LoadHelper::getIntDataset(entry, "monitor/data");

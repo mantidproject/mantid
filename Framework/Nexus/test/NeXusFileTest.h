@@ -384,7 +384,7 @@ public:
   void test_check_str_length() {
     FileResource resource("test_nexus_str_len.h5");
     std::string filename = resource.fullPath();
-    NeXus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     std::string testStr("some_str_data");
@@ -395,7 +395,7 @@ public:
     file.closeData();
 
     file.openAddress("/entry/string_data");
-    Info info = file.getInfo();
+    Mantid::Nexus::Info info = file.getInfo();
     auto data = file.getStrData();
 
     TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);

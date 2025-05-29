@@ -228,7 +228,7 @@ void LoadILLReflectometry::exec() {
  * @param entry :: the NeXus file entry
  */
 void LoadILLReflectometry::initNames(const Nexus::NXEntry &entry) {
-  std::string instrumentNamePath = LoadHelper::findInstrumentNexusPath(entry);
+  std::string instrumentNamePath = LoadHelper::findInstrumentNexusAddress(entry);
   std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");

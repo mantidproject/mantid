@@ -110,7 +110,7 @@ void LoadILLSANS::exec() {
   getMonitorIndices(filename);
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
-  const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath = LoadHelper::findInstrumentNexusAddress(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
@@ -185,13 +185,13 @@ void LoadILLSANS::exec() {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    double distance = LoadHelper::getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/det_calc");
+    double distance = LoadHelper::getDoubleFromNexusAddress(firstEntry, instrumentPath + "/detector/det_calc");
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", distance, true);
     if (m_instrumentName == "D22") {
-      double offset = LoadHelper::getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/dtr_actual");
+      double offset = LoadHelper::getDoubleFromNexusAddress(firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
     }
   }
@@ -212,7 +212,7 @@ void LoadILLSANS::setInstrumentName(const Nexus::NXEntry &firstEntry, const std:
   if (instrumentNamePath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName);
 
   // set alternative version name. Note that D16B is set later, because we need to open the data to distinguish with D16
@@ -257,14 +257,14 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const Nexus::N
                                                                   const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
   DetectorPosition pos;
-  pos.distanceSampleRear = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det2_calc");
-  pos.distanceSampleBottomTop = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_calc");
-  pos.distanceSampleRightLeft = pos.distanceSampleBottomTop +
-                                LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_panel_separation");
-  pos.shiftLeft = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OxL_actual") * 1e-3;
-  pos.shiftRight = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OxR_actual") * 1e-3;
-  pos.shiftUp = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OyT_actual") * 1e-3;
-  pos.shiftDown = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OyB_actual") * 1e-3;
+  pos.distanceSampleRear = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/det2_calc");
+  pos.distanceSampleBottomTop = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/det1_calc");
+  pos.distanceSampleRightLeft = pos.distanceSampleBottomTop + LoadHelper::getDoubleFromNexusAddress(
+                                                                  firstEntry, detectorPath + "/det1_panel_separation");
+  pos.shiftLeft = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/OxL_actual") * 1e-3;
+  pos.shiftRight = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/OxR_actual") * 1e-3;
+  pos.shiftUp = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/OyT_actual") * 1e-3;
+  pos.shiftDown = LoadHelper::getDoubleFromNexusAddress(firstEntry, detectorPath + "/OyB_actual") * 1e-3;
   pos >> g_log.debug();
   return pos;
 }
@@ -588,11 +588,11 @@ void LoadILLSANS::initWorkSpaceD33(Nexus::NXEntry &firstEntry, const std::string
       try {
         // LTOF mode
         std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
-        binningRear = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
-        binningRight = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
-        binningLeft = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
-        binningDown = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
-        binningUp = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
+        binningRear = LoadHelper::getTimeBinningFromNexusAddress(firstEntry, binPathPrefix + "1");
+        binningRight = LoadHelper::getTimeBinningFromNexusAddress(firstEntry, binPathPrefix + "2");
+        binningLeft = LoadHelper::getTimeBinningFromNexusAddress(firstEntry, binPathPrefix + "3");
+        binningDown = LoadHelper::getTimeBinningFromNexusAddress(firstEntry, binPathPrefix + "4");
+        binningUp = LoadHelper::getTimeBinningFromNexusAddress(firstEntry, binPathPrefix + "5");
       } catch (std::runtime_error &e) {
         throw std::runtime_error("Unable to load the wavelength axes for TOF data " + std::string(e.what()));
       }

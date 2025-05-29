@@ -45,7 +45,7 @@ namespace LegacyLoadHelper { // these methods are copied from LoadHelper
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
-std::string findInstrumentNexusPath(const LegacyNexus::NXEntry &firstEntry) {
+std::string findInstrumentNexusAddress(const LegacyNexus::NXEntry &firstEntry) {
   std::string result("");
   std::vector<LegacyNexus::NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == NXINSTRUMENT; });
@@ -419,13 +419,13 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const LegacyNexus::NXEntry 
  */
 void LoadILLTOF2::loadInstrumentDetails(const LegacyNexus::NXEntry &firstEntry) {
 
-  m_instrumentPath = LegacyLoadHelper::findInstrumentNexusPath(firstEntry);
+  m_instrumentAddress = LegacyLoadHelper::findInstrumentNexusAddress(firstEntry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = firstEntry.getString(m_instrumentPath + "/name");
+  m_instrumentName = firstEntry.getString(m_instrumentAddress + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {
