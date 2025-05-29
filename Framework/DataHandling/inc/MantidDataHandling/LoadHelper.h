@@ -10,8 +10,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Quat.h"
-#include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 
 namespace Mantid {
 

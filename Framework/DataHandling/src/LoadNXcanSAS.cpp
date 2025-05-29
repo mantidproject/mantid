@@ -20,7 +20,7 @@
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <H5Cpp.h>
 
 using namespace Mantid::Kernel;

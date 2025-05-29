@@ -21,8 +21,8 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/regex.hpp>
 

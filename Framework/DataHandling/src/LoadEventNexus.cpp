@@ -34,7 +34,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
@@ -438,7 +438,7 @@ void LoadEventNexus::execLoader() {
   bool load_monitors = this->getProperty("LoadMonitors");
 
   // this must make absolutely sure that m_file is a valid (and open)
-  // NeXus::File object
+  // Nexus::File object
   safeOpenFile(m_filename);
 
   setTopEntryName();
@@ -1676,7 +1676,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(Nexus::File &file, EventWor
 }
 
 /**
- * Makes sure that m_file is a valid and open NeXus::File object.
+ * Makes sure that m_file is a valid and open Nexus::File object.
  * Throws if there is an exception opening the file.
  *
  * @param fname name of the nexus file to open

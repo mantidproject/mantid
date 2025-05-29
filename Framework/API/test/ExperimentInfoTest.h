@@ -25,7 +25,7 @@
 #include "PropertyManagerHelper.h"
 
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>

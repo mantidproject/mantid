@@ -10,7 +10,7 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.hxx"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 namespace Mantid::Kernel {
 

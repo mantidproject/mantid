@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <string>
 #include <vector>

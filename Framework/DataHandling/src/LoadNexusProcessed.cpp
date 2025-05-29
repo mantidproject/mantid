@@ -182,7 +182,7 @@ LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false), m_interval(false), m_spec_min(0),
       m_spec_max(Mantid::EMPTY_INT()), m_spec_list(), m_filtered_spec_idxs(), m_nexusFile() {}
 
-/// Destructor defined here so that NeXus::File can be forward declared
+/// Destructor defined here so that Nexus::File can be forward declared
 /// in header
 LoadNexusProcessed::~LoadNexusProcessed() = default;
 

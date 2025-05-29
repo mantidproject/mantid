@@ -16,7 +16,7 @@
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/File.h>
 #include <exception>

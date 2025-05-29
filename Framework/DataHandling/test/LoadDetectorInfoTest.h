@@ -20,7 +20,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>

@@ -19,7 +19,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 

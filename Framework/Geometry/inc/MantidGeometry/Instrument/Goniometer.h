@@ -9,7 +9,7 @@
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <string>
 #include <utility>
 

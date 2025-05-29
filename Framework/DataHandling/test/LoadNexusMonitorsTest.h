@@ -17,7 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>

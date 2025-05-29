@@ -16,7 +16,7 @@
 #include "MantidKernel/OptionalBool.h"
 
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Exception.h>
 #include <Poco/File.h>

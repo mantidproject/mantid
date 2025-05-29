@@ -7,7 +7,7 @@
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <sstream>
 #include <utility>

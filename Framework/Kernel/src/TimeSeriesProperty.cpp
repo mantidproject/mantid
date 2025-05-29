@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <json/value.h>
 

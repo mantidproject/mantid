@@ -21,7 +21,7 @@
 
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <json/value.h>
 #include <type_traits>
 #include <vector>

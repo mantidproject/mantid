@@ -20,7 +20,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"

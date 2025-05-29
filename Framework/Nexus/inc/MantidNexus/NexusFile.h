@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -14,7 +14,7 @@ static const std::string NULL_STR("NULL");
 }
 
 /**
- * \file NeXusFile.hpp Definition of the NeXus C++ API.
+ * \file NexusFile.h Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
  * \defgroup cpp_core C++ Core
  * \ingroup cpp_main

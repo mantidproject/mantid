@@ -23,7 +23,7 @@
 
 #include "MantidNexus/NeXusException.hpp"
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory

@@ -167,7 +167,7 @@ void LoadNexusMonitors2::exec() {
   }
 
   m_top_entry_name = this->getPropertyValue("NXentryName");
-  // must be done here before the NeXus::File, HDF5 files can't have 2
+  // must be done here before the Nexus::File, HDF5 files can't have 2
   // simultaneous handlers
   Nexus::NexusDescriptor descriptor(m_filename);
 

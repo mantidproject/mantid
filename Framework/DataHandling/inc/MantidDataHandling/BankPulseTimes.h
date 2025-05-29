@@ -27,7 +27,7 @@ public:
   /// Unix epoch used as default epoch when the file does not specify one
   static const std::string DEFAULT_START_TIME;
 
-  /// Constructor with NeXus::File
+  /// Constructor with Nexus::File
   BankPulseTimes(Nexus::File &file, const std::vector<int> &periodNumbers);
 
   /// Constructor with vector of DateAndTime

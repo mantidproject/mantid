@@ -27,8 +27,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 

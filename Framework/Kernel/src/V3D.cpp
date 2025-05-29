@@ -7,7 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <algorithm>
 #include <boost/version.hpp>
 #include <sstream>

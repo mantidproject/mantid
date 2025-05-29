@@ -10,7 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <climits>
 #include <optional>
 

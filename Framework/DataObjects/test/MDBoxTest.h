@@ -17,7 +17,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <map>

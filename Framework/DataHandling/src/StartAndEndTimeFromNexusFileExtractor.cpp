@@ -9,7 +9,7 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <vector>
 
 namespace Mantid::DataHandling {

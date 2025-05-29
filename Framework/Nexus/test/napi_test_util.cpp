@@ -1,4 +1,4 @@
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include <filesystem>
 #include <iostream>

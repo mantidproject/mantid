@@ -1,7 +1,7 @@
 #include <cstring>
 // REMOVE
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include <algorithm>
 #include <iostream>
@@ -23,7 +23,7 @@ using std::vector;
   }
 
 /**
- * \file NeXusFile.cpp
+ * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
  */
 

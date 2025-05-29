@@ -1,4 +1,4 @@
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "napi_test_util.h"
 #include <cstdio>
 #include <cstdlib>

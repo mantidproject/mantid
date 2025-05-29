@@ -15,9 +15,9 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses_fwd.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/scoped_ptr.hpp>
 

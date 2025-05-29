@@ -23,8 +23,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>

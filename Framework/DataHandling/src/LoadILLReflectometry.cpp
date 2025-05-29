@@ -30,8 +30,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace {
 
