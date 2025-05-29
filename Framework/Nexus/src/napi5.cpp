@@ -272,38 +272,6 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
   return fapl;
 }
 
-herr_t set_file_cache(hid_t fapl, CONSTCHAR *filename) {
-  char pBuffer[512];
-  int mdc_nelmts;
-  size_t rdcc_nelmts;
-  size_t rdcc_nbytes;
-  double rdcc_w0;
-  herr_t error = -1;
-
-  error = H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0);
-
-  if (error < 0) {
-    sprintf(pBuffer,
-            "Error: cannot obtain HDF5 cache size"
-            " for file %s",
-            filename);
-    NXReportError(pBuffer);
-    return error;
-  }
-
-  rdcc_nbytes = (size_t)nx_cacheSize;
-  error = H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
-  if (error < 0) {
-    sprintf(pBuffer,
-            "Error: cannot set cache size "
-            "for file %s",
-            filename);
-    NXReportError(pBuffer);
-    return error;
-  }
-  return error;
-}
-
 herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   char pBuffer[512];
   hid_t attr_id;
@@ -373,13 +341,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 
   /* start HDF5 interface */
   if (am == NXACC_CREATE5) {
-
-    /* set the cache size for the file */
-    if (set_file_cache(fapl, filename) < 0) {
-      free(pNew);
-      return NXstatus::NX_ERROR;
-    }
-
     am1 = H5F_ACC_TRUNC;
     pNew->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
   } else {
