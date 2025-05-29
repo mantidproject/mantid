@@ -51,15 +51,14 @@ const std::string PERIODOUTPUT{"output"};
 const std::string PERIODCOUNTS{"total_counts"};
 } // namespace NeXusEntry
 
-using namespace NeXus;
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using namespace HistogramData;
 using std::size_t;
 using namespace DataObjects;
 
-LoadMuonNexusV2NexusHelper::LoadMuonNexusV2NexusHelper(const NeXus::NXEntry &entry) : m_entry(entry) {}
+LoadMuonNexusV2NexusHelper::LoadMuonNexusV2NexusHelper(const Nexus::NXEntry &entry) : m_entry(entry) {}
 
 // Loads the good frames from the Muon Nexus V2 entry
 NXInt LoadMuonNexusV2NexusHelper::loadGoodFramesDataFromNexus(bool isFileMultiPeriod) {

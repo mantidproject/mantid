@@ -35,9 +35,9 @@ using namespace API;
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
-std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
+std::string LoadHelper::findInstrumentNexusPath(const Mantid::Nexus::NXEntry &firstEntry) {
   std::string result("");
-  std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
+  std::vector<Mantid::Nexus::NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == "NXinstrument"; });
   if (it != v.cend())
     result = it->nxname;
@@ -45,11 +45,11 @@ std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &fi
   return result;
 }
 
-std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
+std::string LoadHelper::getStringFromNexusPath(const Mantid::Nexus::NXEntry &firstEntry, const std::string &nexusPath) {
   return firstEntry.getString(nexusPath);
 }
 
-double LoadHelper::getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
+double LoadHelper::getDoubleFromNexusPath(const Mantid::Nexus::NXEntry &firstEntry, const std::string &nexusPath) {
   return firstEntry.getFloat(nexusPath);
 }
 
@@ -57,10 +57,10 @@ double LoadHelper::getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &firstEnt
  * Gets the time binning from a Nexus float array
  * Adds an extra bin at the end
  */
-std::vector<double> LoadHelper::getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
+std::vector<double> LoadHelper::getTimeBinningFromNexusPath(const Mantid::Nexus::NXEntry &firstEntry,
                                                             const std::string &nexusPath) {
 
-  Mantid::NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
+  Mantid::Nexus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
   timeBinningNexus.load();
 
   size_t numberOfBins = static_cast<size_t>(timeBinningNexus.dim0()) + 1; // boundaries
@@ -406,7 +406,7 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
  * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
  */
-void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum, bool pointData,
                                      const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
@@ -488,7 +488,7 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
  * tube-pixel-channel order
  */
-void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum,
                                      const std::set<int> &acceptedDetectorIDs,
                                      const std::vector<int> &customDetectorIDs,
@@ -550,7 +550,7 @@ void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double z
  * @param groupName Full name of the data group
  * @return NXInt data object
  */
-NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+Nexus::NXInt LoadHelper::getIntDataset(const Nexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openIntData();
 }
@@ -561,7 +561,7 @@ NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::s
  * @param groupName Full name of the data group
  * @return NXDouble data object
  */
-NeXus::NXDouble LoadHelper::getDoubleDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+Nexus::NXDouble LoadHelper::getDoubleDataset(const Nexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openDoubleData();
 }

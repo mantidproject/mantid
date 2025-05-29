@@ -61,7 +61,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using namespace HistogramData;
 using std::size_t;
 
@@ -1054,7 +1054,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
  * @param entry a handle to the Nexus file
  * @return if the file has multiple time regimes or not
  */
-bool LoadISISNexus2::isMultipleTimeRegimeFile(const NeXus::NXEntry &entry) const {
+bool LoadISISNexus2::isMultipleTimeRegimeFile(const Nexus::NXEntry &entry) const {
   auto hasMultipleTimeRegimes(false);
   try {
     NXClass instrument = entry.openNXGroup("instrument");

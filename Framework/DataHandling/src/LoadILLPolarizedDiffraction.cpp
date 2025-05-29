@@ -37,7 +37,7 @@ namespace Mantid::DataHandling {
 using namespace API;
 using namespace Geometry;
 using namespace Kernel;
-using namespace NeXus;
+using namespace Nexus;
 using Types::Core::DateAndTime;
 
 namespace {

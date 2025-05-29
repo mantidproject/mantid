@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 
 /** C++ implementation of NeXus classes.
 
@@ -722,5 +722,5 @@ private:
   const std::string m_filename; ///< The file name
 };
 
-} // namespace NeXus
+} // namespace Nexus
 } // namespace Mantid

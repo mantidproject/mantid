@@ -52,7 +52,7 @@ namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
@@ -779,7 +779,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
  * @param columnType  :: Name of the column type to create
  */
 template <typename ColumnType, typename NexusType>
-void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData &tableData, const std::string &dataSetName,
+void LoadNexusProcessed::loadNumericColumn(const Mantid::Nexus::NXData &tableData, const std::string &dataSetName,
                                            const API::ITableWorkspace_sptr &tableWs, const std::string &columnType) {
   NXDataSetTyped<NexusType> data = tableData.openNXDataSet<NexusType>(dataSetName);
   std::string columnTitle = data.attributes("name");
@@ -927,7 +927,7 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData, const std::st
  * @param data   :: Table data to load from
  * @param tableWs     :: Workspace to add column to
  */
-void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
+void LoadNexusProcessed::loadV3DColumn(Mantid::Nexus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
   std::string columnTitle = data.attributes("name");
   if (!columnTitle.empty()) {
     ColumnVector<V3D> col = tableWs->addColumn("V3D", columnTitle);
