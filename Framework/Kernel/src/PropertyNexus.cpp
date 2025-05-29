@@ -10,7 +10,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 // PropertyWithValue implementation
@@ -110,7 +110,7 @@ void getTimeAndStart(Nexus::File *file, std::vector<double> &timeSec, std::strin
   // Optionally get a start
   try {
     file->getAttr("start", startStr);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
   file->closeData();
 }
@@ -187,7 +187,7 @@ std::unique_ptr<Property> loadPropertyCommon(Nexus::File *file, const std::strin
   std::string unitsStr;
   try {
     file->getAttr("units", unitsStr);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // let it drop on the floor
   }
 

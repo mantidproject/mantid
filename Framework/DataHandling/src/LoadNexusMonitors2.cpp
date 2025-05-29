@@ -50,7 +50,7 @@ namespace {
 void loadSampleDataISIScompatibilityInfo(Nexus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // No problem, it just means that this entry does not exist
     return;
   }
@@ -66,7 +66,7 @@ void loadSampleDataISIScompatibilityInfo(Nexus::File &file, Mantid::API::MatrixW
     WS->mutableSample().setThickness(rspb[3]);
     WS->mutableSample().setHeight(rspb[4]);
     WS->mutableSample().setWidth(rspb[5]);
-  } catch (::NeXus::Exception &ex) {
+  } catch (Nexus::Exception const &ex) {
     // it means that the data was not as expected, report the problem
     std::stringstream s;
     s << "Wrong definition found in isis_vms_compat :> " << ex.what();
@@ -293,7 +293,7 @@ void LoadNexusMonitors2::exec() {
   try {
     g_log.debug() << "Load Sample data isis\n";
     loadSampleDataISIScompatibilityInfo(file, m_workspace);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
 
   // Need to get the instrument name from the file
@@ -376,7 +376,7 @@ void LoadNexusMonitors2::fixUDets(Nexus::File &file) {
 
   try {
     file.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return;
   }
   // UDET
@@ -450,7 +450,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   try {
     filePointer = std::make_unique<Nexus::File>(fname);
     filePointer->getEntries();
-  } catch (::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
     res = false;
   }

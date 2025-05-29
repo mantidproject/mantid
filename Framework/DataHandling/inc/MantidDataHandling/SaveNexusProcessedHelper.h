@@ -14,7 +14,7 @@
 #include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
@@ -135,7 +135,7 @@ inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string
       m_filehandle->putAttr(attributes[it], avalues[it]);
     }
     m_filehandle->closeData();
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return false;
   }
 

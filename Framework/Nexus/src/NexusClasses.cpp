@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <memory>
 #include <utility>
@@ -179,7 +179,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
   std::string className = nxclass.empty() ? NX_class() : nxclass;
   try {
     m_fileID->openGroup(name(), className);
-  } catch (::NeXus::Exception const &) {
+  } catch (Exception const &) {
     return false;
   }
   m_open = true;
@@ -190,7 +190,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
 void NXClass::close() {
   try {
     m_fileID->closeGroup();
-  } catch (::NeXus::Exception const &) {
+  } catch (Exception const &) {
     throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close path " +
                              m_path + ")");
   }
@@ -272,7 +272,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   // Open NeXus file
   try {
     m_fileID = std::make_shared<File>(m_filename, NXACC_READ);
-  } catch (::NeXus::Exception const &e) {
+  } catch (Exception const &e) {
     std::cout << "NXRoot: Error loading " << m_filename << "\" in read mode: " << e.what() << "\n";
     throw;
   }

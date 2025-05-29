@@ -30,7 +30,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <vector>
@@ -413,7 +413,7 @@ void LoadMD::loadVisualNormalization(const std::string &key,
     uint32_t readVisualNormalization(0);
     m_file->readData(key, readVisualNormalization);
     normalization = static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
 
   } catch (std::exception &) {
   }
@@ -429,14 +429,14 @@ void LoadMD::loadCoordinateSystem() {
     uint32_t readCoord(0);
     m_file->readData("coordinate_system", readCoord);
     m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     auto pathOnEntry = m_file->getPath();
     try {
       m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
       int readCoord(0);
       m_file->readData("value", readCoord);
       m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
     }
     // return to where we started
     m_file->openPath(pathOnEntry);

@@ -27,8 +27,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
@@ -1003,7 +1003,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   try {
     Nexus::File nxHandle(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << filename << "\" in read mode: " << e.what() << "\n";
   }
 }

@@ -33,7 +33,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/NexusIOHelper.h"
 
@@ -542,7 +542,7 @@ std::size_t numEvents(Nexus::File &file, bool &hasTotalCounts, bool &oldNeXusFil
           hasTotalCounts = true;
           return eventCount;
         }
-      } catch (::NeXus::Exception &) {
+      } catch (Nexus::Exception const &) {
       }
     }
   }
@@ -553,12 +553,12 @@ std::size_t numEvents(Nexus::File &file, bool &hasTotalCounts, bool &oldNeXusFil
       file.openData("event_pixel_id");
     else
       file.openData("event_id");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Older files (before Nov 5, 2010) used this field.
     try {
       file.openData("event_pixel_id");
       oldNeXusFileNames = true;
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       // Some groups have neither indicating there are not events here
       return 0;
     }
@@ -944,7 +944,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
         // Open NeXus file
         Nexus::File nxHandle(m_filename, NXACC_READ);
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
-      } catch (const ::NeXus::Exception &e) {
+      } catch (Nexus::Exception const &e) {
         g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
       }
     }
@@ -1552,7 +1552,7 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '" << entry_name << vms_str << "'.\n";
     m_file->openPath("/" + entry_name + vms_str);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return nullptr; // Doesn't exist
   }
 
@@ -1648,7 +1648,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 void LoadEventNexus::loadSampleDataISIScompatibility(Nexus::File &file, EventWorkspaceCollection &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // No problem, it just means that this entry does not exist
     return;
   }
@@ -1664,7 +1664,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(Nexus::File &file, EventWor
     WS.setThickness(rspb[3]);
     WS.setHeight(rspb[4]);
     WS.setWidth(rspb[5]);
-  } catch (::NeXus::Exception &ex) {
+  } catch (Nexus::Exception const &ex) {
     // it means that the data was not as expected, report the problem
     std::stringstream s;
     s << "Wrong definition found in isis_vms_compat :> " << ex.what();

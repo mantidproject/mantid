@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "test_helper.h"
 #include <H5Cpp.h>
@@ -130,8 +130,8 @@ public:
     string grp("test_group"), cls("NXsample");
 
     // check error conditions
-    TS_ASSERT_THROWS(file.makeGroup(grp, ""), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.makeGroup("", cls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.makeGroup(grp, ""), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeGroup("", cls), Mantid::Nexus::Exception const &);
     // check works when correct
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
   }
@@ -147,9 +147,9 @@ public:
     file.makeGroup(grp, cls, false);
 
     // check error conditions
-    TS_ASSERT_THROWS(file.openGroup(string(), cls), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openGroup(grp, string()), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup(string(), cls), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup(grp, string()), Mantid::Nexus::Exception const &);
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
@@ -167,7 +167,7 @@ public:
 
     // try to open it with wrong class name
     string notcls("NXshorts");
-    TS_ASSERT_THROWS(file.openGroup(grp, notcls), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup(grp, notcls), Mantid::Nexus::Exception const &);
   }
 
   void test_open_group_layers() {
@@ -219,14 +219,14 @@ public:
     Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
     // if there is not a top-level NXentry, should throw error
-    TS_ASSERT_THROWS(file.makeData(name, type, dims), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.makeData(name, type, dims), Mantid::Nexus::Exception const &);
 
     // now make a NXentry group and try
     file.makeGroup("entry", "NXentry", true);
 
     // check some failing cases
-    TS_ASSERT_THROWS(file.makeData("", type, dims), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.makeData(name, type, Mantid::Nexus::DimVector()), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.makeData("", type, dims), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeData(name, type, Mantid::Nexus::DimVector()), Mantid::Nexus::Exception const &);
 
     // check it works when it works
     TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
@@ -261,8 +261,8 @@ public:
     file.makeData(data, type, 3, false);
 
     // check error conditions
-    TS_ASSERT_THROWS(file.openData(string()), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openData("tacos1"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openData(string()), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openData("tacos1"), Mantid::Nexus::Exception const &);
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
@@ -291,13 +291,13 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // check error at root
-    TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
 
     // now make data, close it, and check we are back at root
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
     TS_ASSERT_THROWS_NOTHING(file.closeData());
 
-    TS_ASSERT_THROWS(file.closeData(), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
   }
 
   template <typename T> void do_test_data_putget(Mantid::Nexus::File &file, string name, T in) {
@@ -360,7 +360,7 @@ public:
     // try to put data when not in a dataset -- should fail
     int data = 1;
     file.makeGroup("a_group", "NXshirt", true);
-    TS_ASSERT_THROWS(file.putData(&data), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.putData(&data), Mantid::Nexus::Exception const &);
   }
 
   void test_data_putget_string() {
@@ -581,9 +581,9 @@ public:
     file.closeGroup();
 
     // tests invalid cases
-    TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
-    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openPath(""), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openPath("/pants"), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openPath("/entry1/pants"), Mantid::Nexus::Exception const &);
 
     // make sure we are at root
     file.openPath("/");
@@ -656,7 +656,7 @@ public:
 
     // open a group and try to get info
     file.makeGroup("a_group", "NXshorts", true);
-    TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.getInfo(), Mantid::Nexus::Exception const &);
   }
 
   // ##################################################################################################################

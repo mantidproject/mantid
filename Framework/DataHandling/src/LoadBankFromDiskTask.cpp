@@ -13,7 +13,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/NexusIOHelper.h"
 
@@ -65,7 +65,7 @@ void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
     file.openData("event_time_zero");
-  } catch (::NeXus::Exception &) {
+  } catch (const Nexus::Exception &) {
     // Field not found error is most likely.
     // Use the "proton_charge" das logs.
     thisBankPulseTimes = m_loader.alg->m_allBanksPulseTimes;
@@ -253,7 +253,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
   std::string tof_unit;
   try {
     file.getAttr("units", tof_unit);
-  } catch (::NeXus::Exception const &) {
+  } catch (Nexus::Exception const &) {
   }
   file.closeData();
 
@@ -273,7 +273,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(Nexus
   try {
     // First, get info about the event_weight field in this bank
     file.openData("event_weight");
-  } catch (::NeXus::Exception &) {
+  } catch (const Nexus::Exception &) {
     // Field not found error is most likely.
     m_have_weight = false;
     return std::unique_ptr<std::vector<float>>();
