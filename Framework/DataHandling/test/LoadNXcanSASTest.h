@@ -64,7 +64,7 @@ public:
   void setUp() override { m_parameters = NXcanSASTestParameters(); }
   void tearDown() override {
     m_ads.clear();
-    removeFile(m_parameters.filename);
+    removeFile(m_parameters.filePath);
   }
 
   void test_that_1D_workspace_with_Q_resolution_can_be_loaded() {
@@ -132,7 +132,7 @@ public:
   }
 
   void test_that_legacy_transmissions_saved_as_histograms_are_loaded() {
-    m_parameters.filename = "NXcanSAS-histo-lambda.h5";
+    m_parameters.filePath = "NXcanSAS-histo-lambda.h5";
 
     const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
     TS_ASSERT(!wsOut->isHistogramData());
@@ -273,7 +273,7 @@ private:
     LoadNXcanSAS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filePath));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadTransmission", m_parameters.loadTransmission));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_parameters.loadedWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -294,8 +294,9 @@ private:
 
     const std::string saveAlgName = m_parameters.isPolarized ? "SavePolarizedNXcanSAS" : "SaveNXcanSAS";
     const auto saveAlg = AlgorithmManager::Instance().createUnmanaged(saveAlgName);
+    std::string filePath = generate_random_filename();
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", m_parameters.filename);
+    saveAlg->setProperty("Filename", filePath);
 
     if (m_parameters.isPolarized) {
       saveAlg->setProperty("InputWorkspace", std::dynamic_pointer_cast<WorkspaceGroup>(workspace));
@@ -525,8 +526,8 @@ public:
 
   ~LoadNXcanSASTestPerformance() {
     AnalysisDataService::Instance().clear();
-    removeFile(parameters1D.filename);
-    removeFile(parameters2D.filename);
+    removeFile(parameters1D.filePath);
+    removeFile(parameters2D.filePath);
   }
 
   void test_execute_1D() { alg1D.execute(); }
@@ -542,7 +543,7 @@ private:
   void save_no_assert(const MatrixWorkspace_sptr &ws, NXcanSASTestParameters &parameters) {
     auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", parameters.filename);
+    saveAlg->setProperty("Filename", parameters.filePath);
     saveAlg->setProperty("InputWorkspace", ws);
     saveAlg->setProperty("RadiationSource", parameters.radiationSource);
     if (!parameters.detectors.empty()) {
@@ -554,11 +555,12 @@ private:
   }
 
   void setup_1D() {
-    removeFile(parameters1D.filename);
+    removeFile(parameters1D.filePath);
     parameters1D.detectors.emplace_back("front-detector");
     parameters1D.detectors.emplace_back("rear-detector");
     parameters1D.invalidDetectors = false;
     parameters1D.hasDx = true;
+    parameters1D.filePath = generate_random_filename();
 
     const auto ws = provide1DWorkspace(parameters1D);
     setXValuesOn1DWorkspace(ws, parameters1D.xmin, parameters1D.xmax);
@@ -569,7 +571,7 @@ private:
     const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
 
     alg1D.initialize();
-    alg1D.setPropertyValue("Filename", parameters1D.filename);
+    alg1D.setPropertyValue("Filename", parameters1D.filePath);
 
     alg1D.setProperty("LoadTransmission", true);
 
@@ -577,13 +579,13 @@ private:
   }
 
   void setup_2D() {
-    removeFile(parameters2D.filename);
+    removeFile(parameters2D.filePath);
 
     parameters2D.detectors.emplace_back("front-detector");
     parameters2D.detectors.emplace_back("rear-detector");
     parameters2D.invalidDetectors = false;
-
     parameters2D.is2dData = true;
+    parameters2D.filePath = generate_random_filename();
 
     const auto ws = provide2DWorkspace(parameters2D);
     set2DValues(ws);
@@ -593,7 +595,7 @@ private:
     save_no_assert(ws, parameters2D);
 
     alg2D.initialize();
-    alg2D.setPropertyValue("Filename", parameters2D.filename);
+    alg2D.setPropertyValue("Filename", parameters2D.filePath);
 
     alg2D.setProperty("LoadTransmission", true);
 

@@ -58,7 +58,7 @@ struct NXcanSASTestParameters {
   double magneticFieldStrength{1};
   double scaledBgSubScaleFactor{};
 
-  std::string filename{(std::filesystem::temp_directory_path() / "testFile.h5").string()};
+  std::string filePath;
   std::string runNumber{"1234"};
   std::string userFile{"my_user_file"};
   std::string workspaceTitle{"sample_workspace"};
@@ -133,4 +133,6 @@ Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(const NXcanSASTestParameter
 void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws, double value = 0);
 
 void removeFile(const std::string &filename);
+
+std::string generate_random_filename(std::size_t length = 12, const std::string &suffix = ".h5");
 } // namespace NXcanSASTestHelper
