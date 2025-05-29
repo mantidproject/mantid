@@ -647,7 +647,7 @@ else()
   if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
   else()
-    set(HTML_ROOT "\\${Mantid_HTML_ROOT}") 
+    set(HTML_ROOT "\\${Mantid_HTML_ROOT}")
   endif()
 endif()
 
