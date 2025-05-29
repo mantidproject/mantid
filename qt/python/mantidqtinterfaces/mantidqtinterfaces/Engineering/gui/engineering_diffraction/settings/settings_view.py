@@ -131,6 +131,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_euler_angles_scheme(self):
         return self.eulerAngles_lineedit.text()
 
+    def get_plot_exp_pf(self):
+        return self.expPF_checkBox.isChecked()
+
+    def get_contour_kernel(self):
+        return self.contourKernel_lineedit.text()
+
     # =================
     # Component Setters
     # =================
@@ -224,6 +230,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_euler_angles_scheme(self, text):
         self.eulerAngles_lineedit.setText(text)
+
+    def set_plot_exp_pf(self, val):
+        self.expPF_checkBox.setChecked(val)
+
+    def set_contour_kernel(self, text):
+        self.contourKernel_lineedit.setText(text)
 
     # =================
     # Force Actions

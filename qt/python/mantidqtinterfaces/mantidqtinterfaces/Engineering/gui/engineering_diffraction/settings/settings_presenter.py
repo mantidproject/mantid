@@ -30,6 +30,8 @@ SETTINGS_DICT = {
     "peak_pos_thresh": str,
     "use_euler_angles": bool,
     "euler_angles_scheme": str,
+    "plot_exp_pf": bool,
+    "contour_kernel": str,
 }
 
 DEFAULT_SETTINGS = {
@@ -51,6 +53,8 @@ DEFAULT_SETTINGS = {
     "peak_pos_thresh": "0.1",
     "use_euler_angles": False,
     "euler_angles_scheme": "YZY",
+    "plot_exp_pf": True,
+    "contour_kernel": "2.0",
 }
 
 ALL_LOGS = ",".join(
@@ -205,6 +209,8 @@ class SettingsPresenter(object):
         self.settings["peak_pos_thresh"] = self.view.get_peak_pos_thresh()
         self.settings["use_euler_angles"] = self.view.get_use_euler_angles()
         self.settings["euler_angles_scheme"] = self.view.get_euler_angles_scheme()
+        self.settings["plot_exp_pf"] = self.view.get_plot_exp_pf()
+        self.settings["contour_kernel"] = self.view.get_contour_kernel()
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
@@ -226,6 +232,8 @@ class SettingsPresenter(object):
         self.view.set_peak_pos_thresh(self.settings["peak_pos_thresh"])
         self.view.set_use_euler_angles(self.settings["use_euler_angles"])
         self.view.set_euler_angles_scheme(self.settings["euler_angles_scheme"])
+        self.view.set_plot_exp_pf(self.settings["plot_exp_pf"])
+        self.view.set_contour_kernel(self.settings["contour_kernel"])
         self._find_files()
 
     def _find_files(self):
@@ -282,6 +290,8 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("peak_pos_thresh")
         self.check_and_populate_with_default("use_euler_angles")
         self.check_and_populate_with_default("euler_angles_scheme")
+        self.check_and_populate_with_default("plot_exp_pf")
+        self.check_and_populate_with_default("contour_kernel")
 
     # -----------------------
     # Observers / Observables
