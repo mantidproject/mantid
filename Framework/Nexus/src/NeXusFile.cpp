@@ -1007,7 +1007,14 @@ template <> MANTID_NEXUS_DLL void File::getData<std::string>(std::vector<std::st
 
 std::string File::getStrData() {
   std::shared_ptr<H5::DataSet> dataset = this->getCurrentLocationAs<H5::DataSet>();
-  const std::string value = H5Util::readString(*dataset);
+  std::string value = H5Util::readString(*dataset);
+
+  // Trim at first null character
+  size_t end = value.find('\0');
+  if (end != std::string::npos) {
+    value = value.substr(0, end);
+  }
+
   if (value == " ") {
     return "";
   } else {

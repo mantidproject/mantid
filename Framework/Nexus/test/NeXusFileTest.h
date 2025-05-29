@@ -470,6 +470,29 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
+  void test_check_str_length() {
+    FileResource resource("test_nexus_str_len.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    std::string testStr("some_str_data");
+    std::string padded(128, '\0');
+    std::copy(testStr.begin(), testStr.end(), padded.begin());
+    file.makeData("string_data", NXnumtype::CHAR, padded.size(), true);
+    file.putData(&padded);
+    file.closeData();
+
+    file.openPath("/entry/string_data");
+    Info info = file.getInfo();
+    auto data = file.getStrData();
+
+    TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(info.dims[0], 128);
+    TS_ASSERT_EQUALS(data.length(), testStr.length());
+    TS_ASSERT_EQUALS(data, testStr);
+  }
+
   void test_data_putget_array() {
     cout << "\ntest dataset read/write -- arrays\n";
 
