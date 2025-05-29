@@ -20,7 +20,8 @@ static const std::string NULL_STR("NULL");
  * \ingroup cpp_main
  */
 
-namespace NeXus {
+namespace Mantid {
+namespace Nexus {
 
 static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
 
@@ -654,4 +655,5 @@ public:
  */
 template <typename NumT> MANTID_NEXUS_DLL NXnumtype getType(NumT const number = NumT());
 
-}; // namespace NeXus
+} // namespace Nexus
+} // namespace Mantid

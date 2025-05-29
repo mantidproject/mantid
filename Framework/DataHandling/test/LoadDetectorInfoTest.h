@@ -82,7 +82,7 @@ void writeSmallDatFile(const std::string &filename) {
 }
 
 void writeDetNXSfile(const std::string &filename, const int nDets) {
-  ::NeXus::File nxsfile(filename, NXACC_CREATE5);
+  Mantid::Nexus::File nxsfile(filename, NXACC_CREATE5);
   nxsfile.makeGroup("detectors.dat", "NXEntry", true);
   nxsfile.putAttr("version", "1.0");
 
@@ -128,7 +128,7 @@ void writeDetNXSfile(const std::string &filename, const int nDets) {
       ic = 0;
   }
 
-  ::NeXus::DimVector array_dims{nDets, 2};
+  Mantid::Nexus::DimVector array_dims{nDets, 2};
 
   nxsfile.makeData("detID", NXnumtype::INT32, array_dims, true);
   nxsfile.putAttr("description", "DetectorID, DetectorType");

@@ -79,7 +79,7 @@ const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
  * @param name : sub entry name to look for
  * @return true only if it exists
  */
-bool exists(::NeXus::File &file, const std::string &name) {
+bool exists(Nexus::File &file, const std::string &name) {
   const auto entries = file.getEntries();
   return exists(entries, name);
 }
@@ -483,7 +483,7 @@ void LoadEventNexus::execLoader() {
   }
 }
 
-std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
+std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(Nexus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
@@ -526,7 +526,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
  * @param descriptor input containing metadata information
  * @return The number of events.
  */
-std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
+std::size_t numEvents(Nexus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
                       const Nexus::NexusDescriptor &descriptor) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
@@ -942,7 +942,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       prog->doReport("Loading all logs");
       try {
         // Open NeXus file
-        ::NeXus::File nxHandle(m_filename, NXACC_READ);
+        Nexus::File nxHandle(m_filename, NXACC_READ);
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
       } catch (const ::NeXus::Exception &e) {
         g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
@@ -1322,7 +1322,7 @@ bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(const st
  * not written properly within the instrument
  * @param hFile :: A reference to the NeXus file opened at the root entry
  */
-std::string LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
+std::string LoadEventNexus::readInstrumentFromISIS_VMSCompat(Nexus::File &hFile) {
   std::string instrumentName;
   try {
     hFile.openGroup("isis_vms_compat", "IXvms");
@@ -1645,7 +1645,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
  * @param file : handle to the nexus file
  * @param WS : pointer to the workspace
  */
-void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS) {
+void LoadEventNexus::loadSampleDataISIScompatibility(Nexus::File &file, EventWorkspaceCollection &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -1683,7 +1683,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File &file, EventW
  */
 void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
-    m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
+    m_file = std::make_unique<Nexus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Severe failure when trying to open NeXus file: " + std::string(e.what()));
   }

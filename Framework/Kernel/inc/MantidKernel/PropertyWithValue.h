@@ -13,7 +13,7 @@
 
 #include <vector>
 
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -45,7 +45,7 @@ public:
   PropertyWithValue() = delete;
   PropertyWithValue<TYPE> *clone() const override;
 
-  void saveProperty(::NeXus::File *file) override;
+  void saveProperty(Nexus::File *file) override;
   std::string value() const override;
   std::string valueAsPrettyStr(const size_t maxLength = 0, const bool collapseLists = true) const override;
   Json::Value valueAsJson() const override;
@@ -91,15 +91,15 @@ private:
   static Logger g_logger;
 };
 
-template <> MANTID_KERNEL_DLL void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
-template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<float>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<double>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<int32_t>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<uint32_t>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<int64_t>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<uint64_t>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<std::string>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<double>>::saveProperty(Nexus::File *file);
+template <> MANTID_KERNEL_DLL void PropertyWithValue<std::vector<int32_t>>::saveProperty(Nexus::File *file);
 
 template <typename TYPE> Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 

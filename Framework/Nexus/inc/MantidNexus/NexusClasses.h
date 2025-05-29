@@ -36,7 +36,7 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), allGood(false) {}
-  NXInfo(::NeXus::Info const &info, std::string const &name);
+  NXInfo(Info const &info, std::string const &name);
   std::string nxname;                 ///< name of the object
   std::size_t rank;                   ///< number of dimensions of the data
   NXDimArray dims;                    ///< sizes along each dimension
@@ -47,7 +47,7 @@ struct NXInfo {
 
 /// Information about a Nexus class
 struct NXClassInfo {
-  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
+  NXClassInfo(Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), allGood(false) {}
   std::string nxname;                 ///< name of the object
   std::string nxclass;                ///< NX class of the object or "SDS" if a dataset
@@ -91,8 +91,8 @@ class MANTID_NEXUS_DLL NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(::NeXus::File *fileID, NXClass const *parent, std::string const &name);
-  NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, std::string const &name);
+  NXObject(File *fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<File> fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -104,7 +104,7 @@ public:
   /// Returns the name of the object
   std::string name() const;
   /// Nexus file id
-  std::shared_ptr<::NeXus::File> m_fileID;
+  std::shared_ptr<File> m_fileID;
 
 protected:
   std::string m_path; ///< Keeps the absolute path to the object
@@ -177,8 +177,7 @@ protected:
    * size of the array) must be equal to the rank of the data.
    * @throw runtime_error if the operation fails.
    */
-  template <typename NumT>
-  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
+  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size) {
     m_fileID->openData(name());
     m_fileID->getSlab(data, start, size);
     m_fileID->closeData();
@@ -314,7 +313,7 @@ public:
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
-    ::NeXus::DimSizeVector datastart, datasize;
+    DimSizeVector datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {

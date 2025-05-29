@@ -58,7 +58,7 @@ public:
   // Auxiliary functions (non-virtual, used for testing)
   int64_t getNDataColums() const { return m_BlockSize[1]; }
   // get pointer to the Nexus file --> compatribility testing only.
-  ::NeXus::File *getFile() { return m_File.get(); }
+  Nexus::File *getFile() { return m_File.get(); }
 
   /**@brief The version of the "event_data" Nexus dataset
    *
@@ -116,7 +116,7 @@ private:
   /// truncated to 64 bytes)
   std::string m_fileName;
   /// the file Handler responsible for Nexus IO operations;
-  std::unique_ptr<::NeXus::File> m_File;
+  std::unique_ptr<Nexus::File> m_File;
   /// identifier if the file open only for reading or is  in read/write
   bool m_ReadOnly;
   /// The size of the events block which can be written in the neXus array at

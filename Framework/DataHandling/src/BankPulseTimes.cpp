@@ -50,7 +50,7 @@ BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTim
  * @param file :: nexus file open in the right bank entry
  * @param periodNumbers :: Period numbers to index into. Index via frame/pulse
  */
-BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers)
+BankPulseTimes::BankPulseTimes(Nexus::File &file, const std::vector<int> &periodNumbers)
     : startTime(DEFAULT_START_TIME), periodNumbers(periodNumbers), have_period_info(true),
       m_sorting_info(PulseSorting::UNKNOWN) {
 
@@ -92,7 +92,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &peri
 }
 
 template <typename ValueType>
-void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start) {
+void BankPulseTimes::readData(Nexus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start) {
   std::vector<int64_t> indexStart{0};
   std::vector<int64_t> indexStep{std::min(numValues, static_cast<int64_t>(12 * 3600 * 60))}; // 12 hour at 60Hz
 

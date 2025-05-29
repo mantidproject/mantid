@@ -10,11 +10,9 @@
 #include <memory>
 #include <utility>
 
-using ::NeXus::dimsize_t;
-
 namespace Mantid::Nexus {
 
-static NXDimArray nxdimArray(const ::NeXus::DimVector &xd) {
+static NXDimArray nxdimArray(const DimVector &xd) {
   NXDimArray ret{0};
   for (std::size_t i = 0; i < xd.size(); i++) {
     ret[i] = xd[i];
@@ -22,7 +20,7 @@ static NXDimArray nxdimArray(const ::NeXus::DimVector &xd) {
   return ret;
 }
 
-NXInfo::NXInfo(::NeXus::Info const &info, std::string const &name)
+NXInfo::NXInfo(Info const &info, std::string const &name)
     : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), allGood(true) {}
 
 std::vector<std::string> NXAttributes::names() const {
@@ -81,8 +79,7 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name) : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_path = parent->path() + "/" + name;
   }
@@ -94,7 +91,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
+NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_path = parent->path() + "/" + name;
@@ -113,7 +110,7 @@ std::string NXObject::name() const {
  */
 void NXDataSet::getAttributes() {
   std::vector<char> buff(128);
-  for (::NeXus::AttrInfo const &ainfo : m_fileID->getAttrInfos()) {
+  for (AttrInfo const &ainfo : m_fileID->getAttrInfos()) {
     if (ainfo.type != NXnumtype::CHAR && ainfo.length != 1) {
       throw std::runtime_error("Encountered attribute with array value");
     }
@@ -274,7 +271,7 @@ bool NXClass::containsDataSet(const std::string &query) const { return getDataSe
 NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   // Open NeXus file
   try {
-    m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_READ);
+    m_fileID = std::make_shared<File>(m_filename, NXACC_READ);
   } catch (::NeXus::Exception const &e) {
     std::cout << "NXRoot: Error loading " << m_filename << "\" in read mode: " << e.what() << "\n";
     throw;
@@ -290,7 +287,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
   // Open NeXus file
-  m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_CREATE5);
+  m_fileID = std::make_shared<File>(m_filename, NXACC_CREATE5);
 }
 
 NXRoot::~NXRoot() { m_fileID->close(); }

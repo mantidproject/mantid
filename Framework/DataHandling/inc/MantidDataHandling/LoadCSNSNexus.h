@@ -49,7 +49,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::unique_ptr<::NeXus::File> m_file;
+  std::unique_ptr<Nexus::File> m_file;
   std::string m_entry;
   std::vector<std::string> m_modules;
   std::vector<std::string> m_monitors;

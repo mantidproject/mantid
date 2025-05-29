@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
 using namespace NexusTest;
+using namespace Mantid::Nexus;
 using std::cout;
 using std::endl;
 using std::map;

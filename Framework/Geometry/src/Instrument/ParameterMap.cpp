@@ -1012,7 +1012,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp, const ICompon
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void ParameterMap::saveNexus(::NeXus::File *file, const std::string &group) const {
+void ParameterMap::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXnote", true);
   file->putAttr("version", 1);
   file->writeData("author", "");

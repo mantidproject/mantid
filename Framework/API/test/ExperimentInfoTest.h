@@ -443,7 +443,7 @@ public:
     std::string path = FileFinder::Instance().getFullPath(testFile);
 
     // Get nexus file for this.
-    ::NeXus::File nxFile(path, NXACC_READ);
+    Mantid::Nexus::File nxFile(path, NXACC_READ);
 
     // Load the Nexus IDF info
     std::string params;
@@ -465,7 +465,7 @@ public:
     std::string path = FileFinder::Instance().getFullPath(testFile);
 
     // Get nexus file for this.
-    ::NeXus::File nxFile(path, NXACC_READ);
+    Mantid::Nexus::File nxFile(path, NXACC_READ);
     // Open instrument group
     nxFile.openGroup("instrument", "NXinstrument");
 

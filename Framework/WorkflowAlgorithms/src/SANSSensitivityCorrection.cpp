@@ -97,7 +97,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
 
   // open file and make sure it has entries
   try {
-    ::NeXus::File handle(filePath, NXACC_READ);
+    Nexus::File handle(filePath, NXACC_READ);
     const auto entries = handle.getEntries();
     if (entries.size() == 0) {
       g_log.error("Error no entries found in " + filePath);

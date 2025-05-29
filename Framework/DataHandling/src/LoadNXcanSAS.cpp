@@ -52,7 +52,7 @@ std::string getNameOfEntry(const H5::H5File &root) {
  * Tries to find a nexus or sas entry definition on the loaded file to provide a confidence estimation for the loader.
  * @param file: Reference to loaded file
  */
-bool findDefinition(NeXus::File &file) {
+bool findDefinition(Mantid::Nexus::File &file) {
   bool foundDefinition = false;
   const auto entries = file.getEntries();
   for (const auto &[sasEntry, nxEntry] : entries) {
@@ -486,7 +486,7 @@ int LoadNXcanSAS::confidence(Nexus::NexusDescriptor &descriptor) const {
     return 0;
   }
   int confidence = 0;
-  ::NeXus::File file(descriptor.filename());
+  Mantid::Nexus::File file(descriptor.filename());
   // Check if there is an entry root/SASentry/definition->NXcanSAS
   try {
     if (findDefinition(file)) {

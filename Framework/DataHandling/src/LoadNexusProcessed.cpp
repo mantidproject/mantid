@@ -391,7 +391,7 @@ void LoadNexusProcessed::execLoader() {
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
-    m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
+    m_nexusFile = std::make_unique<Nexus::File>(root.m_fileID);
 
     // Find out how many NXentry groups there are in the file.
     nWorkspaceEntries = std::count_if(root.groups().cbegin(), root.groups().cend(),

@@ -177,7 +177,7 @@ void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
  *
  * @param file :: previously opened NXS file.
  */
-void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
+void WorkspaceHistory::saveNexus(Nexus::File *file) const {
   file->makeGroup("process", "NXprocess", true);
   std::stringstream output;
 
@@ -255,7 +255,7 @@ void getWordsInString(const std::string &words4, std::string &w1, std::string &w
  *
  * @param file :: previously opened NXS file.
  */
-void WorkspaceHistory::loadNexus(::NeXus::File *file) {
+void WorkspaceHistory::loadNexus(Nexus::File *file) {
   if (file->hasGroup("process", "NXprocess")) {
     file->openGroup("process", "NXprocess");
     loadNestedHistory(file);
@@ -277,7 +277,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  *loaded histories are added to
  * the workspace history.
  */
-void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHistory_sptr &parent) {
+void WorkspaceHistory::loadNestedHistory(Nexus::File *file, const AlgorithmHistory_sptr &parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {
@@ -309,7 +309,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHis
  * @param file :: The handle to the nexus file
  * @returns set of integers. One for each algorithm at the level in the file.
  */
-std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
+std::set<int> WorkspaceHistory::findHistoryEntries(Nexus::File *file) {
   std::set<int> historyNumbers;
   std::map<std::string, std::string> entries;
   file->getEntries(entries);

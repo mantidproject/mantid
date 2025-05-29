@@ -51,12 +51,12 @@ namespace {
     throw std::runtime_error(msg);                                                                                     \
   }
 
-int64_t vectorVolume(const ::NeXus::DimSizeVector &size) {
+int64_t vectorVolume(const Nexus::DimSizeVector &size) {
   return std::accumulate(size.cbegin(), size.cend(), int64_t{1}, std::multiplies<>());
 }
 
-std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
-  std::pair<::NeXus::Info, bool> info_and_close;
+std::pair<Nexus::Info, bool> checkIfOpenAndGetInfo(Nexus::File &file, const std::string &&entry) {
+  std::pair<Nexus::Info, bool> info_and_close;
   info_and_close.second = false;
   if (!file.isDataSetOpen()) {
     file.openData(entry);
@@ -70,7 +70,7 @@ std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file, const 
  * to another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U, Narrowing narrow>
-void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t size, const bool close_data) {
+void doReadNexusAnyVector(std::vector<T> &out, Nexus::File &file, const size_t size, const bool close_data) {
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
@@ -93,7 +93,7 @@ void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t
 
 /// Read any type of vector and return it as a new vector.
 template <typename T, typename U, Narrowing narrow>
-std::vector<T> readNexusAnyVector(::NeXus::File &file, const size_t size, const bool close_data) {
+std::vector<T> readNexusAnyVector(Nexus::File &file, const size_t size, const bool close_data) {
   std::vector<T> vec(size);
   doReadNexusAnyVector<T, U, narrow>(vec, file, size, close_data);
   return vec;
@@ -101,7 +101,7 @@ std::vector<T> readNexusAnyVector(::NeXus::File &file, const size_t size, const 
 
 /// Read any type of vector and store it into the provided buffer vector.
 template <typename T, typename U, Narrowing narrow>
-void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t size, const bool close_data) {
+void readNexusAnyVector(std::vector<T> &out, Nexus::File &file, const size_t size, const bool close_data) {
   if (out.size() < size)
     throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
   doReadNexusAnyVector<T, U, narrow>(out, file, size, close_data);
@@ -111,8 +111,8 @@ void readNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t s
  * another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U, Narrowing narrow>
-void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus::DimSizeVector &start,
-                        const ::NeXus::DimSizeVector &size, const int64_t volume, const bool close_data) {
+void doReadNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimSizeVector &start,
+                        const Nexus::DimSizeVector &size, const int64_t volume, const bool close_data) {
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
@@ -135,8 +135,8 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus:
 
 /// Read any type of slab and return it as a new vector.
 template <typename T, typename U, Narrowing narrow>
-std::vector<T> readNexusAnySlab(::NeXus::File &file, const ::NeXus::DimSizeVector &start,
-                                const ::NeXus::DimSizeVector &size, const bool close_data) {
+std::vector<T> readNexusAnySlab(Nexus::File &file, const Nexus::DimSizeVector &start, const Nexus::DimSizeVector &size,
+                                const bool close_data) {
   const auto volume = vectorVolume(size);
   std::vector<T> vec(volume);
   doReadNexusAnySlab<T, U, narrow>(vec, file, start, size, volume, close_data);
@@ -145,8 +145,8 @@ std::vector<T> readNexusAnySlab(::NeXus::File &file, const ::NeXus::DimSizeVecto
 
 /// Read any type of slab and store it into the provided buffer vector.
 template <typename T, typename U, Narrowing narrow>
-void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus::DimSizeVector &start,
-                      const ::NeXus::DimSizeVector &size, const bool close_data) {
+void readNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimSizeVector &start,
+                      const Nexus::DimSizeVector &size, const bool close_data) {
   const auto volume = vectorVolume(size);
   if (out.size() < static_cast<size_t>(volume))
     throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
@@ -156,7 +156,7 @@ void readNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const ::NeXus::D
 /** Templated function to read any type of variable and (potentially) convert it
  * to another type. If the two types are the same, the conversion is skipped.
  */
-template <typename T, typename U, Narrowing narrow> T readNexusAnyVariable(::NeXus::File &file, const bool close_data) {
+template <typename T, typename U, Narrowing narrow> T readNexusAnyVariable(Nexus::File &file, const bool close_data) {
   T buf;
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
@@ -182,7 +182,7 @@ template <typename T, typename U, Narrowing narrow> T readNexusAnyVariable(::NeX
  * Version that allows Narrowing.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-std::vector<T> readNexusVector(::NeXus::File &file, const std::string &entry = "") {
+std::vector<T> readNexusVector(Nexus::File &file, const std::string &entry = "") {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnyVector, file,
                              vectorVolume((info_and_close.first).dims), info_and_close.second);
@@ -193,7 +193,7 @@ std::vector<T> readNexusVector(::NeXus::File &file, const std::string &entry = "
  * The provided output buffer is filled.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-void readNexusVector(std::vector<T> &out, ::NeXus::File &file, const std::string &entry = "") {
+void readNexusVector(std::vector<T> &out, Nexus::File &file, const std::string &entry = "") {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnyVector, out, file,
                              vectorVolume((info_and_close.first).dims), info_and_close.second);
@@ -203,7 +203,7 @@ void readNexusVector(std::vector<T> &out, ::NeXus::File &file, const std::string
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry, const std::vector<int64_t> &start,
+std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
                              const std::vector<int64_t> &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, file, start, size,
@@ -215,15 +215,15 @@ std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry, cons
  * The provided output buffer is filled.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-void readNexusSlab(std::vector<T> &out, ::NeXus::File &file, const std::string &entry,
-                   const std::vector<int64_t> &start, const std::vector<int64_t> &size) {
+void readNexusSlab(std::vector<T> &out, Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
+                   const std::vector<int64_t> &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, out, file, start, size,
                              info_and_close.second);
 }
 
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
+T readNexusValue(Nexus::File &file, const std::string &entry = "") {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnyVariable, file, info_and_close.second);
 }

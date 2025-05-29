@@ -73,7 +73,7 @@ protected:
 
 private:
   /// Fix the detector numbers if the defaults are not correct
-  void fixUDets(::NeXus::File &file);
+  void fixUDets(Nexus::File &file);
 
   /// Load the logs
   void runLoadLogs(const std::string &filename, const API::MatrixWorkspace_sptr &localWorkspace);
@@ -84,13 +84,13 @@ private:
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
-  size_t getMonitorInfo(::NeXus::File &file, size_t &numPeriods);
+  size_t getMonitorInfo(Nexus::File &file, size_t &numPeriods);
 
   bool createOutputWorkspace(std::vector<bool> &loadMonitorFlags);
 
-  void readEventMonitorEntry(::NeXus::File &file, size_t ws_index);
+  void readEventMonitorEntry(Nexus::File &file, size_t ws_index);
 
-  void readHistoMonitorEntry(::NeXus::File &file, size_t ws_index, size_t numPeriods);
+  void readHistoMonitorEntry(Nexus::File &file, size_t ws_index, size_t numPeriods);
 
 private:
   std::vector<LoadNexusMonitorsAlg::MonitorInfo> m_monitorInfo;

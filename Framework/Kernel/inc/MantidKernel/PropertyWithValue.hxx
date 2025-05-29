@@ -95,7 +95,7 @@ template <typename TYPE> PropertyWithValue<TYPE> *PropertyWithValue<TYPE>::clone
   return new PropertyWithValue<TYPE>(*this);
 }
 
-template <typename TYPE> void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
+template <typename TYPE> void PropertyWithValue<TYPE>::saveProperty(Nexus::File * /*file*/) {
   // AppleClang 7.3 and later gives a -Winfinite-recursion warning if I call the
   // base class method. The function is small enough that reimplementing it
   // isn't a big deal.

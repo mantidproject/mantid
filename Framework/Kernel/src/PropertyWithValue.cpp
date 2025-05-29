@@ -15,7 +15,7 @@
 namespace Mantid::Kernel {
 
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                                                           \
-  template <> void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {                                        \
+  template <> void PropertyWithValue<type>::saveProperty(Nexus::File *file) {                                          \
     file->makeGroup(this->name(), "NXlog", true);                                                                      \
     file->writeData("value", m_value);                                                                                 \
     file->openData("value");                                                                                           \
@@ -54,7 +54,7 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<std::
 template class MANTID_KERNEL_DLL PropertyWithValue<std::shared_ptr<PropertyManager>>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 // nexus does not support writeData for long type on mac, so we save as int64
-template <> void PropertyWithValue<long>::saveProperty(::NeXus::File *file) {
+template <> void PropertyWithValue<long>::saveProperty(Nexus::File *file) {
   file->makeGroup(this->name(), "NXlog", true);
   file->writeData("value", static_cast<int64_t>(m_value));
   file->openData("value");

@@ -123,7 +123,7 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  * @param entryName   :: entry name to load properties from
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  */
-void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName,
+void LoadHelper::addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
   // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
   // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
@@ -145,7 +145,7 @@ void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runD
 
 namespace {
 template <typename NumericType>
-void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, const std::string &property_name,
+void addNumericProperty(Nexus::File &filehandle, const Nexus::Info &nxinfo, const std::string &property_name,
                         API::Run &runDetails) {
   if (!runDetails.hasProperty(property_name)) {
     g_log.warning() << "Property " << property_name << " was set twice. Please check the Nexus file and your inputs.";
@@ -194,7 +194,7 @@ void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, 
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails,
+void LoadHelper::recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails,
                                                  const std::string &parent_name, const std::string &parent_class,
                                                  int level, bool useFullPath) {
   const std::string SDS("SDS"); // denotes data field

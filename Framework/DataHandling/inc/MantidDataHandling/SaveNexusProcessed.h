@@ -51,11 +51,10 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  void saveSpectraDetectorMapNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file,
-                                   const std::vector<int> &wsIndices,
+  void saveSpectraDetectorMapNexus(const API::MatrixWorkspace &ws, Nexus::File *file, const std::vector<int> &wsIndices,
                                    const NXcompression compression = NXcompression::LZW) const;
 
-  void saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file, const std::vector<int> &wsIndices,
+  void saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, Nexus::File *file, const std::vector<int> &wsIndices,
                                 const NXcompression compression = NXcompression::LZW) const;
 
   virtual bool saveLegacyInstrument() { return true; }

@@ -197,7 +197,7 @@ enum NXcompression : int {
 };
 
 // forward declare
-namespace NeXus {
+namespace Mantid::Nexus {
 
 // TODO change to std::size_t
 typedef std::int64_t dimsize_t;
@@ -231,4 +231,4 @@ struct AttrInfo {
 
 /** Forward declare of NeXus::File */
 class File;
-} // namespace NeXus
+} // namespace Mantid::Nexus

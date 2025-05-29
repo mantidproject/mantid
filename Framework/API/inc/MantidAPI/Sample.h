@@ -37,8 +37,8 @@ public:
   ~Sample();
   Sample &operator=(const Sample &rhs);
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  int loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  int loadNexus(Nexus::File *file, const std::string &group);
 
   /// index operator for accessing multiple samples
   Sample &operator[](const int index);

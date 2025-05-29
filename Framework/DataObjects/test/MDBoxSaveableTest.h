@@ -835,7 +835,7 @@ public:
   //    // Create and open the test NXS file
   //    MDBox<MDLeanEvent<3>,3> c(bc, 0);
   //    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
-  //    ::NeXus::File * file = do_saveAndOpenNexus(c);
+  //    Nexus::File * file = do_saveAndOpenNexus(c);
   //
   //    // Set the stuff that is handled outside the box itself
   //    c.setSignal(1234.5); // fake value loaded from disk

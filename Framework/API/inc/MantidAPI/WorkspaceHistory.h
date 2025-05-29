@@ -74,18 +74,17 @@ public:
   void printSelf(std::ostream &, const int indent = 0) const;
 
   /// Save the workspace history to a nexus file
-  void saveNexus(::NeXus::File *file) const;
+  void saveNexus(Nexus::File *file) const;
   /// Load the workspace history from a nexus file
-  void loadNexus(::NeXus::File *file);
+  void loadNexus(Nexus::File *file);
 
 private:
   /// Recursive function to load the algorithm history tree from file
-  void loadNestedHistory(::NeXus::File *file,
-                         const AlgorithmHistory_sptr &parent = std::shared_ptr<AlgorithmHistory>());
+  void loadNestedHistory(Nexus::File *file, const AlgorithmHistory_sptr &parent = std::shared_ptr<AlgorithmHistory>());
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.
-  std::set<int> findHistoryEntries(::NeXus::File *file);
+  std::set<int> findHistoryEntries(Nexus::File *file);
   /// The environment of the workspace
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace

@@ -65,7 +65,7 @@ public:
   Types::Core::DateAndTime timeAtIndex(unsigned long index) const;
 
   // nexus items
-  void saveNexus(::NeXus::File *file) const;
+  void saveNexus(Nexus::File *file) const;
 
 private:
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);

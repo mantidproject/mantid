@@ -51,9 +51,9 @@ public:
   // Create the U matrix from two vectors
   const Kernel::DblMatrix &setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
   // Save the lattice to an open NeXus file
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
+  void saveNexus(Nexus::File *file, const std::string &group) const;
   // Load the lattice to from an open NeXus file
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void loadNexus(Nexus::File *file, const std::string &group);
   // Get the UB matix corresponding to the real space edge vectors a, b, c
   static bool GetUB(Kernel::DblMatrix &UB, const Kernel::V3D &a_dir, const Kernel::V3D &b_dir,
                     const Kernel::V3D &c_dir);

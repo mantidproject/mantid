@@ -2011,7 +2011,7 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::setValueFromPrope
 
 //----------------------------------------------------------------------------------------------
 /** Saves the time vector has time + start attribute */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::saveTimeVector(::NeXus::File *file) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::saveTimeVector(Nexus::File *file) {
   std::vector<DateAndTime> times = this->timesAsVector();
   const DateAndTime &start = times.front();
   std::vector<double> timeSec(times.size());
@@ -2025,7 +2025,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::saveTimeVector(::NeXus::
 
 //----------------------------------------------------------------------------------------------
 /** Helper function to save a TimeSeriesProperty<> */
-template <> void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
+template <> void TimeSeriesProperty<std::string>::saveProperty(Nexus::File *file) {
   std::vector<std::string> values = this->valuesAsVector();
   if (values.empty())
     return;
@@ -2044,7 +2044,8 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *fi
     index += maxlen;
   }
 
-  const NeXus::DimVector dims{static_cast<NeXus::dimsize_t>(values.size()), static_cast<NeXus::dimsize_t>(maxlen)};
+  const Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(values.size()),
+                                      static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
   file->makeData("value", NXnumtype::CHAR, dims, true);
   file->putData(strs.data());
   file->closeData();
@@ -2058,7 +2059,7 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *fi
  * UINT8
  * for the value and add an attribute boolean to inidcate it is actually a bool
  */
-template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
+template <> void TimeSeriesProperty<bool>::saveProperty(Nexus::File *file) {
   std::vector<bool> value = this->valuesAsVector();
   if (value.empty())
     return;
@@ -2070,7 +2071,7 @@ template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
   file->closeGroup();
 }
 
-template <typename TYPE> void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::saveProperty(Nexus::File *file) {
   auto values = this->valuesAsVector();
   if (values.empty())
     return;

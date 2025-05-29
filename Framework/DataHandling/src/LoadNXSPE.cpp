@@ -70,7 +70,7 @@ int LoadNXSPE::confidence(Nexus::NexusDescriptor &descriptor) const {
   int confidence(0);
   using string_map_t = std::map<std::string, std::string>;
   try {
-    ::NeXus::File file = ::NeXus::File(descriptor.filename());
+    Nexus::File file = Nexus::File(descriptor.filename());
     string_map_t entries = file.getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
       if (it->second == "NXentry") {
@@ -100,7 +100,7 @@ void LoadNXSPE::exec() {
   std::string filename = getProperty("Filename");
   // quicly check if it's really nxspe
   try {
-    ::NeXus::File file(filename);
+    Nexus::File file(filename);
     std::string mainEntry = (*(file.getEntries().begin())).first;
     file.openGroup(mainEntry, "NXentry");
     file.openData("definition");
@@ -113,7 +113,7 @@ void LoadNXSPE::exec() {
   }
 
   // Load the data
-  ::NeXus::File file(filename);
+  Nexus::File file(filename);
 
   std::string mainEntry = (*(file.getEntries().begin())).first;
   file.openGroup(mainEntry, "NXentry");
@@ -160,7 +160,7 @@ void LoadNXSPE::exec() {
     throw std::invalid_argument("data field was not found");
   }
   file.openData("data");
-  ::NeXus::Info info = file.getInfo();
+  Nexus::Info info = file.getInfo();
   auto numSpectra = static_cast<std::size_t>(info.dims.at(0));
   auto numBins = static_cast<std::size_t>(info.dims.at(1));
   std::vector<double> data;

@@ -28,7 +28,7 @@ public:
   static const std::string DEFAULT_START_TIME;
 
   /// Constructor with NeXus::File
-  BankPulseTimes(::NeXus::File &file, const std::vector<int> &periodNumbers);
+  BankPulseTimes(Nexus::File &file, const std::vector<int> &periodNumbers);
 
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times);
@@ -67,7 +67,7 @@ public:
 
 private:
   template <typename ValueType>
-  void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+  void readData(Nexus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
 
   /// This determines the start time by finding the minimum value in the array
   void updateStartTime();

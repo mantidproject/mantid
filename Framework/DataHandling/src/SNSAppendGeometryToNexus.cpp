@@ -168,7 +168,7 @@ void SNSAppendGeometryToNexus::exec() {
   Geometry::IComponent_const_sptr source = instrument->getSource();
 
   // Open the NeXus file
-  ::NeXus::File nxfile(m_filename, NXACC_RDWR);
+  Nexus::File nxfile(m_filename, NXACC_RDWR);
 
   // using string_map_t = std::map<std::string,std::string>;
   std::map<std::string, std::string>::const_iterator root_iter;
@@ -299,7 +299,7 @@ std::string SNSAppendGeometryToNexus::getInstrumentName(const std::string &nxfil
   std::string instrument;
 
   // Open the NeXus file
-  ::NeXus::File nxfile(nxfilename);
+  Nexus::File nxfile(nxfilename);
   // What is the first entry ?
   std::map<std::string, std::string> entries = nxfile.getEntries();
 

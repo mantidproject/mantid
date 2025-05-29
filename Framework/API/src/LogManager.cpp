@@ -586,7 +586,7 @@ void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes writing to the same group
  */
-void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen) const {
+void LogManager::saveNexus(Nexus::File *file, const std::string &group, bool keepOpen) const {
   file->makeGroup(group, "NXgroup", true);
   file->putAttr("version", 1);
 
@@ -618,7 +618,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
+void LogManager::loadNexus(Nexus::File * /*file*/, const std::string & /*group*/,
                            const Nexus::NexusDescriptor & /*fileInfo*/, const std::string & /*prefix*/,
                            bool /*keepOpen*/) {
   throw std::runtime_error("LogManager::loadNexus should not be used");
@@ -633,7 +633,7 @@ void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen) {
+void LogManager::loadNexus(Nexus::File *file, const std::string &group, bool keepOpen) {
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
   }
@@ -646,7 +646,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool k
   }
 }
 
-void LogManager::loadNexus(::NeXus::File *file, const Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
+void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
 
   // Only load from NXlog entries
   const auto &allEntries = fileInfo.getAllEntries();
@@ -697,7 +697,7 @@ void LogManager::loadNexus(::NeXus::File *file, const Nexus::NexusDescriptor &fi
  * @param entries :: The entries available in the current place in the file.
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries) {
+void LogManager::loadNexus(Nexus::File *file, const std::map<std::string, std::string> &entries) {
 
   for (const auto &name_class : entries) {
     // NXLog types are the main one.

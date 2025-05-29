@@ -505,7 +505,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   try {
-    ::NeXus::File nxfileID(filename, NXACC_READ);
+    Nexus::File nxfileID(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const ::NeXus::Exception &) {
     throw Kernel::Exception::FileError("Unable to open File:", filename);

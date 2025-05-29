@@ -50,7 +50,7 @@ void NexusTestHelper::createFile(const std::string &barefilename) {
   filename = (Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + barefilename);
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
-  file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
+  file = std::make_unique<Mantid::Nexus::File>(filename, NXACC_CREATE5);
   file->makeGroup("test_entry", "NXentry", true);
 }
 
@@ -60,6 +60,6 @@ void NexusTestHelper::reopenFile() {
   if (!file)
     throw std::runtime_error("NexusTestHelper: you must call createFile() before reopenFile().");
   file->close();
-  file = std::make_unique<::NeXus::File>(filename, NXACC_READ);
+  file = std::make_unique<Mantid::Nexus::File>(filename, NXACC_READ);
   file->openGroup("test_entry", "NXentry");
 }

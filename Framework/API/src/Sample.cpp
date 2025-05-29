@@ -283,7 +283,7 @@ void Sample::addSample(const std::shared_ptr<Sample> &childSample) { m_samples.e
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   if (m_name.empty()) {
@@ -324,7 +324,7 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
  * @param group :: name of the group to open
  * @return the version tag of the sample group
  */
-int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
+int Sample::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXsample");
 
   // Version 0 = saveNexusProcessed before Sep 8, 2011

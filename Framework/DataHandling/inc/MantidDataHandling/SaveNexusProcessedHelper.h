@@ -74,7 +74,7 @@ public:
                                            bool compress) const;
 
   template <typename NumT>
-  void writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
+  void writeData(const char *name, NXnumtype datatype, Nexus::DimVector dims_array, NumT const *data,
                  bool compress = false) const;
 
   /// write bin masking information
@@ -84,11 +84,11 @@ public:
   void resetProgress(Mantid::API::Progress *prog);
 
   /// Nexus file handle
-  std::shared_ptr<::NeXus::File> filehandle() const { return m_filehandle; }
+  std::shared_ptr<Nexus::File> filehandle() const { return m_filehandle; }
 
 private:
   /// C++ API file handle
-  std::shared_ptr<::NeXus::File> m_filehandle;
+  std::shared_ptr<Nexus::File> m_filehandle;
   /// Nexus compression method
   NXcompression m_nexuscompression;
   /// Allow an externally supplied progress object to be used

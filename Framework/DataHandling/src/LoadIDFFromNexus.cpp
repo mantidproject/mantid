@@ -78,7 +78,7 @@ void LoadIDFFromNexus::exec() {
   std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
-  ::NeXus::File nxfile(filename);
+  Nexus::File nxfile(filename);
   // Assume one level in instrument path
   nxfile.openPath(instrumentParentPath);
 
@@ -240,7 +240,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(const std::string &correction
  *
  *  @throw FileError Thrown if unable to parse XML file
  */
-void LoadIDFFromNexus::LoadParameters(::NeXus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
+void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
 
   std::string parameterString;
 

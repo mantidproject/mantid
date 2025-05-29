@@ -72,7 +72,7 @@ void LoadMcStasNexus::exec() {
   std::string filename = getPropertyValue("Filename");
   g_log.debug() << "Opening file " << filename << '\n';
 
-  ::NeXus::File nxFile(filename);
+  Nexus::File nxFile(filename);
   auto entries = nxFile.getEntries();
   auto itend = entries.end();
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);

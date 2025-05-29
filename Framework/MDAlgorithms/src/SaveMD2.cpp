@@ -23,7 +23,7 @@
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
-using file_holder_type = std::unique_ptr<::NeXus::File>;
+using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -79,7 +79,7 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  auto file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
+  auto file = std::make_unique<Nexus::File>(filename, NXACC_CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
@@ -149,14 +149,14 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   // Number of data points
   // Size in each dimension (in the "C" style order, so z,y,x
   // That is, data[z][y][x] = etc.
-  ::NeXus::DimVector size(numDims);
+  Nexus::DimVector size(numDims);
   for (size_t d = 0; d < numDims; d++) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     // Size in each dimension (reverse order for RANK)
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  ::NeXus::DimSizeVector chunks = size;
+  Nexus::DimSizeVector chunks = size;
   chunks[0] = 1; // Drop the largest stride for chunking, I don't know
                  // if this is the best but appears to work
 

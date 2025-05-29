@@ -233,7 +233,7 @@ private:
 
   void checkNXTomoStructure() {
     // Checks the structure of the file - not interested in the data content
-    ::NeXus::File nxFile(m_outputFile);
+    Mantid::Nexus::File nxFile(m_outputFile);
 
     // Check for entry1/tomo_entry/control { and data dataset within }
     TS_ASSERT_THROWS_NOTHING(nxFile.openPath("/entry1/tomo_entry/control"));
@@ -308,7 +308,7 @@ private:
   void checkNXTomoDimensions(int wsCount) {
     // Check that the dimensions for the datasets are correct for the number of
     // workspaces
-    ::NeXus::File nxFile(m_outputFile);
+    Mantid::Nexus::File nxFile(m_outputFile);
 
     nxFile.openPath("/entry1/tomo_entry/data");
     nxFile.openData("data");
@@ -337,7 +337,7 @@ private:
     // Check that the rotation values are correct for the rotation dataset for
     // the number of workspaces
 
-    ::NeXus::File nxFile(m_outputFile);
+    Mantid::Nexus::File nxFile(m_outputFile);
 
     nxFile.openPath("/entry1/tomo_entry/data");
     nxFile.openData("rotation_angle");
@@ -354,7 +354,7 @@ private:
   void checkNXTomoData(int wsCount) {
     // Checks the first {wsCount} data entries are correct - All test data is
     // value 2.0
-    ::NeXus::File nxFile(m_outputFile);
+    Mantid::Nexus::File nxFile(m_outputFile);
 
     nxFile.openPath("/entry1/tomo_entry/data");
     nxFile.openData("data");

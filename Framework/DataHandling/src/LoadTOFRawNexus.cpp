@@ -99,7 +99,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   bankNames.clear();
 
   // Create the root Nexus class
-  auto file = ::NeXus::File(nexusfilename);
+  auto file = Nexus::File(nexusfilename);
 
   // Open the default data group 'entry'
   file.openGroup(entry_name, "NXentry");
@@ -187,7 +187,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
-          ::NeXus::DimVector const dims = file.getInfo().dims;
+          Nexus::DimVector const dims = file.getInfo().dims;
           file.closeData();
 
           if (!dims.empty()) {
@@ -200,11 +200,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");
-          ::NeXus::DimVector const xdim = file.getInfo().dims;
+          Nexus::DimVector const xdim = file.getInfo().dims;
           file.closeData();
 
           file.openData("y_pixel_offset");
-          ::NeXus::DimVector const ydim = file.getInfo().dims;
+          Nexus::DimVector const ydim = file.getInfo().dims;
           file.closeData();
 
           if (!xdim.empty() && !ydim.empty()) {
@@ -215,7 +215,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
           file.openData(m_axisField);
-          ::NeXus::DimVector const dims = file.getInfo().dims;
+          Nexus::DimVector const dims = file.getInfo().dims;
           // Find the units, if available
           if (file.hasAttr("units"))
             file.getAttr("units", m_xUnits);
@@ -277,7 +277,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   m_fileMutex.lock();
 
   // Navigate to the point in the file
-  auto file = ::NeXus::File(nexusfilename);
+  auto file = Nexus::File(nexusfilename);
   file.openGroup(entry_name, "NXentry");
   file.openGroup("instrument", "NXinstrument");
   file.openGroup(bankName, "NXdetector");
@@ -419,7 +419,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 /** @return the name of the entry that we will load */
 std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   std::string entry_name = "entry";
-  auto file = ::NeXus::File(filename);
+  auto file = Nexus::File(filename);
   std::map<std::string, std::string> entries = file.getEntries();
   file.close();
 

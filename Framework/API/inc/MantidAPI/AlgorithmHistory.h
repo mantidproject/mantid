@@ -99,7 +99,7 @@ public:
   /// Create an child algorithm from a history record at a given index
   std::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
   /// Write this history object to a nexus file
-  void saveNexus(::NeXus::File *file, int &algCount) const;
+  void saveNexus(Nexus::File *file, int &algCount) const;
   // Set the execution count
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created

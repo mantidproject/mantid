@@ -262,7 +262,7 @@ void CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) 
  * tables from
  */
 void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filename) {
-  ::NeXus::File nxsFile(filename);
+  Nexus::File nxsFile(filename);
   try {
     nxsFile.openPath("/raw_data_1/isis_vms_compat");
   } catch (::NeXus::Exception &) {

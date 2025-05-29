@@ -50,7 +50,7 @@ void print_data(const std::string &prefix, std::ostream &stream, const void *dat
 }
 
 namespace { // anonymous
-void putAttr(NeXus::File &file, const std::string &dataName, const std::string &attrName,
+void putAttr(Mantid::Nexus::File &file, const std::string &dataName, const std::string &attrName,
              const std::string &attrValue) {
   file.openData(dataName);
   file.putAttr(attrName, attrValue);
@@ -63,7 +63,7 @@ void putAttr(NeXus::File &file, const std::string &dataName, const std::string &
 void write_dmc(const std::string &filename, const std::string &start_time, const std::vector<int32_t> &counts,
                const std::vector<double> &two_theta) {
   std::cout << "Creating external file \"" << filename << "\"\n";
-  NeXus::File file(filename, NXACC_CREATE5);
+  Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
   const std::string title("Ga0.94Mn0.04Sb_8mm 2.567A T=4");
 

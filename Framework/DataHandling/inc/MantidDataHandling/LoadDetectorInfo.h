@@ -56,9 +56,9 @@ private:
   /// Use a isis raw nexus or event file as input
   void loadFromIsisNXS(const std::string &filename);
   /// Read data from old-style libisis NeXus file
-  void readLibisisNxs(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
+  void readLibisisNxs(Nexus::File &nxsFile, DetectorInfo &detInfo) const;
   /// Read data from old-style libisis NeXus file
-  void readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
+  void readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
   void updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex, Geometry::ParameterMap &pmap,

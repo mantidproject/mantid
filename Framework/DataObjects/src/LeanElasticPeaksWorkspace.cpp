@@ -402,7 +402,7 @@ std::shared_ptr<const Mantid::API::Column> LeanElasticPeaksWorkspace::getColumn(
   return m_columns[index];
 }
 
-void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
+void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
 
   // Number of Peaks
   const size_t np(m_peaks.size());
@@ -586,7 +586,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Goniometer Matrix Column
-  const NeXus::DimVector array_dims{static_cast<::NeXus::dimsize_t>(m_peaks.size()), 9};
+  const Nexus::DimVector array_dims{static_cast<Nexus::dimsize_t>(m_peaks.size()), 9};
   file->writeData("column_13", goniometerMatrix, array_dims);
   file->openData("column_13");
   file->putAttr("name", "Goniometer Matrix");
@@ -595,7 +595,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Shape
-  ::NeXus::DimVector dims;
+  Nexus::DimVector dims;
   dims.emplace_back(np);
   dims.emplace_back(static_cast<int>(maxShapeJSONLength));
   const std::string name = "column_14";
@@ -620,7 +620,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->closeData();
 
   // Qlab
-  const NeXus::DimVector qlab_dims{static_cast<::NeXus::dimsize_t>(m_peaks.size()), 3};
+  const Nexus::DimVector qlab_dims{static_cast<Nexus::dimsize_t>(m_peaks.size()), 3};
   file->writeData("column_15", qlabs, qlab_dims);
   file->openData("column_15");
   file->putAttr("name", "Q LabFrame");

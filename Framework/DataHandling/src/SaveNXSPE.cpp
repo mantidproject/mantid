@@ -90,7 +90,7 @@ void SaveNXSPE::exec() {
   std::string filename = getPropertyValue("Filename");
 
   // Create the file.
-  ::NeXus::File nxFile(filename, NXACC_CREATE5);
+  Nexus::File nxFile(filename, NXACC_CREATE5);
 
   // Make the top level entry (and open it)
   std::string entryName = getPropertyValue("InputWorkspace");
