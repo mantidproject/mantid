@@ -32,7 +32,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using namespace HistogramData;
 using std::size_t;
 using namespace DataObjects;
@@ -68,8 +68,8 @@ int LoadMuonNexusV2::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
 
-  ::NeXus::File file(descriptor.filename());
-  file.openPath(NeXusEntry::DEFINITION);
+  Nexus::File file(descriptor.filename());
+  file.openAddress(NeXusEntry::DEFINITION);
   std::string def = file.getStrData();
   if (def == "muonTD" || def == "pulsedTD") {
     return 82; // have to return 82 to "beat" the LoadMuonNexus2 algorithm,

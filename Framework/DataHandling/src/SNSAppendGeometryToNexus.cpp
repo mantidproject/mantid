@@ -6,17 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SNSAppendGeometryToNexus.h"
 #include "MantidAPI/FileProperty.h"
-
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-
 #include "MantidKernel/OptionalBool.h"
-
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Exception.h>
 #include <Poco/File.h>
@@ -24,7 +20,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace ::NeXus;
+using namespace Mantid::Nexus;
 
 namespace Mantid::DataHandling {
 
@@ -168,7 +164,7 @@ void SNSAppendGeometryToNexus::exec() {
   Geometry::IComponent_const_sptr source = instrument->getSource();
 
   // Open the NeXus file
-  ::NeXus::File nxfile(m_filename, NXACC_RDWR);
+  Nexus::File nxfile(m_filename, NXACC_RDWR);
 
   // using string_map_t = std::map<std::string,std::string>;
   std::map<std::string, std::string>::const_iterator root_iter;
@@ -299,7 +295,7 @@ std::string SNSAppendGeometryToNexus::getInstrumentName(const std::string &nxfil
   std::string instrument;
 
   // Open the NeXus file
-  ::NeXus::File nxfile(nxfilename);
+  Nexus::File nxfile(nxfilename);
   // What is the first entry ?
   std::map<std::string, std::string> entries = nxfile.getEntries();
 
@@ -311,7 +307,7 @@ std::string SNSAppendGeometryToNexus::getInstrumentName(const std::string &nxfil
   try {
     nxfile.openData("name");
     instrument = nxfile.getStrData();
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // TODO: try and get the instrument name from the filename instead.
     // Note in filename we have instrument short name yet
     // ExperimentiInfo.getInstrumentFilename() expects instrument long name

@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -36,18 +36,17 @@ public:
   void run() override;
 
 private:
-  void loadPulseTimes(::NeXus::File &file);
-  std::unique_ptr<std::vector<uint64_t>> loadEventIndex(::NeXus::File &file);
-  void prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
-                      const uint64_t &start_event_index);
-  std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
-  std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);
-  std::unique_ptr<std::vector<float>> loadEventWeights(::NeXus::File &file);
+  void loadPulseTimes(Nexus::File &file);
+  std::unique_ptr<std::vector<uint64_t>> loadEventIndex(Nexus::File &file);
+  void prepareEventId(Nexus::File &file, int64_t &start_event, int64_t &stop_event, const uint64_t &start_event_index);
+  std::unique_ptr<std::vector<uint32_t>> loadEventId(Nexus::File &file);
+  std::unique_ptr<std::vector<float>> loadTof(Nexus::File &file);
+  std::unique_ptr<std::vector<float>> loadEventWeights(Nexus::File &file);
   int64_t recalculateDataSize(const int64_t size);
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
-  /// NXS path to bank
+  /// NXS address to bank
   std::string entry_name;
   /// NXS type
   std::string entry_type;

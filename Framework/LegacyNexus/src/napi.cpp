@@ -737,7 +737,7 @@ static int isRoot(NXhandle hfil) {
   copies the next path element into element.
   returns a pointer into path beyond the extracted path
   ---------------------------------------------------------------------*/
-static char *extractNextPath(char *path, NXname element) {
+static char *extractNextAddress(char *path, NXname element) {
   char *pStart = path;
   /*
      skip over leading /
@@ -903,7 +903,7 @@ NXstatus NXopenpath(NXhandle hfil, CONSTCHAR *path) {
   }
 
   while (run == 1) {
-    pPtr = extractNextPath(pPtr, pathElement);
+    pPtr = extractNextAddress(pPtr, pathElement);
     status = stepOneUp(hfil, pathElement);
     if (status != NXstatus::NX_OK) {
       return status;
@@ -934,7 +934,7 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
   }
 
   do {
-    pPtr = extractNextPath(pPtr, pathElement);
+    pPtr = extractNextAddress(pPtr, pathElement);
     status = stepOneGroupUp(hfil, pathElement);
     if (status == NXstatus::NX_ERROR) {
       sprintf(buffer, "ERROR: NXopengrouppath cannot reach path %s", path);

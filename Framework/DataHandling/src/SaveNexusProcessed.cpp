@@ -557,7 +557,7 @@ bool SaveNexusProcessed::processGroups() {
  * @param wsIndices :: list of the Workspace Indices to save.
  * @param compression :: NXcompression int to indicate how to compress
  */
-void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, ::NeXus::File *file,
+void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, Nexus::File *file,
                                                      const std::vector<int> &wsIndices,
                                                      const NXcompression compression) const {
 
@@ -573,7 +573,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, 
     return;
 
   // write data as Nexus sections detector{index,count,list}
-  ::NeXus::DimVector dims(1, numberSpec);
+  Nexus::DimVector dims(1, numberSpec);
   file->writeCompData("detector_index", detector_index, dims, compression, dims);
   file->writeCompData("detector_count", detector_count, dims, compression, dims);
   dims.front() = static_cast<int>(nDetectors);
@@ -622,7 +622,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, 
  * @param wsIndices :: list of the Workspace Indices to save.
  * @param compression :: NXcompression int to indicate how to compress
  */
-void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, ::NeXus::File *file,
+void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws, Nexus::File *file,
                                                   const std::vector<int> &wsIndices,
                                                   const NXcompression compression) const {
   const auto numberSpec = int(wsIndices.size());
@@ -633,7 +633,7 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws
     spectra.emplace_back(static_cast<int32_t>(spectrum.getSpectrumNo()));
   }
 
-  const ::NeXus::DimVector dims(1, numberSpec);
+  const Nexus::DimVector dims(1, numberSpec);
   file->writeCompData("spectra", spectra, dims, compression, dims);
 }
 

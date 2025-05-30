@@ -1,18 +1,17 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <iosfwd>
 #include <stdexcept>
 #include <string>
 
 /**
- * \file NeXusException.hpp
- * Header for a base NeXus::Exception
+ * Header for a base Nexus::Exception
  * \ingroup cpp_main
  */
 
-namespace NeXus {
+namespace Mantid::Nexus {
 
 /**
  * Class that provides for a standard NeXus exception
@@ -21,7 +20,7 @@ namespace NeXus {
 
 class MANTID_NEXUS_DLL Exception : public std::runtime_error {
 public:
-  /// Create a new NeXus::Exception
+  /// Create a new Nexus::Exception
   Exception(const std::string &msg = "GENERIC ERROR", const std::string &functionname = "",
             const std::string &filename = "");
   /// \return the message with functionname
@@ -35,4 +34,4 @@ private:
 };
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const Exception &err);
-}; // namespace NeXus
+}; // namespace Mantid::Nexus

@@ -11,7 +11,7 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <numeric>
 #include <optional>

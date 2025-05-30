@@ -11,7 +11,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::API::FileBackedExperimentInfo;
@@ -33,7 +33,7 @@ public:
     }
 
     m_inMemoryExptInfo = std::make_shared<ExperimentInfo>();
-    ::NeXus::File nxFile(m_filename, NXACC_READ);
+    Mantid::Nexus::File nxFile(m_filename, NXACC_READ);
     nxFile.openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
     m_inMemoryExptInfo->loadExperimentInfoNexus(m_filename, &nxFile, paramString);

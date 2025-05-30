@@ -415,7 +415,7 @@ public:
   virtual void setMonitorWorkspace(const std::shared_ptr<MatrixWorkspace> &monitorWS);
   std::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
-  void loadInstrumentNexus(::NeXus::File *file);
+  void loadInstrumentNexus(Nexus::File *file);
 
   //=====================================================================================
   // MD Geometry methods

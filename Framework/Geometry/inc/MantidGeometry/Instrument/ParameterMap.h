@@ -264,7 +264,7 @@ public:
   /// Attempts to retrieve a rotation from the rotation cache
   bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
   /// Persist a representation of the Parameter map to the open Nexus file
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
+  void saveNexus(Nexus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
   /// newComp->id
   void copyFromParameterMap(const IComponent *oldComp, const IComponent *newComp, const ParameterMap *oldPMap);

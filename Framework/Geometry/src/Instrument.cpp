@@ -21,7 +21,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 #include <memory>
@@ -883,7 +883,7 @@ const std::string &Instrument::getXmlText() const {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Instrument::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Instrument::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXinstrument", true);
   file->putAttr("version", 1);
 
@@ -943,7 +943,7 @@ void Instrument::saveNexus(::NeXus::File *file, const std::string &group) const 
  *                 a group must be open that has only one call of this function.
  *  @param detIDs :: the dectector IDs of the detectors belonging to the set
  */
-void Instrument::saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const {
+void Instrument::saveDetectorSetInfoToNexus(Nexus::File *file, const std::vector<detid_t> &detIDs) const {
 
   size_t nDets = detIDs.size();
   if (nDets == 0)
@@ -989,7 +989,7 @@ void Instrument::saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vect
  * @param file :: open NeXus file
  * @param group :: name of the group to open
  */
-void Instrument::loadNexus(::NeXus::File *file, const std::string &group) {
+void Instrument::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXinstrument");
   file->closeGroup();
 }

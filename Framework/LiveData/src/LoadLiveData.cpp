@@ -78,6 +78,8 @@ const std::string LoadLiveData::category() const { return "DataHandling\\LiveDat
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadLiveData::version() const { return 1; }
 
+const std::vector<std::string> LoadLiveData::seeAlso() const { return {"MonitorLiveData", "StartLiveData"}; }
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */

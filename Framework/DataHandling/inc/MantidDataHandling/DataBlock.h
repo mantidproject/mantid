@@ -28,7 +28,7 @@ class DataBlockGenerator;
 class MANTID_DATAHANDLING_DLL DataBlock {
 public:
   DataBlock();
-  DataBlock(const Mantid::NeXus::NXInt &data);
+  DataBlock(const Mantid::Nexus::NXInt &data);
   DataBlock(size_t numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
 
   virtual ~DataBlock() = default;

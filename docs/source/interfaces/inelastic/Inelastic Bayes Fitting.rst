@@ -79,8 +79,6 @@ Save Result
 Quasi
 -----
 
-.. warning:: This interface is only available on Windows
-
 The model that is being fitted is that of a :math:`\delta`-function (elastic component)
 of amplitude :math:`A(0)` and Lorentzians of amplitude :math:`A(j)` and HWHM
 :math:`W(j)` where :math:`j=1,2,3`. The whole function is then convolved with
@@ -162,8 +160,6 @@ Save Result
 
 Stretch
 -------
-
-.. warning:: This interface is only available on Windows
 
 This is a variation of the stretched exponential option of Quasi. For each
 spectrum, a fit is performed for a grid of β and σ values. The distribution of

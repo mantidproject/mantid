@@ -20,8 +20,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace {
 
@@ -262,10 +262,10 @@ void CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) 
  * tables from
  */
 void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filename) {
-  ::NeXus::File nxsFile(filename);
+  Nexus::File nxsFile(filename);
   try {
-    nxsFile.openPath("/raw_data_1/isis_vms_compat");
-  } catch (::NeXus::Exception &) {
+    nxsFile.openAddress("/raw_data_1/isis_vms_compat");
+  } catch (Nexus::Exception const &) {
     throw std::runtime_error("Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
   using NXIntArray = std::vector<int32_t>;

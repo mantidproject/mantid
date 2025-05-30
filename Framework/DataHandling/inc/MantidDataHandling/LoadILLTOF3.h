@@ -46,21 +46,21 @@ private:
   void addFacility();
   void addPulseInterval();
 
-  void fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
-  void fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList);
+  void fillStaticWorkspace(const Nexus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
+  void fillScanWorkspace(const Nexus::NXEntry &entry, const std::vector<std::string> &monitorList);
 
-  std::vector<std::string> getMonitorInfo(const NeXus::NXEntry &firstEntry);
-  void initWorkspace(const NeXus::NXEntry &entry);
+  std::vector<std::string> getMonitorInfo(const Nexus::NXEntry &firstEntry);
+  void initWorkspace(const Nexus::NXEntry &entry);
 
-  void loadInstrumentDetails(const NeXus::NXEntry &);
-  void loadTimeDetails(const NeXus::NXEntry &entry);
+  void loadInstrumentDetails(const Nexus::NXEntry &);
+  void loadTimeDetails(const Nexus::NXEntry &entry);
 
-  std::vector<double> prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF);
+  std::vector<double> prepareAxis(const Nexus::NXEntry &entry, bool convertToTOF);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  std::string m_instrumentName; ///< Name of the instrument
-  std::string m_instrumentPath; ///< Name of the instrument path
+  std::string m_instrumentName;    ///< Name of the instrument
+  std::string m_instrumentAddress; ///< Name of the instrument address
 
   // Variables describing the data in the detector
   size_t m_numberOfTubes;         // number of tubes - X

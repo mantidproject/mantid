@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <utility>
 
@@ -283,7 +283,7 @@ void Sample::addSample(const std::shared_ptr<Sample> &childSample) { m_samples.e
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   if (m_name.empty()) {
@@ -324,14 +324,14 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
  * @param group :: name of the group to open
  * @return the version tag of the sample group
  */
-int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
+int Sample::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXsample");
 
   // Version 0 = saveNexusProcessed before Sep 8, 2011
   int version = 0;
   try {
     file->getAttr("version", version);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     version = 0;
   }
 
@@ -339,7 +339,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     // Sample NAME field may/may not be present
     try {
       file->readData("name", m_name);
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       m_name = "";
     }
   }

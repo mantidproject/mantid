@@ -20,7 +20,7 @@
 
   For further information, see <http://www.nexusformat.org>
 
-  Added functions to deal with the path stack for NXgetpath
+  Added functions to deal with the address stack for NXgetaddress
   Mark Koennecke, October 2009
 
 */
@@ -45,8 +45,8 @@ void setCloseID(pFileStack self, const NXlink &id);
 
 int fileStackDepth(pFileStack self);
 
-void pushPath(pFileStack self, const char *name);
-void popPath(pFileStack self);
-int buildPath(pFileStack self, char *path, int pathlen);
+void pushAddress(pFileStack self, const char *name);
+void popAddress(pFileStack self);
+int buildAddress(pFileStack self, char *address, int addresslen);
 
 #endif

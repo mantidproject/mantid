@@ -55,7 +55,7 @@ private:
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
-  /// NXS path to bank
+  /// NXS address to bank
   std::string entry_name;
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
   /// index)

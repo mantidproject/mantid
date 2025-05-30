@@ -36,15 +36,15 @@ private:
   void init() override;
   void exec() override;
 
-  void loadDataDetails(const NeXus::NXEntry &entry);
+  void loadDataDetails(const Nexus::NXEntry &entry);
   void initWorkSpace();
-  void setInstrumentName(const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath);
-  std::string getDataPath(const NeXus::NXEntry &entry);
+  void setInstrumentName(const Nexus::NXEntry &firstEntry, const std::string &instrumentNameAddress);
+  std::string getDataAddress(const Nexus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
-  void loadDataIntoWorkspace(const NeXus::NXEntry &entry);
-  void loadDiffractionData(NeXus::NXEntry &entry);
+  void loadDataIntoWorkspace(const Nexus::NXEntry &entry);
+  void loadDiffractionData(Nexus::NXEntry &entry);
   void moveComponent(const std::string &, double);
-  void moveSingleDetectors(const NeXus::NXEntry &entry);
+  void moveSingleDetectors(const Nexus::NXEntry &entry);
   void rotateTubes();
   std::string getInstrumentFileName();
 

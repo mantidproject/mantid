@@ -11,10 +11,6 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 namespace DataHandling {
 

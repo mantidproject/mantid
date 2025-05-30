@@ -141,7 +141,7 @@ class SaveISISReflectometryORSOTest(systemtesting.MantidSystemTest):
             # Check the data values
             ref_values = np.fromstring(ref_line, dtype=float, sep=" ")
             actual_values = np.fromstring(line, dtype=float, sep=" ")
-            self.assertTrue(np.allclose(actual_values, ref_values, atol=1e-10, equal_nan=True))
+            np.testing.assert_allclose(actual_values, ref_values, atol=1e-10, equal_nan=True)
 
 
 class SaveISISReflectometryORSOReducedSingleDatasetFileTest(SaveISISReflectometryORSOTest):

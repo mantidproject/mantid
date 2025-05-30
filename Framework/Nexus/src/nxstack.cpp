@@ -20,7 +20,7 @@
 
   For further information, see <http://www.nexusformat.org>
 
-  Added code to support the path stack for NXgetpath,
+  Added code to support the address stack for NXgetaddress,
         Mark Koennecke, October 2009
 */
 #include "MantidNexus/nxstack.h"
@@ -42,14 +42,14 @@ typedef struct {
 typedef struct __fileStack {
   int fileStackPointer;
   std::vector<fileStackEntry> fileStack;
-  int pathPointer;
-  std::vector<std::string> pathStack;
+  int addressPointer;
+  std::vector<std::string> addressStack;
 } fileStack;
 /*---------------------------------------------------------------------*/
 pFileStack makeFileStack() {
   pFileStack pNew = new fileStack;
   pNew->fileStackPointer = -1;
-  pNew->pathPointer = -1;
+  pNew->addressPointer = -1;
   return pNew;
 }
 /*---------------------------------------------------------------------*/
@@ -84,33 +84,33 @@ void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileS
 /*----------------------------------------------------------------------*/
 int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
-void pushPath(pFileStack self, const char *name) {
-  if (self->pathPointer >= 0 && name == self->pathStack[self->pathPointer]) {
+void pushAddress(pFileStack self, const char *name) {
+  if (self->addressPointer >= 0 && name == self->addressStack[self->addressPointer]) {
     return;
   }
-  self->pathPointer++;
-  self->pathStack.emplace_back(name);
+  self->addressPointer++;
+  self->addressStack.emplace_back(name);
 }
 /*-----------------------------------------------------------------------*/
-void popPath(pFileStack self) {
-  self->pathPointer--;
-  if (self->pathPointer < -1) {
-    self->pathPointer = -1;
+void popAddress(pFileStack self) {
+  self->addressPointer--;
+  if (self->addressPointer < -1) {
+    self->addressPointer = -1;
   }
-  if (!self->pathStack.empty()) {
-    self->pathStack.pop_back();
+  if (!self->addressStack.empty()) {
+    self->addressStack.pop_back();
   }
 }
 /*-----------------------------------------------------------------------*/
-int buildPath(pFileStack self, char *path, int pathlen) {
-  std::string totalPath;
-  if (self->pathStack.empty()) {
-    totalPath = "/";
+int buildAddress(pFileStack self, char *address, int addresslen) {
+  std::string totalAddress;
+  if (self->addressStack.empty()) {
+    totalAddress = "/";
   }
-  for (std::string const &subpath : self->pathStack) {
-    totalPath += "/" + subpath;
+  for (std::string const &subaddress : self->addressStack) {
+    totalAddress += "/" + subaddress;
   }
-  strncpy(path, totalPath.c_str(), pathlen - 1);
+  strncpy(address, totalAddress.c_str(), addresslen - 1);
 
   return 1;
 }

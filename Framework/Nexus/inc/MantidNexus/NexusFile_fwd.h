@@ -1,6 +1,6 @@
 /** This class defines data types which are used as part of the NeXus API.
- * They should more properly be moved into NeXusFile, when the nexus layer has been cleaned up.
- * OR all type and enum definitions in NeXusFile all moved here.
+ * They should more properly be moved into NexusFile, when the nexus layer has been cleaned up.
+ * OR all type and enum definitions in NexusFile all moved here.
  */
 
 #pragma once
@@ -32,7 +32,7 @@ constexpr int NX_UNLIMITED = -1;
 
 constexpr int NX_MAXRANK = 32;
 constexpr int NX_MAXNAMELEN = 64;
-constexpr int NX_MAXPATHLEN = 1024;
+constexpr int NX_MAXADDRESSLEN = 1024;
 
 constexpr int NXMAXSTACK = 50;
 
@@ -44,17 +44,11 @@ typedef char NXname[128];
  * \li NXACC_READ read-only
  * \li NXACC_RDWR open an existing file for reading and writing.
  * \li NXACC_CREATE5 create a NeXus HDF-5 file.
- * \li NXACC_CREATEXML create a NeXus XML file -- this is no longer be supported, exists for legacy reasons
- * \li NXACC_CHECKNAMESYNTAX Check names conform to NeXus allowed characters.
  */
 typedef enum {
   NXACC_READ = 1,
   NXACC_RDWR = 2,
   NXACC_CREATE5 = 5,
-  NXACC_CREATEXML = 6,
-  NXACC_TABLE = 8,
-  NXACC_NOSTRIP = 128,
-  NXACC_CHECKNAMESYNTAX = 256
 } NXaccess_mode;
 
 /**
@@ -77,12 +71,12 @@ enum NXentrytype : int { group = 0, sds = 1 };
 /**
  * \struct NXlink
  * Represents a link between entries in a NeXus file
- * \li targetPath path to item to link
+ * \li targetAddress address to item to link
  * \li linkType 0 for group link, 1 for SDS link
  */
 typedef struct {
-  std::string targetPath; /* path to item to link */
-  NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
+  std::string targetAddress; /* address to item to link */
+  NXentrytype linkType;      /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
 /* Map NeXus compression methods to HDF compression methods */
@@ -203,7 +197,7 @@ enum NXcompression : int {
 };
 
 // forward declare
-namespace NeXus {
+namespace Mantid::Nexus {
 
 // TODO change to std::size_t
 typedef std::int64_t dimsize_t;
@@ -237,4 +231,4 @@ struct AttrInfo {
 
 /** Forward declare of NeXus::File */
 class File;
-} // namespace NeXus
+} // namespace Mantid::Nexus

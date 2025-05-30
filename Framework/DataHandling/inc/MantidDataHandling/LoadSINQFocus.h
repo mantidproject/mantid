@@ -45,18 +45,18 @@ public:
 private:
   void init() override;
   void exec() override;
-  void setInstrumentName(const NeXus::NXEntry &entry);
-  void initWorkSpace(const NeXus::NXEntry &);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
+  void setInstrumentName(const Nexus::NXEntry &entry);
+  void initWorkSpace(const Nexus::NXEntry &);
+  void loadDataIntoTheWorkSpace(Nexus::NXEntry &);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  void loadExperimentDetails(const NeXus::NXEntry &);
-  void loadRunDetails(const NeXus::NXEntry &);
+  void loadExperimentDetails(const Nexus::NXEntry &);
+  void loadRunDetails(const Nexus::NXEntry &);
   void runLoadInstrument();
 
   std::vector<std::string> m_supportedInstruments;
   std::string m_instrumentName;
-  std::string m_instrumentPath;
+  std::string m_instrumentAddress;
   API::MatrixWorkspace_sptr m_localWorkspace;
   size_t m_numberOfTubes;         // number of tubes - X
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y

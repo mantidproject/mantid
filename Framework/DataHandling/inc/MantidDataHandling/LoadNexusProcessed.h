@@ -21,10 +21,6 @@
 #include <map>
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 
 namespace DataHandling {
@@ -69,10 +65,10 @@ public:
 
 protected:
   /// Read the spectra
-  void readInstrumentGroup(Mantid::NeXus::NXEntry &mtd_entry, API::MatrixWorkspace &local_workspace);
+  void readInstrumentGroup(Mantid::Nexus::NXEntry &mtd_entry, API::MatrixWorkspace &local_workspace);
 
 private:
-  virtual void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws);
+  virtual void readSpectraToDetectorMapping(Mantid::Nexus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws);
 
   /// Validates the input Min < Max and Max < Maximum_Int
   std::map<std::string, std::string> validateInputs() override;
@@ -88,10 +84,10 @@ private:
   void correctForWorkspaceNameClash(std::string &wsName);
 
   /// Extract the workspace name
-  std::vector<std::string> extractWorkspaceNames(Mantid::NeXus::NXRoot &root, size_t nWorkspaceEntries);
+  std::vector<std::string> extractWorkspaceNames(Mantid::Nexus::NXRoot &root, size_t nWorkspaceEntries);
 
   /// Load the workspace name attribute if it exists
-  std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root, const std::string &entry_name);
+  std::string loadWorkspaceName(Mantid::Nexus::NXRoot &root, const std::string &entry_name);
 
   /// Load nexus geometry and apply to workspace
   virtual bool loadNexusGeometry(Mantid::API::Workspace & /* ws */, size_t /* entryNumber */,
@@ -101,39 +97,39 @@ private:
   }
 
   /// Load a single entry
-  API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root, const std::string &entry_name, const double &progressStart,
+  API::Workspace_sptr loadEntry(Mantid::Nexus::NXRoot &root, const std::string &entry_name, const double &progressStart,
                                 const double &progressRange);
 
-  API::Workspace_sptr loadTableEntry(const Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadTableEntry(const Mantid::Nexus::NXEntry &entry);
 
   /// Load a numeric column to the TableWorkspace.
   template <typename ColumnType, typename NexusType>
-  void loadNumericColumn(const Mantid::NeXus::NXData &tableData, const std::string &dataSetName,
+  void loadNumericColumn(const Mantid::Nexus::NXData &tableData, const std::string &dataSetName,
                          const API::ITableWorkspace_sptr &tableWs, const std::string &columnType);
 
   /// Loads a vector column to the TableWorkspace.
   template <typename Type>
-  void loadVectorColumn(const Mantid::NeXus::NXData &tableData, const std::string &dataSetName,
+  void loadVectorColumn(const Mantid::Nexus::NXData &tableData, const std::string &dataSetName,
                         const API::ITableWorkspace_sptr &tableWs, const std::string &columnType);
 
   /// Loads a V3D column to the TableWorkspace.
-  void loadV3DColumn(Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs);
+  void loadV3DColumn(Mantid::Nexus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs);
 
-  API::Workspace_sptr loadPeaksEntry(const Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadPeaksEntry(const Mantid::Nexus::NXEntry &entry);
 
-  API::Workspace_sptr loadLeanElasticPeaksEntry(const Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadLeanElasticPeaksEntry(const Mantid::Nexus::NXEntry &entry);
 
-  API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData &wksp_cls, Mantid::NeXus::NXDouble &xbins,
+  API::MatrixWorkspace_sptr loadEventEntry(Mantid::Nexus::NXData &wksp_cls, Mantid::Nexus::NXDouble &xbins,
                                            const double &progressStart, const double &progressRange);
-  API::MatrixWorkspace_sptr loadNonEventEntry(Mantid::NeXus::NXData &wksp_cls, Mantid::NeXus::NXDouble &xbins,
+  API::MatrixWorkspace_sptr loadNonEventEntry(Mantid::Nexus::NXData &wksp_cls, Mantid::Nexus::NXDouble &xbins,
                                               const double &progressStart, const double &progressRange,
-                                              const Mantid::NeXus::NXEntry &mtd_entry, const int64_t xlength,
+                                              const Mantid::Nexus::NXEntry &mtd_entry, const int64_t xlength,
                                               std::string &workspaceType);
 
   /// Read the data from the sample group
-  void readSampleGroup(Mantid::NeXus::NXEntry &mtd_entry, API::MatrixWorkspace_sptr local_workspace);
+  void readSampleGroup(Mantid::Nexus::NXEntry &mtd_entry, API::MatrixWorkspace_sptr local_workspace);
   /// Add a property to the sample object
-  bool addSampleProperty(Mantid::NeXus::NXClass &sample_entry, const std::string &entryName,
+  bool addSampleProperty(Mantid::Nexus::NXClass &sample_entry, const std::string &entryName,
                          API::Sample &sampleDetails);
   /// Splits a string of exactly three words into the separate words
   void getWordsInString(const std::string &words3, std::string &w1, std::string &w2, std::string &w3);
@@ -141,27 +137,27 @@ private:
   void getWordsInString(const std::string &words4, std::string &w1, std::string &w2, std::string &w3, std::string &w4);
 
   /// Read the bin masking information
-  void readBinMasking(const Mantid::NeXus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
+  void readBinMasking(const Mantid::Nexus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached
-  void loadBlock(Mantid::NeXus::NXDouble &data, Mantid::NeXus::NXDouble &errors, Mantid::NeXus::NXDouble &farea,
-                 bool hasFArea, Mantid::NeXus::NXDouble &xErrors, bool hasXErrors, int64_t blocksize, int64_t nchannels,
+  void loadBlock(Mantid::Nexus::NXDouble &data, Mantid::Nexus::NXDouble &errors, Mantid::Nexus::NXDouble &farea,
+                 bool hasFArea, Mantid::Nexus::NXDouble &xErrors, bool hasXErrors, int64_t blocksize, int64_t nchannels,
                  int64_t &hist, const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached
-  void loadBlock(Mantid::NeXus::NXDouble &data, Mantid::NeXus::NXDouble &errors, Mantid::NeXus::NXDouble &farea,
-                 bool hasFArea, Mantid::NeXus::NXDouble &xErrors, bool hasXErrors, int64_t blocksize, int64_t nchannels,
+  void loadBlock(Mantid::Nexus::NXDouble &data, Mantid::Nexus::NXDouble &errors, Mantid::Nexus::NXDouble &farea,
+                 bool hasFArea, Mantid::Nexus::NXDouble &xErrors, bool hasXErrors, int64_t blocksize, int64_t nchannels,
                  int64_t &hist, int64_t &wsIndex, const API::MatrixWorkspace_sptr &local_workspace);
   /// Load a block of data into the workspace
-  void loadBlock(Mantid::NeXus::NXDouble &data, Mantid::NeXus::NXDouble &errors, Mantid::NeXus::NXDouble &farea,
-                 bool hasFArea, Mantid::NeXus::NXDouble &xErrors, bool hasXErrors, Mantid::NeXus::NXDouble &xbins,
+  void loadBlock(Mantid::Nexus::NXDouble &data, Mantid::Nexus::NXDouble &errors, Mantid::Nexus::NXDouble &farea,
+                 bool hasFArea, Mantid::Nexus::NXDouble &xErrors, bool hasXErrors, Mantid::Nexus::NXDouble &xbins,
                  int64_t blocksize, int64_t nchannels, int64_t &hist, int64_t &wsIndex,
                  const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
-  void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const Mantid::NeXus::NXData &data);
+  void loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const Mantid::Nexus::NXData &data);
 
   /// Validates the optional 'spectra to read' properties, if they have been set
   void checkOptionalProperties(const std::size_t numberofspectra);
@@ -170,7 +166,7 @@ private:
   std::size_t calculateWorkspaceSize(const std::size_t numberofspectra, bool gen_filtered_list = false);
 
   /// Accellerated multiperiod loading
-  Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(Mantid::NeXus::NXRoot &root,
+  Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(Mantid::Nexus::NXRoot &root,
                                                                const std::string &entryName,
                                                                Mantid::API::MatrixWorkspace_sptr &tempMatrixWorkspace,
                                                                const size_t nWorkspaceEntries, const size_t p);
@@ -202,10 +198,10 @@ private:
   std::vector<int> m_filtered_spec_idxs;
 
   // Handle to the NeXus file
-  std::unique_ptr<::NeXus::File> m_nexusFile;
+  std::unique_ptr<Nexus::File> m_nexusFile;
 };
 /// to sort the algorithmhistory vector
-bool UDlesserExecCount(const Mantid::NeXus::NXClassInfo &elem1, const Mantid::NeXus::NXClassInfo &elem2);
+bool UDlesserExecCount(const Mantid::Nexus::NXClassInfo &elem1, const Mantid::Nexus::NXClassInfo &elem2);
 
 } // namespace DataHandling
 } // namespace Mantid

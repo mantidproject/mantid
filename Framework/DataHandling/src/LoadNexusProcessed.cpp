@@ -35,8 +35,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
@@ -52,7 +52,7 @@ namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
@@ -182,7 +182,7 @@ LoadNexusProcessed::LoadNexusProcessed()
     : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false), m_interval(false), m_spec_min(0),
       m_spec_max(Mantid::EMPTY_INT()), m_spec_list(), m_filtered_spec_idxs(), m_nexusFile() {}
 
-/// Destructor defined here so that NeXus::File can be forward declared
+/// Destructor defined here so that Nexus::File can be forward declared
 /// in header
 LoadNexusProcessed::~LoadNexusProcessed() = default;
 
@@ -391,7 +391,7 @@ void LoadNexusProcessed::execLoader() {
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
-    m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
+    m_nexusFile = std::make_unique<Nexus::File>(root.m_fileID);
 
     // Find out how many NXentry groups there are in the file.
     nWorkspaceEntries = std::count_if(root.groups().cbegin(), root.groups().cend(),
@@ -779,7 +779,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
  * @param columnType  :: Name of the column type to create
  */
 template <typename ColumnType, typename NexusType>
-void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData &tableData, const std::string &dataSetName,
+void LoadNexusProcessed::loadNumericColumn(const Mantid::Nexus::NXData &tableData, const std::string &dataSetName,
                                            const API::ITableWorkspace_sptr &tableWs, const std::string &columnType) {
   NXDataSetTyped<NexusType> data = tableData.openNXDataSet<NexusType>(dataSetName);
   std::string columnTitle = data.attributes("name");
@@ -927,7 +927,7 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData, const std::st
  * @param data   :: Table data to load from
  * @param tableWs     :: Workspace to add column to
  */
-void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
+void LoadNexusProcessed::loadV3DColumn(Mantid::Nexus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
   std::string columnTitle = data.attributes("name");
   if (!columnTitle.empty()) {
     ColumnVector<V3D> col = tableWs->addColumn("V3D", columnTitle);
@@ -996,12 +996,12 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
 
   // Hop to the right point /mantid_workspace_1
   try {
-    m_nexusFile->openPath(entry.path()); // This is
+    m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
                              "Nexus processed file. "
-                             "This path is wrong: " +
-                             entry.path() + ". Lower level error description: " + re.what());
+                             "This address is wrong: " +
+                             entry.address() + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1029,7 +1029,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     uint32_t loadCoord(0);
     m_nexusFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Check for a log value
     auto logs = peakWS->logs();
     if (logs->hasProperty("CoordinateSystem")) {
@@ -1276,12 +1276,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
 
   // Hop to the right point /mantid_workspace_1
   try {
-    m_nexusFile->openPath(entry.path()); // This is
+    m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
                              "Nexus processed file. "
-                             "This path is wrong: " +
-                             entry.path() + ". Lower level error description: " + re.what());
+                             "This address is wrong: " +
+                             entry.address() + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1309,7 +1309,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     uint32_t loadCoord(0);
     m_nexusFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Check for a log value
     auto logs = peakWS->logs();
     if (logs->hasProperty("CoordinateSystem")) {
@@ -1901,7 +1901,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   progress(progressStart + 0.05 * progressRange, "Reading the sample details...");
 
   // Hop to the right point
-  m_nexusFile->openPath(mtd_entry.path());
+  m_nexusFile->openAddress(mtd_entry.address());
   try {
     // Get information from all but data group
     std::string parameterStr;
@@ -1934,7 +1934,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   }
 
   progress(progressStart + 0.15 * progressRange, "Reading the workspace history...");
-  m_nexusFile->openPath(mtd_entry.path());
+  m_nexusFile->openAddress(mtd_entry.address());
   try {
     bool load_history = getProperty("LoadHistory");
     if (load_history)

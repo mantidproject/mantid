@@ -11,19 +11,13 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include "MantidDataHandling/FindDetectorsPar.h"
-
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-
 #include "MantidKernel/CompositeValidator.h"
-
 #include "MantidKernel/MantidVersion.h"
-
-#include "MantidNexus/NeXusException.hpp"
-
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -171,15 +165,15 @@ void SaveNXTomo::setupFile() {
   // if we can overwrite, try to open the file
   if (!m_overwriteFile) {
     try {
-      m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_RDWR);
+      m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_RDWR);
       return;
-    } catch (NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
     }
   }
 
   // If not overwriting, or no existing file found above, create new file
   if (!m_nxFile) {
-    m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_CREATE5);
+    m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_CREATE5);
   }
   // Make the top level entry (and open it)
   m_nxFile->makeGroup("entry1", "NXentry", true);
@@ -275,7 +269,7 @@ void SaveNXTomo::setupFile() {
  */
 void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/data");
+    m_nxFile->openAddress("/entry1/tomo_entry/data");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -301,7 +295,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   }
 
   m_nxFile->openData("rotation_angle");
-  m_nxFile->putSlab(rotValue, static_cast<::NeXus::dimsize_t>(numFiles), 1);
+  m_nxFile->putSlab(rotValue, static_cast<Nexus::dimsize_t>(numFiles), 1);
   m_nxFile->closeData();
 
   // Copy data out, remake data with dimension of old size plus new elements.
@@ -341,7 +335,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
 void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/instrument/detector");
+    m_nxFile->openAddress("/entry1/tomo_entry/instrument/detector");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -359,7 +353,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   }
 
   m_nxFile->openData("image_key");
-  m_nxFile->putSlab(keyValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(keyValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 
   m_nxFile->closeGroup();
@@ -370,7 +364,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
   // Unable to add multidimensional string data, storing strings as
   // multidimensional data set of uint8 values
   try {
-    m_nxFile->openPath("/entry1/log_info");
+    m_nxFile->openAddress("/entry1/log_info");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -384,7 +378,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         prop->name() != "Axis1" && prop->name() != "Axis2") {
       try {
         m_nxFile->openData(prop->name());
-      } catch (::NeXus::Exception &) {
+      } catch (Nexus::Exception const &) {
         // Create the data entry if it doesn't exist yet, and open.
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);
@@ -397,8 +391,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       // it won't be greater than this. Otherwise Shorten it
       if (strSize > 80)
         strSize = 80;
-      const ::NeXus::DimVector start = {thisFileInd, 0};
-      const ::NeXus::DimSizeVector size = {1, static_cast<::NeXus::dimsize_t>(strSize)};
+      const Nexus::DimVector start = {thisFileInd, 0};
+      const Nexus::DimSizeVector size = {1, static_cast<Nexus::dimsize_t>(strSize)};
       // single item
       m_nxFile->putSlab(valueAsStr.data(), start, size);
 
@@ -410,7 +404,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
 void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
-    m_nxFile->openPath("/entry1/tomo_entry/control");
+    m_nxFile->openAddress("/entry1/tomo_entry/control");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -428,7 +422,7 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
   }
 
   m_nxFile->openData("data");
-  m_nxFile->putSlab(intensityValue, static_cast<::NeXus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(intensityValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
   m_nxFile->closeData();
 }
 
