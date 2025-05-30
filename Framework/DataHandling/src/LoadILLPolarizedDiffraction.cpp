@@ -26,8 +26,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
@@ -222,7 +222,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
         workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }
     }
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << m_fileName << "\" in read mode: " << e.what() << "\n";
   }
 }

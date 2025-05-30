@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
@@ -327,7 +327,7 @@ void OrientedLattice::loadNexus(Nexus::File *file, const std::string &group) {
     int crossTerm;
     file->readData("cross_term", crossTerm);
     this->setCrossTerm(crossTerm);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Old files don't have these. Ignore
   }
   file->closeGroup();

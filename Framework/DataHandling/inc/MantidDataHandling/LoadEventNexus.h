@@ -26,7 +26,7 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
@@ -495,7 +495,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
       nxfile.openData("name");
       instrument = nxfile.getStrData();
       alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << '\n';
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       // Try to fall back to isis compatibility options
       nxfile.closeGroup();
       instrument = readInstrumentFromISIS_VMSCompat(nxfile);
@@ -687,7 +687,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
           WS->mutableSample().setName(sampleName);
         }
       }
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       // let it drop on floor if an exception occurs while reading sample
     }
     file.closeGroup();
@@ -762,7 +762,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
   try {
     Nexus::File nxsfile(nexusfilename);
     nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     alg->getLogger().information("No instrument XML definition found in " + nexusfilename + " at " + top_entry_name +
                                  "/instrument");
     return false;

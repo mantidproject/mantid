@@ -15,9 +15,7 @@
 #include <string>
 #include <utility>
 
-namespace Mantid {
-namespace NeXus {
-namespace NeXusIOHelper {
+namespace Mantid::Nexus::IOHelper {
 
 enum class Narrowing : bool { Allow = true, Prevent = false };
 
@@ -228,6 +226,4 @@ T readNexusValue(Nexus::File &file, const std::string &entry = "") {
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnyVariable, file, info_and_close.second);
 }
 
-} // namespace NeXusIOHelper
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::Nexus::IOHelper

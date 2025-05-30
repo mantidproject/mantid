@@ -15,7 +15,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 namespace {
@@ -266,7 +266,7 @@ void LoadILLTOF3::addAllNexusFieldsAsProperties(const std::string &filename) {
   try {
     Nexus::File nxfileID(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  } catch (const ::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }

@@ -18,7 +18,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
@@ -240,7 +240,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
     Nexus::File nxsfile(filename);
     nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
     foundIDF = true;
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
 
   if (!foundIDF) {
@@ -249,7 +249,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
       Nexus::File nxsfile(filename);
       nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
       foundIDF = true;
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
     }
   }
 

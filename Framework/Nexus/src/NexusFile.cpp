@@ -1,6 +1,6 @@
 #include <cstring>
 // REMOVE
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include <algorithm>
@@ -9,7 +9,6 @@
 #include <sstream>
 #include <typeinfo>
 
-using namespace NeXus;
 using std::string;
 using std::stringstream;
 using std::vector;

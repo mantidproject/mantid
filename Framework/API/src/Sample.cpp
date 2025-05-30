@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <utility>
 
@@ -331,7 +331,7 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
   int version = 0;
   try {
     file->getAttr("version", version);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     version = 0;
   }
 
@@ -339,7 +339,7 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
     // Sample NAME field may/may not be present
     try {
       file->readData("name", m_name);
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       m_name = "";
     }
   }

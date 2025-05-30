@@ -50,7 +50,7 @@ namespace {
 void loadSampleDataISIScompatibilityInfo(Nexus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // No problem, it just means that this entry does not exist
     return;
   }
@@ -66,7 +66,7 @@ void loadSampleDataISIScompatibilityInfo(Nexus::File &file, Mantid::API::MatrixW
     WS->mutableSample().setThickness(rspb[3]);
     WS->mutableSample().setHeight(rspb[4]);
     WS->mutableSample().setWidth(rspb[5]);
-  } catch (::NeXus::Exception &ex) {
+  } catch (Nexus::Exception const &ex) {
     // it means that the data was not as expected, report the problem
     std::stringstream s;
     s << "Wrong definition found in isis_vms_compat :> " << ex.what();
@@ -293,7 +293,7 @@ void LoadNexusMonitors2::exec() {
   try {
     g_log.debug() << "Load Sample data isis\n";
     loadSampleDataISIScompatibilityInfo(file, m_workspace);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
 
   // Need to get the instrument name from the file
@@ -376,7 +376,7 @@ void LoadNexusMonitors2::fixUDets(Nexus::File &file) {
 
   try {
     file.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return;
   }
   // UDET
@@ -450,7 +450,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   try {
     filePointer = std::make_unique<Nexus::File>(fname);
     filePointer->getEntries();
-  } catch (::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
     res = false;
   }
@@ -547,7 +547,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(Nexus::File &file, size_t &numPeriods)
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
-        const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(file, "monitor_number");
+        const auto detNum = Nexus::IOHelper::readNexusValue<int64_t>(file, "monitor_number");
         if (detNum > std::numeric_limits<detid_t>::max()) {
           throw std::runtime_error("Monitor number too larger to represent");
         }
@@ -681,10 +681,10 @@ void LoadNexusMonitors2::readEventMonitorEntry(Nexus::File &file, size_t ws_inde
   std::string tof_units, event_time_zero_units;
 
   // read in the data
-  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+  auto event_index = Nexus::IOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   file.openData("event_time_offset"); // time of flight
-  MantidVec time_of_flight = NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  MantidVec time_of_flight = Nexus::IOHelper::readNexusVector<double>(file);
   file.getAttr("units", tof_units);
   Kernel::Units::timeConversionVector(time_of_flight, tof_units, "microseconds");
   file.closeData();
@@ -696,7 +696,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(Nexus::File &file, size_t ws_inde
   }
 
   file.openData("event_time_zero"); // pulse time
-  MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  MantidVec seconds = Nexus::IOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
   Kernel::Units::timeConversionVector(seconds, event_time_zero_units, "seconds");
   Mantid::Types::Core::DateAndTime pulsetime_offset;

@@ -19,8 +19,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
@@ -341,7 +341,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
   try {
     Nexus::File nxfileID(nexusfilename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "convertNexusToProperties: Error loading  \"" << nexusfilename << "\" in read mode: " << e.what()
                   << "\n";
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);

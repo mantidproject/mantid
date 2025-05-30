@@ -37,7 +37,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -1068,7 +1068,7 @@ void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::str
     file->openGroup("instrument_xml", "NXnote");
     file->readData("data", instrumentXml);
     file->closeGroup();
-  } catch (NeXus::Exception &ex) {
+  } catch (Nexus::Exception const &ex) {
     g_log.debug(std::string("Unable to load instrument_xml: ") + ex.what());
   }
 }
@@ -1158,7 +1158,7 @@ void ExperimentInfo::loadInstrumentParametersNexus(Nexus::File *file, std::strin
     file->openGroup("instrument_parameter_map", "NXnote");
     file->readData("data", parameterStr);
     file->closeGroup();
-  } catch (NeXus::Exception &ex) {
+  } catch (Nexus::Exception const &ex) {
     g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
     g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
   }

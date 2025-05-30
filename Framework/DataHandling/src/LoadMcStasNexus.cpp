@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
@@ -128,7 +128,7 @@ void LoadMcStasNexus::exec() {
       std::vector<double> errors;
       try {
         nxFile.readData<double>("errors", errors);
-      } catch (::NeXus::Exception &) {
+      } catch (Nexus::Exception const &) {
         g_log.information() << "Field " << dataName << " contains no error information.\n";
       }
 
