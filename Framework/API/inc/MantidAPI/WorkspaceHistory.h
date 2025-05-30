@@ -14,13 +14,6 @@
 #include <ctime>
 #include <set>
 
-//-----------------------------------------------------------------------------
-// Forward declarations
-//-----------------------------------------------------------------------------
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 namespace API {
 class IAlgorithm;

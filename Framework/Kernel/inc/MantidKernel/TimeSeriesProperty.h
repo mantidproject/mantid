@@ -18,11 +18,6 @@
 #include <cstdint>
 #include <utility>
 
-// Forward declare
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 namespace Kernel {
 class DataItem;

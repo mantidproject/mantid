@@ -21,7 +21,6 @@
 #include <memory>
 
 using namespace Mantid::Kernel;
-using namespace ::NeXus;
 
 #ifdef _WIN32
 #pragma warning(push)

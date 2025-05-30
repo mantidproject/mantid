@@ -40,7 +40,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 class ExperimentInfoTest : public CxxTest::TestSuite {

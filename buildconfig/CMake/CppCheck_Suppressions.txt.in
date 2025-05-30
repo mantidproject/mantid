@@ -94,7 +94,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhen
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParameterTie.h:42
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:43
+missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:39
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Workspace.h:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:405
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:1182
