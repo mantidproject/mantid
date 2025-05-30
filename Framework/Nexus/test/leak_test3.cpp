@@ -37,7 +37,7 @@ int main() {
 
     NXhandle fileid;
     NXlink aLink;
-    if (NXopen(szFile, NXACC_CREATE5, &fileid) != NXstatus::NX_OK)
+    if (NXopen(szFile, NXACC_CREATE5, fileid) != NXstatus::NX_OK)
       ON_ERROR("NXopen_failed")
 
     for (iEntry = 0; iEntry < nEntry; iEntry++) {
@@ -87,7 +87,7 @@ int main() {
         ON_ERROR("NXclosegroup failed!")
     }
 
-    if (NXclose(&fileid) != NXstatus::NX_OK)
+    if (NXclose(fileid) != NXstatus::NX_OK)
       ON_ERROR("NXclose failed!")
 
     // Delete file

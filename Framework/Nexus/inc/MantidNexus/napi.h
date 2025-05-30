@@ -151,14 +151,14 @@ extern "C" {
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUS_DLL NXstatus NXopen(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXopen(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
 
 /**
  * Opens an existing NeXus file a second time for e.g. access from another thread.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUS_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
+MANTID_NEXUS_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &pNewHandle);
 
 /**
  * close a NeXus file
@@ -167,7 +167,7 @@ MANTID_NEXUS_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
-MANTID_NEXUS_DLL NXstatus NXclose(NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXclose(NXhandle &handle);
 
 /**
  * flush data to disk
@@ -175,7 +175,7 @@ MANTID_NEXUS_DLL NXstatus NXclose(NXhandle *pHandle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXflush(NXhandle *pHandle);
+MANTID_NEXUS_DLL NXstatus NXflush(NXhandle &handle);
 
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.

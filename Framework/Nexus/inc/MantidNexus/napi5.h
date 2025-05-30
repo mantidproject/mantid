@@ -9,11 +9,11 @@
 
 /* HDF5 interface */
 
-extern NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle *pHandle);
-extern NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle);
+extern NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
+extern NXstatus NX5reopen(NXhandle origHandle, NXhandle &newHandle);
 
-extern NXstatus NX5close(NXhandle *pHandle);
-extern NXstatus NX5flush(NXhandle *pHandle);
+extern NXstatus NX5close(NXhandle &handle);
+extern NXstatus NX5flush(NXhandle &handle);
 
 extern NXstatus NX5makegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
 extern NXstatus NX5opengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
