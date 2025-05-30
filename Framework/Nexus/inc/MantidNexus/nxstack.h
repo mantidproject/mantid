@@ -27,26 +27,16 @@
 #ifndef NEXUSFILESTACK
 #define NEXUSFILESTACK
 
+#include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/napi_internal.h"
 
-typedef struct __fileStack *pFileStack;
 #define MAXEXTERNALDEPTH 16
 
-pFileStack makeFileStack();
-void killFileStack(pFileStack self);
+pNexusFile5 makeFileStack();
+void killFileStack(pNexusFile5 self);
 
-void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *filename);
-void popFileStack(pFileStack self);
-
-pNexusFunction peekFileOnStack(pFileStack self);
-char *peekFilenameOnStack(pFileStack self);
-void peekIDOnStack(pFileStack self, NXlink *id);
-void setCloseID(pFileStack self, const NXlink &id);
-
-int fileStackDepth(pFileStack self);
-
-void pushAddress(pFileStack self, const char *name);
-void popAddress(pFileStack self);
-int buildAddress(pFileStack self, char *address, int addresslen);
+void pushPath(pNexusFile5 self, const char *name);
+void popPath(pNexusFile5 self);
+int buildPath(pNexusFile5 self, char *path, int pathlen);
 
 #endif
