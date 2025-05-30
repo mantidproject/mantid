@@ -23,7 +23,6 @@
 #include <set>
 #include <vector>
 
-using namespace ::NeXus;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::map;

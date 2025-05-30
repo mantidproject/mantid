@@ -81,7 +81,7 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  */
 NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name) : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
-    m_path = parent->path() + "/" + name;
+    m_address = parent->address() + "/" + name;
   }
 }
 
@@ -94,16 +94,16 @@ NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name)
 NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
-    m_path = parent->path() + "/" + name;
+    m_address = parent->address() + "/" + name;
   }
 }
 
 std::string NXObject::name() const {
-  size_t i = m_path.find_last_of('/');
+  size_t i = m_address.find_last_of('/');
   if (i == std::string::npos)
-    return m_path;
+    return m_address;
   else
-    return m_path.substr(i + 1, m_path.size() - i - 1);
+    return m_address.substr(i + 1, m_address.size() - i - 1);
 }
 
 /**  Reads in attributes
@@ -157,10 +157,10 @@ void NXClass::readAllInfo() {
   }
 }
 
-bool NXClass::isValid(const std::string &path) const { return m_fileID->hasPath(path); }
+bool NXClass::isValid(const std::string &address) const { return m_fileID->hasAddress(address); }
 
 void NXClass::open() {
-  m_fileID->openGroupPath(m_path);
+  m_fileID->openGroupAddress(m_address);
   m_open = true;
   readAllInfo();
 }
@@ -191,8 +191,8 @@ void NXClass::close() {
   try {
     m_fileID->closeGroup();
   } catch (Exception const &) {
-    throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close path " +
-                             m_path + ")");
+    throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close address " +
+                             m_address + ")");
   }
   m_open = false;
 }
@@ -330,11 +330,11 @@ NXDataSet::NXDataSet(const NXClass &parent, const std::string &name) : NXObject(
 
 // Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open() {
-  size_t i = m_path.find_last_of('/');
+  size_t i = m_address.find_last_of('/');
   if (i == std::string::npos || i == 0)
     return; // we are in the root group, assume it is open
-  std::string group_path = m_path.substr(0, i);
-  m_fileID->openPath(group_path);
+  std::string group_address = m_address.substr(0, i);
+  m_fileID->openAddress(group_address);
   m_fileID->openData(name());
   m_info = NXInfo(m_fileID->getInfo(), name());
   getAttributes();

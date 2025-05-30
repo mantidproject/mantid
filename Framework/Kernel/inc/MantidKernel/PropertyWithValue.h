@@ -13,10 +13,6 @@
 
 #include <vector>
 
-namespace Mantid::Nexus {
-class File;
-}
-
 namespace Mantid {
 
 namespace Kernel {

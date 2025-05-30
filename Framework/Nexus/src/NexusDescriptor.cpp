@@ -104,19 +104,19 @@ void NexusDescriptor::addEntry(const std::string &entryName, const std::string &
   if (groupClass.empty())
     throw Exception("Cannot add empty class", "", m_filename);
   if (!entryName.starts_with("/"))
-    throw Exception("Paths must be absolute: " + entryName, "", m_filename);
+    throw Exception("Address must be absolute: " + entryName, "", m_filename);
 
-  // do not add path twice
+  // do not add address twice
   if (this->isEntry(entryName))
     throw Exception("Cannot add an entry twice: " + entryName, "", m_filename);
 
   // verify the parent exists
   const auto lastPos = entryName.rfind("/");
-  const auto parentPath = entryName.substr(0, lastPos);
-  if (parentPath != "" && !this->isEntry(parentPath))
-    throw Exception("Parent path " + parentPath + " does not exist", "", m_filename);
+  const auto parentAddress = entryName.substr(0, lastPos);
+  if (parentAddress != "" && !this->isEntry(parentAddress))
+    throw Exception("Parent address " + parentAddress + " does not exist", "", m_filename);
 
-  // add the path
+  // add the address
   m_allEntries[groupClass].insert(entryName);
 }
 
@@ -174,7 +174,7 @@ bool NexusDescriptor::isEntry(const std::string &entryName) const noexcept {
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
 }
 
-std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type) const {
+std::vector<std::string> NexusDescriptor::allAddressesOfType(const std::string &type) const {
   std::vector<std::string> result;
   if (auto itClass = m_allEntries.find(type); itClass != m_allEntries.end()) {
     result.assign(itClass->second.begin(), itClass->second.end());
@@ -183,7 +183,7 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
   return result;
 }
 
-std::map<std::string, std::string> NexusDescriptor::allPathsAtLevel(const std::string &level) const {
+std::map<std::string, std::string> NexusDescriptor::allAddressesAtLevel(const std::string &level) const {
   std::map<std::string, std::string> result;
   for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend(); itClass++) {
     for (auto itEntry = itClass->second.cbegin(); itEntry != itClass->second.cend(); itEntry++) {
@@ -192,9 +192,9 @@ std::map<std::string, std::string> NexusDescriptor::allPathsAtLevel(const std::s
       }
       if (itEntry->starts_with(level)) {
         int offset = (level == "/" ? 0 : 1);
-        std::string path = itEntry->substr(level.size() + offset, itEntry->find("/", level.size() + offset));
-        if (itEntry->ends_with(path)) {
-          result[path] = itClass->first;
+        std::string address = itEntry->substr(level.size() + offset, itEntry->find("/", level.size() + offset));
+        if (itEntry->ends_with(address)) {
+          result[address] = itClass->first;
         }
       }
     }

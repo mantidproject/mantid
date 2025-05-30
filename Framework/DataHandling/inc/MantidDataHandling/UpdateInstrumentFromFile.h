@@ -10,10 +10,6 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 namespace Geometry {
 class DetectorInfo;

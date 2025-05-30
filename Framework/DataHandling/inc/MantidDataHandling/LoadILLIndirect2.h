@@ -38,8 +38,8 @@ private:
 
   void loadDataDetails(const Nexus::NXEntry &entry);
   void initWorkSpace();
-  void setInstrumentName(const Nexus::NXEntry &firstEntry, const std::string &instrumentNamePath);
-  std::string getDataPath(const Nexus::NXEntry &entry);
+  void setInstrumentName(const Nexus::NXEntry &firstEntry, const std::string &instrumentNameAddress);
+  std::string getDataAddress(const Nexus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoWorkspace(const Nexus::NXEntry &entry);
   void loadDiffractionData(Nexus::NXEntry &entry);

@@ -86,7 +86,7 @@ void LoadErrorEventsNexus::exec() {
   // load the data
   Nexus::File file(filename);
 
-  file.openPath("/");
+  file.openAddress("/");
   file.openGroup("entry", "NXentry");
   file.openGroup("bank_error_events", "NXevent_data");
 

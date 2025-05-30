@@ -14,10 +14,6 @@
 #include <memory>
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 namespace Types {
 namespace Core {

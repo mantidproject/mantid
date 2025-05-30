@@ -21,10 +21,6 @@
 #include <map>
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 
 namespace DataHandling {

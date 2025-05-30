@@ -61,9 +61,9 @@ static PropertyInfo PatchableProperties[] = {
 };
 
 // load nx dataset
-template <class T> bool loadNXDataSet(Nexus::NXEntry &entry, const std::string &path, T &value) {
+template <class T> bool loadNXDataSet(Nexus::NXEntry &entry, const std::string &address, T &value) {
   try {
-    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(address);
     dataSet.load();
 
     value = *dataSet();
@@ -72,9 +72,9 @@ template <class T> bool loadNXDataSet(Nexus::NXEntry &entry, const std::string &
     return false;
   }
 }
-bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value) {
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &address, std::string &value) {
   try {
-    value = entry.getString(path);
+    value = entry.getString(address);
     return true;
   } catch (std::runtime_error &) {
     return false;

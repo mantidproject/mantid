@@ -99,16 +99,16 @@ public:
   // True if complies with our understanding of the www.nexusformat.org
   // definition.
   // virtual bool isStandard()const = 0;
-  /// Returns the absolute path to the object
-  std::string const &path() const { return m_path; }
+  /// Returns the absolute address to the object
+  std::string const &address() const { return m_address; }
   /// Returns the name of the object
   std::string name() const;
   /// Nexus file id
   std::shared_ptr<File> m_fileID;
 
 protected:
-  std::string m_path; ///< Keeps the absolute path to the object
-  bool m_open;        ///< Set to true if the object has been open
+  std::string m_address; ///< Keeps the absolute address to the object
+  bool m_open;           ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
 };
@@ -212,13 +212,13 @@ public:
    */
   const T *operator()() const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     return m_data.data();
   }
 
   T *operator()() {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     return m_data.data();
   }
 
@@ -232,7 +232,7 @@ public:
    */
   const T &operator[](std::size_t i) const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     if (i >= m_size)
       rangeError();
     return m_data[i];
@@ -404,7 +404,7 @@ private:
    */
   void alloc(nxdimsize_t new_size) {
     if (new_size <= 0) {
-      throw std::runtime_error("Attempt to load from an empty dataset " + path());
+      throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {
       if (new_size != static_cast<nxdimsize_t>(m_size)) {
@@ -464,11 +464,11 @@ public:
   std::string NX_class() const override { return "NXClass"; }
 
   /**
-   * Check if a path exists relative to the current class path
-   * @param path :: A string representing the path to test
+   * Check if a address exists relative to the current class address
+   * @param address :: A string representing the address to test
    * @return True if it is valid
    */
-  bool isValid(const std::string &path) const;
+  bool isValid(const std::string &address) const;
   /**
    * Templated method for creating derived NX classes. It also opens the created class.
    *
@@ -575,7 +575,7 @@ public:
   bool containsDataSet(const std::string &query) const;
   /// Close this class
   void close();
-  /// Opens this NXClass using NXopengrouppath. Can be slow (or is slow)
+  /// Opens this NXClass using NXopengroupaddress. Can be slow (or is slow)
   void open();
   /// Opens this NXClass using NXopengroup. It is fast, but the parent of this
   /// class must be open at

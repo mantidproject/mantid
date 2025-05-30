@@ -43,7 +43,7 @@ int LoadMcStasNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
     const auto grouped_entries = iter->second;
     if (std::any_of(grouped_entries.cbegin(), grouped_entries.cend(),
-                    [](const auto &path) { return path.ends_with("information"); })) {
+                    [](const auto &address) { return address.ends_with("information"); })) {
       confidence = 40;
       break;
     }

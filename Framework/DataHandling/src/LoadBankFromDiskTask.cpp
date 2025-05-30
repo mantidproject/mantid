@@ -30,7 +30,7 @@ namespace Mantid::DataHandling {
 /** Constructor
  *
  * @param loader :: Handle to the main loader
- * @param entry_name :: The pathname of the bank to load
+ * @param entry_name :: The address of the bank to load
  * @param entry_type :: The classtype of the entry to load
  * @param numEvents :: The number of events in the bank.
  * @param oldNeXusFileNames :: Identify if file is of old variety.

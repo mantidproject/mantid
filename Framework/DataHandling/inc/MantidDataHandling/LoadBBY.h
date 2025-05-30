@@ -77,8 +77,8 @@ private:
                                 std::map<std::string, std::string> &allParams);
 
   // load nx dataset
-  template <class T> static bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value);
-  bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value);
+  template <class T> static bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &address, T &value);
+  bool loadNXString(const Nexus::NXEntry &entry, const std::string &address, std::string &value);
 
   // binary file access
   template <class EventProcessor>
