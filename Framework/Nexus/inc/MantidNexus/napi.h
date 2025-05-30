@@ -115,7 +115,6 @@
 #define NXsameID MANGLE(nxisameid)
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXinquirefile MANGLE(nxiinquirefile)
 #define NXgetversion MANGLE(nxigetversion)
 
 /*
@@ -525,17 +524,6 @@ MANTID_NEXUS_DLL NXstatus NXinitgroupdir(NXhandle handle);
 MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
 
 /**
- * Inquire the filename of the currently open file. FilenameBufferLength of the file name
- * will be copied into the filename buffer.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param filename The buffer to hold the filename.
- * \param  filenameBufferLength The length of the filename buffer.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength);
-
-/**
  * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
  * \param data A pointer to a pointer which will be initialized with a pointer to a suitably sized memory area.
  * \param rank the rank of the data.
@@ -580,11 +568,6 @@ MANTID_NEXUS_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
  * \param datatype A pointer to an integer which be set to the NeXus data type code for this dataset.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
-
-/**
- * @copydoc NXgetrawinfo
  */
 MANTID_NEXUS_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
