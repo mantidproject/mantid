@@ -1,1 +1,1 @@
-- WorkspaceTreeWidget was updated so that hidden worksapces within a workspace group are correctly not shown in the tree view. They were being shown before.
+- Hidden workspaces within a workspace group are no longer shown in WorkspaceTreeWidget
