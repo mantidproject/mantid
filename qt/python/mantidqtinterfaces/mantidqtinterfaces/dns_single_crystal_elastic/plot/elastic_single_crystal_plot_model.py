@@ -71,3 +71,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
         axis_labels = {"hkl": [f"[{hkl1}] (r.l.u.)", f"[{hkl2}] (r.l.u.)"]}
         labels = axis_labels[axis_type]
         return labels
+
+    def get_omega_offset(self):
+        return self._single_crystal_map["omega_offset"]
+
+    def get_dx_dy(self):
+        return self._single_crystal_map["dx"], self._single_crystal_map["dy"]
