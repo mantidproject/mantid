@@ -21,6 +21,14 @@ using boost::python::return_value_policy;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 
+/// Extracts the angle of rotation and axis
+/// @returns The angle of rotation in degrees and the three components of the axis
+std::vector<double> getAngleAxis(Quat &self) {
+  double angle, x, y, z = 0;
+  self.getAngleAxis(angle, x, y, z);
+  return {angle, x, y, z};
+}
+
 /**
  * Python exports of the Mantid::Kernel::Quat class.
  */
@@ -52,6 +60,7 @@ void export_Quat() {
       .def("len2", &Quat::len2, arg("self"), "Returns the square of the 'length' of the quaternion")
       .def("getEulerAngles", &Quat::getEulerAngles, (arg("self"), arg("convention") = "YZX"),
            "Default convention is \'YZX\'.")
+      .def("getAngleAxis", &getAngleAxis, arg("self"), "Extracts the angle of rotation and the axis")
       // cppcheck-suppress syntaxError
       .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(), (arg("self"), arg("other")))
