@@ -18,14 +18,14 @@ set build_env=%lockfile_dir%\%package_name%_build_environment.yaml
 IF %package_name%==mantid (
   set package_conda_env=%lockfile_dir%\package-conda_environment.yaml
   call conda env export --no-builds --prefix %mamba_dir%\envs\package-conda > %package_conda_env%
-  call conda-lock -f %package_conda_env% -p win-64 --lockfile package-conda-lockfile.yml
+  call conda-lock --mamba -f %package_conda_env% -p win-64 --lockfile package-conda-lockfile.yml
   del %package_conda_env%
 )
 call conda env export --no-builds --prefix %host_env_prefix% > %host_env%
 call conda env export --no-builds --prefix %build_env_prefix% > %build_env%
 
-call conda-lock -f %host_env% -p win-64 --lockfile %package_name%-lockfile.yml
-call conda-lock -f %build_env% -p win-64 --lockfile %package_name%-lockfile.yml
+call conda-lock --mamba -f %host_env% -p win-64 --lockfile %package_name%-lockfile.yml
+call conda-lock --mamba -f %build_env% -p win-64 --lockfile %package_name%-lockfile.yml
 
 del %host_env%
 del %build_env%
