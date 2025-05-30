@@ -106,19 +106,19 @@ void LoadSINQFocus::exec() {
 
 /*
  * Set global variables:
- * m_instrumentPath
+ * m_instrumentAddress
  * m_instrumentName
  * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
  *
  */
 void LoadSINQFocus::setInstrumentName(const Nexus::NXEntry &entry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusAddress(entry);
+  m_instrumentAddress = LoadHelper::findInstrumentNexusAddress(entry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = LoadHelper::getStringFromNexusAddress(entry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(entry, m_instrumentAddress + "/name");
   size_t pos = m_instrumentName.find(' ');
   m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
@@ -201,10 +201,10 @@ void LoadSINQFocus::loadRunDetails(const NXEntry &entry) {
   // end_time = getDateTimeInIsoFormat(end_time);
   runDetails.addProperty("run_end", end_time);
 
-  double wavelength = entry.getFloat(m_instrumentPath + "/monochromator/lambda");
+  double wavelength = entry.getFloat(m_instrumentAddress + "/monochromator/lambda");
   runDetails.addProperty<double>("wavelength", wavelength);
 
-  double energy = entry.getFloat(m_instrumentPath + "/monochromator/energy");
+  double energy = entry.getFloat(m_instrumentAddress + "/monochromator/energy");
   runDetails.addProperty<double>("Ei", energy, true); // overwrite
 
   std::string title = entry.getString("title");

@@ -74,13 +74,13 @@ void LoadIDFFromNexus::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  // Get the instrument path
-  std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
+  // Get the instrument address
+  std::string instrumentParentAddress = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
   Nexus::File nxfile(filename);
   // Assume one level in instrument path
-  nxfile.openAddress(instrumentParentPath);
+  nxfile.openAddress(instrumentParentAddress);
 
   // Take instrument info from nexus file.
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile);

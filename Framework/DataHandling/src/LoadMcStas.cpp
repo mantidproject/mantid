@@ -94,14 +94,14 @@ void LoadMcStas::execLoader() {
     }
 
     const auto parts = Strings::StrParts(entry, boost::regex("/"));
-    const auto groupPath = "/" + Strings::join(parts.cbegin(), parts.cend() - 1, "/");
+    const auto groupAddress = "/" + Strings::join(parts.cbegin(), parts.cend() - 1, "/");
     const auto groupName = *(parts.cend() - 2);
     const auto datasetName = parts.back();
 
     if (groupName == "content_nxs")
       continue;
 
-    const H5::Group group = file.openGroup(groupPath);
+    const H5::Group group = file.openGroup(groupAddress);
     const H5::DataSet dataset = group.openDataSet(datasetName);
 
     if (!H5Util::hasAttribute(dataset, attributeName)) {
@@ -111,11 +111,11 @@ void LoadMcStas::execLoader() {
     std::string nameAttrValue;
     H5Util::readStringAttribute(dataset, attributeName, nameAttrValue);
     if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-      eventEntries.emplace_back(groupPath);
-    } else if (histogramEntries.find(groupPath) == histogramEntries.cend()) {
-      histogramEntries[groupPath] = {datasetName};
+      eventEntries.emplace_back(groupAddress);
+    } else if (histogramEntries.find(groupAddress) == histogramEntries.cend()) {
+      histogramEntries[groupAddress] = {datasetName};
     } else {
-      histogramEntries[groupPath].emplace_back(datasetName);
+      histogramEntries[groupAddress].emplace_back(datasetName);
     }
   }
 
@@ -262,8 +262,8 @@ std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string
   // Refer to entry in allEventWS. The first non-summed workspace index is 1
   auto eventWSIndex = 1u;
   // Loop over McStas event data components
-  for (const auto &groupPath : eventEntries) {
-    const H5::Group group = file.openGroup(groupPath);
+  for (const auto &groupAddress : eventEntries) {
+    const H5::Group group = file.openGroup(groupAddress);
     const H5::DataSet dataset = group.openDataSet("events");
 
     // open second level entry
@@ -408,8 +408,8 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
   std::vector<std::string> histoWSNames;
 
   for (const auto &entry : histogramEntries) {
-    const auto groupPath = entry.first;
-    const H5::Group group = file.openGroup(groupPath);
+    const auto groupAddress = entry.first;
+    const H5::Group group = file.openGroup(groupAddress);
 
     std::string nameAttrValueTITLE;
     H5Util::readStringAttribute(group, "filename", nameAttrValueTITLE);

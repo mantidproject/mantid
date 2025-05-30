@@ -42,7 +42,7 @@ DECLARE_LEGACY_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 namespace LegacyLoadHelper { // these methods are copied from LoadHelper
 /**
- * Finds the path for the instrument name in the nexus file
+ * Finds the address for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string findInstrumentNexusAddress(const LegacyNexus::NXEntry &firstEntry) {
@@ -413,7 +413,7 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const LegacyNexus::NXEntry 
 }
 
 /**
- * Sets the instrument name along with its path in the nexus file
+ * Sets the instrument name along with its address in the nexus file
  *
  * @param firstEntry The NeXus entry
  */
@@ -654,7 +654,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(const LegacyNexus::NXEntry &entry, 
  * Fills the non-scan measurement data into the workspace, including that from the monitor
  *
  * @param entry The Nexus entry
- * @param monitorList Vector containing paths to monitor data
+ * @param monitorList Vector containing addresses to monitor data
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
@@ -699,7 +699,7 @@ void LoadILLTOF2::fillStaticWorkspace(const LegacyNexus::NXEntry &entry, const s
 /**
  * Fills scan workspace with data and monitor data counts
  * @param entry The Nexus entry to load the data from
- * @param monitorList Vector containing paths to monitor data
+ * @param monitorList Vector containing addresses to monitor data
  */
 void LoadILLTOF2::fillScanWorkspace(const LegacyNexus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array

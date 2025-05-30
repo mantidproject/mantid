@@ -112,10 +112,10 @@ int LoadMLZ::confidence(Nexus::NexusDescriptor &descriptor) const {
  * Loads Masked detectors from the /Scan/instrument/Detector/pixel_mask
  */
 void LoadMLZ::maskDetectors(const Nexus::NXEntry &entry) {
-  // path to the pixel_mask
-  std::string pmpath = "instrument/detector/pixel_mask";
+  // address to the pixel_mask
+  std::string pmaddress = "instrument/detector/pixel_mask";
 
-  Nexus::NXInt pmdata = entry.openNXInt(pmpath);
+  Nexus::NXInt pmdata = entry.openNXInt(pmaddress);
   // load the counts from the file into memory
   pmdata.load();
   g_log.debug() << "PMdata size: " << pmdata.size() << '\n';
@@ -142,7 +142,7 @@ void LoadMLZ::maskDetectors(const Nexus::NXEntry &entry) {
 }
 
 /**
- * Set the instrument name along with its path on the nexus file
+ * Set the instrument name along with its address on the nexus file
  */
 void LoadMLZ::loadInstrumentDetails(const Nexus::NXEntry &firstEntry) {
 

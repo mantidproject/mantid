@@ -113,8 +113,8 @@ void LoadILLIndirect2::exec() {
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
-  const std::string instrumentPath = LoadHelper::findInstrumentNexusAddress(firstEntry);
-  setInstrumentName(firstEntry, instrumentPath);
+  const std::string instrumentAddress = LoadHelper::findInstrumentNexusAddress(firstEntry);
+  setInstrumentName(firstEntry, instrumentAddress);
 
   initWorkSpace();
   progress.report("Initialised the workspace");
@@ -146,15 +146,15 @@ void LoadILLIndirect2::exec() {
 /**
  * Set member variable with the instrument name
  * @param firstEntry : nexus entry
- * @param instrumentNamePath : nexus path to instrument name
+ * @param instrumentNameAddress : nexus address to instrument name
  */
-void LoadILLIndirect2::setInstrumentName(const Nexus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
-  if (instrumentNamePath.empty()) {
+void LoadILLIndirect2::setInstrumentName(const Nexus::NXEntry &firstEntry, const std::string &instrumentNameAddress) {
+  if (instrumentNameAddress.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
     throw std::runtime_error(message);
   }
-  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, instrumentNameAddress + "/name");
   boost::to_upper(m_instrumentName); // "IN16b" in file, keep it upper case.
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }

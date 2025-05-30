@@ -32,7 +32,7 @@ using namespace Kernel;
 using namespace API;
 
 /**
- * Finds the path for the instrument name in the nexus file
+ * Finds the address for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string LoadHelper::findInstrumentNexusAddress(const Mantid::Nexus::NXEntry &firstEntry) {
@@ -46,12 +46,13 @@ std::string LoadHelper::findInstrumentNexusAddress(const Mantid::Nexus::NXEntry 
 }
 
 std::string LoadHelper::getStringFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
-                                                  const std::string &nexusPath) {
-  return firstEntry.getString(nexusPath);
+                                                  const std::string &nexusAddress) {
+  return firstEntry.getString(nexusAddress);
 }
 
-double LoadHelper::getDoubleFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry, const std::string &nexusPath) {
-  return firstEntry.getFloat(nexusPath);
+double LoadHelper::getDoubleFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
+                                             const std::string &nexusAddress) {
+  return firstEntry.getFloat(nexusAddress);
 }
 
 /**
@@ -59,9 +60,9 @@ double LoadHelper::getDoubleFromNexusAddress(const Mantid::Nexus::NXEntry &first
  * Adds an extra bin at the end
  */
 std::vector<double> LoadHelper::getTimeBinningFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
-                                                               const std::string &nexusPath) {
+                                                               const std::string &nexusAddress) {
 
-  Mantid::Nexus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
+  Mantid::Nexus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusAddress);
   timeBinningNexus.load();
 
   size_t numberOfBins = static_cast<size_t>(timeBinningNexus.dim0()) + 1; // boundaries
@@ -122,10 +123,10 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  * @param filehandle  :: Nexus file handle to be parsed, just after an NXopengroup
  * @param runDetails  :: where to add properties
  * @param entryName   :: entry name to load properties from
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
+ * @param useFullAddress :: use full address to entry in nexus tree to generate the log entry name in Mantid
  */
 void LoadHelper::addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &entryName,
-                                       bool useFullPath) {
+                                       bool useFullAddress) {
   // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
   // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
   // follows
@@ -139,7 +140,7 @@ void LoadHelper::addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDet
     constexpr int LEVEL_RECURSE{1};
     filehandle.openGroup(entryNameActual, "NXentry");
     const std::string EMPTY_STR;
-    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullPath);
+    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullAddress);
     filehandle.closeGroup();
   }
 }
@@ -192,12 +193,12 @@ void addNumericProperty(Nexus::File &filehandle, const Nexus::Info &nxinfo, cons
  * @param parent_name :: nexus caller name
  * @param parent_class :: nexus caller class
  * @param level       :: current level in nexus tree
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
+ * @param useFullAddress :: use full address to entry in nexus tree to generate the log entry name in Mantid
  *
  */
 void LoadHelper::recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails,
                                                  const std::string &parent_name, const std::string &parent_class,
-                                                 int level, bool useFullPath) {
+                                                 int level, bool useFullAddress) {
   const std::string SDS("SDS"); // denotes data field
 
   for (const auto &entry : filehandle.getEntries()) {
@@ -277,10 +278,11 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::R
         filehandle.openGroup(nxname, nxclass);
 
         const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-        const std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
+        const std::string p_nxname =
+            useFullAddress ? property_name : nxname; // current names can be useful for next level
         const std::string p_nxclass(nxclass);
 
-        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
+        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullAddress);
 
         filehandle.closeGroup();
       }
