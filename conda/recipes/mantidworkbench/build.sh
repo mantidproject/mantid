@@ -3,7 +3,7 @@ set -ex
 
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidworkbench'
-
+bash "${parent_dir}"/create_conda_lockfile.sh "$BUILD_PREFIX" "$PREFIX" 'mantidworkbench'
 
 mkdir build
 cd build

@@ -249,6 +249,7 @@ pipeline {
           post {
             always {
               archive_env_logs('linux-64')
+	      archive_lockfiles('linux-64')
             }
           }
         }
@@ -281,6 +282,7 @@ pipeline {
           post {
             always {
               archive_env_logs('win-64')
+	      archive_lockfiles('win-64')
             }
           }
         }
@@ -313,6 +315,7 @@ pipeline {
           post {
             always {
               archive_env_logs('osx-64')
+	      archive_lockfiles('osx-64')
             }
           }
         }
@@ -345,6 +348,7 @@ pipeline {
           post {
             always {
               archive_env_logs('osx-arm64')
+	      archive_lockfiles('osx-arm64')
             }
           }
         }
@@ -396,6 +400,7 @@ pipeline {
             post {
               always {
                 archive_env_logs("${PLATFORM}")
+		archive_lockfiles("${PLATFORM}")
               }
             }
           }
@@ -710,6 +715,14 @@ def archive_test_logs(){
 def archive_env_logs(platform) {
   env_log_dir = "**/conda-bld/${platform}/env_logs"
   archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: false
+}
+
+def archive_lockfiles(platform) {
+  lockfile_dir = "**/conda-bld/${platform}/lockfiles"
+  archiveArtifacts artifacts: lockfile_dir += "/**/*.yml",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: false
