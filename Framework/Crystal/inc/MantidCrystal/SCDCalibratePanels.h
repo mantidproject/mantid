@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
@@ -26,8 +27,10 @@ namespace Crystal {
  *
  */
 
-class SCDCalibratePanels : public Mantid::API::Algorithm {
+class SCDCalibratePanels : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  SCDCalibratePanels();
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

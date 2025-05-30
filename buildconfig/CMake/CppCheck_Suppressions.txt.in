@@ -219,9 +219,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/OptimizeCrystal
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntegration.cpp:105
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntensityVsRadius.cpp:184
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:109
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:124
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:189
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1385
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1483
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158
