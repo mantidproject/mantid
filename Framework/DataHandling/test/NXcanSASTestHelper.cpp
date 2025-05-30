@@ -290,21 +290,21 @@ void removeFile(const std::string &filename) {
   }
 }
 
-std::string generate_random_filename(std::size_t length, const std::string &suffix) {
+std::string generateRandomFilename(std::size_t length, const std::string &suffix) {
   const char charset[] = "0123456789"
                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                          "abcdefghijklmnopqrstuvwxyz";
   static std::mt19937 rng{std::random_device{}()};
   static std::uniform_int_distribution<> dist(0, sizeof(charset) - 2); // -2 to skip null terminator
 
-  std::string tempDir = std::filesystem::temp_directory_path().string();
   std::string name;
-  name.reserve(tempDir.size() + length);
-  name += tempDir;
+  name.reserve(length);
   for (std::size_t i = 0; i < length; ++i) {
     name += charset[dist(rng)];
   }
-  return name + suffix;
+  std::filesystem::path filepath;
+  filepath = std::filesystem::temp_directory_path() / (name + suffix);
+  return filepath.string();
 }
 
 } // namespace NXcanSASTestHelper

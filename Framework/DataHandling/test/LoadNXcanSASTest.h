@@ -111,6 +111,7 @@ public:
     m_parameters.invalidDetectors = false;
     m_parameters.hasDx = false;
     m_parameters.loadTransmission = true;
+    m_parameters.filePath = generateRandomFilename();
 
     const auto ws = provide1DWorkspace(m_parameters);
     setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
@@ -142,9 +143,9 @@ public:
     m_parameters.detectors.emplace_back("front-detector");
     m_parameters.detectors.emplace_back("rear-detector");
     m_parameters.invalidDetectors = false;
-
     m_parameters.is2dData = true;
     m_parameters.hasDx = false;
+    m_parameters.filePath = generateRandomFilename();
 
     const auto ws = provide2DWorkspace(m_parameters);
     set2DValues(ws);
@@ -270,7 +271,11 @@ private:
   NXcanSASTestParameters m_parameters;
 
   Workspace_sptr load_file_no_issues() const {
+    if (m_parameters.filePath.empty()) {
+      throw std::runtime_error("Error in test - no file path set in parameters");
+    }
     LoadNXcanSAS alg;
+
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filePath));
@@ -294,9 +299,9 @@ private:
 
     const std::string saveAlgName = m_parameters.isPolarized ? "SavePolarizedNXcanSAS" : "SaveNXcanSAS";
     const auto saveAlg = AlgorithmManager::Instance().createUnmanaged(saveAlgName);
-    std::string filePath = generate_random_filename();
+    m_parameters.filePath = generateRandomFilename();
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", filePath);
+    saveAlg->setProperty("Filename", m_parameters.filePath);
 
     if (m_parameters.isPolarized) {
       saveAlg->setProperty("InputWorkspace", std::dynamic_pointer_cast<WorkspaceGroup>(workspace));
@@ -560,7 +565,7 @@ private:
     parameters1D.detectors.emplace_back("rear-detector");
     parameters1D.invalidDetectors = false;
     parameters1D.hasDx = true;
-    parameters1D.filePath = generate_random_filename();
+    parameters1D.filePath = generateRandomFilename();
 
     const auto ws = provide1DWorkspace(parameters1D);
     setXValuesOn1DWorkspace(ws, parameters1D.xmin, parameters1D.xmax);
@@ -585,7 +590,7 @@ private:
     parameters2D.detectors.emplace_back("rear-detector");
     parameters2D.invalidDetectors = false;
     parameters2D.is2dData = true;
-    parameters2D.filePath = generate_random_filename();
+    parameters2D.filePath = generateRandomFilename();
 
     const auto ws = provide2DWorkspace(parameters2D);
     set2DValues(ws);

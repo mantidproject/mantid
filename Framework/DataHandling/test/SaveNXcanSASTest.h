@@ -378,7 +378,7 @@ private:
                            const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();
-    parameters.filePath = generate_random_filename();
+    parameters.filePath = generateRandomFilename();
 
     saveAlg->setProperty("Filename", parameters.filePath);
     saveAlg->setProperty("InputWorkspace", workspace);
