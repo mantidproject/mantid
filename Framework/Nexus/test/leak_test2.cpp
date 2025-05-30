@@ -26,7 +26,7 @@ int main() {
     remove(strFile);
     printf("file %s\n", strFile);
     NXhandle fileid;
-    if (NXopen(strFile, access_mode, &fileid) != NXstatus::NX_OK) {
+    if (NXopen(strFile, access_mode, fileid) != NXstatus::NX_OK) {
       std::cerr << "NXopen failed!" << std::endl;
       return 1;
     }
@@ -94,7 +94,7 @@ int main() {
       }
     }
 
-    if (NXclose(&fileid) != NXstatus::NX_OK) {
+    if (NXclose(fileid) != NXstatus::NX_OK) {
       std::cerr << "NXclose failed!" << std::endl;
       return 1;
     }

@@ -84,11 +84,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
-  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), nx_creation_code, &fileid), "Failure in NXopen for " + nxFile);
+  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), nx_creation_code, fileid), "Failure in NXopen for " + nxFile);
   if (nx_creation_code == NXACC_CREATE5) {
     std::cout << "Trying to reopen the file handle" << std::endl;
     NXhandle clone_fileid;
-    ASSERT_NO_ERROR(NXreopen(fileid, &clone_fileid), "Failed to NXreopen " + nxFile);
+    ASSERT_NO_ERROR(NXreopen(fileid, clone_fileid), "Failed to NXreopen " + nxFile);
   }
   // open group entry
   ASSERT_NO_ERROR(NXmakegroup(fileid, "entry", "NXentry"), "NXmakegroup(fileid, \"entry\", \"NXentry\")");
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopendata(fileid, "comp_data"), "NXopendata comp_data");
   ASSERT_NO_ERROR(NXputdata(fileid, comp_array), "NXputdata comp_data");
   ASSERT_NO_ERROR(NXclosedata(fileid), "NXclosedata comp_data");
-  ASSERT_NO_ERROR(NXflush(&fileid), "NXflush comp_data");
+  ASSERT_NO_ERROR(NXflush(fileid), "NXflush comp_data");
   int64_t unlimited_dims[1] = {NX_UNLIMITED};
   // NXcompmakedata64 has a hard time with unlimited dimensions
   ASSERT_NO_ERROR(NXmakedata64(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims), "NXmakedata64 flush_data");
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     slab_start[0] = i;
     ASSERT_NO_ERROR(NXopendata(fileid, "flush_data"), "");
     ASSERT_NO_ERROR(NXputslab64(fileid, &i, slab_start, slab_size), "");
-    ASSERT_NO_ERROR(NXflush(&fileid), "");
+    ASSERT_NO_ERROR(NXflush(fileid), "");
   }
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // close group entry/data
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXmakenamedlink(fileid, "renLinkData", &dlink), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // close group link
-  ASSERT_NO_ERROR(NXclose(&fileid), "");
+  ASSERT_NO_ERROR(NXclose(fileid), "");
   // close file
   //  END LINK TEST
 
@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/r8_data"), "Failure on NXopenaddress\n");
   std::cout << "NXopenaddress checks OK\n";
 
-  ASSERT_NO_ERROR(NXclose(&fileid), "");
+  ASSERT_NO_ERROR(NXclose(fileid), "");
 #endif // WIN32
 
   std::cout << "before load path tests\n";
@@ -456,12 +456,12 @@ int testLoadPath() {
     // TODO create file and cleanup
     // std::string filename("data/dmc01.h5");
     NXhandle h;
-    if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NXstatus::NX_OK) {
+    if (NXopen("dmc01.hdf", NXACC_RDWR, h) != NXstatus::NX_OK) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
     } else {
       std::cout << "Success loading NeXus file from path\n";
-      NXclose(&h);
+      NXclose(h);
       return TEST_SUCCEED;
     }
   } else {
