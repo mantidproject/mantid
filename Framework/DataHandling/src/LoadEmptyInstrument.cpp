@@ -238,7 +238,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
   bool foundIDF{false};
   try {
     Nexus::File nxsfile(filename);
-    nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
+    nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
     foundIDF = true;
   } catch (Nexus::Exception const &) {
   }
@@ -247,7 +247,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
     instrumentParentEntryName = instrumentParentEntryName_2;
     try {
       Nexus::File nxsfile(filename);
-      nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
+      nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
       foundIDF = true;
     } catch (Nexus::Exception const &) {
     }

@@ -183,20 +183,20 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 static void NXI5KillAttDir(pNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
 
 /*---------------------------------------------------------------------*/
-static void buildCurrentPath(pNexusFile5 self, char *pathBuffer, // cppcheck-suppress constParameterPointer
-                             int pathBufferLen) {
+static void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, // cppcheck-suppress constParameterPointer
+                                int addressBufferLen) {
 
-  memset(pathBuffer, 0, static_cast<size_t>(pathBufferLen));
+  memset(addressBuffer, 0, static_cast<size_t>(addressBufferLen));
   if (self->iCurrentG != 0) {
-    strcpy(pathBuffer, "/");
-    if ((int)strlen(self->name_ref) + 1 < pathBufferLen) {
-      strcat(pathBuffer, self->name_ref);
+    strcpy(addressBuffer, "/");
+    if ((int)strlen(self->name_ref) + 1 < addressBufferLen) {
+      strcat(addressBuffer, self->name_ref);
     }
   }
   if (self->iCurrentD != 0) {
-    strcat(pathBuffer, "/");
-    if ((int)strlen(self->iCurrentLD) + (int)strlen(pathBuffer) < pathBufferLen) {
-      strcat(pathBuffer, self->iCurrentLD);
+    strcat(addressBuffer, "/");
+    if ((int)strlen(self->iCurrentLD) + (int)strlen(addressBuffer) < addressBufferLen) {
+      strcat(addressBuffer, self->iCurrentLD);
     }
   }
 }
@@ -532,7 +532,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pNexusFile5 pFile;
   hid_t attr1, atype, iVID;
   herr_t iRet;
-  char pBuffer[NX_MAXPATHLEN + 12]; // no idea what the 12 is about
+  char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) {
@@ -1191,12 +1191,12 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
   /*
      this means: if the item is already linked: use the target attribute else,
-     the path to the current node
+     the address to the current node
    */
   datalen = 1024;
-  sRes->targetPath.resize(datalen, 0);
-  if (NX5getattr(fid, "target", sRes->targetPath.data(), &datalen, &type) != NXstatus::NX_OK) {
-    buildCurrentPath(pFile, sRes->targetPath.data(), 1024);
+  sRes->targetAddress.resize(datalen, 0);
+  if (NX5getattr(fid, "target", sRes->targetAddress.data(), &datalen, &type) != NXstatus::NX_OK) {
+    buildCurrentAddress(pFile, sRes->targetAddress.data(), 1024);
   }
   sRes->linkType = NXentrytype::sds;
   return NXstatus::NX_OK;
@@ -1206,7 +1206,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
 NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
   NXI5assert(fid);
-  printf("HDF5 link: targetPath = \"%s\", linkType = \"%d\"\n", sLink->targetPath.c_str(), sLink->linkType);
+  printf("HDF5 link: targetAddress = \"%s\", linkType = \"%d\"\n", sLink->targetAddress.c_str(), sLink->linkType);
   return NXstatus::NX_OK;
 }
 
@@ -1219,12 +1219,12 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
      set the target attribute
    */
   if (sLink->linkType > 0) {
-    dataID = H5Dopen(pFile->iFID, sLink->targetPath.c_str(), H5P_DEFAULT);
+    dataID = H5Dopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
   } else {
-    dataID = H5Gopen(pFile->iFID, sLink->targetPath.c_str(), H5P_DEFAULT);
+    dataID = H5Gopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
   }
   if (dataID < 0) {
-    NXReportError("Internal error, path to link does not exist");
+    NXReportError("Internal error, address to link does not exist");
     return NXstatus::NX_ERROR;
   }
   hid_t status = H5Aopen_by_name(dataID, ".", name, H5P_DEFAULT, H5P_DEFAULT);
@@ -1237,12 +1237,12 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   }
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, sLink->targetPath.size());
+  H5Tset_size(aid1, sLink->targetAddress.size());
   attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attID < 0) {
     return NXstatus::NX_OK;
   }
-  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetPath.c_str()));
+  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetAddress.c_str()));
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
@@ -1258,7 +1258,7 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
 
 NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
   pNexusFile5 pFile;
-  char linkTarget[NX_MAXPATHLEN];
+  char linkTarget[NX_MAXADDRESSLEN];
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) { /* root level, can not link here */
@@ -1266,20 +1266,20 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
   }
 
   /*
-     build pathname to link from our current group and the name
+     build addressname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(name) + 2 < NX_MAXPATHLEN) {
+  if (strlen(pFile->name_ref) + strlen(name) + 2 < NX_MAXADDRESSLEN) {
     strcpy(linkTarget, "/");
     strcat(linkTarget, pFile->name_ref);
     strcat(linkTarget, "/");
     strcat(linkTarget, name);
   } else {
-    NXReportError("ERROR: path string to long");
+    NXReportError("ERROR: address string to long");
     return NXstatus::NX_ERROR;
   }
 
-  H5Lcreate_hard(pFile->iFID, sLink->targetPath.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(pFile->iFID, sLink->targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
 
   return NX5settargetattribute(pFile, sLink);
 }
@@ -1288,7 +1288,7 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
 
 NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
   pNexusFile5 pFile;
-  char linkTarget[NX_MAXPATHLEN];
+  char linkTarget[NX_MAXADDRESSLEN];
   char *itemName = NULL;
 
   pFile = NXI5assert(fid);
@@ -1299,7 +1299,7 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
   /*
      locate name of the element to link
    */
-  itemName = strrchr(sLink->targetPath.data(), '/');
+  itemName = strrchr(sLink->targetAddress.data(), '/');
   if (itemName == NULL) {
     NXReportError("ERROR: bad link structure");
     return NXstatus::NX_ERROR;
@@ -1307,20 +1307,20 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
   itemName++;
 
   /*
-     build pathname to link from our current group and the name
+     build addressname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXPATHLEN) {
+  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXADDRESSLEN) {
     strcpy(linkTarget, "/");
     strcat(linkTarget, pFile->name_ref);
     strcat(linkTarget, "/");
     strcat(linkTarget, itemName);
   } else {
-    NXReportError("ERROR: path string to long");
+    NXReportError("ERROR: address string to long");
     return NXstatus::NX_ERROR;
   }
 
-  H5Lcreate_hard(pFile->iFID, sLink->targetPath.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(pFile->iFID, sLink->targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
 
   return NX5settargetattribute(pFile, sLink);
 }
@@ -2107,12 +2107,12 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
   } else {
     /*
        this means: if the item is already linked: use the target attribute, else
-       the path to the current node
+       the address to the current node
      */
     int datalen = 1024;
-    sRes->targetPath.resize(datalen, 0);
-    if (NX5getattr(fileid, "target", sRes->targetPath.data(), &datalen, &type) != NXstatus::NX_OK) {
-      buildCurrentPath(pFile, sRes->targetPath.data(), datalen);
+    sRes->targetAddress.resize(datalen, 0);
+    if (NX5getattr(fileid, "target", sRes->targetAddress.data(), &datalen, &type) != NXstatus::NX_OK) {
+      buildCurrentAddress(pFile, sRes->targetAddress.data(), datalen);
     }
     sRes->linkType = NXentrytype::group;
     return NXstatus::NX_OK;
@@ -2147,7 +2147,7 @@ NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int fil
 
 NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   NXI5assert(fileid);
-  if (pFirstID->targetPath == pSecondID->targetPath) {
+  if (pFirstID->targetAddress == pSecondID->targetAddress) {
     return NXstatus::NX_OK;
   } else {
     return NXstatus::NX_ERROR;

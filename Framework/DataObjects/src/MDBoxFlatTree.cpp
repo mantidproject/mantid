@@ -442,7 +442,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
   for (; itr != experimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
-      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
     } else {
@@ -451,7 +451,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getPath());
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getAddress());
         // Now do the parameter map
         if (parameterStr.empty()) {
           ei->populateInstrumentParameters();
@@ -500,7 +500,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
   for (; itr != experimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
-      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
     } else {

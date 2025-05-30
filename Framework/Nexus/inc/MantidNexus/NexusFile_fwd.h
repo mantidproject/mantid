@@ -32,7 +32,7 @@ constexpr int NX_UNLIMITED = -1;
 
 constexpr int NX_MAXRANK = 32;
 constexpr int NX_MAXNAMELEN = 64;
-constexpr int NX_MAXPATHLEN = 1024;
+constexpr int NX_MAXADDRESSLEN = 1024;
 
 constexpr int NXMAXSTACK = 50;
 
@@ -71,12 +71,12 @@ enum NXentrytype : int { group = 0, sds = 1 };
 /**
  * \struct NXlink
  * Represents a link between entries in a NeXus file
- * \li targetPath path to item to link
+ * \li targetAddress address to item to link
  * \li linkType 0 for group link, 1 for SDS link
  */
 typedef struct {
-  std::string targetPath; /* path to item to link */
-  NXentrytype linkType;   /* HDF5: 0 for group link, 1 for SDS link */
+  std::string targetAddress; /* address to item to link */
+  NXentrytype linkType;      /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
 /* Map NeXus compression methods to HDF compression methods */

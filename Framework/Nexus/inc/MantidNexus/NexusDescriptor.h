@@ -74,41 +74,41 @@ public:
   const std::map<std::string, std::set<std::string>> &getAllEntries() const noexcept;
 
   /**
-   * Checks if a full-path entry exists for a particular groupClass in a Nexus
+   * Checks if a full-address entry exists for a particular groupClass in a Nexus
    * dataset
    * @param groupClass e.g. NxLog , Nexus entry attribute
-   * @param entryName full path for an entry name /entry/NXlogs
+   * @param entryName full address for an entry name /entry/NXlogs
    * @return true: entryName exists for a groupClass, otherwise false
    */
   bool isEntry(const std::string &entryName, const std::string &groupClass) const noexcept;
 
   /**
-   * Checks if a full-path entry exists in a Nexus dataset
-   * @param entryName full path for an entry name /entry/NXlogs
+   * Checks if a full-address entry exists in a Nexus dataset
+   * @param entryName full address for an entry name /entry/NXlogs
    * @return true: entryName exists, otherwise false
    */
   bool isEntry(const std::string &entryName) const noexcept;
 
   /**
    * @param type A string specifying the required type
-   * @return path A vector of strings giving paths using UNIX-style path
+   * @return pataddressh A vector of strings giving address using UNIX-style address
    * separators (/), e.g. /raw_data_1, /entry/bank1
    */
-  std::vector<std::string> allPathsOfType(const std::string &type) const;
+  std::vector<std::string> allAddressesOfType(const std::string &type) const;
 
   /**
-   * @param level A string specifying the parent path
-   * @return path A map of strings giving names within parent (mapped to class type)
+   * @param level A string specifying the parent address
+   * @return address A map of strings giving names within parent (mapped to class type)
    * e.g. group1 : NXentry, group2 : NXentry, data : NXdata
    */
-  std::map<std::string, std::string> allPathsAtLevel(const std::string &level) const;
+  std::map<std::string, std::string> allAddressesAtLevel(const std::string &level) const;
 
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(const std::string &classType) const;
 
   /**
-   * @param name A path within a NeXus file to an entry
-   * @return The class type associated with that path
+   * @param name A address within a NeXus file to an entry
+   * @return The class type associated with that address
    */
   std::string classTypeForName(std::string const &name) const;
 
@@ -116,7 +116,7 @@ public:
    * Add an entry to the mapping for the file. Since there is no handle to the file after creation, it is up to the
    * caller to only add entries that exist. This should not be used for files that are read-only.
    *
-   * @param entryName full path to the node in the file
+   * @param entryName full address to the node in the file
    * @param groupClass NXclass (for group) or SDS (for dataset)
    */
   void addEntry(const std::string &entryName, const std::string &groupClass);

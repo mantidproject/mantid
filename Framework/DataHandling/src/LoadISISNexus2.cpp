@@ -250,7 +250,7 @@ void LoadISISNexus2::exec() {
   }
 
   // Load logs and sample information
-  m_nexusFile->openPath(entry.path());
+  m_nexusFile->openAddress(entry.address());
   local_workspace->loadSampleAndLogInfoNexus(m_nexusFile.get());
 
   // Load logs and sample information further information... See maintenance

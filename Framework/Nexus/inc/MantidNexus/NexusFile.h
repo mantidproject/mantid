@@ -120,33 +120,33 @@ public:
   // ADDRESS GET / OPEN
 
   /**
-   * Open the NeXus object with the path specified.
+   * Open the NeXus object with the address specified.
    *
-   * \param path A unix like path string to a group or field. The path
+   * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  void openPath(std::string const &path);
+  void openAddress(std::string const &address);
 
   /**
-   * Open the group in which the NeXus object with the specified path exists.
+   * Open the group in which the NeXus object with the specified address exists.
    *
-   * \param path A unix like path string to a group or field. The path
+   * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
    * '/' (i.e. "/entry/sample/name").
    */
-  void openGroupPath(std::string const &path);
+  void openGroupAddress(std::string const &address);
 
   /**
-   * Get the path into the current file
-   * \return A unix like path string pointing to the current
+   * Get the address into the current file
+   * \return A unix like address string pointing to the current
    *         position in the file
    */
-  std::string getPath();
+  std::string getAddress();
 
   // CHECK ADDRESS EXISTENCE
 
-  bool hasPath(std::string const &);
+  bool hasAddress(std::string const &);
 
   bool hasGroup(std::string const &, std::string const &);
 
@@ -167,7 +167,7 @@ private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
 
   // these are used for updating the NexusDescriptor
-  std::string formAbsolutePath(std::string const &);
+  std::string formAbsoluteAddress(std::string const &);
   void registerEntry(std::string const &, std::string const &);
 
   //------------------------------------------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ public:
 
   /** Return the string name of the top-level entry
    *
-   * \return a string with the name (not abs path) of the top-level entry
+   * \return a string with the name (not abs address) of the top-level entry
    */
   std::string getTopLevelEntryName();
 

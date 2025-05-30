@@ -238,7 +238,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
   status = pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
   if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
+    pushAddress(fileStack, name);
   }
 
   return status;
@@ -256,7 +256,7 @@ NXstatus NXclosegroup(NXhandle fid) {
   if (fileStackDepth(fileStack) == 0) {
     status = pFunc->nxclosegroup(pFunc->pNexusData);
     if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
+      popAddress(fileStack);
     }
     return status;
   } else {
@@ -269,7 +269,7 @@ NXstatus NXclosegroup(NXhandle fid) {
     } else {
       status = pFunc->nxclosegroup(pFunc->pNexusData);
       if (status == NXstatus::NX_OK) {
-        popPath(fileStack);
+        popAddress(fileStack);
       }
     }
     return status;
@@ -303,7 +303,7 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   status = pFunc->nxopendata(pFunc->pNexusData, name);
 
   if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
+    pushAddress(fileStack, name);
   }
 
   return status;
@@ -322,7 +322,7 @@ NXstatus NXclosedata(NXhandle fid) {
   if (fileStackDepth(fileStack) == 0) {
     status = pFunc->nxclosedata(pFunc->pNexusData);
     if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
+      popAddress(fileStack);
     }
     return status;
   } else {
@@ -335,7 +335,7 @@ NXstatus NXclosedata(NXhandle fid) {
     } else {
       status = pFunc->nxclosedata(pFunc->pNexusData);
       if (status == NXstatus::NX_OK) {
-        popPath(fileStack);
+        popAddress(fileStack);
       }
     }
     return status;
@@ -405,17 +405,17 @@ NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
 
 /* -------------------------------------------------------------------- */
 NXstatus NXopensourcegroup(NXhandle fid) {
-  char target_path[512];
+  char target_address[512];
   NXnumtype type = NXnumtype::CHAR;
   int length = 511;
   NXstatus status;
 
-  status = NXgetattr(fid, "target", target_path, &length, &type);
+  status = NXgetattr(fid, "target", target_address, &length, &type);
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: item not linked");
     return NXstatus::NX_ERROR;
   }
-  return NXopengrouppath(fid, target_path);
+  return NXopengroupaddress(fid, target_address);
 }
 
 /*----------------------------------------------------------------------*/
@@ -684,7 +684,7 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
 }
 
 /*------------------------------------------------------------------------
-  Implementation of NXopenpath
+  Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
 static int isDataSetOpen(NXhandle hfil) {
   NXlink id;
@@ -716,11 +716,11 @@ static int isRoot(NXhandle hfil) {
 }
 
 /*--------------------------------------------------------------------
-  copies the next path element into element.
-  returns a pointer into path beyond the extracted path
+  copies the next address element into element.
+  returns a pointer into address beyond the extracted address
   ---------------------------------------------------------------------*/
-static char *extractNextPath(char *path, NXname element) {
-  char *pStart = path;
+static char *extractNextAddress(char *address, NXname element) {
+  char *pStart = address;
   /*
      skip over leading /
    */
@@ -734,7 +734,7 @@ static char *extractNextPath(char *path, NXname element) {
   char *pNext = strchr(pStart, '/');
   if (pNext == NULL) {
     /*
-       this is the last path element
+       this is the last address element
      */
     strcpy(element, pStart);
     return NULL;
@@ -766,8 +766,8 @@ static NXstatus gotoRoot(NXhandle hfil) {
 }
 
 /*--------------------------------------------------------------------*/
-static int isRelative(char const *path) {
-  if (path[0] == '.' && path[1] == '.')
+static int isRelative(char const *address) {
+  if (address[0] == '.' && address[1] == '.')
     return 1;
   else
     return 0;
@@ -783,17 +783,17 @@ static NXstatus moveOneDown(NXhandle hfil) {
 }
 
 /*-------------------------------------------------------------------
-  returns a pointer to the remaining path string to move up
+  returns a pointer to the remaining address string to move up
   --------------------------------------------------------------------*/
-static char *moveDown(NXhandle hfil, char *path, NXstatus *code) {
+static char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
   *code = NXstatus::NX_OK;
 
-  if (path[0] == '/') {
+  if (address[0] == '/') {
     *code = gotoRoot(hfil);
-    return path;
+    return address;
   } else {
     char *pPtr;
-    pPtr = path;
+    pPtr = address;
     while (isRelative(pPtr)) {
       NXstatus status = moveOneDown(hfil);
       if (status == NXstatus::NX_ERROR) {
@@ -814,7 +814,7 @@ static NXstatus stepOneUp(NXhandle hfil, char const *name) {
 
   /*
      catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with paths like ../
+     necessary. This can happen with address like ../
    */
   if (strlen(name) < 1) {
     return NXstatus::NX_OK;
@@ -831,7 +831,7 @@ static NXstatus stepOneUp(NXhandle hfil, char const *name) {
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopenpath cannot step into %s", name);
+  snprintf(pBueffel, 255, "ERROR: NXopenaddress cannot step into %s", name);
   NXReportError(pBueffel);
   return NXstatus::NX_ERROR;
 }
@@ -844,7 +844,7 @@ static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
 
   /*
      catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with paths like ../
+     necessary. This can happen with address like ../
    */
   if (strlen(name) < 1) {
     return NXstatus::NX_OK;
@@ -861,32 +861,32 @@ static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopengrouppath cannot step into %s", name);
+  snprintf(pBueffel, 255, "ERROR: NXopengroupaddress cannot step into %s", name);
   NXReportError(pBueffel);
   return NXstatus::NX_ERROR;
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopenpath(NXhandle hfil, CONSTCHAR *path) {
+NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
   NXstatus status;
   int run = 1;
-  NXname pathElement;
+  NXname addressElement;
   char *pPtr;
 
-  if (hfil == NULL || path == NULL) {
-    NXReportError("ERROR: NXopendata needs both a file handle and a path string");
+  if (hfil == NULL || address == NULL) {
+    NXReportError("ERROR: NXopendata needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(path)), &status);
+  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: NXopendata failed to move down in hierarchy");
     return status;
   }
 
   while (run == 1) {
-    pPtr = extractNextPath(pPtr, pathElement);
-    status = stepOneUp(hfil, pathElement);
+    pPtr = extractNextAddress(pPtr, addressElement);
+    status = stepOneUp(hfil, addressElement);
     if (status != NXstatus::NX_OK) {
       return status;
     }
@@ -898,28 +898,28 @@ NXstatus NXopenpath(NXhandle hfil, CONSTCHAR *path) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
+NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
   NXstatus status;
-  NXname pathElement;
+  NXname addressElement;
   char *pPtr;
   char buffer[256];
 
-  if (hfil == NULL || path == NULL) {
-    NXReportError("ERROR: NXopengrouppath needs both a file handle and a path string");
+  if (hfil == NULL || address == NULL) {
+    NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(path)), &status);
+  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
   if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: NXopengrouppath failed to move down in hierarchy");
+    NXReportError("ERROR: NXopengroupaddress failed to move down in hierarchy");
     return status;
   }
 
   do {
-    pPtr = extractNextPath(pPtr, pathElement);
-    status = stepOneGroupUp(hfil, pathElement);
+    pPtr = extractNextAddress(pPtr, addressElement);
+    status = stepOneGroupUp(hfil, addressElement);
     if (status == NXstatus::NX_ERROR) {
-      sprintf(buffer, "ERROR: NXopengrouppath cannot reach path %s", path);
+      sprintf(buffer, "ERROR: NXopengroupaddress cannot reach address %s", address);
       NXReportError(buffer);
       return NXstatus::NX_ERROR;
     }
@@ -934,12 +934,12 @@ NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
 }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
+NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   int status;
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
-  status = buildPath(fileStack, path, pathlen);
+  status = buildAddress(fileStack, address, addresslen);
   if (status != 1) {
     return NXstatus::NX_ERROR;
   }

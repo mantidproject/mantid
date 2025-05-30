@@ -56,7 +56,7 @@ private:
 
   std::vector<std::string> m_supportedInstruments;
   std::string m_instrumentName;
-  std::string m_instrumentPath;
+  std::string m_instrumentAddress;
   API::MatrixWorkspace_sptr m_localWorkspace;
   size_t m_numberOfTubes;         // number of tubes - X
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y

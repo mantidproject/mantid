@@ -21,15 +21,15 @@ namespace DataHandling {
  */
 namespace LoadHelper {
 
-std::string findInstrumentNexusPath(const Mantid::Nexus::NXEntry &);
-std::string getStringFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
-double getDoubleFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
-std::vector<double> getTimeBinningFromNexusPath(const Mantid::Nexus::NXEntry &, const std::string &);
+std::string findInstrumentNexusAddress(const Mantid::Nexus::NXEntry &);
+std::string getStringFromNexusAddress(const Mantid::Nexus::NXEntry &, const std::string &);
+double getDoubleFromNexusAddress(const Mantid::Nexus::NXEntry &, const std::string &);
+std::vector<double> getTimeBinningFromNexusAddress(const Mantid::Nexus::NXEntry &, const std::string &);
 double calculateEnergy(double);
 double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
 void addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &entryName = "",
-                           bool useFullPath = false);
+                           bool useFullAddress = false);
 std::string dateTimeInIsoFormat(const std::string &);
 
 void moveComponent(const API::MatrixWorkspace_sptr &ws, const std::string &componentName, const Kernel::V3D &newPos);
@@ -37,7 +37,7 @@ void rotateComponent(const API::MatrixWorkspace_sptr &ws, const std::string &com
 Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws, const std::string &componentName);
 
 void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
-                         const std::string &instrumentPath = "");
+                         const std::string &instrumentAddress = "");
 
 void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::Nexus::NXInt &,
                          const std::vector<double> &xAxis, int64_t initialSpectrum = 0, bool pointData = false,
@@ -59,7 +59,7 @@ Nexus::NXDouble getDoubleDataset(const Nexus::NXEntry &, const std::string &);
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
 void recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &parent_name,
-                                     const std::string &parent_class, int level, bool useFullPath);
+                                     const std::string &parent_class, int level, bool useFullAddress);
 } // namespace LoadHelper
 } // namespace DataHandling
 } // namespace Mantid

@@ -135,19 +135,19 @@ std::vector<std::string> LoadILLTOF3::getMonitorInfo(const Nexus::NXEntry &first
 }
 
 /**
- * Sets the instrument name along with its path in the nexus file
+ * Sets the instrument name along with its address in the nexus file
  *
  * @param firstEntry The NeXus entry
  */
 void LoadILLTOF3::loadInstrumentDetails(const Nexus::NXEntry &firstEntry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  m_instrumentAddress = LoadHelper::findInstrumentNexusAddress(firstEntry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, m_instrumentAddress + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {
@@ -376,7 +376,7 @@ std::vector<double> LoadILLTOF3::prepareAxis(const Nexus::NXEntry &entry, bool c
  * Fills the non-scan measurement data into the workspace, including that from the monitor
  *
  * @param entry The Nexus entry
- * @param monitorList Vector containing paths to monitor data
+ * @param monitorList Vector containing addresses to monitor data
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
@@ -421,7 +421,7 @@ void LoadILLTOF3::fillStaticWorkspace(const Nexus::NXEntry &entry, const std::ve
 /**
  * Fills scan workspace with data and monitor data counts
  * @param entry The Nexus entry to load the data from
- * @param monitorList Vector containing paths to monitor data
+ * @param monitorList Vector containing addresses to monitor data
  */
 void LoadILLTOF3::fillScanWorkspace(const Nexus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array

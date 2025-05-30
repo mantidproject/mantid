@@ -72,7 +72,7 @@ private:
   void addMetaData(Mantid::Nexus::File *fin, const Mantid::API::Workspace_sptr &ws,
                    const Mantid::API::ExperimentInfo_sptr &info);
 
-  int safeOpenpath(Mantid::Nexus::File *fin, const std::string &path);
+  int safeOpenAddress(Mantid::Nexus::File *fin, const std::string &path);
   int calculateCAddress(const int *pos, const int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };

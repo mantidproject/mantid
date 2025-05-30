@@ -55,8 +55,8 @@ private:
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  std::string m_instrumentName; ///< Name of the instrument
-  std::string m_instrumentPath; ///< Name of the instrument path
+  std::string m_instrumentName;    ///< Name of the instrument
+  std::string m_instrumentAddress; ///< Name of the instrument address
 
   // Variables describing the data in the detector
   size_t m_numberOfTubes;         // number of tubes - X
