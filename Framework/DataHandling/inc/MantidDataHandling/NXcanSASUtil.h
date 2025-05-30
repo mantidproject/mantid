@@ -67,9 +67,6 @@ struct SpinState {
   std::pair<size_t, size_t> spinIndexPair{0, 0};
 };
 
-std::optional<size_t> findWorkspaceIndexForSpinState(const std::vector<std::string> &spinStates,
-                                                     const std::string &targetState);
-
 DataSpaceInformation getDataSpaceInfo(const H5::DataSet &dataSet);
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
