@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-namespace Mantid::NeXus {
+namespace Mantid::Nexus {
 class NXClass;
 struct NXClassInfo;
 class NXData;
@@ -16,4 +16,4 @@ template <typename T> class NXDataSetTyped;
 using NXInt = NXDataSetTyped<int32_t>;
 using NXFloat = NXDataSetTyped<float>;
 using NXDouble = NXDataSetTyped<double>;
-} // namespace Mantid::NeXus
+} // namespace Mantid::Nexus

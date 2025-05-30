@@ -5,16 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <memory>
 #include <utility>
 
-using ::NeXus::dimsize_t;
+namespace Mantid::Nexus {
 
-namespace Mantid::NeXus {
-
-static NXDimArray nxdimArray(::NeXus::DimVector xd) {
+static NXDimArray nxdimArray(const DimVector &xd) {
   NXDimArray ret{0};
   for (std::size_t i = 0; i < xd.size(); i++) {
     ret[i] = xd[i];
@@ -22,7 +20,7 @@ static NXDimArray nxdimArray(::NeXus::DimVector xd) {
   return ret;
 }
 
-NXInfo::NXInfo(::NeXus::Info const &info, std::string const &name)
+NXInfo::NXInfo(Info const &info, std::string const &name)
     : nxname(name), rank(info.dims.size()), dims(nxdimArray(info.dims)), type(info.type), allGood(true) {}
 
 std::vector<std::string> NXAttributes::names() const {
@@ -81,8 +79,7 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::string &name)
-    : m_fileID(fileID), m_open(false) {
+NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name) : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_path = parent->path() + "/" + name;
   }
@@ -94,7 +91,7 @@ NXObject::NXObject(::NeXus::File *fileID, NXClass const *parent, const std::stri
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, const std::string &name)
+NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_path = parent->path() + "/" + name;
@@ -113,7 +110,7 @@ std::string NXObject::name() const {
  */
 void NXDataSet::getAttributes() {
   std::vector<char> buff(128);
-  for (::NeXus::AttrInfo const &ainfo : m_fileID->getAttrInfos()) {
+  for (AttrInfo const &ainfo : m_fileID->getAttrInfos()) {
     if (ainfo.type != NXnumtype::CHAR && ainfo.length != 1) {
       throw std::runtime_error("Encountered attribute with array value");
     }
@@ -182,7 +179,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
   std::string className = nxclass.empty() ? NX_class() : nxclass;
   try {
     m_fileID->openGroup(name(), className);
-  } catch (::NeXus::Exception const &) {
+  } catch (Exception const &) {
     return false;
   }
   m_open = true;
@@ -193,7 +190,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
 void NXClass::close() {
   try {
     m_fileID->closeGroup();
-  } catch (::NeXus::Exception const &) {
+  } catch (Exception const &) {
     throw std::runtime_error("Cannot close group " + name() + " of class " + NX_class() + " (trying to close path " +
                              m_path + ")");
   }
@@ -274,8 +271,8 @@ bool NXClass::containsDataSet(const std::string &query) const { return getDataSe
 NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   // Open NeXus file
   try {
-    m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_READ);
-  } catch (::NeXus::Exception const &e) {
+    m_fileID = std::make_shared<File>(m_filename, NXACC_READ);
+  } catch (Exception const &e) {
     std::cout << "NXRoot: Error loading " << m_filename << "\" in read mode: " << e.what() << "\n";
     throw;
   }
@@ -290,7 +287,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
   // Open NeXus file
-  m_fileID = std::make_shared<::NeXus::File>(m_filename, NXACC_CREATE5);
+  m_fileID = std::make_shared<File>(m_filename, NXACC_CREATE5);
 }
 
 NXRoot::~NXRoot() { m_fileID->close(); }
@@ -405,4 +402,4 @@ nxdimsize_t NXDataSet::dim3() const {
 
 NXData::NXData(const NXClass &parent, const std::string &name) : NXClass(parent, name) {}
 
-} // namespace Mantid::NeXus
+} // namespace Mantid::Nexus

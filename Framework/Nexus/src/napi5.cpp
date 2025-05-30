@@ -272,38 +272,6 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
   return fapl;
 }
 
-herr_t set_file_cache(hid_t fapl, CONSTCHAR *filename) {
-  char pBuffer[512];
-  int mdc_nelmts;
-  size_t rdcc_nelmts;
-  size_t rdcc_nbytes;
-  double rdcc_w0;
-  herr_t error = -1;
-
-  error = H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0);
-
-  if (error < 0) {
-    sprintf(pBuffer,
-            "Error: cannot obtain HDF5 cache size"
-            " for file %s",
-            filename);
-    NXReportError(pBuffer);
-    return error;
-  }
-
-  rdcc_nbytes = (size_t)nx_cacheSize;
-  error = H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
-  if (error < 0) {
-    sprintf(pBuffer,
-            "Error: cannot set cache size "
-            "for file %s",
-            filename);
-    NXReportError(pBuffer);
-    return error;
-  }
-  return error;
-}
-
 herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   char pBuffer[512];
   hid_t attr_id;
@@ -373,13 +341,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 
   /* start HDF5 interface */
   if (am == NXACC_CREATE5) {
-
-    /* set the cache size for the file */
-    if (set_file_cache(fapl, filename) < 0) {
-      free(pNew);
-      return NXstatus::NX_ERROR;
-    }
-
     am1 = H5F_ACC_TRUNC;
     pNew->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
   } else {
@@ -2162,27 +2123,6 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *externalfile, const char *remotetarget) {
-  hid_t openwhere;
-
-  const pNexusFile5 pFile = NXI5assert(fileid);
-
-  if (pFile->iCurrentG <= 0) {
-    openwhere = pFile->iFID;
-  } else {
-    openwhere = pFile->iCurrentG;
-  }
-
-  const herr_t iRet = H5Lcreate_external(externalfile, remotetarget, openwhere, name, H5P_DEFAULT, H5P_DEFAULT);
-  if (iRet < 0) {
-    NXReportError("ERROR: making external link failed");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
-
-/* ------------------------------------------------------------------- */
-
 NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int filenamelen) {
   hid_t openthing;
 
@@ -2200,53 +2140,6 @@ NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int fil
     NXReportError("ERROR: retrieving file name");
     return NXstatus::NX_ERROR;
   }
-  return NXstatus::NX_OK;
-}
-
-/* ------------------------------------------------------------------- */
-
-NXstatus NX5nativeisexternallink(NXhandle fileid, const char *name, char *url, const int urllen) {
-  pNexusFile5 pFile; // cppcheck-suppress constVariablePointer
-  herr_t ret;
-  H5L_info_t link_buff;
-  char linkval_buff[NX_MAXPATHLEN];
-  const char *filepath = NULL, *objpath = NULL;
-  size_t val_size;
-  hid_t openthing;
-
-  pFile = NXI5assert(fileid);
-  memset(url, 0, static_cast<size_t>(urllen));
-
-  if (pFile->iCurrentG > 0) {
-    openthing = pFile->iCurrentG;
-  } else {
-    openthing = pFile->iFID;
-  }
-
-  ret = H5Lget_info(openthing, name, &link_buff, H5P_DEFAULT);
-  if (ret < 0 || link_buff.type != H5L_TYPE_EXTERNAL) {
-    return NXstatus::NX_ERROR;
-  }
-
-  val_size = link_buff.u.val_size;
-  if (val_size > sizeof(linkval_buff)) {
-    NXReportError("ERROR: linkval_buff too small");
-    return NXstatus::NX_ERROR;
-  }
-
-  ret = H5Lget_val(openthing, name, linkval_buff, val_size, H5P_DEFAULT);
-  if (ret < 0) {
-    NXReportError("ERROR: H5Lget_val failed");
-    return NXstatus::NX_ERROR;
-  }
-
-  ret = H5Lunpack_elink_val(linkval_buff, val_size, NULL, &filepath, &objpath);
-  if (ret < 0) {
-    NXReportError("ERROR: H5Lunpack_elink_val failed");
-    return NXstatus::NX_ERROR;
-  }
-
-  snprintf(url, static_cast<size_t>(urllen - 1), "nxfile://%s#%s", filepath, objpath);
   return NXstatus::NX_OK;
 }
 
@@ -2434,8 +2327,6 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxinitgroupdir = NX5initgroupdir;
   fHandle->nxinitattrdir = NX5initattrdir;
   fHandle->nxprintlink = NX5printlink;
-  fHandle->nxnativeexternallink = NX5nativeexternallink;
   fHandle->nxnativeinquirefile = NX5nativeinquirefile;
-  fHandle->nxnativeisexternallink = NX5nativeisexternallink;
   fHandle->nxgetnextattra = NX5getnextattra;
 }

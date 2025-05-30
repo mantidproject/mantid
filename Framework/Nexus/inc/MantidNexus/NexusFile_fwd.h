@@ -1,6 +1,6 @@
 /** This class defines data types which are used as part of the NeXus API.
- * They should more properly be moved into NeXusFile, when the nexus layer has been cleaned up.
- * OR all type and enum definitions in NeXusFile all moved here.
+ * They should more properly be moved into NexusFile, when the nexus layer has been cleaned up.
+ * OR all type and enum definitions in NexusFile all moved here.
  */
 
 #pragma once
@@ -197,7 +197,7 @@ enum NXcompression : int {
 };
 
 // forward declare
-namespace NeXus {
+namespace Mantid::Nexus {
 
 // TODO change to std::size_t
 typedef std::int64_t dimsize_t;
@@ -231,4 +231,4 @@ struct AttrInfo {
 
 /** Forward declare of NeXus::File */
 class File;
-} // namespace NeXus
+} // namespace Mantid::Nexus

@@ -14,7 +14,7 @@
 #include <unordered_set>
 #include <vector>
 
-// from NeXusFile_fwd.h
+// from NexusFile_fwd.h
 typedef int NXaccess;
 
 namespace Mantid {

@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
+#include "MantidKernel/SpinStateValidator.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Algorithms;
+using namespace Mantid::Kernel;
 
 class SpinStateValidatorTest : public CxxTest::TestSuite {
 public:
@@ -29,13 +29,13 @@ public:
   }
 
   void testSpinStateSinglePairCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, false, '+', '-');
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, false, "+", "-");
     auto correctInputs = std::vector<std::string>{"-+", "--", "+-", "++", " -+", " -- ", "++ "};
     checkAllInputs(validator, correctInputs, true);
   }
 
   void testSpinStateSingleDigitCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, true, '+', '-');
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{1}, true, "+", "-");
     auto correctInputs = std::vector<std::string>{"-+", "--", "+-", "++", " -+", " -- ", "++ ", "-", "+"};
     checkAllInputs(validator, correctInputs, true);
   }
@@ -52,6 +52,12 @@ public:
     checkAllInputs(validator, incorrectInputs, false);
   }
 
+  void testDoubleIncorrectInputs() {
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2});
+    auto incorrectInputs = std::vector<std::string>{"0 1,11", " ,01", "11,0 0", "11", "1 1"};
+    checkAllInputs(validator, incorrectInputs, false);
+  }
+
   void testDuplicateEntry() {
     auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3});
     auto duplicates = std::vector<std::string>{"01, 01", "11,10,11", "00,00"};
@@ -59,7 +65,7 @@ public:
   }
 
   void testSpinStateDuplicateEntry() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3}, false, false);
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3}, false);
     auto duplicates = std::vector<std::string>{"-+, -+", "++,+-,++", "--,--"};
     checkAllInputs(validator, duplicates, false);
   }
@@ -77,7 +83,7 @@ public:
   }
 
   void testSpinStateMultipleStatesCorrectInputs() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, '+', '-');
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, "+", "-");
     auto correctInputs = std::vector<std::string>{"-+, ++", "--,+-,++", "++,+-, --,-+", "--, +- "};
     checkAllInputs(validator, correctInputs, true);
   }
@@ -89,7 +95,7 @@ public:
   }
 
   void testSpinStateMixedWithFlipperConfig() {
-    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, '+', '-');
+    auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4}, false, "+", "-");
     auto invalidInputs = std::vector<std::string>{"-+, 0+", "--,+-,11", "++,01, --,-+", "00, 1- "};
     checkAllInputs(validator, invalidInputs, false);
   }

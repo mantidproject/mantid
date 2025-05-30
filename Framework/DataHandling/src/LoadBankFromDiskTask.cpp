@@ -13,8 +13,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <algorithm>
@@ -61,11 +61,11 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, std::stri
 /** Load the pulse times, if needed. This sets
  * thisBankPulseTimes to the right pointer.
  * */
-void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
+void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
     file.openData("event_time_zero");
-  } catch (::NeXus::Exception &) {
+  } catch (const Nexus::Exception &) {
     // Field not found error is most likely.
     // Use the "proton_charge" das logs.
     thisBankPulseTimes = m_loader.alg->m_allBanksPulseTimes;
@@ -105,13 +105,13 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
     pulse)
  * @param file :: File handle for the NeXus file
  */
-std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
+std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(Nexus::File &file) {
   // Get the event_index (a list of size of # of pulses giving the index in
   // the event list for that pulse) as a uint64 vector.
   // The Nexus standard does not specify if this is to be 32-bit or 64-bit
   // integers, so we use the NeXusIOHelper to do the conversion on the fly.
-  auto event_index = std::make_unique<std::vector<uint64_t>>(
-      Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index"));
+  auto event_index =
+      std::make_unique<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(file, "event_index"));
 
   // Look for the sign that the bank is empty
   if (event_index->size() == 1) {
@@ -133,14 +133,14 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(::Ne
  * @param start_event_index ::  (a list of size of # of pulses giving the index in
  * the event list for that pulse)
  */
-void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
+void LoadBankFromDiskTask::prepareEventId(Nexus::File &file, int64_t &start_event, int64_t &stop_event,
                                           const uint64_t &start_event_index) {
   // Get the list of pixel ID's
   file.openData(m_detIdFieldName);
 
   // By default, use all available indices
   start_event = static_cast<int64_t>(start_event_index);
-  ::NeXus::Info id_info = file.getInfo();
+  Nexus::Info id_info = file.getInfo();
   // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into
   // account
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
@@ -164,12 +164,12 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_ev
 }
 
 /** Load the event_id field, which has been opened
- * @param file An NeXus::File object opened at the correct group
+ * @param file An Nexus::File object opened at the correct group
  * @returns A new array containing the event Ids for this bank
  */
-std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
+std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::File &file) {
   // This is the data size
-  ::NeXus::Info id_info = file.getInfo();
+  Nexus::Info id_info = file.getInfo();
   const int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Check that the required space is there in the file.
@@ -184,8 +184,8 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus
   auto event_id = std::make_unique<std::vector<uint32_t>>(dim0);
 
   if (!m_loadError) {
-    Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::Narrowing::Prevent>(
-        *event_id, file, m_detIdFieldName, m_loadStart, m_loadSize);
+    Nexus::IOHelper::readNexusSlab<uint32_t, Nexus::IOHelper::Narrowing::Prevent>(*event_id, file, m_detIdFieldName,
+                                                                                  m_loadStart, m_loadSize);
     file.closeData();
 
     // determine the range of pixel ids
@@ -218,19 +218,19 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus
 }
 
 /** Open and load the times-of-flight data
- * @param file An NeXus::File object opened at the correct group
+ * @param file An Nexus::File object opened at the correct group
  * @returns A new array containing the time of flights for this bank
  */
-std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
+std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &file) {
   // Get the list of event_time_of_flight's
   file.openData(m_timeOfFlightFieldName);
 
   // This is the data size
-  ::NeXus::Info id_info = file.getInfo();
+  Nexus::Info id_info = file.getInfo();
   const int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Check that the required space is there in the file.
-  ::NeXus::Info tof_info = file.getInfo();
+  Nexus::Info tof_info = file.getInfo();
   int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
@@ -248,12 +248,12 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   // explicitly allow downcasting using the additional AllowDowncasting
   // template argument.
   // the memory is allocated earlier in the function
-  Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::Narrowing::Allow>(
+  Nexus::IOHelper::readNexusSlab<float, Nexus::IOHelper::Narrowing::Allow>(
       *event_time_of_flight, file, m_timeOfFlightFieldName, m_loadStart, m_loadSize);
   std::string tof_unit;
   try {
     file.getAttr("units", tof_unit);
-  } catch (::NeXus::Exception const &) {
+  } catch (Nexus::Exception const &) {
   }
   file.closeData();
 
@@ -265,15 +265,15 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
 }
 
 /** Load weight of weigthed events if they exist
- * @param file An NeXus::File object opened at the correct group
+ * @param file An Nexus::File object opened at the correct group
  * @returns A new array containing the weights or a nullptr if the weights
  * are not present
  */
-std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
+std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(Nexus::File &file) {
   try {
     // First, get info about the event_weight field in this bank
     file.openData("event_weight");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Field not found error is most likely.
     m_have_weight = false;
     return std::unique_ptr<std::vector<float>>();
@@ -284,7 +284,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(::NeX
   // Allocate the array
   auto event_weight = std::make_unique<std::vector<float>>(m_loadSize[0]);
 
-  ::NeXus::Info weight_info = file.getInfo();
+  Nexus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
   if (weight_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
@@ -328,7 +328,7 @@ void LoadBankFromDiskTask::run() {
   std::unique_ptr<std::vector<uint64_t>> event_index;
 
   // Open the file
-  ::NeXus::File file(m_loader.alg->m_filename);
+  Nexus::File file(m_loader.alg->m_filename);
   try {
     // Navigate into the file
     file.openGroup(m_loader.alg->m_top_entry_name, "NXentry");

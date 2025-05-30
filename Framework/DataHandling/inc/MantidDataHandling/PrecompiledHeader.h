@@ -15,7 +15,7 @@
 
 // NeXus
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 // Poco
 #include <Poco/DOM/DOMParser.h>

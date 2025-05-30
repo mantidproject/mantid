@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile_fwd.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -14,13 +14,14 @@ static const std::string NULL_STR("NULL");
 }
 
 /**
- * \file NeXusFile.hpp Definition of the NeXus C++ API.
+ * \file NexusFile.h Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
  * \defgroup cpp_core C++ Core
  * \ingroup cpp_main
  */
 
-namespace NeXus {
+namespace Mantid {
+namespace Nexus {
 
 static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
 
@@ -29,6 +30,10 @@ static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
  * \ingroup cpp_core
  */
 class MANTID_NEXUS_DLL File {
+
+  //------------------------------------------------------------------------------------------------------------------
+  // PRIVATE MEMBERS
+  //------------------------------------------------------------------------------------------------------------------
 private:
   std::string m_filename;
   NXaccess m_access;
@@ -43,36 +48,9 @@ private:
    */
   Mantid::Nexus::NexusDescriptor m_descriptor;
 
-  /**
-   * \return A pair of the next entry available in a listing.
-   * NOTE: this is to be deleted in 6.14.  do NOT make public
-   */
-  Entry getNextEntry();
-
-public:
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
-
-  /**
-   * Initialize the pending group search to start again.
-   */
-  void initGroupDir();
-
-private:
-  /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * Function to consolidate the file opening code for the various constructors
-   * \param filename The name of the file to open.
-   * \param access How to access the file.
-   */
-  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
-
+  //------------------------------------------------------------------------------------------------------------------
+  // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
+  //------------------------------------------------------------------------------------------------------------------
 public:
   /**
    * Create a new File.
@@ -127,27 +105,19 @@ public:
   /** Flush the file. */
   void flush();
 
-  bool hasPath(std::string const &);
-  bool hasGroup(std::string const &, std::string const &);
-  bool hasData(std::string const &);
-
+private:
   /**
-   * Create a new group.
-   *
-   * \param name The name of the group to create (i.e. "entry").
-   * \param class_name The type of group to create (i.e. "NXentry").
-   * \param open_group Whether or not to automatically open the group after
-   * creating it.
+   * Function to consolidate the file opening code for the various constructors
+   * \param filename The name of the file to open.
+   * \param access How to access the file.
    */
-  void makeGroup(std::string const &name, std::string const &class_name, bool open_group = false);
+  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
 
-  /**
-   * Open an existing group.
-   *
-   * \param name The name of the group to create (i.e. "entry").
-   * \param class_name The type of group to create (i.e. "NXentry").
-   */
-  void openGroup(std::string const &name, std::string const &class_name);
+  //------------------------------------------------------------------------------------------------------------------
+  // FILE NAVIGATION METHODS
+  //------------------------------------------------------------------------------------------------------------------
+public:
+  // ADDRESS GET / OPEN
 
   /**
    * Open the NeXus object with the path specified.
@@ -174,10 +144,62 @@ public:
    */
   std::string getPath();
 
+  // CHECK ADDRESS EXISTENCE
+
+  bool hasPath(std::string const &);
+
+  bool hasGroup(std::string const &, std::string const &);
+
+  bool hasData(std::string const &);
+
+  /**
+   * This function checks if we are in an open dataset
+   * \returns true if we are currently in an open dataset else false
+   */
+  bool isDataSetOpen();
+
+  /** Return true if the data opened is of one of the
+   * int data types, 32 bits or less.
+   */
+  bool isDataInt();
+
+private:
+  // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
+
+  // these are used for updating the NexusDescriptor
+  std::string formAbsolutePath(std::string const &);
+  void registerEntry(std::string const &, std::string const &);
+
+  //------------------------------------------------------------------------------------------------------------------
+  // GROUP MAKE / OPEN / CLOSE
+  //------------------------------------------------------------------------------------------------------------------
+public:
+  /**
+   * Create a new group.
+   *
+   * \param name The name of the group to create (i.e. "entry").
+   * \param class_name The type of group to create (i.e. "NXentry").
+   * \param open_group Whether or not to automatically open the group after
+   * creating it.
+   */
+  void makeGroup(std::string const &name, std::string const &class_name, bool open_group = false);
+
+  /**
+   * Open an existing group.
+   *
+   * \param name The name of the group to create (i.e. "entry").
+   * \param class_name The type of group to create (i.e. "NXentry").
+   */
+  void openGroup(std::string const &name, std::string const &class_name);
+
   /**
    * Close the currently open group.
    */
   void closeGroup();
+
+  //------------------------------------------------------------------------------------------------------------------
+  // DATA MAKE / OPEN / PUT / GET / CLOSE
+  //------------------------------------------------------------------------------------------------------------------
 
   /**
    * Create a data field with the specified information.
@@ -187,17 +209,138 @@ public:
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(std::string const &name, NXnumtype type, DimVector const &dims, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype const type, DimVector const &dims, bool const open_data = false);
 
   /**
-   * Create a 1D data field with the specified information.
+   * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
    * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
-   * \param length The number of elements in the field.
+   * \param length For 1D data, the length of the 1D array
    * \param open_data Whether or not to open the data after creating it.
    */
-  void makeData(std::string const &name, NXnumtype const type, dimsize_t const length, bool open_data = false);
+  void makeData(std::string const &name, NXnumtype const type, dimsize_t const length, bool const open_data = false);
+
+  /**
+   * \param name The name of the data to open.
+   */
+  void openData(std::string const &name);
+
+  /**
+   * \param data The data to put in the file.
+   */
+  template <typename NumT> void putData(NumT const *data);
+
+  void putData(std::string const &data);
+
+  /**
+   * \param data The data to put in the file.
+   * \tparam NumT numeric data type of \a data
+   */
+  template <typename NumT> void putData(std::vector<NumT> const &data);
+
+  /**
+   * Put the currently open data in the supplied pointer.
+   *
+   * \param data The pointer to copy the data to.
+   */
+  template <typename NumT> void getData(NumT *data);
+
+  /**
+   * Put data into the supplied vector. The vector does not need to
+   * be the correct size, just the correct type as it is resized to
+   * the appropriate value.
+   *
+   * \param data Where to put the data.
+   * \tparam NumT numeric data type of \a data
+   */
+  template <typename NumT> void getData(std::vector<NumT> &data);
+
+  /**
+   * \return String data from the file.
+   */
+  std::string getStrData();
+
+  /**
+   * Close the currently open data.
+   */
+  void closeData();
+
+  //------------------------------------------------------------------------------------------------------------------
+  // DATA MAKE COMP / PUT/GET SLAB / COERCE
+  //------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Create a field with compression.
+   *
+   * \param name The name of the data to create.
+   * \param type The primitive type for the data.
+   * \param dims The dimensions of the data.
+   * \param comp The compression algorithm to use.
+   * \param bufsize The size of the compression buffer to use.
+   * \param open_data Whether or not to open the data after creating it.
+   */
+  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
+                    DimSizeVector const &bufsize, bool open_data = false);
+
+  /**
+   * Insert an array as part of a data in the final file.
+   *
+   * \param data The array to put in the file.
+   * \param start The starting index to insert the data.
+   * \param size The size of the array to put in the file.
+   */
+  template <typename NumT> void putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size);
+
+  /**
+   * Insert an array as part of a data in the final file.
+   *
+   * \param data The array to put in the file.
+   * \param start The starting index to insert the data.
+   * \param size The size of the array to put in the file.
+   * \tparam NumT numeric data type of \a data
+   */
+  template <typename NumT>
+  void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
+
+  /**
+   * Insert a number as part of a data in the final file.
+   *
+   * \param data The array to put in the file.
+   * \param start The starting index to insert the data.
+   * \param size The size of the array to put in the file.
+   * \tparam NumT numeric data type of \a data
+   */
+  template <typename NumT> void putSlab(std::vector<NumT> const &data, dimsize_t const start, dimsize_t const size);
+
+  /**
+   * Get a section of data from the file.
+   *
+   * \param data The pointer to insert that data into.
+   * \param start The offset into the file's data block to start the read
+   * from.
+   * \param size The size of the block to read from the file.
+   */
+  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size);
+
+  /** Get data and coerce into an int vector.
+   *
+   * @throw Exception if the data is actually a float or
+   *    another type that cannot be coerced to an int.
+   * @param data :: vector to be filled.
+   */
+  void getDataCoerce(std::vector<int> &data);
+
+  /** Get data and coerce into a vector of doubles.
+   *
+   * @throw Exception if the data cannot be coerced to a double.
+   * @param data :: vector to be filled.
+   */
+  void getDataCoerce(std::vector<double> &data);
+
+  //------------------------------------------------------------------------------------------------------------------
+  // DATA READ / WRITE
+  //------------------------------------------------------------------------------------------------------------------
 
   /**
    * Create a 1D data field, insert the data, and close the data.
@@ -295,19 +438,6 @@ public:
   void writeUpdatedData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims);
 
   /**
-   * Create a field with compression.
-   *
-   * \param name The name of the data to create.
-   * \param type The primitive type for the data.
-   * \param dims The dimensions of the data.
-   * \param comp The compression algorithm to use.
-   * \param bufsize The size of the compression buffer to use.
-   * \param open_data Whether or not to open the data after creating it.
-   */
-  void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
-                    DimSizeVector const &bufsize, bool open_data = false);
-
-  /**
    * Create a compressed data, insert the data, and close it.
    *
    * \param name The name of the data to create.
@@ -321,139 +451,7 @@ public:
   void writeCompData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
                      NXcompression const comp, DimSizeVector const &bufsize);
 
-  /**
-   * \param name The name of the data to open.
-   */
-  void openData(std::string const &name);
-
-  /**
-   * Close the currently open data.
-   */
-  void closeData();
-
-  /**
-   * \param data The data to put in the file.
-   */
-  template <typename NumT> void putData(NumT const *data);
-
-  void putData(std::string const &data);
-
-  /**
-   * \param data The data to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT> void putData(std::vector<NumT> const &data);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   * \tparam NumT numeric data type of \a value
-   */
-  template <typename NumT> void putAttr(std::string const &name, NumT const &value);
-
-  /**
-   * Put a string as an attribute in the file.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   */
-  void putAttr(char const *name, char const *value);
-
-  /**
-   * Put a string as an attribute in the file.
-   *
-   * \param name Name of the attribute to add.
-   * \param value The attribute value.
-   */
-  void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
-
-  /**
-   * Insert an array as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   */
-  template <typename NumT> void putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size);
-
-  /**
-   * Insert an array as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT>
-  void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
-
-  /**
-   * Insert a number as part of a data in the final file.
-   *
-   * \param data The array to put in the file.
-   * \param start The starting index to insert the data.
-   * \param size The size of the array to put in the file.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT> void putSlab(std::vector<NumT> const &data, dimsize_t const start, dimsize_t const size);
-
-  /**
-   * \return The id of the data used for linking.
-   */
-  NXlink getDataID();
-
-  /**
-   * Create a link in the current location to the supplied id.
-   *
-   * \param link The object (group or data) in the file to link to.
-   */
-  void makeLink(NXlink &link);
-
-  /**
-   * Put the currently open data in the supplied pointer.
-   *
-   * \param data The pointer to copy the data to.
-   */
-  template <typename NumT> void getData(NumT *data);
-
-  /**
-   * Put data into the supplied vector. The vector does not need to
-   * be the correct size, just the correct type as it is resized to
-   * the appropriate value.
-   *
-   * \param data Where to put the data.
-   * \tparam NumT numeric data type of \a data
-   */
-  template <typename NumT> void getData(std::vector<NumT> &data);
-
-  /** Get data and coerce into an int vector.
-   *
-   * @throw Exception if the data is actually a float or
-   *    another type that cannot be coerced to an int.
-   * @param data :: vector to be filled.
-   */
-  void getDataCoerce(std::vector<int> &data);
-
-  /** Get data and coerce into a vector of doubles.
-   *
-   * @throw Exception if the data cannot be coerced to a double.
-   * @param data :: vector to be filled.
-   */
-  void getDataCoerce(std::vector<double> &data);
-
-  /** Return true if the data opened is of one of the
-   * int data types, 32 bits or less.
-   */
-  bool isDataInt();
+  /*----------------------------------------------------------------------*/
 
   /** Put data into the supplied vector. The vector does not need to
    * be the correct size, just the correct type as it is resized to
@@ -488,16 +486,28 @@ public:
    */
   void readData(std::string const &dataName, std::string &data);
 
-  /**
-   * \return String data from the file.
-   */
-  std::string getStrData();
+  //------------------------------------------------------------------------------------------------------------------
+  // ENTRY METHODS
+  //------------------------------------------------------------------------------------------------------------------
 
   /**
    * \return The Info structure that describes the currently open data.
    */
   Info getInfo();
 
+  /**
+   * Initialize the pending group search to start again.
+   */
+  void initGroupDir();
+
+private:
+  /**
+   * \return A pair of the next entry available in a listing.
+   * NOTE: this is to be deleted in 6.14.  do NOT make public
+   */
+  Entry getNextEntry();
+
+public:
   /**
    * Return the entries available in the current place in the file.
    */
@@ -510,32 +520,49 @@ public:
    */
   void getEntries(Entries &result);
 
-  /**
-   * Get a section of data from the file.
-   *
-   * \param data The pointer to insert that data into.
-   * \param start The offset into the file's data block to start the read
-   * from.
-   * \param size The size of the block to read from the file.
-   */
-  template <typename NumT> void getSlab(NumT *data, const DimSizeVector &start, const DimSizeVector &size);
-
   /** Return the string name of the top-level entry
    *
    * \return a string with the name (not abs path) of the top-level entry
    */
   std::string getTopLevelEntryName();
 
-  /**
-   * \return Information about all attributes on the data that is currently open.
-   */
-  std::vector<AttrInfo> getAttrInfos();
+  //------------------------------------------------------------------------------------------------------------------
+  // ATTRIBUTE METHODS
+  //------------------------------------------------------------------------------------------------------------------
+
+  // PUT / GET ATTRIBUTES
 
   /**
-   *  \return true if the current point in the file has the named attribute
-   *  \param name the name of the attribute to look for.
+   * Put the supplied data as an attribute into the currently open data.
+   *
+   * \param info Description of the attribute to add.
+   * \param data The attribute value.
    */
-  bool hasAttr(const std::string &name);
+  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
+  /**
+   * Put the supplied data as an attribute into the currently open data.
+   *
+   * \param name Name of the attribute to add.
+   * \param value The attribute value.
+   * \tparam NumT numeric data type of \a value
+   */
+  template <typename NumT> void putAttr(std::string const &name, NumT const &value);
+
+  /**
+   * Put a string as an attribute in the file.
+   *
+   * \param name Name of the attribute to add.
+   * \param value The attribute value.
+   */
+  void putAttr(char const *name, char const *value);
+
+  /**
+   * Put a string as an attribute in the file.
+   *
+   * \param name Name of the attribute to add.
+   * \param value The attribute value.
+   */
+  void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
   /**
    * Get the value of the attribute specified by the AttrInfo supplied.
@@ -577,20 +604,49 @@ public:
    */
   std::string getStrAttr(const AttrInfo &info);
 
+  // NAVIGATE ATTRIBUTES
+
+  /**
+   * Initialize the pending attribute search to start again.
+   */
+  void initAttrDir();
+
+  /**
+   * \return Information about the next attribute.
+   */
+  AttrInfo getNextAttr();
+
+  /**
+   * \return Information about all attributes on the data that is currently open.
+   */
+  std::vector<AttrInfo> getAttrInfos();
+
+  /**
+   *  \return true if the current point in the file has the named attribute
+   *  \param name the name of the attribute to look for.
+   */
+  bool hasAttr(const std::string &name);
+
+  //------------------------------------------------------------------------------------------------------------------
+  // LINK METHODS
+  //------------------------------------------------------------------------------------------------------------------
+
   /**
    * \return The id of the group used for linking.
    */
   NXlink getGroupID();
 
   /**
-   * This function checks if we are in an open dataset
-   * \returns true if we are currently in an open dataset else false
+   * \return The id of the data used for linking.
    */
-  bool isDataSetOpen();
+  NXlink getDataID();
 
-private:
-  std::string formAbsolutePath(std::string const &);
-  void registerEntry(std::string const &, std::string const &);
+  /**
+   * Create a link in the current location to the supplied id.
+   *
+   * \param link The object (group or data) in the file to link to.
+   */
+  void makeLink(NXlink &link);
 };
 
 /**
@@ -599,4 +655,5 @@ private:
  */
 template <typename NumT> MANTID_NEXUS_DLL NXnumtype getType(NumT const number = NumT());
 
-}; // namespace NeXus
+} // namespace Nexus
+} // namespace Mantid

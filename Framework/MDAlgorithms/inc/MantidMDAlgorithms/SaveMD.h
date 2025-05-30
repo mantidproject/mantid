@@ -44,12 +44,12 @@ private:
   void doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Save all the affine matricies
-  void saveAffineTransformMatricies(::NeXus::File *const file, API::IMDWorkspace_const_sptr ws);
+  void saveAffineTransformMatricies(Nexus::File *const file, API::IMDWorkspace_const_sptr ws);
   /// Save a given affine matrix
-  void saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform *transform, std::string entry_name);
+  void saveAffineTransformMatrix(Nexus::File *const file, API::CoordTransform *transform, std::string entry_name);
   /// Save a generic matrix
   template <typename T>
-  void saveMatrix(::NeXus::File *const file, std::string name, Kernel::Matrix<T> &m, NXnumtype type,
+  void saveMatrix(Nexus::File *const file, std::string name, Kernel::Matrix<T> &m, NXnumtype type,
                   std::string tag = "");
 };
 

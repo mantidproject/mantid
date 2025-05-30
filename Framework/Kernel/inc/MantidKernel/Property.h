@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -126,7 +126,7 @@ public:
 
   void setDocumentation(const std::string &documentation);
 
-  virtual void saveProperty(::NeXus::File * /*file*/) {
+  virtual void saveProperty(Nexus::File * /*file*/) {
     throw std::invalid_argument("Property::saveProperty - Cannot save '" + this->name() +
                                 "', property type not implemented.");
   }

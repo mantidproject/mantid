@@ -17,7 +17,7 @@
 #include <sstream>
 #include <vector>
 
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -328,8 +328,8 @@ public:
   bool unitVector(const double tolerance = Kernel::Tolerance) const noexcept;
   bool coLinear(const V3D &, const V3D &) const noexcept;
 
-  void saveNexus(::NeXus::File *file, const std::string &name) const;
-  void loadNexus(::NeXus::File *file, const std::string &name);
+  void saveNexus(Nexus::File *file, const std::string &name) const;
+  void loadNexus(Nexus::File *file, const std::string &name);
 
   /// @brief  Determine if a V3D can be considered nan
   /// @param vec

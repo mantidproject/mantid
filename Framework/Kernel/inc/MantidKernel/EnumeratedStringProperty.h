@@ -71,7 +71,7 @@ public:
 
   // MUTATORS AND SUNDRY
   EnumeratedStringProperty &operator+=(Property const *right) override;
-  void saveProperty(::NeXus::File *file) override;
+  void saveProperty(Nexus::File *file) override;
 
 protected:
   /// The value of the property

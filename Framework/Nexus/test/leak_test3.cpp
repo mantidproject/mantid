@@ -14,7 +14,7 @@ using namespace std;
 const int nFiles = 10;
 const int nEntry = 2;
 const int nData = 2;
-int array_dims[2] = {512, 512};
+int64_t array_dims[2] = {512, 512};
 const char szFile[] = "leak_test.nxs";
 const int iBinarySize = 512 * 512;
 int aiBinaryData[iBinarySize];
@@ -65,7 +65,7 @@ int main() {
           ostringstream oss3;
           oss3 << "i2_data_" << iData;
 
-          if (NXcompmakedata(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NX_COMP_LZW, array_dims) !=
+          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NX_COMP_LZW, array_dims) !=
               NXstatus::NX_OK)
             ON_ERROR("NXcompmakedata failed!")
 

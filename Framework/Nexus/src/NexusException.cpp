@@ -1,13 +1,11 @@
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile_fwd.h"
+#include "MantidNexus/NexusException.h"
 #include <ostream>
 
 /**
- * \file NeXusException.cpp
- * The implementation of the NeXus::Exception class
+ * The implementation of the Nexus::Exception class
  */
 
-namespace NeXus {
+namespace Mantid::Nexus {
 
 Exception::Exception(const std::string &msg, const std::string &functionname, const std::string &filename)
     : std::runtime_error(msg), m_functionname(functionname), m_filename(filename) {}
@@ -27,4 +25,4 @@ std::ostream &operator<<(std::ostream &os, const Exception &err) {
   return os;
 }
 
-} // namespace NeXus
+} // namespace Mantid::Nexus

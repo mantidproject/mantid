@@ -12,8 +12,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -72,7 +72,7 @@ void LoadMcStasNexus::exec() {
   std::string filename = getPropertyValue("Filename");
   g_log.debug() << "Opening file " << filename << '\n';
 
-  ::NeXus::File nxFile(filename);
+  Nexus::File nxFile(filename);
   auto entries = nxFile.getEntries();
   auto itend = entries.end();
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
@@ -128,7 +128,7 @@ void LoadMcStasNexus::exec() {
       std::vector<double> errors;
       try {
         nxFile.readData<double>("errors", errors);
-      } catch (::NeXus::Exception &) {
+      } catch (Nexus::Exception const &) {
         g_log.information() << "Field " << dataName << " contains no error information.\n";
       }
 

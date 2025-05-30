@@ -55,29 +55,29 @@ private:
   void init() override;
   void exec() override;
   void applySensitivityMap();
-  void setInstrumentName(const NeXus::NXEntry &, const std::string &);
-  DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
+  void setInstrumentName(const Nexus::NXEntry &, const std::string &);
+  DetectorPosition getDetectorPositionD33(const Nexus::NXEntry &, const std::string &);
 
-  void initWorkSpace(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
+  void initWorkSpace(Nexus::NXEntry &, const std::string &);
+  void initWorkSpaceD11B(Nexus::NXEntry &, const std::string &);
+  void initWorkSpaceD22B(Nexus::NXEntry &, const std::string &);
+  void initWorkSpaceD33(Nexus::NXEntry &, const std::string &);
+  void initWorkSpaceD16(Nexus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t, const MultichannelType type = MultichannelType::TOF);
-  void getDataDimensions(const NeXus::NXInt &data, size_t &numberOfChannels, size_t &numberOfTubes,
+  void getDataDimensions(const Nexus::NXInt &data, size_t &numberOfChannels, size_t &numberOfTubes,
                          size_t &numberOfPixelsPerTube);
-  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
+  size_t loadDataFromMonitors(Nexus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
-  size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
+  size_t loadDataFromD16ScanMonitors(const Nexus::NXEntry &firstEntry, size_t firstIndex,
                                      const std::vector<double> &binning);
-  size_t loadDataFromTubes(NeXus::NXInt const &, const std::vector<double> &, size_t,
+  size_t loadDataFromTubes(Nexus::NXInt const &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
   void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
-  void loadMetaData(const NeXus::NXEntry &, const std::string &);
+  void loadMetaData(const Nexus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);
   void placeD16(double, double, const std::string &);
@@ -97,9 +97,9 @@ private:
   std::vector<size_t> m_monitorIndices;            ///< Indices for monitor data in scanned variables table
 
   void setFinalProperties(const std::string &filename);
-  std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
-                                             const NeXus::NXFloat &) const;
-  std::vector<double> getOmegaBinning(const NeXus::NXEntry &entry, const std::string &path) const;
+  std::vector<double> getVariableTimeBinning(const Nexus::NXEntry &, const std::string &, const Nexus::NXInt &,
+                                             const Nexus::NXFloat &) const;
+  std::vector<double> getOmegaBinning(const Nexus::NXEntry &entry, const std::string &path) const;
 };
 
 } // namespace DataHandling

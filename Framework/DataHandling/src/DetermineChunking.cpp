@@ -15,8 +15,8 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/File.h>
 #include <exception>
@@ -141,7 +141,7 @@ void DetermineChunking::exec() {
   else if (fileType == EVENT_NEXUS_FILE) {
 
     // top level file information
-    ::NeXus::File file(filename);
+    Nexus::File file(filename);
     std::string m_top_entry_name = setTopEntryName(filename);
 
     // Start with the base entry
@@ -172,7 +172,7 @@ void DetermineChunking::exec() {
             }
             file.closeData();
             file.closeGroup();
-          } catch (::NeXus::Exception &) {
+          } catch (Nexus::Exception const &) {
             g_log.error() << "Unable to find total counts to determine "
                              "chunking strategy.\n";
           }
@@ -251,7 +251,7 @@ std::string DetermineChunking::setTopEntryName(const std::string &filename) {
   using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
-    ::NeXus::File file = ::NeXus::File(filename);
+    Nexus::File file = Nexus::File(filename);
     string_map_t entries = file.getEntries();
 
     // Choose the first entry as the default

@@ -25,8 +25,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 #include <cctype>
@@ -61,7 +61,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using namespace HistogramData;
 using std::size_t;
 
@@ -148,7 +148,7 @@ void LoadISISNexus2::exec() {
   NXRoot root(m_filename);
 
   // "Open" the same file but with the C++ interface
-  m_nexusFile.reset(new ::NeXus::File(root.m_fileID));
+  m_nexusFile.reset(new Nexus::File(root.m_fileID));
 
   // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");
@@ -1054,7 +1054,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
  * @param entry a handle to the Nexus file
  * @return if the file has multiple time regimes or not
  */
-bool LoadISISNexus2::isMultipleTimeRegimeFile(const NeXus::NXEntry &entry) const {
+bool LoadISISNexus2::isMultipleTimeRegimeFile(const Nexus::NXEntry &entry) const {
   auto hasMultipleTimeRegimes(false);
   try {
     NXClass instrument = entry.openNXGroup("instrument");

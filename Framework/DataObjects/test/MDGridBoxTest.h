@@ -24,7 +24,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <Poco/File.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>

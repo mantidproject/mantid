@@ -71,16 +71,16 @@ void LoadQKK::exec() {
   std::string filename = getPropertyValue("Filename");
 
   // Open the root.
-  NeXus::NXRoot root(filename);
+  Nexus::NXRoot root(filename);
   // Open the first NXentry found in the file.
-  NeXus::NXEntry entry = root.openFirstEntry();
+  Nexus::NXEntry entry = root.openFirstEntry();
   // Open NXdata group with name "data"
-  NeXus::NXData data = entry.openNXData("data");
+  Nexus::NXData data = entry.openNXData("data");
   // Read in wavelength value
   double wavelength = static_cast<double>(data.getFloat("wavelength"));
   // open the data set with the counts. It is identified by the signal=1
   // attribute
-  NeXus::NXInt hmm = data.openIntData();
+  Nexus::NXInt hmm = data.openIntData();
   // Read the data into memory
   hmm.load();
 

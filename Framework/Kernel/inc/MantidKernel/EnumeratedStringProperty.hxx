@@ -307,7 +307,7 @@ EnumeratedStringProperty<E, names> &EnumeratedStringProperty<E, names>::operator
 }
 
 template <class E, std::vector<std::string> const *const names>
-void EnumeratedStringProperty<E, names>::saveProperty(::NeXus::File * /*file*/) {
+void EnumeratedStringProperty<E, names>::saveProperty(Nexus::File * /*file*/) {
   // AppleClang 7.3 and later gives a -Winfinite-recursion warning if I call the
   // base class method. The function is small enough that reimplementing it
   // isn't a big deal.

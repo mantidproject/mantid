@@ -156,7 +156,7 @@ public:
 
   // --- Nexus Methods ---
   // Save to Nexus
-  void saveNexus(::NeXus::File *file) const override;
+  void saveNexus(Nexus::File *file) const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

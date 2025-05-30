@@ -185,8 +185,8 @@ public:
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline, double &beamline_norm, Kernel::V3D &samplePos) const;
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  void loadNexus(Nexus::File *file, const std::string &group);
 
   void setFilename(const std::string &filename);
   const std::string &getFilename() const;
@@ -222,7 +222,7 @@ public:
 
 private:
   /// Save information about a set of detectors to Nexus
-  void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
+  void saveDetectorSetInfoToNexus(Nexus::File *file, const std::vector<detid_t> &detIDs) const;
 
   bool validateComponentProperties(IComponent_const_sptr component) const;
 

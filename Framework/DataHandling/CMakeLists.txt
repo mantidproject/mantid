@@ -141,7 +141,7 @@ set(SRC_FILES
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
-    src/NXcanSASHelper.cpp
+    src/NXcanSASUtil.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
     src/ParallelEventLoader.cpp
@@ -182,6 +182,7 @@ set(SRC_FILES
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
     src/SaveNXcanSASBase.cpp
+    src/SaveNXcanSASHelper.cpp
     src/SaveNexus.cpp
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
@@ -192,6 +193,7 @@ set(SRC_FILES
     src/SavePDFGui.cpp
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
+    src/SavePolarizedNXcanSAS.cpp
     src/SaveRKH.cpp
     src/SaveRMCProfile.cpp
     src/SaveReflectometryAscii.cpp
@@ -356,7 +358,7 @@ set(INC_FILES
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
-    inc/MantidDataHandling/NXcanSASHelper.h
+    inc/MantidDataHandling/NXcanSASUtil.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
     inc/MantidDataHandling/ParallelEventLoader.h
@@ -397,6 +399,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNXTomo.h
     inc/MantidDataHandling/SaveNXcanSAS.h
     inc/MantidDataHandling/SaveNXcanSASBase.h
+    inc/MantidDataHandling/SaveNXcanSASHelper.h
     inc/MantidDataHandling/SaveNexus.h
     inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h
@@ -407,6 +410,7 @@ set(INC_FILES
     inc/MantidDataHandling/SavePDFGui.h
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
+    inc/MantidDataHandling/SavePolarizedNXcanSAS.h
     inc/MantidDataHandling/SaveRKH.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
@@ -606,6 +610,7 @@ set(TEST_FILES
     SavePDFGuiTest.h
     SavePHXTest.h
     SaveParameterFileTest.h
+    SavePolarizedNXcanSASTest.h
     SaveRKHTest.h
     SaveRMCProfileTest.h
     SaveReflectometryAsciiTest.h

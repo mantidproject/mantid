@@ -38,12 +38,6 @@
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 
-/*---------------------------------------------------------------------
- Recognized and handled napimount URLS
- -----------------------------------------------------------------------*/
-#define NXBADURL 0
-#define NXFILE 1
-
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
@@ -65,90 +59,6 @@
 #endif
 
 #include "MantidNexus/nx_stptok.h"
-
-#if HAVE_LIBPTHREAD
-
-#include <pthread.h>
-
-static pthread_mutex_t nx_mutex;
-
-#if defined(PTHREAD_MUTEX_RECURSIVE) || defined(__FreeBSD__)
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE
-#else
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE_NP
-#endif /* PTHREAD_MUTEX_RECURSIVE */
-
-static void nx_pthread_init() {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  pthread_mutexattr_settype(&attr, RECURSIVE_LOCK);
-  pthread_mutex_init(&nx_mutex, &attr);
-}
-
-static NXstatus nxilock() {
-  static pthread_once_t once_control = PTHREAD_ONCE_INIT;
-  if (pthread_once(&once_control, nx_pthread_init) != 0) {
-    NXReportError("pthread_once failed");
-    return NXstatus::NX_ERROR;
-  }
-  if (pthread_mutex_lock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_lock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(int ret) {
-  if (pthread_mutex_unlock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_unlock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#elif defined(WIN32)
-/*
- *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
- *  Freddie Akeroyd, 16/06/2011
- */
-#include <windows.h>
-
-static CRITICAL_SECTION nx_critical;
-
-static NXstatus nxilock() {
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-    InitializeCriticalSection(&nx_critical);
-  }
-  EnterCriticalSection(&nx_critical);
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(NXstatus ret) {
-  LeaveCriticalSection(&nx_critical);
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#else
-
-#define LOCKED_CALL(__call) __call
-
-#endif /* _WIN32 */
-
-static int64_t *dupDimsArray(int const *dims_array, int rank) {
-  int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
-  if (dims64 != NULL) {
-    for (int i = 0; i < rank; ++i) {
-      dims64[i] = dims_array[i];
-    }
-  }
-  return dims64;
-}
 
 /*---------------------------------------------------------------------
  wrapper for getenv. This is a future proofing thing for porting to OS
@@ -203,19 +113,6 @@ static char *locateNexusFileInPath(char const *const startName) {
     pPtr = stptok(pPtr, pathPrefix, 255, LIBSEP);
   }
   return strdup(startName);
-}
-
-/*------------------------------------------------------------------------
-  HDF-5 cache size special stuff
-  -------------------------------------------------------------------------*/
-long nx_cacheSize = 1024000; /* 1MB, HDF-5 default */
-
-NXstatus NXsetcache(long newVal) {
-  if (newVal > 0) {
-    nx_cacheSize = newVal;
-    return NXstatus::NX_OK;
-  }
-  return NXstatus::NX_ERROR;
 }
 
 /*----------------------------------------------------------------------*/
@@ -277,15 +174,10 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
+static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
   pNexusFunction fHandle = NULL;
   char *filename = NULL;
   int my_am = (am & NXACCMASK_REMOVEFLAGS);
-
-  /* configure fortify
-     iFortifyScope = Fortify_EnterScope();
-     Fortify_CheckAllMemory();
-   */
 
   /*
      allocate data
@@ -361,10 +253,6 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   return retstat;
 }
 
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  return LOCKED_CALL(NXinternalopenImpl(userfilename, am, fileStack));
-}
-
 NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   pFileStack newFileStack;
   pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
@@ -388,7 +276,7 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   }
   fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
   memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  LOCKED_CALL(fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData)));
+  fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData));
   pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
   *pNewHandle = newFileStack;
   return NXstatus::NX_OK;
@@ -407,7 +295,7 @@ NXstatus NXclose(NXhandle *fid) {
   fileStack = (pFileStack)*fid;
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
-  status = LOCKED_CALL(pFunc->nxclose(&hfil));
+  status = pFunc->nxclose(&hfil);
   pFunc->pNexusData = hfil;
   free(pFunc);
   popFileStack(fileStack);
@@ -427,84 +315,22 @@ NXstatus NXclose(NXhandle *fid) {
 
 NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
-}
-
-/*------------------------------------------------------------------------*/
-static int analyzeNapimount(char *napiMount, char *extFile, int extFileLen, char *extPath, int extPathLen) {
-  char *pPtr = NULL;
-  char const *path = NULL;
-
-  memset(extFile, 0, static_cast<size_t>(extFileLen));
-  memset(extPath, 0, static_cast<size_t>(extPathLen));
-  pPtr = strstr(napiMount, "nxfile://");
-  if (pPtr == NULL) {
-    return NXBADURL;
-  }
-  path = strrchr(napiMount, '#');
-  if (path == NULL) {
-    const auto length = strlen(napiMount) - 9;
-    if (length > static_cast<size_t>(extFileLen)) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr + 9, length);
-    strcpy(extPath, "/");
-    return NXFILE;
-  } else {
-    pPtr += 9;
-    int length = static_cast<int>(path - pPtr);
-    if (length > extFileLen) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr, static_cast<size_t>(length));
-    length = static_cast<int>(strlen(path - 1));
-    if (length > extPathLen) {
-      NXReportError("ERROR: internal error with external linking");
-      return NXBADURL;
-    }
-    strcpy(extPath, path + 1);
-    return NXFILE;
-  }
-  return NXBADURL;
+  return pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass);
 }
 
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
+  NXstatus status;
   pFileStack fileStack;
   pNexusFunction pFunc = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
   pFunc = handleToNexusFunc(fid);
 
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
+  status = pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
   if (status == NXstatus::NX_OK) {
     pushPath(fileStack, name);
-  }
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int const napistat = static_cast<int>(analyzeNapimount(nxurl, exfile, 511, expath, 511));
-    if (napistat == NXBADURL) {
-      return NXstatus::NX_ERROR;
-    }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-    status = NXopenpath(fid, expath);
-    NXgetgroupID(fid, &breakID);
-    setCloseID(fileStack, breakID);
   }
 
   return status;
@@ -520,7 +346,7 @@ NXstatus NXclosegroup(NXhandle fid) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   fileStack = static_cast<pFileStack>(fid);
   if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
+    status = pFunc->nxclosegroup(pFunc->pNexusData);
     if (status == NXstatus::NX_OK) {
       popPath(fileStack);
     }
@@ -533,7 +359,7 @@ NXstatus NXclosegroup(NXhandle fid) {
       NXclose(&fid);
       status = NXclosegroup(fid);
     } else {
-      status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
+      status = pFunc->nxclosegroup(pFunc->pNexusData);
       if (status == NXstatus::NX_OK) {
         popPath(fileStack);
       }
@@ -544,76 +370,32 @@ NXstatus NXclosegroup(NXhandle fid) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                    int dimensions[]) { // cppcheck-suppress constParameter
-  NXstatus status;
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  status = NXmakedata64(fid, name, datatype, rank, dims64);
-  free(dims64);
-  return status;
-}
-
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions));
+  return pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions);
 }
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                        int dimensions[], // cppcheck-suppress constParameter
-                        int compress_type, int const chunk_size[]) {
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  int64_t *chunk64 = dupDimsArray(chunk_size, rank);
-  NXstatus const status = NXcompmakedata64(fid, name, datatype, rank, dims64, compress_type, chunk64);
-  free(dims64);
-  free(chunk64);
-  return status;
-}
-
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(
-      pFunc->nxcompmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions, compress_type, chunk_size));
+  return pFunc->nxcompmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions, compress_type, chunk_size);
 }
 
 /* --------------------------------------------------------------------- */
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
+  NXstatus status;
   pFileStack fileStack;
   pNexusFunction pFunc = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
   pFunc = handleToNexusFunc(fid);
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
+  status = pFunc->nxopendata(pFunc->pNexusData, name);
 
   if (status == NXstatus::NX_OK) {
     pushPath(fileStack, name);
-  }
-
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat == NXBADURL) {
-      return NXstatus::NX_ERROR;
-    }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-    status = NXopenpath(fid, expath);
-    NXgetdataID(fid, &breakID);
-    setCloseID(fileStack, breakID);
   }
 
   return status;
@@ -630,7 +412,7 @@ NXstatus NXclosedata(NXhandle fid) {
   fileStack = static_cast<pFileStack>(fid);
 
   if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
+    status = pFunc->nxclosedata(pFunc->pNexusData);
     if (status == NXstatus::NX_OK) {
       popPath(fileStack);
     }
@@ -643,7 +425,7 @@ NXstatus NXclosedata(NXhandle fid) {
       NXclose(&fid);
       status = NXclosedata(fid);
     } else {
-      status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
+      status = pFunc->nxclosedata(pFunc->pNexusData);
       if (status == NXstatus::NX_OK) {
         popPath(fileStack);
       }
@@ -656,7 +438,7 @@ NXstatus NXclosedata(NXhandle fid) {
 
 NXstatus NXputdata(NXhandle fid, const void *data) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxputdata(pFunc->pNexusData, data));
+  return pFunc->nxputdata(pFunc->pNexusData, data);
 }
 
 /* ------------------------------------------------------------------- */
@@ -668,7 +450,7 @@ NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen,
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
     return NXstatus::NX_ERROR;
   }
-  return LOCKED_CALL(pFunc->nxputattr(pFunc->pNexusData, name, data, datalen, iType));
+  return pFunc->nxputattr(pFunc->pNexusData, name, data, datalen, iType);
 }
 
 /* ------------------------------------------------------------------- */
@@ -689,28 +471,28 @@ NXstatus NXputslab(NXhandle fid, const void *data, const int iStart[], const int
 
 NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxputslab64(pFunc->pNexusData, data, iStart, iSize));
+  return pFunc->nxputslab64(pFunc->pNexusData, data, iStart, iSize);
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetdataID(pFunc->pNexusData, sRes));
+  return pFunc->nxgetdataID(pFunc->pNexusData, sRes);
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxmakelink(pFunc->pNexusData, sLink));
+  return pFunc->nxmakelink(pFunc->pNexusData, sLink);
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxmakenamedlink(pFunc->pNexusData, newname, sLink));
+  return pFunc->nxmakenamedlink(pFunc->pNexusData, newname, sLink);
 }
 
 /* -------------------------------------------------------------------- */
@@ -739,12 +521,22 @@ NXstatus NXflush(NXhandle *pHandle) {
   fileStack = (pFileStack)*pHandle;
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
-  status = LOCKED_CALL(pFunc->nxflush(&hfil));
+  status = pFunc->nxflush(&hfil);
   pFunc->pNexusData = hfil;
   return status;
 }
 
 /*-------------------------------------------------------------------------*/
+
+static int64_t *dupDimsArray(int const *dims_array, int rank) {
+  int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
+  if (dims64 != NULL) {
+    for (int i = 0; i < rank; ++i) {
+      dims64[i] = dims_array[i];
+    }
+  }
+  return dims64;
+}
 
 NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype) {
   int64_t *dims64 = dupDimsArray(static_cast<const int *>(dimensions), rank);
@@ -802,7 +594,7 @@ NXstatus NXfree(void **data) {
 
 NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetnextentry(pFunc->pNexusData, name, nxclass, datatype));
+  return pFunc->nxgetnextentry(pFunc->pNexusData, name, nxclass, datatype);
 }
 
 /*----------------------------------------------------------------------*/
@@ -842,13 +634,13 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   int64_t iDim[NX_MAXRANK];
 
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
+  pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
     memset(pPtr, 0, (size_t)iDim[0] + 5);
-    status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
+    status = pFunc->nxgetdata(pFunc->pNexusData, pPtr);
     char const *pPtr2;
     pPtr2 = nxitrim(pPtr);
 #if defined(__GNUC__) && !(defined(__clang__))
@@ -861,7 +653,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 #endif
     free(pPtr);
   } else {
-    status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, data));
+    status = pFunc->nxgetdata(pFunc->pNexusData, data);
   }
   return status;
 }
@@ -869,40 +661,17 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 /*---------------------------------------------------------------------------*/
 NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
-}
-
-NXstatus NXgetrawinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dims64, iType));
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
-  }
-  return status;
+  return pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType);
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  status = NXgetinfo64(fid, rank, dims64, iType);
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
-  }
-  return status;
-}
 
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
   char *pPtr = NULL;
   pNexusFunction pFunc = handleToNexusFunc(fid);
   *rank = 0;
-  status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
+  status = pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType);
   /*
      the length of a string may be trimmed....
    */
@@ -911,7 +680,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
-      LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
+      pFunc->nxgetdata(pFunc->pNexusData, pPtr);
       dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
       free(pPtr);
     }
@@ -921,72 +690,58 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetslab(NXhandle fid, void *data, const int iStart[], const int iSize[]) {
-  int i, rank;
-  NXnumtype iType;
-  int64_t iStart64[NX_MAXRANK], iSize64[NX_MAXRANK];
-  if (NXgetinfo64(fid, &rank, iStart64, &iType) != NXstatus::NX_OK) {
-    return NXstatus::NX_ERROR;
-  }
-  for (i = 0; i < rank; ++i) {
-    iStart64[i] = iStart[i];
-    iSize64[i] = iSize[i];
-  }
-  return NXgetslab64(fid, data, iStart64, iSize64);
-}
-
 NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetslab64(pFunc->pNexusData, data, iStart, iSize));
+  return pFunc->nxgetslab64(pFunc->pNexusData, data, iStart, iSize);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType));
+  return pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattrinfo(NXhandle fid, int *iN) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetattrinfo(pFunc->pNexusData, iN));
+  return pFunc->nxgetattrinfo(pFunc->pNexusData, iN);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
   pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return LOCKED_CALL(pFunc->nxgetgroupID(pFunc->pNexusData, sRes));
+  return pFunc->nxgetgroupID(pFunc->pNexusData, sRes);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetgroupinfo(pFunc->pNexusData, iN, pName, pClass));
+  return pFunc->nxgetgroupinfo(pFunc->pNexusData, iN, pName, pClass);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return LOCKED_CALL(pFunc->nxsameID(pFunc->pNexusData, pFirstID, pSecondID));
+  return pFunc->nxsameID(pFunc->pNexusData, pFirstID, pSecondID);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitattrdir(NXhandle fid) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxinitattrdir(pFunc->pNexusData));
+  return pFunc->nxinitattrdir(pFunc->pNexusData);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXinitgroupdir(NXhandle fid) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxinitgroupdir(pFunc->pNexusData));
+  return pFunc->nxinitgroupdir(pFunc->pNexusData);
 }
 
 /*----------------------------------------------------------------------*/
@@ -996,7 +751,7 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
   pNexusFunction pFunc = handleToNexusFunc(handle);
   if (pFunc->nxnativeinquirefile != NULL) {
 
-    NXstatus status = LOCKED_CALL(pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength));
+    NXstatus status = pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength);
     if (status != NXstatus::NX_OK) {
       return NXstatus::NX_ERROR;
     } else {
@@ -1018,172 +773,6 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
   } else {
     return NXstatus::NX_ERROR;
   }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternalgroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  int length = 1023;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = (int)strlen(nxurl);
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  int length = 1023;
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = static_cast<int>(strlen(nxurl));
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url) {
-  NXstatus status;
-  NXnumtype type = NXnumtype::CHAR;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    size_t urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen >= length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
-      return NXstatus::NX_ERROR;
-    }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
-  }
-
-  LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-  return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
-  NXnumtype type = NXnumtype::CHAR;
-  NXstatus status;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  int rank = 1;
-  int64_t dims[1] = {1};
-
-  // TODO cut and paste
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    auto urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen > length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
-      return NXstatus::NX_ERROR;
-    }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
-  }
-
-  status = LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, NXnumtype::CHAR, rank, dims));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  return NXstatus::NX_OK;
 }
 
 /*------------------------------------------------------------------------
@@ -1433,7 +1022,7 @@ NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
 /*---------------------------------------------------------------------*/
 NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxprintlink(pFunc->pNexusData, link));
+  return pFunc->nxprintlink(pFunc->pNexusData, link);
 }
 
 /*----------------------------------------------------------------------*/
@@ -1451,7 +1040,7 @@ NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
 
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType));
+  return pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType);
 }
 
 /*--------------------------------------------------------------------

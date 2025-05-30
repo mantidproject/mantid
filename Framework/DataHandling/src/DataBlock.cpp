@@ -20,7 +20,7 @@ DataBlock::DataBlock()
     : m_numberOfPeriods(0), m_numberOfSpectra(0), m_numberOfChannels(0),
       m_minSpectraID(std::numeric_limits<specnum_t>::max()), m_maxSpectraID(0) {}
 
-DataBlock::DataBlock(const Mantid::NeXus::NXInt &data)
+DataBlock::DataBlock(const Mantid::Nexus::NXInt &data)
     : m_numberOfPeriods(static_cast<int>(data.dim0())), m_numberOfSpectra(data.dim1()), m_numberOfChannels(data.dim2()),
       m_minSpectraID(std::numeric_limits<specnum_t>::max()), m_maxSpectraID(0) {}
 

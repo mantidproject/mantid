@@ -45,18 +45,18 @@ private:
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
   void sampleHorizontalOffset();
-  void sampleAngle(const NeXus::NXEntry &entry);
+  void sampleAngle(const Nexus::NXEntry &entry);
   void initWorkspace(const std::vector<std::string> &monitorNames);
-  void initNames(const NeXus::NXEntry &entry);
+  void initNames(const Nexus::NXEntry &entry);
   void initPixelWidth();
-  void loadDataDetails(const NeXus::NXEntry &entry);
+  void loadDataDetails(const Nexus::NXEntry &entry);
   std::vector<double> getXValues();
   void convertTofToWavelength();
   double reflectometryPeak();
-  void loadData(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorNames,
+  void loadData(const Nexus::NXEntry &entry, const std::vector<std::string> &monitorNames,
                 const std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties();
-  std::vector<int> loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data);
+  std::vector<int> loadSingleMonitor(const Nexus::NXEntry &entry, const std::string &monitor_data);
   std::vector<std::string> getMonitorNames();
   double peakOffsetAngle();
   void addSampleLogs();

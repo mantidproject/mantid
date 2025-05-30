@@ -78,7 +78,7 @@ template <typename NumT> void writeArray1D(H5::Group &group, const std::string &
 
 MANTID_NEXUS_DLL std::string readString(H5::H5File &file, const std::string &path);
 
-MANTID_NEXUS_DLL std::string readString(H5::Group &group, const std::string &name);
+MANTID_NEXUS_DLL std::string readString(const H5::Group &group, const std::string &name);
 
 MANTID_NEXUS_DLL std::string readString(const H5::DataSet &dataset);
 
