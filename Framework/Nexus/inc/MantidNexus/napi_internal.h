@@ -33,9 +33,9 @@
 
 typedef struct {
   NXhandle pNexusData;
-  NXstatus (*nxreopen)(NXhandle pOrigHandle, NXhandle *pNewHandle);
-  NXstatus (*nxclose)(NXhandle *pHandle);
-  NXstatus (*nxflush)(NXhandle *pHandle);
+  NXstatus (*nxreopen)(NXhandle pOrigHandle, NXhandle &pNewHandle);
+  NXstatus (*nxclose)(NXhandle &pHandle);
+  NXstatus (*nxflush)(NXhandle &pHandle);
   NXstatus (*nxmakegroup)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
   NXstatus (*nxopengroup)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
   NXstatus (*nxclosegroup)(NXhandle handle);
