@@ -35,7 +35,7 @@ public:
   static void destroySuite(SavePolarizedNXcanSASTest *suite) { delete suite; }
   void setUp() override {
     m_parameters = NXcanSASTestParameters();
-    m_parameters.filePath = generate_random_filename();
+    m_parameters.filePath = generateRandomFilename();
     setPolarizedParameters(m_parameters);
   }
   void tearDown() override {

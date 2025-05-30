@@ -134,5 +134,5 @@ void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws, double value = 0);
 
 void removeFile(const std::string &filename);
 
-std::string generate_random_filename(std::size_t length = 12, const std::string &suffix = ".h5");
+std::string generateRandomFilename(std::size_t length = 12, const std::string &suffix = ".h5");
 } // namespace NXcanSASTestHelper
