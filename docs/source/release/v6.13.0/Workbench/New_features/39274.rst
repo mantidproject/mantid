@@ -1,0 +1,19 @@
+This update changes the installation location for HTML documentation to ``<prefix>/share/doc/html/``, making the MantidWorkbench help viewer more reliable at finding local documentation.
+
+**Key Changes:**
+
+*   **New Standard Path**: HTML documentation now consistently installs to ``<prefix>/share/doc/html/``.
+    *   Build systems (CMake, Conda recipes) were updated to reflect this.
+*   **Improved Discovery**:
+    *   Mantid's internal components (C++ ``MantidHelpWindow`` and Python ``gui_helper.py`` fallbacks) now search for help files in the ``share/doc/html/`` directory.
+    *   The ``docs.html.root`` property in `Mantid.properties` (used by Workbench's HTML help) is now an absolute path, resolving issues with local document discovery.
+*   **Conda Package Updates**:
+    *   Conda build scripts for `mantiddocs` and related packages now disable QtHelp/QtAssistant component generation (e.g., ``.qhc`` files). This supports the move towards an HTML-only help viewer and the eventual removal of Qt Assistant.
+*   **CMake Cleanup**:
+    *   Removed some unused CMake variables from `Framework/Kernel/CMakeLists.txt` that were related to `Mantid.properties` configuration, simplifying the setup.
+
+**Impact:**
+
+*   Ensures a consistent documentation layout in packaged Mantid installations.
+*   Increases the reliability of the local HTML help viewer in MantidWorkbench.
+*   Supports the ongoing modernization of Mantid's help system by phasing out Qt Assistant.
