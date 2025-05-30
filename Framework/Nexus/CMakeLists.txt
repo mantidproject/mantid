@@ -7,7 +7,6 @@ set(SRC_FILES
     src/NexusException.cpp
     src/NexusFile.cpp
     src/nxstack.cpp
-    src/stptok.cpp
 )
 
 set(INC_FILES
@@ -21,7 +20,6 @@ set(INC_FILES
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
-    inc/MantidNexus/nx_stptok.h
     inc/MantidNexus/nxstack.h
 )
 
