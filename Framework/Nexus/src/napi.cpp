@@ -200,7 +200,7 @@ NXstatus NXclose(NXhandle &fid) {
   if (fid == NULL) {
     return NXstatus::NX_OK;
   }
-  fileStack = (pFileStack)fid;
+  fileStack = static_cast<pFileStack>(fid);
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxclose(hfil);
@@ -426,7 +426,7 @@ NXstatus NXflush(NXhandle &handle) {
   NXstatus status;
 
   pNexusFunction pFunc = NULL;
-  fileStack = (pFileStack)handle;
+  fileStack = static_cast<pFileStack>(handle);
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxflush(hfil);
