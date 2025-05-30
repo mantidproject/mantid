@@ -282,7 +282,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   // write data entry
   try {
     m_filehandle->makeGroup(group_name, "NXdata", true);
-  } catch (const ::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 2;
   }
 
@@ -558,7 +558,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
   // write data entry
   try {
     m_filehandle->makeGroup(group_name, "NXdata", true);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 2;
   }
 
@@ -636,7 +636,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
 
   try {
     m_filehandle->closeGroup();
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 3;
   }
   return 0;

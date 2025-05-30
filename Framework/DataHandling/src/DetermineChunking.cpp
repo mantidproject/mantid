@@ -15,7 +15,7 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/File.h>
@@ -172,7 +172,7 @@ void DetermineChunking::exec() {
             }
             file.closeData();
             file.closeGroup();
-          } catch (::NeXus::Exception &) {
+          } catch (Nexus::Exception const &) {
             g_log.error() << "Unable to find total counts to determine "
                              "chunking strategy.\n";
           }

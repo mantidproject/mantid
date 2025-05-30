@@ -16,8 +16,8 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
@@ -161,7 +161,7 @@ void UpdateInstrumentFromFile::updateFromRaw(const std::string &filename) {
 void UpdateInstrumentFromFile::updateFromNeXus(Nexus::File &nxFile) {
   try {
     nxFile.openGroup("isis_vms_compat", "IXvms");
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument "
                              "positions using this type of file");
   }

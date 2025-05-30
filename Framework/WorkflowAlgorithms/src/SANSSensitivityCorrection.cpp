@@ -19,7 +19,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
@@ -109,7 +109,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
       return false;
     else
       return iter->second == "NXentry";
-  } catch (NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     throw Exception::FileError("Unable to read data in File:", filePath);
   }
 }

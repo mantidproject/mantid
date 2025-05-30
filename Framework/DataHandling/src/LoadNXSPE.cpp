@@ -20,8 +20,8 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <boost/regex.hpp>
@@ -80,7 +80,7 @@ int LoadNXSPE::confidence(Nexus::NexusDescriptor &descriptor) const {
         confidence = identiferConfidence(value);
       }
     }
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
   return confidence;
 }

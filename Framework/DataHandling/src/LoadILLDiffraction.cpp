@@ -22,8 +22,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
@@ -228,7 +228,7 @@ void LoadILLDiffraction::loadMetaData() {
   try {
     Nexus::File filehandle(m_filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(filehandle, mutableRun);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
   }
 

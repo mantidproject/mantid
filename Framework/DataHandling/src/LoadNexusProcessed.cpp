@@ -35,8 +35,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
@@ -1029,7 +1029,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     uint32_t loadCoord(0);
     m_nexusFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Check for a log value
     auto logs = peakWS->logs();
     if (logs->hasProperty("CoordinateSystem")) {
@@ -1309,7 +1309,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     uint32_t loadCoord(0);
     m_nexusFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     // Check for a log value
     auto logs = peakWS->logs();
     if (logs->hasProperty("CoordinateSystem")) {

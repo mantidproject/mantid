@@ -15,10 +15,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
-
 #include "MantidKernel/StringTokenizer.h"
-
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
@@ -332,7 +330,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
       else
         g_log.information("No IDF loaded from Nexus file.");
 
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       g_log.information("No instrument definition found in " + filename + " at " + top_entry_name + "/instrument");
     }
   }

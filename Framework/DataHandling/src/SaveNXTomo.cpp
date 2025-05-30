@@ -11,18 +11,12 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include "MantidDataHandling/FindDetectorsPar.h"
-
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-
 #include "MantidKernel/CompositeValidator.h"
-
 #include "MantidKernel/MantidVersion.h"
-
-#include "MantidNexus/NeXusException.hpp"
-
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 namespace Mantid::DataHandling {
@@ -173,7 +167,7 @@ void SaveNXTomo::setupFile() {
     try {
       m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_RDWR);
       return;
-    } catch (NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
     }
   }
 
@@ -384,7 +378,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         prop->name() != "Axis1" && prop->name() != "Axis2") {
       try {
         m_nxFile->openData(prop->name());
-      } catch (::NeXus::Exception &) {
+      } catch (Nexus::Exception const &) {
         // Create the data entry if it doesn't exist yet, and open.
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);

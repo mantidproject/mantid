@@ -15,7 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
@@ -391,8 +391,8 @@ std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
 int LoadFlexiNexus::safeOpenpath(Nexus::File *fin, const std::string &path) {
   try {
     fin->openPath(path);
-  } catch (NeXus::Exception &) {
-    getLogger().error("NeXus path " + path + " kaputt");
+  } catch (Nexus::Exception const &) {
+    g_log.error("NeXus path " + path + " kaputt");
     return 0;
   }
   return 1;

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <sstream>
@@ -59,7 +59,7 @@ void FileBackedExperimentInfo::populateFromFile() const {
     std::string parameterStr;
     const_cast<FileBackedExperimentInfo *>(this)->loadExperimentInfoNexus(m_filename, &nxFile, parameterStr);
     const_cast<FileBackedExperimentInfo *>(this)->readParameterMap(parameterStr);
-  } catch (::NeXus::Exception &exc) {
+  } catch (Nexus::Exception const &exc) {
     std::ostringstream os;
     os << "Unable to load experiment information from NeXus file: " << exc.what() << "\n";
     throw std::runtime_error(os.str());

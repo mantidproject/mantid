@@ -7,7 +7,7 @@
 
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <H5Cpp.h>
 #include <boost/multi_index/detail/index_matcher.hpp>
@@ -100,21 +100,21 @@ void NexusDescriptor::addRootAttr(const std::string &name) { m_rootAttrs.insert(
 void NexusDescriptor::addEntry(const std::string &entryName, const std::string &groupClass) {
   // simple checks
   if (entryName.empty())
-    throw ::NeXus::Exception("Cannot add empty path", "", m_filename);
+    throw Exception("Cannot add empty path", "", m_filename);
   if (groupClass.empty())
-    throw ::NeXus::Exception("Cannot add empty class", "", m_filename);
+    throw Exception("Cannot add empty class", "", m_filename);
   if (!entryName.starts_with("/"))
-    throw ::NeXus::Exception("Paths must be absolute: " + entryName, "", m_filename);
+    throw Exception("Paths must be absolute: " + entryName, "", m_filename);
 
   // do not add path twice
   if (this->isEntry(entryName))
-    throw ::NeXus::Exception("Cannot add an entry twice: " + entryName, "", m_filename);
+    throw Exception("Cannot add an entry twice: " + entryName, "", m_filename);
 
   // verify the parent exists
   const auto lastPos = entryName.rfind("/");
   const auto parentPath = entryName.substr(0, lastPos);
   if (parentPath != "" && !this->isEntry(parentPath))
-    throw ::NeXus::Exception("Parent path " + parentPath + " does not exist", "", m_filename);
+    throw Exception("Parent path " + parentPath + " does not exist", "", m_filename);
 
   // add the path
   m_allEntries[groupClass].insert(entryName);
@@ -214,7 +214,7 @@ std::string NexusDescriptor::classTypeForName(std::string const &entryName) cons
     }
   }
   if (it == m_allEntries.cend()) {
-    throw ::NeXus::Exception("Cannot find entry " + entryName, "classTypeForName", m_filename);
+    throw Exception("Cannot find entry " + entryName, "classTypeForName", m_filename);
   }
   return groupClass;
 }
