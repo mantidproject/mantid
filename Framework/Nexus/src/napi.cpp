@@ -148,7 +148,7 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
   }
 
   NXhandle hdf5_handle = NULL;
-  NXstatus retstat = NX5open(userfilename, am, &hdf5_handle);
+  NXstatus retstat = NX5open(userfilename, am, hdf5_handle);
   if (retstat != NXstatus::NX_OK) {
     free(fHandle);
   } else {
