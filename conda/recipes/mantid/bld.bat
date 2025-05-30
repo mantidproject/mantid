@@ -2,6 +2,7 @@
 
 set "parent_dir=%RECIPE_DIR%\.."
 CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantid
+CALL "%parent_dir%\create_conda_lockfile.bat" %BUILD_PREFIX% %PREFIX% mantid
 
 mkdir build && cd build
 
