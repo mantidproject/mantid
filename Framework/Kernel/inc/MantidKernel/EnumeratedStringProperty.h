@@ -9,10 +9,6 @@
 #include "MantidKernel/Property.h"
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 
 namespace Kernel {

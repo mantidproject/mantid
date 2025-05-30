@@ -11,10 +11,6 @@
 #include "MantidKernel/Property.h"
 #include <mutex>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid::DataHandling {
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
