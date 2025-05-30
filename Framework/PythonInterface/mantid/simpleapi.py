@@ -50,10 +50,16 @@ from mantid.kernel.funcinspect import (
 
 # register matplotlib projection
 try:
-    from mantid import plots  # noqa
-    from mantid.plots._compatability import plotSpectrum, plotBin  # noqa
+    from mantid import plots
+    from mantid.plots._compatability import plotSpectrum, plotBin
 except ImportError:
-    pass  # matplotlib is unavailable
+
+    def notSupported(*args, **kwargs):
+        raise ModuleNotFoundError("Plotting is not supported by default. Please install matplotlib to enable plotting.")
+
+    plots = notSupported
+    plotSpectrum = notSupported
+    plotBin = notSupported
 
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
