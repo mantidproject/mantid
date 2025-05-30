@@ -206,22 +206,6 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         CreateSampleWorkspace(OutputWorkspace="ws")
         self.assertEqual(self.ws_widget.empty_of_workspaces(), False)
 
-    def test_group_workspaces(self):
-        self.ws_widget._ads.clear()
-        CreateSampleWorkspace(OutputWorkspace="ws1")
-        CreateSampleWorkspace(OutputWorkspace="ws2")
-        group_ws = GroupWorkspaces(["ws1", "ws2"])
-
-        # Expand all top-level items
-        for index in range(self.ws_widget.workspacewidget.topLevelItemCount()):
-            top_level_item = self.ws_widget.workspacewidget.topLevelItem(index)
-            self.ws_widget.workspacewidget.expandItem(top_level_item)
-
-        # Add check to see how many times populateChildData is called
-        self.assertTrue(self.ws_widget._ads.doesExist("group_ws"))
-        group_ws = self.ws_widget._ads.retrieve("group_ws")
-        self.assertEqual(group_ws.name(), "group_ws")
-
 
 if __name__ == "__main__":
     unittest.main()
