@@ -54,29 +54,6 @@
 
 extern void *NXpData;
 
-typedef struct __NexusFile5 {
-  struct iStack5 {
-    char irefn[1024];
-    hid_t iVref;
-    hsize_t iCurrentIDX;
-  } iStack5[NXMAXSTACK];
-  struct iStack5 iAtt5;
-  hid_t iFID;
-  hid_t iCurrentG;
-  hid_t iCurrentD;
-  hid_t iCurrentS;
-  hid_t iCurrentT;
-  hid_t iCurrentA;
-  int iNX;
-  int iNXID;
-  int iStackPtr;
-  char *iCurrentLGG;
-  char *iCurrentLD;
-  char name_ref[1024];
-  char name_tmp[1024];
-  char iAccess[2];
-} NexusFile5, *pNexusFile5;
-
 /* forward declaration of NX5closegroup in order to get rid of a nasty warning */
 
 NXstatus NX5closegroup(NXhandle fid);
@@ -84,12 +61,9 @@ NXstatus NX5closegroup(NXhandle fid);
 /*-------------------------------------------------------------------*/
 
 static pNexusFile5 NXI5assert(NXhandle fid) {
-  pNexusFile5 pRes;
-
   assert(fid != NULL);
-  pRes = static_cast<pNexusFile5>(fid);
-  assert(pRes->iNXID == NX5SIGNATURE);
-  return pRes;
+  assert(fid->iNXID == NX5SIGNATURE);
+  return fid;
 }
 
 /*--------------------------------------------------------------------*/
@@ -208,42 +182,22 @@ static void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, // cppche
    --------------------------------------------------------------------- */
 
 NXstatus NX5reopen(NXhandle origHandle, NXhandle &newHandle) {
-  pNexusFile5 pNew = NULL, pOrig = NULL;
-  newHandle = NULL;
-  pOrig = static_cast<pNexusFile5>(origHandle);
-  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: no memory to create File datastructure");
-    return NXstatus::NX_ERROR;
-  }
-  memset(pNew, 0, sizeof(NexusFile5));
-  pNew->iFID = H5Freopen(pOrig->iFID);
-  if (pNew->iFID <= 0) {
+  newHandle = new NexusFile5;
+  newHandle->iFID = H5Freopen(origHandle->iFID);
+  if (newHandle->iFID <= 0) {
     NXReportError("cannot clone file");
-    free(pNew);
+    free(newHandle);
     return NXstatus::NX_ERROR;
   }
-  strcpy(pNew->iAccess, pOrig->iAccess);
-  pNew->iNXID = NX5SIGNATURE;
-  pNew->iStack5[0].iVref = 0; /* root! */
-  newHandle = static_cast<NXhandle>(pNew);
+  strcpy(newHandle->iAccess, origHandle->iAccess);
+  newHandle->iNXID = NX5SIGNATURE;
+  newHandle->iStack5[0].iVref = 0; /* root! */
   return NXstatus::NX_OK;
 }
 
 /*---------------------------------------------------------------------
  * private functions used in NX5open
  */
-
-pNexusFile5 create_file_struct() {
-  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: not enough memory to create file structure");
-  } else {
-    memset(pNew, 0, sizeof(NexusFile5));
-  }
-
-  return pNew;
-}
 
 hid_t create_file_access_plist(CONSTCHAR *filename) {
   char pBuffer[512];
@@ -329,13 +283,10 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   struct timeb timeb_struct;
 #endif
 
-  /* create the new file structure */
-  if (!(pNew = create_file_struct()))
-    return NXstatus::NX_ERROR;
+  pNew = new NexusFile5;
 
   /* create the file access property list*/
   if ((fapl = create_file_access_plist(filename)) < 0) {
-    free(pNew);
     return NXstatus::NX_ERROR;
   }
 
@@ -358,12 +309,14 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   if (pNew->iFID <= 0) {
     snprintf(pBuffer, sizeof(pBuffer) - 1, "ERROR: cannot open file: %s", filename);
     NXReportError(pBuffer);
-    free(pNew);
     return NXstatus::NX_ERROR;
   }
 
   /*
-   * need to create global attributes         file_name file_time NeXus_version
+   * need to create global attributes
+      file_name
+      file_time
+      NeXus_version
    * at some point for new files
    */
 
@@ -372,14 +325,12 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     if (set_str_attribute(root_id, "NeXus_version", NEXUS_VERSION) < 0) {
       H5Gclose(root_id);
       H5Fclose(pNew->iFID);
-      free(pNew);
       return NXstatus::NX_ERROR;
     }
 
     if (set_str_attribute(root_id, "file_name", filename) < 0) {
       H5Gclose(root_id);
       H5Fclose(pNew->iFID);
-      free(pNew);
       return NXstatus::NX_ERROR;
     }
 
@@ -387,7 +338,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     if (set_str_attribute(root_id, "HDF5_Version", version_nr) < 0) {
       H5Gclose(root_id);
       H5Fclose(pNew->iFID);
-      free(pNew);
       return NXstatus::NX_ERROR;
     }
 
@@ -396,7 +346,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
       if (set_str_attribute(root_id, "file_time", time_buffer) < 0) {
         H5Gclose(root_id);
         H5Fclose(pNew->iFID);
-        free(pNew);
         free(time_buffer);
         return NXstatus::NX_ERROR;
       }
@@ -407,7 +356,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     if (set_str_attribute(root_id, "NX_class", "NXroot") < 0) {
       H5Gclose(root_id);
       H5Fclose(pNew->iFID);
-      free(pNew);
       return NXstatus::NX_ERROR;
     }
 
@@ -479,7 +427,8 @@ NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   hid_t iVID;
   hid_t attr1, aid1, aid2;
   std::string pBuffer;
-
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  fflush(stdout);
   pFile = NXI5assert(fid);
   /* create and configure the group */
   if (pFile->iCurrentG == 0) {
@@ -489,26 +438,38 @@ NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   }
   iVID = H5Gcreate(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   if (iVID < 0) {
+    printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+    fflush(stdout);
     NXReportError("ERROR: could not create Group");
     return NXstatus::NX_ERROR;
   }
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  fflush(stdout);
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
   H5Tset_size(aid1, strlen(nxclass));
   attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attr1 < 0) {
+    printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+    fflush(stdout);
     NXReportError("ERROR: failed to store class name");
     return NXstatus::NX_ERROR;
   }
   if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(nxclass))) < 0) {
     NXReportError("ERROR: failed to store class name");
+    printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+    fflush(stdout);
     return NXstatus::NX_ERROR;
   }
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  fflush(stdout);
   /* close group */
   hid_t iRet = H5Sclose(aid2);
   iRet += H5Tclose(aid1);
   iRet += H5Aclose(attr1);
   iRet += H5Gclose(iVID);
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  fflush(stdout);
   UNUSED_ARG(iRet);
   // always return that it worked
   return NXstatus::NX_OK;
@@ -2293,40 +2254,4 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   *rank = static_cast<int>(myrank);
 
   return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------*/
-void NX5assignFunctions(pNexusFunction fHandle) {
-  fHandle->nxclose = NX5close;
-  fHandle->nxreopen = NX5reopen;
-  fHandle->nxflush = NX5flush;
-  fHandle->nxmakegroup = NX5makegroup;
-  fHandle->nxopengroup = NX5opengroup;
-  fHandle->nxclosegroup = NX5closegroup;
-  fHandle->nxmakedata64 = NX5makedata64;
-  fHandle->nxcompmakedata64 = NX5compmakedata64;
-  fHandle->nxcompress = NX5compress;
-  fHandle->nxopendata = NX5opendata;
-  fHandle->nxclosedata = NX5closedata;
-  fHandle->nxputdata = NX5putdata;
-  fHandle->nxputattr = NX5putattr;
-  fHandle->nxputslab64 = NX5putslab64;
-  fHandle->nxgetdataID = NX5getdataID;
-  fHandle->nxmakelink = NX5makelink;
-  fHandle->nxmakenamedlink = NX5makenamedlink;
-  fHandle->nxgetdata = NX5getdata;
-  fHandle->nxgetinfo64 = NX5getinfo64;
-  fHandle->nxgetnextentry = NX5getnextentry;
-  fHandle->nxgetslab64 = NX5getslab64;
-  fHandle->nxgetnextattr = NX5getnextattr;
-  fHandle->nxgetattr = NX5getattr;
-  fHandle->nxgetattrinfo = NX5getattrinfo;
-  fHandle->nxgetgroupID = NX5getgroupID;
-  fHandle->nxgetgroupinfo = NX5getgroupinfo;
-  fHandle->nxsameID = NX5sameID;
-  fHandle->nxinitgroupdir = NX5initgroupdir;
-  fHandle->nxinitattrdir = NX5initattrdir;
-  fHandle->nxprintlink = NX5printlink;
-  fHandle->nxnativeinquirefile = NX5nativeinquirefile;
-  fHandle->nxgetnextattra = NX5getnextattra;
 }

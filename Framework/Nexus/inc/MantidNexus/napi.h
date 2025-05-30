@@ -66,58 +66,6 @@
 #define NX_COMP_LZW_LVL8 (100 * NX_COMP_LZW + 8)
 #define NX_COMP_LZW_LVL9 (100 * NX_COMP_LZW + 9)
 
-// name mangling macro
-#define CONCAT(__a, __b) __a##__b /* token concatenation */
-#define MANGLE(__arg) CONCAT(__arg, _)
-
-#define NXopen MANGLE(nxiopen)
-#define NXreopen MANGLE(nxireopen)
-#define NXclose MANGLE(nxiclose)
-#define NXmakegroup MANGLE(nximakegroup)
-#define NXopengroup MANGLE(nxiopengroup)
-#define NXopenaddress MANGLE(nxiopenpath)
-#define NXgetaddress MANGLE(nxigetpath)
-#define NXopengroupaddress MANGLE(nxiopengrouppath)
-#define NXclosegroup MANGLE(nxiclosegroup)
-#define NXmakedata64 MANGLE(nximakedata64)
-#define NXcompmakedata64 MANGLE(nxicompmakedata64)
-#define NXcompress MANGLE(nxicompress)
-#define NXopendata MANGLE(nxiopendata)
-#define NXclosedata MANGLE(nxiclosedata)
-#define NXputdata MANGLE(nxiputdata)
-#define NXputslab MANGLE(nxiputslab)
-#define NXputslab64 MANGLE(nxiputslab64)
-#define NXputattr MANGLE(nxiputattr)
-#define NXputattra MANGLE(nxiputattra)
-#define NXgetdataID MANGLE(nxigetdataid)
-#define NXmakelink MANGLE(nximakelink)
-#define NXmakenamedlink MANGLE(nximakenamedlink)
-#define NXopensourcegroup MANGLE(nxiopensourcegroup)
-#define NXmalloc MANGLE(nximalloc)
-#define NXmalloc64 MANGLE(nximalloc64)
-#define NXfree MANGLE(nxifree)
-#define NXflush MANGLE(nxiflush)
-
-#define NXgetinfo64 MANGLE(nxigetinfo64)
-#define NXgetrawinfo64 MANGLE(nxigetrawinfo64)
-#define NXgetnextentry MANGLE(nxigetnextentry)
-#define NXgetdata MANGLE(nxigetdata)
-
-#define NXgetslab64 MANGLE(nxigetslab64)
-#define NXgetnextattr MANGLE(nxigetnextattr)
-#define NXgetattr MANGLE(nxigetattr)
-#define NXgetnextattra MANGLE(nxigetnextattra)
-#define NXgetattra MANGLE(nxigetattra)
-#define NXgetattrinfo MANGLE(nxigetattrinfo)
-#define NXgetattrainfo MANGLE(nxigetattrainfo)
-#define NXgetgroupID MANGLE(nxigetgroupid)
-#define NXgetgroupinfo MANGLE(nxigetgroupinfo)
-#define NXsameID MANGLE(nxisameid)
-#define NXinitgroupdir MANGLE(nxiinitgroupdir)
-#define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXinquirefile MANGLE(nxiinquirefile)
-#define NXgetversion MANGLE(nxigetversion)
-
 /*
  * Standard interface
  *
@@ -525,17 +473,6 @@ MANTID_NEXUS_DLL NXstatus NXinitgroupdir(NXhandle handle);
 MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
 
 /**
- * Inquire the filename of the currently open file. FilenameBufferLength of the file name
- * will be copied into the filename buffer.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param filename The buffer to hold the filename.
- * \param  filenameBufferLength The length of the filename buffer.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength);
-
-/**
  * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
  * \param data A pointer to a pointer which will be initialized with a pointer to a suitably sized memory area.
  * \param rank the rank of the data.
@@ -568,20 +505,6 @@ MANTID_NEXUS_DLL const char *NXgetversion();
 MANTID_NEXUS_DLL NXstatus NXfree(void **data);
 
 MANTID_NEXUS_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
-
-/**
- * Retrieve information about the currently open dataset. In contrast to the main function below,
- * this function does not try to find out about the size of strings properly.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param rank A pointer to an integer which will be filled with the rank of
- * the dataset.
- * \param dimension An array which will be initialized with the size of the dataset in any of its
- * dimensions. The array must have at least the size of rank.
- * \param datatype A pointer to an integer which be set to the NeXus data type code for this dataset.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimension[], NXnumtype *datatype);
 
 /**
  * @copydoc NXgetrawinfo

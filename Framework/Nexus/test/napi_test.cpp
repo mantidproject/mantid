@@ -45,10 +45,6 @@ using NexusNapiTest::write_dmc02;
   if ((status) != NXstatus::NX_OK)                                                                                     \
     ON_ERROR(msg);
 
-namespace { // anonymous namespace
-std::string relativePathOf(const std::string &filename) { return std::filesystem::path(filename).filename().string(); }
-} // anonymous namespace
-
 int main(int argc, char *argv[]) {
   std::cout << "determining file type" << std::endl;
   std::string nxFile;
@@ -226,9 +222,6 @@ int main(int argc, char *argv[]) {
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
   ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXACC_RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
-  char filename[256];
-  ASSERT_NO_ERROR(NXinquirefile(fileid, filename, 256), "");
-  std::cout << "NXinquirefile found: " << relativePathOf(filename) << std::endl;
   NXgetattrinfo(fileid, &i);
   if (i > 0) {
     std::cout << "Number of global attributes: " << i << std::endl;

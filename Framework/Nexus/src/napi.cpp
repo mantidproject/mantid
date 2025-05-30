@@ -31,6 +31,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <hdf5.h>
+
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_internal.h"
 #include "MantidNexus/nxstack.h"
@@ -50,19 +52,6 @@
 #endif
 
 /*----------------------------------------------------------------------*/
-static bool canOpen(char const *filename) {
-  FILE *fd = NULL;
-
-  fd = fopen(filename, "r");
-  if (fd != NULL) {
-    fclose(fd);
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/*----------------------------------------------------------------------*/
 
 void NXReportError(const char *string) { UNUSED_ARG(string); }
 
@@ -72,120 +61,95 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
 
    --------------------------------------------------------------------- */
 
-static int determineFileType(CONSTCHAR *filename) {
+static bool canBeOpened(CONSTCHAR *filename) {
   // this is for reading, check for existence first
-  if (!canOpen(filename))
-    return -1;
+  FILE *fd = NULL;
+  fd = fopen(filename, "r");
+  if (fd == NULL) {
+    return false;
+  }
+  fclose(fd);
 
   // check that this is indeed hdf5
   if (H5Fis_hdf5(static_cast<const char *>(filename)) > 0) {
-    return NXACC_CREATE5;
+    return true;
   } else {
     // file type not recognized
-    return 0;
-  }
-}
-
-/*---------------------------------------------------------------------*/
-static pNexusFunction handleToNexusFunc(NXhandle fid) {
-  if (pFileStack fileStack = static_cast<pFileStack>(fid)) {
-    return peekFileOnStack(fileStack);
-  } else {
-    return NULL;
+    return false;
   }
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack);
+static std::string getTrueFilename(CONSTCHAR *userfilename, NXaccess am) {
+  // determine the filename for opening
+  printf("%s:%d %s %s\n", __FILE__, __LINE__, __func__, userfilename);
+  fflush(stdout);
+  std::string path(userfilename);
+  printf("%s:%d %s %s\n", __FILE__, __LINE__, __func__, path.c_str());
+  fflush(stdout);
+  if (am != NXACC_CREATE5) {
+    std::string new_path = locateNexusFileInPath(path.c_str());
+    printf("%s:%d %s %s\n", __FILE__, __LINE__, __func__, new_path.c_str());
+    fflush(stdout);
+    path = new_path;
+  }
+  printf("%s:%d %s %s\n", __FILE__, __LINE__, __func__, path.c_str());
+  fflush(stdout);
+  if (!path.empty()) {
+    return path;
+  } else {
+    return "";
+  }
+}
+
 /*----------------------------------------------------------------------*/
 NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)gHandle);
+  fflush(stdout);
 
-  gHandle = NULL;
-  fileStack = makeFileStack();
-  if (fileStack == NULL) {
-    NXReportError("ERROR: no memory to create filestack");
-    return NXstatus::NX_ERROR;
+  // allocate the object on the heap
+  gHandle = new NexusFile5;
+
+  // determine the filename for opening
+  std::string filename = getTrueFilename(userfilename, am);
+  printf("%s:%d %s %s\n", __FILE__, __LINE__, __func__, filename.c_str());
+  fflush(stdout);
+
+  // determine if the file can be opened
+  bool isHDF5 = (am == NXACC_CREATE5 ? true : canBeOpened(filename.c_str()));
+  printf("%s:%d %s %d\n", __FILE__, __LINE__, __func__, isHDF5);
+  fflush(stdout);
+  NXstatus status = NXstatus::NX_ERROR;
+  if (isHDF5) {
+    // call NX5open to set variables on it
+    status = NX5open(filename.c_str(), am, gHandle);
+    printf("%s:%d %s %d\n", __FILE__, __LINE__, __func__, gHandle->iFID);
+    fflush(stdout);
+  } else {
+    NXReportError("ERROR: Format not readable by this NeXus library");
+    status = NXstatus::NX_ERROR;
   }
-  status = NXinternalopen(userfilename, am, fileStack);
-  if (status == NXstatus::NX_OK) {
-    gHandle = fileStack;
+  if (status != NXstatus::NX_OK) {
+    delete gHandle;
   }
 
+  // set the path pointer to -1
+  gHandle->pathPointer = -1;
+  printf("%s:%d %s %d\n", __FILE__, __LINE__, __func__, status);
   return status;
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  pNexusFunction fHandle = static_cast<pNexusFunction>(malloc(sizeof(NexusFunction)));
-  if (fHandle == NULL) {
-    NXReportError("ERROR: no memory to create Function structure");
-    return NXstatus::NX_ERROR;
-  }
-  memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
 
-  const int my_am = (am & NXACCMASK_REMOVEFLAGS); // remove high bits
-  if (my_am != NXACC_CREATE5) {
-    // check file type is hdf5 for reading
-    const int iRet = determineFileType(userfilename);
-    if (iRet != NXACC_CREATE5) {
-      char error[1024];
-      if (iRet < 0) {
-        snprintf(error, 1023, "failed to open %s for reading", userfilename);
-      } else if (iRet == 0) {
-        snprintf(error, 1023, "failed to determine filetype for %s ", userfilename);
-      }
-      NXReportError(error);
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-  }
-  if (userfilename == NULL) {
-    NXReportError("Out of memory in NeXus-API");
-    free(fHandle);
-    return NXstatus::NX_ERROR;
-  }
-
-  NXhandle hdf5_handle = NULL;
-  NXstatus retstat = NX5open(userfilename, am, hdf5_handle);
-  if (retstat != NXstatus::NX_OK) {
-    free(fHandle);
-  } else {
-    fHandle->pNexusData = hdf5_handle;
-    const int backend_type = NXACC_CREATE5; // to get past compiler warning
-    fHandle->access_mode = backend_type || (NXACC_READ && am);
-    NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, userfilename);
-  }
-  return retstat;
-}
-
-NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
-  pFileStack newFileStack;
-  pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
-  pNexusFunction fOrigHandle = NULL, fNewHandle = NULL;
+NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
+  pNexusFile5 newFileStack;
   newHandle = NULL;
   newFileStack = makeFileStack();
   if (newFileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
   }
-  // The code below will only open the last file on a stack
-  // for the moment raise an error, but this behaviour may be OK
-  if (fileStackDepth(origFileStack) > 0) {
-    NXReportError("ERROR: handle stack referes to many files - cannot reopen");
-    return NXstatus::NX_ERROR;
-  }
-  fOrigHandle = peekFileOnStack(origFileStack);
-  if (fOrigHandle->nxreopen == NULL) {
-    NXReportError("ERROR: NXreopen not implemented for this underlying file format");
-    return NXstatus::NX_ERROR;
-  }
-  fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
-  memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  fNewHandle->nxreopen(fOrigHandle->pNexusData, fNewHandle->pNexusData);
-  pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
+  NX5reopen(origHandle, newHandle);
   newHandle = newFileStack;
   return NXstatus::NX_OK;
 }
@@ -193,50 +157,34 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
 /* ------------------------------------------------------------------------- */
 
 NXstatus NXclose(NXhandle &fid) {
-  NXhandle hfil;
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
   NXstatus status;
-  pFileStack fileStack = NULL;
-  pNexusFunction pFunc = NULL;
   if (fid == NULL) {
+    printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
     return NXstatus::NX_OK;
   }
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = peekFileOnStack(fileStack);
-  hfil = pFunc->pNexusData;
-  status = pFunc->nxclose(hfil);
-  pFunc->pNexusData = hfil;
-  free(pFunc);
-  popFileStack(fileStack);
-  if (fileStackDepth(fileStack) < 0) {
-    killFileStack(fileStack);
-    fid = NULL;
-  }
-  /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
-  /*
-     Fortify_CheckAllMemory();
-   */
-
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  status = NX5close(fid);
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
+  delete fid;
+  printf("%s:%d %s %p\n", __FILE__, __LINE__, __func__, (void *)fid);
   return status;
 }
 
 /*-----------------------------------------------------------------------*/
 
-NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass);
-}
+NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) { return NX5makegroup(fid, name, nxclass); }
 
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXstatus status;
-  pFileStack fileStack;
+  pNexusFile5 fileStack;
   pNexusFunction pFunc = NULL;
 
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
+  fileStack = static_cast<pNexusFile5>(fid);
 
-  status = pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
+  status = NX5opengroup(fid, name, nxclass);
   if (status == NXstatus::NX_OK) {
     pushAddress(fileStack, name);
   }
@@ -248,64 +196,41 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
 NXstatus NXclosegroup(NXhandle fid) {
   NXstatus status;
-  pFileStack fileStack = NULL;
+  pNexusFile5 fileStack = NULL;
   NXlink closeID, currentID;
 
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosegroup(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetgroupID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosegroup(fid);
-    } else {
-      status = pFunc->nxclosegroup(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
-    }
-    return status;
+  fileStack = static_cast<pNexusFile5>(fid);
+  status = NX5closegroup(fid);
+  if (status == NXstatus::NX_OK) {
+    popPath(fileStack);
   }
+  return status;
 }
 
 /* --------------------------------------------------------------------- */
 
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions);
+  return NX5makedata64(fid, name, datatype, rank, dimensions);
 }
 
 /* --------------------------------------------------------------------- */
 
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxcompmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions, compress_type, chunk_size);
+  return NX5compmakedata64(fid, name, datatype, rank, dimensions, compress_type, chunk_size);
 }
 
 /* --------------------------------------------------------------------- */
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXstatus status;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
+  pNexusFile5 fileStack = NULL;
 
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-  status = pFunc->nxopendata(pFunc->pNexusData, name);
-
+  fileStack = static_cast<pNexusFile5>(fid);
+  status = NX5opendata(fid, name);
   if (status == NXstatus::NX_OK) {
     pushAddress(fileStack, name);
   }
-
   return status;
 }
 
@@ -313,52 +238,29 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
 
 NXstatus NXclosedata(NXhandle fid) {
   NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
+  pNexusFile5 fileStack = NULL;
 
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosedata(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetdataID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosedata(fid);
-    } else {
-      status = pFunc->nxclosedata(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
-    }
-    return status;
+  fileStack = static_cast<pNexusFile5>(fid);
+  status = NX5closedata(fid);
+  if (status == NXstatus::NX_OK) {
+    popPath(fileStack);
   }
+  return status;
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXputdata(NXhandle fid, const void *data) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxputdata(pFunc->pNexusData, data);
-}
+NXstatus NXputdata(NXhandle fid, const void *data) { return NX5putdata(fid, data); }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
   if (datalen > 1 && iType != NXnumtype::CHAR) {
     NXReportError(
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
     return NXstatus::NX_ERROR;
   }
-  return pFunc->nxputattr(pFunc->pNexusData, name, data, datalen, iType);
+  return NX5putattr(fid, name, data, datalen, iType);
 }
 
 /* ------------------------------------------------------------------- */
@@ -378,29 +280,21 @@ NXstatus NXputslab(NXhandle fid, const void *data, const int iStart[], const int
 }
 
 NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxputslab64(pFunc->pNexusData, data, iStart, iSize);
+  return NX5putslab64(fid, data, iStart, iSize);
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetdataID(pFunc->pNexusData, sRes);
-}
+NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) { return NX5getdataID(fid, sRes); }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxmakelink(pFunc->pNexusData, sLink);
-}
+NXstatus NXmakelink(NXhandle fid, NXlink *sLink) { return NX5makelink(fid, sLink); }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxmakenamedlink(pFunc->pNexusData, newname, sLink);
+  return NX5makenamedlink(fid, newname, sLink);
 }
 
 /* -------------------------------------------------------------------- */
@@ -420,19 +314,7 @@ NXstatus NXopensourcegroup(NXhandle fid) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NXflush(NXhandle &handle) {
-  NXhandle hfil;
-  pFileStack fileStack = NULL;
-  NXstatus status;
-
-  pNexusFunction pFunc = NULL;
-  fileStack = static_cast<pFileStack>(handle);
-  pFunc = peekFileOnStack(fileStack);
-  hfil = pFunc->pNexusData;
-  status = pFunc->nxflush(hfil);
-  pFunc->pNexusData = hfil;
-  return status;
-}
+NXstatus NXflush(NXhandle &fid) { return NX5flush(fid); }
 
 /*-------------------------------------------------------------------------*/
 
@@ -501,8 +383,7 @@ NXstatus NXfree(void **data) {
 /* --------------------------------------------------------------------- */
 
 NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetnextentry(pFunc->pNexusData, name, nxclass, datatype);
+  return NX5getnextentry(fid, name, nxclass, datatype);
 }
 
 /*----------------------------------------------------------------------*/
@@ -541,14 +422,13 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   int rank;
   int64_t iDim[NX_MAXRANK];
 
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type); /* unstripped size if string */
+  NX5getinfo64(fid, &rank, iDim, &type); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
     memset(pPtr, 0, (size_t)iDim[0] + 5);
-    status = pFunc->nxgetdata(pFunc->pNexusData, pPtr);
+    status = NX5getdata(fid, pPtr);
     char const *pPtr2;
     pPtr2 = nxitrim(pPtr);
 #if defined(__GNUC__) && !(defined(__clang__))
@@ -561,15 +441,14 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 #endif
     free(pPtr);
   } else {
-    status = pFunc->nxgetdata(pFunc->pNexusData, data);
+    status = NX5getdata(fid, data);
   }
   return status;
 }
 
 /*---------------------------------------------------------------------------*/
 NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType);
+  return NX5getinfo64(fid, rank, dimension, iType);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -577,9 +456,8 @@ NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype 
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
   char *pPtr = NULL;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
   *rank = 0;
-  status = pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType);
+  status = NX5getinfo64(fid, rank, dimension, iType);
   /*
      the length of a string may be trimmed....
    */
@@ -588,7 +466,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
-      pFunc->nxgetdata(pFunc->pNexusData, pPtr);
+      NX5getdata(fid, pPtr);
       dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
       free(pPtr);
     }
@@ -599,89 +477,42 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetslab64(pFunc->pNexusData, data, iStart, iSize);
+  return NX5getslab64(fid, data, iStart, iSize);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType);
+  return NX5getattr(fid, name, data, datalen, iType);
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetattrinfo(NXhandle fid, int *iN) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetattrinfo(pFunc->pNexusData, iN);
-}
+NXstatus NXgetattrinfo(NXhandle fid, int *iN) { return NX5getattrinfo(fid, iN); }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
-  pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return pFunc->nxgetgroupID(pFunc->pNexusData, sRes);
-}
+NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) { return NX5getgroupID(fileid, sRes); }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxgetgroupinfo(pFunc->pNexusData, iN, pName, pClass);
+  return NX5getgroupinfo(fid, iN, pName, pClass);
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
-  pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return pFunc->nxsameID(pFunc->pNexusData, pFirstID, pSecondID);
+  return NX5sameID(fileid, pFirstID, pSecondID);
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXinitattrdir(NXhandle fid) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxinitattrdir(pFunc->pNexusData);
-}
+NXstatus NXinitattrdir(NXhandle fid) { return NX5initattrdir(fid); }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXinitgroupdir(NXhandle fid) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxinitgroupdir(pFunc->pNexusData);
-}
-
-/*----------------------------------------------------------------------*/
-NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength) {
-  pFileStack fileStack;
-
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  if (pFunc->nxnativeinquirefile != NULL) {
-
-    NXstatus status = pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength);
-    if (status != NXstatus::NX_OK) {
-      return NXstatus::NX_ERROR;
-    } else {
-      return NXstatus::NX_OK;
-    }
-  }
-
-  fileStack = static_cast<pFileStack>(handle);
-  char const *pPtr = NULL;
-  pPtr = peekFilenameOnStack(fileStack);
-  if (pPtr != NULL) {
-    auto length = strlen(pPtr);
-    if (length > static_cast<size_t>(filenameBufferLength)) {
-      length = static_cast<size_t>(filenameBufferLength - 1);
-    }
-    memset(filename, 0, static_cast<size_t>(filenameBufferLength));
-    memcpy(filename, pPtr, length);
-    return NXstatus::NX_OK;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
+NXstatus NXinitgroupdir(NXhandle fid) { return NX5initgroupdir(fid); }
 
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
@@ -928,15 +759,12 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return pFunc->nxprintlink(pFunc->pNexusData, link);
-}
+NXstatus NXIprintlink(NXhandle fid, NXlink const *link) { return NX5printlink(fid, link); }
 
 /*----------------------------------------------------------------------*/
 NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   int status;
-  pFileStack fileStack = NULL;
+  pNexusFile5 fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
   status = buildAddress(fileStack, address, addresslen);
@@ -947,8 +775,7 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
 }
 
 NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType);
+  return NX5getnextattra(handle, pName, rank, dim, iType);
 }
 
 /*--------------------------------------------------------------------
