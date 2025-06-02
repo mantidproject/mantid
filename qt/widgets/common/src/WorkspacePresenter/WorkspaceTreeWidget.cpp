@@ -20,6 +20,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidQtWidgets/Common/pixmaps.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -700,11 +701,14 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 
   if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
     auto members = group->getAllItems();
+    auto visibleNames = AnalysisDataService::Instance().getObjectNames();
     for (const auto &ws : members) {
-      auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
-      excludeItemFromSort(node);
-      if (shouldBeSelected(node->text(0)))
-        node->setSelected(true);
+      if (std::find(visibleNames.begin(), visibleNames.end(), ws->getName()) != visibleNames.end()) {
+        auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
+        excludeItemFromSort(node);
+        if (shouldBeSelected(node->text(0)))
+          node->setSelected(true);
+      }
     }
   } else {
     QString details;
