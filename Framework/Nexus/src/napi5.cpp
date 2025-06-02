@@ -23,7 +23,7 @@
 
 ----------------------------------------------------------------------------*/
 
-// cppcheck-suppress-begin
+// cppcheck-suppress-begin [constParameterCallback, variableScope]
 
 #include <string>
 #define H5Aiterate_vers 2
@@ -2287,4 +2287,4 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxgetnextattra = NX5getnextattra;
 }
 
-// cppcheck-suppress-end
+// cppcheck-suppress-end [constParameterCallback, variableScope]
