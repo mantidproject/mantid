@@ -376,7 +376,6 @@ int testLoadPath(const string &filename) {
   if (getenv("NX_LOAD_PATH") != NULL) {
     Mantid::Nexus::File file(filename);
     cout << "Success loading NeXus file from path" << endl;
-    // cout << file.inquireFile() << endl; // DEBUG print
     return TEST_SUCCEED;
   } else {
     cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";

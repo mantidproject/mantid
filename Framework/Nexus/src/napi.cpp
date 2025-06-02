@@ -652,37 +652,6 @@ NXstatus NXinitgroupdir(NXhandle fid) {
   return pFunc->nxinitgroupdir(pFunc->pNexusData);
 }
 
-/*----------------------------------------------------------------------*/
-NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength) {
-  pFileStack fileStack;
-
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  if (pFunc->nxnativeinquirefile != NULL) {
-
-    NXstatus status = pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength);
-    if (status != NXstatus::NX_OK) {
-      return NXstatus::NX_ERROR;
-    } else {
-      return NXstatus::NX_OK;
-    }
-  }
-
-  fileStack = static_cast<pFileStack>(handle);
-  char const *pPtr = NULL;
-  pPtr = peekFilenameOnStack(fileStack);
-  if (pPtr != NULL) {
-    auto length = strlen(pPtr);
-    if (length > static_cast<size_t>(filenameBufferLength)) {
-      length = static_cast<size_t>(filenameBufferLength - 1);
-    }
-    memset(filename, 0, static_cast<size_t>(filenameBufferLength));
-    memcpy(filename, pPtr, length);
-    return NXstatus::NX_OK;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
