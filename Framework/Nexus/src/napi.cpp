@@ -35,7 +35,7 @@
 #include "MantidNexus/napi_internal.h"
 #include "MantidNexus/nxstack.h"
 
-// cppcheck-suppress-begin [constVariablePointer, constParameterCallback, variableScope]
+// cppcheck-suppress-begin [constVariablePointer]
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
@@ -896,4 +896,4 @@ char *NXIformatNeXusTime() {
 
 const char *NXgetversion() { return NEXUS_VERSION; }
 
-// cppcheck-suppress-end [constVariablePointer, constParameterCallback, variableScope]
+// cppcheck-suppress-end [constVariablePointer]

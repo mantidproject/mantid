@@ -43,15 +43,11 @@ public:
 
   void resetValues(pNexusFunction pDriv, std::string const &filename);
 
-  pNexusFunction getFunctions() const { return pDriver; }
+  pNexusFunction const &getFunctions() const { return pDriver; }
 
-  std::string getFilename() const { return filename; }
+  std::string const &getFilename() const { return filename; }
 };
 
 typedef nxstack *pFileStack;
-
-pFileStack makeFileStack();
-
-void killFileStack(pFileStack self);
 
 #endif
