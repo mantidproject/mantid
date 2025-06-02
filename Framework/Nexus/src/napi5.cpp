@@ -207,10 +207,10 @@ static void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, // cppche
 
    --------------------------------------------------------------------- */
 
-NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
+NXstatus NX5reopen(NXhandle origHandle, NXhandle &newHandle) {
   pNexusFile5 pNew = NULL, pOrig = NULL;
-  *pNewHandle = NULL;
-  pOrig = static_cast<pNexusFile5>(pOrigHandle);
+  newHandle = NULL;
+  pOrig = static_cast<pNexusFile5>(origHandle);
   pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
@@ -226,7 +226,7 @@ NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   strcpy(pNew->iAccess, pOrig->iAccess);
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  *pNewHandle = static_cast<NXhandle>(pNew);
+  newHandle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
 }
 
@@ -300,7 +300,7 @@ herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   return 0;
 }
 
-NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
+NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   hid_t root_id;
   pNexusFile5 pNew = NULL;
   char pBuffer[512];
@@ -309,7 +309,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   unsigned int vers_major, vers_minor, vers_release, am1;
   hid_t fapl = -1;
 
-  *pHandle = NULL;
+  handle = NULL;
 
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
     NXReportError("ERROR: cannot determine HDF5 library version");
@@ -422,17 +422,17 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   }
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  *pHandle = static_cast<NXhandle>(pNew);
+  handle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------------- */
 
-NXstatus NX5close(NXhandle *fid) {
+NXstatus NX5close(NXhandle &fid) {
   pNexusFile5 pFile = NULL;
   herr_t iRet;
 
-  pFile = NXI5assert(*fid);
+  pFile = NXI5assert(fid);
 
   iRet = 0;
   /*
@@ -467,7 +467,7 @@ NXstatus NX5close(NXhandle *fid) {
     free(pFile->iCurrentLD);
   }
   free(pFile);
-  *fid = NULL;
+  fid = NULL;
   H5garbage_collect();
   return NXstatus::NX_OK;
 }
@@ -1327,11 +1327,11 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NX5flush(NXhandle *pHandle) {
+NXstatus NX5flush(NXhandle &handle) {
   pNexusFile5 pFile = NULL;
   herr_t iRet;
 
-  pFile = NXI5assert(*pHandle);
+  pFile = NXI5assert(handle);
   if (pFile->iCurrentD != 0) {
     iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
   } else if (pFile->iCurrentG != 0) {
