@@ -98,11 +98,11 @@ static pNexusFunction handleToNexusFunc(NXhandle fid) {
 /*--------------------------------------------------------------------*/
 static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack);
 /*----------------------------------------------------------------------*/
-NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
+NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   NXstatus status;
   pFileStack fileStack = NULL;
 
-  *gHandle = NULL;
+  gHandle = NULL;
   fileStack = makeFileStack();
   if (fileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
@@ -110,7 +110,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
   }
   status = NXinternalopen(userfilename, am, fileStack);
   if (status == NXstatus::NX_OK) {
-    *gHandle = fileStack;
+    gHandle = fileStack;
   }
 
   return status;
@@ -148,7 +148,7 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
   }
 
   NXhandle hdf5_handle = NULL;
-  NXstatus retstat = NX5open(userfilename, am, &hdf5_handle);
+  NXstatus retstat = NX5open(userfilename, am, hdf5_handle);
   if (retstat != NXstatus::NX_OK) {
     free(fHandle);
   } else {
@@ -161,11 +161,11 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
   return retstat;
 }
 
-NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
+NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
   pFileStack newFileStack;
   pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
   pNexusFunction fOrigHandle = NULL, fNewHandle = NULL;
-  *pNewHandle = NULL;
+  newHandle = NULL;
   newFileStack = makeFileStack();
   if (newFileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
@@ -184,32 +184,32 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   }
   fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
   memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData));
+  fNewHandle->nxreopen(fOrigHandle->pNexusData, fNewHandle->pNexusData);
   pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
-  *pNewHandle = newFileStack;
+  newHandle = newFileStack;
   return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------------- */
 
-NXstatus NXclose(NXhandle *fid) {
+NXstatus NXclose(NXhandle &fid) {
   NXhandle hfil;
   NXstatus status;
   pFileStack fileStack = NULL;
   pNexusFunction pFunc = NULL;
-  if (*fid == NULL) {
+  if (fid == NULL) {
     return NXstatus::NX_OK;
   }
-  fileStack = (pFileStack)*fid;
+  fileStack = static_cast<pFileStack>(fid);
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
-  status = pFunc->nxclose(&hfil);
+  status = pFunc->nxclose(hfil);
   pFunc->pNexusData = hfil;
   free(pFunc);
   popFileStack(fileStack);
   if (fileStackDepth(fileStack) < 0) {
     killFileStack(fileStack);
-    *fid = NULL;
+    fid = NULL;
   }
   /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
   /*
@@ -264,7 +264,7 @@ NXstatus NXclosegroup(NXhandle fid) {
     NXgetgroupID(fid, &currentID);
     peekIDOnStack(fileStack, &closeID);
     if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(&fid);
+      NXclose(fid);
       status = NXclosegroup(fid);
     } else {
       status = pFunc->nxclosegroup(pFunc->pNexusData);
@@ -330,7 +330,7 @@ NXstatus NXclosedata(NXhandle fid) {
     NXgetdataID(fid, &currentID);
     peekIDOnStack(fileStack, &closeID);
     if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(&fid);
+      NXclose(fid);
       status = NXclosedata(fid);
     } else {
       status = pFunc->nxclosedata(pFunc->pNexusData);
@@ -420,16 +420,16 @@ NXstatus NXopensourcegroup(NXhandle fid) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NXflush(NXhandle *pHandle) {
+NXstatus NXflush(NXhandle &handle) {
   NXhandle hfil;
   pFileStack fileStack = NULL;
   NXstatus status;
 
   pNexusFunction pFunc = NULL;
-  fileStack = (pFileStack)*pHandle;
+  fileStack = static_cast<pFileStack>(handle);
   pFunc = peekFileOnStack(fileStack);
   hfil = pFunc->pNexusData;
-  status = pFunc->nxflush(&hfil);
+  status = pFunc->nxflush(hfil);
   pFunc->pNexusData = hfil;
   return status;
 }
