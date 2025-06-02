@@ -2123,28 +2123,6 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int filenamelen) {
-  hid_t openthing;
-
-  const pNexusFile5 pFile = NXI5assert(fileid);
-  if (pFile->iCurrentD > 0) {
-    openthing = pFile->iCurrentD;
-  } else if (pFile->iCurrentG > 0) {
-    openthing = pFile->iCurrentG;
-  } else {
-    openthing = pFile->iFID;
-  }
-
-  // Check for failure again
-  if (H5Fget_name(openthing, externalfile, static_cast<size_t>(filenamelen)) < 0) {
-    NXReportError("ERROR: retrieving file name");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
-
-/* ------------------------------------------------------------------- */
-
 NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   NXI5assert(fileid);
   if (pFirstID->targetAddress == pSecondID->targetAddress) {
@@ -2327,6 +2305,5 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxinitgroupdir = NX5initgroupdir;
   fHandle->nxinitattrdir = NX5initattrdir;
   fHandle->nxprintlink = NX5printlink;
-  fHandle->nxnativeinquirefile = NX5nativeinquirefile;
   fHandle->nxgetnextattra = NX5getnextattra;
 }
