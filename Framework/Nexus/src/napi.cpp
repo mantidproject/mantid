@@ -89,7 +89,7 @@ static int determineFileType(CONSTCHAR *filename) {
 /*---------------------------------------------------------------------*/
 static pNexusFunction handleToNexusFunc(NXhandle fid) {
   if (pFileStack fileStack = static_cast<pFileStack>(fid)) {
-    return peekFileOnStack(fileStack);
+    return fileStack->getFunctions();
   } else {
     return NULL;
   }
@@ -103,7 +103,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   pFileStack fileStack = NULL;
 
   gHandle = NULL;
-  fileStack = makeFileStack();
+  fileStack = new nxstack;
   if (fileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
@@ -156,7 +156,7 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
     const int backend_type = NXACC_CREATE5; // to get past compiler warning
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, userfilename);
+    fileStack->resetValues(fHandle, std::string(userfilename));
   }
   return retstat;
 }
@@ -166,20 +166,20 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
   pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
   pNexusFunction fOrigHandle = NULL, fNewHandle = NULL;
   newHandle = NULL;
-  newFileStack = makeFileStack();
+  newFileStack = new nxstack;
   if (newFileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
   }
-  fOrigHandle = peekFileOnStack(origFileStack);
+  fOrigHandle = handleToNexusFunc(origFileStack);
   if (fOrigHandle->nxreopen == NULL) {
     NXReportError("ERROR: NXreopen not implemented for this underlying file format");
     return NXstatus::NX_ERROR;
   }
   fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
   memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  fNewHandle->nxreopen(fOrigHandle->pNexusData, fNewHandle->pNexusData);
-  pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
+  fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData));
+  newFileStack->resetValues(fNewHandle, origFileStack->getFilename());
   newHandle = newFileStack;
   return NXstatus::NX_OK;
 }
@@ -195,12 +195,12 @@ NXstatus NXclose(NXhandle &fid) {
     return NXstatus::NX_OK;
   }
   fileStack = static_cast<pFileStack>(fid);
-  pFunc = peekFileOnStack(fileStack);
+  pFunc = handleToNexusFunc(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxclose(hfil);
   pFunc->pNexusData = hfil;
   free(pFunc);
-  killFileStack(fileStack);
+  delete fileStack;
   fid = NULL;
 
   return status;
@@ -341,7 +341,7 @@ NXstatus NXflush(NXhandle &handle) {
 
   pNexusFunction pFunc = NULL;
   fileStack = static_cast<pFileStack>(handle);
-  pFunc = peekFileOnStack(fileStack);
+  pFunc = handleToNexusFunc(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxflush(hfil);
   pFunc->pNexusData = hfil;
@@ -821,7 +821,7 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
-  pNexusFile5 const hfil = static_cast<pNexusFile5>(peekFileOnStack(fileStack)->pNexusData);
+  pNexusFile5 const hfil = static_cast<pNexusFile5>(handleToNexusFunc(fileStack)->pNexusData);
   hid_t current;
   if (hfil->iCurrentD != 0) {
     current = hfil->iCurrentD;

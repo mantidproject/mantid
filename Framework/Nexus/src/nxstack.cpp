@@ -29,33 +29,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*-----------------------------------------------------------------------
- Data definitions
----------------------------------------------------------------------*/
-
-typedef struct __fileStack {
-  pNexusFunction pDriver;
-  std::string filename;
-} fileStack;
-
-/*---------------------------------------------------------------------*/
-pFileStack makeFileStack() {
-  pFileStack pNew = new fileStack;
-  return pNew;
-}
-/*---------------------------------------------------------------------*/
-void killFileStack(pFileStack self) {
-  if (self != NULL) {
-    delete self;
-  }
-}
 /*----------------------------------------------------------------------*/
-void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *file) {
-  self->pDriver = pDriv;
-  self->filename = std::string(file);
+void nxstack::resetValues(pNexusFunction pDriv, std::string const &file) {
+  this->pDriver = pDriv;
+  this->filename = file;
 }
-/*----------------------------------------------------------------------*/
-pNexusFunction peekFileOnStack(pFileStack self) { return self->pDriver; }
-/*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileStack self) { return self->filename.data(); }
 /*----------------------------------------------------------------------*/
