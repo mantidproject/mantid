@@ -821,7 +821,7 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
-  pNexusFile5 hfil = static_cast<pNexusFile5>(peekFileOnStack(fileStack)->pNexusData);
+  pNexusFile5 const hfil = static_cast<pNexusFile5>(peekFileOnStack(fileStack)->pNexusData);
   hid_t current;
   if (hfil->iCurrentD != 0) {
     current = hfil->iCurrentD;

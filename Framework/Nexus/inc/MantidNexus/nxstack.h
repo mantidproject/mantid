@@ -40,6 +40,4 @@ void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *filename);
 pNexusFunction peekFileOnStack(pFileStack self);
 char *peekFilenameOnStack(pFileStack self);
 
-int fileStackDepth(pFileStack self);
-
 #endif
