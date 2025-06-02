@@ -36,12 +36,9 @@ pFileStack makeFileStack();
 void killFileStack(pFileStack self);
 
 void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *filename);
-void popFileStack(pFileStack self);
 
 pNexusFunction peekFileOnStack(pFileStack self);
 char *peekFilenameOnStack(pFileStack self);
-void peekIDOnStack(pFileStack self, NXlink *id);
-void setCloseID(pFileStack self, const NXlink &id);
 
 int fileStackDepth(pFileStack self);
 

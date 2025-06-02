@@ -171,12 +171,6 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
   }
-  // The code below will only open the last file on a stack
-  // for the moment raise an error, but this behaviour may be OK
-  if (fileStackDepth(origFileStack) > 0) {
-    NXReportError("ERROR: handle stack referes to many files - cannot reopen");
-    return NXstatus::NX_ERROR;
-  }
   fOrigHandle = peekFileOnStack(origFileStack);
   if (fOrigHandle->nxreopen == NULL) {
     NXReportError("ERROR: NXreopen not implemented for this underlying file format");
@@ -206,15 +200,8 @@ NXstatus NXclose(NXhandle &fid) {
   status = pFunc->nxclose(hfil);
   pFunc->pNexusData = hfil;
   free(pFunc);
-  popFileStack(fileStack);
-  if (fileStackDepth(fileStack) < 0) {
-    killFileStack(fileStack);
-    fid = NULL;
-  }
-  /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
-  /*
-     Fortify_CheckAllMemory();
-   */
+  killFileStack(fileStack);
+  fid = NULL;
 
   return status;
 }
@@ -236,26 +223,8 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NXclosegroup(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
-
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosegroup(pFunc->pNexusData);
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetgroupID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosegroup(fid);
-    } else {
-      status = pFunc->nxclosegroup(pFunc->pNexusData);
-    }
-  }
-  return status;
+  return pFunc->nxclosegroup(pFunc->pNexusData);
 }
 
 /* --------------------------------------------------------------------- */
@@ -283,27 +252,8 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
 /* ----------------------------------------------------------------- */
 
 NXstatus NXclosedata(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
-
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosedata(pFunc->pNexusData);
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetdataID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosedata(fid);
-    } else {
-      status = pFunc->nxclosedata(pFunc->pNexusData);
-    }
-  }
-  return status;
+  return pFunc->nxclosedata(pFunc->pNexusData);
 }
 
 /* ------------------------------------------------------------------- */

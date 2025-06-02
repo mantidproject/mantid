@@ -33,54 +33,29 @@
  Data definitions
 ---------------------------------------------------------------------*/
 
-typedef struct {
-  pNexusFunction pDriver;
-  NXlink closeID;
-  std::string filename;
-} fileStackEntry;
-
 typedef struct __fileStack {
-  int fileStackPointer;
-  std::vector<fileStackEntry> fileStack;
-  int addressPointer;
-  std::vector<std::string> addressStack;
+  pNexusFunction pDriver;
+  std::string filename;
 } fileStack;
+
 /*---------------------------------------------------------------------*/
 pFileStack makeFileStack() {
   pFileStack pNew = new fileStack;
-  pNew->fileStackPointer = -1;
-  pNew->addressPointer = -1;
   return pNew;
 }
 /*---------------------------------------------------------------------*/
 void killFileStack(pFileStack self) {
   if (self != NULL) {
-    free(self);
+    delete self;
   }
 }
 /*----------------------------------------------------------------------*/
 void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *file) {
-  self->fileStackPointer++;
-  self->fileStack.emplace_back(pDriv, NXlink{"", NXentrytype::group}, std::string(file));
+  self->pDriver = pDriv;
+  self->filename = std::string(file);
 }
 /*----------------------------------------------------------------------*/
-void popFileStack(pFileStack self) {
-  self->fileStackPointer--;
-  if (self->fileStackPointer < -1) {
-    self->fileStackPointer = -1;
-  }
-  if (!self->fileStack.empty()) {
-    self->fileStack.pop_back();
-  }
-}
-/*----------------------------------------------------------------------*/
-pNexusFunction peekFileOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
+pNexusFunction peekFileOnStack(pFileStack self) { return self->pDriver; }
 /*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].filename.data(); }
-/*----------------------------------------------------------------------*/
-void peekIDOnStack(pFileStack self, NXlink *id) { *id = self->fileStack[self->fileStackPointer].closeID; }
-/*---------------------------------------------------------------------*/
-void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileStackPointer].closeID = id; }
-/*----------------------------------------------------------------------*/
-int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
+char *peekFilenameOnStack(pFileStack self) { return self->filename.data(); }
 /*----------------------------------------------------------------------*/
