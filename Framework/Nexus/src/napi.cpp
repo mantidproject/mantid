@@ -180,7 +180,7 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
   }
   fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
   memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData));
+  fNewHandle->nxreopen(fOrigHandle->pNexusData, fNewHandle->pNexusData);
   newFileStack->resetValues(fNewHandle, origFileStack->getFilename());
   newHandle = newFileStack;
   return NXstatus::NX_OK;
