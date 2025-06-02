@@ -1,0 +1,1 @@
+- :ref:`algm-SCDCalibratePanels-v1` has been deprecated, use :ref:`algm-SCDCalibratePanels-v2` instead.
