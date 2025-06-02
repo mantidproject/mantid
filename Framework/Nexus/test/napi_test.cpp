@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXACC_RDWR, &fileid), "Failed to open \"" << nxFile << "\" for read/write");
+  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXACC_RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXgetattrinfo(fileid, &i);
   if (i > 0) {
     std::cout << "Number of global attributes: " << i << std::endl;
