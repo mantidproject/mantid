@@ -84,33 +84,3 @@ void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileS
 /*----------------------------------------------------------------------*/
 int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
-void pushAddress(pFileStack self, const char *name) {
-  if (self->addressPointer >= 0 && name == self->addressStack[self->addressPointer]) {
-    return;
-  }
-  self->addressPointer++;
-  self->addressStack.emplace_back(name);
-}
-/*-----------------------------------------------------------------------*/
-void popAddress(pFileStack self) {
-  self->addressPointer--;
-  if (self->addressPointer < -1) {
-    self->addressPointer = -1;
-  }
-  if (!self->addressStack.empty()) {
-    self->addressStack.pop_back();
-  }
-}
-/*-----------------------------------------------------------------------*/
-int buildAddress(pFileStack self, char *address, int addresslen) {
-  std::string totalAddress;
-  if (self->addressStack.empty()) {
-    totalAddress = "/";
-  }
-  for (std::string const &subaddress : self->addressStack) {
-    totalAddress += "/" + subaddress;
-  }
-  strncpy(address, totalAddress.c_str(), addresslen - 1);
-
-  return 1;
-}

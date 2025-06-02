@@ -229,19 +229,8 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  NXstatus status;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-
-  status = pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
-  if (status == NXstatus::NX_OK) {
-    pushAddress(fileStack, name);
-  }
-
-  return status;
+  pNexusFunction pFunc = handleToNexusFunc(fid);
+  return pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
 }
 
 /* ------------------------------------------------------------------- */
@@ -255,10 +244,6 @@ NXstatus NXclosegroup(NXhandle fid) {
   fileStack = static_cast<pFileStack>(fid);
   if (fileStackDepth(fileStack) == 0) {
     status = pFunc->nxclosegroup(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
   } else {
     /* we have to check for leaving an external file */
     NXgetgroupID(fid, &currentID);
@@ -268,12 +253,9 @@ NXstatus NXclosegroup(NXhandle fid) {
       status = NXclosegroup(fid);
     } else {
       status = pFunc->nxclosegroup(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
     }
-    return status;
   }
+  return status;
 }
 
 /* --------------------------------------------------------------------- */
@@ -294,19 +276,8 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
 /* --------------------------------------------------------------------- */
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXstatus status;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-  status = pFunc->nxopendata(pFunc->pNexusData, name);
-
-  if (status == NXstatus::NX_OK) {
-    pushAddress(fileStack, name);
-  }
-
-  return status;
+  pNexusFunction pFunc = handleToNexusFunc(fid);
+  return pFunc->nxopendata(pFunc->pNexusData, name);
 }
 
 /* ----------------------------------------------------------------- */
@@ -321,10 +292,6 @@ NXstatus NXclosedata(NXhandle fid) {
 
   if (fileStackDepth(fileStack) == 0) {
     status = pFunc->nxclosedata(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
   } else {
     /* we have to check for leaving an external file */
     NXgetdataID(fid, &currentID);
@@ -334,12 +301,9 @@ NXstatus NXclosedata(NXhandle fid) {
       status = NXclosedata(fid);
     } else {
       status = pFunc->nxclosedata(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
     }
-    return status;
   }
+  return status;
 }
 
 /* ------------------------------------------------------------------- */
@@ -904,7 +868,6 @@ NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
 
 /*----------------------------------------------------------------------*/
 NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
-  int status;
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);

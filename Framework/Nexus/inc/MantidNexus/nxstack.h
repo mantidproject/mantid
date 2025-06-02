@@ -45,8 +45,4 @@ void setCloseID(pFileStack self, const NXlink &id);
 
 int fileStackDepth(pFileStack self);
 
-void pushAddress(pFileStack self, const char *name);
-void popAddress(pFileStack self);
-int buildAddress(pFileStack self, char *address, int addresslen);
-
 #endif
