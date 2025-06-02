@@ -908,10 +908,16 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
-  status = buildAddress(fileStack, address, addresslen);
-  if (status != 1) {
-    return NXstatus::NX_ERROR;
+  pNexusFile5 hfil = static_cast<pNexusFile5>(peekFileOnStack(fileStack)->pNexusData);
+  hid_t current;
+  if (hfil->iCurrentD != 0) {
+    current = hfil->iCurrentD;
+  } else if (hfil->iCurrentG != 0) {
+    current = hfil->iCurrentG;
+  } else {
+    current = hfil->iFID;
   }
+  H5Iget_name(current, address, addresslen);
   return NXstatus::NX_OK;
 }
 
