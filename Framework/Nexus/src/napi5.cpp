@@ -636,7 +636,7 @@ NXstatus NX5closegroup(NXhandle fid) {
 }
 
 /*-----------------------------------------------------------------------*/
-static hid_t nxToHDF5Type(NXnumtype datatype) {
+hid_t nxToHDF5Type(NXnumtype datatype) {
   hid_t type;
   switch (datatype) {
   case NXnumtype::CHAR: {
@@ -2254,41 +2254,6 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   *rank = static_cast<int>(myrank);
 
   return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------*/
-void NX5assignFunctions(pNexusFunction fHandle) {
-  fHandle->nxclose = NX5close;
-  fHandle->nxreopen = NX5reopen;
-  fHandle->nxflush = NX5flush;
-  fHandle->nxmakegroup = NX5makegroup;
-  fHandle->nxopengroup = NX5opengroup;
-  fHandle->nxclosegroup = NX5closegroup;
-  fHandle->nxmakedata64 = NX5makedata64;
-  fHandle->nxcompmakedata64 = NX5compmakedata64;
-  fHandle->nxcompress = NX5compress;
-  fHandle->nxopendata = NX5opendata;
-  fHandle->nxclosedata = NX5closedata;
-  fHandle->nxputdata = NX5putdata;
-  fHandle->nxputattr = NX5putattr;
-  fHandle->nxputslab64 = NX5putslab64;
-  fHandle->nxgetdataID = NX5getdataID;
-  fHandle->nxmakelink = NX5makelink;
-  fHandle->nxmakenamedlink = NX5makenamedlink;
-  fHandle->nxgetdata = NX5getdata;
-  fHandle->nxgetinfo64 = NX5getinfo64;
-  fHandle->nxgetnextentry = NX5getnextentry;
-  fHandle->nxgetslab64 = NX5getslab64;
-  fHandle->nxgetnextattr = NX5getnextattr;
-  fHandle->nxgetattr = NX5getattr;
-  fHandle->nxgetattrinfo = NX5getattrinfo;
-  fHandle->nxgetgroupID = NX5getgroupID;
-  fHandle->nxgetgroupinfo = NX5getgroupinfo;
-  fHandle->nxsameID = NX5sameID;
-  fHandle->nxinitgroupdir = NX5initgroupdir;
-  fHandle->nxinitattrdir = NX5initattrdir;
-  fHandle->nxprintlink = NX5printlink;
-  fHandle->nxgetnextattra = NX5getnextattra;
 }
 
 // cppcheck-suppress-end [constParameterCallback, variableScope, unreadVariable]
