@@ -141,9 +141,9 @@ void LoadMD::execLoader() {
   const std::shared_ptr<Mantid::Nexus::NexusDescriptor> fileInfo = getFileInfo();
 
   std::string entryName;
-  if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
+  if (m_file->hasGroup("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
-  } else if (fileInfo->isEntry("/MDHistoWorkspace", "NXentry")) {
+  } else if (m_file->hasGroup("/MDHistoWorkspace", "NXentry")) {
     entryName = "MDHistoWorkspace";
   } else {
     throw std::runtime_error("Unexpected NXentry name. Expected "
@@ -181,7 +181,7 @@ void LoadMD::execLoader() {
   this->loadQConvention();
 
   // Display normalization settting
-  if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
+  if (m_file->hasAddress("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
@@ -190,7 +190,7 @@ void LoadMD::execLoader() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
-    if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
+    if (m_file->hasAddress("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
       this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
     }
 
@@ -425,21 +425,21 @@ void LoadMD::loadCoordinateSystem() {
   // in its own field. The first version stored it
   // as a log value so fallback on that if it can't
   // be found.
-  try {
+  if (m_file->hasData("coordinate_system")) {
     uint32_t readCoord(0);
     m_file->readData("coordinate_system", readCoord);
     m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-  } catch (Nexus::Exception const &) {
-    auto addressOnEntry = m_file->getAddress();
-    try {
-      m_file->openAddress(addressOnEntry + "/experiment0/logs/CoordinateSystem");
+  } else {
+    std::string addressOnEntry = m_file->getAddress();
+    std::string newAddress = addressOnEntry + "/experiment0/logs/CoordinateSystem";
+    if (m_file->hasData(newAddress + "/value")) {
       int readCoord(0);
+      m_file->openAddress(newAddress);
       m_file->readData("value", readCoord);
       m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-    } catch (Nexus::Exception const &) {
+      // return to where we started
+      m_file->openAddress(addressOnEntry);
     }
-    // return to where we started
-    m_file->openAddress(addressOnEntry);
   }
 }
 

@@ -23,6 +23,9 @@
 
 ----------------------------------------------------------------------------*/
 
+// cppcheck-suppress-begin [unmatchedSuppression, variableScope]
+// cppcheck-suppress-begin [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
+
 #include <string>
 #define H5Aiterate_vers 2
 
@@ -34,7 +37,6 @@
 #include <time.h>
 
 #include "MantidNexus/napi.h"
-#include "MantidNexus/napi_internal.h"
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
@@ -53,29 +55,6 @@
 #define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
 
 extern void *NXpData;
-
-typedef struct __NexusFile5 {
-  struct iStack5 {
-    char irefn[1024];
-    hid_t iVref;
-    hsize_t iCurrentIDX;
-  } iStack5[NXMAXSTACK];
-  struct iStack5 iAtt5;
-  hid_t iFID;
-  hid_t iCurrentG;
-  hid_t iCurrentD;
-  hid_t iCurrentS;
-  hid_t iCurrentT;
-  hid_t iCurrentA;
-  int iNX;
-  int iNXID;
-  int iStackPtr;
-  char *iCurrentLGG;
-  char *iCurrentLD;
-  char name_ref[1024];
-  char name_tmp[1024];
-  char iAccess[2];
-} NexusFile5, *pNexusFile5;
 
 /* forward declaration of NX5closegroup in order to get rid of a nasty warning */
 
@@ -300,7 +279,7 @@ herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   return 0;
 }
 
-NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
+NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &fid) {
   hid_t root_id;
   pNexusFile5 pNew = NULL;
   char pBuffer[512];
@@ -309,7 +288,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   unsigned int vers_major, vers_minor, vers_release, am1;
   hid_t fapl = -1;
 
-  handle = NULL;
+  fid = NULL;
 
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
     NXReportError("ERROR: cannot determine HDF5 library version");
@@ -363,7 +342,10 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   }
 
   /*
-   * need to create global attributes         file_name file_time NeXus_version
+   * need to create global attributes
+      file_name
+      file_time
+      NeXus_version
    * at some point for new files
    */
 
@@ -422,7 +404,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   }
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  handle = static_cast<NXhandle>(pNew);
+  fid = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
 }
 
@@ -462,9 +444,11 @@ NXstatus NX5close(NXhandle &fid) {
   NXI5KillDir(pFile);
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   free(pFile);
   fid = NULL;
@@ -594,6 +578,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pFile->iCurrentD = 0;
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   pFile->iCurrentLGG = strdup(name);
   NXI5KillDir(pFile);
@@ -654,7 +639,7 @@ NXstatus NX5closegroup(NXhandle fid) {
 }
 
 /*-----------------------------------------------------------------------*/
-static hid_t nxToHDF5Type(NXnumtype datatype) {
+hid_t nxToHDF5Type(NXnumtype datatype) {
   hid_t type;
   switch (datatype) {
   case NXnumtype::CHAR: {
@@ -935,6 +920,7 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   pFile->iCurrentLD = strdup(name);
 
@@ -1327,11 +1313,11 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NX5flush(NXhandle &handle) {
+NXstatus NX5flush(NXhandle &fid) {
   pNexusFile5 pFile = NULL;
   herr_t iRet;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
   if (pFile->iCurrentD != 0) {
     iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
   } else if (pFile->iCurrentG != 0) {
@@ -2153,14 +2139,14 @@ NXstatus NX5initgroupdir(NXhandle fid) {
 }
 
 /*------------------------------------------------------------------------*/
-NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getnextattra(NXhandle fid, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   pNexusFile5 pFile;
   herr_t iRet;
   char *iname = NULL;
   hid_t vid;
   H5O_info1_t oinfo;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
 
   vid = getAttVID(pFile);
 
@@ -2195,7 +2181,7 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
       free(iname);
       iname = NULL;
       killAttVID(pFile, vid);
-      return NX5getnextattra(handle, pName, rank, dim, iType);
+      return NX5getnextattra(fid, pName, rank, dim, iType);
     }
     strcpy(pName, iname);
     free(iname);
@@ -2207,10 +2193,10 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
   }
 
   killAttVID(pFile, vid);
-  return NX5getattrainfo(handle, pName, rank, dim, iType);
+  return NX5getattrainfo(fid, pName, rank, dim, iType);
 }
 /*------------------------------------------------------------------------*/
-NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getattrainfo(NXhandle fid, NXname name, int *rank, int dim[], NXnumtype *iType) {
   pNexusFile5 pFile;
   int iRet;
   NXnumtype mType;
@@ -2220,7 +2206,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   H5T_class_t tclass;
   char *vlStr = NULL;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
 
   vid = getAttVID(pFile);
   pFile->iCurrentA = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
@@ -2273,37 +2259,5 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   return NXstatus::NX_OK;
 }
 
-/*------------------------------------------------------------------------*/
-void NX5assignFunctions(pNexusFunction fHandle) {
-  fHandle->nxclose = NX5close;
-  fHandle->nxreopen = NX5reopen;
-  fHandle->nxflush = NX5flush;
-  fHandle->nxmakegroup = NX5makegroup;
-  fHandle->nxopengroup = NX5opengroup;
-  fHandle->nxclosegroup = NX5closegroup;
-  fHandle->nxmakedata64 = NX5makedata64;
-  fHandle->nxcompmakedata64 = NX5compmakedata64;
-  fHandle->nxcompress = NX5compress;
-  fHandle->nxopendata = NX5opendata;
-  fHandle->nxclosedata = NX5closedata;
-  fHandle->nxputdata = NX5putdata;
-  fHandle->nxputattr = NX5putattr;
-  fHandle->nxputslab64 = NX5putslab64;
-  fHandle->nxgetdataID = NX5getdataID;
-  fHandle->nxmakelink = NX5makelink;
-  fHandle->nxmakenamedlink = NX5makenamedlink;
-  fHandle->nxgetdata = NX5getdata;
-  fHandle->nxgetinfo64 = NX5getinfo64;
-  fHandle->nxgetnextentry = NX5getnextentry;
-  fHandle->nxgetslab64 = NX5getslab64;
-  fHandle->nxgetnextattr = NX5getnextattr;
-  fHandle->nxgetattr = NX5getattr;
-  fHandle->nxgetattrinfo = NX5getattrinfo;
-  fHandle->nxgetgroupID = NX5getgroupID;
-  fHandle->nxgetgroupinfo = NX5getgroupinfo;
-  fHandle->nxsameID = NX5sameID;
-  fHandle->nxinitgroupdir = NX5initgroupdir;
-  fHandle->nxinitattrdir = NX5initattrdir;
-  fHandle->nxprintlink = NX5printlink;
-  fHandle->nxgetnextattra = NX5getnextattra;
-}
+// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
+// cppcheck-suppress-end [unmatchedSuppression, variableScope]
