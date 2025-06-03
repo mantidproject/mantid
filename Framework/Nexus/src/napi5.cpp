@@ -23,7 +23,8 @@
 
 ----------------------------------------------------------------------------*/
 
-// cppcheck-suppress-begin [constParameterCallback, variableScope, unreadVariable]
+// cppcheck-suppress-begin [unmatchedSuppression, variableScope]
+// cppcheck-suppress-begin [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
 
 #include <string>
 #define H5Aiterate_vers 2
@@ -2255,4 +2256,5 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   return NXstatus::NX_OK;
 }
 
-// cppcheck-suppress-end [constParameterCallback, variableScope, unreadVariable]
+// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
+// cppcheck-suppress-end [unmatchedSuppression, variableScope]
