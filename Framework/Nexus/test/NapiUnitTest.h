@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/napi.h"
-#include "MantidNexus/napi5.h"
 #include "test_helper.h"
 #include <cstdio>
 #include <cstdlib>

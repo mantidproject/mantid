@@ -80,9 +80,9 @@ static bool canBeOpened(CONSTCHAR *filename) {
 }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
+NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &fid) {
   // allocate the object on the heap
-  gHandle = NULL;
+  fid = NULL;
   // determine the filename for opening
   std::string filename(userfilename);
   // determine if the file can be opened
@@ -90,14 +90,14 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
     // call NX5open to set variables on it
-    status = NX5open(filename.c_str(), am, gHandle);
+    status = NX5open(filename.c_str(), am, fid);
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     status = NXstatus::NX_ERROR;
   }
-  if (status != NXstatus::NX_OK && gHandle != NULL) {
-    delete gHandle;
-    gHandle = NULL;
+  if (status != NXstatus::NX_OK && fid != NULL) {
+    delete fid;
+    fid = NULL;
   }
 
   return status;
@@ -400,7 +400,7 @@ NXstatus NXgetattrinfo(NXhandle fid, int *iN) { return NX5getattrinfo(fid, iN); 
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) { return NX5getgroupID(fileid, sRes); }
+NXstatus NXgetgroupID(NXhandle fid, NXlink *sRes) { return NX5getgroupID(fid, sRes); }
 
 /*-------------------------------------------------------------------------*/
 
@@ -410,8 +410,8 @@ NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
-  return NX5sameID(fileid, pFirstID, pSecondID);
+NXstatus NXsameID(NXhandle fid, NXlink const *pFirstID, NXlink const *pSecondID) {
+  return NX5sameID(fid, pFirstID, pSecondID);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -425,14 +425,14 @@ NXstatus NXinitgroupdir(NXhandle fid) { return NX5initgroupdir(fid); }
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
-static int isDataSetOpen(NXhandle hfil) {
+static int isDataSetOpen(NXhandle fid) {
   NXlink id;
 
   /*
      This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
      when no dataset is open
    */
-  if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(fid, &id) == NXstatus::NX_ERROR) {
     return 0;
   } else {
     return 1;
@@ -440,14 +440,14 @@ static int isDataSetOpen(NXhandle hfil) {
 }
 
 /*----------------------------------------------------------------------*/
-static int isRoot(NXhandle hfil) {
+static int isRoot(NXhandle fid) {
   NXlink id;
 
   /*
      This uses the feauture that NXgetgroupID returns NX_ERROR
      when we are at root level
    */
-  if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetgroupID(fid, &id) == NXstatus::NX_ERROR) {
     return 1;
   } else {
     return 0;
@@ -486,17 +486,17 @@ static char *extractNextAddress(char *address, NXname element) {
 }
 
 /*-------------------------------------------------------------------*/
-static NXstatus gotoRoot(NXhandle hfil) {
+static NXstatus gotoRoot(NXhandle fid) {
   NXstatus status;
 
-  if (isDataSetOpen(hfil)) {
-    status = NXclosedata(hfil);
+  if (isDataSetOpen(fid)) {
+    status = NXclosedata(fid);
     if (status == NXstatus::NX_ERROR) {
       return status;
     }
   }
-  while (!isRoot(hfil)) {
-    status = NXclosegroup(hfil);
+  while (!isRoot(fid)) {
+    status = NXclosegroup(fid);
     if (status == NXstatus::NX_ERROR) {
       return status;
     }
@@ -513,28 +513,28 @@ static int isRelative(char const *address) {
 }
 
 /*------------------------------------------------------------------*/
-static NXstatus moveOneDown(NXhandle hfil) {
-  if (isDataSetOpen(hfil)) {
-    return NXclosedata(hfil);
+static NXstatus moveOneDown(NXhandle fid) {
+  if (isDataSetOpen(fid)) {
+    return NXclosedata(fid);
   } else {
-    return NXclosegroup(hfil);
+    return NXclosegroup(fid);
   }
 }
 
 /*-------------------------------------------------------------------
   returns a pointer to the remaining address string to move up
   --------------------------------------------------------------------*/
-static char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
+static char *moveDown(NXhandle fid, char *address, NXstatus *code) {
   *code = NXstatus::NX_OK;
 
   if (address[0] == '/') {
-    *code = gotoRoot(hfil);
+    *code = gotoRoot(fid);
     return address;
   } else {
     char *pPtr;
     pPtr = address;
     while (isRelative(pPtr)) {
-      NXstatus status = moveOneDown(hfil);
+      NXstatus status = moveOneDown(fid);
       if (status == NXstatus::NX_ERROR) {
         *code = status;
         return pPtr;
@@ -546,7 +546,7 @@ static char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus stepOneUp(NXhandle hfil, char const *name) {
+static NXstatus stepOneUp(NXhandle fid, char const *name) {
   NXnumtype datatype;
   NXname name2, xclass;
   char pBueffel[256];
@@ -559,14 +559,14 @@ static NXstatus stepOneUp(NXhandle hfil, char const *name) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
+  NXinitgroupdir(fid);
 
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+  while (NXgetnextentry(fid, name2, xclass, &datatype) != NXstatus::NX_EOD) {
     if (strcmp(name2, name) == 0) {
       if (strcmp(xclass, "SDS") == 0) {
-        return NXopendata(hfil, name);
+        return NXopendata(fid, name);
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
@@ -576,7 +576,7 @@ static NXstatus stepOneUp(NXhandle hfil, char const *name) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
+static NXstatus stepOneGroupUp(NXhandle fid, char const *name) {
   NXnumtype datatype;
   NXname name2, xclass;
   char pBueffel[256];
@@ -589,14 +589,14 @@ static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+  NXinitgroupdir(fid);
+  while (NXgetnextentry(fid, name2, xclass, &datatype) != NXstatus::NX_EOD) {
 
     if (strcmp(name2, name) == 0) {
       if (strcmp(xclass, "SDS") == 0) {
         return NXstatus::NX_EOD;
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
@@ -606,18 +606,18 @@ static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
+NXstatus NXopenaddress(NXhandle fid, CONSTCHAR *address) {
   NXstatus status;
   int run = 1;
   NXname addressElement;
   char *pPtr;
 
-  if (hfil == NULL || address == NULL) {
+  if (fid == NULL || address == NULL) {
     NXReportError("ERROR: NXopendata needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
+  pPtr = moveDown(fid, const_cast<char *>(static_cast<const char *>(address)), &status);
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: NXopendata failed to move down in hierarchy");
     return status;
@@ -625,7 +625,7 @@ NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
 
   while (run == 1) {
     pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneUp(hfil, addressElement);
+    status = stepOneUp(fid, addressElement);
     if (status != NXstatus::NX_OK) {
       return status;
     }
@@ -637,18 +637,18 @@ NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
+NXstatus NXopengroupaddress(NXhandle fid, CONSTCHAR *address) {
   NXstatus status;
   NXname addressElement;
   char *pPtr;
   char buffer[256];
 
-  if (hfil == NULL || address == NULL) {
+  if (fid == NULL || address == NULL) {
     NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
+  pPtr = moveDown(fid, const_cast<char *>(static_cast<const char *>(address)), &status);
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: NXopengroupaddress failed to move down in hierarchy");
     return status;
@@ -656,7 +656,7 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 
   do {
     pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneGroupUp(hfil, addressElement);
+    status = stepOneGroupUp(fid, addressElement);
     if (status == NXstatus::NX_ERROR) {
       sprintf(buffer, "ERROR: NXopengroupaddress cannot reach address %s", address);
       NXReportError(buffer);
@@ -683,8 +683,8 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   return NXstatus::NX_OK;
 }
 
-NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  return NX5getnextattra(handle, pName, rank, dim, iType);
+NXstatus NXgetnextattra(NXhandle fid, NXname pName, int *rank, int dim[], NXnumtype *iType) {
+  return NX5getnextattra(fid, pName, rank, dim, iType);
 }
 
 /*--------------------------------------------------------------------

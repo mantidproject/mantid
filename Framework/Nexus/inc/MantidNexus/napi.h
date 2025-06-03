@@ -126,9 +126,6 @@
  *
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 /**
  * Open a NeXus file.
  * NXopen honours full path file names. But it also searches
@@ -578,10 +575,6 @@ MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
 MANTID_NEXUS_DLL char *NXIformatNeXusTime();
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
 
 /**
  * Freddie Akeroyd 11/8/2009

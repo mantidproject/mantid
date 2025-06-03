@@ -279,7 +279,7 @@ herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
   return 0;
 }
 
-NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
+NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &fid) {
   hid_t root_id;
   pNexusFile5 pNew = NULL;
   char pBuffer[512];
@@ -288,7 +288,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   unsigned int vers_major, vers_minor, vers_release, am1;
   hid_t fapl = -1;
 
-  handle = NULL;
+  fid = NULL;
 
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
     NXReportError("ERROR: cannot determine HDF5 library version");
@@ -342,7 +342,10 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   }
 
   /*
-   * need to create global attributes         file_name file_time NeXus_version
+   * need to create global attributes
+      file_name
+      file_time
+      NeXus_version
    * at some point for new files
    */
 
@@ -401,7 +404,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   }
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  handle = static_cast<NXhandle>(pNew);
+  fid = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
 }
 
@@ -1310,11 +1313,11 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NX5flush(NXhandle &handle) {
+NXstatus NX5flush(NXhandle &fid) {
   pNexusFile5 pFile = NULL;
   herr_t iRet;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
   if (pFile->iCurrentD != 0) {
     iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
   } else if (pFile->iCurrentG != 0) {
@@ -2136,14 +2139,14 @@ NXstatus NX5initgroupdir(NXhandle fid) {
 }
 
 /*------------------------------------------------------------------------*/
-NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getnextattra(NXhandle fid, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   pNexusFile5 pFile;
   herr_t iRet;
   char *iname = NULL;
   hid_t vid;
   H5O_info1_t oinfo;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
 
   vid = getAttVID(pFile);
 
@@ -2178,7 +2181,7 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
       free(iname);
       iname = NULL;
       killAttVID(pFile, vid);
-      return NX5getnextattra(handle, pName, rank, dim, iType);
+      return NX5getnextattra(fid, pName, rank, dim, iType);
     }
     strcpy(pName, iname);
     free(iname);
@@ -2190,10 +2193,10 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
   }
 
   killAttVID(pFile, vid);
-  return NX5getattrainfo(handle, pName, rank, dim, iType);
+  return NX5getattrainfo(fid, pName, rank, dim, iType);
 }
 /*------------------------------------------------------------------------*/
-NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getattrainfo(NXhandle fid, NXname name, int *rank, int dim[], NXnumtype *iType) {
   pNexusFile5 pFile;
   int iRet;
   NXnumtype mType;
@@ -2203,7 +2206,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   H5T_class_t tclass;
   char *vlStr = NULL;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
 
   vid = getAttVID(pFile);
   pFile->iCurrentA = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
