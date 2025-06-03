@@ -8,6 +8,11 @@ Mantid Workbench Changes
 New Features
 ------------
 .. amalgamate:: Workbench/New_features
+
+MantidWorkbench now features a new, integrated HTML-based help viewer, replacing the previous Qt Assistant-based system. This modernization provides a more streamlined user experience and aligns with current web standards.
+
+**Key Enhancements & Foundational Changes:**
+
 -   **Modern Help Viewer**: A new help window directly renders HTML documentation within MantidWorkbench, offering improved navigation and display.
 -   **Standardized Documentation Path**: To support the new viewer, HTML documentation now installs to a consistent location: ``<prefix>/share/doc/html/``.
     *   Build systems (CMake, Conda recipes) have been updated for this standard.
@@ -19,11 +24,11 @@ New Features
 -   **CMake Configuration Streamlined**:
     *   Related cleanup of some unused CMake variables in `Framework/Kernel/CMakeLists.txt` was performed.
 
--*Impact:**
+**Impact:**
 
 -   Delivers a more modern and integrated help experience within MantidWorkbench.
 -   Ensures consistent and reliable access to locally installed documentation.
--   Progresses Mantid's codebase by removing dependencies on the older Qt Assistant technology. 
+-   Progresses Mantid's codebase by removing dependencies on the older Qt Assistant technology.
 
 Bugfixes
 --------
