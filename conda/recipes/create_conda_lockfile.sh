@@ -15,16 +15,9 @@ if [ ! -d $mamba_dir/envs/conda-lock ] ; then
 fi
 conda activate $mamba_dir/envs/conda-lock
 
-package_conda_env=$lockfile_directory/package-conda_environment.yaml
 build_env=$lockfile_directory/"${package_name}"_build_environment.yaml
 host_env=$lockfile_directory/"${package_name}"_host_environment.yaml
 
-#Just for first package (mantid), create lockfile for the package-conda environment
-if [ "$package_name" == mantid ] ; then
-  conda env export --no-builds --prefix $mamba_dir/envs/package-conda > $package_conda_env 2>&1 || echo "Failed create package-conda environment.yaml file"
-  conda-lock --mamba -f $package_conda_env -p $target_platform --lockfile package-conda-lockfile.yml 2>&1 || echo "Failed to create package-conda lockfile"
-  rm $package_conda_env
-fi
 conda env export --no-builds --prefix "$build_prefix" > $build_env 2>&1 || echo "Failed to create build environment.yaml"
 conda env export --no-builds --prefix "$prefix" > $host_env 2>&1 || echo "Failed to create host envionment.yaml"
 
@@ -35,8 +28,8 @@ else
   build_platform=$target_platform
 fi
 
-conda-lock --mamba -f $build_env -p $build_platform --lockfile $package_name-lockfile.yml 2>&1 || echo "Failed to create build conda lockfile"
-conda-lock --mamba -f $host_env -p $target_platform --lockfile $package_name-lockfile.yml 2>&1 || echo "Failed to create host conda lockfile"
+conda-lock --mamba -f $build_env -p $build_platform --lockfile $package_name-build-lockfile.yml 2>&1 || echo "Failed to create build conda lockfile"
+conda-lock --mamba -f $host_env -p $target_platform --lockfile $package_name-host-lockfile.yml 2>&1 || echo "Failed to create host conda lockfile"
 
 #clean up
 rm $build_env
