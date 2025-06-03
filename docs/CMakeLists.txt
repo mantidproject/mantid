@@ -120,7 +120,7 @@ add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
 # Installation settings
 option(PACKAGE_DOCS "If true the HTML documentation is bundled with the package" OFF)
 if(PACKAGE_DOCS)
-  set(HTML_DOCS_DEST share/doc)
+  set(HTML_DOCS_DEST share/doc/html)
   foreach(_bundle ${BUNDLES})
     # Always install HTML documentation if PACKAGE_DOCS is true This comes from the 'docs-html' sphinx target's output
     # directory

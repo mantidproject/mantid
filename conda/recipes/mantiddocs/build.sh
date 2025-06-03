@@ -16,6 +16,8 @@ cmake \
   -DMANTID_QT_LIB=SYSTEM \
   -DENABLE_WORKBENCH=OFF \
   -DENABLE_DOCS=ON \
+  -DENABLE_QTASSISTANT=OFF \
+  -DDOCS_QTHELP=OFF \
   -DDOCS_DOTDIAGRAMS=ON \
   -DDOCS_SCREENSHOTS=ON \
   -DDOCS_MATH_EXT=sphinx.ext.imgmath \
@@ -30,7 +32,8 @@ cmake \
 
 cmake --build .
 
-# Build the StandardTestData target. We need this test data to build docs-qthelp
+# Build the StandardTestData target.
+# This might not be strictly necessary if docs-qthelp target is not built due to DOCS_QTHELP=OFF
 cmake --build . --target StandardTestData
 
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
