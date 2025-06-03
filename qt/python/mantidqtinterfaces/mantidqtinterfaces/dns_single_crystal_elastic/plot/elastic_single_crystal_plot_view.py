@@ -67,10 +67,12 @@ class DNSElasticSCPlotView(DNSView):
 
         # setting up custom menu for single crystal plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
-        options_menu = DNSElasticSCPlotOptionsMenu(self)
+        self.options_menu = DNSElasticSCPlotOptionsMenu(self)
+        self.views_menu.menuAction().setVisible(False)
+        self.options_menu.menuAction().setVisible(False)
         self.menus = []
         self.menus.append(self.views_menu)
-        self.menus.append(options_menu)
+        self.menus.append(self.options_menu)
         self.views_menu.sig_replot.connect(self._plot)
         canvas = FigureCanvas(Figure())
         canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
