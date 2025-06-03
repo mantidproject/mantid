@@ -36,7 +36,6 @@
 #include <time.h>
 
 #include "MantidNexus/napi.h"
-#include "MantidNexus/napi_internal.h"
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
