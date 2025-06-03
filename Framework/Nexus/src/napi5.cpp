@@ -441,9 +441,11 @@ NXstatus NX5close(NXhandle &fid) {
   NXI5KillDir(pFile);
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   free(pFile);
   fid = NULL;
@@ -573,6 +575,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pFile->iCurrentD = 0;
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   pFile->iCurrentLGG = strdup(name);
   NXI5KillDir(pFile);
@@ -915,6 +918,7 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   pFile->iCurrentLD = strdup(name);
 
