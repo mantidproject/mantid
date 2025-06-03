@@ -28,8 +28,8 @@ else
   build_platform=$target_platform
 fi
 
-conda-lock --mamba -f $build_env -p $build_platform --lockfile $package_name-build-lockfile.yml 2>&1 || echo "Failed to create build conda lockfile"
-conda-lock --mamba -f $host_env -p $target_platform --lockfile $package_name-host-lockfile.yml 2>&1 || echo "Failed to create host conda lockfile"
+conda-lock --mamba -f $build_env -p $build_platform --lockfile $lockfile_directory/$package_name-build-lockfile.yml 2>&1 || echo "Failed to create build conda lockfile"
+conda-lock --mamba -f $host_env -p $target_platform --lockfile $lockfile_directory/$package_name-host-lockfile.yml 2>&1 || echo "Failed to create host conda lockfile"
 
 #clean up
 rm $build_env

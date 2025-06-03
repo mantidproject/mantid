@@ -18,8 +18,8 @@ set build_env=%lockfile_dir%\%package_name%_build_environment.yaml
 call conda env export --no-builds --prefix %host_env_prefix% > %host_env%
 call conda env export --no-builds --prefix %build_env_prefix% > %build_env%
 
-call conda-lock --mamba -f %host_env% -p win-64 --lockfile %package_name%-host-lockfile.yml
-call conda-lock --mamba -f %build_env% -p win-64 --lockfile %package_name%-build-lockfile.yml
+call conda-lock --mamba -f %host_env% -p win-64 --lockfile %lockfile_dir%\%package_name%-host-lockfile.yml
+call conda-lock --mamba -f %build_env% -p win-64 --lockfile %lockfile_dir%\%package_name%-build-lockfile.yml
 
 del %host_env%
 del %build_env%
