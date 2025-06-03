@@ -29,88 +29,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*-----------------------------------------------------------------------
- Data definitions
----------------------------------------------------------------------*/
-
-typedef struct {
-  pNexusFunction pDriver;
-  NXlink closeID;
-  std::string filename;
-} fileStackEntry;
-
-typedef struct __fileStack {
-  int fileStackPointer;
-  std::vector<fileStackEntry> fileStack;
-  int addressPointer;
-  std::vector<std::string> addressStack;
-} fileStack;
-/*---------------------------------------------------------------------*/
-pFileStack makeFileStack() {
-  pFileStack pNew = new fileStack;
-  pNew->fileStackPointer = -1;
-  pNew->addressPointer = -1;
-  return pNew;
-}
-/*---------------------------------------------------------------------*/
-void killFileStack(pFileStack self) {
-  if (self != NULL) {
-    free(self);
-  }
+/*----------------------------------------------------------------------*/
+void nxstack::resetValues(pNexusFunction pDriv, std::string const &file) {
+  this->pDriver = pDriv;
+  this->filename = file;
 }
 /*----------------------------------------------------------------------*/
-void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *file) {
-  self->fileStackPointer++;
-  self->fileStack.emplace_back(pDriv, NXlink{"", NXentrytype::group}, std::string(file));
-}
-/*----------------------------------------------------------------------*/
-void popFileStack(pFileStack self) {
-  self->fileStackPointer--;
-  if (self->fileStackPointer < -1) {
-    self->fileStackPointer = -1;
-  }
-  if (!self->fileStack.empty()) {
-    self->fileStack.pop_back();
-  }
-}
-/*----------------------------------------------------------------------*/
-pNexusFunction peekFileOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].pDriver; }
-/*---------------------------------------------------------------------*/
-char *peekFilenameOnStack(pFileStack self) { return self->fileStack[self->fileStackPointer].filename.data(); }
-/*----------------------------------------------------------------------*/
-void peekIDOnStack(pFileStack self, NXlink *id) { *id = self->fileStack[self->fileStackPointer].closeID; }
-/*---------------------------------------------------------------------*/
-void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileStackPointer].closeID = id; }
-/*----------------------------------------------------------------------*/
-int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
-/*----------------------------------------------------------------------*/
-void pushAddress(pFileStack self, const char *name) {
-  if (self->addressPointer >= 0 && name == self->addressStack[self->addressPointer]) {
-    return;
-  }
-  self->addressPointer++;
-  self->addressStack.emplace_back(name);
-}
-/*-----------------------------------------------------------------------*/
-void popAddress(pFileStack self) {
-  self->addressPointer--;
-  if (self->addressPointer < -1) {
-    self->addressPointer = -1;
-  }
-  if (!self->addressStack.empty()) {
-    self->addressStack.pop_back();
-  }
-}
-/*-----------------------------------------------------------------------*/
-int buildAddress(pFileStack self, char *address, int addresslen) {
-  std::string totalAddress;
-  if (self->addressStack.empty()) {
-    totalAddress = "/";
-  }
-  for (std::string const &subaddress : self->addressStack) {
-    totalAddress += "/" + subaddress;
-  }
-  strncpy(address, totalAddress.c_str(), addresslen - 1);
-
-  return 1;
-}

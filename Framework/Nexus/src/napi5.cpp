@@ -23,6 +23,8 @@
 
 ----------------------------------------------------------------------------*/
 
+// cppcheck-suppress-begin [constParameterCallback, variableScope]
+
 #include <string>
 #define H5Aiterate_vers 2
 
@@ -53,29 +55,6 @@
 #define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
 
 extern void *NXpData;
-
-typedef struct __NexusFile5 {
-  struct iStack5 {
-    char irefn[1024];
-    hid_t iVref;
-    hsize_t iCurrentIDX;
-  } iStack5[NXMAXSTACK];
-  struct iStack5 iAtt5;
-  hid_t iFID;
-  hid_t iCurrentG;
-  hid_t iCurrentD;
-  hid_t iCurrentS;
-  hid_t iCurrentT;
-  hid_t iCurrentA;
-  int iNX;
-  int iNXID;
-  int iStackPtr;
-  char *iCurrentLGG;
-  char *iCurrentLD;
-  char name_ref[1024];
-  char name_tmp[1024];
-  char iAccess[2];
-} NexusFile5, *pNexusFile5;
 
 /* forward declaration of NX5closegroup in order to get rid of a nasty warning */
 
@@ -462,9 +441,11 @@ NXstatus NX5close(NXhandle &fid) {
   NXI5KillDir(pFile);
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   free(pFile);
   fid = NULL;
@@ -530,7 +511,7 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
 NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
   pNexusFile5 pFile;
-  hid_t attr1, atype, iVID;
+  hid_t iVID;
   herr_t iRet;
   char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
 
@@ -564,12 +545,12 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
       return NXstatus::NX_ERROR;
     }
     /* check contents of group attribute */
-    attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    hid_t attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr1 < 0) {
       NXReportError("ERROR: opening NX_class group attribute");
       return NXstatus::NX_ERROR;
     }
-    atype = H5Tcopy(H5T_C_S1);
+    hid_t atype = H5Tcopy(H5T_C_S1);
     char data[128];
     H5Tset_size(atype, sizeof(data));
     iRet = readStringAttributeN(attr1, data, sizeof(data));
@@ -594,6 +575,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pFile->iCurrentD = 0;
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
+    pFile->iCurrentLGG = NULL;
   }
   pFile->iCurrentLGG = strdup(name);
   NXI5KillDir(pFile);
@@ -719,7 +701,7 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
   char pBuffer[256];
   size_t byte_zahl = 0;
   hsize_t chunkdims[H5S_MAX_RANK];
-  hsize_t mydim[H5S_MAX_RANK], mydim1[H5S_MAX_RANK];
+  hsize_t mydim[H5S_MAX_RANK];
   hsize_t size[H5S_MAX_RANK];
   hsize_t maxdims[H5S_MAX_RANK];
   unsigned int compress_level;
@@ -769,6 +751,7 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
      *  search for tests on H5T_STRING
      */
     byte_zahl = (size_t)mydim[rank - 1];
+    hsize_t mydim1[H5S_MAX_RANK];
     for (int i = 0; i < rank; i++) {
       mydim1[i] = mydim[i];
       if (dimensions[i] <= 0) {
@@ -778,7 +761,7 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, in
     }
     mydim1[rank - 1] = 1;
     if (mydim[rank - 1] > 1) {
-      mydim[rank - 1] = maxdims[rank - 1] = size[rank - 1] = 1;
+      mydim[rank - 1] = maxdims[rank - 1] = size[rank - 1] = 1; // cppcheck-suppress unreadVariable
     }
     if (chunkdims[rank - 1] > 1) {
       chunkdims[rank - 1] = 1;
@@ -935,6 +918,7 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   }
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
+    pFile->iCurrentLD = NULL;
   }
   pFile->iCurrentLD = strdup(name);
 
@@ -1086,7 +1070,7 @@ NXstatus NX5putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
   hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
   hsize_t size[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  hid_t filespace, dataspace;
+  hid_t dataspace;
   int unlimiteddim = 0;
 
   pFile = NXI5assert(fid);
@@ -1132,7 +1116,7 @@ NXstatus NX5putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
       return NXstatus::NX_ERROR;
     }
 
-    filespace = H5Dget_space(pFile->iCurrentD);
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
 
     /* define slab */
     iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
@@ -1456,23 +1440,22 @@ static int countObjectsInGroup(hid_t loc_id) {
 /*----------------------------------------------------------------------------*/
 NXstatus NX5getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
   pNexusFile5 pFile;
-  hid_t atype, attr_id, gid;
 
   pFile = NXI5assert(fid);
   /* check if there is a group open */
   if (pFile->iCurrentG == 0) {
     strcpy(pName, "root");
     strcpy(pClass, "NXroot");
-    gid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
+    hid_t gid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
     *iN = countObjectsInGroup(gid);
     H5Gclose(gid);
   } else {
     strcpy(pName, pFile->name_ref);
-    attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    hid_t attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0) {
       strcpy(pClass, NX_UNKNOWN_GROUP);
     } else {
-      atype = H5Tcopy(H5T_C_S1);
+      hid_t atype = H5Tcopy(H5T_C_S1);
       char data[64];
       H5Tset_size(atype, sizeof(data));
       readStringAttributeN(attr_id, data, sizeof(data));
@@ -2307,3 +2290,5 @@ void NX5assignFunctions(pNexusFunction fHandle) {
   fHandle->nxprintlink = NX5printlink;
   fHandle->nxgetnextattra = NX5getnextattra;
 }
+
+// cppcheck-suppress-end [constParameterCallback, variableScope]

@@ -29,24 +29,25 @@
 
 #include "MantidNexus/napi_internal.h"
 
-typedef struct __fileStack *pFileStack;
-#define MAXEXTERNALDEPTH 16
+class nxstack {
+private:
+  std::string filename;
+  pNexusFunction pDriver;
 
-pFileStack makeFileStack();
-void killFileStack(pFileStack self);
+public:
+  nxstack() = default;
 
-void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *filename);
-void popFileStack(pFileStack self);
+  nxstack(std::string const &filename) : filename(filename) {};
 
-pNexusFunction peekFileOnStack(pFileStack self);
-char *peekFilenameOnStack(pFileStack self);
-void peekIDOnStack(pFileStack self, NXlink *id);
-void setCloseID(pFileStack self, const NXlink &id);
+  nxstack(pNexusFunction pDriv, std::string const &filename) : filename(filename), pDriver(pDriv) {};
 
-int fileStackDepth(pFileStack self);
+  void resetValues(pNexusFunction pDriv, std::string const &filename);
 
-void pushAddress(pFileStack self, const char *name);
-void popAddress(pFileStack self);
-int buildAddress(pFileStack self, char *address, int addresslen);
+  pNexusFunction const &getFunctions() const { return pDriver; }
+
+  std::string const &getFilename() const { return filename; }
+};
+
+typedef nxstack *pFileStack;
 
 #endif
