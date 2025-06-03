@@ -35,6 +35,8 @@
 #include "MantidNexus/napi_internal.h"
 #include "MantidNexus/nxstack.h"
 
+// cppcheck-suppress-begin [constVariablePointer]
+
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 
@@ -89,7 +91,7 @@ static int determineFileType(CONSTCHAR *filename) {
 /*---------------------------------------------------------------------*/
 static pNexusFunction handleToNexusFunc(NXhandle fid) {
   if (pFileStack fileStack = static_cast<pFileStack>(fid)) {
-    return peekFileOnStack(fileStack);
+    return fileStack->getFunctions();
   } else {
     return NULL;
   }
@@ -103,7 +105,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   pFileStack fileStack = NULL;
 
   gHandle = NULL;
-  fileStack = makeFileStack();
+  fileStack = new nxstack;
   if (fileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
@@ -156,7 +158,7 @@ static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack 
     const int backend_type = NXACC_CREATE5; // to get past compiler warning
     fHandle->access_mode = backend_type || (NXACC_READ && am);
     NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, userfilename);
+    fileStack->resetValues(fHandle, std::string(userfilename));
   }
   return retstat;
 }
@@ -166,18 +168,12 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
   pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
   pNexusFunction fOrigHandle = NULL, fNewHandle = NULL;
   newHandle = NULL;
-  newFileStack = makeFileStack();
+  newFileStack = new nxstack;
   if (newFileStack == NULL) {
     NXReportError("ERROR: no memory to create filestack");
     return NXstatus::NX_ERROR;
   }
-  // The code below will only open the last file on a stack
-  // for the moment raise an error, but this behaviour may be OK
-  if (fileStackDepth(origFileStack) > 0) {
-    NXReportError("ERROR: handle stack referes to many files - cannot reopen");
-    return NXstatus::NX_ERROR;
-  }
-  fOrigHandle = peekFileOnStack(origFileStack);
+  fOrigHandle = handleToNexusFunc(origFileStack);
   if (fOrigHandle->nxreopen == NULL) {
     NXReportError("ERROR: NXreopen not implemented for this underlying file format");
     return NXstatus::NX_ERROR;
@@ -185,7 +181,7 @@ NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &newHandle) {
   fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
   memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
   fNewHandle->nxreopen(fOrigHandle->pNexusData, fNewHandle->pNexusData);
-  pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
+  newFileStack->resetValues(fNewHandle, origFileStack->getFilename());
   newHandle = newFileStack;
   return NXstatus::NX_OK;
 }
@@ -201,20 +197,13 @@ NXstatus NXclose(NXhandle &fid) {
     return NXstatus::NX_OK;
   }
   fileStack = static_cast<pFileStack>(fid);
-  pFunc = peekFileOnStack(fileStack);
+  pFunc = handleToNexusFunc(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxclose(hfil);
   pFunc->pNexusData = hfil;
   free(pFunc);
-  popFileStack(fileStack);
-  if (fileStackDepth(fileStack) < 0) {
-    killFileStack(fileStack);
-    fid = NULL;
-  }
-  /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
-  /*
-     Fortify_CheckAllMemory();
-   */
+  delete fileStack;
+  fid = NULL;
 
   return status;
 }
@@ -229,51 +218,15 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  NXstatus status;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-
-  status = pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
-  if (status == NXstatus::NX_OK) {
-    pushAddress(fileStack, name);
-  }
-
-  return status;
+  pNexusFunction pFunc = handleToNexusFunc(fid);
+  return pFunc->nxopengroup(pFunc->pNexusData, name, nxclass);
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXclosegroup(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
-
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosegroup(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetgroupID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosegroup(fid);
-    } else {
-      status = pFunc->nxclosegroup(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
-    }
-    return status;
-  }
+  return pFunc->nxclosegroup(pFunc->pNexusData);
 }
 
 /* --------------------------------------------------------------------- */
@@ -294,52 +247,15 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
 /* --------------------------------------------------------------------- */
 
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXstatus status;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-  status = pFunc->nxopendata(pFunc->pNexusData, name);
-
-  if (status == NXstatus::NX_OK) {
-    pushAddress(fileStack, name);
-  }
-
-  return status;
+  pNexusFunction pFunc = handleToNexusFunc(fid);
+  return pFunc->nxopendata(pFunc->pNexusData, name);
 }
 
 /* ----------------------------------------------------------------- */
 
 NXstatus NXclosedata(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
-
   pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-
-  if (fileStackDepth(fileStack) == 0) {
-    status = pFunc->nxclosedata(pFunc->pNexusData);
-    if (status == NXstatus::NX_OK) {
-      popAddress(fileStack);
-    }
-    return status;
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetdataID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(fid);
-      status = NXclosedata(fid);
-    } else {
-      status = pFunc->nxclosedata(pFunc->pNexusData);
-      if (status == NXstatus::NX_OK) {
-        popAddress(fileStack);
-      }
-    }
-    return status;
-  }
+  return pFunc->nxclosedata(pFunc->pNexusData);
 }
 
 /* ------------------------------------------------------------------- */
@@ -427,7 +343,7 @@ NXstatus NXflush(NXhandle &handle) {
 
   pNexusFunction pFunc = NULL;
   fileStack = static_cast<pFileStack>(handle);
-  pFunc = peekFileOnStack(fileStack);
+  pFunc = handleToNexusFunc(fileStack);
   hfil = pFunc->pNexusData;
   status = pFunc->nxflush(hfil);
   pFunc->pNexusData = hfil;
@@ -904,14 +820,19 @@ NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
 
 /*----------------------------------------------------------------------*/
 NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
-  int status;
   pFileStack fileStack = NULL;
 
   fileStack = static_cast<pFileStack>(fid);
-  status = buildAddress(fileStack, address, addresslen);
-  if (status != 1) {
-    return NXstatus::NX_ERROR;
+  pNexusFile5 const hfil = static_cast<pNexusFile5>(handleToNexusFunc(fileStack)->pNexusData);
+  hid_t current;
+  if (hfil->iCurrentD != 0) {
+    current = hfil->iCurrentD;
+  } else if (hfil->iCurrentG != 0) {
+    current = hfil->iCurrentG;
+  } else {
+    current = hfil->iFID;
   }
+  H5Iget_name(current, address, addresslen);
   return NXstatus::NX_OK;
 }
 
@@ -974,3 +895,5 @@ char *NXIformatNeXusTime() {
 }
 
 const char *NXgetversion() { return NEXUS_VERSION; }
+
+// cppcheck-suppress-end [constVariablePointer]
