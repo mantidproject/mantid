@@ -39,7 +39,7 @@ constexpr int NXMAXSTACK = 50;
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
-typedef struct __NexusFile5 {
+struct NexusFile5 {
   struct iStack5 {
     char irefn[1024];
     hid_t iVref;
@@ -60,9 +60,11 @@ typedef struct __NexusFile5 {
   char name_ref[1024];
   char name_tmp[1024];
   char iAccess[2];
-} NexusFile5, *pNexusFile5;
+};
 
-typedef void *NXhandle; /* really a pointer to a NexusFile structure */
+typedef NexusFile5 *pNexusFile5;
+typedef NexusFile5 *NXhandle;
+
 typedef char NXname[128];
 
 /** \enum NXaccess_mode
