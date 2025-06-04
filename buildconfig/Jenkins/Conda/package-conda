@@ -56,6 +56,7 @@ ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
 BUILD_WORKBENCH_WITH_DOCS=true
+ENABLE_LOCKFILES=false
 PLATFORM=""
 
 # Handle flag inputs
@@ -71,6 +72,7 @@ do
             ENABLE_BUILD_WORKBENCH=true
             BUILD_WORKBENCH_WITH_DOCS=false
             ;;
+        --use-lockfiles) ENABLE_LOCKFILES=true ;;
         --git-tag)
             GIT_TAG="$2"
             shift ;;
@@ -133,9 +135,17 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
+# Enable the use of conda lockfiles
+if [[ $ENABLE_LOCKFILES == true ]]; then
+    CONDA_LOCK_DIR=$SCRIPT_DIR/conda-lock
+    $CONDA_LOCK_DIR/generate_condarc_files.sh $CONDA_LOCK_DIR $PLATFORM $ENABLE_BUILD_MANTID $ENABLE_BUILD_QT $ENABLE_BUILD_WORKBENCH
+    BACKUP_PATH=$PATH
+    export PATH=$CONDA_LOCK_DIR:$PATH # add the conda wrapper script to the path
+fi
+
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTION
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
@@ -151,6 +161,10 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
     conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
+fi
+
+if [[ $ENABLE_LOCKFILES == true ]]; then
+    export PATH=$BACKUP_PATH # remove conda wrapper script from path in case in causes issues down the line.
 fi
 
 # elapsed time with second resolution
