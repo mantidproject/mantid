@@ -11,7 +11,6 @@ import numpy as np
 import math
 import pyvista as pv
 from scipy.spatial.transform import Rotation
-from joblib import Parallel, delayed
 
 
 class DetectorPosition(np.ndarray):
@@ -53,6 +52,7 @@ class FullInstrumentViewModel:
             component_mesh_colours = []
 
         self._detector_index_to_workspace_index = np.full(len(self._component_info), self._invalid_index, dtype=int)
+        self._detector_index_to_detector_id = np.full(len(self._component_info), self._invalid_index, dtype=int)
         spectrum_info = workspace.spectrumInfo()
         self._bin_min = math.inf
         self._bin_max = -math.inf
@@ -61,9 +61,12 @@ class FullInstrumentViewModel:
             self._union_with_current_bin_min_max(x_data[0])
             self._union_with_current_bin_min_max(x_data[-1])
             spectrum_definition = spectrum_info.getSpectrumDefinition(workspace_index)
+            spectrum_detector_ids = self._workspace.getSpectrum(workspace_index).getDetectorIDs()
             for i in range(len(spectrum_definition)):
                 pair = spectrum_definition[i]
-                self._detector_index_to_workspace_index[pair[0]] = workspace_index
+                if not self._detector_info.isMonitor(pair[0]):
+                    self._detector_index_to_workspace_index[pair[0]] = workspace_index
+                    self._detector_index_to_detector_id[pair[0]] = spectrum_detector_ids[i]
 
         for component_index in range(self._component_info.root(), -1, -1):
             component_type = self._component_info.componentTypeName(component_index)
@@ -115,18 +118,13 @@ class FullInstrumentViewModel:
                 self._bin_max = bin_edge
 
     def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
-        """Calculate integrated counts for the specified TOF range"""
-        integrated_spectra = self._workspace.getIntegratedSpectra(tof_min, tof_max, entire_range)
-
-        new_detector_counts = np.zeros(len(self._detector_indices), dtype=int)
-
-        def set_detector_count(index: int) -> None:
-            det_index = self._detector_indices[index]
-            workspace_index = int(self._detector_index_to_workspace_index[det_index])
-            new_detector_counts[index] = 0 if workspace_index == self._invalid_index else integrated_spectra[workspace_index]
-
-        Parallel(n_jobs=-1, prefer="threads")(delayed(set_detector_count)(index) for index in range(len(self._detector_indices)))
-
+        workspace_indices = self._detector_index_to_workspace_index[self._detector_index_to_workspace_index != self._invalid_index]
+        new_detector_counts = np.array(
+            self._workspace.getIntegratedCountsForWorkspaceIndices(
+                workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
+            ),
+            dtype=int,
+        )
         self._detector_counts = new_detector_counts
         self._data_max = max(self._detector_counts)
         self._data_min = min(self._detector_counts)
@@ -143,7 +141,7 @@ class FullInstrumentViewModel:
     def detector_positions(self) -> list:
         return list(self._detector_position_map.values())
 
-    def detector_counts(self) -> list:
+    def detector_counts(self) -> np.ndarray:
         return self._detector_counts
 
     def detector_index(self, i: int) -> int:

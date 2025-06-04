@@ -796,7 +796,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
  *then ignored!
  */
 std::vector<double> MatrixWorkspace::getIntegratedSpectra(const double minX, const double maxX,
-                                                          const bool entireRange) {
+                                                          const bool entireRange) const {
   std::vector<double> integratedSpectra;
   getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
   return integratedSpectra;
@@ -859,6 +859,17 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
       out[wksp_index] = sum;
     }
   }
+}
+
+std::vector<size_t> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+                                                                            const double minX, const double maxX,
+                                                                            const bool entireRange) const {
+  const auto integratedSpectra = getIntegratedSpectra(minX, maxX, entireRange);
+  std::vector<size_t> detectorCounts(workspaceIndices.size(), 0);
+  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
+    detectorCounts[i] = integratedSpectra[workspaceIndices[i]];
+  }
+  return detectorCounts;
 }
 
 /** Get the effective detector for the given spectrum
