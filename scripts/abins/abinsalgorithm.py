@@ -328,84 +328,82 @@ class AbinsAlgorithm:
         all_atms_smbls = list(set([atoms_data[atom_index]["symbol"] for atom_index in range(num_atoms)]))
         all_atms_smbls.sort()
 
+        # Exit early if nothing was selected: default is to return no numbers, all symbols
         if len(selection) == 0:  # case: all atoms
-            atom_symbols = all_atms_smbls
-            atom_numbers = []
-        else:  # case selected atoms
-            # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
-            # A regular expression match is used to make the underscore separator optional and check the index format
+            return [], all_atms_smbls
 
-            # Acceptable formats for index: atom_1 atom1 1
-            numbered_atom_test = re.compile(
-                f"""^                  # No arbitrary prefixes
-                    ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
-                    _?                 # optional underscore
-                    (?P<index>[0-9]+)  # capture digits as "index"
-                    $                  # No suffix
-                 """,
-                re.VERBOSE,
+        # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
+        # A regular expression match is used to make the underscore separator optional and check the index format
+
+        # Acceptable formats for index: atom_1 atom1 1
+        numbered_atom_test = re.compile(
+            f"""^                  # No arbitrary prefixes
+                ({ATOM_PREFIX})?   # optional ATOM_PREFIX (i.e. "atom")
+                _?                 # optional underscore
+                (?P<index>[0-9]+)  # capture digits as "index"
+                $                  # No suffix
+             """,
+            re.VERBOSE,
+        )
+        atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
+
+        # Acceptable formats for range: 1-2
+        atom_range_test = re.compile(
+            """^                  # No prefix
+               (?P<start>\\d+)  # Capture starting index
+               (-|\\.\\.)
+            # range indicated with "-" or ".."
+               (?P<end>\\d+)    # Capture ending index
+               $                  # No suffix
+            """,
+            re.VERBOSE,
+        )
+        atom_ranges = [(int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))]
+
+        # Acceptable formats for symbol: Ca
+        element_symbol_test = re.compile(
+            f"""^(?!{ATOM_PREFIX})  # Must not start with ATOM_PREFIX (i.e. "atom")
+                [a-zA-Z]+$           # Must contain only letters
+             """,
+            re.VERBOSE,
+        )
+        atom_symbols = [item for item in selection if element_symbol_test.match(item)]
+
+        if len(atom_numbers) != len(set(atom_numbers)):
+            raise ValueError(
+                "User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                " cannot create multiple workspaces with the same name."
             )
-            atom_numbers = [int(match.group("index")) for item in selection if (match := numbered_atom_test.match(item))]
 
-            # Acceptable formats for range: 1-2
-            atom_range_test = re.compile(
-                """^                  # No prefix
-                   (?P<start>\\d+)  # Capture starting index
-                   (-|\\.\\.)
-                # range indicated with "-" or ".."
-                   (?P<end>\\d+)    # Capture ending index
-                   $                  # No suffix
-                """,
-                re.VERBOSE,
-            )
-            atom_ranges = [
-                (int(match.group("start")), int(match.group("end"))) for item in selection if (match := atom_range_test.match(item))
-            ]
-
-            # Acceptable formats for symbol: Ca
-            element_symbol_test = re.compile(
-                f"""^(?!{ATOM_PREFIX})  # Must not start with ATOM_PREFIX (i.e. "atom")
-                    [a-zA-Z]+$           # Must contain only letters
-                 """,
-                re.VERBOSE,
-            )
-            atom_symbols = [item for item in selection if element_symbol_test.match(item)]
-
-            if len(atom_numbers) != len(set(atom_numbers)):
+        for atom_number in atom_numbers:
+            if atom_number < 1 or atom_number > num_atoms:
                 raise ValueError(
-                    "User atom selection (by number) contains repeated atom. This is not permitted as Abins"
-                    " cannot create multiple workspaces with the same name."
+                    "Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" % (ATOM_PREFIX, atom_number, 1, num_atoms)
                 )
 
-            for atom_number in atom_numbers:
-                if atom_number < 1 or atom_number > num_atoms:
-                    raise ValueError(
-                        "Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" % (ATOM_PREFIX, atom_number, 1, num_atoms)
-                    )
+        for atom_symbol in atom_symbols:
+            if atom_symbol not in all_atms_smbls:
+                raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
 
-            for atom_symbol in atom_symbols:
-                if atom_symbol not in all_atms_smbls:
-                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." % atom_symbol)
+        if len(atom_symbols) != len(set(atom_symbols)):  # only different types
+            raise ValueError(
+                "User atom selection (by symbol) contains repeated species. This is not permitted as "
+                "Abins cannot create multiple workspaces with the same name."
+            )
 
-            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
-                raise ValueError(
-                    "User atom selection (by symbol) contains repeated species. This is not permitted as "
-                    "Abins cannot create multiple workspaces with the same name."
-                )
+        # Final sanity check that everything in "atoms" field was understood
+        if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
+            elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
+            numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
+            ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
+            raise ValueError(
+                "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
+            )
 
-            # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len(atom_numbers) + len(atom_ranges) < len(selection):
-                elements_report = " Symbols: " + ", ".join(atom_symbols) if atom_symbols else ""
-                numbers_report = " Numbers: " + ", ".join(atom_numbers) if atom_numbers else ""
-                ranges_report = " Ranges: " + ", ".join(f"{start}-{end}" for start, end in atom_ranges) if atom_ranges else ""
-                raise ValueError(
-                    "Not all user atom selections ('atoms' option) were understood." + elements_report + numbers_report + ranges_report
-                )
-
-            for start, end in atom_ranges:
-                if start > end:
-                    start, end = end, start
-                atom_numbers = atom_numbers + list(range(start, end + 1))
+        for start, end in atom_ranges:
+            if start > end:
+                start, end = end, start
+            atom_numbers = atom_numbers + list(range(start, end + 1))
 
         return sorted(atom_numbers), atom_symbols
 
