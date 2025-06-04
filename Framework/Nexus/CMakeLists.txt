@@ -6,7 +6,6 @@ set(SRC_FILES
     src/NexusDescriptor.cpp
     src/NexusException.cpp
     src/NexusFile.cpp
-    src/nxstack.cpp
 )
 
 set(INC_FILES
@@ -16,11 +15,9 @@ set(INC_FILES
     inc/MantidNexus/NexusFile_fwd.h
     inc/MantidNexus/napi.h
     inc/MantidNexus/napi5.h
-    inc/MantidNexus/napi_internal.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
-    inc/MantidNexus/nxstack.h
 )
 
 set(TEST_FILES
