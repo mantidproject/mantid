@@ -20,6 +20,8 @@ PUBLISH_TO_GITHUB_DEFAULT = PUBLISH_PACKAGES_DEFAULT
 // If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
 BUILD_MANTIDDOCS_PACKAGE = true
+// hardcode for testing
+USE_CONDA_LOCKFILES = true
 
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
@@ -622,6 +624,10 @@ def package_conda_options(platform, base_or_workbench) {
     } else {
       package_flags = "--build-workbench-without-docs"
     }
+  }
+
+  if(USE_CONDA_LOCKFILES) {
+    package_flags = package_flags + " --use-lockfiles"
   }
 
   package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
