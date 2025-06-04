@@ -605,9 +605,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             ax.add_line(line)
 
     def crosshair_toggle(self, on):
-        cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
-        if not on:
-            self.canvas.mpl_disconnect(cid)
+        if on:
+            # Create crosshair lines for each axes (except colorbars)
+            self._crosshair_lines = {}
+            for ax in self._axes_that_are_not_colour_bars():
+                ax.set_autoscalex_on(False)
+                ax.set_autoscaley_on(False)
+                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False)
+                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False)
+                self._crosshair_lines[ax] = (hline, vline)
+
+            self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
 
     def crosshair(self, event):
         axes = self.canvas.figure.gca()
