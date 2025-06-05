@@ -34,8 +34,8 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.modus = mock.create_autospec(DNSModus, instance=True)
         cls.widget = mock.Mock()
         cls.modus.widgets = {"observer1": cls.widget}
+        cls.modus.name = "modus_test_name"
         cls.widget.view = mock.Mock()
-        # cls.widget.view.has_tab = True
         cls.widget.view.menus = True
         cls.widget.presenter = mock.Mock()
         cls.widget.presenter.view = cls.widget.view
@@ -48,7 +48,11 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.view.sig_save_triggered.connect = mock.Mock()
         cls.view.sig_open_triggered.connect = mock.Mock()
         cls.view.sig_modus_change.connect = mock.Mock()
-
+        cls.view.action = {
+            "powder_tof": mock.Mock(),
+            "powder_elastic": mock.Mock(),
+            "single_crystal_elastic": mock.Mock(),
+        }
         cls.presenter = DNSReductionGUIPresenter(
             name="reduction_gui",
             view=cls.view,
