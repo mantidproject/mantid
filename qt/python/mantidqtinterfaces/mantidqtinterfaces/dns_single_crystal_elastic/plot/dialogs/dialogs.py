@@ -30,15 +30,14 @@ class DNSOmegaOffsetDialog(DNSDialog):
         self._content.dSB_omega_offset.setFocus()
         self._content.dSB_omega_offset.valueChanged.connect(self._omega_offset_changed)
         self._content.pB_restore_default.clicked.connect(self._discard_changes)
-
-        self.parent = parent
+        self._parent = parent
 
     def _omega_offset_changed(self, omega_offset):
-        self.parent.sig_update_omega_offset.emit(omega_offset)
+        self._parent.sig_update_omega_offset.emit(omega_offset)
 
     def _discard_changes(self):
-        self._omega_offset_changed(self._initial_omega_offset)
-        self._content.dSB_omega_offset.setValue(self._initial_omega_offset)
+        self._parent.sig_restore_default_omega_offset.emit()
+        self._content.dSB_omega_offset.setValue(self._parent.initial_values["omega_offset"])
 
 
 class DNSdxdyDialog(DNSDialog):
@@ -63,6 +62,7 @@ class DNSdxdyDialog(DNSDialog):
         self._parent.sig_update_dxdy.emit(dx, dy)
 
     def _discard_changes(self):
-        self._dxdy_changed(dx=self._initial_dx, dy=self._initial_dy)
-        self._content.dSB_dx.setValue(self._initial_dx)
-        self._content.dSB_dy.setValue(self._initial_dy)
+        self._parent.sig_restore_default_dxdy.emit()
+        self._content.dSB_dx.setValue(self._parent.initial_values["dx"])
+        self._parent.sig_restore_default_dxdy.emit()
+        self._content.dSB_dy.setValue(self._parent.initial_values["dy"])

@@ -85,6 +85,8 @@ class DNSElasticSCPlotView(DNSView):
 
     # Signals
     sig_plot = Signal()
+    sig_restore_default_omega_offset = Signal()
+    sig_restore_default_dxdy = Signal()
     sig_update_omega_offset = Signal(float)
     sig_update_dxdy = Signal(float, float)
     sig_change_colormap = Signal()
@@ -103,7 +105,7 @@ class DNSElasticSCPlotView(DNSView):
 
     def change_omega_offset(self):
         if self.initial_values:
-            omega_offset_dialog = DNSOmegaOffsetDialog(parent=self, omega_offset=self.initial_values["oof"])
+            omega_offset_dialog = DNSOmegaOffsetDialog(parent=self, omega_offset=self.initial_values["omega_offset"])
             omega_offset_dialog.exec_()
 
     # gui options
@@ -114,7 +116,7 @@ class DNSElasticSCPlotView(DNSView):
         return self.views_menu.get_value()
 
     def set_initial_omega_offset_dx_dy(self, off, dx, dy):
-        self.initial_values = {"oof": off, "dx": dx, "dy": dy}
+        self.initial_values = {"omega_offset": off, "dx": dx, "dy": dy}
 
     def draw(self):
         self.canvas.draw()

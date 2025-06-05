@@ -66,12 +66,25 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.set_initial_omega_offset_dx_dy(omega_offset, dx, dy)
 
     def _update_omega_offset(self, omega_offset):
-        initial_values = {"omega_offset": omega_offset}
-        self._plot(initial_values)
+        self.view.initial_values["omega_offset"] = omega_offset
+        self._plot(self.view.initial_values)
+
+    def _set_default_omega_offset(self):
+        default_value = self.param_dict["elastic_single_crystal_options"]["omega_offset"]
+        self.view.initial_values["omega_offset"] = default_value
+        self._plot(self.view.initial_values)
 
     def _update_dx_dy(self, dx, dy):
-        initial_values = {"dx": dx, "dy": dy}
-        self._plot(initial_values)
+        self.view.initial_values["dx"] = dx
+        self.view.initial_values["dy"] = dy
+        self._plot(self.view.initial_values)
+
+    def _set_default_dx_dy(self):
+        default_dx = self.param_dict["elastic_single_crystal_options"]["dx"]
+        default_dy = self.param_dict["elastic_single_crystal_options"]["dy"]
+        self.view.initial_values["dx"] = default_dx
+        self.view.initial_values["dy"] = default_dy
+        self._plot(self.view.initial_values)
 
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
@@ -104,6 +117,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
         self.view.sig_update_omega_offset.connect(self._update_omega_offset)
+        self.view.sig_restore_default_omega_offset.connect(self._set_default_omega_offset)
         self.view.sig_update_dxdy.connect(self._update_dx_dy)
+        self.view.sig_restore_default_dxdy.connect(self._set_default_dx_dy)
         self.view.sig_change_colormap.connect(self._set_colormap)
         self._plotted_script_number = 0
