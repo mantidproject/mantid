@@ -23,11 +23,12 @@ public:
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
 
+protected:
+  double averageTransmition(Mantid::API::WorkspaceGroup_const_sptr wsGroup) const;
+
 private:
   void init() override;
   void exec() override;
-
-  double averageTransmition(Mantid::API::WorkspaceGroup_const_sptr wsGroup) const;
 
   std::string m_spinFlipperLogName;
   int m_rfStateCondition;

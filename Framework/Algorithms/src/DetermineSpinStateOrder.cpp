@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 
 #include <algorithm>
 
@@ -103,9 +104,7 @@ void DetermineSpinStateOrder::exec() {
     }
   }
 
-  const std::string spinStates = std::accumulate(
-      spinStatesOrder.cbegin() + 1, spinStatesOrder.cend(), spinStatesOrder[0],
-      [](const std::string spinStatesStr, const std::string spinState) { return spinStatesStr + "," + spinState; });
+  const std::string spinStates = Kernel::Strings::join(spinStatesOrder.cbegin(), spinStatesOrder.cend(), ",");
   setProperty("SpinStates", spinStates);
 }
 
