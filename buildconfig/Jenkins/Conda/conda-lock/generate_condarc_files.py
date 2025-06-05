@@ -16,9 +16,13 @@ class buildPackage(Enum):
     MANTIDWORKBENCH = 3
 
 
+ENV_TYPE_MAP = {envType.BUILD: "build", envType.HOST: "host"}
+BUILD_PACKAGE_MAP = {buildPackage.MANTID: "mantid", buildPackage.MANTIDQT: "mantid", buildPackage.MANTIDWORKBENCH: "mantidworkbench"}
+
+
 def generate_conda_rc(build_package: buildPackage, env_type: envType, dir: Path, platform: str):
-    lockfile = dir / f"{platform}-{env_type}-lockfile.yml"
-    output = dir / f"{platform}-{env_type}.condarc.yaml"
+    lockfile = dir / f"{platform}" / f"{BUILD_PACKAGE_MAP[build_package]}-{ENV_TYPE_MAP[env_type]}-lockfile.yml"
+    output = dir / f"{platform}" / f"{BUILD_PACKAGE_MAP[build_package]}-{ENV_TYPE_MAP[env_type]}.condarc.yaml"
     if path.exists(lockfile):
         parsed_packages = parse_package_requirements(lockfile)
         generate_file(parsed_packages, output)
