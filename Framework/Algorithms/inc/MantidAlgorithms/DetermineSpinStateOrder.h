@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -20,10 +21,16 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
+
+  double averageTransmition(Mantid::API::WorkspaceGroup_const_sptr wsGroup) const;
+
+  std::string m_spinFlipperLogName;
+  int m_rfStateCondition;
 };
 
 } // namespace Algorithms
