@@ -38,3 +38,10 @@ if(MSVC)
 else()
   configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest @ONLY)
 endif()
+if(MSVC)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/systemtest_no_update.bat.in ${CMAKE_BINARY_DIR}/systemtest_no_update.bat @ONLY
+  )
+else()
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest_no_update.in ${CMAKE_BINARY_DIR}/systemtest_no_update @ONLY)
+endif()
