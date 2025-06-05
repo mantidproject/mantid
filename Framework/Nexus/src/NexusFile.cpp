@@ -183,11 +183,8 @@ void File::openGroupAddress(std::string const &address) {
 }
 
 std::string File::getAddress() {
-  char cAddress[2048];
-
-  memset(cAddress, 0, sizeof(cAddress));
-  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), cAddress, sizeof(cAddress) - 1), "NXgetaddress() failed");
-  std::string address(cAddress);
+  std::string address;
+  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), address), "NXgetaddress() failed");
   // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
   if (address == "") {
