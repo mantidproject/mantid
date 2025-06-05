@@ -33,7 +33,7 @@ def generate_conda_rc(build_package: buildPackage, env_type: envType, dir: Path,
 def generate_file(parsed_packages, output_file):
     with open(output_file, "w") as f:
         lines_to_write = ["pinned_packages:"]
-        lines_to_write.extend([f"  - {k}=={v}" for k, v in parsed_packages])
+        lines_to_write.extend([f"  - {k}=={v}" for k, v in parsed_packages.items()])
         f.writelines(lines_to_write)
 
 
