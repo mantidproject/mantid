@@ -138,7 +138,7 @@ export CONDA_SUBDIR=$PLATFORM
 # Enable the use of conda lockfiles
 if [[ $ENABLE_LOCKFILES == true ]]; then
     CONDA_LOCK_DIR=$SCRIPT_DIR/conda-lock
-    $CONDA_LOCK_DIR/generate_condarc_files.sh $CONDA_LOCK_DIR $PLATFORM $ENABLE_BUILD_MANTID $ENABLE_BUILD_QT $ENABLE_BUILD_WORKBENCH
+    $CONDA_LOCK_DIR/generate_condarc_files.py $CONDA_LOCK_DIR $PLATFORM $ENABLE_BUILD_MANTID $ENABLE_BUILD_QT $ENABLE_BUILD_WORKBENCH
     BACKUP_PATH=$PATH
     export PATH=$CONDA_LOCK_DIR:$PATH # add the conda wrapper script to the path
 fi
