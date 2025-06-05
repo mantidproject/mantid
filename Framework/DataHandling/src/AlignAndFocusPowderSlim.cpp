@@ -59,7 +59,6 @@ const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
-const std::string READ_BANKS_IN_THREAD("ReadBanksInThread");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
@@ -501,10 +500,6 @@ void AlignAndFocusPowderSlim::init() {
   const std::string CHUNKING_PARAM_GROUP("Chunking-temporary");
   auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   positiveIntValidator->setLower(1);
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_BANKS_IN_THREAD, 1, positiveIntValidator),
-      "Number of banks to read in a single thread. Lower means more parallelization.");
-  setPropertyGroup(PropertyNames::READ_BANKS_IN_THREAD, CHUNKING_PARAM_GROUP);
   declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000,
                                                                    positiveIntValidator),
                   "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
@@ -665,7 +660,6 @@ void AlignAndFocusPowderSlim::exec() {
     const auto num_banks_to_read = bankEntryNames.size();
 
     // threaded processing of the banks
-    const int GRAINSIZE_BANK = getProperty(PropertyNames::READ_BANKS_IN_THREAD);
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
@@ -673,10 +667,10 @@ void AlignAndFocusPowderSlim::exec() {
                          m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
-    if (static_cast<size_t>(GRAINSIZE_BANK) < num_banks_to_read) {
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)), task);
+    if (num_banks_to_read > 1) {
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
     } else {
-      task(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)));
+      task(tbb::blocked_range<size_t>(0, num_banks_to_read));
     }
   }
 
