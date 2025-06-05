@@ -27,6 +27,7 @@ generate_condarc() {
     done
 }
 
+source "$(conda info --base)/etc/profile.d/conda.sh"
 # activate or create conda-lock env
 conda activate conda-lock 2>/dev/null || {
     conda create -y -n conda-lock conda-lock
