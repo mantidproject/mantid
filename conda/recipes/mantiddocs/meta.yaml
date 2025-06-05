@@ -49,7 +49,7 @@ test:
 about:
   home: https://github.com/mantidproject/mantid
   license: GPL-3.0-or-later
-  summary: The QtHelp documentation for mantid
+  summary: HTML Documentation for Mantid
 
 extra:
   recipe-maintainers:

@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/AlgorithmDialogFactory.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include "MantidQtWidgets/Common/MantidHelpWindow.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
@@ -24,10 +24,10 @@
 
 #include <Poco/Environment.h>
 #include <QStringList>
+#include <QUrl>
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
-using MantidQt::MantidWidgets::MantidHelpWindow;
 
 namespace {
 // static logger
@@ -37,7 +37,8 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 std::once_flag DLLS_LOADED;
 
 // Track if message saying offline help is unavailable has been shown
-bool offlineHelpMsgDisplayed = false;
+// This might now refer to the new Python help system if it's not registered via the factory
+bool helpSystemNotAvailableMsgDisplayed = false;
 
 } // namespace
 
@@ -224,15 +225,15 @@ void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstant
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
-    if (!offlineHelpMsgDisplayed) {
-      g_log.information("Offline help is not available in this version of Workbench.");
-      offlineHelpMsgDisplayed = true;
+    if (!helpSystemNotAvailableMsgDisplayed) {
+      g_log.information("Help system not available (no viewer registered via factory).");
+      helpSystemNotAvailableMsgDisplayed = true;
     }
     return nullptr;
   } else {
     MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance();
     if (!interface) {
-      g_log.error("Error creating help window");
+      g_log.error("Error creating help window via factory registration.");
     }
     return interface;
   }
@@ -264,16 +265,26 @@ void InterfaceManager::showFitFunctionHelp(const QString &name) {
 
 void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
   auto window = createHelpWindow();
-  if (window)
-    window->showCustomInterface(name, area, section);
-}
-
-void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
-
-void InterfaceManager::closeHelpWindow() {
-  if (MantidHelpWindow::helpWindowExists()) {
-    auto window = createHelpWindow();
-    if (window)
-      window->shutdown();
+  if (window) {
+    QString pagePath = QString("interfaces/%1/%2.html").arg(area).arg(name);
+    if (!section.isEmpty()) {
+      pagePath += QString("#%1").arg(section);
+    }
+    window->showPage(pagePath);
   }
 }
+
+void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(QUrl(url)); }
+
+void InterfaceManager::closeHelpWindow() {
+  g_log.debug("InterfaceManager::closeHelpWindow() called. Note: Direct management of a single help window instance is "
+              "deprecated.");
+}
+
+void InterfaceManager::showHomeHelpPage() {
+  auto window = createHelpWindow();
+  if (window)
+    window->showPage(QString());
+}
+
+void InterfaceManager::cleanup() { g_log.debug("InterfaceManager::cleanup() called."); }
