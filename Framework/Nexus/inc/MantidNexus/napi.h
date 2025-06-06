@@ -406,7 +406,6 @@ MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
  * \param rank Rank of the attribute data.
  * \param dim Dimension array for the attribute content.
  * \param iType A pointer to an integer which will be set to the NeXus data type of the attribute.
- *  The fix to support the proper, expected behavior is commented out inside the function body.
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_readwrite
  */
