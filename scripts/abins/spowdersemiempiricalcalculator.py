@@ -736,16 +736,14 @@ class SPowderSemiEmpiricalCalculator:
         match q2.shape:
             case (n_q, 1):
                 return Spectrum2DCollection(
-                    x_data=(self._q_bins * ureg("1/angstrom")),
-                    y_data=(self._bin_centres * ureg("1/cm")),
-                    z_data=(s_array * ureg("barn / (1/cm)")),
+                    x_data=(self._q_bins * self.q_unit),
+                    y_data=(self._bin_centres * self.freq_unit),
+                    z_data=(s_array * self.s_unit),
                     metadata=metadata,
                 )
 
             case (n_q,):
-                return Spectrum1DCollection(
-                    x_data=(self._bin_centres * ureg("1/cm")), y_data=(s_array * ureg("barn / (1/cm)")), metadata=metadata
-                )
+                return Spectrum1DCollection(x_data=(self._bin_centres * self.freq_unit), y_data=(s_array * self.s_unit), metadata=metadata)
             case _:
                 raise ValueError("Unexpected shape of q2 array")
 
