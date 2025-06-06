@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
 #include "test_helper.h"
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
@@ -38,6 +39,8 @@ public:
     TS_ASSERT(!entry.containsGroup("bank91_events")); // there aren't that many groups
     TS_ASSERT(entry.containsGroup("bank19_events"));
 
+    TS_ASSERT_THROWS(entry.openNXGroup("bank91_events"), const Mantid::Nexus::Exception &); // next call should be fine
+
     auto bank19 = entry.openNXGroup("bank19_events");
     TS_ASSERT_EQUALS(bank19.name(), "bank19_events");
     // bank19.NX_class() returns the type in "NexusClasses" (i.e. NXClass) rather than what is in the file
@@ -52,6 +55,18 @@ public:
     TS_ASSERT_DELTA(time_of_flight[0], 16681.5, .01);
     TS_ASSERT_DELTA(time_of_flight[255], 958.1, .01);
     TS_ASSERT_THROWS_ANYTHING(time_of_flight[256]); // out of bounds
+
+    TS_ASSERT_THROWS(bank19.openNXFloat("timeofflight"), const Mantid::Nexus::Exception &); // next call should be fine
+
+    // load detector ids without letting previous data go out of scope
+    auto detid = bank19.openNXDataSet<uint32_t>("event_id"); // type does not have a convenience function
+    TS_ASSERT_EQUALS(detid.dim0(), 256);                     // same as number of time-of-flight
+    TS_ASSERT_EQUALS(detid.attributes.n(), 1);
+    TS_ASSERT_EQUALS(detid.attributes("target"), "/entry/instrument/bank19/event_id");
+    detid.load();
+    TS_ASSERT_EQUALS(detid[0], 37252);
+    TS_ASSERT_EQUALS(detid[255], 37272);
+    TS_ASSERT_THROWS_ANYTHING(detid[256]); // out of bounds
 
     auto duration = root.openNXFloat("/entry/duration"); // absolute address
     TS_ASSERT_EQUALS(duration.attributes.n(), 1);

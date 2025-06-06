@@ -105,7 +105,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   }
 
   NXhandle temp;
-  NXstatus status = NXopen(filename.c_str(), access, &(temp));
+  NXstatus status = NXopen(filename.c_str(), access, temp);
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopen(" << filename << ", " << access << ") failed";
@@ -145,7 +145,7 @@ File &File::operator=(File const &f) {
 
 File::~File() {
   if (m_close_handle && m_pfile_id != NULL) {
-    NXstatus status = NXclose(&(*this->m_pfile_id));
+    NXstatus status = NXclose(*m_pfile_id);
     this->m_pfile_id = NULL;
     if (status != NXstatus::NX_OK) {
       stringstream msg;
@@ -157,12 +157,12 @@ File::~File() {
 
 void File::close() {
   if (this->m_pfile_id != NULL) {
-    NAPI_CALL(NXclose(&(*this->m_pfile_id)), "NXclose failed");
+    NAPI_CALL(NXclose(*m_pfile_id), "NXclose failed");
     this->m_pfile_id = NULL;
   }
 }
 
-void File::flush() { NAPI_CALL(NXflush(&(*this->m_pfile_id)), "NXflush failed"); }
+void File::flush() { NAPI_CALL(NXflush(*m_pfile_id), "NXflush failed"); }
 
 //------------------------------------------------------------------------------------------------------------------
 // FILE NAVIGATION METHODS

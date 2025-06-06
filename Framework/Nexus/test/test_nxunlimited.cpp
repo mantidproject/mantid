@@ -39,7 +39,7 @@ int test_unlimited(int file_type, const char *filename) {
   int64_t slab_start[2], slab_size[2];
   NXhandle file_id = NULL;
   remove(filename);
-  NXopen(filename, file_type, &file_id);
+  NXopen(filename, file_type, file_id);
   NXmakegroup(file_id, "entry1", "NXentry");
   NXopengroup(file_id, "entry1", "NXentry");
   NXcompmakedata64(file_id, "data", NXnumtype::FLOAT64, 2, dims, NXcompression::NONE, dims);
@@ -55,7 +55,7 @@ int test_unlimited(int file_type, const char *filename) {
 
   NXclosedata(file_id);
   NXclosegroup(file_id);
-  NXclose(&file_id);
+  NXclose(file_id);
   return 0;
 }
 

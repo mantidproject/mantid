@@ -231,14 +231,14 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
   nDims = scanVarSpace.getSimpleExtentNdims();
   dimsSize = std::vector<hsize_t>(nDims);
   scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
-  if ((nDims != 2) || (dimsSize[1] != numberOfScans))
+  if ((nDims != 2) || (dimsSize[1] != numberOfScans)) // cppcheck-suppress containerOutOfBounds
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
 
-  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
+  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]); // cppcheck-suppress containerOutOfBounds
   scanVar.read(scanVarData.data(), scanVar.getDataType());
-  std::vector<double> monitorData(dimsSize[1]);
+  std::vector<double> monitorData(dimsSize[1]); // cppcheck-suppress containerOutOfBounds
   for (size_t i = 0; i < monitorData.size(); i++)
-    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
+    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i]; // cppcheck-suppress containerOutOfBounds
 
   scanVar.close();
 
