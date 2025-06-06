@@ -827,14 +827,14 @@ template <typename NumT> NumT File::getAttr(std::string const &name) {
   return value;
 }
 
+template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
+  value = this->getStrAttr(name);
+}
+
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   NXnumtype type;
   int length;
   NAPI_CALL(NXgetattr(*(this->m_pfile_id), name.c_str(), &value, &length, &type), "NXgetattr(" + name + ") failed");
-}
-
-template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
-  value = this->getStrAttr(name);
 }
 
 string File::getStrAttr(std::string const &name) {
