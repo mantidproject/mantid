@@ -316,7 +316,7 @@ class SPowderSemiEmpiricalCalculator:
         for angle in self._instrument.get_angles():
             self._report_progress(msg=f"Calculating S for angle: {angle:} degrees", reporter=self.progress_reporter)
             one_angle_spectra = self._calculate_s_powder_over_k(angle=angle)
-            one_angle_spectra.metadata["angle"] = str(angle)
+            one_angle_spectra.metadata["angle"] = f"{angle:.16f}"
             spectra_by_angle.append(one_angle_spectra)
 
         # Sum and broaden to single set of s_data with instrumental corrections
