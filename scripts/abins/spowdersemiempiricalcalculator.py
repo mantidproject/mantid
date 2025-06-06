@@ -300,6 +300,13 @@ class SPowderSemiEmpiricalCalculator:
     def _calculate_s_powder_1d(self) -> Spectrum1DCollection:
         """
         Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
+
+        Includes sum over scattering angles if appropriate.
+
+        Returns:
+            Spectrum1DCollection populated with spectrum contributions,
+            separated by atom and quantum order (as indicated in metadata).
+
         """
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
 
