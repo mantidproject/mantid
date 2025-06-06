@@ -19,7 +19,6 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/SpinStateHelpers.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
@@ -793,7 +792,7 @@ void addPolarizedData(H5::Group &data, const WorkspaceGroup_sptr &wsGroup, const
   }
 
   writeStandardDataAttributes(data, sasDataIAxesAttrSpin, qIndices);
-  const auto inputSpinOrder = StringTokenizer{inputSpinStates, ",", StringTokenizer::TOK_TRIM}.asVector();
+  const auto inputSpinOrder = splitSpinStateString(inputSpinStates);
   const auto &spinPairs = SpinVectorBuilder(inputSpinOrder);
   writeSpinDataAttributes(data, spinPairs);
 

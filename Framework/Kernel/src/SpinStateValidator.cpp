@@ -7,7 +7,7 @@
 
 #include "MantidKernel/SpinStateValidator.h"
 
-#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/SpinStateHelpers.h"
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 
@@ -38,7 +38,7 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   const auto &allowedPairs = getAllowedPairStates();
   const auto &allowedSingles = getAllowedSingleStates();
 
-  auto spinStates = StringTokenizer{input, ",", StringTokenizer::TOK_TRIM}.asVector();
+  auto spinStates = SpinStateHelpers::splitSpinStateString(input);
 
   int numberSpinStates = static_cast<int>(spinStates.size());
   if (m_allowedNumbersOfSpins.find(numberSpinStates) == m_allowedNumbersOfSpins.cend())

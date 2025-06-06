@@ -133,8 +133,8 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::string &inputSta
                                       "WorkspaceGroup.");
         }
 
-        const auto inputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(inputStatesStr);
-        const auto outputStates = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(outputStatesStr);
+        const auto inputStates = SpinStateHelpers::splitSpinStateString(inputStatesStr);
+        const auto outputStates = SpinStateHelpers::splitSpinStateString(outputStatesStr);
 
         if (!isValidSpinState(inputStates, analysisMode)) {
           throw std::invalid_argument("Invalid input spin state: " + inputStatesStr + " for " + analysisMode +

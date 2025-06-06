@@ -24,7 +24,7 @@ state in the spin state order.
 */
 std::optional<size_t> indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
                                                    std::string targetSpinState) {
-  boost::trim(targetSpinState);
+  trimToken(targetSpinState);
   size_t const index =
       std::find(spinStateOrder.cbegin(), spinStateOrder.cend(), targetSpinState) - spinStateOrder.cbegin();
   if (index == spinStateOrder.size()) {
