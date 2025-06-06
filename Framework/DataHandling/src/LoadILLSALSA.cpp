@@ -207,7 +207,7 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
   H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
 
   nDims = scanVarNamesSpace.getSimpleExtentNdims();
-  dimsSize = std::vector<hsize_t>(nDims);
+  dimsSize.resize(nDims);
   scanVarNamesSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
   std::vector<char *> rdata(dimsSize[0]);
@@ -230,10 +230,10 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
 
   nDims = scanVarSpace.getSimpleExtentNdims();
   std::vector<double> monitorData;
-  if (nDims != 2) {
+  dimsSize.resize(nDims);
+  if (dimsSize.size() < 2) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
   } else {
-    dimsSize = std::vector<hsize_t>(nDims);
     scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
     if (dimsSize[1] != numberOfScans)

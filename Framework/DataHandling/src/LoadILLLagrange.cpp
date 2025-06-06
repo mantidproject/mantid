@@ -138,10 +138,10 @@ void LoadILLLagrange::loadData() {
   nDims = scanVarSpace.getSimpleExtentNdims();
   std::vector<double> monitorData;
   std::vector<double> scanVariableData;
-  if (nDims != 2) {
+  dimsSize.resize(nDims);
+  if (dimsSize.size() != 2) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
   } else {
-    dimsSize = std::vector<hsize_t>(nDims);
     scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
     if (dimsSize[1] != m_nScans)
