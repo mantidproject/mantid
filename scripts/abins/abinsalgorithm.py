@@ -409,20 +409,6 @@ class AbinsAlgorithm:
 
         return sorted(atom_numbers), atom_symbols
 
-    @staticmethod
-    def _iter_line_metadata(metadata: Dict[str, int | str | List[Dict[str, int | str]]]):
-        """Iterate over spectrum metadata as though all data were in line_data"""
-        common_data = {
-            key: metadata[key]
-            for key in metadata.keys()
-            - {
-                "line_data",
-            }
-        }
-
-        for row in metadata["line_data"]:
-            yield common_data | row
-
     @classmethod
     def get_masses_table(cls, spectra: Spectrum1DCollection | Spectrum2DCollection) -> Dict[str, List[float]]:
         """
@@ -439,7 +425,7 @@ class AbinsAlgorithm:
             return {spectra.metadata["symbol"]: [float(spectra.metadata["mass"])]}
 
         masses_table = defaultdict(set)
-        for row in cls._iter_line_metadata(spectra.metadata):
+        for row in spectra.iter_metadata():
             masses_table[row["symbol"]].add(row["mass"])
 
         # convert sets to sorted lists to fix order
