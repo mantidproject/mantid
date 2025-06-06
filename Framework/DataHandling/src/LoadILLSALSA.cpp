@@ -229,20 +229,22 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
   H5::DataSpace scanVarSpace = scanVar.getSpace();
 
   nDims = scanVarSpace.getSimpleExtentNdims();
-  if (nDims != 2)
+  std::vector<double> monitorData;
+  if (nDims != 2) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
-  dimsSize = std::vector<hsize_t>(nDims);
-  scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+  } else {
+    dimsSize = std::vector<hsize_t>(nDims);
+    scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
-  if (dimsSize[1] != numberOfScans)
-    throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
+    if (dimsSize[1] != numberOfScans)
+      throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
 
-  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
-  scanVar.read(scanVarData.data(), scanVar.getDataType());
-  std::vector<double> monitorData(dimsSize[1]);
-  for (size_t i = 0; i < monitorData.size(); i++)
-    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
-
+    std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
+    scanVar.read(scanVarData.data(), scanVar.getDataType());
+    monitorData.resize(dimsSize[1]);
+    for (size_t i = 0; i < monitorData.size(); i++)
+      monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
+  }
   scanVar.close();
 
   // fill the workspace

@@ -136,22 +136,25 @@ void LoadILLLagrange::loadData() {
   H5::DataSpace scanVarSpace = scanVar.getSpace();
 
   nDims = scanVarSpace.getSimpleExtentNdims();
-  if (nDims != 2)
+  std::vector<double> monitorData;
+  std::vector<double> scanVariableData;
+  if (nDims != 2) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
+  } else {
+    dimsSize = std::vector<hsize_t>(nDims);
+    scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
-  dimsSize = std::vector<hsize_t>(nDims);
-  scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+    if (dimsSize[1] != m_nScans)
+      throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
 
-  if (imsSize[1] != m_nScans)
-    throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
-
-  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
-  scanVar.read(scanVarData.data(), scanVar.getDataType());
-  std::vector<double> monitorData(dimsSize[1]);
-  std::vector<double> scanVariableData(dimsSize[1]);
-  for (size_t i = 0; i < monitorData.size(); i++) {
-    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
-    scanVariableData[i] = scanVarData[i];
+    std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
+    scanVar.read(scanVarData.data(), scanVar.getDataType());
+    monitorData.resize(dimsSize[1]);
+    scanVariableData.resize(dimsSize[1]);
+    for (size_t i = 0; i < monitorData.size(); i++) {
+      monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
+      scanVariableData[i] = scanVarData[i];
+    }
   }
   scanVar.close();
 
