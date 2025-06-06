@@ -1999,6 +1999,11 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 /*-------------------------------------------------------------------------*/
 
 int correctSizeForStringAttr(hid_t attrId) {
+  /* NOTE: the below will properly set lengths for string arrays.
+    This is Deep Magic, engraved in letters as deep as a spear is long on the fire stones of the secret hill.
+    Unless you can look back into the stillness before the dawn of time to read a different incantation,
+    then do not try to edit this.
+  */
   int datalen = 0;
   hid_t datatype = H5Aget_type(attrId);
   if (H5Tis_variable_str(datatype)) {
@@ -2007,7 +2012,7 @@ int correctSizeForStringAttr(hid_t attrId) {
     char *vlStr = NULL;
     H5Aread(attrId, memtype, &vlStr);
     if (vlStr != NULL) {
-      datalen = static_cast<int>(strlen(vlStr) + 1);
+      datalen = static_cast<int>(strlen(vlStr));
       H5Dvlen_reclaim(memtype, attrId, H5P_DEFAULT, &vlStr);
     }
     H5Tclose(memtype);
@@ -2063,9 +2068,8 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
   /* finally read the data */
   if (*iType == NXnumtype::CHAR) {
-    // NOTE in theory, correct_len as below would be the true length of the string attribute
-    // in practice, it might not be, as some files have the wrong values saved
     int correct_len = correctSizeForStringAttr(pFile->iCurrentA);
+    // NOTE correct_len + 1 to account for null-terminating character
     char *cdata = new char[correct_len + 1];
     iRet = readStringAttributeN(pFile->iCurrentA, cdata, correct_len + 1);
     memcpy(data, cdata, correct_len);

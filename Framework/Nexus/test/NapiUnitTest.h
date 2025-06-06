@@ -919,27 +919,25 @@ public:
     ASSERT_OKAY(NXputattr(fid, "str_attr_", data.data(), static_cast<int>(data.size()), NXnumtype::CHAR),
                 "failed to put attr");
 
-    // int len;
-    // NXnumtype datatype = NXnumtype::CHAR;
+    int len;
+    NXnumtype datatype = NXnumtype::CHAR;
 
     // read into a low-level char array
-    // NOTE causes inexplicable segfaults unless the below test also runs
-    // char cread[30] = {0};
-    // ASSERT_OKAY(NXgetattr(fid, "str_attr_", cread, &len, &datatype), "failed to get attribute");
-    // TS_ASSERT_EQUALS(data, cread);
-    // TS_ASSERT_EQUALS(len, data.size());
-    // TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
+    char cread[30] = {0};
+    ASSERT_OKAY(NXgetattr(fid, "str_attr_", cread, &len, &datatype), "failed to get attribute");
+    TS_ASSERT_EQUALS(data, cread);
+    TS_ASSERT_EQUALS(len, data.size());
+    TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
 
     // read into a string through .data()
     // NOTE this requries that the string already be the correct size.
     // If it is too long, the string will contain junk data
     // If too short, the string will not contain all of the data
-    // This needs to be fixed somehow
-    // string readme(data.size(), 0);
-    // ASSERT_OKAY(NXgetattr(fid, "str_attr_", readme.data(), &len, &datatype), "failed to get attribute");
-    // TS_ASSERT_EQUALS(data, readme);
-    // TS_ASSERT_EQUALS(len, data.size() - 1);
-    // TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
+    string readme(data.size(), 'A');
+    ASSERT_OKAY(NXgetattr(fid, "str_attr_", readme.data(), &len, &datatype), "failed to get attribute");
+    TS_ASSERT_EQUALS(data, readme);
+    TS_ASSERT_EQUALS(len, data.size());
+    TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
 
     // cleanup
     ASSERT_OKAY(NXclose(fid), "failed to close");

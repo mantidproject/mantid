@@ -578,7 +578,7 @@ public:
   /**
    * Get the value of an attribute that is a scalar number.
    *
-   * \param nme Name of attribute to read.
+   * \param name Name of attribute to read.
    * \tparam NumT numeric data type of result
    *
    * \return The attribute value.
