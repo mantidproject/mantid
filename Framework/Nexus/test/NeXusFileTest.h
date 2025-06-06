@@ -399,9 +399,10 @@ public:
     auto data = file.getStrData();
 
     TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
-    // uncomment when nexus getInfo has been updated
+    // TODO should it be 13 or 128?
     // TS_ASSERT_EQUALS(info.dims[0], 128);
-    // TS_ASSERT_EQUALS(data.length(), testStr.length());
+    TS_ASSERT_EQUALS(info.dims[0], testStr.length());
+    TS_ASSERT_EQUALS(data.length(), testStr.length());
     TS_ASSERT_EQUALS(data, testStr);
   }
 
