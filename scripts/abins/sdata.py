@@ -20,7 +20,7 @@ from typing import (
 )
 
 from euphonic import Quantity, ureg
-from euphonic.spectra import Spectrum1D, Spectrum1DCollection, Spectrum2DCollection
+from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
 import numpy as np
 from scipy.signal import convolve
 
@@ -161,14 +161,14 @@ def add_autoconvolution_spectra(
         key=(lambda spec: spec.metadata["atom_index"]),
     )
 
-    # Iterator tweaking: drop the keys and convert each group to list
-    spectra_by_atom = (list(sba_item[1]) for sba_item in spectra_by_atom)
+    # Iterator tweaking: drop the keys and convert each group to Spectrum1DCollection
+    spectra_by_atom = (Spectrum1DCollection.from_spectra(list(sba_item[1]), unsafe=True) for sba_item in spectra_by_atom)
 
     # create new spectra using first and last spectra in initial group, iterating until order = max_order
     x_data = spectra.x_data
 
     with Pool(N_THREADS) as p:
-        output_spectra = p.map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), map(list, spectra_by_atom))
+        output_spectra = p.map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), spectra_by_atom)
 
         if output_bins is not None:
             output_spectra = p.map(partial(_resample_spectra, input_bins=x_data, output_bins=output_bins), output_spectra)
@@ -176,7 +176,7 @@ def add_autoconvolution_spectra(
     return Spectrum1DCollection.from_spectra(list(chain(*output_spectra)), unsafe=True)
 
 
-def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity, max_order: int) -> Spectrum1DCollection:
+def _autoconvolve_atom_spectra(atom_spectra: Spectrum1DCollection, x_data: Quantity, max_order: int) -> Spectrum1DCollection:
     """
     Autoconvolve pre-sorted list of spectra; convolve first element with last until order reaches max_order
 
@@ -189,14 +189,15 @@ def _autoconvolve_atom_spectra(atom_spectra: List[Spectrum1D], x_data: Quantity,
         max_order: Highest quantum order for autoconvolution
     """
 
-    assert atom_spectra[0].metadata["quantum_order"] == 1
-    fundamentals = atom_spectra[0]._y_data
-    y_units = atom_spectra[0]._internal_y_data_unit
+    first_spectrum = atom_spectra[0]
+    assert first_spectrum.metadata["quantum_order"] == 1
+    fundamentals = first_spectrum.y_data.magnitude
+    y_units = first_spectrum.y_data_unit
 
     highest_initial_order = atom_spectra[-1].metadata["quantum_order"]
 
-    new_y_data = [spectrum._y_data for spectrum in atom_spectra]
-    new_line_data = [spectrum.metadata for spectrum in atom_spectra]
+    new_y_data = list(atom_spectra.y_data.magnitude)
+    new_line_data = list(atom_spectra.iter_metadata())
     for order in range(highest_initial_order, max_order):
         autoconv_spectrum = convolve(new_y_data[-1], fundamentals, mode="full")[: fundamentals.size]
 
