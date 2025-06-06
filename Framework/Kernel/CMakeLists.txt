@@ -200,6 +200,7 @@ set(INC_FILES
     inc/MantidKernel/Interpolation.h
     inc/MantidKernel/InvisibleProperty.h
     inc/MantidKernel/LambdaValidator.h
+    inc/MantidKernel/LegacyNexusDescriptor.h
     inc/MantidKernel/LibraryManager.h
     inc/MantidKernel/LibraryWrapper.h
     inc/MantidKernel/ListValidator.h
@@ -233,12 +234,10 @@ set(INC_FILES
     inc/MantidKernel/NearestNeighbours.h
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
-    inc/MantidKernel/LegacyNexusDescriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
-    inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/ProgressBase.h
     inc/MantidKernel/Property.h
     inc/MantidKernel/PropertyHelper.h
@@ -263,6 +262,7 @@ set(INC_FILES
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
+    inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/SpinStateValidator.h
     inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
@@ -270,6 +270,7 @@ set(INC_FILES
     inc/MantidKernel/StdoutChannel.h
     inc/MantidKernel/StringContainsValidator.h
     inc/MantidKernel/StringTokenizer.h
+    inc/MantidKernel/StringTrimmer.h
     inc/MantidKernel/Strings.h
     inc/MantidKernel/System.h
     inc/MantidKernel/Task.h
@@ -363,6 +364,7 @@ set(TEST_FILES
     InterpolationTest.h
     InvisiblePropertyTest.h
     LambdaValidatorTest.h
+    LegacyNexusDescriptorTest.h
     ListValidatorTest.h
     LiveListenerInfoTest.h
     LogFilterTest.h
@@ -391,10 +393,8 @@ set(TEST_FILES
     NDRandomNumberGeneratorTest.h
     NearestNeighboursTest.h
     NeutronAtomTest.h
-    LegacyNexusDescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
-    SpinStateHelpersTest.h
     ProgressBaseTest.h
     PropertyHistoryTest.h
     PropertyManagerDataServiceTest.h
@@ -414,6 +414,7 @@ set(TEST_FILES
     ShrinkToFitTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
+    SpinStateHelpersTest.h
     SpinStateValidatorTest.h
     SplittingIntervalTest.h
     StartsWithValidatorTest.h
@@ -421,6 +422,7 @@ set(TEST_FILES
     StdoutChannelTest.h
     StringContainsValidatorTest.h
     StringTokenizerTest.h
+    StringTrimmerTest.h
     StringsTest.h
     TaskTest.h
     ThreadPoolRunnableTest.h

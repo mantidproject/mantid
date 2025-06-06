@@ -5,25 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/StringTrimmer.h"
 #include <algorithm>
 #include <iterator> //cbegin,cend
 #include <stdexcept>
 
 namespace {
-
-// implement our own trim function to avoid the locale overhead in boost::trim.
-
-// trim from start
-void trimTokenFromStart(std::string &s) { s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), ::isspace)); }
-
-// trim from end
-void trimTokenFromEnd(std::string &s) { s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(), s.end()); }
-
-// trim from both ends
-void trimToken(std::string &s) {
-  trimTokenFromStart(s);
-  trimTokenFromEnd(s);
-}
 
 // If the final character is a separator, we need to add an empty string to
 // tokens.
@@ -75,7 +62,7 @@ void splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str, const std
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
-                   trimToken(output.back());
+                   Mantid::Kernel::trimString(output.back());
                  });
 }
 
@@ -86,7 +73,7 @@ void splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::strin
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second) {
                      output.emplace_back(first, second);
-                     trimToken(output.back());
+                     Mantid::Kernel::trimString(output.back());
                      if (output.back().empty())
                        output.pop_back();
                    }

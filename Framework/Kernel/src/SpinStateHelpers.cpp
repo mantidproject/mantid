@@ -7,10 +7,9 @@
 
 #include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/StringTrimmer.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -24,7 +23,7 @@ state in the spin state order.
 */
 std::optional<size_t> indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
                                                    std::string targetSpinState) {
-  trimToken(targetSpinState);
+  trimString(targetSpinState);
   size_t const index =
       std::find(spinStateOrder.cbegin(), spinStateOrder.cend(), targetSpinState) - spinStateOrder.cbegin();
   if (index == spinStateOrder.size()) {
