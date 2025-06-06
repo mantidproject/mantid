@@ -14,6 +14,7 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/SpinStateValidator.h"
 
 #include <boost/algorithm/string/join.hpp>
@@ -119,18 +120,15 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     return errorList;
   }
 
-  const auto &spinStates =
-      PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(PropertyNames::SPIN_STATES));
+  const auto &spinStates = SpinStateHelpers::splitSpinStateString(getPropertyValue(PropertyNames::SPIN_STATES));
   if (spinStates.size() != inputWsCount) {
     errorList[PropertyNames::SPIN_STATES] =
         "The number of workspaces in the input WorkspaceGroup (" + std::to_string(inputWsCount) +
         ") does not match the number of spin states provided (" + std::to_string(spinStates.size()) + ").";
     return errorList;
   }
-  const auto &t01WsIndex =
-      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_ON);
-  const auto &t00WsIndex =
-      PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_OFF);
+  const auto &t01WsIndex = SpinStateHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_ON);
+  const auto &t00WsIndex = SpinStateHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_OFF);
   if (!t01WsIndex.has_value() || !t00WsIndex.has_value()) {
     errorList[PropertyNames::SPIN_STATES] =
         "The required spin configurations (00, 01) could not be found in the given SpinStates.";

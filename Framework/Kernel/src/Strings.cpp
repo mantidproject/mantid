@@ -10,10 +10,8 @@
 
 #include <Poco/Path.h>
 
-#include <boost/algorithm/string.hpp>
-#include <memory>
-
 #include <fstream>
+#include <memory>
 
 using std::size_t;
 
@@ -405,7 +403,8 @@ std::string fullBlock(const std::string &A) { return strip(A); }
  */
 std::string strip(const std::string &A) {
   std::string result(A);
-  boost::trim(result);
+  result.erase(result.begin(), std::find_if_not(result.begin(), result.end(), ::isspace));
+  result.erase(std::find_if_not(result.rbegin(), result.rend(), ::isspace).base(), result.end());
   return result;
 }
 

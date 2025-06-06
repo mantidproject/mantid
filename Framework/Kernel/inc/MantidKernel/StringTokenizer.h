@@ -24,6 +24,8 @@
 namespace Mantid {
 namespace Kernel {
 
+void trimToken(std::string &s);
+
 class MANTID_KERNEL_DLL StringTokenizer final {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
