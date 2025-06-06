@@ -1998,6 +1998,27 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 
 /*-------------------------------------------------------------------------*/
 
+int correctSizeForStringAttr(hid_t attrId) {
+  int datalen = 0;
+  hid_t datatype = H5Aget_type(attrId);
+  if (H5Tis_variable_str(datatype)) {
+    hid_t memtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memtype, H5T_VARIABLE);
+    char *vlStr = NULL;
+    H5Aread(attrId, memtype, &vlStr);
+    if (vlStr != NULL) {
+      datalen = static_cast<int>(strlen(vlStr) + 1);
+      H5Dvlen_reclaim(memtype, attrId, H5P_DEFAULT, &vlStr);
+    }
+    H5Tclose(memtype);
+  } else {
+    datalen = static_cast<int>(H5Tget_size(datatype));
+  }
+  return datalen;
+}
+
+/*-------------------------------------------------------------------------*/
+
 // cppcheck-suppress constParameterCallback
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFile5 pFile;
@@ -2042,8 +2063,14 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
   /* finally read the data */
   if (*iType == NXnumtype::CHAR) {
-    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), *datalen);
-    *datalen = static_cast<int>(strlen(static_cast<char *>(data)));
+    // NOTE in theory, correct_len as below would be the true length of the string attribute
+    // in practice, it might not be, as some files have the wrong values saved
+    int correct_len = correctSizeForStringAttr(pFile->iCurrentA);
+    char *cdata = new char[correct_len + 1];
+    iRet = readStringAttributeN(pFile->iCurrentA, cdata, correct_len + 1);
+    memcpy(data, cdata, correct_len);
+    delete[] cdata;
+    *datalen = correct_len;
   } else {
     iRet = H5Aread(pFile->iCurrentA, type, data);
     *datalen = 1;
@@ -2213,10 +2240,9 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   int iRet;
   NXnumtype mType;
   hid_t vid;
-  hid_t filespace, attrt, memtype;
+  hid_t filespace, attrt;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
-  char *vlStr = NULL;
 
   pFile = NXI5assert(handle);
 
@@ -2246,18 +2272,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
 
   if (tclass == H5T_STRING) {
     myrank++;
-    if (H5Tis_variable_str(attrt)) {
-      memtype = H5Tcopy(H5T_C_S1);
-      H5Tset_size(memtype, H5T_VARIABLE);
-      H5Aread(pFile->iCurrentA, memtype, &vlStr);
-      if (vlStr != NULL) {
-        myDim[myrank - 1] = strlen(vlStr) + 1;
-        H5Dvlen_reclaim(memtype, pFile->iCurrentA, H5P_DEFAULT, &vlStr);
-      }
-      H5Tclose(memtype);
-    } else {
-      myDim[myrank - 1] = H5Tget_size(attrt);
-    }
+    myDim[myrank - 1] = correctSizeForStringAttr(pFile->iCurrentA);
   } else if (myrank == 0) {
     myrank = 1; /* we pretend */
     myDim[0] = 1;

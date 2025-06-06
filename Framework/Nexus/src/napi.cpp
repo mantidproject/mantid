@@ -679,8 +679,8 @@ NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   } else {
     current = fid->iFID;
   }
-  char caddr[2048];
-  H5Iget_name(current, caddr, 2048);
+  char caddr[NX_MAXADDRESSLEN];
+  H5Iget_name(current, caddr, NX_MAXADDRESSLEN);
   address = std::string(caddr);
   return NXstatus::NX_OK;
 }

@@ -742,6 +742,9 @@ public:
     file.getAttr("units", actual);
     TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
 
+    std::string again = file.getStrAttr("units");
+    TS_ASSERT_EQUALS(again, "kg * mol / parsec");
+
     // check attr infos
     auto attrInfos = file.getAttrInfos();
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
@@ -751,6 +754,50 @@ public:
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
     TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
+  }
+
+  void test_existing_attr_resolved() {
+    // test that attributes in existing files are corectly resolved
+    // this prevents a regression that will otherwise show up in tests of LoadMD and various python algorithms
+    cout << "\ntest open existing file with system-dependent type\n";
+
+    // open the file in read-only mode
+    std::string filename = getFullPath("md_missing_paramater_map.nxs");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // go to main entry (for this file, MDHistoWorkspace)
+    file.openGroup("MDHistoWorkspace", "NXentry");
+
+    // get the attribute without specifying type -- should be no errors
+    int32_t version32 = 0;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version32));
+    int64_t version64 = 0;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version64));
+
+    // get attribute asserting the type -- make sure there is a failure
+    Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
+    Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
+    TS_ASSERT_THROWS(file.getAttr(info32, &version32), Mantid::Nexus::Exception const &)
+    TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
+  }
+
+  void test_existing_attr_bad_length() {
+    // some fiels have the unit attribute set with value "microseconds" but with a length of 8 instead of 12
+    // this prevents a regression that will otherwise show up in tests of LoadEventNexus and various python algorithms
+    cout << "\ntest open existing file with system-dependent type\n";
+
+    // open the file in read-only mode
+    std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // go to the trouble spot -- /entry/bank39_events/event_time_offset
+    std::string entryName("/entry/bank39_events/event_time_offset");
+    file.openAddress(entryName);
+    auto infos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(infos[1].name, "units");
+    TS_ASSERT_EQUALS(infos[1].length, 12);
+    std::string units = file.getAttr<std::string>("units");
+    TS_ASSERT_EQUALS(units, "microsecond");
   }
 
   void test_getEntries() {

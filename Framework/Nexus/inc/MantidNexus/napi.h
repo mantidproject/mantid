@@ -168,7 +168,7 @@ MANTID_NEXUS_DLL NXstatus NXopengroupaddress(NXhandle handle, CONSTCHAR *address
 /**
  * Retrieve the current address in the NeXus file
  * \param handle a NeXus file handle
- * \param address A string to copy the address to
+ * \param address A string into which to copy the address
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
@@ -405,7 +405,10 @@ MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
  * \param pName The name of the attribute
  * \param rank Rank of the attribute data.
  * \param dim Dimension array for the attribute content.
- * \param iType A pointer to an integer which be set to the NeXus data type of the attribute.
+ * \param iType A pointer to the NeXus data type of the attribute.
+ *  NOTE iType is NOT set by this function.  This seems to have been an uncaught bug,
+ *  and is now expected behavior that needs to be supported for certain algorithms to work.
+ *  The fix to support the proper, expected behavior is commented out inside the function body.
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_readwrite
  */
