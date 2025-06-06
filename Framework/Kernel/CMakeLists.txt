@@ -270,7 +270,6 @@ set(INC_FILES
     inc/MantidKernel/StdoutChannel.h
     inc/MantidKernel/StringContainsValidator.h
     inc/MantidKernel/StringTokenizer.h
-    inc/MantidKernel/StringTrimmer.h
     inc/MantidKernel/Strings.h
     inc/MantidKernel/System.h
     inc/MantidKernel/Task.h
@@ -422,7 +421,6 @@ set(TEST_FILES
     StdoutChannelTest.h
     StringContainsValidatorTest.h
     StringTokenizerTest.h
-    StringTrimmerTest.h
     StringsTest.h
     TaskTest.h
     ThreadPoolRunnableTest.h

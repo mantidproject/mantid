@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/StringTrimmer.h"
+#include "MantidKernel/Strings.h"
 #include <algorithm>
 #include <iterator> //cbegin,cend
 #include <stdexcept>
@@ -62,7 +62,7 @@ void splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str, const std
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
-                   Mantid::Kernel::trimString(output.back());
+                   Mantid::Kernel::Strings::stripInPlace(output.back());
                  });
 }
 
@@ -73,7 +73,7 @@ void splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::strin
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second) {
                      output.emplace_back(first, second);
-                     Mantid::Kernel::trimString(output.back());
+                     Mantid::Kernel::Strings::stripInPlace(output.back());
                      if (output.back().empty())
                        output.pop_back();
                    }
