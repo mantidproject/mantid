@@ -790,6 +790,23 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
  * Default implementation, can be overridden by base classes if they know
  *something smarter!
  *
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are
+ *then ignored!
+ */
+std::vector<double> MatrixWorkspace::getIntegratedSpectra(const double minX, const double maxX,
+                                                          const bool entireRange) const {
+  std::vector<double> integratedSpectra;
+  getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
+  return integratedSpectra;
+}
+
+/** Integrate all the spectra in the matrix workspace within the range given.
+ * NaN and Infinite values are ignored.
+ * Default implementation, can be overridden by base classes if they know
+ *something smarter!
+ *
  * @param out :: returns the vector where there is one entry per spectrum in the
  *workspace. Same
  *            order as the workspace indices.
@@ -842,6 +859,17 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
       out[wksp_index] = sum;
     }
   }
+}
+
+std::vector<size_t> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+                                                                            const double minX, const double maxX,
+                                                                            const bool entireRange) const {
+  const auto integratedSpectra = getIntegratedSpectra(minX, maxX, entireRange);
+  std::vector<size_t> detectorCounts(workspaceIndices.size(), 0);
+  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
+    detectorCounts[i] = integratedSpectra[workspaceIndices[i]];
+  }
+  return detectorCounts;
 }
 
 /** Get the effective detector for the given spectrum
@@ -1011,9 +1039,6 @@ bool MatrixWorkspace::isCommonLogBins() const {
  * @return int
  */
 size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
-
-/// Returns the units of the data in the workspace
-const std::string &MatrixWorkspace::YUnit() const { return m_YUnit; }
 
 /// Sets a new unit for the data (Y axis) in the workspace
 void MatrixWorkspace::setYUnit(const std::string &newUnit) { m_YUnit = newUnit; }
