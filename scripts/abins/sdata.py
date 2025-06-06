@@ -195,6 +195,8 @@ def _autoconvolve_atom_spectra(atom_spectra: Spectrum1DCollection, x_data: Quant
     y_units = first_spectrum.y_data_unit
 
     highest_initial_order = atom_spectra[-1].metadata["quantum_order"]
+    if max_order < highest_initial_order:
+        raise ValueError("Max order should not be lower than highest quantum order before autoconvolution.")
 
     new_y_data = list(atom_spectra.y_data.magnitude)
     new_line_data = list(atom_spectra.iter_metadata())
