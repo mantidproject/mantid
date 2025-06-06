@@ -162,22 +162,18 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 static void NXI5KillAttDir(pNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
 
 /*---------------------------------------------------------------------*/
-static void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, // cppcheck-suppress constParameterPointer
-                                int addressBufferLen) {
-
-  memset(addressBuffer, 0, static_cast<size_t>(addressBufferLen));
-  if (self->iCurrentG != 0) {
-    strcpy(addressBuffer, "/");
-    if ((int)strlen(self->name_ref) + 1 < addressBufferLen) {
-      strcat(addressBuffer, self->name_ref);
-    }
+static std::string buildCurrentAddress(pNexusFile5 fid) {
+  hid_t current;
+  if (fid->iCurrentD != 0) {
+    current = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    current = fid->iCurrentG;
+  } else {
+    current = fid->iFID;
   }
-  if (self->iCurrentD != 0) {
-    strcat(addressBuffer, "/");
-    if ((int)strlen(self->iCurrentLD) + (int)strlen(addressBuffer) < addressBufferLen) {
-      strcat(addressBuffer, self->iCurrentLD);
-    }
-  }
+  char caddr[2048];
+  H5Iget_name(current, caddr, 2048);
+  return std::string(caddr);
 }
 
 /* ----------------------------------------------------------------------
@@ -1014,7 +1010,7 @@ static void killAttVID(const pNexusFile5 pFile, hid_t vid) {
 
 NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
   pNexusFile5 pFile;
-  hid_t attr1, aid1, aid2;
+  hid_t attr1;
   hid_t type;
   herr_t iRet = 0;
   hid_t vid, attRet;
@@ -1023,8 +1019,10 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
 
   type = nxToHDF5Type(iType);
 
-  /* determine vid */
+  // determine ID of containing HDF object
   vid = getAttVID(pFile);
+
+  // check if the attribute exists -- if so, delete it
   attRet = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
   if (attRet > 0) {
     H5Aclose(attRet);
@@ -1035,25 +1033,29 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
       return NXstatus::NX_ERROR;
     }
   }
-  aid2 = H5Screate(H5S_SCALAR);
-  aid1 = H5Tcopy(type);
+
+  // prepare dataspace, datatype
+  hid_t dataspace = H5Screate(H5S_SCALAR);
+  hid_t datatype = H5Tcopy(type);
   if (iType == NXnumtype::CHAR) {
-    H5Tset_size(aid1, static_cast<size_t>(datalen));
+    H5Tset_size(datatype, static_cast<size_t>(datalen));
   }
-  attr1 = H5Acreate(vid, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+
+  // create the attribute
+  attr1 = H5Acreate(vid, name, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
   if (attr1 < 0) {
     NXReportError("ERROR: attribute cannot created! ");
     killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
   }
-  if (H5Awrite(attr1, aid1, data) < 0) {
+  if (H5Awrite(attr1, datatype, data) < 0) {
     NXReportError("ERROR: failed to store attribute ");
     killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
   }
   /* Close attribute dataspace */
-  iRet += H5Tclose(aid1);
-  iRet += H5Sclose(aid2);
+  iRet += H5Tclose(datatype);
+  iRet += H5Sclose(dataspace);
   /* Close attribute  */
   iRet += H5Aclose(attr1);
   killAttVID(pFile, vid);
@@ -1177,9 +1179,11 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
      the address to the current node
    */
   datalen = 1024;
-  sRes->targetAddress.resize(datalen, 0);
-  if (NX5getattr(fid, "target", sRes->targetAddress.data(), &datalen, &type) != NXstatus::NX_OK) {
-    buildCurrentAddress(pFile, sRes->targetAddress.data(), 1024);
+  char caddr[1024] = {0};
+  if (NX5getattr(fid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
+    sRes->targetAddress = buildCurrentAddress(pFile);
+  } else {
+    sRes->targetAddress = std::string(caddr);
   }
   sRes->linkType = NXentrytype::sds;
   return NXstatus::NX_OK;
@@ -1994,6 +1998,32 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 
 /*-------------------------------------------------------------------------*/
 
+int correctSizeForStringAttr(hid_t attrId) {
+  /* NOTE: the below will properly set lengths for string arrays.
+    This is Deep Magic, engraved in letters as deep as a spear is long on the fire stones of the secret hill.
+    Unless you can look back into the stillness before the dawn of time to read a different incantation,
+    then do not try to edit this.
+  */
+  int datalen = 0;
+  hid_t datatype = H5Aget_type(attrId);
+  if (H5Tis_variable_str(datatype)) {
+    hid_t memtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memtype, H5T_VARIABLE);
+    char *vlStr = NULL;
+    H5Aread(attrId, memtype, &vlStr);
+    if (vlStr != NULL) {
+      datalen = static_cast<int>(strlen(vlStr));
+      H5Dvlen_reclaim(memtype, attrId, H5P_DEFAULT, &vlStr);
+    }
+    H5Tclose(memtype);
+  } else {
+    datalen = static_cast<int>(H5Tget_size(datatype));
+  }
+  return datalen;
+}
+
+/*-------------------------------------------------------------------------*/
+
 // cppcheck-suppress constParameterCallback
 NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFile5 pFile;
@@ -2005,8 +2035,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
   pFile = NXI5assert(fid);
 
-  type = nxToHDF5Type(*iType);
-
+  // get the attribute ID
   vid = getAttVID(pFile);
   iNew = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
   if (iNew < 0) {
@@ -2016,6 +2045,8 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
     return NXstatus::NX_ERROR;
   }
   pFile->iCurrentA = iNew;
+
+  // get the dataspace and proper dimensions
   filespace = H5Aget_space(pFile->iCurrentA);
   totalsize = 1;
   const auto ndims = H5Sget_simple_extent_dims(filespace, dims, NULL);
@@ -2027,10 +2058,23 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
     return NXstatus::NX_ERROR;
   }
 
+  // get the correct datatype
+  type = H5Aget_type(pFile->iCurrentA);
+  H5T_class_t tclass = H5Tget_class(type);
+  if (type >= 0) {
+    // set the iType
+    *iType = hdf5ToNXType(tclass, type);
+  }
+
   /* finally read the data */
-  if (type == H5T_C_S1) {
-    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), *datalen);
-    *datalen = static_cast<int>(strlen(static_cast<char *>(data)));
+  if (*iType == NXnumtype::CHAR) {
+    int correct_len = correctSizeForStringAttr(pFile->iCurrentA);
+    // NOTE correct_len + 1 to account for null-terminating character
+    char *cdata = new char[correct_len + 1];
+    iRet = readStringAttributeN(pFile->iCurrentA, cdata, correct_len + 1);
+    memcpy(data, cdata, correct_len);
+    delete[] cdata;
+    *datalen = correct_len;
   } else {
     iRet = H5Aread(pFile->iCurrentA, type, data);
     *datalen = 1;
@@ -2093,9 +2137,11 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
        the address to the current node
      */
     int datalen = 1024;
-    sRes->targetAddress.resize(datalen, 0);
-    if (NX5getattr(fileid, "target", sRes->targetAddress.data(), &datalen, &type) != NXstatus::NX_OK) {
-      buildCurrentAddress(pFile, sRes->targetAddress.data(), datalen);
+    char caddr[1024] = {0};
+    if (NX5getattr(fileid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
+      sRes->targetAddress = buildCurrentAddress(pFile);
+    } else {
+      sRes->targetAddress = std::string(caddr);
     }
     sRes->linkType = NXentrytype::group;
     return NXstatus::NX_OK;
@@ -2198,10 +2244,9 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
   int iRet;
   NXnumtype mType;
   hid_t vid;
-  hid_t filespace, attrt, memtype;
+  hid_t filespace, attrt;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
-  char *vlStr = NULL;
 
   pFile = NXI5assert(handle);
 
@@ -2231,18 +2276,7 @@ NXstatus NX5getattrainfo(NXhandle handle, NXname name, int *rank, int dim[], NXn
 
   if (tclass == H5T_STRING) {
     myrank++;
-    if (H5Tis_variable_str(attrt)) {
-      memtype = H5Tcopy(H5T_C_S1);
-      H5Tset_size(memtype, H5T_VARIABLE);
-      H5Aread(pFile->iCurrentA, memtype, &vlStr);
-      if (vlStr != NULL) {
-        myDim[myrank - 1] = strlen(vlStr) + 1;
-        H5Dvlen_reclaim(memtype, pFile->iCurrentA, H5P_DEFAULT, &vlStr);
-      }
-      H5Tclose(memtype);
-    } else {
-      myDim[myrank - 1] = H5Tget_size(attrt);
-    }
+    myDim[myrank - 1] = correctSizeForStringAttr(pFile->iCurrentA);
   } else if (myrank == 0) {
     myrank = 1; /* we pretend */
     myDim[0] = 1;

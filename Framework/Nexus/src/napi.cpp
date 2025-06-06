@@ -670,7 +670,7 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 NXstatus NXIprintlink(NXhandle fid, NXlink const *link) { return NX5printlink(fid, link); }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
+NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   hid_t current;
   if (fid->iCurrentD != 0) {
     current = fid->iCurrentD;
@@ -679,7 +679,9 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   } else {
     current = fid->iFID;
   }
-  H5Iget_name(current, address, addresslen);
+  char caddr[NX_MAXADDRESSLEN];
+  H5Iget_name(current, caddr, NX_MAXADDRESSLEN);
+  address = std::string(caddr);
   return NXstatus::NX_OK;
 }
 
