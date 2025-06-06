@@ -65,8 +65,7 @@ def check_thresholds(
     Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These
     thresholds are defined in the abins.parameters.sampling dictionary.
 
-    :param return_cases: If True, return a list of cases where S was small compared to threshold.
-    :type return_cases: bool
+    :param items: Components of S data to check with form (atom_index, quantum_order_index, s_array)
     :param logger: Alternative logging object. (Defaults to Mantid logger)
     :param logging_level: logging level of warnings that a significant
         portion of S is being removed. Usually this will be 'information' or 'warning'.
@@ -119,8 +118,7 @@ def apply_kinematic_constraints(spectra: Spectrum2DCollection, instrument: Direc
         q_values[:, np.newaxis] > q_upper[np.newaxis, :],
     )
 
-    # Applying NaN to spectra.z_data doesn't seem to work? Use private attribute
-    spectra._z_data[:, mask] = float("nan")
+    spectra.z_data[:, mask] = float("nan") * ureg(spectra.z_data_unit)
 
 
 def add_autoconvolution_spectra(
