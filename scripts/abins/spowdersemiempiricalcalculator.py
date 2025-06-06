@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from functools import partial
+from functools import cached_property, partial
 import json
 from multiprocessing import Pool
 from operator import attrgetter
@@ -68,14 +68,12 @@ class SPowderSemiEmpiricalCalculator:
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.
         :param temperature: temperature in K for which calculation of S should be done
         :param abins_data: object of type AbinsData with data from phonon file
-        :param instrument: name of instrument (str)
+        :param instrument: simulated INS instrument
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
         :param autoconvolution_max:
             approximate spectra up to this order using auto-convolution
         :param cache_directory: location for .hdf5
         """
-        from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
-
         # Expose input parameters
         self._input_filename = filename
         self._temperature = float(temperature)
@@ -136,7 +134,7 @@ class SPowderSemiEmpiricalCalculator:
             self._fine_bin_centres = None
 
         # If operating in 2-D mode, there is also an explicit set of q bins
-        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+        if self.is_2d:
             params = abins.parameters.instruments[self._instrument.get_name()]
             q_min, q_max = self._instrument.get_q_bounds()
             self._q_bins = np.linspace(q_min, q_max, params.get("q_size") + 1)
@@ -144,6 +142,20 @@ class SPowderSemiEmpiricalCalculator:
         else:
             self._q_bins = None
             self._q_bin_centres = None
+
+    @cached_property
+    def is_2d(self) -> bool:
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
+
+        """Validate instrument name and get dimensionality from known instruments"""
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            return False
+        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+            return True
+
+        raise ValueError(
+            'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
+        )
 
     @staticmethod
     def _get_s(spectrum: Spectrum1D | Spectrum2D) -> np.ndarray:
@@ -179,8 +191,6 @@ class SPowderSemiEmpiricalCalculator:
         """
         Loads S from an hdf file.
         """
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
-
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
 
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
@@ -201,10 +211,10 @@ class SPowderSemiEmpiricalCalculator:
         # Some of the strings get stored as bytes, safer to just parse strings
         data_dict = {key: _stringify(value) for key, value in data_dict.items()}
 
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            spectra = Spectrum1DCollection.from_dict(data_dict)
-        else:
+        if self.is_2d:
             spectra = Spectrum2DCollection.from_dict(data_dict)
+        else:
+            spectra = Spectrum1DCollection.from_dict(data_dict)
 
         return spectra
 
@@ -215,15 +225,13 @@ class SPowderSemiEmpiricalCalculator:
         2-D writing is currently slow compared to 2-D calculation, so only 1-D
         results will be cached.
         """
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
-
         spectra = self._calculate_s()
 
         spectra_dict = spectra.to_dict()
         # Metadata dict is not very HDF5-friendly, dump to string
         spectra_dict["metadata"] = json.dumps(spectra_dict["metadata"])
 
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+        if not self.is_2d:
             self._clerk.add_file_attributes()
             self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
             self._clerk.add_data("data", spectra_dict)
@@ -273,8 +281,6 @@ class SPowderSemiEmpiricalCalculator:
         If self._isotropic_fundamentals is True, order-1 will use the same Debye-Waller approximation
         as higher orders.
         """
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
-
         # Compute tensors and traces, write to cache for access during atomic s calculations
         powder_calculator = abins.PowderCalculator(
             filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature, cache_directory=self._cache_directory
@@ -282,14 +288,10 @@ class SPowderSemiEmpiricalCalculator:
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            return self._calculate_s_powder_1d()
-        elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+        if self.is_2d:
             return self._calculate_s_powder_2d()
-        else:
-            raise ValueError(
-                'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
-            )
+
+        return self._calculate_s_powder_1d()
 
     def _calculate_s_powder_2d(self) -> Spectrum2DCollection:
         spectra = self._calculate_s_powder_over_k_and_q()
@@ -372,14 +374,10 @@ class SPowderSemiEmpiricalCalculator:
 
         # Get numpy broadcasting right: we need to convert an array from (order,)
         # to (order, energy) or (order, q, energy) format.
-        if len(q2.shape) == 1:
-            order_expansion_slice = np.s_[:, np.newaxis]
-            is_2d = False
-        elif len(q2.shape) == 2:
+        if self.is_2d:
             order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
-            is_2d = True
         else:
-            raise IndexError("q2 should be 1-D or 2-D array")
+            order_expansion_slice = np.s_[:, np.newaxis]
 
         # Collect S(w) at q = 1/Å without DW factors
         bins = self._fine_bins if self._use_autoconvolution else self._bins
@@ -417,7 +415,7 @@ class SPowderSemiEmpiricalCalculator:
                 },
             )
         # Otherwise there is nothing to calculate, return suitable empty-ish data structure
-        elif is_2d:
+        elif self.is_2d:
             return Spectrum2DCollection(
                 x_data=(self._q_bins * self.q_unit),
                 y_data=(bin_centres * self.freq_unit),
@@ -455,7 +453,7 @@ class SPowderSemiEmpiricalCalculator:
             spectra = self._broaden_spectra(spectra, broadening_scheme=broadening_scheme)
 
         self._report_progress("Applying q^2n / n! q-dependence")
-        if is_2d:
+        if self.is_2d:
             # convert 1-D spectra sampled at q=1 to 2-D spectra by applying q-dependent factor
             z_data = np.empty((spectra.y_data.shape[0], q2.shape[0], spectra.y_data.shape[1]), dtype=FLOAT_TYPE) * ureg(spectra.y_data_unit)
             for i, (y_data_1d, metadata) in enumerate(zip(spectra.y_data, spectra.iter_metadata())):
