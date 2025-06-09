@@ -50,8 +50,7 @@ bool MaskBinsData::isEmpty() const { return m_masks.isEmpty(); }
 void MaskBinsData::subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
                                              std::vector<double> &spectraIntgrs) const {
   for (const auto &binMask : m_masks) {
-    std::vector<double> subtract;
-    workspace.getIntegratedSpectra(subtract, binMask.start, binMask.end, false);
+    std::vector<double> subtract = workspace.getIntegratedSpectra(binMask.start, binMask.end, false);
     auto &spectra = binMask.spectra;
     for (const auto &ispec : spectra) {
       auto counts = spectraIntgrs[ispec] - subtract[ispec];

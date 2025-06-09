@@ -34,7 +34,9 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
+#include <algorithm>
 #include <cmath>
+#include <execution>
 #include <functional>
 #include <numeric>
 #include <utility>
@@ -42,17 +44,6 @@
 using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
-
-namespace {
-/** Simple method which will accumulate a value as long as it is Finite */
-auto accumulate_if_finite = [](const double accumulator, const double newValue) {
-  if (std::isfinite(newValue)) {
-    return accumulator + newValue;
-  } else {
-    return accumulator;
-  }
-};
-} // namespace
 
 namespace Mantid::API {
 using std::size_t;
@@ -785,35 +776,17 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
   }
 }
 
-/** Integrate all the spectra in the matrix workspace within the range given.
- * NaN and Infinite values are ignored.
- * Default implementation, can be overridden by base classes if they know
- *something smarter!
- *
- * @param out :: returns the vector where there is one entry per spectrum in the
- *workspace. Same
- *            order as the workspace indices.
- * @param minX :: minimum X bin to use in integrating.
- * @param maxX :: maximum X bin to use in integrating.
- * @param entireRange :: set to true to use the entire range. minX and maxX are
- *then ignored!
- */
-void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
-                                           const bool entireRange) const {
-  out.resize(this->getNumberHistograms(), 0.0);
+template <typename ExecPolicy>
+void integrateSpectra(ExecPolicy &&parallelPolicy, std::vector<double> &out, const std::vector<size_t> &indices,
+                      const MatrixWorkspace &ws, double minX, double maxX, bool entireRange, size_t histogramOffset) {
 
-  // offset for histogram data, because the x axis is not the same size for histogram and point data.
-  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
-
-  // Run in parallel if the implementation is threadsafe
-  PARALLEL_FOR_IF(this->threadSafe())
-  for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
+  std::transform(parallelPolicy, indices.cbegin(), indices.cend(), out.begin(), [&](const size_t wksp_index) {
     // Get Handle to data
-    const Mantid::MantidVec &xData = this->readX(wksp_index);
-    const auto &yData = this->y(wksp_index);
+    const Mantid::MantidVec &xData = ws.readX(wksp_index);
+    const auto &yData = ws.y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((xData.size() <= 1 + histogramOffset) && (!yData.empty())) {
-      out[wksp_index] = yData[0];
+      return yData[0];
     } else {
       // Iterators for limits - whole range by default
       Mantid::MantidVec::const_iterator lowit, highit;
@@ -831,17 +804,49 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
       }
 
       // Get the range for the y vector
-      Mantid::MantidVec::difference_type distmin = std::distance(xData.begin(), lowit);
-      Mantid::MantidVec::difference_type distmax = std::distance(xData.begin(), highit);
-      double sum(0.0);
-      if (distmin <= distmax) {
-        // Integrate
-        sum = std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
+      Mantid::MantidVec::difference_type distmin = lowit - xData.begin();
+      Mantid::MantidVec::difference_type distmax = highit - xData.begin();
+
+      if (distmin > distmax) {
+        return 0.0;
       }
-      // Save it in the vector
-      out[wksp_index] = sum;
+
+      return std::transform_reduce(yData.begin() + distmin, yData.begin() + distmax, 0.0, std::plus{},
+                                   [](const double val) { return std::isfinite(val) ? val : 0.0; });
     }
+  });
+}
+
+/** Integrate all the spectra in the matrix workspace within the range given.
+ * NaN and Infinite values are ignored.
+ * Default implementation, can be overridden by base classes if they know
+ *something smarter!
+ *
+ * @param out :: returns the vector where there is one entry per spectrum in the
+ *workspace. Same
+ *            order as the workspace indices.
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are
+ *then ignored!
+ * @returns :: the vector where there is one entry per spectrum in the
+ * workspace. Same order as the workspace indices.
+ */
+std::vector<double> MatrixWorkspace::getIntegratedSpectra(const double minX, const double maxX,
+                                                          const bool entireRange) const {
+  auto out = std::vector<double>(this->getNumberHistograms(), 0.0);
+
+  // offset for histogram data, because the x axis is not the same size for histogram and point data.
+  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
+
+  std::vector<size_t> indices(this->getNumberHistograms());
+  std::iota(indices.begin(), indices.end(), 0);
+  if (this->threadSafe()) {
+    integrateSpectra(std::execution::par_unseq, out, indices, *this, minX, maxX, entireRange, histogramOffset);
+  } else {
+    integrateSpectra(std::execution::seq, out, indices, *this, minX, maxX, entireRange, histogramOffset);
   }
+  return out;
 }
 
 /** Get the effective detector for the given spectrum

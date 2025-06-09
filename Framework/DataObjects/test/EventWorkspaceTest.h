@@ -323,8 +323,7 @@ public:
 
   void testIntegrateSpectra_entire_range() {
     EventWorkspace_sptr ws = createFlatEventWorkspace();
-    MantidVec sums;
-    ws->getIntegratedSpectra(sums, 0, 0, true);
+    MantidVec sums = ws->getIntegratedSpectra(0, 0, true);
     for (int i = 0; i < NUMPIXELS; ++i) {
       TS_ASSERT_EQUALS(sums[i], (NUMBINS - 1) * 2.0);
       ;
@@ -332,8 +331,7 @@ public:
   }
   void testIntegrateSpectra_empty_range() {
     EventWorkspace_sptr ws = createFlatEventWorkspace();
-    MantidVec sums;
-    ws->getIntegratedSpectra(sums, 10, 5, false);
+    MantidVec sums = ws->getIntegratedSpectra(10, 5, false);
     for (int i = 0; i < NUMPIXELS; ++i) {
       TS_ASSERT_EQUALS(sums[i], 0.0);
       ;
@@ -342,9 +340,8 @@ public:
 
   void testIntegrateSpectra_partial_range() {
     EventWorkspace_sptr ws = createFlatEventWorkspace();
-    MantidVec sums;
     // This will include a single bin
-    ws->getIntegratedSpectra(sums, BIN_DELTA * 1.9, BIN_DELTA * 3.1, false);
+    MantidVec sums = ws->getIntegratedSpectra(BIN_DELTA * 1.9, BIN_DELTA * 3.1, false);
     for (int i = 0; i < NUMPIXELS; ++i) {
       TS_ASSERT_EQUALS(sums[i], 2);
       ;

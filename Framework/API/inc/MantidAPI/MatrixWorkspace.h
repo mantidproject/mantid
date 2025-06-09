@@ -360,8 +360,7 @@ public:
 
   /// Return a vector with the integrated counts for all spectra withing the
   /// given range
-  virtual void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
-                                    const bool entireRange) const;
+  virtual std::vector<double> getIntegratedSpectra(const double minX, const double maxX, const bool entireRange) const;
 
   /// Return an index in the X vector for an x-value close to a given value
   std::pair<size_t, double> getXIndex(size_t i, double x, bool isLeft = true, size_t start = 0) const;

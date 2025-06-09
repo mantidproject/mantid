@@ -2141,19 +2141,19 @@ public:
     }
     MantidVec integratedValues;
     // the enitre range
-    workspace.getIntegratedSpectra(integratedValues, 0, 0, true);
+    integratedValues = workspace.getIntegratedSpectra(0, 0, true);
     MantidVec expected = {10., 0., 0., 4., 6.};
     TS_ASSERT_EQUALS(integratedValues, expected);
     // just the first two values
-    workspace.getIntegratedSpectra(integratedValues, 0.0, 2.0, false);
+    integratedValues = workspace.getIntegratedSpectra(0.0, 2.0, false);
     expected = {3., 0., 0., 1., 2.};
     TS_ASSERT_EQUALS(integratedValues, expected);
     // just the middle two values
-    workspace.getIntegratedSpectra(integratedValues, 2.0, 3.9, false);
+    integratedValues = workspace.getIntegratedSpectra(2.0, 3.9, false);
     expected = {5., 0., 0., 3., 2.};
     TS_ASSERT_EQUALS(integratedValues, expected);
     // just the last two values
-    workspace.getIntegratedSpectra(integratedValues, 3.0, 5.0, false);
+    integratedValues = workspace.getIntegratedSpectra(3.0, 5.0, false);
     expected = {7., 0., 0., 3., 4.};
     TS_ASSERT_EQUALS(integratedValues, expected);
   }

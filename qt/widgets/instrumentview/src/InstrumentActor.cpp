@@ -1002,7 +1002,7 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax) {
 
 void InstrumentActor::calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace) {
   // Use the workspace function to get the integrated spectra
-  workspace.getIntegratedSpectra(m_integratedSignal, m_BinMinValue, m_BinMaxValue, wholeRange());
+  m_integratedSignal = workspace.getIntegratedSpectra(m_BinMinValue, m_BinMaxValue, wholeRange());
   // replace any values that are not finite
   std::replace_if(
       m_integratedSignal.begin(), m_integratedSignal.end(), [](double x) { return !std::isfinite(x); },

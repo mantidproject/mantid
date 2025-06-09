@@ -185,8 +185,7 @@ public:
 
   void testIntegrateSpectra_entire_range() {
     ws = create2DWorkspaceBinned(nhist, nbins);
-    MantidVec sums;
-    ws->getIntegratedSpectra(sums, 10, 5, true);
+    MantidVec sums = ws->getIntegratedSpectra(10, 5, true);
     for (int i = 0; i < nhist; ++i) {
       TS_ASSERT_EQUALS(sums[i], nbins * 2.0);
       ;
@@ -194,8 +193,7 @@ public:
   }
   void testIntegrateSpectra_empty_range() {
     ws = create2DWorkspaceBinned(nhist, nbins);
-    MantidVec sums;
-    ws->getIntegratedSpectra(sums, 10, 5, false);
+    MantidVec sums = ws->getIntegratedSpectra(10, 5, false);
     for (int i = 0; i < nhist; ++i) {
       TS_ASSERT_EQUALS(sums[i], 0.0);
       ;
@@ -204,8 +202,7 @@ public:
 
   void testIntegrateSpectra_partial_range() {
     ws = create2DWorkspaceBinned(nhist, nbins);
-    MantidVec sums;
-    ws->getIntegratedSpectra(sums, 1.9, 3.2, false);
+    MantidVec sums = ws->getIntegratedSpectra(1.9, 3.2, false);
     for (int i = 0; i < nhist; ++i) {
       TS_ASSERT_EQUALS(sums[i], 4.0);
       ;
