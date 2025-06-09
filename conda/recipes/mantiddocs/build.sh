@@ -43,4 +43,5 @@ echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TE
 # Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
 # QT_QPA_PLATFORM=offscreen cmake --build . --target docs-qthelp
 
+cmake --build . --target docs-html
 cmake --build . --target install
