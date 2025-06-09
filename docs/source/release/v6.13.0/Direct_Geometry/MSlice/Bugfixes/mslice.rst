@@ -1,0 +1,5 @@
+- Fix for unhandled exception when overplotting a Cut plot with changed intensity and a Bragg peak.
+- Fix for crash when changing intensity to GDOS on an interactive Cut plot.
+- Catch OSError when attempting to save to read-only folder.
+- Fix for rounding error in width calculation for Cut plots.
+- Prevent crash for invalid characters in user input boxes such as Intensity, Bose and Scale.
