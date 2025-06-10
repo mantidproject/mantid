@@ -216,6 +216,18 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, pickable=pickable, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
 
+    def add_picked_mesh(self, point_cloud, scalars, pickable=True) -> None:
+        self.main_plotter.add_mesh(
+            point_cloud,
+            scalars=scalars,
+            opacity=[0.0, 0.5],
+            show_scalar_bar=False,
+            pickable=pickable,
+            color="red",
+            point_size=20,
+            render_points_as_spheres=True,
+        )
+
     def add_rgba_mesh(self, mesh, scalars):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, render_points_as_spheres=True, point_size=10)
