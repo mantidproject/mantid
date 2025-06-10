@@ -53,7 +53,6 @@ Deprecated
   and :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
 - :ref:`IntegratePeaksCWSD <algm-IntegratePeaksCWSD>` has been deprecated. There is no replacement.
-- :ref:`UnwrapMonitor <algm-UnwrapMonitor>` has been deprecated. There is no replacement.
 
 Removed
 ############
