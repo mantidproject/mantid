@@ -10,11 +10,11 @@ General
 
 New features
 ############
-.. amalgamate:: Direct_Geometry/General/New_features
+- :ref:`LoadCIF <algm-LoadCIF>` now accepts the short forms of the Hermann-Mauguin symbols. These short forms may include a single space or none at all.
 
 Bugfixes
 ############
-.. amalgamate:: Direct_Geometry/General/Bugfixes
+
 
 
 CrystalField
@@ -22,11 +22,11 @@ CrystalField
 
 New features
 ############
-.. amalgamate:: Direct_Geometry/CrystalField/New_features
+
 
 Bugfixes
 ############
-.. amalgamate:: Direct_Geometry/CrystalField/Bugfixes
+- Removed unnecessary fix for IB21 for C1 and Ci symmetries in the Crystal Field peak base function to match the documentation: https://docs.mantidproject.org/nightly/concepts/CrystalField.html#appendix-b-tables
 
 
 MSlice
@@ -34,10 +34,10 @@ MSlice
 
 New features
 ############
-.. amalgamate:: Direct_Geometry/MSlice/New_features
+
 
 Bugfixes
 ############
-.. amalgamate:: Direct_Geometry/MSlice/Bugfixes
+
 
 :ref:`Release 6.13.0 <v6.13.0>`
