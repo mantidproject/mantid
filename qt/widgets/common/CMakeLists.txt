@@ -213,6 +213,8 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
+    inc/MantidQtWidgets/Common/PythonHelpBridge.h
+    inc/MantidQtWidgets/Common/PythonHelpWindow.h
     inc/MantidQtWidgets/Common/PythonRunner.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJobRunner.h
@@ -258,8 +260,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
-    inc/MantidQtWidgets/Common/PythonHelpBridge.h
-    inc/MantidQtWidgets/Common/PythonHelpWindow.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -696,9 +696,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
-
-# Help collection file
-set(QCH_FILES)
 
 # For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
 # # This line is now removed/commented
