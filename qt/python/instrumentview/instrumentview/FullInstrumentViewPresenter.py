@@ -44,8 +44,12 @@ class FullInstrumentViewPresenter:
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
 
-        self._view.add_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=True)
+        self._view.add_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=False)
         self._view.set_contour_range_limits(self._contour_limits)
+
+        self._picked_detector_mesh = self.createPolyDataMesh(self._model.detector_positions())
+        self._picked_detector_mesh["visibility"] = np.zeros(self._picked_detector_mesh.number_of_points)
+        self._view.add_picked_mesh(self._picked_detector_mesh, scalars="visibility", pickable=True)
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
@@ -101,6 +105,11 @@ class FullInstrumentViewPresenter:
             return
         point_index = picker.GetPointId()
         detector_index = self._model.detector_index(point_index)
+
+        visibility = self._model.negate_picked_detector([detector_index])
+        # Update to visibility shows up in the plot in real time
+        self._picked_detector_mesh["visibility"] = visibility
+
         self.show_plot_for_detectors([detector_index])
         self.show_info_text_for_detectors([detector_index])
 
