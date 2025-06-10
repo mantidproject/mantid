@@ -117,7 +117,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
 
     def _change_crystal_axes_grid(self):
-        self._plot_param.grid_state = self._plot_param.grid_state % 4
+        # self._plot_param.grid_state = self._plot_param.grid_state % 4
+        current_state = self._plot_param.grid_state % 4
+        if current_state == 0:
+            self._plot_param.grid_state = 1
+        else:
+            self._plot_param.grid_state = current_state
         self._plot_param.grid_helper = self._create_grid_helper()
         self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 3)
 
@@ -138,7 +143,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
 
     def _change_crystal_axes(self):
-        self._plot_param.grid_state = 1
+        own_dict = self.view.get_state()
+        if own_dict["crystal_axes"]:
+            self._plot_param.grid_state = 1
+        else:
+            self._plot_param.grid_state = 0
         self._plot()
 
     def _create_grid_helper(self):
