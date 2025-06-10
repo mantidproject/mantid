@@ -708,7 +708,7 @@ std::vector<double> EventWorkspace::getIntegratedSpectra(const double minX, cons
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int wksp_index = 0; wksp_index < int(this->getNumberHistograms()); wksp_index++) {
     // Get Handle to data
-    EventList *el = this->data[wksp_index].get();
+    const EventList *const el = this->data[wksp_index].get();
 
     // Let the eventList do the integration
     out[wksp_index] = el->integrate(minX, maxX, entireRange);
