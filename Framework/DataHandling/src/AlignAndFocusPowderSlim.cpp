@@ -299,14 +299,10 @@ public:
       std::sort(subset_tofs.begin(), subset_tofs.end());
       // loop over bin edges and count the number of events in each bin
       auto search_start = subset_tofs.cbegin(); // we can advance the search starting point since binedges are sorted
-      for (size_t i = 0; i < m_binedges->size() - 1; ++i) {
+      for (size_t i = 0; i < m_binedges->size(); ++i) {
         search_start = std::lower_bound(search_start, subset_tofs.cend(), m_binedges->at(i));
         cum_n[i] += std::distance(subset_tofs.cbegin(), search_start);
       }
-
-      // last bin inclusive
-      cum_n.back() +=
-          std::distance(subset_tofs.cbegin(), std::upper_bound(search_start, subset_tofs.cend(), m_binedges->back()));
     }
 
     for (size_t i = 0; i < cum_n.size() - 1; ++i)
