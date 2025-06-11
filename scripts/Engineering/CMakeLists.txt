@@ -1,6 +1,6 @@
 # Tests for Engineering scripts/common code
 
-set(TEST_PY_FILES test/test_EnggUtils.py)
+set(TEST_PY_FILES test/test_EnggUtils.py texture/correction/test/test_correction_model.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
