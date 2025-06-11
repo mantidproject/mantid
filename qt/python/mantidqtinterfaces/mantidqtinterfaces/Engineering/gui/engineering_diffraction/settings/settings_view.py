@@ -74,6 +74,15 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_save_location(self):
         return self.finder_save.getFirstFilename()
 
+    def get_rd_name(self):
+        return self.lineedit_RD.text()
+
+    def get_nd_name(self):
+        return self.lineedit_ND.text()
+
+    def get_td_name(self):
+        return self.lineedit_TD.text()
+
     def get_rd_dir(self):
         return ",".join([self.lineedit_RD0.text(), self.lineedit_RD1.text(), self.lineedit_RD2.text()])
 
@@ -131,6 +140,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_euler_angles_scheme(self):
         return self.eulerAngles_lineedit.text()
 
+    def get_euler_angles_sense(self):
+        return self.eulerAnglesSense_lineedit.text()
+
     def get_plot_exp_pf(self):
         return self.expPF_checkBox.isChecked()
 
@@ -143,6 +155,15 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_save_location(self, text):
         self.finder_save.setText(text)
+
+    def set_rd_name(self, text):
+        self.lineedit_RD.setText(text)
+
+    def set_nd_name(self, text):
+        self.lineedit_ND.setText(text)
+
+    def set_td_name(self, text):
+        self.lineedit_TD.setText(text)
 
     def set_rd_dir(self, text):
         vec = text.split(",")
@@ -230,6 +251,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_euler_angles_scheme(self, text):
         self.eulerAngles_lineedit.setText(text)
+
+    def set_euler_angles_sense(self, text):
+        self.eulerAnglesSense_lineedit.setText(text)
 
     def set_plot_exp_pf(self, val):
         self.expPF_checkBox.setChecked(val)

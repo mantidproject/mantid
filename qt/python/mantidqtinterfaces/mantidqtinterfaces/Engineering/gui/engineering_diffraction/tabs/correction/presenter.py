@@ -1,6 +1,7 @@
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
+from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
 from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
@@ -71,11 +72,14 @@ class TextureCorrectionPresenter:
 
         for path in filenames:
             ws_name = os.path.splitext(os.path.basename(path))[0]
-            try:
-                Load(Filename=path, OutputWorkspace=ws_name)
-            except Exception as e:
-                logger.warning(f"Failed to load {path}: {e}")
-                continue
+            if ADS.doesExist(ws_name):
+                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
+            else:
+                try:
+                    Load(Filename=path, OutputWorkspace=ws_name)
+                except Exception as e:
+                    logger.warning(f"Failed to load {path}: {e}")
+                    continue
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
 
@@ -104,7 +108,8 @@ class TextureCorrectionPresenter:
         orientation_file = self.view.get_orientation_file()
         use_euler = self._get_setting("use_euler_angles", bool)
         euler_scheme = self._get_setting("euler_angles_scheme")
-        self.model.load_all_orientations(wss, orientation_file, use_euler, euler_scheme)
+        euler_sense = self._get_setting("euler_angles_sense")
+        self.model.load_all_orientations(wss, orientation_file, use_euler, euler_scheme, euler_sense)
         self.redraw_table()
 
     def select_all(self):
@@ -116,15 +121,15 @@ class TextureCorrectionPresenter:
     def _on_view_shape_clicked(self, ws_name):
         try:
             fig = sample_shape.plot_sample_container_and_components(ws_name)
-            ax_transform = output_settings.get_texture_axes_transform()
-            self.model.plot_sample_directions(fig, ws_name, ax_transform)
+            ax_transform, ax_labels = output_settings.get_texture_axes_transform()
+            self.model.plot_sample_directions(fig, ws_name, ax_transform, ax_labels)
         except Exception as exception:
             logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(ws_name, exception))
 
     def _on_view_ref_shape_clicked(self):
         fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws)
-        ax_transform = output_settings.get_texture_axes_transform()
-        self.model.plot_sample_directions(fig, None, ax_transform)
+        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
+        self.model.plot_sample_directions(fig, None, ax_transform, ax_labels)
 
     def on_apply_clicked(self):
         wss = self.view.get_selected_workspaces()

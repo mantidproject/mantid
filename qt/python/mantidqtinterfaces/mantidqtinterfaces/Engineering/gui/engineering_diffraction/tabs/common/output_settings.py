@@ -32,4 +32,7 @@ def get_texture_axes_transform():
     rd = array([float(x) for x in rd_str.split(",")])[:, None]
     nd = array([float(x) for x in nd_str.split(",")])[:, None]
     td = array([float(x) for x in td_str.split(",")])[:, None]
-    return concatenate([rd, nd, td], axis=1)
+    rd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_name")
+    nd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_name")
+    td_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_name")
+    return concatenate([rd, nd, td], axis=1), (rd_name, nd_name, td_name)
