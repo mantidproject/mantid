@@ -108,12 +108,11 @@ class FullInstrumentViewModel:
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
         self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
-        self._detector_visibility = {id: False for id in self._detector_indices}
+        self.detector_visibility = {id: False for id in self._detector_indices}
 
-    def negate_picked_detector(self, detector_indices):
+    def negate_picked_visibility(self, detector_indices: list[int]) -> None:
         for id in detector_indices:
-            self._detector_visibility[id] = not self._detector_visibility[id]
-        return list(self._detector_visibility.values())
+            self.detector_visibility[id] = not self.detector_visibility[id]
 
     def _union_with_current_bin_min_max(self, bin_edge) -> None:
         """Expand current bin limits to include new bin edge"""
