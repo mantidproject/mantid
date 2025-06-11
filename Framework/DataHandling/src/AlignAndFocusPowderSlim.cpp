@@ -61,6 +61,7 @@ const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
+const std::string EVENTS_BLOCK_SIZE("EventsToSort");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
@@ -222,38 +223,6 @@ private:
   const size_t m_pulse_stop_index;
 };
 
-class Histogrammer {
-public:
-  Histogrammer(const std::vector<double> *binedges, const double width, const bool linear_bins) : m_binedges(binedges) {
-    m_xmin = binedges->front();
-    m_xmax = binedges->back();
-
-    if (linear_bins) {
-      m_findBin = DataObjects::EventList::findLinearBin;
-      m_bin_divisor = 1. / width;
-      m_bin_offset = m_xmin * m_bin_divisor;
-    } else {
-      m_findBin = DataObjects::EventList::findLogBin;
-      m_bin_divisor = 1. / log1p(abs(width)); // use this to do change of base
-      m_bin_offset = log(m_xmin) * m_bin_divisor;
-    }
-  }
-
-  bool inRange(const double tof) const { return !(tof < m_xmin || tof >= m_xmax); }
-
-  const std::optional<size_t> findBin(const double tof) const {
-    return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
-  }
-
-private:
-  double m_bin_divisor;
-  double m_bin_offset;
-  double m_xmin;
-  double m_xmax;
-  const std::vector<double> *m_binedges;
-  std::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
-};
-
 template <typename Type> class MinMax {
   const std::vector<Type> *vec;
 
@@ -295,41 +264,52 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
 
 template <typename CountsType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<detid_t> *detids,
-                    const std::vector<float> *tofs, const AlignAndFocusPowderSlim::BankCalibration *calibration,
-                    std::vector<CountsType> *y_temp, const std::set<detid_t> *masked)
-      : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp),
-        masked(masked), no_mask(masked->empty()) {}
+  ProcessEventsTask(std::vector<detid_t> *detids, std::vector<float> *tofs,
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration, std::vector<CountsType> *y_temp,
+                    const std::vector<double> *binedges, const std::set<detid_t> *masked, const size_t events_blocksize)
+      : m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp), m_binedges(binedges),
+        masked(masked), no_mask(masked->empty()), m_events_blocksize(events_blocksize) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-    // both iterators need to be incremented in each loop
-    auto detid_ptr = m_detids->cbegin() + range.begin();
-    auto tof_ptr = m_tofs->cbegin() + range.begin();
+    // This follows the algorithm from numpy.histogram
 
-    for (size_t i = range.begin(); i < range.end(); ++i) {
-      if (no_mask || (!masked->contains(*detid_ptr))) {
-        // focussed time-off-flight
-        const auto tof = static_cast<double>(*tof_ptr) * m_calibration->value(*detid_ptr);
-        // increment the bin if it is found
-        if (m_histogrammer->inRange(tof)) {
-          if (const auto binnum = m_histogrammer->findBin(tof)) {
-            y_temp->at(binnum.value())++;
-          }
-        }
-      }
-      ++detid_ptr;
-      ++tof_ptr;
+    // apply the calibration
+    std::transform(m_detids->cbegin() + range.begin(), m_detids->cbegin() + range.end(),
+                   m_tofs->cbegin() + range.begin(), m_tofs->begin() + range.begin(),
+                   [this](const detid_t &detid, const float &tof) { return tof * m_calibration->value(detid); });
+
+    // create output vector same size as binedges
+    std::vector<size_t> cum_n(m_binedges->size(), 0);
+
+    for (size_t start = range.begin(); start < range.end(); start += m_events_blocksize) {
+      const size_t end = std::min(start + m_events_blocksize, range.end());
+      // sort subset of tof vector
+      std::sort(m_tofs->begin() + start, m_tofs->begin() + end);
+      // loop over bin edges and count the number of events in each bin
+      for (size_t i = 0; i < m_binedges->size() - 1; ++i)
+        cum_n[i] +=
+            std::distance(m_tofs->cbegin() + start,
+                          std::lower_bound(m_tofs->cbegin() + start, m_tofs->cbegin() + end, m_binedges->at(i)));
+
+      // last bin inclusive
+      cum_n.back() +=
+          std::distance(m_tofs->cbegin() + start,
+                        std::upper_bound(m_tofs->cbegin() + start, m_tofs->cbegin() + end, m_binedges->back()));
     }
+
+    for (size_t i = 0; i < cum_n.size() - 1; ++i)
+      y_temp->at(i) += static_cast<uint32_t>(cum_n[i + 1] - cum_n[i]);
   }
 
 private:
-  const Histogrammer *m_histogrammer;
   const std::vector<detid_t> *m_detids;
-  const std::vector<float> *m_tofs;
+  std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   std::vector<CountsType> *y_temp;
+  const std::vector<double> *m_binedges;
   const std::set<detid_t> *masked;
-  const bool no_mask; // whether there are any masked pixels
+  const bool no_mask;              // whether there are any masked pixels
+  const size_t m_events_blocksize; // number of events to process as a group
 };
 
 class ProcessBankTask {
@@ -338,11 +318,11 @@ public:
                   const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
                   const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked, const double binWidth,
                   const bool linearBins, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::shared_ptr<API::Progress> &progress)
+                  const size_t events_blocksize, std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
         m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins), m_events_per_chunk(events_per_chunk),
-        m_grainsize_event(grainsize_event), m_progress(progress) {
+        m_grainsize_event(grainsize_event), m_events_blocksize(events_blocksize), m_progress(progress) {
     if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
       throw std::runtime_error("failed to reopen async");
     }
@@ -385,7 +365,6 @@ public:
 
         // create a histogrammer to process the events
         auto &spectrum = m_wksp->getSpectrum(wksp_index);
-        Histogrammer histogrammer(&spectrum.readX(), m_binWidth, m_linearBins);
 
         // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
         // counting things
@@ -417,8 +396,8 @@ public:
           const auto numEvent = event_time_of_flight->size();
 
           // threaded processing of the events
-          ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), calibration.get(),
-                                 &y_temp, &m_masked);
+          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &y_temp,
+                                 &spectrum.readX(), &m_masked, m_events_blocksize);
           if (numEvent > m_grainsize_event) {
             // use tbb
             tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
@@ -452,6 +431,7 @@ private:
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
+  const size_t m_events_blocksize;
   std::shared_ptr<API::Progress> m_progress;
 };
 
@@ -505,9 +485,14 @@ void AlignAndFocusPowderSlim::init() {
                   "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
   setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 2000, positiveIntValidator),
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_BLOCK_SIZE, 65536, positiveIntValidator),
+      "Number of events to sort/histogram at a time. "
+      "It should be smaller than the number of events processed in a single thread.");
+  setPropertyGroup(PropertyNames::EVENTS_BLOCK_SIZE, CHUNKING_PARAM_GROUP);
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -520,6 +505,14 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     const std::string msg(PropertyNames::READ_SIZE_FROM_DISK + " must be larger than " +
                           PropertyNames::EVENTS_PER_THREAD);
     errors[PropertyNames::READ_SIZE_FROM_DISK] = msg;
+    errors[PropertyNames::EVENTS_PER_THREAD] = msg;
+  }
+
+  const int events_block = getProperty(PropertyNames::EVENTS_BLOCK_SIZE);
+  if (events_block > grainsize_events) {
+    const std::string msg(PropertyNames::EVENTS_PER_THREAD + " must be larger than " +
+                          PropertyNames::EVENTS_BLOCK_SIZE);
+    errors[PropertyNames::EVENTS_BLOCK_SIZE] = msg;
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
@@ -662,10 +655,11 @@ void AlignAndFocusPowderSlim::exec() {
     // threaded processing of the banks
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
+    const int EVENTS_BLOCK_SIZE = getProperty(PropertyNames::EVENTS_BLOCK_SIZE);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
-                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
+                         static_cast<size_t>(GRAINSIZE_EVENTS), static_cast<size_t>(EVENTS_BLOCK_SIZE), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
