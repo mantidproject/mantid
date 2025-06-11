@@ -2,6 +2,8 @@ include(PythonPackageTargetFunctions)
 
 add_python_package(instrumentview)
 
+add_dependencies(instrumentview mantidqt)
+
 # ctest targets
 set(PYTHON_TEST_FILES
     instrumentview/test/test_presenter.py instrumentview/test/test_model.py instrumentview/test/test_instruments.py
