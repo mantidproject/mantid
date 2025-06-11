@@ -212,11 +212,11 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
-    def add_mesh(self, mesh, pickable=False, scalars=None, clim=None) -> None:
+    def add_main_mesh(self, mesh, pickable=False, scalars=None, clim=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, pickable=pickable, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
 
-    def add_picked_mesh(self, point_cloud, scalars, pickable=True) -> None:
+    def add_pickable_main_mesh(self, point_cloud, scalars, pickable=True) -> None:
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
