@@ -264,7 +264,7 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
 
 template <typename CountsType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(std::vector<detid_t> *detids, std::vector<float> *tofs,
+  ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, std::vector<CountsType> *y_temp,
                     const std::vector<double> *binedges, const std::set<detid_t> *masked, const size_t events_blocksize)
       : m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp), m_binedges(binedges),
@@ -273,28 +273,40 @@ public:
   void operator()(const tbb::blocked_range<size_t> &range) const {
     // This follows the algorithm from numpy.histogram
 
-    // apply the calibration
-    std::transform(m_detids->cbegin() + range.begin(), m_detids->cbegin() + range.end(),
-                   m_tofs->cbegin() + range.begin(), m_tofs->begin() + range.begin(),
-                   [this](const detid_t &detid, const float &tof) { return tof * m_calibration->value(detid); });
-
     // create output vector same size as binedges
     std::vector<size_t> cum_n(m_binedges->size(), 0);
 
+    // process the events in blocks, extracting a subset of the tof vector before sorting and histogramming it
     for (size_t start = range.begin(); start < range.end(); start += m_events_blocksize) {
       const size_t end = std::min(start + m_events_blocksize, range.end());
+
+      // create a subset of the tof vector with masked pixels removed and calibration applied
+      std::vector<double> subset_tofs(end - start);
+
+      auto detid_ptr = m_detids->cbegin() + start;
+      auto tof_ptr = m_tofs->cbegin() + start;
+      for (size_t i = start; i < end; ++i) {
+        if (no_mask || (!masked->contains(*detid_ptr))) {
+          // apply the calibration
+          subset_tofs.push_back(static_cast<double>(*tof_ptr) * m_calibration->value(*detid_ptr));
+        }
+
+        ++detid_ptr;
+        ++tof_ptr;
+      }
+
       // sort subset of tof vector
-      std::sort(m_tofs->begin() + start, m_tofs->begin() + end);
+      std::sort(subset_tofs.begin(), subset_tofs.end());
       // loop over bin edges and count the number of events in each bin
-      for (size_t i = 0; i < m_binedges->size() - 1; ++i)
-        cum_n[i] +=
-            std::distance(m_tofs->cbegin() + start,
-                          std::lower_bound(m_tofs->cbegin() + start, m_tofs->cbegin() + end, m_binedges->at(i)));
+      auto search_start = subset_tofs.cbegin(); // we can advance the search starting point since binedges are sorted
+      for (size_t i = 0; i < m_binedges->size() - 1; ++i) {
+        search_start = std::lower_bound(search_start, subset_tofs.cend(), m_binedges->at(i));
+        cum_n[i] += std::distance(subset_tofs.cbegin(), search_start);
+      }
 
       // last bin inclusive
       cum_n.back() +=
-          std::distance(m_tofs->cbegin() + start,
-                        std::upper_bound(m_tofs->cbegin() + start, m_tofs->cbegin() + end, m_binedges->back()));
+          std::distance(subset_tofs.cbegin(), std::upper_bound(search_start, subset_tofs.cend(), m_binedges->back()));
     }
 
     for (size_t i = 0; i < cum_n.size() - 1; ++i)
@@ -303,7 +315,7 @@ public:
 
 private:
   const std::vector<detid_t> *m_detids;
-  std::vector<float> *m_tofs;
+  const std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   std::vector<CountsType> *y_temp;
   const std::vector<double> *m_binedges;
