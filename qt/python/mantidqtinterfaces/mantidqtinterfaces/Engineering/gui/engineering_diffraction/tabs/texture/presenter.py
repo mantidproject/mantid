@@ -1,6 +1,7 @@
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
+from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
 from qtpy.QtCore import QTimer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -57,11 +58,14 @@ class TexturePresenter:
 
         for path in filenames:
             ws_name = os.path.splitext(os.path.basename(path))[0]
-            try:
-                Load(Filename=path, OutputWorkspace=ws_name)
-            except Exception as e:
-                logger.warning(f"Failed to load {path}: {e}")
-                continue
+            if ADS.doesExist(ws_name):
+                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
+            else:
+                try:
+                    Load(Filename=path, OutputWorkspace=ws_name)
+                except Exception as e:
+                    logger.warning(f"Failed to load {path}: {e}")
+                    continue
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
 
@@ -139,7 +143,7 @@ class TexturePresenter:
         inc_scatt = self.view.get_inc_scatt_power()
         hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
         out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl)
-        ax_transform = output_settings.get_texture_axes_transform().T
+        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
         readout_col = self.view.get_readout_column()
         plot_exp = self._get_setting("plot_exp_pf", bool)
         contour_kernel = float(self._get_setting("contour_kernel", str))
@@ -173,6 +177,7 @@ class TexturePresenter:
                 peak_thresh,
                 self.rb_num,
                 ax_transform,
+                ax_labels,
                 readout_col,
                 grouping,
                 plot_exp,
@@ -195,6 +200,7 @@ class TexturePresenter:
         peak_thresh,
         rb_num,
         ax_transform,
+        ax_labels,
         readout_col,
         grouping,
         plot_exp,
@@ -204,7 +210,7 @@ class TexturePresenter:
         self.model.make_pole_figure_tables(
             wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_col
         )
-        self.plot_pf(out_ws, self.view.get_projection_method(), readout_col, save_dirs, plot_exp, contour_kernel)
+        self.plot_pf(out_ws, self.view.get_projection_method(), readout_col, save_dirs, plot_exp, ax_labels, contour_kernel)
 
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Corrections Applied")
@@ -222,7 +228,7 @@ class TexturePresenter:
             dialog.finished.connect(self._redraw_on_alg_exec)
             dialog.open()
 
-    def plot_pf(self, pf_ws, proj, readout_col, save_dirs, plot_exp, contour_kernel):
+    def plot_pf(self, pf_ws, proj, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel):
         # Get figure and canvas from view
         fig, canvas = self.view.get_plot_axis()
 
@@ -233,7 +239,14 @@ class TexturePresenter:
         readout_col = "I" if readout_col == "" else readout_col
 
         self.model.plot_pole_figure(
-            pf_ws, proj, fig=fig, readout_col=readout_col, save_dirs=save_dirs, plot_exp=plot_exp, contour_kernel=contour_kernel
+            pf_ws,
+            proj,
+            fig=fig,
+            readout_col=readout_col,
+            save_dirs=save_dirs,
+            plot_exp=plot_exp,
+            ax_labels=ax_labels,
+            contour_kernel=contour_kernel,
         )
 
         canvas.draw()

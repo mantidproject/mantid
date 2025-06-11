@@ -73,11 +73,20 @@ QGroupBox:title {
    </spacer>
   </item>
          <item row="0" column="1">
-       <widget class="QLabel" name="label_RD">
-        <property name="text">
-         <string>RD</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="lineedit_RD">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
       </item>
       <item row="0" column="2">
        <widget class="QLineEdit" name="lineedit_RD0">
@@ -128,11 +137,20 @@ QGroupBox:title {
          </widget>
       </item>
          <item row="1" column="1">
-       <widget class="QLabel" name="label_ND">
-        <property name="text">
-         <string>ND</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="lineedit_ND">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
       </item>
       <item row="1" column="2">
        <widget class="QLineEdit" name="lineedit_ND0">
@@ -183,11 +201,20 @@ QGroupBox:title {
          </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLabel" name="label_TD">
-        <property name="text">
-         <string>TD</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="lineedit_TD">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
       </item>
       <item row="2" column="2">
        <widget class="QLineEdit" name="lineedit_TD0">
@@ -327,6 +354,20 @@ QGroupBox:title {
          <widget class="QLabel" name="label_10">
           <property name="text">
            <string>Euler Angle Scheme</string>
+          </property>
+         </widget>
+        </item>
+         <item row="5" column="2">
+         <widget class="QLineEdit" name="eulerAnglesSense_lineedit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Euler Angles Sense</string>
           </property>
          </widget>
         </item>

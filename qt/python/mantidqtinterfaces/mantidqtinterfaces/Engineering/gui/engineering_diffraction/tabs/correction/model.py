@@ -26,24 +26,24 @@ class TextureCorrectionModel:
     def __init__(self):
         self.reference_ws = None
 
-    def load_all_orientations(self, wss, txt_file, use_euler, euler_scheme):
+    def load_all_orientations(self, wss, txt_file, use_euler, euler_scheme, euler_sense):
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
                 goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
-                goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
+                # goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
                 if not use_euler:
                     # if use euler angles not selected then assumes it is a scans output matrix
                     for iws, ws in enumerate(wss):
-                        SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
+                        NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
                 else:
                     axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
-                    ENGINX_SENSE = [1, -1, 1]
+                    rotation_sense = [int(x) for x in euler_sense.split(",")]
                     for iws, ws in enumerate(wss):
                         angles = goniometer_strings[iws].split(",")
                         kwargs = {}
                         for iang, angle in enumerate(angles):
-                            sense = ENGINX_SENSE[iang]
+                            sense = rotation_sense[iang]
                             kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},{sense}"
                         SetGoniometer(ws, **kwargs)
             except BaseException as e:
@@ -251,7 +251,7 @@ class TextureCorrectionModel:
             shape_enabled = not self._has_no_valid_shape(self.reference_ws)
         return self.reference_ws, shape_enabled, material
 
-    def plot_sample_directions(self, fig, ws_name, ax_transform):
+    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels):
         ax = fig.axes[0]
         if not ws_name:
             ws_name = self.reference_ws
@@ -265,16 +265,16 @@ class TextureCorrectionModel:
         sample_mesh = ws.sample().getShape().getMesh()
         furthest_vertex_from_origin = np.linalg.norm(sample_mesh[:, :, 0], axis=1).max()
         arrow_len = 1.3 * furthest_vertex_from_origin
-        rotated_ax_transform = rotation_matrix @ ax_transform.T
+        rotated_ax_transform = rotation_matrix @ ax_transform
         rd = rotated_ax_transform[:, 0] * arrow_len
         nd = rotated_ax_transform[:, 1] * arrow_len
         td = rotated_ax_transform[:, 2] * arrow_len
         ax.quiver(0, 0, 0, *rd, color="red", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
         ax.quiver(0, 0, 0, *td, color="blue", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
         ax.quiver(0, 0, 0, *nd, color="green", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
-        ax.text(*rd, "RD")
-        ax.text(*nd, "ND")
-        ax.text(*td, "TD")
+        ax.text(*rd, ax_labels[0])
+        ax.text(*nd, ax_labels[1])
+        ax.text(*td, ax_labels[2])
 
 
 # temporary methods until SetGoniometer PR is merged

@@ -124,19 +124,28 @@ class TextureProjection:
         return proj(alphas, betas, i)
 
     def plot_pole_figure(
-        self, ws_name: str, projection: str, fig=None, readout_col="I", save_dirs=None, plot_exp=True, contour_kernel=2.0, **kwargs
+        self,
+        ws_name: str,
+        projection: str,
+        fig=None,
+        readout_col="I",
+        save_dirs=None,
+        plot_exp=True,
+        ax_labels=("Dir1", "Dir2"),
+        contour_kernel=2.0,
+        **kwargs,
     ) -> None:
         pfi = self.get_pole_figure_data(ws_name, projection, readout_col)
 
         if plot_exp:
-            fig = self.plot_exp_pf(pfi, fig, **kwargs)
+            fig = self.plot_exp_pf(pfi, ax_labels, fig, **kwargs)
         else:
-            fig = self.plot_contour_pf(pfi, fig, contour_kernel, **kwargs)
+            fig = self.plot_contour_pf(pfi, ax_labels, fig, contour_kernel, **kwargs)
         if save_dirs:
             for save_dir in save_dirs:
                 fig.savefig(str(path.join(save_dir, ws_name + ".png")))
 
-    def plot_exp_pf(self, pfi, fig=None, **kwargs):
+    def plot_exp_pf(self, pfi, ax_labels, fig=None, **kwargs):
         u = np.linspace(0, 2 * np.pi, 100)
         x = np.cos(u)
         y = np.sin(u)
@@ -151,11 +160,11 @@ class TextureProjection:
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-        ax.text(-0.8, -0.95, "TD", fontsize=10)
-        ax.text(-0.95, -0.8, "RD", fontsize=10)
+        ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
+        ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
         return fig
 
-    def plot_contour_pf(self, pfi, fig=None, contour_kernel=2.0, **kwargs):
+    def plot_contour_pf(self, pfi, ax_labels, fig=None, contour_kernel=2.0, **kwargs):
         x, y, z = pfi[:, 1], pfi[:, 0], pfi[:, 2]
         # Grid definition
         R = 1
@@ -182,8 +191,8 @@ class TextureProjection:
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-        ax.text(-0.8, -0.95, "TD", fontsize=10)
-        ax.text(-0.95, -0.8, "RD", fontsize=10)
+        ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
+        ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
         return fig
 
     def get_pf_table_name(self, wss, fit_params, hkl):
