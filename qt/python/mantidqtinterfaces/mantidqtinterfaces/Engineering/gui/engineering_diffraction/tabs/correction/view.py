@@ -19,6 +19,10 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.finder_corr.setLabelText("Sample Run(s)")
         self.finder_corr.allowMultipleFiles(True)
 
+        self.finder_reference.setLabelText("Reference Workspace")
+        self.finder_reference.allowMultipleFiles(False)
+        self.finder_reference.setFileExtensions([".nxs"])
+
         self.finder_orientation_file.setLabelText("Orientation File")
         self.finder_orientation_file.allowMultipleFiles(False)
         self.finder_orientation_file.setFileExtensions([".txt"])
@@ -64,6 +68,12 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     def set_on_set_ref_ws_orientation_clicked(self, slot):
         self.btn_setRefOrientation.clicked.connect(slot)
+
+    def set_on_save_ref_clicked(self, slot):
+        self.btn_saveRefWS.clicked.connect(slot)
+
+    def set_on_load_ref_clicked(self, slot):
+        self.btn_loadRef.clicked.connect(slot)
 
     def set_on_set_orientation_clicked(self, slot):
         self.btn_setOrientation.clicked.connect(slot)
@@ -169,6 +179,10 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         return self.finder_corr.isSearching()
 
     # ========== Component Getters ==========
+    def get_reference_file(self):
+        fnames = self.finder_reference.getFilenames()
+        return fnames[0] if len(fnames) > 0 else None
+
     def get_orientation_file(self):
         fnames = self.finder_orientation_file.getFilenames()
         return fnames[0] if len(fnames) > 0 else None

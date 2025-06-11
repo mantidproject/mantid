@@ -44,7 +44,9 @@ class TextureCorrectionPresenter:
 
         self.view.set_on_create_ref_ws_clicked(self.on_create_ref_sample_clicked)
         self.view.set_on_set_ref_ws_orientation_clicked(self.open_goniometer_dialog)
+        self.view.set_on_save_ref_clicked(self._on_save_ref_clicked)
         self.view.set_on_view_reference_shape_clicked(self._on_view_ref_shape_clicked)
+        self.view.set_on_load_ref_clicked(self._on_load_ref_clicked)
 
         self.view.set_on_set_orientation_clicked(self.open_goniometer_dialog)
         self.view.set_on_load_sample_shape_clicked(self.open_load_sample_shape_dialog)
@@ -130,6 +132,24 @@ class TextureCorrectionPresenter:
         fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws)
         ax_transform, ax_labels = output_settings.get_texture_axes_transform()
         self.model.plot_sample_directions(fig, None, ax_transform, ax_labels)
+
+    def _on_save_ref_clicked(self):
+        self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
+
+    def _on_load_ref_clicked(self):
+        path = self.view.get_reference_file()
+        if path:
+            ws_name = os.path.splitext(os.path.basename(path))[0]
+            if ADS.doesExist(ws_name):
+                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
+                self.model.set_reference_ws(ws_name)
+            else:
+                try:
+                    Load(Filename=path, OutputWorkspace=ws_name)
+                    self.model.set_reference_ws(ws_name)
+                except Exception as e:
+                    logger.warning(f"Failed to load {path}: {e}")
+            self.update_reference_info()
 
     def on_apply_clicked(self):
         wss = self.view.get_selected_workspaces()
@@ -242,7 +262,7 @@ class TextureCorrectionPresenter:
             self.view.finder_gauge_vol.setVisible(False)
 
     def on_create_ref_sample_clicked(self):
-        self.model.create_reference_ws(self.rb_num)
+        self.model.create_reference_ws(self.rb_num, self.instrument)
         self.update_reference_info()
 
     def update_reference_info(self):
