@@ -85,10 +85,14 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        projection = self._model.calculate_projection(is_spherical, axis)
-        projection_mesh = self.createPolyDataMesh(projection)
+        self._model.calculate_projection(is_spherical, axis)
+        projection_mesh = self.createPolyDataMesh(self._model.detector_positions_projection())
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
+
+        self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_positions_projection())
+        self._pickable_projection_mesh["visibility"] = np.array(list(self._model.detector_visibility.values())).astype(int)
+        self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
 
     def set_contour_limits(self, min: int, max: int) -> None:
         self._contour_limits = [min, max]
@@ -126,9 +130,10 @@ class FullInstrumentViewPresenter:
         self._model.negate_picked_visibility(detector_indices)
         # Update to visibility shows up in the plot in real time
         self._picked_detector_mesh["visibility"] = list(self._model.detector_visibility.values())
-        visible_detectors = [key for key, val in self._model.detector_visibility.items() if val]
-        self.show_plot_for_detectors(visible_detectors)
-        self.show_info_text_for_detectors(visible_detectors)
+        self._pickable_projection_mesh["visibility"] = list(self._model.detector_visibility.values())
+        visible_detector_indices = [key for key, val in self._model.detector_visibility.items() if val]
+        self.show_plot_for_detectors(visible_detector_indices)
+        self.show_info_text_for_detectors(visible_detector_indices)
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
