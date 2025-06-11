@@ -108,12 +108,12 @@ class FullInstrumentViewModel:
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
         self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
-        self.detector_visibility = {id: False for id in self._detector_indices}
-        self.detector_position_projection_map = {}
+        self._detector_visibility_map = {id: False for id in self._detector_indices}
+        self._detector_position_projection_map = {}
 
     def negate_picked_visibility(self, detector_indices: list[int]) -> None:
         for id in detector_indices:
-            self.detector_visibility[id] = not self.detector_visibility[id]
+            self._detector_visibility_map[id] = not self._detector_visibility_map[id]
 
     def _union_with_current_bin_min_max(self, bin_edge) -> None:
         """Expand current bin limits to include new bin edge"""
@@ -144,11 +144,17 @@ class FullInstrumentViewModel:
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
-    def detector_positions(self) -> list:
+    def detector_main_positions(self) -> list:
         return list(self._detector_position_map.values())
 
-    def detector_positions_projection(self) -> list:
-        return list(self.detector_position_projection_map.values())
+    def detector_projection_positions(self) -> list:
+        return list(self._detector_position_projection_map.values())
+
+    def detector_visibility(self) -> np.ndarray:
+        return np.array(list(self._detector_visibility_map.values())).astype(int)
+
+    def picked_detector_indices(self) -> list:
+        return [key for key, val in self._detector_visibility_map.items() if val]
 
     def detector_counts(self) -> np.ndarray:
         return self._detector_counts
@@ -304,6 +310,6 @@ class FullInstrumentViewModel:
         )
         for det_id in range(len(self._detector_indices)):
             x, y = projection.coordinate_for_detector(det_id)
-            self.detector_position_projection_map[det_id] = DetectorPosition([x, y, 0])
+            self._detector_position_projection_map[det_id] = DetectorPosition([x, y, 0])
 
-        return list(self.detector_position_projection_map.values())
+        return list(self._detector_position_projection_map.values())

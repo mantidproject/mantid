@@ -40,16 +40,16 @@ class FullInstrumentViewPresenter:
         self._view.set_camera_focal_point(self._model.sample_position())
 
         self._counts_label = "Integrated Counts"
-        self._detector_mesh = self.createPolyDataMesh(self._model.detector_positions())
+        self._detector_mesh = self.createPolyDataMesh(self._model.detector_main_positions())
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
 
-        self._view.add_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=False)
+        self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=False)
         self._view.set_contour_range_limits(self._contour_limits)
 
-        self._picked_detector_mesh = self.createPolyDataMesh(self._model.detector_positions())
-        self._picked_detector_mesh["visibility"] = np.zeros(self._picked_detector_mesh.number_of_points)
-        self._view.add_picked_mesh(self._picked_detector_mesh, scalars="visibility", pickable=True)
+        self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_main_positions())
+        self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
+        self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility", pickable=True)
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
@@ -86,12 +86,12 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        projection_mesh = self.createPolyDataMesh(self._model.detector_positions_projection())
+        projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
 
-        self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_positions_projection())
-        self._pickable_projection_mesh["visibility"] = np.array(list(self._model.detector_visibility.values())).astype(int)
+        self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
+        self._pickable_projection_mesh["visibility"] = self._model.detector_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
 
     def set_contour_limits(self, min: int, max: int) -> None:
@@ -128,10 +128,12 @@ class FullInstrumentViewPresenter:
 
     def update_picked_detectors(self, detector_indices: list[int]) -> None:
         self._model.negate_picked_visibility(detector_indices)
-        # Update to visibility shows up in the plot in real time
-        self._picked_detector_mesh["visibility"] = list(self._model.detector_visibility.values())
-        self._pickable_projection_mesh["visibility"] = list(self._model.detector_visibility.values())
-        visible_detector_indices = [key for key, val in self._model.detector_visibility.items() if val]
+
+        # Update to visibility shows up in real time
+        self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
+        self._pickable_projection_mesh["visibility"] = self._model.detector_visibility()
+
+        visible_detector_indices = self._model.picked_detector_indices()
         self.show_plot_for_detectors(visible_detector_indices)
         self.show_info_text_for_detectors(visible_detector_indices)
 
