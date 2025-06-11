@@ -105,13 +105,7 @@ class FullInstrumentViewPresenter:
             return
         point_index = picker.GetPointId()
         detector_index = self._model.detector_index(point_index)
-
-        visibility = self._model.negate_picked_detector([detector_index])
-        # Update to visibility shows up in the plot in real time
-        self._picked_detector_mesh["visibility"] = visibility
-
-        self.show_plot_for_detectors([detector_index])
-        self.show_info_text_for_detectors([detector_index])
+        self.update_picked_detectors([detector_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:
         """Change between single and multi point picking"""
@@ -122,10 +116,19 @@ class FullInstrumentViewPresenter:
 
     def rectangle_picked(self, rectangle):
         """Get points within the selection rectangle and display information for those detectors"""
-        selected_points = rectangle.frustum_mesh.points
-        points = set([self._detector_mesh.find_closest_point(p) for p in selected_points])
-        self.show_plot_for_detectors(points)
-        self.show_info_text_for_detectors(points)
+        selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
+        selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
+        selected_point_ids = np.argwhere(selected_mask).flatten()
+        selected_detector_indices = [self._model.detector_index(id) for id in selected_point_ids]
+        self.update_picked_detectors(selected_detector_indices)
+
+    def update_picked_detectors(self, detector_indices: list[int]) -> None:
+        self._model.negate_picked_visibility(detector_indices)
+        # Update to visibility shows up in the plot in real time
+        self._picked_detector_mesh["visibility"] = list(self._model.detector_visibility.values())
+        visible_detectors = [key for key, val in self._model.detector_visibility.items() if val]
+        self.show_plot_for_detectors(visible_detectors)
+        self.show_info_text_for_detectors(visible_detectors)
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
