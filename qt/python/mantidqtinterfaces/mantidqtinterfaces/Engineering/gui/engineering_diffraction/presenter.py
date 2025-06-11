@@ -12,7 +12,7 @@ from .tabs.calibration.presenter import CalibrationPresenter
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
-from .tabs.correction.model import TextureCorrectionModel
+from .tabs.correction.model import CorrectionModel
 from .tabs.correction.view import TextureCorrectionView
 from .tabs.correction.presenter import TextureCorrectionPresenter
 from .tabs.fitting.view import FittingView
@@ -20,7 +20,7 @@ from .tabs.fitting.presenter import FittingPresenter
 from .tabs.gsas2.model import GSAS2Model
 from .tabs.gsas2.presenter import GSAS2Presenter
 from .tabs.gsas2.view import GSAS2View
-from .tabs.texture.model import TextureProjection
+from .tabs.texture.model import ProjectionModel
 from .tabs.texture.view import TextureView
 from .tabs.texture.presenter import TexturePresenter
 from .settings.settings_model import SettingsModel
@@ -73,7 +73,7 @@ class EngineeringDiffractionPresenter(object):
         view.tabs.addTab(focus_view, "Focus")
 
     def setup_correction(self, view):
-        correction_model = TextureCorrectionModel()
+        correction_model = CorrectionModel()
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
         view.tabs.addTab(correction_view, "Absorption Correction")
@@ -93,7 +93,7 @@ class EngineeringDiffractionPresenter(object):
         view.tabs.addTab(gsas2_view, "GSAS II")
 
     def setup_texture(self, view):
-        texture_model = TextureProjection()
+        texture_model = ProjectionModel()
         texture_view = TextureView()
         self.texture_presenter = TexturePresenter(texture_model, texture_view)
         view.tabs.addTab(texture_view, "Texture")
