@@ -38,6 +38,10 @@ if [[ $OSTYPE == "msys"* ]]; then
     BUILD_OPTIONS="$BUILD_OPTIONS --config Release"
 fi
 
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+    EXTRA_CMAKE_FLAGS+=" -DPR_JOB=True"
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
