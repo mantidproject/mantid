@@ -93,7 +93,7 @@ function(add_sphinx_build_target builder math_renderer)
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
       DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
+      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m sphinx.cmd.build
       ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
     COMMENT "Building ${builder} documentation using ${math_renderer}"
