@@ -31,9 +31,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_update_time_of_flight_range(self):
         integrated_spectra = list(range(len(self._ws.spectrumInfo())))
         self._model._workspace = mock.MagicMock()
-        self._model._workspace.getIntegratedSpectra.return_value = integrated_spectra
+        self._model._workspace.getIntegratedCountsForWorkspaceIndices.return_value = integrated_spectra
         self._model.update_time_of_flight_range(200, 10000, False)
-        self._model._workspace.getIntegratedSpectra.assert_called_once()
+        self._model._workspace.getIntegratedCountsForWorkspaceIndices.assert_called_once()
         self.assertEqual(min(integrated_spectra), self._model._data_min)
         self.assertEqual(max(integrated_spectra), self._model._data_max)
 

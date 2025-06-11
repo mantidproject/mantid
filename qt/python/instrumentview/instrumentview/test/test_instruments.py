@@ -8,6 +8,7 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 
+@unittest.skip("These tests take a long time to run, so are skipped by default, but are useful for manual testing.")
 class TestEmptyInstruments(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
