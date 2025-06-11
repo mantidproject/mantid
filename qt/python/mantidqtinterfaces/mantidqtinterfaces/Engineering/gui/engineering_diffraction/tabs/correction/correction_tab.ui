@@ -229,7 +229,9 @@ QGroupBox:title {
    }
   </string>
  </property>
-     <layout class="QHBoxLayout">
+     <layout class="QVBoxLayout">
+         <item>
+             <layout class="QHBoxLayout">
       <item>
        <widget class="QPushButton" name="btn_createRefWS">
         <property name="text">
@@ -243,6 +245,42 @@ QGroupBox:title {
          <string>Set Reference Orientation</string>
         </property>
        </widget>
+      </item>
+                 <item>
+       <widget class="QPushButton" name="btn_saveRefWS">
+        <property name="text">
+         <string>Save Reference Workspace</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+         </item>
+         <item>
+      <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+      </item>
+         <item>
+             <layout class="QHBoxLayout">
+                 <item>
+       <widget class="FileFinderWidget" name="finder_reference" native="true"/>
+      </item>
+                 <item>
+       <widget class="QPushButton" name="btn_loadRef">
+        <property name="text">
+         <string>Load Reference</string>
+        </property>
+       </widget>
+      </item>
+             </layout>
       </item>
      </layout>
     </widget>

@@ -239,9 +239,16 @@ class TextureCorrectionModel:
             )
         self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration)
 
-    def create_reference_ws(self, rb_num):
-        self.reference_ws = f"{rb_num}_reference_workspace"
-        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace=self.reference_ws)
+    def create_reference_ws(self, rb_num, instr="ENGINX"):
+        self.set_reference_ws(f"{rb_num}_reference_workspace")
+        LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
+
+    def save_reference_file(self, rb_num, calibration, root_dir):
+        if self.reference_ws and ADS.doesExist(self.reference_ws):
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, calibration)
+
+    def set_reference_ws(self, ws_name):
+        self.reference_ws = ws_name
 
     def get_reference_info(self):
         material = "Not set"
