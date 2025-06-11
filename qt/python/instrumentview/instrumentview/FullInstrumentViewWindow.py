@@ -238,16 +238,36 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
 
+        self.projection_plotter.disable_picking()
+        if not self.projection_plotter.off_screen:
+            self.projection_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
+
     def enable_rectangle_picking(self, callback=None) -> None:
         """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
 
-    def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
+    def add_projection_mesh(self, mesh, scalars=None, clim=None, pickable=False) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.clear()
-        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
+        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=pickable)
+        self.projection_plotter.view_xy()
+        if not self.projection_plotter.off_screen:
+            self.projection_plotter.enable_image_style()
+
+    def add_pickable_projection_mesh(self, mesh, scalars=None, pickable=True) -> None:
+        """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
+        self.projection_plotter.add_mesh(
+            mesh,
+            scalars=scalars,
+            opacity=[0.0, 0.5],
+            show_scalar_bar=False,
+            pickable=pickable,
+            color="red",
+            point_size=20,
+            render_points_as_spheres=True,
+        )
         self.projection_plotter.view_xy()
         if not self.projection_plotter.off_screen:
             self.projection_plotter.enable_image_style()

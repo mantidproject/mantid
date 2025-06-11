@@ -109,6 +109,7 @@ class FullInstrumentViewModel:
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
         self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
         self.detector_visibility = {id: False for id in self._detector_indices}
+        self.detector_position_projection_map = {}
 
     def negate_picked_visibility(self, detector_indices: list[int]) -> None:
         for id in detector_indices:
@@ -145,6 +146,9 @@ class FullInstrumentViewModel:
 
     def detector_positions(self) -> list:
         return list(self._detector_position_map.values())
+
+    def detector_positions_projection(self) -> list:
+        return list(self.detector_position_projection_map.values())
 
     def detector_counts(self) -> np.ndarray:
         return self._detector_counts
@@ -298,8 +302,8 @@ class FullInstrumentViewModel:
             if is_spherical
             else iv_cylindrical.cylindrical_projection(self._workspace, self._detector_indices, axis)
         )
-        projection_points = []
         for det_id in range(len(self._detector_indices)):
             x, y = projection.coordinate_for_detector(det_id)
-            projection_points.append([x, y, 0])
-        return projection_points
+            self.detector_position_projection_map[det_id] = DetectorPosition([x, y, 0])
+
+        return list(self.detector_position_projection_map.values())
