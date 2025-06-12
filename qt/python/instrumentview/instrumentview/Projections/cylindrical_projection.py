@@ -11,11 +11,11 @@ import numpy as np
 class cylindrical_projection(projection):
     """2D projection with a cylindrical coordinate system, see https://en.wikipedia.org/wiki/Cylindrical_coordinate_system"""
 
-    def __init__(self, workspace, detector_indices, axis: np.ndarray):
-        super().__init__(workspace, detector_indices, axis)
+    def __init__(self, workspace, detectors, axis: np.ndarray):
+        super().__init__(workspace, detectors, axis)
 
-    def _calculate_2d_coordinates(self, detector_index: int) -> tuple[float, float]:
-        detector_relative_position = np.array(self._component_info.position(detector_index)) - self._sample_position
+    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[float, float]:
+        detector_relative_position = detector_position - self._sample_position
         z = detector_relative_position.dot(self._projection_axis)
         x = detector_relative_position.dot(self._x_axis)
         y = detector_relative_position.dot(self._y_axis)

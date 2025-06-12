@@ -29,7 +29,7 @@ class FullInstrumentViewPresenter:
         pv.global_theme.allow_empty_mesh = True
 
         self._view = view
-        self._model = FullInstrumentViewModel(workspace, draw_detector_geometry=False)
+        self._model = FullInstrumentViewModel(workspace)
 
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
@@ -40,14 +40,14 @@ class FullInstrumentViewPresenter:
         self._view.set_camera_focal_point(self._model.sample_position())
 
         self._counts_label = "Integrated Counts"
-        self._detector_mesh = self.createPolyDataMesh(self._model.detector_main_positions())
+        self._detector_mesh = self.createPolyDataMesh(self._model.detector_positions())
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
 
         self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=False)
         self._view.set_contour_range_limits(self._contour_limits)
 
-        self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_main_positions())
+        self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_positions())
         self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility", pickable=True)
 
@@ -107,8 +107,7 @@ class FullInstrumentViewPresenter:
         """For the given point, get the detector index and show all the information for that detector"""
         if point is None:
             return
-        point_index = picker.GetPointId()
-        detector_index = self._model.detector_index(point_index)
+        detector_index = picker.GetPointId()
         self.update_picked_detectors([detector_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:
@@ -122,8 +121,7 @@ class FullInstrumentViewPresenter:
         """Get points within the selection rectangle and display information for those detectors"""
         selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
         selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-        selected_point_ids = np.argwhere(selected_mask).flatten()
-        selected_detector_indices = [self._model.detector_index(id) for id in selected_point_ids]
+        selected_detector_indices = np.argwhere(selected_mask).flatten()
         self.update_picked_detectors(selected_detector_indices)
 
     def update_picked_detectors(self, detector_indices: list[int]) -> None:
@@ -151,13 +149,11 @@ class FullInstrumentViewPresenter:
         rgba[:, 3] = alpha
         return rgba
 
-    def show_plot_for_detectors(self, detector_indices: Iterable[int]) -> None:
+    def show_plot_for_detectors(self, detector_ids: Iterable[int]) -> None:
         """Show line plot for specified detectors"""
-        self._view.show_plot_for_detectors(
-            self._model.workspace(), [self._model.workspace_index_from_detector_index(d) for d in detector_indices]
-        )
+        self._view.show_plot_for_detectors(self._model.workspace(), [self._model.workspace_index_from_detector_id(d) for d in detector_ids])
 
-    def show_info_text_for_detectors(self, detector_indices: Iterable[int]) -> None:
+    def show_info_text_for_detectors(self, detector_ids: Iterable[int]) -> None:
         """Show text information for specified detectors"""
-        detector_infos = [self._model.get_detector_info_text(d) for d in detector_indices]
+        detector_infos = [self._model.get_detector_info_text(d) for d in detector_ids]
         self._view.update_selected_detector_info(detector_infos)
