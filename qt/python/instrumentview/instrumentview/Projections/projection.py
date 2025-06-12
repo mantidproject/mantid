@@ -7,6 +7,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from joblib import Parallel, delayed
+from instrumentview.Detectors import Detector
 
 
 class projection(ABC):
@@ -21,21 +22,21 @@ class projection(ABC):
     _x_range = None
     _y_range = None
 
-    def __init__(self, workspace, detector_indices, axis: np.ndarray):
+    def __init__(self, workspace, detectors: list[Detector], axis: np.ndarray):
         """For the given workspace and detectors, calculate 2D points with specified projection axis"""
-        self._component_info = workspace.componentInfo()
-        self._sample_position = np.array(self._component_info.samplePosition())
-        self._detector_indices = detector_indices
+        component_info = workspace.componentInfo()
+        self._sample_position = np.array(component_info.samplePosition())
+        self._detectors = detectors
         self._projection_axis = np.array(axis)
-        self._calculate_axes()
+        root_position = np.array(component_info.position(0))
+        self._calculate_axes(root_position)
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
 
-    def _calculate_axes(self):
+    def _calculate_axes(self, root_position: np.ndarray) -> None:
         """The projection axis is specified, we calculate a 3D coordinate system based on that"""
-        position = np.array(self._component_info.position(0))
-        z = position.dot(self._projection_axis)
-        if z == 0 or np.abs(z) == np.linalg.norm(position):
+        z = root_position.dot(self._projection_axis)
+        if z == 0 or np.abs(z) == np.linalg.norm(root_position):
             # Find the shortest projection of the projection axis and direct the x axis along it
             if np.abs(self._projection_axis[2]) < np.abs(self._projection_axis[1]):
                 self._x_axis = np.array([0, 0, 1])
@@ -44,30 +45,27 @@ class projection(ABC):
             else:
                 self._x_axis = np.array([1, 0, 0])
         else:
-            x_axis = position - z * self._projection_axis
+            x_axis = root_position - z * self._projection_axis
             self._x_axis = x_axis / np.linalg.norm(x_axis)
 
         self._y_axis = np.cross(self._projection_axis, self._x_axis)
 
     @abstractmethod
-    def _calculate_2d_coordinates(self, detector_index: int) -> tuple[float, float]:
+    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[float, float]:
         pass
 
     def _calculate_detector_coordinates(self):
         """Calculate 2D projection coordinates and store data"""
-        x_values = np.zeros(len(self._detector_indices), dtype=np.float32)
-        y_values = np.zeros(len(self._detector_indices), dtype=np.float32)
+        x_values = np.zeros(len(self._detectors), dtype=np.float32)
+        y_values = np.zeros(len(self._detectors), dtype=np.float32)
 
-        def store_2d_coordinates(index: int, det_id: int) -> None:
-            x, y = self._calculate_2d_coordinates(det_id)
+        def store_2d_coordinates(index: int) -> None:
+            x, y = self._calculate_2d_coordinates(self._detectors[index].position)
             x_values[index] = x
             y_values[index] = y
 
-        detector_loop_indices = range(len(self._detector_indices))
-        Parallel(n_jobs=-1, prefer="threads")(
-            delayed(store_2d_coordinates)(detector_index, self._detector_indices[detector_index])
-            for detector_index in detector_loop_indices
-        )
+        detector_loop_indices = range(len(self._detectors))
+        Parallel(n_jobs=-1, prefer="threads")(delayed(store_2d_coordinates)(detector_index) for detector_index in detector_loop_indices)
 
         self._detector_x_coordinates = x_values
         self._detector_y_coordinates = y_values
@@ -85,9 +83,7 @@ class projection(ABC):
         if bin_width == 0.0:
             return
 
-        for i in range(len(self._detector_indices)):
-            if not self._component_info.hasValidShape(self._detector_indices[i]):
-                continue
+        for i in range(len(self._detectors)):
             x = self._detector_x_coordinates[i]
             bin_i = int((x - self._x_range[0]) / bin_width)
             x_bins[bin_i] = True
@@ -114,9 +110,7 @@ class projection(ABC):
             self._x_range = (x_to, x_from)
             if self._x_range[0] > self._x_range[1]:
                 self._x_range = (self._x_range[0], self._x_range[1] + self._u_period)
-            for i in range(len(self._detector_indices)):
-                if not self._component_info.hasValidShape(self._detector_indices[i]):
-                    continue
+            for i in range(len(self._detectors)):
                 self._apply_x_correction(i)
 
     def _apply_x_correction(self, i: int) -> None:
