@@ -309,8 +309,12 @@ public:
       subset_tofs.clear();
     }
 
-    for (size_t i = 0; i < cum_n.size() - 1; ++i)
-      y_temp->at(i) += static_cast<uint32_t>(cum_n[i + 1] - cum_n[i]);
+    for (size_t i = 0; i < cum_n.size() - 1; ++i) {
+      uint32_t count = static_cast<uint32_t>(cum_n[i + 1] - cum_n[i]);
+      if (count > 0) {
+        (*y_temp)[i].fetch_add(count, std::memory_order_relaxed);
+      }
+    }
   }
 
 private:
