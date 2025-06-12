@@ -24,7 +24,7 @@ from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
-from instrumentview.DetectorInfo import DetectorInfo
+from instrumentview.Detectors import DetectorInfo
 from typing import Callable
 import numpy as np
 
