@@ -271,48 +271,36 @@ public:
         masked(masked), no_mask(masked->empty()), m_events_blocksize(events_blocksize) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-    // This follows the algorithm from numpy.histogram
+    // Fast histogramming without sorting or cumulative counting
 
-    // create output vector same size as binedges
-    std::vector<size_t> cum_n(m_binedges->size(), 0);
+    // Precompute bin edges for fast lookup
+    const auto &binedges = *m_binedges;
+    const size_t nbins = binedges.size() - 1;
 
-    // create a subset of the tof vector with masked pixels removed and calibration applied
-    std::vector<double> subset_tofs;
-    subset_tofs.reserve(m_events_blocksize);
+    // Local histogram for this block/thread
+    std::vector<uint32_t> local_hist(nbins, 0);
 
-    // process the events in blocks, extracting a subset of the tof vector before sorting and histogramming it
-    for (size_t start = range.begin(); start < range.end(); start += m_events_blocksize) {
-      const size_t end = std::min(start + m_events_blocksize, range.end());
+    for (size_t i = range.begin(); i < range.end(); ++i) {
+      const detid_t detid = (*m_detids)[i];
+      if (no_mask || (masked->find(detid) == masked->end())) {
+        // Apply calibration
+        double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
 
-      auto detid_ptr = m_detids->cbegin() + start;
-      auto tof_ptr = m_tofs->cbegin() + start;
-      for (size_t i = start; i < end; ++i) {
-        if (no_mask || (!masked->contains(*detid_ptr))) {
-          // apply the calibration
-          subset_tofs.push_back(static_cast<double>(*tof_ptr) * m_calibration->value(*detid_ptr));
+        // Find the bin index using binary search
+        auto it = std::upper_bound(binedges.begin(), binedges.end(), tof);
+        size_t bin =
+            (it == binedges.begin() || it == binedges.end()) ? nbins : static_cast<size_t>(it - binedges.begin() - 1);
+
+        if (bin < nbins) {
+          local_hist[bin]++;
         }
-
-        ++detid_ptr;
-        ++tof_ptr;
       }
-
-      // sort subset of tof vector
-      std::sort(subset_tofs.begin(), subset_tofs.end());
-      // loop over bin edges and count the number of events in each bin
-      auto search_start = subset_tofs.cbegin(); // we can advance the search starting point since binedges are sorted
-      for (size_t i = 0; i < m_binedges->size(); ++i) {
-        search_start = std::lower_bound(search_start, subset_tofs.cend(), m_binedges->at(i));
-        cum_n[i] += std::distance(subset_tofs.cbegin(), search_start);
-      }
-
-      // clear the subset for the next block
-      subset_tofs.clear();
     }
 
-    for (size_t i = 0; i < cum_n.size() - 1; ++i) {
-      uint32_t count = static_cast<uint32_t>(cum_n[i + 1] - cum_n[i]);
-      if (count > 0) {
-        (*y_temp)[i].fetch_add(count, std::memory_order_relaxed);
+    // Atomically add local histogram to global
+    for (size_t i = 0; i < nbins; ++i) {
+      if (local_hist[i] > 0) {
+        (*y_temp)[i].fetch_add(local_hist[i], std::memory_order_relaxed);
       }
     }
   }
