@@ -512,8 +512,10 @@ class PyChopGui(QMainWindow):
             for ie, ei in enumerate(eis):
                 with warnings.catch_warnings(record=True):
                     warnings.simplefilter("always", UserWarning)
-                    flux[ie] = self.engine.getFlux(ei)
-                    elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                    # flux[ie] = self.engine.getFlux(ei)
+                    # elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                    flux[ie] = self.presenter.current_instrument.getFlux(ei)
+                    elres[ie] = self.presenter.current_instrument.getResolution(0.0, ei)[0]
             if not overplot:
                 self.flxaxes1.clear()
                 self.flxaxes2.clear()
@@ -565,9 +567,12 @@ class PyChopGui(QMainWindow):
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
                 if inst == prevInst and chop == prevChop and abs(ei - float(prevEi)) < 0.01:
                     return
-        freq0 = self.engine.getFrequency()
-        rep = self.engine.moderator.source_rep
-        maxfreq = self.engine.chopper_system.max_frequencies
+        # freq0 = self.engine.getFrequency()
+        # rep = self.engine.moderator.source_rep
+        # maxfreq = self.engine.chopper_system.max_frequencies
+        freq0 = self.presenter.current_instrument.getFrequency()
+        rep = self.presenter.current_instrument.moderator.source_rep
+        maxfreq = self.presenter.current_instrument.chopper_system.max_frequencies
         freqs = range(rep, (maxfreq[0] if hasattr(maxfreq, "__len__") else maxfreq) + 1, rep)
         flux = np.zeros(len(freqs))
         elres = np.zeros(len(freqs))
@@ -578,8 +583,8 @@ class PyChopGui(QMainWindow):
                 self.setFreq(manual_freq=freq)
             with warnings.catch_warnings(record=True):
                 warnings.simplefilter("always", UserWarning)
-                flux[ie] = self.engine.getFlux(ei)
-                elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                flux[ie] = self.presenter.current_instrument.getFlux(ei)
+                elres[ie] = self.presenter.current_instrument.getResolution(0.0, ei)[0]
         if not overplot:
             self.frqaxes1.clear()
             self.frqaxes2.clear()

@@ -170,3 +170,5 @@ class PyChopPresenter:
 
         # return calculations to View
         return {"eis": eis, "res": res, "flux": flux, "errormess": errormess}
+
+    ## add getFlux and getResolution helper functions
