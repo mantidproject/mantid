@@ -56,17 +56,7 @@ template <> NXnumtype getType<float>() { return NXnumtype::FLOAT32; }
 
 template <> NXnumtype getType<double>() { return NXnumtype::FLOAT64; }
 
-template <> NXnumtype getType<int8_t>() { return NXnumtype::INT8; }
-
-template <> NXnumtype getType<uint8_t>() { return NXnumtype::UINT8; }
-
-template <> NXnumtype getType<int16_t>() { return NXnumtype::INT16; }
-
-template <> NXnumtype getType<uint16_t>() { return NXnumtype::UINT16; }
-
 template <> NXnumtype getType<int32_t>() { return NXnumtype::INT32; }
-
-template <> NXnumtype getType<uint32_t>() { return NXnumtype::UINT32; }
 
 template <> NXnumtype getType<int64_t>() { return NXnumtype::INT64; }
 
@@ -102,6 +92,7 @@ public:
 
     ASSERT_OKAY(NXclose(fid), "Nxclose file");
     TS_ASSERT(std::filesystem::exists(filename));
+    TS_ASSERT_EQUALS(fid, nullptr);
   }
 
   void test_can_open_existing() {
@@ -531,13 +522,13 @@ public:
     // put/get a string
     cout << "\nread/write string...\n";
     // NOTE: whitespace is not stripped, so `out` must have EXACTLY the same length a `in`
-    string in("this is a string"), out(in.size(), ' ');
+    string in("this is a string"), out(in.size(), 'X');
     string name("string_data_2");
 
     // NOTE: to properly set the DataSpace, should be `dims {in.size(), 1}` and use rank = 2
     // However, that seems to contradict notes inside napi5 about rank for string data
-    // Using rank = 1 works, but the DataSpace will regisrer size = 1
-    DimVector dims{in.size()};
+    // Using rank = 1 works, but the DataSpace will register size = 1
+    DimVector dims{static_cast<dimsize_t>(in.size())};
     ASSERT_OKAY(NXmakedata64(fid, name.c_str(), NXnumtype::CHAR, 1, dims.data()), "failed to make data");
     ASSERT_OKAY(NXopendata(fid, name.c_str()), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, in.data()), "failed to put data");
@@ -550,108 +541,93 @@ public:
     ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
-  // void test_data_putget_array() {
-  //   cout << "\ntest dataset read/write -- arrays\n";
+  void test_data_putget_array() {
+    cout << "\ntest dataset read/write -- arrays\n";
 
-  //   // open a file
-  //   FileResource resource("test_napi_file_dataRW.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   file.makeGroup("entry", "NXentry", true);
+    // open a file
+    FileResource resource("test_napi_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   // put/get an int
-  //   file.makeData("data_int", NeXus::getType<int32_t>(), 4, true);
-  //   int in[] = {12, 7, 2, 3}, out[4];
-  //   file.putData(&(in[0]));
-  //   Info info = file.getInfo();
-  //   file.getData(&(out[0]));
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 4);
-  //   for (int i = 0; i < 4; i++) {
-  //     TS_ASSERT_EQUALS(in[i], out[i]);
-  //   }
+    // put/get an int
+    int in[4] = {12, 7, 2, 3}, out[4];
+    DimVector dims{4};
+    ASSERT_OKAY(NXmakedata64(fid, "data_int", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data_int"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, in), "failed to put data");
+    DimVector dimsout{0, 0, 0, 0};
+    int rank;
+    NXnumtype datatype;
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    ASSERT_OKAY(NXgetdata(fid, &(out[0])), "failed to get data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+    // confirm
+    TS_ASSERT_EQUALS(rank, 1);
+    TS_ASSERT_EQUALS(dimsout.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(in[i], out[i]);
+    }
+    TS_ASSERT_EQUALS(datatype, NXnumtype::INT32);
 
-  //   // put/get double array
-  //   file.makeData("data_double", NeXus::getType<double>(), 4, true);
-  //   double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
-  //   file.putData(&(ind[0]));
-  //   info = file.getInfo();
-  //   file.getData(&(outd[0]));
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 4);
-  //   for (int i = 0; i < 4; i++) {
-  //     TS_ASSERT_EQUALS(ind[i], outd[i]);
-  //   }
+    // put/get double array
+    double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
+    dims = {4};
+    ASSERT_OKAY(NXmakedata64(fid, "data_double", NXnumtype::FLOAT64, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data_double"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, ind), "failed to put data");
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    ASSERT_OKAY(NXgetdata(fid, outd), "failed to get data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+    // confirm
+    TS_ASSERT_EQUALS(rank, 1);
+    TS_ASSERT_EQUALS(dimsout.front(), 4);
+    for (int i = 0; i < 4; i++) {
+      TS_ASSERT_EQUALS(ind[i], outd[i]);
+    }
+    TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
 
-  //   // put/get double 2D array
-  //   DimVector dims{3, 2};
-  //   double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
-  //   double outdd[3][2];
-  //   file.makeData("data_double_2d", NeXus::getType<double>(), dims, true);
-  //   file.putData(&(indd[0][0]));
-  //   info = file.getInfo();
-  //   file.getData(&(outdd[0][0]));
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 2);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 3);
-  //   TS_ASSERT_EQUALS(info.dims.back(), 2);
-  //   for (dimsize_t i = 0; i < dims[0]; i++) {
-  //     for (dimsize_t j = 0; j < dims[1]; j++) {
-  //       TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
-  //     }
-  //   }
+    // put/get double 2D array
+    double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}}, outdd[3][2];
+    dims = {3, 2};
+    ASSERT_OKAY(NXmakedata64(fid, "data_double_2d", NXnumtype::FLOAT64, 2, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data_double_2d"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, indd), "failed to put data");
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    ASSERT_OKAY(NXgetdata(fid, outdd), "failed to get data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+    // confirm
+    TS_ASSERT_EQUALS(rank, 2);
+    TS_ASSERT_EQUALS(dimsout[0], 3);
+    TS_ASSERT_EQUALS(dimsout[1], 2);
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      for (dimsize_t j = 0; j < dims[1]; j++) {
+        TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
+      }
+    }
+    TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
 
-  //   // put/get a char array
-  //   char word[] = "silicovolcaniosis";
-  //   char read[18];
-  //   file.makeData("data_char", NeXus::getType<char>(), 17, true);
-  //   file.putData(word);
-  //   info = file.getInfo();
-  //   file.getData(read);
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 17);
-  // }
-
-  // void test_data_putget_vector() {
-  //   cout << "\ntest dataset read/write -- vector\n";
-
-  //   // open a file
-  //   FileResource resource("test_napi_file_dataRW_vec.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   file.makeGroup("entry", "NXentry", true);
-
-  //   // put/get an int vector
-  //   vector<int32_t> in{11, 8, 9, 12}, out;
-  //   file.makeData("data_int", NeXus::getType<int32_t>(), in.size(), true);
-  //   file.putData(in);
-  //   file.getData(out);
-  //   Info info = file.getInfo();
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), in.size());
-  //   TS_ASSERT_EQUALS(in, out);
-
-  //   // put/get a double vector
-  //   vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
-  //   file.makeData("data_dbl", NeXus::getType<double>(), ind.size(), true);
-  //   file.putData(ind);
-  //   file.getData(outd);
-  //   info = file.getInfo();
-  //   file.closeData();
-  //   // confirm
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), ind.size());
-  //   TS_ASSERT_EQUALS(ind, outd);
-  // }
+    // put/get a char array
+    char word[] = "silicovolcaniosis";
+    char read[30] = {'A'}; // pre-fill with junk data
+    dims = {static_cast<dimsize_t>(strlen(word))};
+    ASSERT_OKAY(NXmakedata64(fid, "data_char", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data_char"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, word), "failed to put data");
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    ASSERT_OKAY(NXgetdata(fid, &(read[0])), "failed to get data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+    // confirm
+    TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
+    TS_ASSERT_EQUALS(rank, 1);
+    TS_ASSERT_EQUALS(dimsout[0], 17);
+    TS_ASSERT_EQUALS(std::string(read), "silicovolcaniosis");
+    TS_ASSERT_EQUALS(std::string(read), std::string(word));
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
+  }
 
   // #################################################################################################################
   // TEST ADDRESS METHODS
@@ -733,391 +709,324 @@ public:
     ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
-  // void test_open_paths() {
-  //   cout << "tests for open path\n";
+  void test_open_address() {
+    cout << "tests for open address\n";
 
-  //   // make file with path /entry
-  //   string const filename("napi_openpathtest.nxs");
-  //   File fileid = do_prep_files(filename);
+    // make file with path /entry
+    FileResource resource("test_napi_openpathtest.nxs");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   // make path /entry/data1
-  //   fileid.writeData("data1", '1');
+    DimVector dims{1};
 
-  //   // make path /entry/data2
-  //   fileid.writeData("data2", '2');
+    // make path /entry/data1
+    char one = '1';
+    ASSERT_OKAY(NXmakedata64(fid, "data1", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data1"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &one), "failed to put data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   // make path /entry/data/more_data
-  //   fileid.makeGroup("data", "NXdata");
-  //   fileid.openGroup("data", "NXdata");
-  //   fileid.writeData("more_data", '3');
+    // make path /entry/data2
+    char two = '2';
+    ASSERT_OKAY(NXmakedata64(fid, "data2", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data2"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &two), "failed to put data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   // make path /link
-  //   fileid.closeGroup(); // close /entry/data
-  //   fileid.closeGroup(); // close /entry
-  //   fileid.makeGroup("link", "NXentry");
-  //   fileid.openGroup("link", "NXentry"); // open /link
-  //   fileid.writeData("data4", '4');
+    // make path /entry/data/more_data
+    char three = '3';
+    ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
+    ASSERT_OKAY(NXmakedata64(fid, "more_data", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "more_data"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &three), "failed to put data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   // compare
-  //   char output;
-  //   fileid.closeGroup();
+    // make path /link
+    char four = '4';
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close data"); // close /entry/data
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close data"); // close /entry
+    ASSERT_OKAY(NXmakegroup(fid, "link", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "link", "NXentry"), "failed to open group"); // open /entry/link
+    ASSERT_OKAY(NXmakedata64(fid, "data4", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "data4"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &four), "failed to put data");
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   fileid.openPath("/entry/data1");
-  //   fileid.getData(&output);
-  //   TS_ASSERT_EQUALS('1', output);
+    // compare
+    char output;
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
 
-  //   fileid.openPath("/link/data4");
-  //   fileid.getData(&output);
-  //   TS_ASSERT_EQUALS('4', output);
+    ASSERT_OKAY(NXopenaddress(fid, "/entry/data1"), "failed to open address");
+    ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
+    TS_ASSERT_EQUALS('1', output);
 
-  //   fileid.openPath("/entry/data/more_data");
-  //   fileid.getData(&output);
-  //   TS_ASSERT_EQUALS('3', output);
+    ASSERT_OKAY(NXopenaddress(fid, "/link/data4"), "failed to open address");
+    ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
+    TS_ASSERT_EQUALS('4', output);
 
-  //   fileid.openPath("/entry/data2");
-  //   fileid.getData(&output);
-  //   TS_ASSERT_EQUALS('2', output);
+    ASSERT_OKAY(NXopenaddress(fid, "/entry/data/more_data"), "failed to open address");
+    ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
+    TS_ASSERT_EQUALS('3', output);
 
-  //   // cleanup
-  //   fileid.close();
-  //   removeFile(filename);
-  //   cout << "NXopenpath checks OK\n";
-  // }
+    ASSERT_OKAY(NXopenaddress(fid, "/entry/data2"), "failed to open address");
+    ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
+    TS_ASSERT_EQUALS('2', output);
 
-  // void test_open_path_tree() {
-  //   cout << "\ntest open path\n";
-  //   // open a file
-  //   FileResource resource("test_napi_entries.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
+    cout << "NXopenaddress checks OK\n";
+  }
 
-  //   // setup a recursive group tree
-  //   std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
-  //                           Entry{"/entry1/layer2a", "NXentry"},
-  //                           Entry{"/entry1/layer2a/layer3a", "NXentry"},
-  //                           Entry{"/entry1/layer2a/layer3b", "NXentry"},
-  //                           Entry{"/entry1/layer2a/data1", "SDS"},
-  //                           Entry{"/entry1/layer2b", "NXentry"},
-  //                           Entry{"/entry1/layer2b/layer3a", "NXentry"},
-  //                           Entry{"/entry1/layer2b/layer3b", "NXentry"},
-  //                           Entry{"/entry2", "NXentry"},
-  //                           Entry{"/entry2/layer2c", "NXentry"},
-  //                           Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+  void test_get_info() {
+    cout << "\ntest get info -- good\n";
 
-  //   string current;
-  //   for (auto it = tree.begin(); it != tree.end(); it++) {
-  //     current = file.getPath();
-  //     string path = it->first;
-  //     while (path.find(current) == path.npos) {
-  //       file.closeGroup();
-  //       current = file.getPath();
-  //     }
-  //     string name = path.substr(path.find_last_of("/") + 1, path.npos);
-  //     if (it->second == "NXentry") {
-  //       file.makeGroup(name, it->second, true);
-  //     } else if (it->second == "SDS") {
-  //       string data = "Data";
-  //       file.makeData(name, NXnumtype::CHAR, data.size(), true);
-  //       file.putData(data.data());
-  //       file.closeData();
-  //     }
-  //   }
-  //   file.closeGroup();
-  //   file.closeGroup();
-  //   file.closeGroup();
+    // open a file
+    FileResource resource("test_napi_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   // tests invalid cases
-  //   TS_ASSERT_THROWS(file.openPath(""), NeXus::Exception &);
-  //   TS_ASSERT_THROWS(file.openPath("/pants"), NeXus::Exception &);
-  //   TS_ASSERT_THROWS(file.openPath("/entry1/pants"), NeXus::Exception &);
+    // put an integer
+    int in = 17;
+    DimVector dims{1};
+    ASSERT_OKAY(NXmakedata64(fid, "int_data", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
-  //   // make sure we are at root
-  //   file.openPath("/");
+    // get the info and check
+    int rank;
+    DimVector dimsout{0};
+    NXnumtype datatype;
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    TS_ASSERT_EQUALS(datatype, NXnumtype::INT32);
+    TS_ASSERT_EQUALS(rank, 1);
+    TS_ASSERT_EQUALS(dimsout[0], 1);
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   // open the root
-  //   file.openGroup("entry1", "NXentry");
-  //   std::string actual, expected = "/";
-  //   file.openPath(expected);
-  //   actual = file.getPath();
-  //   TS_ASSERT_EQUALS(actual, expected);
+    // put a double
+    double ind = 107.2345;
+    ASSERT_OKAY(NXmakedata64(fid, "double_data", NXnumtype::FLOAT64, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "double_data"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &ind), "failed to put data");
 
-  //   expected = "/entry1/layer2b/layer3a";
-  //   file.openPath(expected);
-  //   actual = file.getPath();
-  //   TS_ASSERT_EQUALS(actual, expected);
+    // get the info and check
+    ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
+    TS_ASSERT_EQUALS(rank, 1);
+    TS_ASSERT_EQUALS(dimsout[0], 1);
+  }
 
-  //   expected = "/entry1/layer2a/data1";
-  //   file.openPath(expected);
-  //   actual = file.getPath();
-  //   TS_ASSERT_EQUALS(actual, expected);
-  // }
+  void test_get_info_bad() {
+    cout << "\ntest get info -- bad\n";
+    // open a file
+    FileResource resource("test_napi_file_dataRW.h5");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  // void test_get_info() {
-  //   cout << "\ntest get info -- good\n";
+    // put an integer
+    int in = 17;
+    DimVector dims{1};
+    ASSERT_OKAY(NXmakedata64(fid, "int_data", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
-  //   // open a file
-  //   FileResource resource("test_napi_file_dataRW.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   file.makeGroup("entry", "NXentry", true);
+    // open a group and try to get info
+    int rank;
+    DimVector dimsout;
+    NXnumtype datatype;
+    ASSERT_OKAY(NXmakegroup(fid, "a_group", "NXshorts"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "a_group", "NXshorts"), "failed to open group");
+    ASSERT_ERROR(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "trying to get info in group should give error");
+  }
 
-  //   // put an integer
-  //   int in = 17;
-  //   file.makeData("int_data", NeXus::getType<int32_t>(), 1, true);
-  //   file.putData(&in);
-
-  //   // get the info and check
-  //   Info info = file.getInfo();
-  //   TS_ASSERT_EQUALS(info.type, NeXus::getType<int32_t>());
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 1);
-
-  //   file.closeData();
-
-  //   // put a double
-  //   double ind = 107.2345;
-  //   file.makeData("double_data", NeXus::getType<double>(), 1, true);
-  //   file.putData(&ind);
-
-  //   // get the info and check
-  //   info = file.getInfo();
-  //   TS_ASSERT_EQUALS(info.type, NeXus::getType<double>());
-  //   TS_ASSERT_EQUALS(info.dims.size(), 1);
-  //   TS_ASSERT_EQUALS(info.dims.front(), 1);
-  // }
-
-  // void test_get_info_bad() {
-  //   cout << "\ntest get info -- bad\n";
-  //   // open a file
-  //   FileResource resource("test_napi_file_dataRW.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   file.makeGroup("entry", "NXentry", true);
-
-  //   // put an integer
-  //   int in = 17;
-  //   file.makeData("int_data", NeXus::getType<int32_t>(), 1, true);
-  //   file.putData(&in);
-  //   file.closeData();
-
-  //   // open a group and try to get info
-  //   file.makeGroup("a_group", "NXshorts", true);
-  //   TS_ASSERT_THROWS(file.getInfo(), NeXus::Exception &);
-  // }
-
-  // //
   // ##################################################################################################################
-  // // TEST ATTRIBUTE METHODS
-  // // ################################################################################################################
+  // TEST ATTRIBUTE METHODS
+  // ################################################################################################################
 
-  // template <typename T> void do_test_putget_attr(NeXus::File &file, string name, T const &data) {
-  //   // test put/get by pointer to data
-  //   T out;
-  //   file.putAttr(name, data);
-  //   file.getAttr(name, out);
-  //   TS_ASSERT_EQUALS(data, out);
-  // }
+  template <typename T> void do_test_putget_attr(NexusFile5 *fid, string name, T const &data) {
+    // test put/get by pointer to data
+    T out;
+    int len;
+    NXnumtype datatype = getType<T>();
+    ASSERT_OKAY(NXputattr(fid, name.c_str(), &data, 1, getType<T>()), "failed to put attr");
+    ASSERT_OKAY(NXgetattr(fid, name.c_str(), &out, &len, &datatype), "failed to get attribute");
+    TS_ASSERT_EQUALS(data, out);
+    TS_ASSERT_EQUALS(len, 1);
+    TS_ASSERT_EQUALS(datatype, getType<T>());
+  }
 
-  // void test_putget_attr_basic() {
-  //   cout << "\ntest attribute read/write\n";
+  void test_putget_attr_basic() {
+    cout << "\ntest attribute read/write\n";
 
-  //   // open a file
-  //   FileResource resource("test_napi_attr.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   // move to an entry to avoid conflict with some root-level attributes
-  //   file.makeGroup("entry", "NXentry", true);
+    // open a file
+    FileResource resource("test_napi_attr.h5");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    // move to an entry to avoid conflict with some root-level attributes
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
 
-  //   // put/get an int attribute
-  //   do_test_putget_attr(file, expected_names[0], 12);
+    // put/get an int attribute
+    do_test_putget_attr<int32_t>(fid, expected_names[0], 12);
 
-  //   // put/get a double attribute
-  //   do_test_putget_attr(file, expected_names[1], 120.2e6);
+    // put/get a double attribute
+    do_test_putget_attr(fid, expected_names[1], 120.2e6);
 
-  //   // check attr infos
-  //   auto attrInfos = file.getAttrInfos();
-  //   TS_ASSERT_EQUALS(attrInfos.size(), expected_names.size());
-  //   for (size_t i = 0; i < attrInfos.size(); i++) {
-  //     TS_ASSERT_EQUALS(attrInfos[i].name, expected_names[i]);
-  //     TS_ASSERT_EQUALS(attrInfos[i].length, 1);
-  //   }
-  // }
+    // check attr infos
+    int numattr;
+    ASSERT_OKAY(NXgetattrinfo(fid, &numattr), "failed to get attr info");
+    TS_ASSERT_EQUALS(numattr, 2);
+    ASSERT_OKAY(NXinitattrdir(fid), "failed to restart attributes");
+    char name[20] = {0};
+    int len;
+    int dims[] = {0, 0, 0, 0};
+    NXnumtype datatype;
+    for (int i = 0; i < numattr; i++) {
+      ASSERT_OKAY(NXgetnextattra(fid, name, &len, dims, &datatype), "could not get next attribute");
+      TS_ASSERT_EQUALS(name, expected_names[i]);
+      TS_ASSERT_EQUALS(len, 1);
+    }
 
-  // void test_putget_attr_str() {
-  //   cout << "\ntest string attribute read/write\n";
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
+  }
 
-  //   // open a file
-  //   FileResource resource("test_napi_attr.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
-  //   // move to an entry to avoid conflict with some root-level attributes
-  //   file.makeGroup("entry", "NXentry", true);
+  void test_putget_attr_str() {
+    cout << "\ntest string attribute read/write\n";
 
-  //   // put/get a string attribute
-  //   string data = "different string of text";
-  //   do_test_putget_attr(file, "str_attr_", data);
+    // open a file
+    FileResource resource("test_napi_attr.h5");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    // move to an entry to avoid conflict with some root-level attributes
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   std::string actual;
-  //   // put/get a string from a string literal
-  //   file.putAttr("units", "kg * mol / parsec");
-  //   file.getAttr("units", actual);
-  //   TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
+    // put/get a string attribute
+    string data = "different string of text";
+    ASSERT_OKAY(NXputattr(fid, "str_attr_", data.data(), static_cast<int>(data.size()), NXnumtype::CHAR),
+                "failed to put attr");
 
-  //   // check attr infos
-  //   auto attrInfos = file.getAttrInfos();
-  //   TS_ASSERT_EQUALS(attrInfos.size(), 2);
-  //   TS_ASSERT_EQUALS(attrInfos[0].name, "str_attr_");
-  //   TS_ASSERT_EQUALS(attrInfos[0].type, NXnumtype::CHAR);
-  //   TS_ASSERT_EQUALS(attrInfos[0].length, data.size());
-  //   TS_ASSERT_EQUALS(attrInfos[1].name, "units");
-  //   TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
-  //   TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
-  // }
+    // NOTE we MUST pass the size of the string + 1 for thsi to work
+    int len = static_cast<int>(data.size() + 1);
+    // NOTE we MUST pass the correct variable type (rather than deducing it) for this to work
+    NXnumtype datatype = NXnumtype::CHAR;
 
-  // void test_getEntries() {
-  //   cout << "\ntest getEntries\n";
+    // read into a low-level char array
+    char cread[30] = {'A'}; // pre-fill with junk
+    ASSERT_OKAY(NXgetattr(fid, "str_attr_", cread, &len, &datatype), "failed to get attribute");
+    TS_ASSERT_EQUALS(data, cread);
+    TS_ASSERT_EQUALS(len, data.size());
+    TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
 
-  //   // open a file
-  //   FileResource resource("test_napi_entries.h5");
-  //   std::string filename = resource.fullPath();
-  //   NeXus::File file(filename, NXACC_CREATE5);
+    // read into a string through .data()
+    // NOTE this requries that the string already be the correct size.
+    // If it is too long, the string will contain junk data
+    // If too short, the string will not contain all of the data
+    string readme(30, 'A'); // pre-fill with junk
+    ASSERT_OKAY(NXgetattr(fid, "str_attr_", readme.data(), &len, &datatype), "failed to get attribute");
+    TS_ASSERT_DIFFERS(data, readme);
+    readme.resize(len);
+    // NOTE we must go to length - 1, because read attribute is WRONG
+    // using the correct length inside napi will lead to errors elsewhere, which
+    // expect the wrong value
+    string expected(data.data(), data.size() - 1);
+    TS_ASSERT_EQUALS(expected, readme);
+    TS_ASSERT_EQUALS(len, data.size() - 1);
+    TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
 
-  //   // setup a recursive group tree
-  //   std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
-  //                           Entry{"/entry1/layer2a", "NXentry"},
-  //                           Entry{"/entry1/layer2a/layer3a", "NXentry"},
-  //                           Entry{"/entry1/layer2a/layer3b", "NXentry"},
-  //                           Entry{"/entry1/layer2a/data1", "SDS"},
-  //                           Entry{"/entry1/layer2b", "NXentry"},
-  //                           Entry{"/entry1/layer2b/layer3a", "NXentry"},
-  //                           Entry{"/entry1/layer2b/layer3b", "NXentry"},
-  //                           Entry{"/entry2", "NXentry"},
-  //                           Entry{"/entry2/layer2c", "NXentry"},
-  //                           Entry{"/entry2/layer2c/layer3c", "NXentry"}};
-
-  //   string current;
-  //   for (auto it = tree.begin(); it != tree.end(); it++) {
-  //     current = file.getPath();
-  //     string path = it->first;
-  //     while (path.find(current) == path.npos) {
-  //       file.closeGroup();
-  //       current = file.getPath();
-  //     }
-  //     string name = path.substr(path.find_last_of("/") + 1, path.npos);
-  //     if (it->second == "NXentry") {
-  //       file.makeGroup(name, it->second, true);
-  //     } else if (it->second == "SDS") {
-  //       string data = "Data";
-  //       file.makeData(name, NXnumtype::CHAR, data.size(), true);
-  //       file.putData(data.data());
-  //       file.closeData();
-  //     }
-  //   }
-
-  //   // at root level, should be entry1, entry2
-  //   file.openPath("/");
-  //   Entries actual = file.getEntries();
-  //   Entries expected = {Entry{"entry1", "NXentry"}, Entry{"entry2", "NXentry"}};
-  //   for (auto it = expected.begin(); it != expected.end(); it++) {
-  //     TS_ASSERT_EQUALS(actual.count(it->first), 1);
-  //     TS_ASSERT_EQUALS(it->second, actual[it->first]);
-  //   }
-
-  //   // within entry1, should be layer2a, layer2b
-  //   file.openPath("/entry1");
-  //   actual = file.getEntries();
-  //   expected = Entries({Entry{"layer2a", "NXentry"}, Entry{"layer2b", "NXentry"}});
-  //   for (auto it = expected.begin(); it != expected.end(); it++) {
-  //     TS_ASSERT_EQUALS(actual.count(it->first), 1);
-  //     TS_ASSERT_EQUALS(it->second, actual[it->first]);
-  //   }
-
-  //   // within entry1/layer2a, should be layer3a, layer3b, data1
-  //   file.openPath("/entry1/layer2a");
-  //   actual = file.getEntries();
-  //   expected = Entries({Entry{"layer3a", "NXentry"}, Entry{"layer3b", "NXentry"}, Entry{"data1", "SDS"}});
-  //   for (auto it = expected.begin(); it != expected.end(); it++) {
-  //     TS_ASSERT_EQUALS(actual.count(it->first), 1);
-  //     TS_ASSERT_EQUALS(it->second, actual[it->first]);
-  //   }
-
-  //   // within entry2/layer2a, should be layer3a, layer3b, data1
-  //   file.openPath("/entry2/layer2c");
-  //   actual = file.getEntries();
-  //   expected = Entries({Entry{"layer3c", "NXentry"}});
-  //   for (auto it = expected.begin(); it != expected.end(); it++) {
-  //     TS_ASSERT_EQUALS(actual.count(it->first), 1);
-  //     TS_ASSERT_EQUALS(it->second, actual[it->first]);
-  //   }
-  // }
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
+  }
 
   // ##################################################################################################################
   // TEST LINK METHODS
   // ################################################################################################################
 
-  // void test_links() {
-  //   cout << "tests of linkature\n";
+  void test_links() {
+    cout << "tests of linkature\n";
 
-  //   string const filename("NexusFile_linktest.nxs");
-  //   removeFile(filename);
-  //   File fileid = do_prep_files(filename);
+    FileResource resource("test_napi_link.nxs");
+    std::string filename = resource.fullPath();
+    NexusFile5 *fid;
+    ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-  //   // Create some data with a link
-  //   cout << "create entry at /entry/some_data\n";
-  //   string const somedata("this is some data");
-  //   fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
-  //   fileid.openData("some_data");
-  //   fileid.putData(somedata.c_str());
-  //   NXlink datalink = fileid.getDataID();
-  //   fileid.closeData();
-  //   fileid.flush();
+    // Create some data
+    cout << "create entry at /entry/some_data\n";
+    string const somedata("this is some data");
+    DimVector dims{static_cast<dimsize_t>(somedata.size())};
+    ASSERT_OKAY(NXmakedata64(fid, "some_data", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXopendata(fid, "some_data"), "failed to open data");
+    ASSERT_OKAY(NXputdata(fid, somedata.data()), "failed to put data");
 
-  //   // Create a group, and link it to that data
-  //   cout << "create group at /entry/data to link to the data\n";
-  //   fileid.makeGroup("data", "NXdata");
-  //   fileid.openGroup("data", "NXdata");
-  //   fileid.makeLink(datalink);
-  //   fileid.closeGroup();
-  //   fileid.flush();
+    // create a link target
+    NXlink datalink;
+    ASSERT_OKAY(NXgetdataID(fid, &datalink), "failed to make link");
+    TS_ASSERT_EQUALS(datalink.targetAddress, "/entry/some_data");
+    TS_ASSERT_EQUALS(datalink.linkType, NXentrytype::sds);
 
-  //   // check data link
-  //   fileid.openPath("/entry/data/some_data");
-  //   // TODO why can't we get the data through the link?
-  //   // string output1;
-  //   // fileid.getData(&output1);
-  //   // TS_ASSERT_EQUALS(somedata, output1);
-  //   NXlink res1 = fileid.getDataID();
-  //   TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-  //   TS_ASSERT_EQUALS(datalink.targetPath, res1.targetPath);
-  //   cout << "data link works\n";
-  //   fileid.closeData();
+    // close data
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
-  //   fileid.openPath("/entry");
+    // Create a group, and link it to that data
+    cout << "create group at /entry/data to link to the data\n";
+    ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
+    ASSERT_OKAY(NXmakelink(fid, &datalink), "failed to make link");
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close");
 
-  //   // Create two groups, group1 and group2
-  //   // Make a link inside group2 to group1
-  //   // make group1
-  //   cout << "create group /entry/group1\n";
-  //   std::string const strdata("NeXus sample data");
-  //   fileid.makeGroup("group1", "NXentry");
-  //   fileid.openGroup("group1", "NXentry");
-  //   NXlink grouplink = fileid.getGroupID();
-  //   fileid.closeGroup();
+    // check data link
+    ASSERT_OKAY(NXopenaddress(fid, "/entry/data/some_data"), "failed to open linked address");
+    NXlink res1;
+    ASSERT_OKAY(NXgetdataID(fid, &res1), "failed to get data ID from link");
+    TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
+    TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
+    cout << "data link works\n";
+    ASSERT_OKAY(NXclosedata(fid), "failed to close linked data");
 
-  //   // make group 2
-  //   cout << "create group /entry/group2/group1\n";
-  //   fileid.makeGroup("group2", "NXentry");
-  //   fileid.openGroup("group2", "NXentry");
-  //   fileid.makeLink(grouplink);
-  //   fileid.closeGroup();
+    NXopenaddress(fid, "/entry");
 
-  //   // check group link
-  //   fileid.openPath("/entry/group2/group1");
-  //   NXlink res2 = fileid.getGroupID();
-  //   TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
-  //   TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
-  //   cout << "group link works\n";
-  // }
+    // Create two groups, group1 and group2
+    // Make a link inside group2 to group1
+
+    // make group1
+    cout << "create group /entry/group1\n";
+    ASSERT_OKAY(NXmakegroup(fid, "group1", "NXpants"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "group1", "NXpants"), "failed to open group");
+    NXlink grouplink;
+    ASSERT_OKAY(NXgetgroupID(fid, &grouplink), "failed to get group ID");
+    TS_ASSERT_EQUALS(grouplink.targetAddress, "/entry/group1");
+    TS_ASSERT_EQUALS(grouplink.linkType, NXentrytype::group);
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
+
+    // make group 2
+    cout << "create group /entry/group2/group1\n";
+    ASSERT_OKAY(NXmakegroup(fid, "group2", "NXshorts"), "failed to make group");
+    ASSERT_OKAY(NXopengroup(fid, "group2", "NXshorts"), "failed to open group");
+    ASSERT_OKAY(NXmakelink(fid, &grouplink), "failed to make link");
+    ASSERT_OKAY(NXclosegroup(fid), "failed to close");
+
+    // check group link
+    ASSERT_OKAY(NXopenaddress(fid, "/entry/group2/group1"), "failed to open linked address");
+    NXlink res2;
+    ASSERT_OKAY(NXgetgroupID(fid, &res2), "failed to get linked group ID");
+    TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
+    TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
+    cout << "group link works\n";
+  }
 };

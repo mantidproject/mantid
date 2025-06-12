@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
 
   char name[NX_MAXNAMELEN], char_class[NX_MAXNAMELEN], char_buffer[128];
   char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
-  char address[512];
+  std::string address;
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   NXgetattrinfo(fileid, &i);
   std::cout << "Number of group attributes: " << i << std::endl;
-  ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
+  ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "NXentry address " << address << std::endl;
   do {
     // cppcheck-suppress argumentSize
@@ -285,8 +285,8 @@ int main(int argc, char *argv[]) {
       void *data_buffer;
       if (entry_status == NXstatus::NX_OK) {
         ASSERT_NO_ERROR(NXopendata(fileid, name), "");
-        ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
-        printf("Data address %s\n", address);
+        ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
+        printf("Data address %s\n", address.c_str());
         ASSERT_NO_ERROR(NXgetinfo64(fileid, &NXrank, NXdims64, &NXtype), "");
         printf("   %s(%d)", name, (int)NXtype);
         // cppcheck-suppress cstyleCast
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
 
   ASSERT_NO_ERROR(NXopengroup(fileid, "link", "NXentry"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "sample", "NXsample"), "");
-  ASSERT_NO_ERROR(NXgetaddress(fileid, address, 512), "");
+  ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "Group address " << address << "\n";
   ASSERT_NO_ERROR(NXgetgroupID(fileid, &blink), "");
   if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
