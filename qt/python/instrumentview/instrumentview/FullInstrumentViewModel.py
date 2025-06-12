@@ -45,9 +45,10 @@ class FullInstrumentViewModel:
             self._union_with_current_bin_min_max(x_data[-1])
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
-        
+
         self._detector_visibility_map = {id: False for id in self.detector_ids()}
         self._detector_position_projection_map = {}
+
     def negate_picked_visibility(self, detectors: list[int]) -> None:
         for d in detectors:
             id = self._detectors[d].id
@@ -139,5 +140,5 @@ class FullInstrumentViewModel:
         for det_index in range(len(detectors)):
             x, y = projection.coordinate_for_detector(det_index)
             self._detector_position_projection_map[det_index] = DetectorPosition([x, y, 0])
-        
+
         return list(self._detector_position_projection_map.values())
