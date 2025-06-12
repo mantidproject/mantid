@@ -174,22 +174,6 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost:
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
-/** Integrate all the spectra in the matrix workspace within the range given.
- * NaN and Infinite values are ignored.
- * Default implementation, can be overridden by base classes if they know
- *something smarter!
- *
- * @param minX :: minimum X bin to use in integrating.
- * @param maxX :: maximum X bin to use in integrating.
- * @param entireRange :: set to true to use the entire range. minX and maxX are
- *then ignored!
- */
-std::vector<double> getIntegratedSpectra(MatrixWorkspace &self, const double minX, const double maxX,
-                                         const bool entireRange) {
-  // Need a wrapper here to deal with the overload
-  return self.getIntegratedSpectra(minX, maxX, entireRange);
-}
-
 std::vector<size_t> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
                                                            const boost::python::object &workspaceIndices,
                                                            const size_t numberOfWorkspaces, const double minX,
@@ -533,8 +517,6 @@ void export_MatrixWorkspace() {
            "of memory free that will fit all of the data.")
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
-      .def("getIntegratedSpectra", &getIntegratedSpectra, args("self", "minX", "maxX", "entireRange"),
-           "Return a vector with the integrated counts for all spectra withing the given range")
       .def("getIntegratedCountsForWorkspaceIndices", &getIntegratedCountsForWorkspaceIndices,
            args("self", "workspaceIndices", "numberOfWorkspaces", "minX", "maxX", "entireRange"),
            "Return a vector with the integrated counts within the given range for the given workspace indices")
