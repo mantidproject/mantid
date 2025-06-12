@@ -7,14 +7,14 @@ SANS Changes
 
 New Features
 ------------
-- A new :ref:`algm-SavePolarizedNXcanSAS` algorithm has been added to save reduced polarized SANS data in NXcanSAS
+- A new :ref:`algm-SavePolarizedNXcanSAS` algorithm has been added to save reduced polarized SANS data in the NXcanSAS
   format.
 
   - :ref:`algm-SANSSave` now supports the new :ref:`algm-SavePolarizedNXcanSAS` algorithm.
   - :ref:`algm-LoadNXcanSAS` has been modified to load polarized NXcanSAS data saved via
     :ref:`algm-SavePolarizedNXcanSAS`.
-  - Polarization options have been added the :ref:`sans_toml_v1-ref` format. As a result, the most up-to-date version of
-    SANS TOML, which supports these options, is now V2.
+  - Polarization options have been added the :ref:`sans_toml_v1-ref` format. The most up-to-date version of SANS TOML,
+    which supports these options, is now V2.
   - ISIS SANS Batch Reductions (such as those performed by ``WavRangeReduction`` from the
     :ref:`ISIS Command Interface <ScriptingSANSReductions>`) can now use polarization properties defined in the V2 User
     File to save using :ref:`algm-SavePolarizedNXcanSAS`.
