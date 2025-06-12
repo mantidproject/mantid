@@ -276,12 +276,13 @@ public:
     // create output vector same size as binedges
     std::vector<size_t> cum_n(m_binedges->size(), 0);
 
+    // create a subset of the tof vector with masked pixels removed and calibration applied
+    std::vector<double> subset_tofs;
+    subset_tofs.reserve(m_events_blocksize);
+
     // process the events in blocks, extracting a subset of the tof vector before sorting and histogramming it
     for (size_t start = range.begin(); start < range.end(); start += m_events_blocksize) {
       const size_t end = std::min(start + m_events_blocksize, range.end());
-
-      // create a subset of the tof vector with masked pixels removed and calibration applied
-      std::vector<double> subset_tofs(end - start);
 
       auto detid_ptr = m_detids->cbegin() + start;
       auto tof_ptr = m_tofs->cbegin() + start;
@@ -303,6 +304,9 @@ public:
         search_start = std::lower_bound(search_start, subset_tofs.cend(), m_binedges->at(i));
         cum_n[i] += std::distance(subset_tofs.cbegin(), search_start);
       }
+
+      // clear the subset for the next block
+      subset_tofs.clear();
     }
 
     for (size_t i = 0; i < cum_n.size() - 1; ++i)
