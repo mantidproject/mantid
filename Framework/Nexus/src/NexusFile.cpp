@@ -842,7 +842,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   NXnumtype type = getType<NumT>();
-  int length;
+  int length = 1;
   NAPI_CALL(NXgetattr(*(this->m_pfile_id), name.c_str(), &value, &length, &type), "NXgetattr(" + name + ") failed");
 }
 

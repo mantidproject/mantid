@@ -555,7 +555,7 @@ public:
     // put/get an int
     int in[4] = {12, 7, 2, 3}, out[4];
     DimVector dims{4};
-    ASSERT_OKAY(NXmakedata64(fid, "data_int", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXmakedata64(fid, "data_int", getType<int>(), 1, dims.data()), "failed to make data");
     ASSERT_OKAY(NXopendata(fid, "data_int"), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, in), "failed to put data");
     DimVector dimsout{0, 0, 0, 0};
@@ -795,7 +795,8 @@ public:
     // put an integer
     int in = 17;
     DimVector dims{1};
-    ASSERT_OKAY(NXmakedata64(fid, "int_data", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    // NOTE the type of `int` is platform-dependent and may be int32_t or int64_t
+    ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims.data()), "failed to make data");
     ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
@@ -804,7 +805,7 @@ public:
     DimVector dimsout{0};
     NXnumtype datatype;
     ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
-    TS_ASSERT_EQUALS(datatype, NXnumtype::INT32);
+    TS_ASSERT_EQUALS(datatype, getType<int>());
     TS_ASSERT_EQUALS(rank, 1);
     TS_ASSERT_EQUALS(dimsout[0], 1);
     ASSERT_OKAY(NXclosedata(fid), "failed to close data");
@@ -835,7 +836,7 @@ public:
     // put an integer
     int in = 17;
     DimVector dims{1};
-    ASSERT_OKAY(NXmakedata64(fid, "int_data", NXnumtype::INT32, 1, dims.data()), "failed to make data");
+    ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims.data()), "failed to make data");
     ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
