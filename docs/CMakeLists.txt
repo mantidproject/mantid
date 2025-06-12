@@ -145,7 +145,7 @@ if(PACKAGE_DOCS)
     if(ENABLE_QTASSISTANT AND TARGET Qt5::qcollectiongenerator)
       # must "make docs-qthelp" before "make package" otherwise there will be a build failure
       install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
-              DESTINATION ${_bundle}${HTML_DOCS_DEST}
+              DESTINATION ${_bundle}${BIN_DIR}
       )
       install(
         DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
