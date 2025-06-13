@@ -33,6 +33,7 @@
 
 #include <H5Cpp.h>
 #include <atomic>
+#include <numbers>
 #include <regex>
 
 namespace Mantid::DataHandling {
@@ -128,7 +129,7 @@ const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return
 namespace { // anonymous
 std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
                                            const std::vector<double> &polars) {
-  constexpr double deg2rad = M_PI / 180.;
+  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
 
   std::vector<double> difc;
 
@@ -157,37 +158,17 @@ public:
     // groups close themselves
   }
 
-  void loadTOF(H5::Group &event_group, std::unique_ptr<std::vector<float>> &data,
-               const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::TIME_OF_FLIGHT);
-    auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<float>> &data, const size_t offset,
+               const size_t slabsize, const std::string &tof_unit) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-
-    // get the units
-    std::string tof_unit;
-    NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
 
     // Convert Tof to microseconds
     if (tof_unit != MICROSEC)
       Kernel::Units::timeConversionVector(*data, tof_unit, MICROSEC);
   }
 
-  void loadDetid(H5::Group &event_group, std::unique_ptr<std::vector<detid_t>> &data,
-                 const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::DETID);
-    auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<detid_t>> &data, const size_t offset,
+                 const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
   }
 
@@ -369,16 +350,26 @@ public:
         // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
         tbb::task_group tg;
+        // get handle to the data
+        auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
+        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+        // and the units
+        std::string tof_unit;
+        NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+
         // read parts of the bank at a time
         size_t event_index_start = eventRangeFull.first;
         while (event_index_start < eventRangeFull.second) {
           // H5Cpp will truncate correctly
-          const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
-                                                                event_index_start + m_events_per_chunk};
+          // H5Util resizes the vector
+          const size_t offset = event_index_start;
+          const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
+                                      ? std::numeric_limits<size_t>::max()
+                                      : m_events_per_chunk;
 
           // load detid
           std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
-          m_loader.loadDetid(event_group, event_detid, eventRangePartial);
+          m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
           // immediately find min/max to allow for other things to read disk
           const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
           // only recreate calibraion if it doesn't already have the useful information
@@ -390,7 +381,7 @@ public:
 
           // load time-of-flight
           std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
+          m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize, tof_unit);
 
           // Non-blocking processing of the events
           // Each thread needs its own ProcessEventsTask
