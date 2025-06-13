@@ -775,6 +775,9 @@ public:
     file.getAttr("units", actual);
     TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
 
+    std::string again = file.getStrAttr("units");
+    TS_ASSERT_EQUALS(again, "kg * mol / parsec");
+
     // check attr infos
     auto attrInfos = file.getAttrInfos();
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
@@ -812,7 +815,7 @@ public:
   }
 
   void test_existing_attr_bad_length() {
-    // some fiels have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
+    // some fields have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
     // this prevents a regression that will otherwise show up in tests of LoadEventNexus and various python algorithms
     cout << "\ntest open existing file with system-dependent type\n";
 
