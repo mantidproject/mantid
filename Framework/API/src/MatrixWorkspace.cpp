@@ -844,6 +844,18 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   }
 }
 
+std::vector<size_t> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+                                                                            const double minX, const double maxX,
+                                                                            const bool entireRange) const {
+  std::vector<double> integratedSpectra;
+  getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
+  std::vector<size_t> detectorCounts(workspaceIndices.size(), 0);
+  for (size_t i = 0; i < workspaceIndices.size(); ++i) {
+    detectorCounts[i] = integratedSpectra[workspaceIndices[i]];
+  }
+  return detectorCounts;
+}
+
 /** Get the effective detector for the given spectrum
 *  @param  workspaceIndex The workspace index for which the detector is required
 *  @return A single detector object representing the detector(s) contributing
@@ -1011,9 +1023,6 @@ bool MatrixWorkspace::isCommonLogBins() const {
  * @return int
  */
 size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
-
-/// Returns the units of the data in the workspace
-const std::string &MatrixWorkspace::YUnit() const { return m_YUnit; }
 
 /// Sets a new unit for the data (Y axis) in the workspace
 void MatrixWorkspace::setYUnit(const std::string &newUnit) { m_YUnit = newUnit; }

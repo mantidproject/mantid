@@ -174,6 +174,23 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost:
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
+std::vector<size_t> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
+                                                           const boost::python::object &workspaceIndices,
+                                                           const size_t numberOfWorkspaces, const double minX,
+                                                           const double maxX, const bool entireRange) {
+
+  std::vector<size_t> sWorkspaceIndices(numberOfWorkspaces);
+  if (NDArray::check(workspaceIndices)) {
+    NDArrayToVector<size_t> converter(workspaceIndices);
+    converter.copyTo(sWorkspaceIndices);
+  } else {
+    PySequenceToVector<size_t> converter(workspaceIndices);
+    converter.copyTo(sWorkspaceIndices);
+  }
+
+  return self.getIntegratedCountsForWorkspaceIndices(sWorkspaceIndices, minX, maxX, entireRange);
+}
+
 /**
  * Adds a deprecation warning to the getSampleDetails call to warn about using
  * getRun instead
@@ -500,6 +517,9 @@ void export_MatrixWorkspace() {
            "of memory free that will fit all of the data.")
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
+      .def("getIntegratedCountsForWorkspaceIndices", &getIntegratedCountsForWorkspaceIndices,
+           args("self", "workspaceIndices", "numberOfWorkspaces", "minX", "maxX", "entireRange"),
+           "Return a vector with the integrated counts within the given range for the given workspace indices")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
