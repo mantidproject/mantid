@@ -19,6 +19,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/SpinStateHelpers.h"
 
 #include <Eigen/Dense>
 #include <algorithm>
@@ -30,7 +31,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
-using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
+using namespace Mantid::Kernel::SpinStateHelpers;
 
 namespace {
 const double Y_VAL{2.3};

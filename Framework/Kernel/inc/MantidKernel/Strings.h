@@ -267,6 +267,8 @@ MANTID_KERNEL_DLL std::string removeSpace(const std::string &CLine);
 MANTID_KERNEL_DLL std::string fullBlock(const std::string &A);
 /// strip pre/post spaces
 MANTID_KERNEL_DLL std::string strip(const std::string &A);
+/// strip pre/post spaces
+MANTID_KERNEL_DLL void stripInPlace(std::string &A);
 /// strip trailling comments
 MANTID_KERNEL_DLL void stripComment(std::string &A);
 /// Determines if a string is only spaces
