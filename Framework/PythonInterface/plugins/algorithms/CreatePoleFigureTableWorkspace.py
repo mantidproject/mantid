@@ -300,7 +300,7 @@ def _get_alpha_beta_from_cart(q_sample_cart: np.ndarray) -> np.ndarray:
     alpha is angle from positive x towards positive z
     beta is angle from positive y
     """
-    q_sample_cart = q_sample_cart.copy()
+    q_sample_cart = np.clip(q_sample_cart.copy(), -1.0, 1.0)  # numerical inaccuracies outside this range will give nan in the trig funcs
     q_sample_cart = np.where(q_sample_cart[1] < 0, -q_sample_cart, q_sample_cart)  # invert the southern points
     alphas = np.arctan2(q_sample_cart[2], q_sample_cart[0])
     betas = np.arccos(q_sample_cart[1])

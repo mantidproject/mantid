@@ -154,7 +154,7 @@ class TextureProjection:
 
         fig = plt.figure() if not fig else fig
         ax = fig.add_subplot(1, 1, 1)
-        ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
+        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
         ax.plot(eq[0], eq[1], c="grey")
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -162,6 +162,7 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
+        fig.colorbar(scat_plot, ax=ax, shrink=0.8, pad=0.05)
         return fig
 
     def plot_contour_pf(self, pfi, ax_labels, fig=None, contour_kernel=2.0, **kwargs):
@@ -183,7 +184,7 @@ class TextureProjection:
         # Plotting
         fig = plt.figure() if not fig else fig
         ax = fig.add_subplot(1, 1, 1)
-        ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet")
+        contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet")
         # ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
         circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
         ax.add_patch(circle)
@@ -193,9 +194,10 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
+        fig.colorbar(contour_plot, ax=ax, shrink=0.8, pad=0.05)
         return fig
 
-    def get_pf_table_name(self, wss, fit_params, hkl):
+    def get_pf_table_name(self, wss, fit_params, hkl, readout_column):
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
         try:
             run_range = f"{fws.run().getLogData('run_number').value}-{lws.run().getLogData('run_number').value}"
@@ -210,10 +212,10 @@ class TextureProjection:
         try:
             # try and get a peak reference either from hkl or from the X0 column of param
             peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
-            table_name = f"{instr}_{run_range}_{peak}_{grouping}_pf_table"
+            table_name = f"{instr}_{run_range}_{peak}_{grouping}_pf_table_{readout_column}"
         except Exception:
             # if no param table given, no peak reference
-            table_name = f"{instr}_{run_range}_{grouping}_pf_table"
+            table_name = f"{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
         return table_name, grouping
 
     def _parse_hkl(self, H, K, L):

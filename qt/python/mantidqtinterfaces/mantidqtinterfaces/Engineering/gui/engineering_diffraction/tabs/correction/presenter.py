@@ -122,16 +122,22 @@ class TextureCorrectionPresenter:
 
     def _on_view_shape_clicked(self, ws_name):
         try:
-            fig = sample_shape.plot_sample_container_and_components(ws_name)
+            fig = sample_shape.plot_sample_container_and_components(ws_name, alpha=0.5, custom_color="grey")
             ax_transform, ax_labels = output_settings.get_texture_axes_transform()
             self.model.plot_sample_directions(fig, ws_name, ax_transform, ax_labels)
+            self._add_gauge_vol_view(fig)
         except Exception as exception:
             logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(ws_name, exception))
 
     def _on_view_ref_shape_clicked(self):
-        fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws)
+        fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws, alpha=0.5, custom_color="grey")
         ax_transform, ax_labels = output_settings.get_texture_axes_transform()
         self.model.plot_sample_directions(fig, None, ax_transform, ax_labels)
+        self._add_gauge_vol_view(fig)
+
+    def _add_gauge_vol_view(self, fig):
+        if self.view.include_absorption():
+            self.model.plot_gauge_vol(self.view.get_shape_method(), self.view.get_custom_shape(), fig)
 
     def _on_save_ref_clicked(self):
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
