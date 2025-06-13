@@ -58,8 +58,9 @@ class VASPLoader(AbInitioLoader):
         else:
             raise ValueError('Cannot guess format from filename "{}". Expected *.xml or *OUTCAR*'.format(input_filename))
 
-        self.save_ab_initio_data(data=data)
-        return self._rearrange_data(data=data)
+        abins_data = self._rearrange_data(data=data)
+        self.save_ab_initio_data(abins_data=abins_data)
+        return abins_data
 
     @classmethod
     def _read_outcar(cls, filename) -> Dict[str, Any]:

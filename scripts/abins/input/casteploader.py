@@ -30,6 +30,7 @@ class CASTEPLoader(AbInitioLoader):
         :returns:  object of type AbinsData.
         """
         modes = QpointPhononModes.from_castep(self._clerk.get_input_filename(), prefer_non_loto=True)
-        data = EuphonicLoader.data_dict_from_modes(modes)
-        self.save_ab_initio_data(data=data)
-        return self._rearrange_data(data=data)
+        abins_data = self._rearrange_data(EuphonicLoader.data_dict_from_modes(modes))
+
+        self.save_ab_initio_data(abins_data=abins_data)
+        return abins_data

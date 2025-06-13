@@ -61,7 +61,8 @@ class EuphonicLoader(AbInitioLoader):
         """
         cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
         modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
-        file_data = self.data_dict_from_modes(modes)
-        self.save_ab_initio_data(data=file_data)
 
-        return self._rearrange_data(data=file_data)
+        abins_data = self._rearrange_data(data=self.data_dict_from_modes(modes))
+
+        self.save_ab_initio_data(abins_data=abins_data)
+        return abins_data

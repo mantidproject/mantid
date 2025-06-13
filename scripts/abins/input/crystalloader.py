@@ -83,11 +83,13 @@ class CRYSTALLoader(AbInitioLoader):
             unit_cell=lattice_vectors,
         )
 
+        abins_data = self._rearrange_data(data=data)
+
         # save data to hdf file
-        self.save_ab_initio_data(data=data)
+        self.save_ab_initio_data(abins_data=abins_data)
 
         # return AbinsData object
-        return self._rearrange_data(data=data)
+        return abins_data
 
     def _determine_system(self):
         """
