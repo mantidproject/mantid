@@ -835,6 +835,10 @@ public:
     TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
     TS_ASSERT_EQUALS(rank, 1);
     TS_ASSERT_EQUALS(dimsout[0], 1);
+    ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
   void test_get_info_bad() {
@@ -861,6 +865,9 @@ public:
     ASSERT_OKAY(NXmakegroup(fid, "a_group", "NXshorts"), "failed to make group");
     ASSERT_OKAY(NXopengroup(fid, "a_group", "NXshorts"), "failed to open group");
     ASSERT_ERROR(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "trying to get info in group should give error");
+
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
   // ##################################################################################################################
@@ -1043,5 +1050,8 @@ public:
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
     cout << "group link works\n";
+
+    // cleanup
+    ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 };
