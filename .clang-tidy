@@ -1,27 +1,22 @@
 # Yaml file format
 Checks: >
-  *,
-  -abseil-*,-android-*,-altera-*,-fuchsia-*,-llvmlibc-*,-objc-*,
-  -google-build-using-namespace,
-  -google-readability-braces-around-statements,-hicpp-braces-around-statements,-readability-braces-around-statements,
+  -*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-init-variables
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  modernize-*,,
+  -modernize-avoid-c-arrays,
+  -modernize-type-traits,
   -modernize-use-trailing-return-type,
-  -readability-implicit-bool-conversion
+  misc-definitions-in-headers,
+  misc-header-include-cycle,
+  misc-include-cleaner,
+  misc-misplaced-const,
 
-# Skip the following family of checks (for perf as we don't touch these libs at all):
-# abseil-*
-# android-*
-# altera-*
-# fuchsia-*
-# llvmlibc-*
-# objc-*
-
-# The following checks are additionally disabled above:
-# -google-build-using-namespace                 Useful for headers, but we can't filter out .cpp where it's used frequently
-
-# -google-readability-braces-around-statements  We use if blocks without braces throughout
-# -readability-braces-around-statements         Ditto
-# -hicpp-braces-around-statements               Ditto
-
-# -modernize-use-trailing-return-type           We use the old style throughout
-
-# -readability-implicit-bool-conversion         Allow if(!ptr) rather than (ptr==nullptr)
+# Don't bother with std::array yet
+#   -modernize-avoid-c-arrays, cppcoreguidelines-avoid-c-arrays
+# We use the old style throughout
+#   -modernize-type-traits, -modernize-use-trailing-return-type
