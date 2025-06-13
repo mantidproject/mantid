@@ -142,9 +142,9 @@ class TexturePresenter:
         params = [p for p in params if p != "Not set"]
         inc_scatt = self.view.get_inc_scatt_power()
         hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
-        out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl)
-        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
         readout_col = self.view.get_readout_column()
+        out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl, readout_col)
+        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
         plot_exp = self._get_setting("plot_exp_pf", bool)
         contour_kernel = float(self._get_setting("contour_kernel", str))
 

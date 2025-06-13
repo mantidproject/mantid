@@ -14,12 +14,15 @@ from mantid.simpleapi import (
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
+    CreateSampleWorkspace,
+    CreateSampleShape,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.EnggUtils import GROUP
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 class TextureCorrectionModel:
@@ -30,12 +33,13 @@ class TextureCorrectionModel:
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
                 goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
-                # goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
+                goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
                 if not use_euler:
                     # if use euler angles not selected then assumes it is a scans output matrix
                     for iws, ws in enumerate(wss):
-                        NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
+                        # NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
+                        SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
                 else:
                     axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
                     rotation_sense = [int(x) for x in euler_sense.split(",")]
@@ -94,10 +98,13 @@ class TextureCorrectionModel:
         except RuntimeError:
             return True
 
+    def _is_valid_mesh(self, mesh):
+        return len(mesh) > 3
+
     def _has_no_valid_shape(self, ws_name):
         no_shape = False
         try:
-            no_shape = len(ADS.retrieve(ws_name).sample().getShape().getMesh()) < 3
+            no_shape = not self._is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
         except RuntimeError:
             no_shape = True
         return no_shape
@@ -109,22 +116,33 @@ class TextureCorrectionModel:
         return self._get_material_name(ws_name) == ""
 
     def define_gauge_volume(self, ws, preset, custom):
+        gauge_str = self.get_gauge_vol_str(preset, custom)
+        if gauge_str:
+            DefineGaugeVolume(ws, gauge_str)
+
+    def get_gauge_vol_str(self, preset, custom):
         if preset == "4mmCube":
             gauge_str = """
-<cuboid id='some-gv'> \
-<height val='4.0'  /> \
-<width val='4.0' />  \
-<depth  val='4.0' />  \
-<centre x='0.0' y='0.0' z='0.0'  />  \
-</cuboid>  \
-<algebra val='some-gv' /> \\ """
+        <cuboid id='some-gv'> \
+        <height val='0.04'  /> \
+        <width val='0.04' />  \
+        <depth  val='0.04' />  \
+        <centre x='0.0' y='0.0' z='0.0'  />  \
+        </cuboid>  \
+        <algebra val='some-gv' /> \\ """
         else:
             try:
                 gauge_str = self._read_xml(custom)
             except RuntimeError:
                 gauge_str = None
-        if gauge_str:
-            DefineGaugeVolume(ws, gauge_str)
+        return gauge_str
+
+    def get_xml_mesh(self, xml):
+        tmp_ws = CreateSampleWorkspace()
+        CreateSampleShape(tmp_ws, xml)
+        mesh = tmp_ws.sample().getShape().getMesh()
+        ADS.remove("tmp_ws")
+        return mesh
 
     def _read_xml(self, file):
         out = None
@@ -270,18 +288,30 @@ class TextureCorrectionModel:
             # if not looking at the reference, we want our definition axes to rotate with the sample
             rotation_matrix = ws.getRun().getGoniometer().getR()
         sample_mesh = ws.sample().getShape().getMesh()
-        furthest_vertex_from_origin = np.linalg.norm(sample_mesh[:, :, 0], axis=1).max()
-        arrow_len = 1.3 * furthest_vertex_from_origin
+        # apply the rotation matrix to the axes
         rotated_ax_transform = rotation_matrix @ ax_transform
-        rd = rotated_ax_transform[:, 0] * arrow_len
-        nd = rotated_ax_transform[:, 1] * arrow_len
-        td = rotated_ax_transform[:, 2] * arrow_len
-        ax.quiver(0, 0, 0, *rd, color="red", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *td, color="blue", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *nd, color="green", length=arrow_len, normalize=True, arrow_length_ratio=0.05)
+        # transform the mesh vertices into new axes frame
+        rot_vert = np.asarray([rotated_ax_transform.T @ sm[0, :] @ rotated_ax_transform for sm in sample_mesh]).T
+        # find the furthest vertex projected along each axis
+        arrow_lens = np.dot(rotated_ax_transform, rot_vert).max(axis=1) * 1.2
+        rd = rotated_ax_transform[:, 0] * arrow_lens[0]
+        nd = rotated_ax_transform[:, 1] * arrow_lens[1]
+        td = rotated_ax_transform[:, 2] * arrow_lens[2]
+        ax.quiver(0, 0, 0, *rd, color="red", length=arrow_lens[0], normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(0, 0, 0, *nd, color="green", length=arrow_lens[1], normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(0, 0, 0, *td, color="blue", length=arrow_lens[2], normalize=True, arrow_length_ratio=0.05)
         ax.text(*rd, ax_labels[0])
         ax.text(*nd, ax_labels[1])
         ax.text(*td, ax_labels[2])
+
+    def plot_gauge_vol(self, preset, custom, fig):
+        gauge_str = self.get_gauge_vol_str(preset, custom)
+        if gauge_str:
+            mesh = self.get_xml_mesh(gauge_str)
+            if self._is_valid_mesh(mesh):
+                axes = fig.gca()
+                mesh_polygon = Poly3DCollection(mesh, facecolors="cyan", edgecolors="black", linewidths=0.1, alpha=0.25)
+                axes.add_collection3d(mesh_polygon)
 
 
 # temporary methods until SetGoniometer PR is merged
