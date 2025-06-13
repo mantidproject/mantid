@@ -9,7 +9,6 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch, Mock
 
-from pydantic import ValidationError
 
 import abins.input
 import abins.test_helpers
@@ -33,8 +32,8 @@ class LoadCastepUsingEuphonicTest(unittest.TestCase):
 
             try:
                 reader.read_vibrational_or_phonon_data()
-            except ValidationError:
-                pass  # Clerk will freak out when passed mocked data to serialise
+            except TypeError:
+                pass  # Data conversion freaks out on mocked data, but we already have what we need
 
         from_castep.assert_called_with(filename, prefer_non_loto=True)
 

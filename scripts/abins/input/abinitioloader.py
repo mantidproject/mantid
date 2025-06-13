@@ -16,6 +16,7 @@ from typing_extensions import TypedDict
 from mantid.kernel import logger
 from mantid.kernel import Atom
 import abins
+from abins.abinsdata import AbinsData
 from abins.atomsdata import _AtomData
 from abins.constants import MASS_EPS
 
@@ -205,11 +206,30 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
-    def save_ab_initio_data(self, data: dict) -> None:
+    @classmethod
+    def _reverse_rearrange_data(cls, abins_data: AbinsData) -> AbinsDataset:
+        """The inverse of _rearrange_data: construct a caching dict from AbinsData"""
+        atoms_data = abins_data.get_atoms_data()
+        kpoints_data = abins_data.get_kpoints_data()
+
+        data = AbinsDataset(
+            frequencies=kpoints_data._frequencies,
+            weights=kpoints_data._weights,
+            k_vectors=kpoints_data._k_vectors,
+            atomic_displacements=kpoints_data._atomic_displacements,
+            unit_cell=kpoints_data.unit_cell,
+            atoms=atoms_data.extract(),
+        )
+        cls._validate_dict(data)
+        return data
+
+    def save_ab_initio_data(self, abins_data: AbinsData) -> None:
         """
         Saves ab initio data to an HDF5 file.
         :param data: dictionary with data to be saved.
         """
+        data = self._reverse_rearrange_data(abins_data)
+
         self._validate_dict(data)
         for name in data:
             self._clerk.add_data(name=name, value=data[name])

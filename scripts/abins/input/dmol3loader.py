@@ -80,11 +80,13 @@ class DMOL3Loader(AbInitioLoader):
             frequencies, raw_modes = self._read_modes(dmol3_file)
             data.update(self._assemble_mode_data(frequencies, raw_modes, masses))
 
+            abins_data = self._rearrange_data(data=data)
+
             # save data to hdf file
-            self.save_ab_initio_data(data=data)
+            self.save_ab_initio_data(abins_data=abins_data)
 
             # return AbinsData object
-            return self._rearrange_data(data=data)
+            return abins_data
 
     @classmethod
     def _read_lattice_vectors(cls, file_obj):
