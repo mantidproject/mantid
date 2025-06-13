@@ -45,21 +45,18 @@ struct NexusFile5 {
     hid_t iVref;
     hsize_t iCurrentIDX;
   } iStack5[NXMAXSTACK];
-  struct iStack5 iAtt5;
   hid_t iFID;
   hid_t iCurrentG;
   hid_t iCurrentD;
   hid_t iCurrentS;
   hid_t iCurrentT;
   hid_t iCurrentA;
+  hsize_t iCurrentIDX;
   int iNX;
   int iNXID;
   int iStackPtr;
-  char *iCurrentLGG;
-  char *iCurrentLD;
   char name_ref[1024];
   char name_tmp[1024];
-  char iAccess[2];
 };
 
 typedef NexusFile5 *pNexusFile5;
