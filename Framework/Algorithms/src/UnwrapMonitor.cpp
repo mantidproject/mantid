@@ -28,9 +28,8 @@ using namespace Kernel;
 using namespace API;
 
 /// Default constructor
-UnwrapMonitor::UnwrapMonitor() : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.), m_XSize(0) {
-  deprecatedDate("2025-04-16");
-}
+UnwrapMonitor::UnwrapMonitor()
+    : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.), m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapMonitor::init() {
