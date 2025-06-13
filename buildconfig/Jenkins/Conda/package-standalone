@@ -64,7 +64,7 @@ do
 done
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true $PLATFORM
+setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
 mamba install --yes conda-index
 
