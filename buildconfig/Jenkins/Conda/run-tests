@@ -26,6 +26,13 @@ if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
     BUILD_THREADS_SYSTEM_TESTS=3
 fi
 
+# Jenkins nodes may specify the maximum number of unit tests to run in parallel.
+# This is useful to prevent test timeouts for machines with limited RAM.
+if [[ -z "$UNIT_TEST_THREADS" ]]; then
+    # Default is number of build threads.
+    UNIT_TEST_THREADS=$BUILD_THREADS
+fi
+
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
         # Use -e because a bug on RHEL7 means --error-file produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
@@ -85,7 +92,7 @@ cd $WORKSPACE/build
 # mkdir for test logs
 mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
