@@ -9,10 +9,31 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Sequence
 
+import numpy as np
+from pydantic import ConfigDict, TypeAdapter
+from typing_extensions import TypedDict
+
 from mantid.kernel import logger
 from mantid.kernel import Atom
 import abins
+from abins.atomsdata import _AtomData
 from abins.constants import MASS_EPS
+
+
+class AbinsDataset(TypedDict):
+    """Dict format of AbinsData used for caching
+
+    Most of the parsers produce this format initially, then convert to AbinsData
+    """
+
+    __pydantic_config__ = ConfigDict(arbitrary_types_allowed=True)
+
+    frequencies: np.ndarray
+    weights: np.ndarray
+    k_vectors: np.ndarray
+    atomic_displacements: np.ndarray  # indexed: (kpt, atom, mode, direction)
+    unit_cell: np.ndarray  # 3x3 array, Å
+    atoms: dict[str, _AtomData]
 
 
 # Make it easier to inspect program classes by cleaning up result from str()
@@ -43,6 +64,10 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             group_name=abins.parameters.hdf_groups["ab_initio_data"],
             cache_directory=cache_directory,
         )
+
+    @staticmethod
+    def _validate_dict(data: AbinsDataset) -> None:
+        TypeAdapter(AbinsDataset).validate_python(data)
 
     @property
     @abstractmethod
@@ -153,6 +178,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             "unit_cell": datasets["unit_cell"],
             "atoms": datasets["atoms"],
         }
+        self._validate_dict(loaded_data)
 
         return self._rearrange_data(data=loaded_data)
 
@@ -184,6 +210,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         Saves ab initio data to an HDF5 file.
         :param data: dictionary with data to be saved.
         """
+        self._validate_dict(data)
         for name in data:
             self._clerk.add_data(name=name, value=data[name])
         self._clerk.add_file_attributes()
