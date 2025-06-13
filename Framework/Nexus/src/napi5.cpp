@@ -1795,6 +1795,9 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
   hid_t memType;
   char *vlData = NULL;
 
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  fflush(stdout);
+
   pFile = NXI5assert(fid);
   /* check if there is an Dataset open */
   if (pFile->iCurrentD == 0) {
@@ -1802,21 +1805,25 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     return NXstatus::NX_ERROR;
   }
 
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  fflush(stdout);
+
   /* read information */
   tclass = H5Tget_class(pFile->iCurrentT);
   mType = hdf5ToNXType(tclass, pFile->iCurrentT);
   iRank = H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
   if (iRank == 0) {
+    printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+    fflush(stdout);
     iRank = 1; /* we pretend */
     myDim[0] = 1;
   } else {
+    printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+    fflush(stdout);
     H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
-    hsize_t total_dims_size = 1;
-    for (i = 0; i < iRank; ++i) {
-      total_dims_size *= myDim[i];
-    }
-    UNUSED_ARG(total_dims_size);
   }
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  fflush(stdout);
   /* conversion to proper ints for the platform */
   *iType = mType;
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
@@ -1835,9 +1842,13 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     }
   }
   *rank = (int)iRank;
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  fflush(stdout);
   for (i = 0; i < iRank; i++) {
     dimension[i] = (int64_t)myDim[i];
   }
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  fflush(stdout);
   return NXstatus::NX_OK;
 }
 

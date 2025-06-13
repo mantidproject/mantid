@@ -792,6 +792,9 @@ public:
     ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
+    cout << "opened group\n";
+    fflush(stdout);
+
     // put an integer
     int in = 17;
     DimVector dims{1};
@@ -800,11 +803,16 @@ public:
     ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
+    cout << "made and put data\n";
+    fflush(stdout);
+
     // get the info and check
     int rank;
     DimVector dimsout{0};
-    NXnumtype datatype;
+    NXnumtype datatype = getType<int>();
     ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    cout << "info got\n";
+    fflush(stdout);
     TS_ASSERT_EQUALS(datatype, getType<int>());
     TS_ASSERT_EQUALS(rank, 1);
     TS_ASSERT_EQUALS(dimsout[0], 1);
@@ -816,8 +824,14 @@ public:
     ASSERT_OKAY(NXopendata(fid, "double_data"), "failed to open data");
     ASSERT_OKAY(NXputdata(fid, &ind), "failed to put data");
 
+    cout << "made and put double data\n";
+    fflush(stdout);
+
     // get the info and check
+    datatype = NXnumtype::FLOAT64;
     ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    cout << "info got\n";
+    fflush(stdout);
     TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
     TS_ASSERT_EQUALS(rank, 1);
     TS_ASSERT_EQUALS(dimsout[0], 1);
