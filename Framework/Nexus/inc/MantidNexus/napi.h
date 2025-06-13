@@ -66,57 +66,6 @@
 #define NX_COMP_LZW_LVL8 (100 * NX_COMP_LZW + 8)
 #define NX_COMP_LZW_LVL9 (100 * NX_COMP_LZW + 9)
 
-// name mangling macro
-#define CONCAT(__a, __b) __a##__b /* token concatenation */
-#define MANGLE(__arg) CONCAT(__arg, _)
-
-#define NXopen MANGLE(nxiopen)
-#define NXreopen MANGLE(nxireopen)
-#define NXclose MANGLE(nxiclose)
-#define NXmakegroup MANGLE(nximakegroup)
-#define NXopengroup MANGLE(nxiopengroup)
-#define NXopenaddress MANGLE(nxiopenpath)
-#define NXgetaddress MANGLE(nxigetpath)
-#define NXopengroupaddress MANGLE(nxiopengrouppath)
-#define NXclosegroup MANGLE(nxiclosegroup)
-#define NXmakedata64 MANGLE(nximakedata64)
-#define NXcompmakedata64 MANGLE(nxicompmakedata64)
-#define NXcompress MANGLE(nxicompress)
-#define NXopendata MANGLE(nxiopendata)
-#define NXclosedata MANGLE(nxiclosedata)
-#define NXputdata MANGLE(nxiputdata)
-#define NXputslab MANGLE(nxiputslab)
-#define NXputslab64 MANGLE(nxiputslab64)
-#define NXputattr MANGLE(nxiputattr)
-#define NXputattra MANGLE(nxiputattra)
-#define NXgetdataID MANGLE(nxigetdataid)
-#define NXmakelink MANGLE(nximakelink)
-#define NXmakenamedlink MANGLE(nximakenamedlink)
-#define NXopensourcegroup MANGLE(nxiopensourcegroup)
-#define NXmalloc MANGLE(nximalloc)
-#define NXmalloc64 MANGLE(nximalloc64)
-#define NXfree MANGLE(nxifree)
-#define NXflush MANGLE(nxiflush)
-
-#define NXgetinfo64 MANGLE(nxigetinfo64)
-#define NXgetrawinfo64 MANGLE(nxigetrawinfo64)
-#define NXgetnextentry MANGLE(nxigetnextentry)
-#define NXgetdata MANGLE(nxigetdata)
-
-#define NXgetslab64 MANGLE(nxigetslab64)
-#define NXgetnextattr MANGLE(nxigetnextattr)
-#define NXgetattr MANGLE(nxigetattr)
-#define NXgetnextattra MANGLE(nxigetnextattra)
-#define NXgetattra MANGLE(nxigetattra)
-#define NXgetattrinfo MANGLE(nxigetattrinfo)
-#define NXgetattrainfo MANGLE(nxigetattrainfo)
-#define NXgetgroupID MANGLE(nxigetgroupid)
-#define NXgetgroupinfo MANGLE(nxigetgroupinfo)
-#define NXsameID MANGLE(nxisameid)
-#define NXinitgroupdir MANGLE(nxiinitgroupdir)
-#define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXgetversion MANGLE(nxigetversion)
-
 /*
  * Standard interface
  *
@@ -126,9 +75,6 @@
  *
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 /**
  * Open a NeXus file.
  * NXopen honours full path file names. But it also searches
@@ -222,12 +168,11 @@ MANTID_NEXUS_DLL NXstatus NXopengroupaddress(NXhandle handle, CONSTCHAR *address
 /**
  * Retrieve the current address in the NeXus file
  * \param handle a NeXus file handle
- * \param address A buffer to copy the address too
- * \param  addresslen The maximum number of characters to copy into address
+ * \param address A string into which to copy the address
  * \return NX_OK or NX_ERROR
  * \ingroup c_navigation
  */
-MANTID_NEXUS_DLL NXstatus NXgetaddress(NXhandle handle, char *address, int addresslen);
+MANTID_NEXUS_DLL NXstatus NXgetaddress(NXhandle handle, std::string &address);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
@@ -426,11 +371,6 @@ MANTID_NEXUS_DLL NXstatus NXgetnextentry(NXhandle handle, NXname name, NXname nx
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXgetslab(NXhandle handle, void *data, const int start[], const int size[]);
-
-/**
- * @copydoc NXgetslab()
- */
 MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
 
 /**
@@ -455,6 +395,8 @@ MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, const char *name, void *dat
  */
 MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
 
+MANTID_NEXUS_DLL NXstatus NXgetattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[], NXnumtype *iType);
+
 /**
  * Iterate over global, group or dataset attributes depending on the currently open group or
  * dataset. In order to search attributes multiple calls to #NXgetnextattr are performed in a loop
@@ -465,7 +407,7 @@ MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, int *no_items);
  * \param pName The name of the attribute
  * \param rank Rank of the attribute data.
  * \param dim Dimension array for the attribute content.
- * \param iType A pointer to an integer which be set to the NeXus data type of the attribute.
+ * \param iType A pointer to an integer which will be set to the NeXus data type of the attribute.
  * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
  * \ingroup c_readwrite
  */
@@ -578,19 +520,3 @@ MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
 MANTID_NEXUS_DLL char *NXIformatNeXusTime();
-
-#ifdef __cplusplus
-};
-#endif /* __cplusplus */
-
-/**
- * Freddie Akeroyd 11/8/2009
- * Add NeXus schema support - this uses BASE.xsd as the initial file
- */
-#define NEXUS_SCHEMA_VERSION "3.1"                                    /**< version of NeXus definition schema */
-#define NEXUS_SCHEMA_ROOT "http://definition.nexusformat.org/schema/" /**< XML schema namespace specified by xmlns */
-#define NEXUS_SCHEMA_NAMESPACE NEXUS_SCHEMA_ROOT NEXUS_SCHEMA_VERSION /**< XML schema namespace specified by xmlns */
-#define NEXUS_SCHEMA_BASE "BASE"
-#define NEXUS_SCHEMA_FILE NEXUS_SCHEMA_BASE ".xsd" /**< default schema file for namespace */
-#define NEXUS_SCHEMA_URL                                                                                               \
-  NEXUS_SCHEMA_NAMESPACE "/" NEXUS_SCHEMA_FILE /**< location of default schema file for namespace */

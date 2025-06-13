@@ -51,7 +51,7 @@ NXstatus NX5initgroupdir(NXhandle handle);
 NXstatus NX5initattrdir(NXhandle handle);
 
 NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
-NXstatus NX5getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
+NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *pName, int *rank, int dim[], NXnumtype *iType);
 
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata);
 herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *unused, void *opdata);

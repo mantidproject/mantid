@@ -398,6 +398,10 @@ NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXn
 
 NXstatus NXgetattrinfo(NXhandle fid, int *iN) { return NX5getattrinfo(fid, iN); }
 
+NXstatus NXgetattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[], NXnumtype *iType) {
+  return NX5getattrainfo(handle, name, rank, dim, iType);
+}
+
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) { return NX5getgroupID(fileid, sRes); }
@@ -670,7 +674,7 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 NXstatus NXIprintlink(NXhandle fid, NXlink const *link) { return NX5printlink(fid, link); }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
+NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   hid_t current;
   if (fid->iCurrentD != 0) {
     current = fid->iCurrentD;
@@ -679,7 +683,9 @@ NXstatus NXgetaddress(NXhandle fid, char *address, int addresslen) {
   } else {
     current = fid->iFID;
   }
-  H5Iget_name(current, address, addresslen);
+  char caddr[NX_MAXADDRESSLEN];
+  H5Iget_name(current, caddr, NX_MAXADDRESSLEN);
+  address = std::string(caddr);
   return NXstatus::NX_OK;
 }
 
