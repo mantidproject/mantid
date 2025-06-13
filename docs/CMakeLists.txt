@@ -93,7 +93,7 @@ function(add_sphinx_build_target builder math_renderer)
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
       DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
+      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m sphinx.cmd.build
       ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
     COMMENT "Building ${builder} documentation using ${math_renderer}"
@@ -112,14 +112,14 @@ add_sphinx_build_target(html "sphinx.ext.mathjax")
 add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 add_dependencies(docs-doctest DocTestData)
 
-# qthelp if building workbench
-if(DOCS_QTHELP)
+if(ENABLE_QTASSISTANT)
   find_package(
     Qt5 ${QT_MIN_VERSION}
     COMPONENTS Help
     REQUIRED
   )
   add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
+
   add_custom_target(
     docs-qthelp
     COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
@@ -131,7 +131,6 @@ if(DOCS_QTHELP)
                EXCLUDE_FROM_DEFAULT_BUILD 1
                EXCLUDE_FROM_ALL 1
   )
-  # add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
   add_dependencies(docs-qthelp docs-qtassistant)
 endif()
 
@@ -141,23 +140,25 @@ add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
 # Installation settings
 option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the package" OFF)
 if(PACKAGE_DOCS)
-  set(HTML_DOCS_DEST share/doc)
+  set(HTML_DOCS_DEST share/doc/html)
   foreach(_bundle ${BUNDLES})
-    if(TARGET Qt5::qcollectiongenerator)
+    if(ENABLE_QTASSISTANT AND TARGET Qt5::qcollectiongenerator)
       # must "make docs-qthelp" before "make package" otherwise there will be a build failure
       install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
-              DESTINATION ${_bundle}${HTML_DOCS_DEST}
+              DESTINATION ${_bundle}${BIN_DIR}
       )
       install(
         DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
         DESTINATION ${_bundle}${HTML_DOCS_DEST}
         FILES_MATCHING
         PATTERN "*.html"
+        PATTERN "_images"
+        PATTERN "_static"
       )
       install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/ ${SPHINX_BUILD_DIR}/qthelp/_static/
               DESTINATION ${_bundle}${HTML_DOCS_DEST}
       )
-    else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    else()
       install(DIRECTORY ${SPHINX_BUILD_DIR}/html/ DESTINATION ${_bundle}${HTML_DOCS_DEST})
     endif()
   endforeach()
