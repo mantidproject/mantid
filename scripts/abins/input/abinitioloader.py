@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Sequence
 
 import numpy as np
-from pydantic import ConfigDict, TypeAdapter
+from pydantic import ConfigDict, validate_call
 from typing_extensions import TypedDict
 
 from mantid.kernel import logger
@@ -22,10 +22,7 @@ from abins.constants import MASS_EPS
 
 
 class AbinsDataset(TypedDict):
-    """Dict format of AbinsData used for caching
-
-    Most of the parsers produce this format initially, then convert to AbinsData
-    """
+    """Dict form of AbinsData used for caching"""
 
     __pydantic_config__ = ConfigDict(arbitrary_types_allowed=True)
 
@@ -65,10 +62,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             group_name=abins.parameters.hdf_groups["ab_initio_data"],
             cache_directory=cache_directory,
         )
-
-    @staticmethod
-    def _validate_dict(data: AbinsDataset) -> None:
-        TypeAdapter(AbinsDataset).validate_python(data)
 
     @property
     @abstractmethod
@@ -179,13 +172,13 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             "unit_cell": datasets["unit_cell"],
             "atoms": datasets["atoms"],
         }
-        self._validate_dict(loaded_data)
 
         return self._rearrange_data(data=loaded_data)
 
     # Internal method for use by child classes which read ab initio phonon data
     @staticmethod
-    def _rearrange_data(data: dict) -> abins.AbinsData:
+    @validate_call
+    def _rearrange_data(data: AbinsDataset) -> abins.AbinsData:
         """
         This method rearranges data read from input ab initio file.
         :param data: dictionary with the data to rearrange
@@ -206,9 +199,11 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
-    @classmethod
-    def _reverse_rearrange_data(cls, abins_data: AbinsData) -> AbinsDataset:
-        """The inverse of _rearrange_data: construct a caching dict from AbinsData"""
+    def save_ab_initio_data(self, abins_data: AbinsData) -> None:
+        """
+        Saves ab initio data to an HDF5 file.
+        :param data: dictionary with data to be saved.
+        """
         atoms_data = abins_data.get_atoms_data()
         kpoints_data = abins_data.get_kpoints_data()
 
@@ -220,17 +215,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             unit_cell=kpoints_data.unit_cell,
             atoms=atoms_data.extract(),
         )
-        cls._validate_dict(data)
-        return data
 
-    def save_ab_initio_data(self, abins_data: AbinsData) -> None:
-        """
-        Saves ab initio data to an HDF5 file.
-        :param data: dictionary with data to be saved.
-        """
-        data = self._reverse_rearrange_data(abins_data)
-
-        self._validate_dict(data)
         for name in data:
             self._clerk.add_data(name=name, value=data[name])
         self._clerk.add_file_attributes()
