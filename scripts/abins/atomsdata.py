@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Dict, List, Optional, overload, TypedDict, Union
+from typing import Dict, List, Optional, overload, Union
 import re
 
 import numpy as np
+from typing_extensions import TypedDict
 
 import abins
 from abins.constants import FLOAT_ID, FLOAT_TYPE
