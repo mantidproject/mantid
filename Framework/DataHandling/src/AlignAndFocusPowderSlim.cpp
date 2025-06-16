@@ -158,7 +158,8 @@ public:
     // groups close themselves
   }
 
-  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<float>> &data, const size_t offset,
+  template <typename NumT>
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<NumT>> &data, const size_t offset,
                const size_t slabsize, const std::string &tof_unit) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
 
@@ -244,9 +245,11 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-class ProcessEventsTask {
+constexpr double TOF_BAD{-1000.}; // large tof that nothing should ever generate
+
+template <typename TofType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
+  ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<TofType> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges,
                     const std::set<detid_t> *masked)
       : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
@@ -262,19 +265,21 @@ public:
     const size_t nbins = binedges.size() - 1;
 
     for (size_t i = range.begin(); i < range.end(); ++i) {
-      const detid_t &detid = (*m_detids)[i];
-      if (no_mask || (masked->find(detid) == masked->end())) {
+      // const detid_t &detid = (*m_detids)[i];
+      if (true) { // no_mask || (masked->find(detid) == masked->end())) {
         // Apply calibration
-        const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
+        const double &tof = static_cast<double>((*m_tofs)[i]);
 
-        // Find the bin index using binary search
-        const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
-        const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
-                               ? nbins
-                               : static_cast<size_t>(it - binedges.cbegin() - 1);
+        if (tof != TOF_BAD) {
+          // Find the bin index using binary search
+          const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
+          const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
+                                 ? nbins
+                                 : static_cast<size_t>(it - binedges.cbegin() - 1);
 
-        if (bin < nbins) {
-          y_temp[bin]++;
+          if (bin < nbins) {
+            y_temp[bin]++;
+          }
         }
       }
     }
@@ -291,7 +296,7 @@ public:
 
 private:
   const std::vector<detid_t> *m_detids;
-  const std::vector<float> *m_tofs;
+  const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
   const std::set<detid_t> *masked;
@@ -310,7 +315,6 @@ public:
         m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
       const auto &bankName = m_bankEntries[wksp_index];
@@ -380,16 +384,27 @@ public:
           }
 
           // load time-of-flight
-          std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+          auto event_time_of_flight = std::make_unique<std::vector<double>>();
           m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize, tof_unit);
+          const auto numEvent = event_time_of_flight->size();
+          { // convert values - TODO? convert to a task
+            const bool no_mask = m_masked.empty();
+            tbb::parallel_for(size_t(0), numEvent, [&](const size_t &index) {
+              const detid_t &detid = (*event_detid)[index];
+              if (no_mask || (!m_masked.contains(detid))) {
+                (*event_time_of_flight)[index] *= calibration->value(detid);
+              } else {
+                // event is masked
+                (*event_time_of_flight)[index] = TOF_BAD;
+              }
+            });
+          }
 
           // Non-blocking processing of the events
           // Each thread needs its own ProcessEventsTask
-          tg.run([event_detid = std::move(event_detid), event_time_of_flight = std::move(event_time_of_flight),
-                  calibration = std::move(calibration), x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp,
-                  grainsize = m_grainsize_event]() {
-            const auto numEvent = event_time_of_flight->size();
-
+          tg.run([numEvent, event_detid = std::move(event_detid),
+                  event_time_of_flight = std::move(event_time_of_flight), calibration = std::move(calibration),
+                  x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp, grainsize = m_grainsize_event]() {
             // Create a local task for this thread
             ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr, masked_ptr);
             tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
