@@ -14,7 +14,11 @@ class projection(ABC):
     """Base class for calculating a 2D projection with a specified axis"""
 
     def __init__(
-        self, sample_position: np.ndarray, root_position: np.ndarray, detector_positions: list[DetectorPosition], axis: np.ndarray
+        self,
+        sample_position: np.ndarray,
+        root_position: np.ndarray,
+        detector_positions: list[DetectorPosition] | np.ndarray,
+        axis: np.ndarray,
     ):
         """For the given workspace and detectors, calculate 2D points with specified projection axis"""
 
