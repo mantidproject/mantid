@@ -7,28 +7,31 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from joblib import Parallel, delayed
-from instrumentview.Detectors import Detector
+from instrumentview.Detectors import DetectorPosition
 
 
 class projection(ABC):
     """Base class for calculating a 2D projection with a specified axis"""
 
-    _projection_axis = None
-    _x_axis = None
-    _y_axis = None
-    _u_period = np.pi
-    _detector_x_coordinates = None
-    _detector_y_coordinates = None
-    _x_range = None
-    _y_range = None
-
-    def __init__(self, workspace, detectors: list[Detector], axis: np.ndarray):
+    def __init__(
+        self, sample_position: np.ndarray, root_position: np.ndarray, detector_positions: list[DetectorPosition], axis: np.ndarray
+    ):
         """For the given workspace and detectors, calculate 2D points with specified projection axis"""
-        component_info = workspace.componentInfo()
-        self._sample_position = np.array(component_info.samplePosition())
-        self._detectors = detectors
+
+        self._sample_position = sample_position
+        self._root_position = root_position
+        self._detector_positions = detector_positions
         self._projection_axis = np.array(axis)
-        root_position = np.array(component_info.position(0))
+
+        self._x_axis = np.zeros_like(self._projection_axis)
+        self._y_axis = np.zeros_like(self._projection_axis)
+        self._detector_x_coordinates = np.zeros(len(self._detector_positions))
+        self._detector_y_coordinates = np.zeros(len(self._detector_positions))
+        self._x_range = (0, 0)
+        self._y_range = (0, 0)
+
+        self._u_period = np.pi
+
         self._calculate_axes(root_position)
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
@@ -56,19 +59,17 @@ class projection(ABC):
 
     def _calculate_detector_coordinates(self):
         """Calculate 2D projection coordinates and store data"""
-        x_values = np.zeros(len(self._detectors), dtype=np.float32)
-        y_values = np.zeros(len(self._detectors), dtype=np.float32)
 
-        def store_2d_coordinates(index: int) -> None:
-            x, y = self._calculate_2d_coordinates(self._detectors[index].position)
-            x_values[index] = x
-            y_values[index] = y
+        def store_2d_coordinates(self, index: int) -> None:
+            x, y = self._calculate_2d_coordinates(self._detector_positions[index])
+            self._detector_x_coordinates[index] = x
+            self._detector_y_coordinates[index] = y
 
-        detector_loop_indices = range(len(self._detectors))
-        Parallel(n_jobs=-1, prefer="threads")(delayed(store_2d_coordinates)(detector_index) for detector_index in detector_loop_indices)
+        detector_loop_indices = range(len(self._detector_positions))
+        Parallel(n_jobs=-1, prefer="threads")(
+            delayed(store_2d_coordinates)(self, detector_index) for detector_index in detector_loop_indices
+        )
 
-        self._detector_x_coordinates = x_values
-        self._detector_y_coordinates = y_values
         self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
@@ -83,7 +84,7 @@ class projection(ABC):
         if bin_width == 0.0:
             return
 
-        for i in range(len(self._detectors)):
+        for i in range(len(self._detector_positions)):
             x = self._detector_x_coordinates[i]
             bin_i = int((x - self._x_range[0]) / bin_width)
             x_bins[bin_i] = True
@@ -110,7 +111,7 @@ class projection(ABC):
             self._x_range = (x_to, x_from)
             if self._x_range[0] > self._x_range[1]:
                 self._x_range = (self._x_range[0], self._x_range[1] + self._u_period)
-            for i in range(len(self._detectors)):
+            for i in range(len(self._detector_positions)):
                 self._apply_x_correction(i)
 
     def _apply_x_correction(self, i: int) -> None:
@@ -128,3 +129,6 @@ class projection(ABC):
 
     def coordinate_for_detector(self, detector_index: int) -> tuple[float, float]:
         return (self._detector_x_coordinates[detector_index], self._detector_y_coordinates[detector_index])
+
+    def positions(self) -> np.ndarray:
+        return np.vstack([self._detector_x_coordinates, self._detector_y_coordinates]).transpose()
