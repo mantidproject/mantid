@@ -1788,7 +1788,6 @@ NXlink File::getDataID() {
 void File::makeLink(NXlink const &link) {
   pNexusFile5 pFile;
   char linkTarget[NX_MAXADDRESSLEN];
-  char *itemName = NULL;
 
   pFile = assertNXID(m_pfile_id);
   if (pFile->iCurrentG == 0) { /* root level, can not link here */
@@ -1798,7 +1797,7 @@ void File::makeLink(NXlink const &link) {
   /*
      locate name of the element to link
    */
-  itemName = strrchr(link.targetAddress.data(), '/');
+  const char *itemName = strrchr(link.targetAddress.data(), '/');
   if (itemName == NULL) {
     throw NXEXCEPTION("makeLink failed bad link structure");
   }
