@@ -10,32 +10,17 @@ from instrumentview.Projections.cylindrical_projection import cylindrical_projec
 
 import numpy as np
 import unittest
-from unittest.mock import MagicMock
 
 
 class TestProjection(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.mock_workspace = MagicMock()
-        cls.mock_componentInfo = MagicMock()
-        cls.mock_componentInfo.samplePosition.return_value = np.array([0, 0, 0])
-        cls.mock_componentInfo.position = cls.mock_position
-        cls.mock_componentInfo.hasValidShape.return_value = True
-        cls.mock_workspace.componentInfo.return_value = cls.mock_componentInfo
-        cls.detector_indices = [0, 1, 2]
-
-    def mock_position(index: int):
-        if index == 0:
-            return [0, 1, 0]
-        if index == 1:
-            return [2, 1, 0]
-        if index == 2:
-            return [-2, 1, 0]
-
-        raise ValueError(f"Unexpected component index: {index}")
+        cls.root_position = np.array([0, 0, 0])
+        cls.sample_position = np.array([0, 0, 0])
+        cls.detector_positions = np.array([[0, 1, 0], [2, 1, 0], [-2, 1, 0]])
 
     def test_apply_x_correction_below_min(self):
-        proj = cylindrical_projection(self.mock_workspace, self.detector_indices, [0, 1, 0])
+        proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_min - np.pi / 2
@@ -45,7 +30,7 @@ class TestProjection(unittest.TestCase):
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
     def test_apply_x_correction_above_max(self):
-        proj = cylindrical_projection(self.mock_workspace, self.detector_indices, [0, 1, 0])
+        proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_max + np.pi / 2
@@ -55,21 +40,21 @@ class TestProjection(unittest.TestCase):
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
     def test_find_and_correct_x_gap(self):
-        def mock_calculate_2d_coordinates(detector_index: int):
-            if detector_index == 0:
+        def mock_calculate_2d_coordinates(position: np.ndarray):
+            if np.all(position == np.array([0, 1, 0])):
                 return (0, 0)
-            elif detector_index == 1:
+            elif np.all(position == np.array([2, 1, 0])):
                 return (np.pi / 4, 0)
-            elif detector_index == 2:
+            elif np.all(position == np.array([-2, 1, 0])):
                 return (-np.pi / 4, 0)
             else:
-                raise ValueError(f"Unexpected detector index: {detector_index}")
+                raise ValueError(f"Unexpected position: {position}")
 
         with unittest.mock.patch(
             "instrumentview.Projections.cylindrical_projection.cylindrical_projection._calculate_2d_coordinates",
             side_effect=mock_calculate_2d_coordinates,
         ):
-            proj = cylindrical_projection(self.mock_workspace, self.detector_indices, [0, 0, 1])
+            proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
             np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 4, -np.pi / 4], rtol=1e-3)
             np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 4], rtol=1e-3)
             proj._u_period = np.pi / 2
