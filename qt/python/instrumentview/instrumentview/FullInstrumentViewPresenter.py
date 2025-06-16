@@ -86,7 +86,7 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(is_spherical, np.array(axis))
+        self._model.calculate_projection(is_spherical, axis)
         projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
