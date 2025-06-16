@@ -616,36 +616,38 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 self._crosshair_lines[ax] = (hline, vline)
 
             self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
+        else:
+            if hasattr(self, "_crosshair_cid"):
+                self.canvas.mpl_disconnect(self._crosshair_cid)
+                del self._crosshair_cid
+
+            if hasattr(self, "_crosshair_lines"):
+                # Remove the crosshair lines
+                for hline, vline in self._crosshair_lines.values():
+                    hline.remove()
+                    vline.remove()
+                del self._crosshair_lines
+
+        self.canvas.draw_idle()
 
     def crosshair(self, event):
-        axes = self.canvas.figure.gca()
+        if event.inaxes and event.xdata is not None and event.ydata is not None:
+            x = event.xdata
+            y = event.ydata
 
-        # create a crosshair made from horizontal and verticle lines.
-        self.horizontal_line = axes.axhline(color="r", lw=1.0, ls="-")
-        self.vertical_line = axes.axvline(color="r", lw=1.0, ls="-")
-
-        def set_cross_hair_visible(visible):
-            need_redraw = self.horizontal_line.get_visible() != visible
-            self.horizontal_line.set_visible(visible)
-            self.vertical_line.set_visible(visible)
-            return need_redraw
-
-        # if event is out-of-bound we update
-        if not event.inaxes:
-            need_redraw = set_cross_hair_visible(False)
-            if need_redraw:
-                axes.figure.canvas.draw()
-
+            # Update all crosshairs to same (x, y)
+            for ax, (hline, vline) in self._crosshair_lines.items():
+                hline.set_ydata([y])
+                vline.set_xdata([x])
+                hline.set_visible(True)
+                vline.set_visible(True)
         else:
-            set_cross_hair_visible(True)
-            x, y = event.xdata, event.ydata
-            self.horizontal_line.set_ydata([y])
-            self.vertical_line.set_xdata([x])
-            self.canvas.draw()
+            # Hide all crosshairs when mouse is out of axes
+            for hline, vline in self._crosshair_lines.values():
+                hline.set_visible(False)
+                vline.set_visible(False)
 
-        # after update we remove
-        self.horizontal_line.remove()
-        self.vertical_line.remove()
+        self.canvas.draw_idle()
 
 
 # -----------------------------------------------------------------------------
