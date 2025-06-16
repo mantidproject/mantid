@@ -253,24 +253,21 @@ hid_t h5MemType(hid_t atype) {
   return memtype_id;
 }
 
-void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, int addressBufferLen) {
-
-  memset(addressBuffer, 0, static_cast<size_t>(addressBufferLen));
-  if (self->iCurrentG != 0) {
-    strcpy(addressBuffer, "/");
-    if ((int)strlen(self->name_ref) + 1 < addressBufferLen) {
-      strcat(addressBuffer, self->name_ref);
-    }
+std::string buildCurrentAddress(pNexusFile5 fid) {
+  hid_t current;
+  if (fid->iCurrentD != 0) {
+    current = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    current = fid->iCurrentG;
+  } else {
+    current = fid->iFID;
   }
-  if (self->iCurrentD != 0) {
-    strcat(addressBuffer, "/");
-    if ((int)strlen(self->iCurrentLD) + (int)strlen(addressBuffer) < addressBufferLen) {
-      strcat(addressBuffer, self->iCurrentLD);
-    }
-  }
+  char caddr[2048];
+  H5Iget_name(current, caddr, 2048);
+  return std::string(caddr);
 }
 
-void killAttDir(pNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
+void killAttDir(pNexusFile5 self) { self->iCurrentIDX = 0; }
 void killDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 } // end of anonymous namespace
 
@@ -621,13 +618,8 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   pFile->iStackPtr++;
   pFile->iStack5[pFile->iStackPtr].iVref = pFile->iCurrentG;
   strcpy(pFile->iStack5[pFile->iStackPtr].irefn, name.c_str());
-  pFile->iAtt5.iCurrentIDX = 0;
+  pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
-  if (pFile->iCurrentLGG != NULL) {
-    free(pFile->iCurrentLGG);
-    pFile->iCurrentLGG = NULL;
-  }
-  pFile->iCurrentLGG = strdup(name.c_str());
   killDir(pFile);
 }
 
@@ -716,7 +708,6 @@ void File::openData(std::string const &name) {
   /* find the ID number and open the dataset */
   pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
   if (pFile->iCurrentD < 0) {
-
     throw NXEXCEPTION("dataset (" + name + ") not found at this level");
   }
   /* find the ID number of datatype */
@@ -731,11 +722,6 @@ void File::openData(std::string const &name) {
     pFile->iCurrentS = 0;
     throw NXEXCEPTION("HDF error opening dataset (" + name + ")");
   }
-  if (pFile->iCurrentLD != NULL) {
-    free(pFile->iCurrentLD);
-    pFile->iCurrentLD = NULL;
-  }
-  pFile->iCurrentLD = strdup(name.c_str());
 }
 
 template <typename NumT> void File::putData(NumT const *data) {
@@ -1751,7 +1737,7 @@ NXlink File::getGroupID() {
   try {
     this->getAttr(info, link.targetAddress.data(), datalen);
   } catch (const Mantid::Nexus::Exception &) {
-    buildCurrentAddress(pFile, link.targetAddress.data(), datalen);
+    link.targetAddress = buildCurrentAddress(pFile);
   }
   link.linkType = NXentrytype::group;
   return link;
@@ -1778,7 +1764,7 @@ NXlink File::getDataID() {
   try {
     this->getAttr(info, link.targetAddress.data(), datalen);
   } catch (const Mantid::Nexus::Exception &) {
-    buildCurrentAddress(pFile, link.targetAddress.data(), datalen);
+    link.targetAddress = buildCurrentAddress(pFile);
   }
 
   link.linkType = NXentrytype::sds;
