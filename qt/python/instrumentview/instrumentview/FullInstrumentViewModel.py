@@ -47,7 +47,6 @@ class FullInstrumentViewModel:
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
 
         self._detector_visibility_map = {id: False for id in self.detector_ids()}
-        self._detector_position_projection_map = {}
 
     def negate_picked_visibility(self, detectors: list[int]) -> None:
         for d in detectors:
@@ -86,11 +85,11 @@ class FullInstrumentViewModel:
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
-    def detector_positions(self) -> list:
+    def detector_positions(self) -> list[DetectorPosition]:
         return [d.position for d in self._detectors if not d.is_monitor]
 
-    def detector_projection_positions(self) -> list:
-        return list(self._detector_position_projection_map.values())
+    def detector_projection_positions(self) -> list[DetectorPosition]:
+        return self._detector_projection_positions
 
     def detector_visibility(self) -> np.ndarray:
         return np.array(list(self._detector_visibility_map.values())).astype(int)
@@ -128,17 +127,14 @@ class FullInstrumentViewModel:
             name, detector_id, workspace_index, np.array(xyz_position), np.array(spherical_position), component_path, int(pixel_counts)
         )
 
-    def calculate_projection(self, is_spherical: bool, axis: np.ndarray) -> list[list[float]]:
+    def calculate_projection(self, is_spherical: bool, axis: np.ndarray) -> list[DetectorPosition]:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        detectors = [d for d in self._detectors if not d.is_monitor]
+        sample_position = np.array(self._component_info.samplePosition())
+        root_position = np.array(self._component_info.position(0))
         projection = (
-            iv_spherical.spherical_projection(self._workspace, detectors, axis)
+            iv_spherical.spherical_projection(sample_position, root_position, self.detector_positions(), axis)
             if is_spherical
-            else iv_cylindrical.cylindrical_projection(self._workspace, detectors, axis)
+            else iv_cylindrical.cylindrical_projection(sample_position, root_position, self.detector_positions(), axis)
         )
-
-        for det_index in range(len(detectors)):
-            x, y = projection.coordinate_for_detector(det_index)
-            self._detector_position_projection_map[det_index] = DetectorPosition([x, y, 0])
-
-        return list(self._detector_position_projection_map.values())
+        self._detector_projection_positions = [DetectorPosition([x, y, 0]) for (x, y) in projection.positions()]
+        return self._detector_projection_positions
