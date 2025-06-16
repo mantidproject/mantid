@@ -125,14 +125,14 @@ class FullInstrumentViewModel:
             name, detector_id, workspace_index, np.array(xyz_position), np.array(spherical_position), component_path, int(pixel_counts)
         )
 
-    def calculate_projection(self, is_spherical: bool, axis: np.ndarray) -> list[DetectorPosition]:
+    def calculate_projection(self, is_spherical: bool, axis: list[int]) -> list[DetectorPosition]:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         sample_position = np.array(self._component_info.samplePosition())
         root_position = np.array(self._component_info.position(0))
         projection = (
-            iv_spherical.spherical_projection(sample_position, root_position, self.detector_positions(), axis)
+            iv_spherical.spherical_projection(sample_position, root_position, self.detector_positions(), np.array(axis))
             if is_spherical
-            else iv_cylindrical.cylindrical_projection(sample_position, root_position, self.detector_positions(), axis)
+            else iv_cylindrical.cylindrical_projection(sample_position, root_position, self.detector_positions(), np.array(axis))
         )
         self._detector_projection_positions = [DetectorPosition([x, y, 0]) for (x, y) in projection.positions()]
         return self._detector_projection_positions
