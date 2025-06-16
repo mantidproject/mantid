@@ -108,21 +108,8 @@ class PyChopGui(QMainWindow):
         self.assistant_process = QProcess(self)
         self.mantidplot_name = "PyChop"
 
-        # Load gui from ui file.
-        # Mantid has a custom function to do the same: load_ui(fullpath, "ui_filename.ui")
-        # from mantidqt.utils.qt import load_ui
-        # Note that this assumes that the .ui file is in the same directory as the view.py
-        # ui_path = os.path.dirname(os.path.realpath(__file__))
-        # uic.loadUi(os.path.join(ui_path, "pychop_mvp_guiwidget.ui"), self)
-
-        # self.pbIncrement.clicked.connect(self.notify_button_clicked)
-
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
-
-    def notify_button_clicked(self) -> None:
-        # An example event slot which notifies the presenter
-        self._presenter.handle_button_clicked()
 
     def set_label(self, text: str) -> None:
         self.lbCount.setText(text)
@@ -255,11 +242,6 @@ class PyChopGui(QMainWindow):
         # call to presenter to set frequency based on phases present
         self.presenter.setFreq(freq_in, phases)
 
-        # if phases:
-        #     self.engine.setFrequency(freq_in, phase=phases)
-        # else:
-        #     self.engine.setFrequency(freq_in)
-
     # unchanged method:
     def _hide_phases(self):
         for widget in [wdg for key, wdg in self.widgets.items() if key.endswith("Phase")]:
@@ -371,16 +353,6 @@ class PyChopGui(QMainWindow):
 
         # now getting result from Presenter
         result = self.presenter.calculate(multirep_enabled)
-
-        # if self.engine.getEi() is None:
-        #     self.setEi()
-        # if self.widgets["MultiRepCheck"].isChecked():
-        #     en = np.linspace(0, 0.95, 200)
-        #     self.eis = self.engine.getAllowedEi()
-        #     with warnings.catch_warnings(record=True) as w:
-        #         warnings.simplefilter("always", UserWarning)
-        #         self.res = self.engine.getMultiRepResolution(en)
-        #         self.flux = self.engine.getMultiRepFlux()
 
         self.eis = result["eis"]
         self.res = result["res"]
