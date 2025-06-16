@@ -253,8 +253,7 @@ hid_t h5MemType(hid_t atype) {
   return memtype_id;
 }
 
-void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, // cppcheck-suppress constParameterPointer
-                         int addressBufferLen) {
+void buildCurrentAddress(pNexusFile5 self, char *addressBuffer, int addressBufferLen) {
 
   memset(addressBuffer, 0, static_cast<size_t>(addressBufferLen));
   if (self->iCurrentG != 0) {
@@ -585,7 +584,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   strcpy(pFile->name_tmp, pBuffer);
   strcpy(pFile->name_ref, pBuffer);
 
-  if ((class_name.c_str() != NULL) && (strcmp(class_name.c_str(), NX_UNKNOWN_GROUP) != 0)) {
+  if ((!class_name.empty()) && (strcmp(class_name.c_str(), NX_UNKNOWN_GROUP) != 0)) {
     /* check group attribute */
     iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
     if (iRet < 0) {
@@ -904,8 +903,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   unsigned int compress_level;
   bool unlimiteddim = false;
   int rank = static_cast<int>(dims.size());
-  int64_t *chunk_size = const_cast<int64_t *>(chunk.data());
-  int64_t *dimensions = const_cast<int64_t *>(dims.data());
+  const int64_t *chunk_size = const_cast<int64_t *>(chunk.data());
+  const int64_t *dimensions = const_cast<int64_t *>(dims.data());
   stringstream msg;
   msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
@@ -1786,7 +1785,7 @@ NXlink File::getDataID() {
   return link;
 }
 
-void File::makeLink(NXlink &link) {
+void File::makeLink(NXlink const &link) {
   pNexusFile5 pFile;
   char linkTarget[NX_MAXADDRESSLEN];
   char *itemName = NULL;
