@@ -1,1 +1,1 @@
-- A crosshair toggle option has been added in mantidplots on the top right of the toolbar area. The crosshair button can be enabled in a single plot or tiled plots(subplots)
+- A crosshair toggle option has been added in mantidplots on the top right of the toolbar area.
