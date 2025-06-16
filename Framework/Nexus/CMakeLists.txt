@@ -29,6 +29,7 @@ set(TEST_FILES
     NeXusFileLeakTest.h
     NeXusFileNapiTest.h
     NeXusFileReadWriteTest.h
+    NapiUnitTest.h
 )
 
 if(COVERAGE)
