@@ -48,7 +48,7 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_range_limits(self._contour_limits)
 
         self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_positions())
-        self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
+        self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility", pickable=True)
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
@@ -67,6 +67,7 @@ class FullInstrumentViewPresenter:
     def projection_option_selected(self, selected_index: int) -> None:
         """Update the projection based on the selected option."""
         projection_type = self._PROJECTION_OPTIONS[selected_index]
+        is_spherical = True
         if projection_type.startswith("Spherical"):
             is_spherical = True
         elif projection_type.startswith("Cylindrical"):
@@ -85,13 +86,13 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(is_spherical, axis)
+        self._model.calculate_projection(is_spherical, np.array(axis))
         projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
 
         self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
-        self._pickable_projection_mesh["visibility"] = self._model.detector_visibility()
+        self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
 
     def set_contour_limits(self, min: int, max: int) -> None:
@@ -124,12 +125,12 @@ class FullInstrumentViewPresenter:
         selected_detector_indices = np.argwhere(selected_mask).flatten()
         self.update_picked_detectors(selected_detector_indices)
 
-    def update_picked_detectors(self, detector_indices: list[int]) -> None:
+    def update_picked_detectors(self, detector_indices: list[int] | np.ndarray) -> None:
         self._model.negate_picked_visibility(detector_indices)
 
         # Update to visibility shows up in real time
-        self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
-        self._pickable_projection_mesh["visibility"] = self._model.detector_visibility()
+        self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
+        self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
 
         picked_detector_ids = self._model.picked_detector_ids()
         self.show_plot_for_detectors(picked_detector_ids)
