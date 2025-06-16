@@ -188,7 +188,7 @@ class TextureCorrectionModel:
         EstimateDivergence(ws, vert, horz, det_horz, OutputWorkspace="_div_corr")
 
     def apply_corrections(
-        self, ws, out_ws, calibration, root_dir, abs_corr=1.0, div_corr=1.0, rb_num=None, remove_ws_after_processing=False
+        self, ws, out_ws, calibration_group, root_dir, abs_corr=1.0, div_corr=1.0, rb_num=None, remove_ws_after_processing=False
     ):
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing")
@@ -205,7 +205,7 @@ class TextureCorrectionModel:
         else:
             temp_ws = temp_ws / div_corr
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws)
-        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", rb_num, calibration)
+        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", rb_num, calibration_group)
         if remove_ws_after_processing:
             # remove output ws from ADS to free up memory
             ADS.remove(out_ws)
@@ -215,11 +215,11 @@ class TextureCorrectionModel:
             if isinstance(div_corr, str):
                 ADS.remove(div_corr)
 
-    def _save_corrected_files(self, ws, root_dir, dir_name, rb_num, calibration):
+    def _save_corrected_files(self, ws, root_dir, dir_name, rb_num, calibration_group):
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
-            if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+            if calibration_group == GROUP.TEXTURE20 or calibration_group == GROUP.TEXTURE30:
                 save_dirs.pop(0)  # only save to RB directory to limit number files saved
         for save_dir in save_dirs:
             if not path.exists(save_dir):
@@ -255,7 +255,7 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration)
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration.group)
 
     def create_reference_ws(self, rb_num, instr="ENGINX"):
         self.set_reference_ws(f"{rb_num}_reference_workspace")
@@ -263,7 +263,7 @@ class TextureCorrectionModel:
 
     def save_reference_file(self, rb_num, calibration, root_dir):
         if self.reference_ws and ADS.doesExist(self.reference_ws):
-            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, calibration)
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, calibration.group)
 
     def set_reference_ws(self, ws_name):
         self.reference_ws = ws_name
