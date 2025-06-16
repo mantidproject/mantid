@@ -13,7 +13,11 @@ class spherical_projection(projection):
     """2D projection with a spherical coordinate system, see https://en.wikipedia.org/wiki/Spherical_coordinate_system"""
 
     def __init__(
-        self, sample_position: np.ndarray, root_position: np.ndarray, detector_positions: list[DetectorPosition], axis: np.ndarray
+        self,
+        sample_position: np.ndarray,
+        root_position: np.ndarray,
+        detector_positions: list[DetectorPosition] | np.ndarray,
+        axis: np.ndarray,
     ):
         super().__init__(sample_position, root_position, detector_positions, axis)
 
