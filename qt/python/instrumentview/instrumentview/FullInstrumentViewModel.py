@@ -47,7 +47,7 @@ class FullInstrumentViewModel:
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
 
-    def negate_picked_visibility(self, indices: list[int]) -> None:
+    def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
         for i in indices:
             self._detector_is_picked[i] = not self._detector_is_picked[i]
 
@@ -89,7 +89,7 @@ class FullInstrumentViewModel:
     def detector_projection_positions(self) -> list[DetectorPosition]:
         return self._detector_projection_positions
 
-    def detector_visibility(self) -> np.ndarray:
+    def picked_visibility(self) -> np.ndarray:
         return np.array(self._detector_is_picked).astype(int)
 
     def picked_detector_ids(self) -> np.ndarray:
