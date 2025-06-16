@@ -376,6 +376,10 @@ void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const 
   file->writeData("num_axes", int(motors.size()));
   for (size_t i = 0; i < motors.size(); i++)
     motors[i].saveNexus(file, "axis" + Strings::toString(i));
+  DblMatrix rMatrix = getR();
+  // Flatten DblMatrix for saving
+  std::vector<double> matrixData = rMatrix.getVector();
+  file->writeData("rotation_matrix", matrixData);
   file->closeGroup();
 }
 
@@ -390,10 +394,19 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   file->readData("num_axes", num_axes);
   motors.clear();
   motors.reserve(num_axes);
-  for (int i = 0; i < num_axes; i++) {
-    GoniometerAxis newAxis;
-    newAxis.loadNexus(file, "axis" + Strings::toString(i));
-    motors.emplace_back(newAxis);
+  // If a rotation matrix is available and no rotation axes are provided load should behave like initFromR
+  if (file->hasData("rotation_matrix") && (num_axes < 1)) {
+    std::vector<double> matrixData;
+    file->readData("rotation_matrix", matrixData);
+    DblMatrix rotMat(matrixData);
+    setR(rotMat);
+    initFromR = true; // set as initFromR to prevent overwrite on R recalc
+  } else {
+    for (int i = 0; i < num_axes; i++) {
+      GoniometerAxis newAxis;
+      newAxis.loadNexus(file, "axis" + Strings::toString(i));
+      motors.emplace_back(newAxis);
+    }
   }
   file->closeGroup();
   // Refresh cached values
