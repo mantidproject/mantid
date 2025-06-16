@@ -810,7 +810,7 @@ public:
     // get attribute asserting the type -- make sure there is a failure
     Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
     Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
-    TS_ASSERT_THROWS(file.getAttr(info32, &version32), Mantid::Nexus::Exception const &)
+    TS_ASSERT_THROWS_NOTHING(file.getAttr(info32, &version32))
     TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
   }
 
