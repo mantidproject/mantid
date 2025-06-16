@@ -33,9 +33,10 @@ class FullInstrumentViewModel:
         self._source_position = np.array(self._component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
 
         self._detectors = [Detector(index, int(id), self._detector_info) for index, id in enumerate(self._detector_info.detectorIDs())]
-        detector_ids = self.detector_ids()
-        workspace_indices = [int(index) for index in self._workspace.getIndicesFromDetectorIDs(detector_ids)]
-        self._detector_id_to_workspace_index = dict(zip(detector_ids, workspace_indices))
+        self._detector_ids = self.detector_ids()
+        self._detector_is_picked = np.full(len(self._detector_ids), False)
+        workspace_indices = [int(index) for index in self._workspace.getIndicesFromDetectorIDs(self._detector_ids)]
+        self._detector_id_to_workspace_index = dict(zip(self._detector_ids, workspace_indices))
 
         self._bin_min = math.inf
         self._bin_max = -math.inf
@@ -46,12 +47,9 @@ class FullInstrumentViewModel:
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
 
-        self._detector_visibility_map = {id: False for id in self.detector_ids()}
-
-    def negate_picked_visibility(self, detectors: list[int]) -> None:
-        for d in detectors:
-            id = self._detectors[d].id
-            self._detector_visibility_map[id] = not self._detector_visibility_map[id]
+    def negate_picked_visibility(self, indices: list[int]) -> None:
+        for i in indices:
+            self._detector_is_picked[i] = not self._detector_is_picked[i]
 
     def _union_with_current_bin_min_max(self, bin_edge) -> None:
         """Expand current bin limits to include new bin edge"""
@@ -92,10 +90,10 @@ class FullInstrumentViewModel:
         return self._detector_projection_positions
 
     def detector_visibility(self) -> np.ndarray:
-        return np.array(list(self._detector_visibility_map.values())).astype(int)
+        return np.array(self._detector_is_picked).astype(int)
 
-    def picked_detector_indices(self) -> list:
-        return [key for key, val in self._detector_visibility_map.items() if val]
+    def picked_detector_ids(self) -> np.ndarray:
+        return np.array(self._detector_ids)[self._detector_is_picked]
 
     def detector_counts(self) -> np.ndarray:
         return self._detector_counts
