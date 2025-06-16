@@ -61,7 +61,6 @@ const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
-const std::string EVENTS_BLOCK_SIZE("EventsToSort");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
@@ -266,9 +265,9 @@ template <typename CountsType> class ProcessEventsTask {
 public:
   ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, std::vector<CountsType> *y_temp,
-                    const std::vector<double> *binedges, const std::set<detid_t> *masked, const size_t events_blocksize)
+                    const std::vector<double> *binedges, const std::set<detid_t> *masked)
       : m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp), m_binedges(binedges),
-        masked(masked), no_mask(masked->empty()), m_events_blocksize(events_blocksize) {}
+        masked(masked), no_mask(masked->empty()) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     // Fast histogramming without sorting or cumulative counting
@@ -312,8 +311,7 @@ private:
   std::vector<CountsType> *y_temp;
   const std::vector<double> *m_binedges;
   const std::set<detid_t> *masked;
-  const bool no_mask;              // whether there are any masked pixels
-  const size_t m_events_blocksize; // number of events to process as a group
+  const bool no_mask; // whether there are any masked pixels
 };
 
 class ProcessBankTask {
@@ -322,11 +320,11 @@ public:
                   const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
                   const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked, const double binWidth,
                   const bool linearBins, const size_t events_per_chunk, const size_t grainsize_event,
-                  const size_t events_blocksize, std::shared_ptr<API::Progress> &progress)
+                  std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
         m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins), m_events_per_chunk(events_per_chunk),
-        m_grainsize_event(grainsize_event), m_events_blocksize(events_blocksize), m_progress(progress) {
+        m_grainsize_event(grainsize_event), m_progress(progress) {
     if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
       throw std::runtime_error("failed to reopen async");
     }
@@ -401,7 +399,7 @@ public:
 
           // threaded processing of the events
           ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &y_temp,
-                                 &spectrum.readX(), &m_masked, m_events_blocksize);
+                                 &spectrum.readX(), &m_masked);
           if (numEvent > m_grainsize_event) {
             // use tbb
             tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
@@ -435,7 +433,6 @@ private:
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
-  const size_t m_events_blocksize;
   std::shared_ptr<API::Progress> m_progress;
 };
 
@@ -492,11 +489,6 @@ void AlignAndFocusPowderSlim::init() {
       std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_BLOCK_SIZE, 65536, positiveIntValidator),
-      "Number of events to sort/histogram at a time. "
-      "It should be smaller than the number of events processed in a single thread.");
-  setPropertyGroup(PropertyNames::EVENTS_BLOCK_SIZE, CHUNKING_PARAM_GROUP);
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -509,14 +501,6 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     const std::string msg(PropertyNames::READ_SIZE_FROM_DISK + " must be larger than " +
                           PropertyNames::EVENTS_PER_THREAD);
     errors[PropertyNames::READ_SIZE_FROM_DISK] = msg;
-    errors[PropertyNames::EVENTS_PER_THREAD] = msg;
-  }
-
-  const int events_block = getProperty(PropertyNames::EVENTS_BLOCK_SIZE);
-  if (events_block > grainsize_events) {
-    const std::string msg(PropertyNames::EVENTS_PER_THREAD + " must be larger than " +
-                          PropertyNames::EVENTS_BLOCK_SIZE);
-    errors[PropertyNames::EVENTS_BLOCK_SIZE] = msg;
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
@@ -659,11 +643,10 @@ void AlignAndFocusPowderSlim::exec() {
     // threaded processing of the banks
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
-    const int EVENTS_BLOCK_SIZE = getProperty(PropertyNames::EVENTS_BLOCK_SIZE);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
-                         static_cast<size_t>(GRAINSIZE_EVENTS), static_cast<size_t>(EVENTS_BLOCK_SIZE), progress);
+                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
