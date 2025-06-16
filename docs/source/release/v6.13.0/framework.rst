@@ -34,6 +34,9 @@ New features
   factor.
 - New algorithm :ref:`algm-CombineTableWorkspaces` allows combination of a pair of :ref:`Table Workspaces`, provided
   they have matching column names and data types.
+- Introduced a new python algorithm, :ref:`algm-RefineSingleCrystalGoniometer`, that refines the UB-matrix and
+  goniometer offsets simultaneously. This Improves the indexing of the peaks for those cases when there is sample
+  misorientation and :ref:`algm-FindUBUsingIndexedPeaks` is insufficient.
 
 Bugfixes
 ############
@@ -53,6 +56,7 @@ Bugfixes
     :ref:`algm-Fit` to preserve existing behaviour.
   - The ``IgnoreInvalidData`` parameter defaulted to ``false`` has been introduced into
     :ref:`algm-ReflectometryBackgroundSubtraction`.
+
 - ``InstrumentArrayConverter`` and ``PeakData`` utility classes used in peak integration algorithms have been moved into
   a common module located at ``plugins.algorithms.peakdata_utils.py``. Import paths related to those classes must be
   updated from ``from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, PeakData`` into
@@ -81,9 +85,9 @@ Deprecated
 - Property ``UnwrapRef`` has been deprecated for algorithms that previously called deprecated algorithm
   :ref:`algm-UnwrapSNS`:
 
-    - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`,
-    - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`
-    - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
+  - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`,
+  - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`
+  - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 
 - :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` has been deprecated. There is no replacement.
 - :ref:`IntegratePeaksCWSD <algm-IntegratePeaksCWSD>` has been deprecated. There is no replacement.
@@ -135,11 +139,12 @@ New features
 
 Deprecated
 ############
-- :ref:`LoadPreNexus <algm-LoadPreNexus>` and :ref:`LoadPreNexusMonitors <algm-LoadPreNexusMonitors>` has been deprecated. There is no replacement.
+- :ref:`LoadPreNexus <algm-LoadPreNexus>` and :ref:`LoadPreNexusMonitors <algm-LoadPreNexusMonitors>` has been
+  deprecated. There is no replacement.
 
 Removed
 ############
-- Remove ``SaveToSNSHistogramNexus`` because it is unused.
+- ``SaveToSNSHistogramNexus`` has been removed, because it is unused.
 
 
 Data Objects
@@ -159,36 +164,45 @@ Python
 
 New features
 ############
-- Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
-- Improvements:
+- Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new
+  Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
+
+  - Improvements:
+
     - Enhances the visual appearance and usability of in-app documentation.
     - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
     - Delivers a smoother and more consistent experience when navigating help and reference material.
-- Key benefits:
-    - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future potential for interactive elements in documentation.
-- Makes the large offline documentation optional rather than a mandatory install, reducing installer/download size significantly.
-- Improvements:
-    - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space (potentially hundreds of MB).
-    - Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access.
-- Key benefits:
-    - Greater flexibility in how Mantid is set up — you choose whether to save space or have fully locally built docs.
-- Introduced a new python algorithm `RefineSingleCrystalGoniometer` that refines the UB-matrix and goniometer offsets simultaneously.
-- Improvements:
-    - Improves the indexing of the peaks for those cases when there is sample misorientation and `FindUBUsingIndexedPeaks` is insufficient.
-- Key benefits:
-    - Improved indexing of peaks in special cases.
-- Exposed ``Instrument.getFilename()`` and ``Instrument.setFilename()`` to python
-- Adds a clear indicator in the Help Window’s toolbar showing whether Mantid is displaying **Local Docs** or **Online Docs** documentation.
-- Improvements:
-    - Makes it obvious if you are using locally installed documentation or viewing updated online docs (default).
-    - Helps diagnose connection or installation issues if pages are not loading as expected.
-- Key benefits:
-    - Immediate clarity on where help content is being retrieved from, removing guesswork.
+
+  - Key benefits:
+
+    - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future
+      potential for interactive elements in documentation.
+
+- Makes the large offline documentation an optional rather than a mandatory install, reducing installer/download size
+  significantly.
+
+  - Improvements:
+
+    - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space
+      (potentially hundreds of MB).
+    - Those who prefer local/offline usage can still opt to install the documentation package and continue working
+      without internet access.
+    - A clear indicator has been added to the Help Window’s toolbar to show whether Mantid is displaying ``Local Docs``
+      or ``Online Docs``.
+
+  - Key benefits:
+
+    - Greater flexibility in how Mantid is set up — you choose whether to save space or have full local, offline docs.
+
+- ``Instrument.getFilename()`` and ``Instrument.setFilename()`` have been exposed to python.
 
 Bugfixes
 ############
-- :class:`ConfigService.setDataSearchDirs <mantid.kernel.ConfigServiceImpl.setDataSearchDirs>` will no longer crash when comma separated paths are used in the `datasearch.directories` setting of the `mantid.user.properties` file.
-- Fixed a bug where the method :meth:`mantid.api.Run.addProperty` was ignoring the ``name`` and ``units`` parameters if the ``value`` was of type :class:`mantid.kernel.Property`. Now only if the ``name`` and ``units`` are empty will the existing values on the ``Property`` be used.
+- :class:`ConfigService.setDataSearchDirs <mantid.kernel.ConfigServiceImpl.setDataSearchDirs>` will no longer crash when
+  comma separated paths are used in the ``datasearch.directories`` setting of the ``mantid.user.properties`` file.
+- :meth:`mantid.api.Run.addProperty` no longer ignores the ``name`` and ``units`` parameters if the ``value`` is of type
+  :class:`mantid.kernel.Property`. Now only if the ``name`` and ``units`` are empty will the existing values on the
+  ``Property`` be used.
 
 
 Dependencies
@@ -196,7 +210,11 @@ Dependencies
 
 New features
 ############
-- Upgraded to Python 3.11, see release notes from Python `here <https://docs.python.org/3/whatsnew/3.11.html>`_. Also see Python's `migration guide <https://docs.python.org/3/whatsnew/3.11.html#porting-to-python-3-11>`_ for changes that could break scripts.
+- Upgraded to Python 3.11.
+
+  - See release notes from Python `here <https://docs.python.org/3/whatsnew/3.11.html>`_.
+  - See Python's `migration guide <https://docs.python.org/3/whatsnew/3.11.html#porting-to-python-3-11>`_ for changes
+    that could break scripts.
 
 Bugfixes
 ############
@@ -208,7 +226,8 @@ Build Tools
 
 Bugfixes
 ############
-- CMake now successfully builds with ``-DUSE_SANITIZER=address``. For more details see :doc:`RunningSanitizers <mantid-dev:RunningSanitizers>`.
+- CMake now successfully builds with ``-DUSE_SANITIZER=address``. For more details see
+  :doc:`RunningSanitizers <mantid-dev:RunningSanitizers>`.
 
 
 MantidWorkbench
