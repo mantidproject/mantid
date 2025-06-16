@@ -12,7 +12,6 @@ from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
 import matplotlib.pyplot as plt
 from mantid.geometry import CrystalStructure
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
@@ -138,12 +137,14 @@ class TextureProjection:
         pfi = self.get_pole_figure_data(ws_name, projection, readout_col)
 
         if plot_exp:
+            suffix = "scatter"
             fig = self.plot_exp_pf(pfi, ax_labels, fig, **kwargs)
         else:
+            suffix = f"contour_{contour_kernel}"
             fig = self.plot_contour_pf(pfi, ax_labels, fig, contour_kernel, **kwargs)
         if save_dirs:
             for save_dir in save_dirs:
-                fig.savefig(str(path.join(save_dir, ws_name + ".png")))
+                fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
 
     def plot_exp_pf(self, pfi, ax_labels, fig=None, **kwargs):
         u = np.linspace(0, 2 * np.pi, 100)
@@ -238,8 +239,7 @@ class TextureProjection:
         for ws in wss:
             ADS.retrieve(ws).sample().setCrystalStructure(xtal)
 
-    def _get_save_dirs(self, dir_name, rb_num, grouping="GROUP"):
-        root_dir = output_settings.get_output_path()
+    def get_save_dirs(self, root_dir, dir_name, rb_num, grouping="GROUP"):
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name, grouping))

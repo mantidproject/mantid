@@ -201,7 +201,7 @@ class TextureCorrectionPresenter:
 
             remove_ws_after_processing = self._get_setting("clear_absorption_ws_after_processing", bool)
             self.model.apply_corrections(
-                ws, out_wss[i], self.current_calibration, root_dir, abs_corr, div_corr, self.rb_num, remove_ws_after_processing
+                ws, out_wss[i], self.current_calibration.group, root_dir, abs_corr, div_corr, self.rb_num, remove_ws_after_processing
             )
 
     def _copy_sample_to_all_selected(self):

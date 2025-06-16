@@ -11,9 +11,9 @@ from unittest.mock import patch, MagicMock, mock_open
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
 
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import TextureCorrectionModel
+from Engineering.texture.correction.correction_model import TextureCorrectionModel
 
-correction_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model"
+correction_model_path = "Engineering.texture.correction.correction_model"
 
 
 class TextureCorrectionModelTest(unittest.TestCase):
@@ -297,11 +297,11 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_calib = mock.MagicMock()
         mock_ads.retrieve.return_value = self.mock_ws
         mock_convert.return_value = mock.MagicMock()
-        self.model.apply_corrections("ws1", "out_ws", mock_calib, "dir", abs_corr=1.0, div_corr=1.0)
+        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0)
 
         mock_convert.assert_called_once_with(self.mock_ws, Target="dSpacing")
         mock_clone.assert_called()
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
 
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")
@@ -321,11 +321,11 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.side_effect = retrieve_mock
         mock_convert.side_effect = lambda x, Target: temp_ws if x is ws else x
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib, "dir", abs_corr="abs_ws", div_corr="div_ws")
+        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr="abs_ws", div_corr="div_ws")
 
         # Assert
         self.assertEqual(mock_convert.call_count, 3)
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
         mock_ads.remove.assert_any_call("abs_ws")
         mock_ads.remove.assert_any_call("div_ws")
 
@@ -339,7 +339,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib, "dir", abs_corr=1.0, div_corr=1.0, remove_ws_after_processing=True)
+        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0, remove_ws_after_processing=True)
 
         mock_ads.remove.assert_any_call("out_ws")
         mock_ads.remove.assert_any_call("temp_ws")
@@ -355,9 +355,9 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_convert.return_value = ws
         mock_clone.return_value = None
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib, "dir", abs_corr=1.0, div_corr=1.0, rb_num="rb123")
+        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0, rb_num="rb123")
 
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", "rb123", mock_calib)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", "rb123", mock_calib.group)
 
     @patch(correction_model_path + ".SaveNexus")
     @patch(correction_model_path + ".CreateEmptyTableWorkspace")
@@ -376,7 +376,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_exists.return_value = False
         calib = MagicMock()
         calib.group = "CUSTOM"
-        self.model._save_corrected_files("ws", "/tmp", "AbsorptionCorrection", "RB123", calib)
+        self.model._save_corrected_files("ws", "/tmp", "AbsorptionCorrection", "RB123", calib.group)
         mock_makedirs.assert_called()
         mock_save.assert_called()
 

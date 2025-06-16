@@ -140,6 +140,7 @@ class TexturePresenter:
         wss, params = self.view.get_selected_workspaces()
         # remove any 'not set' parameters workspaces from the list
         params = [p for p in params if p != "Not set"]
+        projection_method = self.view.get_projection_method()
         inc_scatt = self.view.get_inc_scatt_power()
         hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
         readout_col = self.view.get_readout_column()
@@ -165,12 +166,13 @@ class TexturePresenter:
         )
 
         self.worker = AsyncTask(
-            self._calc_pf,
+            self.calc_pf,
             (
                 wss,
                 params,
                 out_ws,
                 hkl,
+                projection_method,
                 inc_scatt,
                 scat_vol_pos,
                 chi2_thresh,
@@ -188,12 +190,13 @@ class TexturePresenter:
         )
         self.worker.start()
 
-    def _calc_pf(
+    def calc_pf(
         self,
         wss,
         params,
         out_ws,
         hkl,
+        projection_method,
         inc_scatt,
         scat_vol_pos,
         chi2_thresh,
@@ -206,11 +209,12 @@ class TexturePresenter:
         plot_exp,
         contour_kernel,
     ):
-        save_dirs = self.model._get_save_dirs("PoleFigureTables", rb_num, grouping)
+        root_dir = output_settings.get_output_path()
+        save_dirs = self.model.get_save_dirs("PoleFigureTables", root_dir, rb_num, grouping)
         self.model.make_pole_figure_tables(
             wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_col
         )
-        self.plot_pf(out_ws, self.view.get_projection_method(), readout_col, save_dirs, plot_exp, ax_labels, contour_kernel)
+        self.plot_pf(out_ws, projection_method, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel)
 
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Corrections Applied")

@@ -189,7 +189,6 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
 
         # alpha
-        print(outws.column("Alpha"))
         self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] + (np.pi / 4))
 
         # beta
@@ -219,100 +218,6 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 0 has 0, det 1 has 1
         self.eval_arrays(outws.column("chi2"), np.array((0.0, 1.0)))
         self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
-
-    def test_flipping_td_negates_alphas(self):
-        # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha
-        ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, -1))).reshape(-1)
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
-        )
-        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
-
-        # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((42.5, 45))))
-
-        # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
-
-        # intensity
-        # det 0 has 1.0, det 1 has 1.1
-        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
-
-    def test_flipping_rd_adds_pi_to_alphas(self):
-        # alpha is taken from rd, if rd is inverted the q vectors are now at alpha +/- pi rather than alpha
-        ax_transform = np.array(((-1, 0, 0), (0, 1, 0), (0, 0, 1))).reshape(-1)
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
-        )
-        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
-
-        # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-137.5, -135))))
-
-        # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
-
-        # intensity
-        # det 0 has 1.0, det 1 has 1.1
-        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
-
-    def test_flipping_nd_does_nothing(self):
-        # negative normal directions are always inverted so expect the same result
-        ax_transform = np.array(((1, 0, 0), (0, -1, 0), (0, 0, 1))).reshape(-1)
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
-        )
-        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
-
-        # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45))))
-
-        # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
-
-        # intensity
-        # det 0 has 1.0, det 1 has 1.1
-        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
-
-    def test_rotating_rd_and_td_pi_by_4_about_nd_adds_pi_by_4_to_alphas(self):
-        # alpha is taken from rd, if rd and td are rotated pi/4 about nd, the Q vectors are rotated pi/4 relative to rd
-        ir2 = 1 / np.sqrt(2)
-        ax_transform = np.array(((ir2, 0, ir2), (0, 1, 0), (-ir2, 0, ir2))).reshape(-1)
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
-        )
-        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
-
-        # alpha
-        print(outws.column("Alpha"))
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((2.5, 0))))
-
-        # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
-
-        # intensity
-        # det 0 has 1.0, det 1 has 1.1
-        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
-
-    def test_alg_with_different_readout_column(self):
-        outws = CreatePoleFigureTableWorkspace(
-            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", ReadoutColumn="chi2"
-        )
-        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
-
-        # alpha
-        # det 1 along X axis, det 0 is 5 degrees towards +Z
-        # det 1 Q is at -45 degrees from X axis (it points towards -Z)
-        # det 0 Q is at -42.5 degrees
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45))))
-
-        # beta
-        # both det 0 and det 1 are in plane, beta = 90 degrees from Y
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
-
-        # final column should be chi2
-        # det 0 has 0, det 1 has 1
-        self.eval_arrays(outws.column("chi2"), np.array((0.0, 1.0)))
 
     def test_alg_with_goniometer_applied(self):
         # ws 2 is rotated 45 degrees away from +Z
