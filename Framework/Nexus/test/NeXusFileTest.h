@@ -399,9 +399,10 @@ public:
     auto data = file.getStrData();
 
     TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
-    // uncomment when nexus getInfo has been updated
+    // TODO should it be 13 or 128?
     // TS_ASSERT_EQUALS(info.dims[0], 128);
-    // TS_ASSERT_EQUALS(data.length(), testStr.length());
+    TS_ASSERT_EQUALS(info.dims[0], testStr.length());
+    TS_ASSERT_EQUALS(data.length(), testStr.length());
     TS_ASSERT_EQUALS(data, testStr);
   }
 
@@ -415,7 +416,7 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
-    file.makeData("data_int", Mantid::Nexus::getType<int32_t>(), 4, true);
+    file.makeData("data_int", NXnumtype::INT32, 4, true);
     int in[] = {12, 7, 2, 3}, out[4];
     file.putData(&(in[0]));
     Mantid::Nexus::Info info = file.getInfo();
@@ -429,7 +430,7 @@ public:
     }
 
     // put/get double array
-    file.makeData("data_double", Mantid::Nexus::getType<double>(), 4, true);
+    file.makeData("data_double", NXnumtype::FLOAT64, 4, true);
     double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
     file.putData(&(ind[0]));
     info = file.getInfo();
@@ -446,7 +447,7 @@ public:
     Mantid::Nexus::DimVector dims{3, 2};
     double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
     double outdd[3][2];
-    file.makeData("data_double_2d", Mantid::Nexus::getType<double>(), dims, true);
+    file.makeData("data_double_2d", NXnumtype::FLOAT64, dims, true);
     file.putData(&(indd[0][0]));
     info = file.getInfo();
     file.getData(&(outdd[0][0]));
@@ -463,15 +464,18 @@ public:
 
     // put/get a char array
     char word[] = "silicovolcaniosis";
-    char read[18];
-    file.makeData("data_char", Mantid::Nexus::getType<char>(), 17, true);
+    char read[20] = {'A'};
+    file.makeData("data_char", NXnumtype::CHAR, 17, true);
     file.putData(word);
     info = file.getInfo();
     file.getData(read);
     file.closeData();
     // confirm
+    TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 17);
+    TS_ASSERT_EQUALS(std::string(read), "silicovolcaniosis");
+    TS_ASSERT_EQUALS(std::string(read), std::string(word));
   }
 
   void test_data_putget_vector() {
@@ -485,7 +489,7 @@ public:
 
     // put/get an int vector
     vector<int32_t> in{11, 8, 9, 12}, out;
-    file.makeData("data_int", Mantid::Nexus::getType<int32_t>(), in.size(), true);
+    file.makeData("data_int", NXnumtype::INT32, in.size(), true);
     file.putData(in);
     file.getData(out);
     Mantid::Nexus::Info info = file.getInfo();
@@ -497,7 +501,7 @@ public:
 
     // put/get a double vector
     vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
-    file.makeData("data_dbl", Mantid::Nexus::getType<double>(), ind.size(), true);
+    file.makeData("data_dbl", NXnumtype::FLOAT64, ind.size(), true);
     file.putData(ind);
     file.getData(outd);
     info = file.getInfo();
@@ -506,6 +510,35 @@ public:
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), ind.size());
     TS_ASSERT_EQUALS(ind, outd);
+  }
+
+  void test_data_existing_missing() {
+    // this test protects against a regression that can occur in OSX inside of LoadMD
+    cout << "\ntest dataset read existing -- sample/material\n";
+
+    // open a file
+    std::string filename = getFullPath("md_missing_paramater_map.nxs");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    std::string addressOfBad("/MDHistoWorkspace/experiment0/sample");
+    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
+
+    // go to this address and read things in
+    file.openAddress(addressOfBad);
+
+    // confirm version is 2
+    int version;
+    file.getAttr("version", version);
+    TS_ASSERT_EQUALS(version, 1);
+
+    // read the name
+    std::string name;
+    file.getAttr("name", name);
+    TS_ASSERT(!name.empty());
+
+    // read the formula style
+    std::string formulaStyle;
+    TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Mantid::Nexus::Exception const &);
   }
 
   // #################################################################################################################
@@ -554,7 +587,7 @@ public:
     TS_ASSERT_EQUALS("/abc", file.getAddress());
 
     // make another layer -- at "/acb/def"
-    file.makeData("def", Mantid::Nexus::getType<int32_t>(), 1, true);
+    file.makeData("def", NXnumtype::INT32, 1, true);
     int in = 17;
     file.putData(&in);
     TS_ASSERT_EQUALS("/abc/def", file.getAddress());
@@ -641,12 +674,12 @@ public:
 
     // put an integer
     int in = 17;
-    file.makeData("int_data", Mantid::Nexus::getType<int32_t>(), 1, true);
+    file.makeData("int_data", NXnumtype::INT32, 1, true);
     file.putData(&in);
 
     // get the info and check
     Mantid::Nexus::Info info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, Mantid::Nexus::getType<int32_t>());
+    TS_ASSERT_EQUALS(info.type, NXnumtype::INT32);
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 1);
 
@@ -654,12 +687,12 @@ public:
 
     // put a double
     double ind = 107.2345;
-    file.makeData("double_data", Mantid::Nexus::getType<double>(), 1, true);
+    file.makeData("double_data", NXnumtype::FLOAT64, 1, true);
     file.putData(&ind);
 
     // get the info and check
     info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, Mantid::Nexus::getType<double>());
+    TS_ASSERT_EQUALS(info.type, NXnumtype::FLOAT64);
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 1);
   }
@@ -674,7 +707,7 @@ public:
 
     // put an integer
     int in = 17;
-    file.makeData("int_data", Mantid::Nexus::getType<int32_t>(), 1, true);
+    file.makeData("int_data", NXnumtype::INT32, 1, true);
     file.putData(&in);
     file.closeData();
 
@@ -751,6 +784,54 @@ public:
     TS_ASSERT_EQUALS(attrInfos[1].name, "units");
     TS_ASSERT_EQUALS(attrInfos[1].type, NXnumtype::CHAR);
     TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
+  }
+
+  void test_existing_attr_resolved() {
+    // test that attributes in existing files are corectly resolved
+    // this prevents a regression that will otherwise show up in tests of LoadMD and various python algorithms
+    cout << "\ntest open existing file with system-dependent type\n";
+
+    // open the file in read-only mode
+    std::string filename = getFullPath("md_missing_paramater_map.nxs");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // go to main entry (for this file, MDHistoWorkspace)
+    file.openGroup("MDHistoWorkspace", "NXentry");
+
+    // get the attribute without specifying type -- should be no errors
+    int32_t version32 = 0;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version32));
+    int64_t version64 = 0;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version64));
+
+    // get attribute asserting the type -- make sure there is a failure
+    Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
+    Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
+    TS_ASSERT_THROWS_NOTHING(file.getAttr(info32, &version32));
+    TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
+  }
+
+  void test_existing_attr_bad_length() {
+    // some fiels have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
+    // this prevents a regression that will otherwise show up in tests of LoadEventNexus and various python algorithms
+    cout << "\ntest open existing file with system-dependent type\n";
+
+    // open the file in read-only mode
+    std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // go to the trouble spot -- /entry/bank39_events/event_time_offset
+    std::string entryName("/entry/bank39_events/event_time_offset");
+    file.openAddress(entryName);
+    // this attribute should be the string "microsecond"
+    std::string expected("microsecond");
+    // make sure the attrinfo corresponding to units has a length of 11
+    auto infos = file.getAttrInfos();
+    TS_ASSERT_EQUALS(infos[1].name, "units");
+    TS_ASSERT_EQUALS(infos[1].length - 1, expected.size());
+    // make sure the entire string attribute is read
+    std::string units = file.getAttr<std::string>("units");
+    TS_ASSERT_EQUALS(units, expected);
   }
 
   void test_getEntries() {
