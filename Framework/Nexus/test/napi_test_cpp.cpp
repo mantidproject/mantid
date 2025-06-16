@@ -210,7 +210,7 @@ int readTest(const string &filename) {
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
       if (it->type == NXnumtype::CHAR) {
-        cout << file.getStrAttr(*it);
+        cout << file.getStrAttr(it->name);
       }
       cout << endl;
     }
@@ -223,7 +223,7 @@ int readTest(const string &filename) {
   for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
     if (it->type == NXnumtype::CHAR) {
-      cout << file.getStrAttr(*it);
+      cout << file.getStrAttr(it->name);
     }
     cout << endl;
   }

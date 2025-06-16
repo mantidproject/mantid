@@ -566,6 +566,7 @@ public:
 
   /**
    * Get the value of the attribute specified by the AttrInfo supplied.
+   * Only use this method if you know what the type on disk should be.
    *
    * \param info Designation of which attribute to read.
    * \param data The pointer to put the attribute value in.
@@ -577,17 +578,16 @@ public:
   /**
    * Get the value of an attribute that is a scalar number.
    *
-   * \param info Designation of which attribute to read.
+   * \param name Name of attribute to read.
    * \tparam NumT numeric data type of result
    *
    * \return The attribute value.
    */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
-
   template <typename NumT> NumT getAttr(std::string const &name);
 
   /**
    * Get the value of an attribute that is a scalar number.
+   * Only use this method if you do not care about precisely matching the data type on disk
    *
    * \param[in] name Name of attribute to read
    * \param[out] value The read attribute value.
@@ -598,11 +598,11 @@ public:
   /**
    * Get the value of a string attribute.
    *
-   * \param info Which attribute to read.
+   * \param name Name of attribute to read.
    *
    * \return The value of the attribute.
    */
-  std::string getStrAttr(const AttrInfo &info);
+  std::string getStrAttr(std::string const &name);
 
   // NAVIGATE ATTRIBUTES
 

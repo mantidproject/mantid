@@ -820,12 +820,6 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   }
 }
 
-template <typename NumT> NumT File::getAttr(const AttrInfo &info) {
-  NumT value;
-  this->getAttr(info, &value);
-  return value;
-}
-
 template <typename NumT> NumT File::getAttr(std::string const &name) {
   NumT value;
   this->getAttr<NumT>(name, value);
@@ -833,11 +827,7 @@ template <typename NumT> NumT File::getAttr(std::string const &name) {
 }
 
 template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::string &value) {
-  AttrInfo info;
-  info.type = getType<char>();
-  info.length = 2000; ///< @todo need to find correct length of attribute
-  info.name = name;
-  value = this->getStrAttr(info);
+  value = this->getStrAttr(name);
 }
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
@@ -846,7 +836,15 @@ template <typename NumT> void File::getAttr(const std::string &name, NumT &value
   NAPI_CALL(NXgetattr(*(this->m_pfile_id), name.c_str(), &value, &length, &type), "NXgetattr(" + name + ") failed");
 }
 
-string File::getStrAttr(const AttrInfo &info) {
+string File::getStrAttr(std::string const &name) {
+  // get info for this string attribute
+  int rank;
+  int dims[NX_MAXRANK];
+  NXnumtype datatype = NXnumtype::CHAR;
+  NAPI_CALL(NXgetattrainfo(*(this->m_pfile_id), name.c_str(), &rank, dims, &datatype), "NXgetinfo failed");
+  AttrInfo info{datatype, static_cast<size_t>(dims[0]), name};
+
+  // do checks
   if (info.type != NXnumtype::CHAR) {
     stringstream msg;
     msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
@@ -1045,18 +1043,6 @@ template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint32_t c
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, int64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, uint64_t const &value);
 template MANTID_NEXUS_DLL void File::putAttr(std::string const &name, char const &value);
-
-template MANTID_NEXUS_DLL float File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL double File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint8_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint16_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint32_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL int64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL uint64_t File::getAttr(const AttrInfo &info);
-template MANTID_NEXUS_DLL char File::getAttr(const AttrInfo &info);
 
 template MANTID_NEXUS_DLL int16_t File::getAttr(std::string const &name);
 template MANTID_NEXUS_DLL uint16_t File::getAttr(std::string const &name);

@@ -775,6 +775,9 @@ public:
     file.getAttr("units", actual);
     TS_ASSERT_EQUALS(actual, "kg * mol / parsec");
 
+    std::string again = file.getStrAttr("units");
+    TS_ASSERT_EQUALS(again, "kg * mol / parsec");
+
     // check attr infos
     auto attrInfos = file.getAttrInfos();
     TS_ASSERT_EQUALS(attrInfos.size(), 2);
@@ -807,12 +810,12 @@ public:
     // get attribute asserting the type -- make sure there is a failure
     Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
     Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
-    TS_ASSERT_THROWS_NOTHING(file.getAttr(info32, &version32));
+    TS_ASSERT_THROWS(file.getAttr(info32, &version32), Mantid::Nexus::Exception const &)
     TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
   }
 
   void test_existing_attr_bad_length() {
-    // some fiels have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
+    // some fields have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
     // this prevents a regression that will otherwise show up in tests of LoadEventNexus and various python algorithms
     cout << "\ntest open existing file with system-dependent type\n";
 
