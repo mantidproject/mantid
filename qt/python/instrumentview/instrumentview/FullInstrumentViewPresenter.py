@@ -131,9 +131,9 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh["visibility"] = self._model.detector_visibility()
         self._pickable_projection_mesh["visibility"] = self._model.detector_visibility()
 
-        visible_detector_indices = self._model.picked_detector_indices()
-        self.show_plot_for_detectors(visible_detector_indices)
-        self.show_info_text_for_detectors(visible_detector_indices)
+        picked_detector_ids = self._model.picked_detector_ids()
+        self.show_plot_for_detectors(picked_detector_ids)
+        self.show_info_text_for_detectors(picked_detector_ids)
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
