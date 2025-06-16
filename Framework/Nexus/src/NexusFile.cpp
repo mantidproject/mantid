@@ -183,11 +183,8 @@ void File::openGroupAddress(std::string const &address) {
 }
 
 std::string File::getAddress() {
-  char cAddress[2048];
-
-  memset(cAddress, 0, sizeof(cAddress));
-  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), cAddress, sizeof(cAddress) - 1), "NXgetaddress() failed");
-  std::string address(cAddress);
+  std::string address;
+  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), address), "NXgetaddress() failed");
   // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
   if (address == "") {
@@ -378,7 +375,6 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
 }
 
 string File::getStrData() {
-  string res;
   Info info = this->getInfo();
   if (info.type != NXnumtype::CHAR) {
     stringstream msg;
@@ -397,7 +393,7 @@ string File::getStrData() {
     delete[] value;
     throw; // rethrow the original exception
   }
-  res = string(value, static_cast<size_t>(info.dims[0]));
+  std::string res(value, static_cast<size_t>(info.dims[0]));
   delete[] value;
   return res;
 }
@@ -805,13 +801,12 @@ void File::putAttr(const std::string &name, const string &value, const bool empt
 }
 
 void File::getAttr(const AttrInfo &info, void *data, int length) {
-  char name[NX_MAXNAMELEN];
-  strcpy(name, info.name.c_str());
   NXnumtype type = info.type;
   if (length < 0) {
     length = static_cast<int>(info.length);
   }
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name, data, &length, &type), "NXgetattr(" + info.name + ") failed");
+  NAPI_CALL(NXgetattr(*(this->m_pfile_id), info.name.c_str(), data, &length, &type),
+            "NXgetattr(" + info.name + ") failed");
   if (type != info.type) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
@@ -846,15 +841,12 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 }
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-  AttrInfo info;
-  info.type = getType<NumT>();
-  info.length = 1;
-  info.name = name;
-  value = this->getAttr<NumT>(info);
+  NXnumtype type = getType<NumT>();
+  int length = 1;
+  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name.c_str(), &value, &length, &type), "NXgetattr(" + name + ") failed");
 }
 
 string File::getStrAttr(const AttrInfo &info) {
-  string res;
   if (info.type != NXnumtype::CHAR) {
     stringstream msg;
     msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
@@ -868,10 +860,7 @@ string File::getStrAttr(const AttrInfo &info) {
     delete[] value;
     throw; // rethrow original exception
   }
-
-  // res = string(value, info.length);
-  // allow the constructor to find the ending point of the string. Janik Zikovsky, sep 22, 2010
-  res = string(value);
+  std::string res(value);
   delete[] value;
 
   return res;
