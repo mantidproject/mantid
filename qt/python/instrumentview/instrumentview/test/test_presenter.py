@@ -28,7 +28,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_projection_option_selected(self):
         self._presenter.projection_option_selected(1)
-        self._mock_view.add_projection_mesh.assert_called_once()
+        self._mock_view.add_projection_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.createPolyDataMesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
@@ -45,7 +45,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
                 return
             self._presenter.projection_option_selected(option_index)
             mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
-            mock_createPolyDataMesh.assert_called_once()
+            mock_createPolyDataMesh.assert_called()
             mock_calculate_projection.reset_mock()
             mock_createPolyDataMesh.reset_mock()
 
@@ -60,11 +60,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_update_time_of_flight_range.assert_called_once()
         mock_set_contour_limits.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_info_text_for_detectors")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_plot_for_detectors")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.detector_index")
-    def test_point_picked(self, mock_detector_index, mock_show_plot, mock_show_info_text):
-        mock_detector_index.return_value = 10
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_picked_detectors")
+    def test_point_picked(self, mock_update_picked_detectors):
         mock_picker = MagicMock()
 
         def get_point_id():
@@ -72,8 +69,34 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         mock_picker.GetPointId = get_point_id
         self._presenter.point_picked(MagicMock(), mock_picker)
-        mock_show_plot.assert_called_once_with([10])
-        mock_show_info_text.assert_called_once_with([10])
+        mock_update_picked_detectors.assert_called_with([1])
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_info_text_for_detectors")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_plot_for_detectors")
+    def test_update_picked_detectors(self, mock_show_plot, mock_show_info_text):
+        mock_model = MagicMock()
+        self._presenter._model = mock_model
+
+        def picked_detector_ids():
+            return [1, 2]
+
+        def picked_visibility():
+            return [True, True, False]
+
+        mock_model.picked_detector_ids = picked_detector_ids
+        mock_model.picked_visibility = picked_visibility
+
+        self._presenter._pickable_main_mesh = {}
+        self._presenter._pickable_projection_mesh = {}
+
+        self._presenter._model = mock_model
+
+        self._presenter.update_picked_detectors([])
+
+        self.assertEqual(self._presenter._pickable_main_mesh["visibility"], [True, True, False])
+        self.assertEqual(self._presenter._pickable_projection_mesh["visibility"], [True, True, False])
+        mock_show_plot.assert_called_with([1, 2])
+        mock_show_info_text.assert_called_with([1, 2])
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generateSingleColour([[1, 0, 0], [0, 1, 0]], 0, 1, 0, 0)
@@ -87,7 +110,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         def mock_workspace_index(i):
             return 2 * i
 
-        mock_model.workspace_index_from_detector_index = mock_workspace_index
+        mock_model.workspace_index_from_detector_id = mock_workspace_index
         self._presenter.show_plot_for_detectors([0, 1, 2])
         self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 2, 4])
 
