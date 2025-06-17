@@ -40,15 +40,8 @@ class TestProjection(unittest.TestCase):
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
     def test_find_and_correct_x_gap(self):
-        def mock_calculate_2d_coordinates(position: np.ndarray):
-            if np.all(position == np.array([0, 1, 0])):
-                return (0, 0)
-            elif np.all(position == np.array([2, 1, 0])):
-                return (np.pi / 4, 0)
-            elif np.all(position == np.array([-2, 1, 0])):
-                return (-np.pi / 4, 0)
-            else:
-                raise ValueError(f"Unexpected position: {position}")
+        def mock_calculate_2d_coordinates(positions):
+            return np.array([0, np.pi / 4, -np.pi / 4]), np.array([0, 0, 0])
 
         with unittest.mock.patch(
             "instrumentview.Projections.cylindrical_projection.cylindrical_projection._calculate_2d_coordinates",
