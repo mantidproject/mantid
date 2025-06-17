@@ -1170,7 +1170,6 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
 NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
   NXI5assert(fid);
-  printf("HDF5 link: targetAddress = \"%s\", linkType = \"%d\"\n", sLink->targetAddress.c_str(), sLink->linkType);
   return NXstatus::NX_OK;
 }
 
@@ -1704,7 +1703,6 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getchardata(NXhandle fid, void *data) {
-  printf("%s:%d %s | %s\n", __FILE__, __LINE__, __func__, buildCurrentAddress(fid).c_str());
   fflush(stdout);
   pNexusFile5 pFile = NXI5assert(fid);
   NXstatus status = NXstatus::NX_ERROR;
@@ -1724,17 +1722,13 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     hsize_t len = H5Tget_size(pFile->iCurrentT);
     // for a 2D char array, handle block size
     int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL);
-    printf("RANK = %d\n", rank);
-    printf("DIM0 = %lu\n", dims[0]);
     if (rank >= 0) {
       len *= (dims[0] > 1 ? dims[0] : 1); // min of dims[0], 1
     }
-    printf("LEN = %lu\n", len);
     // reserve space in memory
     char *cdata = new char[len + 1];
     memset(cdata, 0, (len + 1) * sizeof(char));
     herr_t ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata);
-    printf("CDATA: %s\n", cdata);
     if (ret < 0) {
       status = NXstatus::NX_ERROR;
     } else {
@@ -1762,7 +1756,6 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
   ndims = static_cast<hsize_t>(H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL));
 
   if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
-    printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
     return NX5getchardata(fid, data);
   }
 
