@@ -1170,6 +1170,7 @@ NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
 
 NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
   NXI5assert(fid);
+  printf("HDF5 link: targetAddress = \"%s\", linkType = \"%d\"\n", sLink->targetAddress.c_str(), sLink->linkType);
   return NXstatus::NX_OK;
 }
 
