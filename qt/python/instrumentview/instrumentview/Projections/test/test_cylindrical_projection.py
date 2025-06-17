@@ -59,4 +59,4 @@ class TestCylindricalProjection(unittest.TestCase):
         calculated = cylinder.positions()
         np.testing.assert_allclose(calculated, np.array(expected_projections))
         if mock_apply_x_correction is not None:
-            self.assertEqual(mock_apply_x_correction.call_count, len(self.detector_positions))
+            mock_apply_x_correction.assert_called_once()
