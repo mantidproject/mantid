@@ -83,7 +83,7 @@ class AbinsAlgorithm:
             name="AbInitioProgram",
             direction=Direction.Input,
             defaultValue="CASTEP",
-            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "JSON", "VASP"]),
+            validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "FORCECONSTANTS", "GAUSSIAN", "JSON", "Molden", "VASP"]),
             doc="An ab initio program which was used for vibrational or phonon calculation.",
         )
 
@@ -236,6 +236,7 @@ class AbinsAlgorithm:
             "FORCECONSTANTS": self._validate_euphonic_input_file,
             "GAUSSIAN": self._validate_gaussian_input_file,
             "JSON": self._validate_json_input_file,
+            "Molden": self._validate_molden_input_file,
             "VASP": self._validate_vasp_input_file,
         }
         ab_initio_program = self.getProperty("AbInitioProgram").value
@@ -898,6 +899,23 @@ class AbinsAlgorithm:
                     "Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
                     " *.xml for VASP calculation output. Please rename your file and try again. ".format(filename_full_path)
                 )
+        return output
+
+    @classmethod
+    def _validate_molden_input_file(cls, filename_full_path: str) -> dict:
+        logger.information("Validate .mol file with vibrational or phonon data.")
+        output = cls._validate_ab_initio_file_extension(
+            ab_initio_program="Molden", filename_full_path=filename_full_path, expected_file_extension=".mol"
+        )
+        if output["Invalid"]:
+            output["Comment"] = ".mol extension is expected for a Molden file"
+        else:
+            with open(filename_full_path) as fd:
+                first_line = fd.readline()
+            if first_line.strip() != "[Molden Format]":
+                output["Invalid"] = True
+                output["Comment"] = ".mol file does not have expected header"
+
         return output
 
     @staticmethod
