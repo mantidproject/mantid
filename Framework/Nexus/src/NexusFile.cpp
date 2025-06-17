@@ -1632,7 +1632,7 @@ string File::getStrAttr(std::string const &name) {
 
   size_t end = res.find('\0');
   if (end != std::string::npos) {
-    res = res.substr(0, end);
+    res.resize(end);
   }
 
   return res;
