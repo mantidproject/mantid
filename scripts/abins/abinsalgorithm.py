@@ -8,6 +8,7 @@
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
 from math import isnan
+import multiprocessing
 import os
 from pathlib import Path
 import re
@@ -1024,12 +1025,8 @@ class AbinsAlgorithm:
         Checks number of threads
         :param message_end: closing part of the error message.
         """
-        try:
-            import pathos.multiprocessing as mp
-
-            threads = abins.parameters.performance["threads"]
-            if not (isinstance(threads, int) and 1 <= threads <= mp.cpu_count()):
-                raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
-
-        except ImportError:
-            pass
+        threads = abins.parameters.performance["threads"]
+        if threads is None:
+            return  # Pool() will set a sensible default
+        if not (1 <= threads <= multiprocessing.cpu_count()):
+            raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
