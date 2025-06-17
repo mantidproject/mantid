@@ -12,6 +12,7 @@ import numpy as np
 from .textparser import TextParser
 from .abinitioloader import AbInitioLoader
 from abins.constants import CRYSTAL, FLOAT_TYPE
+from abins.abinsdata import AbinsData
 from mantid.kernel import Atom, logger
 
 
@@ -41,11 +42,10 @@ class CRYSTALLoader(AbInitioLoader):
     def _ab_initio_program(self) -> str:
         return "CRYSTAL"
 
-    def read_vibrational_or_phonon_data(self):
+    @AbInitioLoader.abinsdata_saver
+    def read_vibrational_or_phonon_data(self) -> AbinsData:
         """
-        Reads vibrational or phonon data from CRYSTAL output files. Saves frequencies, weights of k-point vectors,
-        k-point vectors, amplitudes of atomic displacements, hash of the vibrational or phonon data file (hash) to
-        <>.hdf5.
+        Read vibrational or phonon data from CRYSTAL output files.
         :return  object of type AbinsData.
         """
 
@@ -83,13 +83,7 @@ class CRYSTALLoader(AbInitioLoader):
             unit_cell=lattice_vectors,
         )
 
-        abins_data = self._rearrange_data(data=data)
-
-        # save data to hdf file
-        self.save_ab_initio_data(abins_data=abins_data)
-
-        # return AbinsData object
-        return abins_data
+        return self._rearrange_data(data=data)
 
     def _determine_system(self):
         """
