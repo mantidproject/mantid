@@ -201,7 +201,7 @@ class TextureProjection:
     def get_pf_table_name(self, wss, fit_params, hkl, readout_column):
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
         try:
-            run_range = f"{fws.run().getLogData('run_number').value}-{lws.run().getLogData('run_number').value}"
+            run_range = f"{fws.getRun().getLogData('run_number').value}-{lws.getRun().getLogData('run_number').value}"
             instr = fws.getInstrument().getName()
         except RuntimeError:
             instr = "UNKNOWN"
