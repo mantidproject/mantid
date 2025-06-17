@@ -30,7 +30,15 @@ from mantid.kernel import ConfigService, Direction, StringListValidator, StringA
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 from abins.atominfo import AtomInfo
-from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
+from abins.constants import (
+    AB_INITIO_FILE_EXTENSIONS,
+    ALL_INSTRUMENTS,
+    ATOM_PREFIX,
+    FLOAT_TYPE,
+    MASS_EPS,
+    ONE_DIMENSIONAL_INSTRUMENTS,
+    TWO_DIMENSIONAL_INSTRUMENTS,
+)
 from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
 import abins.parameters
@@ -144,7 +152,7 @@ class AbinsAlgorithm:
                 defaultValue="1",
                 validator=StringListValidator(["1", "2"]),
                 doc="Number of quantum order effects included in the calculation "
-                "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations",
+                "(1 -> Fundamentals, 2-> first overtone + Fundamentals + 2nd order combinations",
             )
 
             self.declareProperty(
@@ -453,8 +461,6 @@ class AbinsAlgorithm:
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
-        from abins.constants import FLOAT_TYPE
-
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
         shape = [max_quantum_order] + list(self.get_s(spectra[0]).shape)
 
@@ -503,8 +509,6 @@ class AbinsAlgorithm:
 
     def get_s(self, spectrum: Spectrum) -> Quantity:
         """Get spectral quantity array, from y or z axis of Spectrum as appropriate"""
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
-
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             return spectrum.y_data
         else:
@@ -524,8 +528,6 @@ class AbinsAlgorithm:
 
         :returns: mantid workspaces of S for atom (total) and individual quantum orders
         """
-        from abins.constants import ATOM_PREFIX
-
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
 
@@ -564,8 +566,6 @@ class AbinsAlgorithm:
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
         """
-        from abins.constants import MASS_EPS
-
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
@@ -623,8 +623,6 @@ class AbinsAlgorithm:
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         :returns: workspace with total S from partial_workspaces
         """
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
-
         total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
