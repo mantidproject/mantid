@@ -9,10 +9,10 @@ New Features
 ------------
 - A new field, ``Fredrikze Input Spin State Order``, has been added to the
   :ref:`Experiment Settings Tab <refl_exp_instrument_settings>` on the ISIS Reflectometry interface. This allows the
-  spin state order of the input workspace group to be supplied when the reduction performs a Fredrikze polarisation
+  spin state order of the input workspace group to be supplied when the reduction performs a Fredrikze polarization
   correction.
 - The flipper configuration for the input workspace group from the :ref:`interface-isis-refl`, when performing a Wildes
-  polarisation correction, can now be passed to the reduction by adding a parameter called ``WildesFlipperConfig`` to
+  polarization correction, can now be passed to the reduction by adding a parameter called ``WildesFlipperConfig`` to
   your instrument's parameter file. Additionally, a default configuration of ``01,01,10,11`` has been added to POLREF's
   parameter file.
 - When a workspace is loaded on the ISIS Reflectometry GUI :ref:`Reduction Preview <refl_preview>` tab, region
