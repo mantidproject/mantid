@@ -1,0 +1,1 @@
+- Changes have been made to ``SANSadd2`` and ``CreateSANSWavelengthPixelAdjustment`` to enable the summing of LOQ event mode data, and allow for the use of the new LOQ IDF.

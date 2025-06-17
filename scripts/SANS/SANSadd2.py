@@ -26,6 +26,7 @@ from mantid.simpleapi import (
     SaveNexusProcessed,
     UnGroupWorkspace,
 )
+from sans.common.file_information import get_geometry_information_isis_nexus, convert_to_flag
 from SANSUtility import (
     AddOperation,
     transfer_special_sample_logs,
@@ -96,7 +97,7 @@ def add_runs(  # noqa: C901
                 userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period
             )
 
-            is_not_allowed_instrument = inst.upper() not in {"SANS2D", "LARMOR", "ZOOM"}
+            is_not_allowed_instrument = inst.upper() not in {"SANS2D", "LARMOR", "ZOOM", "LOQ"}
             if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = "Adding event data not supported for " + inst + " for now"
                 print(error)
@@ -302,7 +303,8 @@ def _make_filename(entry, ext, inst):
         filename = inst + _pad_zero(run_num, inst) + ext
     except ValueError:  # We don't have a run number, assume it's a valid filename
         filename = entry
-        dummy, ext = os.path.splitext(filename)
+        _, filename_ext = os.path.splitext(filename)
+        ext = filename_ext if filename_ext else ext
 
     return filename, ext
 
@@ -378,6 +380,13 @@ def _load_ws(entry, ext, inst, ws_name, raw_types, period=_NO_INDIVIDUAL_PERIODS
 
     if _is_type(ext, raw_types):
         LoadSampleDetailsFromRaw(InputWorkspace=ws_name, Filename=path + "/" + f_name)
+    else:
+        height, width, thickness, shape = get_geometry_information_isis_nexus(full_path)
+        sample = mtd[ws_name].sample()
+        sample.setGeometryFlag(convert_to_flag(shape))
+        sample.setHeight(height)
+        sample.setWidth(width)
+        sample.setThickness(thickness)
 
     # Change below when logs in Nexus files work  file types of .raw need their log files to be copied too
     # if isType(ext, raw_types):

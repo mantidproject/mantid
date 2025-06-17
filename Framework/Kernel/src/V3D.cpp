@@ -7,7 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <algorithm>
 #include <boost/version.hpp>
 #include <sstream>
@@ -401,7 +401,7 @@ std::istream &operator>>(std::istream &IX, V3D &A)
  * @param file :: open NeXus file
  * @param name :: name of the data to create
  */
-void V3D::saveNexus(::NeXus::File *file, const std::string &name) const {
+void V3D::saveNexus(Nexus::File *file, const std::string &name) const {
   file->makeData(name, NXnumtype::FLOAT64, 3, true);
   file->putData(m_pt.data());
   file->closeData();
@@ -412,7 +412,7 @@ void V3D::saveNexus(::NeXus::File *file, const std::string &name) const {
  * @param file :: open NeXus file
  * @param name :: name of the data to open
  */
-void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
+void V3D::loadNexus(Nexus::File *file, const std::string &name) {
   std::vector<double> data;
   file->readData(name, data);
   if (data.size() != 3)

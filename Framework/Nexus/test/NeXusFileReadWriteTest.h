@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "test_helper.h"
 #include <cstdarg>
 #include <cstdio>
@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
 using namespace NexusTest;
+using namespace Mantid::Nexus;
 using std::cout;
 using std::endl;
 using std::map;
@@ -290,26 +290,26 @@ public:
     char output;
     fileid.closeGroup();
 
-    fileid.openPath("/entry/data1");
+    fileid.openAddress("/entry/data1");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('1', output);
 
-    fileid.openPath("/link/data4");
+    fileid.openAddress("/link/data4");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('4', output);
 
-    fileid.openPath("/entry/data/more_data");
+    fileid.openAddress("/entry/data/more_data");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('3', output);
 
-    fileid.openPath("/entry/data2");
+    fileid.openAddress("/entry/data2");
     fileid.getData(&output);
     TS_ASSERT_EQUALS('2', output);
 
     // cleanup
     fileid.close();
     removeFile(filename);
-    cout << "NXopenpath checks OK\n";
+    cout << "NXopenaddress checks OK\n";
   }
 
   void test_links() {
@@ -338,18 +338,18 @@ public:
     fileid.flush();
 
     // check data link
-    fileid.openPath("/entry/data/some_data");
+    fileid.openAddress("/entry/data/some_data");
     // TODO why can't we get the data through the link?
     // string output1;
     // fileid.getData(&output1);
     // TS_ASSERT_EQUALS(somedata, output1);
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
-    TS_ASSERT_EQUALS(datalink.targetPath, res1.targetPath);
+    TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
     cout << "data link works\n";
     fileid.closeData();
 
-    fileid.openPath("/entry");
+    fileid.openAddress("/entry");
 
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
@@ -369,10 +369,10 @@ public:
     fileid.closeGroup();
 
     // check group link
-    fileid.openPath("/entry/group2/group1");
+    fileid.openAddress("/entry/group2/group1");
     NXlink res2 = fileid.getGroupID();
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
-    TS_ASSERT_EQUALS(string(grouplink.targetPath), string(res2.targetPath));
+    TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
     cout << "group link works\n";
   }
 };

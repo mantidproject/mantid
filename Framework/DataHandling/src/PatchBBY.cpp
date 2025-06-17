@@ -61,9 +61,9 @@ static PropertyInfo PatchableProperties[] = {
 };
 
 // load nx dataset
-template <class T> bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
+template <class T> bool loadNXDataSet(Nexus::NXEntry &entry, const std::string &address, T &value) {
   try {
-    NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(address);
     dataSet.load();
 
     value = *dataSet();
@@ -72,12 +72,9 @@ template <class T> bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &
     return false;
   }
 }
-bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &address, std::string &value) {
   try {
-    NeXus::NXChar buffer = entry.openNXChar(path);
-    buffer.load();
-
-    value = std::string(buffer(), buffer.dim0());
+    value = entry.getString(address);
     return true;
   } catch (std::runtime_error &) {
     return false;
@@ -236,8 +233,8 @@ void PatchBBY::exec() {
           fwrite(buffer, bytesRead, 1, handle.get());
         handle.reset();
 
-        NeXus::NXRoot root(hdfFile.path());
-        NeXus::NXEntry entry = root.openFirstEntry();
+        Nexus::NXRoot root(hdfFile.path());
+        Nexus::NXEntry entry = root.openFirstEntry();
 
         float tmp_float;
         int32_t tmp_int32 = 0;

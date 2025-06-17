@@ -58,7 +58,7 @@ void SaveZODS::exec() {
                        "Saving anyway...\n";
 
   // Create a HDF5 file
-  auto file = std::make_unique<::NeXus::File>(Filename, NXACC_CREATE5);
+  auto file = std::make_unique<Nexus::File>(Filename, NXACC_CREATE5);
 
   // ----------- Coordinate system -----------
   uint32_t isLocal = 1;
@@ -79,7 +79,7 @@ void SaveZODS::exec() {
         unitCell.emplace_back(latt.gamma());
 
         // Now write out the 6D vector
-        const ::NeXus::DimVector unit_cell_size(1, 6);
+        const Nexus::DimVector unit_cell_size(1, 6);
         file->writeData("unit_cell", unitCell, unit_cell_size);
       }
     }
@@ -97,7 +97,7 @@ void SaveZODS::exec() {
 
   // Size in each dimension (in the "C" style order, so z,y,x
   // That is, data[z][y][x] = etc.
-  ::NeXus::DimVector size(3, 0);
+  Nexus::DimVector size(3, 0);
 
   // And this will be the "size" field we save, in the usual XYZ order.
   std::vector<int> size_field(3, 0);

@@ -120,29 +120,29 @@ public:
   void setEFixed(const detid_t detID, const double value);
 
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file, bool saveLegacyInstrument = true) const;
+  void saveExperimentInfoNexus(Nexus::File *file, bool saveLegacyInstrument = true) const;
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
+  void saveExperimentInfoNexus(Nexus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
 
-  void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr,
+  void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr,
                                const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
 
   /// Loads an experiment description from the open NeXus file
-  void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
-  void loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file without reading any parameters
-  void loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file);
+  void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file);
   /// Load instrument parameters from an open Nexus file in Instument group if
   /// found there
-  void loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr);
+  void loadInstrumentParametersNexus(Nexus::File *file, std::string &parameterStr);
 
   /// Load the sample and log info from an open NeXus file. Overload that uses NexusDescriptor for faster metadata
   /// lookup
-  void loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo,
+  void loadSampleAndLogInfoNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo,
                                  const std::string &prefix);
   /// Load the sample and log info from an open NeXus file.
-  void loadSampleAndLogInfoNexus(::NeXus::File *file);
+  void loadSampleAndLogInfoNexus(Nexus::File *file);
   /// Populate the parameter map given a string
   void readParameterMap(const std::string &parameterStr);
 
@@ -188,7 +188,7 @@ private:
 
   /// Attempt to load instrument embedded in Nexus file. *file must have
   /// instrument group open.
-  void loadEmbeddedInstrumentInfoNexus(::NeXus::File *file, std::string &instrumentName, std::string &instrumentXml);
+  void loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName, std::string &instrumentXml);
 
   /// Set the instrument given the name and XML leading from IDF file if XML
   /// string is empty

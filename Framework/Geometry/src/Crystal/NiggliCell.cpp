@@ -230,7 +230,6 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
     size_t num_to_try = std::min(max_to_try, directions.size());
 
     V3D acrossb;
-    double vol = 0;
     double min_vol = .1f; // what should this be? 0.1 works OK, but...?
     for (size_t i = 0; i < num_to_try - 2; i++) {
       a = directions[i];
@@ -239,7 +238,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
         acrossb = a.cross_prod(b);
         for (size_t k = j + 1; k < num_to_try; k++) {
           c = directions[k];
-          vol = acrossb.scalar_prod(c);
+          double vol = acrossb.scalar_prod(c);
           if (vol > min_vol && HasNiggliAngles(a, b, c, 0.01)) {
             Matrix<double> new_tran(3, 3, false);
             OrientedLattice::GetUB(new_tran, a, b, c);

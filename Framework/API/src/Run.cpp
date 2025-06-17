@@ -6,18 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/lexical_cast.hpp>
 #include <memory>
 
 #include <algorithm>
+#include <functional>
 #include <numeric>
 
 namespace Mantid::API {
@@ -26,12 +28,54 @@ using namespace Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-/// The number of log entries summed when adding a run
-const int ADDABLES = 12;
-/// The names of the log entries summed when adding two runs together
-const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
-                                       "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
-                                       "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
+/// static logger object
+Kernel::Logger g_log("Run");
+
+auto addPeriodSeries = [](Property *left, const Property *right) {
+  auto *leftAP = dynamic_cast<PropertyWithValue<std::vector<double>> *>(left);
+  const auto *rightAP = dynamic_cast<const PropertyWithValue<std::vector<double>> *>(right);
+  if (!leftAP || !rightAP) {
+    throw std::runtime_error("Expected ArrayProperty<double> for both inputs.");
+  }
+  const auto &leftVec = leftAP->operator()();
+  const auto &rightVec = rightAP->operator()();
+  if (leftVec.size() != rightVec.size()) {
+    g_log.warning(
+        "Summing runs with differing number of periods. Proton charge logs will retain values from LHS operand.");
+    return;
+  }
+  std::vector<double> resVec;
+  resVec.reserve(leftVec.size());
+  for (size_t i = 0; i < leftVec.size(); i++) {
+    resVec.push_back(leftVec[i] + rightVec[i]);
+  }
+  *leftAP = resVec;
+};
+
+/// helper struct for addable properties
+struct addableProperty {
+public:
+  using func = std::function<void(Property *, const Property *)>;
+  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(opFunc_in) {};
+  std::string name;
+  func opFunc;
+};
+
+/// The log entries that can be summed when adding two runs together
+const std::vector<addableProperty> ADDABLE{addableProperty("tot_prtn_chrg"),
+                                           addableProperty("rawfrm"),
+                                           addableProperty("goodfrm"),
+                                           addableProperty("dur"),
+                                           addableProperty("gd_prtn_chrg"),
+                                           addableProperty("uA.hour"),
+                                           addableProperty("monitor0_counts"),
+                                           addableProperty("monitor1_counts"),
+                                           addableProperty("monitor2_counts"),
+                                           addableProperty("monitor3_counts"),
+                                           addableProperty("monitor4_counts"),
+                                           addableProperty("monitor5_counts"),
+                                           addableProperty("proton_charge_by_period", addPeriodSeries)};
+
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 const char *GONIOMETERS_LOG_NAME = "goniometers";
@@ -40,9 +84,6 @@ const char *HISTO_BINS_LOG_NAME = "processed_histogram_bins";
 const char *PEAK_RADIUS_GROUP = "peak_radius";
 const char *INNER_BKG_RADIUS_GROUP = "inner_bkg_radius";
 const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
-
-/// static logger object
-Kernel::Logger g_log("Run");
 } // namespace
 
 Run::Run() {
@@ -192,7 +233,8 @@ Run &Run::operator+=(const Run &rhs) {
   mergeMergables(*m_manager, *rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
-  for (const auto &name : ADDABLE) {
+  for (const auto &addableProp : ADDABLE) {
+    const std::string name = addableProp.name;
     if (rhs.m_manager->existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
       const Property *right = rhs.m_manager->getProperty(name);
@@ -200,7 +242,11 @@ Run &Run::operator+=(const Run &rhs) {
       // now deal with the left-hand side
       if (m_manager->existsProperty(name)) {
         Property *left = m_manager->getProperty(name);
-        left->operator+=(right);
+        if (!addableProp.opFunc) {
+          left->operator+=(right);
+        } else {
+          addableProp.opFunc(left, right);
+        }
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
@@ -262,11 +308,11 @@ double Run::getProtonCharge() const {
   if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   } else if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME) &&
-             m_manager->getProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
+             m_manager->getProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME).operator int()) {
     const std::vector<double> &protonChargeByPeriod = m_manager->getProperty("proton_charge_by_period");
     const int currentPeriod = m_manager->getProperty("current_period");
     m_manager->setProperty(PROTON_CHARGE_LOG_NAME, protonChargeByPeriod[currentPeriod - 1]);
-    m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
+    m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, 0);
   }
 
   if (m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
@@ -338,7 +384,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     const_cast<Run *>(this)->setProtonCharge(total);
     // Mark gd_prtn_chrg as filtered as this method accounts for period filtering
     if (m_manager->existsProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME)) {
-      m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, false);
+      m_manager->setProperty(PROTON_CHARGE_UNFILTERED_LOG_NAME, 0);
     }
 
   } else {
@@ -602,7 +648,7 @@ const std::vector<Kernel::Matrix<double>> Run::getGoniometerMatrices() const {
  * @param group :: name of the group to create
  * @param keepOpen :: If true, leave the file open after saving
  */
-void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen) const {
+void Run::saveNexus(Nexus::File *file, const std::string &group, bool keepOpen) const {
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
@@ -655,7 +701,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
  * @param prefix indicates current group location in file (absolute name)
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group, const Nexus::NexusDescriptor &fileInfo,
+void Run::loadNexus(Nexus::File *file, const std::string &group, const Nexus::NexusDescriptor &fileInfo,
                     const std::string &prefix, bool keepOpen) {
 
   if (!group.empty()) {
@@ -720,7 +766,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, const Nexus::
  * load any NXlog in the current open group.
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen) {
+void Run::loadNexus(Nexus::File *file, const std::string &group, bool keepOpen) {
 
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
@@ -848,7 +894,7 @@ void Run::copyGoniometers(const Run &other) {
   }
 }
 
-void Run::loadNexusCommon(::NeXus::File *file, const std::string &nameClass) {
+void Run::loadNexusCommon(Nexus::File *file, const std::string &nameClass) {
   if (nameClass == GONIOMETER_LOG_NAME) {
     // Goniometer class
     m_goniometers[0]->loadNexus(file, nameClass);
@@ -890,6 +936,12 @@ void Run::loadNexusCommon(::NeXus::File *file, const std::string &nameClass) {
     double charge;
     file->readData("proton_charge", charge);
     this->setProtonCharge(charge);
+  } else if (nameClass == "proton_charge_by_period") {
+    file->openGroup(nameClass, "NXlog");
+    std::vector<double> values;
+    file->readData("value", values);
+    file->closeGroup();
+    this->addProperty("proton_charge_by_period", values, true);
   }
 }
 

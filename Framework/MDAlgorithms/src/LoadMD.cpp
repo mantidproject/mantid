@@ -30,7 +30,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <vector>
@@ -128,10 +128,10 @@ void LoadMD::execLoader() {
   if (fileBacked) {
 
     for_access = "for Read/Write access";
-    m_file.reset(new ::NeXus::File(m_filename, NXACC_RDWR));
+    m_file.reset(new Nexus::File(m_filename, NXACC_RDWR));
   } else {
     for_access = "for Read access";
-    m_file.reset(new ::NeXus::File(m_filename, NXACC_READ));
+    m_file.reset(new Nexus::File(m_filename, NXACC_READ));
   }
 
   if (!m_file)
@@ -141,9 +141,9 @@ void LoadMD::execLoader() {
   const std::shared_ptr<Mantid::Nexus::NexusDescriptor> fileInfo = getFileInfo();
 
   std::string entryName;
-  if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
+  if (m_file->hasGroup("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
-  } else if (fileInfo->isEntry("/MDHistoWorkspace", "NXentry")) {
+  } else if (m_file->hasGroup("/MDHistoWorkspace", "NXentry")) {
     entryName = "MDHistoWorkspace";
   } else {
     throw std::runtime_error("Unexpected NXentry name. Expected "
@@ -181,7 +181,7 @@ void LoadMD::execLoader() {
   this->loadQConvention();
 
   // Display normalization settting
-  if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
+  if (m_file->hasAddress("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
@@ -190,7 +190,7 @@ void LoadMD::execLoader() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
-    if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
+    if (m_file->hasAddress("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
       this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
     }
 
@@ -253,8 +253,10 @@ void LoadMD::execLoader() {
 template <typename NumT>
 void LoadMD::loadSlab(const std::string &name, NumT *data, const MDHistoWorkspace_sptr &ws, NXnumtype dataType) {
   m_file->openData(name);
-  if (m_file->getInfo().type != dataType)
-    throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
+  auto info = m_file->getInfo();
+  if (info.type != dataType)
+    throw std::runtime_error("Unexpected data type " + std::string(dataType) + " for '" + name +
+                             "' data set with type " + std::string(info.type) + ".");
 
   // verify that the number of points is correct
   const auto dataDims = m_file->getInfo().dims;
@@ -411,7 +413,7 @@ void LoadMD::loadVisualNormalization(const std::string &key,
     uint32_t readVisualNormalization(0);
     m_file->readData(key, readVisualNormalization);
     normalization = static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
 
   } catch (std::exception &) {
   }
@@ -423,21 +425,21 @@ void LoadMD::loadCoordinateSystem() {
   // in its own field. The first version stored it
   // as a log value so fallback on that if it can't
   // be found.
-  try {
+  if (m_file->hasData("coordinate_system")) {
     uint32_t readCoord(0);
     m_file->readData("coordinate_system", readCoord);
     m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-  } catch (::NeXus::Exception &) {
-    auto pathOnEntry = m_file->getPath();
-    try {
-      m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
+  } else {
+    std::string addressOnEntry = m_file->getAddress();
+    std::string newAddress = addressOnEntry + "/experiment0/logs/CoordinateSystem";
+    if (m_file->hasData(newAddress + "/value")) {
       int readCoord(0);
+      m_file->openAddress(newAddress);
       m_file->readData("value", readCoord);
       m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
-    } catch (::NeXus::Exception &) {
+      // return to where we started
+      m_file->openAddress(addressOnEntry);
     }
-    // return to where we started
-    m_file->openPath(pathOnEntry);
   }
 }
 

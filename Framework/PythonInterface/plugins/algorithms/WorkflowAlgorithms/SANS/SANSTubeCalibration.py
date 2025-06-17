@@ -96,7 +96,6 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _MERGED_WS_NAME = "original"
     _CALIBRATED_WS_NAME = "result"
     _NEXUS_SUFFIX = ".nxs"
-    _PROTON_CHRG_LOG = "proton_charge_by_period"
     _REAR_DET_Z_LOG = "Rear_Det_Z"
     _FRONT_DET_Z_LOG = "Front_Det_Z"
     _BEAM_STOPPER_STRIP_POSITION = 260
@@ -396,8 +395,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         return ws_list
 
     def _get_proton_charge(self, ws) -> float:
-        proton_charge = ws.getRun()[self._PROTON_CHRG_LOG].value
-        return proton_charge[0] if type(proton_charge) is np.ndarray else proton_charge
+        return ws.getRun().getProtonCharge()
 
     def _crop_and_scale_workspace(self, ws, start_pixel: int, end_pixel: int, uamphr_to_rescale: float):
         scaled_ws_name = ws.name() + self._SCALED_WS_SUFFIX

@@ -54,9 +54,9 @@ template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATI
 
 template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
-template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::NATIVE_CHAR; }
+template <> MANTID_NEXUS_DLL DataType getType<char>() { return PredType::C_S1; }
 
-template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::NATIVE_CHAR; }
+template <> MANTID_NEXUS_DLL DataType getType<std::string>() { return PredType::C_S1; }
 
 template <> MANTID_NEXUS_DLL DataType getType<bool>() { return PredType::NATIVE_HBOOL; }
 
@@ -107,6 +107,8 @@ template <typename InT, typename OutT, Narrowing narrow> inline void throwIfUnal
     func_name<int64_t, OutT, narrow>(__VA_ARGS__);                                                                     \
   } else if (dataType == PredType::NATIVE_UINT64) {                                                                    \
     func_name<uint64_t, OutT, narrow>(__VA_ARGS__);                                                                    \
+  } else if (dataType == PredType::C_S1) {                                                                             \
+    func_name<char, OutT, narrow>(__VA_ARGS__);                                                                        \
   } else {                                                                                                             \
     std::string msg = "H5Util: error in narrowing, unknown H5Cpp PredType ";                                           \
     msg += dataType.fromClass() + ".";                                                                                 \
@@ -242,9 +244,9 @@ template <typename NumT> void writeArray1D(Group &group, const std::string &name
 // read methods
 // -------------------------------------------------------------------
 
-std::string readString(H5::H5File &file, const std::string &path) {
+std::string readString(H5::H5File &file, const std::string &address) {
   try {
-    auto data = file.openDataSet(path);
+    auto data = file.openDataSet(address);
     return readString(data);
   } catch (const H5::FileIException &e) {
     UNUSED_ARG(e);
@@ -255,9 +257,9 @@ std::string readString(H5::H5File &file, const std::string &path) {
   }
 }
 
-std::string readString(H5::Group &group, const std::string &name) {
+std::string readString(const H5::Group &group, const std::string &name) {
   try {
-    auto data = group.openDataSet(name);
+    const auto data = group.openDataSet(name);
     return readString(data);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
@@ -441,7 +443,7 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
   DataSpace filespace = dataset.getSpace();
   const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
-  if (offset >= length_actual) {
+  if (offset >= length_actual && offset != 0) {
     std::stringstream msg;
     msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
     throw std::runtime_error(msg.str());
@@ -464,11 +466,11 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<OutT> &output, co
 }
 
 /// Test if a group exists in an HDF5 file or parent group.
-bool groupExists(H5::H5Object const &h5, const std::string &groupPath) {
+bool groupExists(H5::H5Object const &h5, const std::string &groupAddress) {
   bool status = true;
   // Unfortunately, this is actually the approach recommended by the HDF Group.
   try {
-    h5.openGroup(groupPath);
+    h5.openGroup(groupAddress);
   } catch (const H5::Exception &) {
     status = false;
   }
@@ -490,12 +492,12 @@ bool keyHasValue(H5::H5Object const &h5, const std::string &key, const std::stri
   return status;
 }
 
-void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Object &src,
-               const std::string &srcGroupPath) {
+void copyGroup(H5::H5Object &dest, const std::string &destGroupAddress, H5::H5Object &src,
+               const std::string &srcGroupAddress) {
   // Source group must exist, and destination group must not exist.
-  if (!groupExists(src, srcGroupPath) || groupExists(dest, destGroupPath))
-    throw std::invalid_argument(std::string("H5Util::copyGroup: source group '") + srcGroupPath + "' must exist and " +
-                                "destination group '" + destGroupPath + "' must not exist.");
+  if (!groupExists(src, srcGroupAddress) || groupExists(dest, destGroupAddress))
+    throw std::invalid_argument(std::string("H5Util::copyGroup: source group '") + srcGroupAddress +
+                                "' must exist and " + "destination group '" + destGroupAddress + "' must not exist.");
 
   // TODO: check that source file must have at least read access and destination file must have write access.
 
@@ -507,7 +509,7 @@ void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Objec
   if (H5Pset_create_intermediate_group(lcpl, 1) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Pset_create_intermediate_group' error return.");
 
-  if (H5Ocopy(src.getId(), srcGroupPath.c_str(), dest.getId(), destGroupPath.c_str(), H5P_DEFAULT, lcpl) < 0)
+  if (H5Ocopy(src.getId(), srcGroupAddress.c_str(), dest.getId(), destGroupAddress.c_str(), H5P_DEFAULT, lcpl) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Ocopy' error return.");
   H5Pclose(lcpl);
 }

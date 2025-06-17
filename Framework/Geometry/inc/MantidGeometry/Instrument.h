@@ -144,14 +144,14 @@ public:
   /// Get the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
   /// SPHERICAL_Z
-  std::string getDefaultView() const { return m_defaultView; }
+  const std::string &getDefaultView() const { return m_defaultView; }
   /// Set the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
   /// SPHERICAL_Z
   void setDefaultView(const std::string &type);
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
-  std::string getDefaultAxis() const { return m_defaultViewAxis; }
+  const std::string &getDefaultAxis() const { return m_defaultViewAxis; }
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
   void setDefaultViewAxis(const std::string &axis) { m_defaultViewAxis = axis; }
@@ -185,8 +185,8 @@ public:
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline, double &beamline_norm, Kernel::V3D &samplePos) const;
 
-  void saveNexus(::NeXus::File *file, const std::string &group) const;
-  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  void loadNexus(Nexus::File *file, const std::string &group);
 
   void setFilename(const std::string &filename);
   const std::string &getFilename() const;
@@ -222,7 +222,7 @@ public:
 
 private:
   /// Save information about a set of detectors to Nexus
-  void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
+  void saveDetectorSetInfoToNexus(Nexus::File *file, const std::vector<detid_t> &detIDs) const;
 
   bool validateComponentProperties(IComponent_const_sptr component) const;
 

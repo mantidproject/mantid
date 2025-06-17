@@ -50,9 +50,9 @@ public:
   /// Return if it has a lower bound
   bool hasUpper() const noexcept { return m_hasUpperBound; }
   /// Return the lower bound value
-  TYPE lower() const noexcept { return m_lowerBound; }
+  const TYPE &lower() const noexcept { return m_lowerBound; }
   /// Return the upper bound value
-  TYPE upper() const noexcept { return m_upperBound; }
+  const TYPE &upper() const noexcept { return m_upperBound; }
   /// Check if lower bound is exclusive
   bool isLowerExclusive() const noexcept { return m_lowerExclusive; }
   /// Check if upper bound is exclusive

@@ -25,7 +25,7 @@ namespace Mantid::CurveFitting::CostFunctions {
  */
 CostFuncFitting::CostFuncFitting()
     : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true), m_includePenalty(true), m_value(0), m_pushed(false),
-      m_pushedValue(false) {}
+      m_pushedValue(false), m_ignoreInvalidData(false) {}
 
 /**
  * Set all dirty flags.
@@ -82,6 +82,7 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, API::Func
   m_function = std::move(function);
   m_domain = std::move(domain);
   m_values = std::move(values);
+  updateValidateFitWeights();
   reset();
 }
 
@@ -507,6 +508,21 @@ void CostFuncFitting::drop() {
   }
   m_pushed = false;
   setDirty();
+}
+
+/**
+ * Functionality to validate negative fit weights
+ */
+void CostFuncFitting::validateNegativeFitWeights() {
+  if (m_ignoreInvalidData) {
+    return;
+  }
+
+  for (size_t i = 0; i < m_values->size(); i++) {
+    if (m_values->getFitWeight(i) < 0) {
+      throw std::runtime_error("Invalid data found at point=" + std::to_string(i) + " in fit weight.");
+    }
+  }
 }
 
 } // namespace Mantid::CurveFitting::CostFunctions

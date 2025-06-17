@@ -8,6 +8,7 @@ import unittest
 import uuid
 from unittest import mock
 
+from SANS.sans.common.enums import CanonicalCoordinates
 from mantid.api import WorkspaceGroup, AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from sans.algorithm_detail.batch_execution import (
@@ -22,6 +23,8 @@ from sans.algorithm_detail.batch_execution import (
     check_for_background_workspace_in_ads,
     group_bgsub_if_required,
     save_to_file,
+    _apply_polarization_component_adjustments,
+    _add_polarization_metadata_if_relevant,
 )
 from sans.common.enums import SaveType, ReductionMode
 from sans.common.constants import SCALED_BGSUB_SUFFIX
@@ -122,6 +125,42 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.reduction_package_transmissions.reduced_hab_sample = reduced_hab_sample
         self.reduction_package_transmissions.unfitted_transmission = transmission
         self.reduction_package_transmissions.unfitted_transmission_can = transmission_can
+
+    def _create_saving_reduction_package(self):
+        state = mock.MagicMock()
+        save_info_mock = mock.MagicMock()
+        scaled_bg_mock = mock.MagicMock()
+        scaled_bg_mock.workspace = "scaled_ws"
+        scaled_bg_mock.scale_factor = 0.5
+        file_formats_mock = mock.MagicMock()
+        save_info_mock.file_format = file_formats_mock
+        state.save = save_info_mock
+        state.background_subtraction = scaled_bg_mock
+        reduction_package = mock.MagicMock()
+        reduction_package.state = state
+        return reduction_package, file_formats_mock
+
+    def _create_move_objects(self):
+        mock_polarization_state = mock.MagicMock()
+        mock_polarization_state.spin_configuration = "+1+1,-1+1,+1-1,-1-1"
+        mock_polarizer = mock.MagicMock()
+        mock_polarizer.idf_component_name = "mocked_polarizer"
+        mock_polarizer.location_x = 1.2
+        mock_polarizer.location_y = 3.4
+        mock_polarizer.location_z = 5.6
+        mock_polarizer.device_type = "He3"
+        mock_polarizer.cell_length = 0.3
+        mock_polarizer.gas_pressure = 5
+        mock_mag_field = mock.MagicMock()
+        mock_mag_field.sample_strength_log = "str_log_name"
+        mock_mag_field.sample_direction_log = "dir_log_name"
+        mock_mag_field.sample_direction_a = None
+        mock_polarization_state.polarizer = mock_polarizer
+        mock_polarization_state.analyzer = None
+        mock_polarization_state.flippers = []
+        mock_polarization_state.magnetic_field = mock_mag_field
+        mock_ws = mock.MagicMock()
+        return mock_polarization_state, mock_ws
 
     def test_returns_merged_name_if_present(self):
         reduction_packages = [self.reduction_package_merged]
@@ -327,39 +366,23 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
-    def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func):
-        state = mock.MagicMock()
-        save_info_mock = mock.MagicMock()
-        scaled_bg_mock = mock.MagicMock()
-        scaled_bg_mock.workspace = "scaled_ws"
-        scaled_bg_mock.scale_factor = 0.5
-        file_formats_mock = mock.MagicMock()
-        save_info_mock.file_format = file_formats_mock
-        state.save = save_info_mock
-        state.background_subtraction = scaled_bg_mock
-        reduction_package = mock.MagicMock()
-        reduction_package.state = state
+    def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func, _):
+        reduction_package, file_formats_mock = self._create_saving_reduction_package()
 
         mock_names_func.return_value = ["unsubbed_ws"]
         save_to_file([reduction_package], False, {}, {})
         mock_save_func.assert_called_with("unsubbed_ws", file_formats_mock, "unsubbed_ws", {}, {})
 
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    @mock.patch("sans.algorithm_detail.batch_execution._add_polarization_metadata_if_relevant")
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
-    def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func):
-        state = mock.MagicMock()
-        save_info_mock = mock.MagicMock()
-        scaled_bg_mock = mock.MagicMock()
-        scaled_bg_mock.workspace = "scaled_ws"
-        scaled_bg_mock.scale_factor = 0.5
-        file_formats_mock = mock.MagicMock()
-        save_info_mock.file_format = file_formats_mock
-        state.save = save_info_mock
-        state.background_subtraction = scaled_bg_mock
-        reduction_package = mock.MagicMock()
-        reduction_package.state = state
+    def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func, _):
+        reduction_package, file_formats_mock = self._create_saving_reduction_package()
 
         mock_names_func.return_value = ["subbed_ws" + SCALED_BGSUB_SUFFIX]
         save_to_file([reduction_package], False, {}, {})
@@ -369,6 +392,108 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "subbed_ws" + SCALED_BGSUB_SUFFIX,
             {},
             {"BackgroundSubtractionWorkspace": "scaled_ws", "BackgroundSubtractionScaleFactor": 0.5},
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_group_to_file")
+    @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
+    def test_save_to_file_uses_save_by_group_for_pol_nx_can_sas(self, mock_names_func, mock_save_group, mock_ads):
+        reduction_package, _ = self._create_saving_reduction_package()
+        reduction_package.state.save.file_format = [SaveType.POL_NX_CAN_SAS]
+        mock_names_func.return_value = ["polarization_ws"]
+        mock_ws = mock.MagicMock()
+        mock_ads.retrieve.return_value = mock_ws
+
+        save_to_file([reduction_package], False, {}, {})
+        self.assertEqual(mock_save_group.call_count, 1)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    @mock.patch("sans.algorithm_detail.batch_execution.move_component")
+    def test_apply_polarization_component_adjustments_uses_state_first(self, mock_move, mock_alg_manager):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+
+        _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
+        self.assertEqual(mock_move.call_count, 1)
+        mock_move.assert_called_with(mock_ws, mock.ANY, "mocked_polarizer", False)
+        # For some reason assert_called_with doesn't like doing the dict comparison, so do it ourselves.
+        self.assertEqual(
+            set(mock_move.call_args.args[1].values()),
+            set({CanonicalCoordinates.X: 1.2, CanonicalCoordinates.Y: 3.4, CanonicalCoordinates.Z: 5.6}.values()),
+        )
+        mock_alg_manager.assert_called_with(
+            "SetInstrumentParameter",
+            Workspace=mock_ws,
+            ComponentName="mocked_polarizer",
+            ParameterName="gas_pressure",
+            ParameterType="Number",
+            Value=5,
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    @mock.patch("sans.algorithm_detail.batch_execution.move_component")
+    def test_apply_polarization_component_adjustments_uses_idf_if_state_not_present(self, mock_move, mock_alg_manager):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_polarization_state.polarizer.location_x = None
+        mock_polarization_state.polarizer.location_z = None
+        mock_polarization_state.polarizer.gas_pressure = None
+        mock_polarization_state.polarizer.cell_length = None
+        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getX = mock.Mock(return_value=9.8)
+        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getY = mock.Mock(return_value=7.6)
+        mock_ws.getInstrument.return_value.getComponentByName.return_value.getPos.return_value.getZ = mock.Mock(return_value=5.4)
+
+        _apply_polarization_component_adjustments(mock_polarization_state, mock_ws)
+        mock_move.assert_any_call(mock_ws, mock.ANY, "mocked_polarizer", False)
+        self.assertEqual(
+            set(mock_move.call_args.args[1].values()),
+            set({CanonicalCoordinates.X: 9.8, CanonicalCoordinates.Y: 3.4, CanonicalCoordinates.Z: 5.4}.values()),
+        )
+        mock_alg_manager.assert_called_with(
+            "SetInstrumentParameter",
+            Workspace=mock_ws,
+            ComponentName="mocked_polarizer",
+            ParameterName="device_type",
+            ParameterType="String",
+            Value="He3",
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    def test_polarization_metadata_added(self, _):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_ws.getRun.return_value.getProperty.return_value.value = "mocked_ws_run_log:1,-3,23"
+        metadata = {}
+        _add_polarization_metadata_if_relevant(mock_polarization_state, metadata, mock_ws)
+        self.assertEqual(
+            {
+                "PolarizationProps": {
+                    "InputSpinStates": "+1+1,-1+1,+1-1,-1-1",
+                    "MagneticFieldDirection": "mocked_ws_run_log:1,-3,23",
+                    "MagneticFieldStrengthLog": "str_log_name",
+                    "PolarizerComponentName": "mocked_polarizer",
+                }
+            },
+            metadata,
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution._apply_polarization_component_adjustments")
+    def test_polarization_metadata_added_mag_field_direction_not_using_log(self, _):
+        mock_polarization_state, mock_ws = self._create_move_objects()
+        mock_polarization_state.magnetic_field.sample_direction_log = None
+        mock_polarization_state.magnetic_field.sample_direction_a = 1
+        mock_polarization_state.magnetic_field.sample_direction_p = -3
+        mock_polarization_state.magnetic_field.sample_direction_d = 23
+
+        metadata = {}
+        _add_polarization_metadata_if_relevant(mock_polarization_state, metadata, mock_ws)
+        self.assertEqual(
+            {
+                "PolarizationProps": {
+                    "InputSpinStates": "+1+1,-1+1,+1-1,-1-1",
+                    "MagneticFieldDirection": "1,-3,23",
+                    "MagneticFieldStrengthLog": "str_log_name",
+                    "PolarizerComponentName": "mocked_polarizer",
+                }
+            },
+            metadata,
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
@@ -396,7 +521,15 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         filename = "fileName"
         additional_run_numbers = {}
         additional_metadata = {}
-        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
+        file_types = [
+            SaveType.NEXUS,
+            SaveType.CAN_SAS,
+            SaveType.NX_CAN_SAS,
+            SaveType.POL_NX_CAN_SAS,
+            SaveType.NIST_QXY,
+            SaveType.RKH,
+            SaveType.CSV,
+        ]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers, additional_metadata)
 
@@ -408,6 +541,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "Nexus": True,
             "CanSAS": True,
             "NXcanSAS": True,
+            "PolarizedNXcanSAS": True,
             "NistQxy": True,
             "RKH": True,
             "CSV": True,

@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -74,13 +74,13 @@ void LoadIDFFromNexus::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  // Get the instrument path
-  std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
+  // Get the instrument address
+  std::string instrumentParentAddress = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
-  ::NeXus::File nxfile(filename);
+  Nexus::File nxfile(filename);
   // Assume one level in instrument path
-  nxfile.openPath(instrumentParentPath);
+  nxfile.openAddress(instrumentParentAddress);
 
   // Take instrument info from nexus file.
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile);
@@ -240,7 +240,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(const std::string &correction
  *
  *  @throw FileError Thrown if unable to parse XML file
  */
-void LoadIDFFromNexus::LoadParameters(::NeXus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
+void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
 
   std::string parameterString;
 

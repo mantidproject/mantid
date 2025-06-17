@@ -28,7 +28,7 @@ using Kernel::V3D;
 
 Mantid::Kernel::Logger g_log("Goniometer");
 
-void GoniometerAxis::saveNexus(::NeXus::File *file, const std::string &group) const {
+void GoniometerAxis::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXmotor", true);
   file->writeData("name", name);
   file->writeData("angle", angle);
@@ -42,7 +42,7 @@ void GoniometerAxis::saveNexus(::NeXus::File *file, const std::string &group) co
   file->closeGroup();
 }
 
-void GoniometerAxis::loadNexus(::NeXus::File *file, const std::string &group) {
+void GoniometerAxis::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXmotor");
   file->readData("name", name);
   file->readData("angle", angle);
@@ -65,14 +65,40 @@ Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
 Goniometer::Goniometer(const DblMatrix &rot) {
-  DblMatrix ide(3, 3), rtr(3, 3);
-  rtr = rot.Tprime() * rot;
-  ide.identityMatrix();
-  if (rtr == ide) {
-    R = rot;
-    initFromR = true;
-  } else
-    throw std::invalid_argument("rot is not a rotation matrix");
+  bool isRot = rot.isRotation(); // this can also throw if matrix is invalid rotation, but that is fine
+  if (!isRot) {
+    // constructor should fail if the matrix is invalid
+    throw std::invalid_argument("rot has not been evaluated to be a valid rotation matrix");
+  }
+  R = rot;
+  initFromR = true;
+}
+
+/// Add an explicit copy constructor
+Goniometer::Goniometer(const Goniometer &other) : R(other.R), motors(other.motors), initFromR(other.initFromR) {}
+
+/// Copy assigment constructor
+Goniometer &Goniometer::operator=(const Goniometer &other) {
+  if (this != &other) {
+    R = other.R;
+    motors = other.motors;
+    initFromR = other.initFromR;
+  }
+  return *this;
+}
+
+// Move constructor
+Goniometer::Goniometer(Goniometer &&other) noexcept
+    : R(std::move(other.R)), motors(std::move(other.motors)), initFromR(other.initFromR) {}
+
+// Move assignment operator
+Goniometer &Goniometer::operator=(Goniometer &&other) noexcept {
+  if (this != &other) {
+    R = std::move(other.R);
+    motors = std::move(other.motors);
+    initFromR = other.initFromR;
+  }
+  return *this;
 }
 
 /// Return global rotation matrix
@@ -322,6 +348,7 @@ void Goniometer::recalculateR() {
                     << "recalculation from motors will be done.\n";
     return;
   }
+
   std::vector<GoniometerAxis>::iterator it;
   std::vector<double> elements;
   Quat QGlobal, QCurrent;
@@ -342,7 +369,7 @@ void Goniometer::recalculateR() {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Goniometer::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXpositioner", true);
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written
@@ -358,7 +385,7 @@ void Goniometer::saveNexus(::NeXus::File *file, const std::string &group) const 
  * @param file :: open NeXus file
  * @param group :: name of the group to open
  */
-void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
+void Goniometer::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXpositioner");
   int num_axes;
   file->readData("num_axes", num_axes);

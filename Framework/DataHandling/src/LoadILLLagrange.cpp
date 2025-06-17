@@ -16,9 +16,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 
@@ -136,18 +136,25 @@ void LoadILLLagrange::loadData() {
   H5::DataSpace scanVarSpace = scanVar.getSpace();
 
   nDims = scanVarSpace.getSimpleExtentNdims();
-  dimsSize = std::vector<hsize_t>(nDims);
-  scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
-  if ((nDims != 2) || (dimsSize[1] != m_nScans))
+  std::vector<double> monitorData;
+  std::vector<double> scanVariableData;
+  dimsSize.resize(nDims);
+  if (dimsSize.size() != 2) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
+  } else {
+    scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
-  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
-  scanVar.read(scanVarData.data(), scanVar.getDataType());
-  std::vector<double> monitorData(dimsSize[1]);
-  std::vector<double> scanVariableData(dimsSize[1]);
-  for (size_t i = 0; i < monitorData.size(); i++) {
-    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
-    scanVariableData[i] = scanVarData[i];
+    if (dimsSize[1] != m_nScans)
+      throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
+
+    std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
+    scanVar.read(scanVarData.data(), scanVar.getDataType());
+    monitorData.resize(dimsSize[1]);
+    scanVariableData.resize(dimsSize[1]);
+    for (size_t i = 0; i < monitorData.size(); i++) {
+      monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
+      scanVariableData[i] = scanVarData[i];
+    }
   }
   scanVar.close();
 
@@ -173,9 +180,9 @@ void LoadILLLagrange::loadMetaData() {
 
   // Open NeXus file
   try {
-    ::NeXus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
+    Nexus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << getPropertyValue("Filename") << "\" in read mode: " << e.what()
                   << "\n";
   }

@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexus/NexusDescriptor.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/H5Util.h"
+#include "MantidNexus/NexusException.h"
 
 #include <H5Cpp.h>
 #include <boost/multi_index/detail/index_matcher.hpp>
@@ -68,11 +69,24 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 }
 } // namespace
 
+// PUBLIC
+
 NexusDescriptor::NexusDescriptor(std::string filename)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
 
-// PUBLIC
+NexusDescriptor::NexusDescriptor(std::string filename, NXaccess access)
+    : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
+      m_firstEntryNameType() {
+  // if we are creating a file and it already exists, then delete it first
+  if (access == NXaccess_mode::NXACC_CREATE5) {
+    if (std::filesystem::exists(m_filename)) {
+      std::filesystem::remove(m_filename);
+    }
+  }
+  m_allEntries = initAllEntries();
+}
+
 const std::string &NexusDescriptor::filename() const noexcept { return m_filename; }
 
 bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
@@ -80,60 +94,62 @@ bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_roo
 const std::map<std::string, std::set<std::string>> &NexusDescriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
+
+void NexusDescriptor::addRootAttr(const std::string &name) { m_rootAttrs.insert(name); }
+
 void NexusDescriptor::addEntry(const std::string &entryName, const std::string &groupClass) {
   // simple checks
   if (entryName.empty())
-    throw ::NeXus::Exception("Cannot add empty path", "", m_filename);
+    throw Exception("Cannot add empty path", "", m_filename);
   if (groupClass.empty())
-    throw ::NeXus::Exception("Cannot add empty class", "", m_filename);
+    throw Exception("Cannot add empty class", "", m_filename);
   if (!entryName.starts_with("/"))
-    throw ::NeXus::Exception("Paths must be absolute: " + entryName, "", m_filename);
+    throw Exception("Address must be absolute: " + entryName, "", m_filename);
 
-  // do not add path twice
+  // do not add address twice
   if (this->isEntry(entryName))
-    throw ::NeXus::Exception("Cannot add an entry twice: " + entryName, "", m_filename);
+    throw Exception("Cannot add an entry twice: " + entryName, "", m_filename);
 
   // verify the parent exists
   const auto lastPos = entryName.rfind("/");
-  const auto parentPath = entryName.substr(0, lastPos);
-  if (!this->isEntry(parentPath))
-    throw ::NeXus::Exception("Parent path " + parentPath + " does not exist", "", m_filename);
+  const auto parentAddress = entryName.substr(0, lastPos);
+  if (parentAddress != "" && !this->isEntry(parentAddress))
+    throw Exception("Parent address " + parentAddress + " does not exist", "", m_filename);
 
-  // add the path
+  // add the address
   m_allEntries[groupClass].insert(entryName);
 }
 
 // PRIVATE
 std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
 
   std::map<std::string, std::set<std::string>> allEntries;
 
-  H5::H5File fileID;
-  try {
-    fileID = H5::H5File(m_filename, H5F_ACC_RDONLY, H5::FileCreatPropList::DEFAULT, access_plist);
-  } catch (const H5::FileIException &) {
-    try {
-      fileID.close();
-    } catch (const H5::FileIException &) { /* do nothing */
+  // if the file exists read it
+  if (std::filesystem::exists(m_filename)) {
+    // if the file exists but cannot be opened, throw invalid
+    // NOTE must be std::invalid_argument for expected errors to be raised in python API
+    if (!H5::H5File::isAccessible(m_filename, Mantid::NeXus::H5Util::defaultFileAcc())) {
+      throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + m_filename + "\n");
     }
-    throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + m_filename + "\n");
+
+    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::Group groupID = fileID.openGroup("/");
+
+    // get root attributes
+    for (int i = 0; i < groupID.getNumAttrs(); ++i) {
+      H5::Attribute attr = groupID.openAttribute(i);
+      m_rootAttrs.insert(attr.getName());
+    }
+
+    // scan file recursively starting with root group "/"
+    getGroup(groupID, allEntries, m_firstEntryNameType, 0);
+
+    // handle going out of scope should automatically close
+    fileID.close();
+  } else {
+    // if the file does not exist, then leave allEntries empty
   }
-
-  H5::Group groupID = fileID.openGroup("/");
-
-  // get root attributes
-  for (int i = 0; i < groupID.getNumAttrs(); ++i) {
-    H5::Attribute attr = groupID.openAttribute(i);
-    m_rootAttrs.insert(attr.getName());
-  }
-
-  // scan file recursively starting with root group "/"
-  getGroup(groupID, allEntries, m_firstEntryNameType, 0);
-
-  // handle going out of scope should automatically close
-  fileID.close();
 
   // rely on move semantics
   return allEntries;
@@ -158,7 +174,7 @@ bool NexusDescriptor::isEntry(const std::string &entryName) const noexcept {
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
 }
 
-std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type) const {
+std::vector<std::string> NexusDescriptor::allAddressesOfType(const std::string &type) const {
   std::vector<std::string> result;
   if (auto itClass = m_allEntries.find(type); itClass != m_allEntries.end()) {
     result.assign(itClass->second.begin(), itClass->second.end());
@@ -167,6 +183,40 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
   return result;
 }
 
+std::map<std::string, std::string> NexusDescriptor::allAddressesAtLevel(const std::string &level) const {
+  std::map<std::string, std::string> result;
+  for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend(); itClass++) {
+    for (auto itEntry = itClass->second.cbegin(); itEntry != itClass->second.cend(); itEntry++) {
+      if (itEntry->size() <= level.size()) {
+        continue;
+      }
+      if (itEntry->starts_with(level)) {
+        int offset = (level == "/" ? 0 : 1);
+        std::string address = itEntry->substr(level.size() + offset, itEntry->find("/", level.size() + offset));
+        if (itEntry->ends_with(address)) {
+          result[address] = itClass->first;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 bool NexusDescriptor::classTypeExists(const std::string &classType) const { return m_allEntries.contains(classType); }
+
+std::string NexusDescriptor::classTypeForName(std::string const &entryName) const {
+  std::string groupClass;
+  auto it = m_allEntries.cbegin();
+  for (; it != m_allEntries.cend(); it++) {
+    if (it->second.count(entryName) == 1) {
+      groupClass = it->first;
+      break;
+    }
+  }
+  if (it == m_allEntries.cend()) {
+    throw Exception("Cannot find entry " + entryName, "classTypeForName", m_filename);
+  }
+  return groupClass;
+}
 
 } // namespace Mantid::Nexus

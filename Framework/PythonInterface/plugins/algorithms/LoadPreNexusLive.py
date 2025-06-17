@@ -8,9 +8,11 @@ from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, Property, PropertyCriterion, StringListValidator
 from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, LoadInstrument, LoadNexusLogs, NormaliseByCurrent
+from mantid.utils.deprecator import deprecated_algorithm
 import os
 
 
+@deprecated_algorithm(None, "2025-05-27")
 class LoadPreNexusLive(DataProcessorAlgorithm):
     def category(self):
         return "DataHandling"

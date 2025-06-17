@@ -260,7 +260,7 @@ std::ostream &operator<<(std::ostream &os, const AlgorithmHistory &AH) {
  * @param file :: The handle to the nexus file to save to
  * @param algCount :: Counter of the number of algorithms written to file.
  */
-void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
+void AlgorithmHistory::saveNexus(Nexus::File *file, int &algCount) const {
   std::stringstream algNumber;
   ++algCount;
   algNumber << "MantidAlgorithm_" << algCount; // history entry names start at 1 not 0

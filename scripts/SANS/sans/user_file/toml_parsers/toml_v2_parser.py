@@ -53,10 +53,10 @@ class TomlV2ParserImpl(TomlV1ParserImpl):
         self.polarization.electric_field = self._parse_field(self.get_val("electric_field", polarization_dict))
         self.polarization.validate()
 
-    def _parse_component(self, component_dict: dict) -> StateComponent:
-        component_state = StateComponent()
+    def _parse_component(self, component_dict: dict) -> StateComponent | None:
         if component_dict is None:
-            return component_state
+            return None
+        component_state = StateComponent()
         component_state.idf_component_name = self.get_val("idf_component_name", component_dict)
         component_state.device_name = self.get_val("device_name", component_dict)
         component_state.device_type = self.get_val("device_type", component_dict)
@@ -69,9 +69,9 @@ class TomlV2ParserImpl(TomlV1ParserImpl):
         component_state.efficiency = self.get_val("efficiency", component_dict)
         return component_state
 
-    def _parse_filter(self, filter_dict: dict) -> StateFilter:
+    def _parse_filter(self, filter_dict: dict) -> StateFilter | None:
         if filter_dict is None:
-            return StateFilter()
+            return None
         filter_state = StateFilter.construct_from_component(self._parse_component(filter_dict))
         filter_state.cell_length = self.get_val("cell_length", filter_dict)
         filter_state.gas_pressure = self.get_val("gas_pressure", filter_dict)
@@ -79,10 +79,10 @@ class TomlV2ParserImpl(TomlV1ParserImpl):
         filter_state.initial_polarization = self.get_val("initial_polarization", filter_dict)
         return filter_state
 
-    def _parse_field(self, field_dict: dict) -> StateField:
+    def _parse_field(self, field_dict: dict) -> StateField | None:
         field_state = StateField()
         if field_dict is None:
-            return field_state
+            return None
         field_state.sample_strength_log = self.get_val("sample_strength_log", field_dict)
         direction_dict = self.get_val("sample_direction", field_dict)
         if direction_dict:

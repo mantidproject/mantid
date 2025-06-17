@@ -40,6 +40,8 @@ const std::string StartLiveData::name() const { return "StartLiveData"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int StartLiveData::version() const { return 1; }
 
+const std::vector<std::string> StartLiveData::seeAlso() const { return {"LoadLiveData", "MonitorLiveData"}; }
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */

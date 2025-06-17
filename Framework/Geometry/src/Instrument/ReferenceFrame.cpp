@@ -145,7 +145,7 @@ Handedness ReferenceFrame::getHandedness() const { return m_handedness; }
 /** Gets the origin
 @return origin
 */
-std::string ReferenceFrame::origin() const { return m_origin; }
+const std::string &ReferenceFrame::origin() const { return m_origin; }
 
 /**
 Getter for the up instrument direction

@@ -26,9 +26,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 
@@ -37,7 +37,7 @@ namespace Mantid::DataHandling {
 using namespace API;
 using namespace Geometry;
 using namespace Kernel;
-using namespace NeXus;
+using namespace Nexus;
 using Types::Core::DateAndTime;
 
 namespace {
@@ -212,7 +212,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
   try {
-    ::NeXus::File nxHandle(m_fileName, NXACC_READ);
+    Nexus::File nxHandle(m_fileName, NXACC_READ);
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);
@@ -222,7 +222,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
         workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }
     }
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << m_fileName << "\" in read mode: " << e.what() << "\n";
   }
 }

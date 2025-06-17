@@ -114,9 +114,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
       throw Exception::FileError(message, fileName);
     }
 
-    auto file = new ::NeXus::File(fileName, mode);
+    auto file = new Nexus::File(fileName, mode);
 
-    m_filehandle = std::shared_ptr<::NeXus::File>(file);
+    m_filehandle = std::shared_ptr<Nexus::File>(file);
   }
 
   //
@@ -221,7 +221,7 @@ template <> const double *_dataPointer<MantidVec>(const MantidVec &v) { return v
 //   * Optionally fill the chunks with a specified fill value;
 //   * Optionally close the dataset.
 template <class V, class WS>
-void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open group, but NO open dataset
+void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open group, but NO open dataset
                        const std::string &name,
                        std::shared_ptr<const WS> src, // Do not pass std::shared_ptr<..> by reference!
                        const std::vector<int> &indices, _VAccessor<V, WS> vData, bool raggedSpectra = false,
@@ -237,9 +237,8 @@ void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open gr
   }
   const size_t chunk_size = _chunk_size;
 
-  const ::NeXus::DimVector dims = {static_cast<::NeXus::dimsize_t>(N_chunk),
-                                   static_cast<::NeXus::dimsize_t>(chunk_size)};
-  const ::NeXus::DimSizeVector chunk_dims = {1, static_cast<::NeXus::dimsize_t>(chunk_size)};
+  const Nexus::DimVector dims = {static_cast<Nexus::dimsize_t>(N_chunk), static_cast<Nexus::dimsize_t>(chunk_size)};
+  const Nexus::DimSizeVector chunk_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size)};
 
   // Create and open the dataset.
   // (If compressionType == NXcompression::NONE, this just creates a non-compressed dataset.)
@@ -250,15 +249,15 @@ void _writeChunkedData(std::shared_ptr<::NeXus::File> dest, // Must have open gr
   const std::vector<double> vFill(pad_data ? chunk_size : 0, fillValue);
 
   // Write the data.
-  ::NeXus::DimVector start{0, 0};
+  Nexus::DimVector start{0, 0};
   for (size_t n : indices) {
     const auto &v = ((*src).*vData)(n);
-    const ::NeXus::DimSizeVector data_dims = {1, static_cast<::NeXus::dimsize_t>(v.size())};
+    const Nexus::DimSizeVector data_dims = {1, static_cast<Nexus::dimsize_t>(v.size())};
     dest->putSlab(_dataPointer<V>(v), start, data_dims);
-    if (pad_data && data_dims[1] != static_cast<::NeXus::dimsize_t>(chunk_size)) {
+    if (pad_data && data_dims[1] != static_cast<Nexus::dimsize_t>(chunk_size)) {
       // Fill the remainder of the slab.
-      const ::NeXus::DimSizeVector fill_dims = {1, static_cast<::NeXus::dimsize_t>(chunk_size) - data_dims[1]};
-      const ::NeXus::DimVector _start = {start[0], data_dims[1]};
+      const Nexus::DimSizeVector fill_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size) - data_dims[1]};
+      const Nexus::DimVector _start = {start[0], data_dims[1]};
       dest->putSlab(vFill.data(), _start, fill_dims);
     }
 
@@ -279,12 +278,11 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
                                            const bool &uniformSpectra, const bool &raggedSpectra,
                                            const std::vector<int> &indices, const std::string &group_name,
                                            bool write2Ddata) const {
-  // NXstatus status;
 
   // write data entry
   try {
     m_filehandle->makeGroup(group_name, "NXdata", true);
-  } catch (const ::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 2;
   }
 
@@ -375,7 +373,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   // write X data, as single array or all values if "ragged"
   if (uniformSpectra) {
     m_filehandle->makeData("axis1", NXnumtype::FLOAT64,
-                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(localworkspace->x(0).size())}, true);
+                           Nexus::DimVector{static_cast<Nexus::dimsize_t>(localworkspace->x(0).size())}, true);
     m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
@@ -401,8 +399,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   if (!sAxis->isText()) {
     // write axis2, maybe just spectra number
-    m_filehandle->makeData("axis2", NXnumtype::FLOAT64,
-                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(axis2.size())}, true);
+    m_filehandle->makeData("axis2", NXnumtype::FLOAT64, Nexus::DimVector{static_cast<Nexus::dimsize_t>(axis2.size())},
+                           true);
     m_filehandle->putData(axis2.data());
     m_filehandle->putAttr("units", sLabel, false);
 
@@ -419,8 +417,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++) {
       textAxis += sAxis->label(i) + "\n";
     }
-    m_filehandle->makeData("axis2", NXnumtype::CHAR,
-                           ::NeXus::DimVector{static_cast<::NeXus::dimsize_t>(textAxis.size())}, true);
+    m_filehandle->makeData("axis2", NXnumtype::CHAR, Nexus::DimVector{static_cast<Nexus::dimsize_t>(textAxis.size())},
+                           true);
     m_filehandle->putData(textAxis.c_str());
     m_filehandle->putAttr("units", "TextAxis");
 
@@ -453,7 +451,7 @@ template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(NXnumtype type, const std::string &interpret_as, const API::Column &col,
                                    const std::string &columnName) const {
   const auto nRows = static_cast<int>(col.size());
-  const ::NeXus::DimVector dims_array = {nRows};
+  const Nexus::DimVector dims_array = {nRows};
 
   auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
@@ -502,7 +500,7 @@ void NexusFileIO::writeNexusVectorColumn(const Column_const_sptr &col, const std
   }
 
   // Set-up dimensions
-  const ::NeXus::DimVector dims{static_cast<::NeXus::dimsize_t>(rowCount), static_cast<::NeXus::dimsize_t>(maxSize)};
+  const Nexus::DimVector dims{static_cast<Nexus::dimsize_t>(rowCount), static_cast<Nexus::dimsize_t>(maxSize)};
 
   // Create data array
   boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
@@ -560,7 +558,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
   // write data entry
   try {
     m_filehandle->makeGroup(group_name, "NXdata", true);
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 2;
   }
 
@@ -597,8 +595,8 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       if (maxStr == 0) {
         maxStr = 1;
       }
-      const ::NeXus::DimVector dims_array = {nRows, static_cast<::NeXus::dimsize_t>(maxStr)};
-      const ::NeXus::DimSizeVector asize = {1, dims_array[1]};
+      const Nexus::DimVector dims_array = {nRows, static_cast<Nexus::dimsize_t>(maxStr)};
+      const Nexus::DimSizeVector asize = {1, dims_array[1]};
 
       m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, NXcompression::LZW, asize);
 
@@ -638,7 +636,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
 
   try {
     m_filehandle->closeGroup();
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     return 3;
   }
   return 0;
@@ -662,7 +660,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
   m_filehandle->openGroup("event_workspace", "NXdata");
 
   // The array of indices for each event list #
-  ::NeXus::DimVector dims_array = {static_cast<::NeXus::dimsize_t>(indices.size())};
+  Nexus::DimVector dims_array = {static_cast<Nexus::dimsize_t>(indices.size())};
   if (!indices.empty()) {
     if (compress)
       m_filehandle->makeCompData("indices", NXnumtype::INT64, dims_array, m_nexuscompression, dims_array);
@@ -694,7 +692,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
 template <typename NumT>
-void NexusFileIO::writeData(const char *name, NXnumtype datatype, ::NeXus::DimVector dims_array, NumT const *data,
+void NexusFileIO::writeData(const char *name, NXnumtype datatype, Nexus::DimVector dims_array, NumT const *data,
                             bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array

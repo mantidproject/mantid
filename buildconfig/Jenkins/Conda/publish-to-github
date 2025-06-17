@@ -75,6 +75,9 @@ for asset in "$@"; do
       label=MantidWorkbench-Windows
     elif [[ $asset == *.dmg ]]; then
       label=MantidWorkbench-macOS
+      if [[ ${asset,,} == *arm64* ]]; then
+        label=$label-ARM
+      fi
     elif [[ $asset == *.tar.xz ]]; then
       label=MantidWorkbench-Linux
     # Conda packages are uploaded to the release as a backup for the packages stored on anaconda,

@@ -76,9 +76,9 @@ void writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &na
 
 template <typename NumT> void writeArray1D(H5::Group &group, const std::string &name, const std::vector<NumT> &values);
 
-MANTID_NEXUS_DLL std::string readString(H5::H5File &file, const std::string &path);
+MANTID_NEXUS_DLL std::string readString(H5::H5File &file, const std::string &address);
 
-MANTID_NEXUS_DLL std::string readString(H5::Group &group, const std::string &name);
+MANTID_NEXUS_DLL std::string readString(const H5::Group &group, const std::string &name);
 
 MANTID_NEXUS_DLL std::string readString(const H5::DataSet &dataset);
 
@@ -109,14 +109,14 @@ void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output,
                        const size_t offset = static_cast<size_t>(0));
 
 /// Test if a group already exists within an HDF5 file or parent group.
-MANTID_NEXUS_DLL bool groupExists(H5::H5Object const &h5, const std::string &groupPath);
+MANTID_NEXUS_DLL bool groupExists(H5::H5Object const &h5, const std::string &groupAddress);
 
 /// Test if an attribute is present and has a specific string value for an HDF5 group or dataset.
 MANTID_NEXUS_DLL bool keyHasValue(H5::H5Object const &h5, const std::string &key, const std::string &value);
 
 /// Copy a group and all of its contents, between the same or different HDF5 files or groups.
-MANTID_NEXUS_DLL void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Object &src,
-                                const std::string &srcGroupPath);
+MANTID_NEXUS_DLL void copyGroup(H5::H5Object &dest, const std::string &destGroupAddress, H5::H5Object &src,
+                                const std::string &srcGroupAddress);
 
 /**
  * Delete a target link for a group or dataset from a parent group.

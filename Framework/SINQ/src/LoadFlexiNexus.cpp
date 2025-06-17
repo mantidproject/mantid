@@ -15,7 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusException.h"
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
@@ -29,7 +29,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
-using namespace ::NeXus;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
@@ -64,7 +63,7 @@ void LoadFlexiNexus::exec() {
   }
   */
 
-  File fin(filename);
+  Nexus::File fin(filename);
   readData(&fin);
 }
 
@@ -91,7 +90,7 @@ void LoadFlexiNexus::loadDictionary(const std::string &dictFile) {
   in.close();
 }
 
-void LoadFlexiNexus::readData(NeXus::File *fin) {
+void LoadFlexiNexus::readData(Nexus::File *fin) {
   std::map<std::string, std::string>::const_iterator it;
 
   if ((it = dictionary.find("data")) == dictionary.end()) {
@@ -99,11 +98,11 @@ void LoadFlexiNexus::readData(NeXus::File *fin) {
   }
 
   // inspect the data element and create WS matching dims
-  if (!safeOpenpath(fin, it->second)) {
-    throw std::runtime_error("data NeXus path not found!");
+  if (!safeOpenAddress(fin, it->second)) {
+    throw std::runtime_error("data NeXus address not found!");
   }
 
-  Info inf = fin->getInfo();
+  Nexus::Info inf = fin->getInfo();
   size_t rank = inf.dims.size();
 
   if (rank <= 2) {
@@ -113,7 +112,7 @@ void LoadFlexiNexus::readData(NeXus::File *fin) {
   }
 }
 
-void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
+void LoadFlexiNexus::load2DWorkspace(Nexus::File *fin) {
   Mantid::DataObjects::Workspace2D_sptr ws;
   int nSpectra, spectraLength;
   std::vector<int> data;
@@ -121,7 +120,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   // read the data first
   fin->getDataCoerce(data);
 
-  Info inf = fin->getInfo();
+  Nexus::Info inf = fin->getInfo();
   if (inf.dims.size() == 1) {
     nSpectra = 1;
     spectraLength = static_cast<int>(inf.dims[0]);
@@ -141,7 +140,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
       xData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(xData);
     }
   }
@@ -154,7 +153,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
       yData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(yData);
     }
   }
@@ -198,13 +197,13 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(ws));
 }
 
-void LoadFlexiNexus::loadMD(NeXus::File *fin) {
+void LoadFlexiNexus::loadMD(Nexus::File *fin) {
   std::vector<double> data;
 
   // read the data first
   fin->getDataCoerce(data);
 
-  Info inf = fin->getInfo();
+  Nexus::Info inf = fin->getInfo();
 
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int k = static_cast<int>(inf.dims.size()) - 1; k >= 0; k--) {
@@ -256,7 +255,7 @@ int LoadFlexiNexus::calculateF77Address(int * /*unused*/, int /*unused*/) {
 
 double LoadFlexiNexus::dblSqrt(double in) { return sqrt(in); }
 
-MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index, int length) {
+MDHistoDimension_sptr LoadFlexiNexus::makeDimension(Nexus::File *fin, int index, int length) {
   static const char *axisNames[] = {"x", "y", "z"};
   std::map<std::string, std::string>::const_iterator it;
 
@@ -279,7 +278,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
       dData[i] = static_cast<double>(i);
     }
   } else {
-    if (safeOpenpath(fin, it->second)) {
+    if (safeOpenAddress(fin, it->second)) {
       fin->getDataCoerce(dData);
     } else {
       dData.resize(length);
@@ -299,7 +298,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   Mantid::Geometry::GeneralFrame frame(axisName, "");
   return MDHistoDimension_sptr(new MDHistoDimension(axisName, axisName, frame, min, max, length));
 }
-void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, const ExperimentInfo_sptr &info) {
+void LoadFlexiNexus::addMetaData(Nexus::File *fin, const Workspace_sptr &ws, const ExperimentInfo_sptr &info) {
   std::map<std::string, std::string>::const_iterator it;
 
   // assign a title
@@ -311,7 +310,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, con
       const std::string title(it->second);
       ws->setTitle(title);
     } else {
-      if (safeOpenpath(fin, it->second)) {
+      if (safeOpenAddress(fin, it->second)) {
         const std::string title = fin->getStrData();
         ws->setTitle(title);
       }
@@ -326,8 +325,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, con
     if (it->second.find('/') == it->second.npos) {
       sample = it->second;
     } else {
-      if (safeOpenpath(fin, it->second)) {
-        Info inf = fin->getInfo();
+      if (safeOpenAddress(fin, it->second)) {
+        Nexus::Info inf = fin->getInfo();
         if (inf.dims.size() == 1) {
           sample = fin->getStrData();
         } else { // something special for 2-d array
@@ -337,7 +336,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, con
           sample = std::string(val_array.begin(), val_array.end());
         }
       } else {
-        sample = "Sample path not found";
+        sample = "Sample address not found";
       }
     }
   }
@@ -354,8 +353,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws, con
       if (it->second.find('/') == it->second.npos) {
         r.addProperty(it->first, it->second, true);
       } else {
-        if (safeOpenpath(fin, it->second)) {
-          NeXus::Info inf = fin->getInfo();
+        if (safeOpenAddress(fin, it->second)) {
+          Nexus::Info inf = fin->getInfo();
           if (inf.type == NXnumtype::CHAR) {
             std::string data = fin->getStrData();
             r.addProperty(it->first, data, true);
@@ -389,11 +388,11 @@ std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
   return specialMap;
 }
 
-int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, const std::string &path) {
+int LoadFlexiNexus::safeOpenAddress(Nexus::File *fin, const std::string &address) {
   try {
-    fin->openPath(path);
-  } catch (NeXus::Exception &) {
-    getLogger().error("NeXus path " + path + " kaputt");
+    fin->openAddress(address);
+  } catch (Nexus::Exception const &) {
+    g_log.error("NeXus address " + address + " kaputt");
     return 0;
   }
   return 1;

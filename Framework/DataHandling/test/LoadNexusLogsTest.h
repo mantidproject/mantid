@@ -189,6 +189,34 @@ public:
     TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
   }
 
+  void test_gd_prtn_chrg_unfiltered_added_for_period_dataset() {
+
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    TSM_ASSERT("Should not have gd_prtn_chrg_unfiltered until we run LoadNexusLogs",
+               !run.hasProperty("gd_prtn_chrg_unfiltered"));
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+
+    run = testWS->run();
+    run.addProperty("current_period", 1, true);
+    const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasGdPrtnChrgUnfiltered);
+
+    int gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered true until getProtonCharge called", gdPrtnChrgUnfiltered);
+
+    run.getProtonCharge();
+    gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered false following getProtonCharge call", !gdPrtnChrgUnfiltered);
+  }
+
   void test_extract_run_title_from_event_nexus() {
 
     auto testWS = createTestWorkspace();

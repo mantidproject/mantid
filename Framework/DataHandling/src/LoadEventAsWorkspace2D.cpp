@@ -240,9 +240,9 @@ void LoadEventAsWorkspace2D::exec() {
   // vector to stored to integrated counts by detector ID
   std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
 
-  ::NeXus::File h5file(filename);
+  Nexus::File h5file(filename);
 
-  h5file.openPath("/");
+  h5file.openAddress("/");
   h5file.openGroup("entry", "NXentry");
 
   // Now we want to go through all the bankN_event entries
@@ -268,9 +268,9 @@ void LoadEventAsWorkspace2D::exec() {
         std::vector<uint32_t> event_ids;
 
         if (descriptor.isEntry("/entry/" + entry_name + "/event_id", "SDS"))
-          event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_id");
+          event_ids = Nexus::IOHelper::readNexusVector<uint32_t>(h5file, "event_id");
         else
-          event_ids = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
+          event_ids = Nexus::IOHelper::readNexusVector<uint32_t>(h5file, "event_pixel_id");
 
         // closeGroup and skip this bank if there is no event
         if (event_ids.size() <= 1) {
@@ -282,8 +282,8 @@ void LoadEventAsWorkspace2D::exec() {
         const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(h5file), std::vector<int>());
 
         // Get event_index from the "h5file"
-        const auto event_index = std::make_shared<std::vector<uint64_t>>(
-            Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
+        const auto event_index =
+            std::make_shared<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
 
         // if "filterTimeStart" is empty, use run start time as default
         if (filter_time_start_sec != EMPTY_DBL()) {
@@ -308,9 +308,9 @@ void LoadEventAsWorkspace2D::exec() {
         std::vector<float> event_times;
         if (tof_filtering) {
           if (descriptor.isEntry("/entry/" + entry_name + "/event_time_offset", "SDS"))
-            event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_offset");
+            event_times = Nexus::IOHelper::readNexusVector<float>(h5file, "event_time_offset");
           else
-            event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
+            event_times = Nexus::IOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
         }
 
         // Nested loop to loop through all the relavent pulses and relavent event_ids.

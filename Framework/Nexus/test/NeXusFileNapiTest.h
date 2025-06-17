@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "test_helper.h"
 #include <cstdarg>
 #include <cstdio>
@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-using namespace NeXus;
 using namespace NexusTest;
+using namespace Mantid::Nexus;
 using std::cout;
 using std::endl;
 using std::map;
@@ -46,7 +46,7 @@ public:
 private:
   void do_test_write(const string &filename, NXaccess create_code) {
     cout << "writeTest(" << filename << ") started\n";
-    NeXus::File file(filename, create_code);
+    Mantid::Nexus::File file(filename, create_code);
     // create group
     file.makeGroup("entry", "NXentry", true);
     // group attributes
@@ -56,7 +56,7 @@ private:
     file.writeData("ch_data", "NeXus_data");
 
     // 2d array
-    ::NeXus::DimVector array_dims{5, 4};
+    Mantid::Nexus::DimVector array_dims{5, 4};
     char c1_array[5][4] = {
         {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
     file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
@@ -175,7 +175,7 @@ private:
     file.flush();
 
     // real flush test
-    file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
+    file.makeData("flush_data", Mantid::Nexus::getType<int>(), NX_UNLIMITED, true);
     vector<int> slab_array;
     slab_array.push_back(0);
     for (int i = 0; i < 7; i++) {
@@ -193,7 +193,7 @@ private:
 
     // make more links
     NXlink glink = file.getGroupID();
-    file.openPath("/");
+    file.openAddress("/");
     file.makeGroup("link", "NXentry", true);
     file.makeLink(glink);
     cout << "writeTest(" << filename << ") successful\n";
@@ -205,7 +205,7 @@ private:
     cout << "readTest(" << filename << ") started\n";
     const string SDS("SDS");
     // top level file information
-    NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     file.openGroup("entry", "NXentry");
 
     // Test getDataCoerce() -------------------
@@ -256,11 +256,11 @@ private:
     // Close the "entry" group
     file.closeGroup();
 
-    // openpath checks
-    file.openPath("/entry/data/comp_data");
-    file.openPath("/entry/data/comp_data");
-    file.openPath("../r8_data");
-    cout << "NXopenpath checks OK\n";
+    // openAddress checks
+    file.openAddress("/entry/data/comp_data");
+    file.openAddress("/entry/data/comp_data");
+    file.openAddress("../r8_data");
+    cout << "NXopenaddress checks OK\n";
 
     // everything went fine
     cout << "readTest(" << filename << ") successful\n";
@@ -268,7 +268,7 @@ private:
 
   void do_test_loadPath(const string &filename) {
     if (getenv("NX_LOAD_PATH") != NULL) {
-      TS_ASSERT_THROWS_NOTHING(NeXus::File file(filename, NXACC_RDWR));
+      TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXACC_RDWR));
       cout << "Success loading NeXus file from path" << endl;
     } else {
       cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";

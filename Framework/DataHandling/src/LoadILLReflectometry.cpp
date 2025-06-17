@@ -29,9 +29,9 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 namespace {
 
@@ -142,7 +142,7 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
@@ -200,7 +200,7 @@ void LoadILLReflectometry::init() {
 
 /// Execute the algorithm.
 void LoadILLReflectometry::exec() {
-  NeXus::NXRoot root(getPropertyValue("Filename"));
+  Nexus::NXRoot root(getPropertyValue("Filename"));
   NXEntry firstEntry{root.openFirstEntry()};
   initNames(firstEntry);
   sampleAngle(firstEntry);
@@ -227,9 +227,9 @@ void LoadILLReflectometry::exec() {
  *
  * @param entry :: the NeXus file entry
  */
-void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
-  std::string instrumentNamePath = LoadHelper::findInstrumentNexusPath(entry);
-  std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
+void LoadILLReflectometry::initNames(const Nexus::NXEntry &entry) {
+  std::string instrumentNameAddress = LoadHelper::findInstrumentNexusAddress(entry);
+  std::string instrumentName = entry.getString(instrumentNameAddress.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   boost::to_lower(instrumentName);
@@ -311,7 +311,7 @@ void LoadILLReflectometry::initWorkspace(const std::vector<std::string> &monitor
  *
  * @param entry First entry of nexus file
  */
-void LoadILLReflectometry::loadDataDetails(const NeXus::NXEntry &entry) {
+void LoadILLReflectometry::loadDataDetails(const Nexus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(entry.getString("start_time")));
@@ -350,7 +350,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
 std::vector<std::string> LoadILLReflectometry::getMonitorNames() {
-  // vector of paths to monitor data
+  // vector of addresses to monitor data
   const std::vector<std::string> monitors{"monitor1/data", "monitor2/data"};
   return monitors;
 }
@@ -474,7 +474,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * @param monitorNames :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorNames,
+void LoadILLReflectometry::loadData(const Nexus::NXEntry &entry, const std::vector<std::string> &monitorNames,
                                     const std::vector<double> &xVals) {
   auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
@@ -505,9 +505,9 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   try {
-    ::NeXus::File nxfileID(filename, NXACC_READ);
+    Nexus::File nxfileID(filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  } catch (const ::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
 
@@ -651,7 +651,7 @@ double LoadILLReflectometry::detectorRotation() {
  *
  * @param entry :: The Nexus file entry
  */
-void LoadILLReflectometry::sampleAngle(const NeXus::NXEntry &entry) {
+void LoadILLReflectometry::sampleAngle(const Nexus::NXEntry &entry) {
   std::string entryName;
   if (m_instrument == Supported::D17) {
     if (entry.isValid("instrument/SAN/value")) {

@@ -30,6 +30,7 @@ public:
   }
 
   const std::string category() const override;
+  const std::vector<std::string> seeAlso() const override;
   int version() const override;
 
   void exec() override;

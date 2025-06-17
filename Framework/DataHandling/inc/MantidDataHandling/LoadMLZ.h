@@ -37,26 +37,26 @@ private:
   void init() override;
   void exec() override;
 
-  void loadInstrumentDetails(const NeXus::NXEntry &);
-  void loadTimeDetails(const NeXus::NXEntry &entry);
+  void loadInstrumentDetails(const Nexus::NXEntry &);
+  void loadTimeDetails(const Nexus::NXEntry &entry);
 
-  std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
+  std::vector<std::vector<int>> getMonitorInfo(Nexus::NXEntry &firstEntry);
 
-  void initWorkspace(const NeXus::NXEntry &entry);
+  void initWorkspace(const Nexus::NXEntry &entry);
   void initInstrumentSpecific();
-  void loadRunDetails(NeXus::NXEntry &entry);
-  void loadExperimentDetails(const NeXus::NXEntry &entry);
+  void loadRunDetails(Nexus::NXEntry &entry);
+  void loadExperimentDetails(const Nexus::NXEntry &entry);
 
-  NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
-  void maskDetectors(const NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(const NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
+  Nexus::NXData loadNexusFileData(Nexus::NXEntry &entry);
+  void maskDetectors(const Nexus::NXEntry &entry);
+  void loadDataIntoTheWorkSpace(const Nexus::NXEntry &entry); //, int ElasticPeakPosition = -1);
 
   void runLoadInstrument();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  std::string m_instrumentName; ///< Name of the instrument
-  std::string m_instrumentPath; ///< Name of the instrument path
+  std::string m_instrumentName;    ///< Name of the instrument
+  std::string m_instrumentAddress; ///< Name of the instrument address
 
   // Variables describing the data in the detector
   size_t m_numberOfTubes;         // number of tubes - X

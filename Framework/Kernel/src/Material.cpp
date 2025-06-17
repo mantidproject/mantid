@@ -8,7 +8,7 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <numeric>
@@ -486,7 +486,7 @@ double Material::totalScatterLengthSqrd(const double lambda) const {
  * @param file :: open NeXus file
  * @param group :: name of the group to create
  */
-void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
+void Material::saveNexus(Nexus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXdata", true);
   file->putAttr("version", 2);
   file->putAttr("name", m_name);
@@ -541,7 +541,7 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
  * @param file :: open NeXus file
  * @param group :: name of the group to open
  */
-void Material::loadNexus(::NeXus::File *file, const std::string &group) {
+void Material::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXdata");
   file->getAttr("name", m_name);
   int version;

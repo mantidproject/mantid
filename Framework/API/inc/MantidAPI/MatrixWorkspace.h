@@ -389,7 +389,7 @@ public:
   /// Returns true if the workspace has common, integer X bins
   virtual bool isIntegerBins() const;
 
-  std::string YUnit() const;
+  const std::string &YUnit() const;
   void setYUnit(const std::string &newUnit);
   std::string YUnitLabel(bool useLatex = false, bool plotAsDistribution = false) const;
   void setYUnitLabel(const std::string &newLabel);
@@ -415,7 +415,7 @@ public:
   virtual void setMonitorWorkspace(const std::shared_ptr<MatrixWorkspace> &monitorWS);
   std::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
-  void loadInstrumentNexus(::NeXus::File *file);
+  void loadInstrumentNexus(Nexus::File *file);
 
   //=====================================================================================
   // MD Geometry methods

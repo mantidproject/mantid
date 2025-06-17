@@ -42,7 +42,7 @@ public:
   /// Gets the handedness
   Handedness getHandedness() const;
   /// Gets the origin
-  std::string origin() const;
+  const std::string &origin() const;
   /// Destructor
   virtual ~ReferenceFrame() = default;
   /// Convert up axis into a 3D direction

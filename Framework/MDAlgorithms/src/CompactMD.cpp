@@ -27,8 +27,8 @@ namespace {
  * @return : a string vector of binning parameters for IntegrateMDHistoWorkspace
  * to take as input.
  */
-std::vector<std::string> createPBinStringVector(std::vector<Mantid::coord_t> minVector,
-                                                std::vector<Mantid::coord_t> maxVector,
+std::vector<std::string> createPBinStringVector(const std::vector<Mantid::coord_t> &minVector,
+                                                const std::vector<Mantid::coord_t> &maxVector,
                                                 const IMDHistoWorkspace_sptr &inputWs) {
   size_t numDims = inputWs->getNumDims();
   std::vector<std::string> pBinStrVector;

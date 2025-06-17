@@ -10,10 +10,9 @@
 
 #include <Poco/Path.h>
 
-#include <boost/algorithm/string.hpp>
-#include <memory>
-
 #include <fstream>
+#include <list>
+#include <memory>
 
 using std::size_t;
 
@@ -405,8 +404,17 @@ std::string fullBlock(const std::string &A) { return strip(A); }
  */
 std::string strip(const std::string &A) {
   std::string result(A);
-  boost::trim(result);
+  stripInPlace(result);
   return result;
+}
+
+//------------------------------------------------------------------------------------------------
+/** Strips the leading and trailing spaces from a string.
+ *  @param A :: string to process
+ */
+void stripInPlace(std::string &A) {
+  A.erase(A.begin(), std::find_if_not(A.begin(), A.end(), ::isspace));
+  A.erase(std::find_if_not(A.rbegin(), A.rend(), ::isspace).base(), A.end());
 }
 
 /**

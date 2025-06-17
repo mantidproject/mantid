@@ -103,7 +103,7 @@ UsageServiceImpl::UsageServiceImpl()
 
 void UsageServiceImpl::setApplicationName(const std::string &name) { m_application = name; }
 
-std::string UsageServiceImpl::getApplicationName() const { return m_application; }
+const std::string &UsageServiceImpl::getApplicationName() const { return m_application; }
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval

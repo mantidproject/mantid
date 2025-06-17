@@ -203,21 +203,21 @@ public:
       testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
     }
 
-    auto savehandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
-    auto loadhandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
     std::string rootstring = "/process/";
     for (int i = 1; i < 5; i++) {
       TS_ASSERT_THROWS_NOTHING(
-          loadhandle->openPath(rootstring + "MantidAlgorithm_" + boost::lexical_cast<std::string>(i)));
+          loadhandle->openAddress(rootstring + "MantidAlgorithm_" + boost::lexical_cast<std::string>(i)));
     }
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/author"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/data"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/description"));
-    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_5"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_4/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_4/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_4/description"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_5"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
@@ -233,21 +233,21 @@ public:
     algHist.addChildHistory(std::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
 
-    auto savehandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
-    auto loadhandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
     std::string rootstring = "/process/";
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/author"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/data"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/description"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/description"));
 
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/author"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/data"));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
@@ -256,15 +256,15 @@ public:
   void test_SaveNexus_Empty() {
     WorkspaceHistory testHistory;
 
-    auto savehandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
-    auto loadhandle = std::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
     std::string rootstring = "/process/";
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring));
-    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1"));
 
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
@@ -272,8 +272,8 @@ public:
 
   void test_LoadNexus() {
     std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
-    auto loadhandle = std::make_shared<::NeXus::File>(filename);
-    loadhandle->openPath("/mantid_workspace_1");
+    auto loadhandle = std::make_shared<Mantid::Nexus::File>(filename);
+    loadhandle->openAddress("/mantid_workspace_1");
 
     WorkspaceHistory emptyHistory;
     TS_ASSERT_THROWS_NOTHING(emptyHistory.loadNexus(loadhandle.get()));
@@ -292,8 +292,8 @@ public:
 
   void test_LoadNexus_NestedHistory() {
     std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs");
-    auto loadhandle = std::make_shared<::NeXus::File>(filename);
-    loadhandle->openPath("/mantid_workspace_1");
+    auto loadhandle = std::make_shared<Mantid::Nexus::File>(filename);
+    loadhandle->openAddress("/mantid_workspace_1");
 
     WorkspaceHistory wsHistory;
     TS_ASSERT_THROWS_NOTHING(wsHistory.loadNexus(loadhandle.get()));
@@ -331,9 +331,9 @@ public:
     const auto &histories = history.getAlgorithmHistories();
 
     TS_ASSERT_EQUALS(0, histories.size());
-    TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring));
-    TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring + "MantidEnvironment"));
-    TS_ASSERT_THROWS_ANYTHING(testfile.file->openPath(rootstring + "MantidAlgorithm_1"));
+    TS_ASSERT_THROWS_ANYTHING(testfile.file->openAddress(rootstring));
+    TS_ASSERT_THROWS_ANYTHING(testfile.file->openAddress(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(testfile.file->openAddress(rootstring + "MantidAlgorithm_1"));
   }
 
   void test_LoadNexus_Missing_Author() {
@@ -365,7 +365,7 @@ public:
     failiure_testfile_setup(4, testfile);
     WorkspaceHistory history;
     // this WILL throw as it looks for a data field using
-    // ::NeXus::File::readData() and it won't be found
+    // Nexus::File::readData() and it won't be found
     TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
     // only one will exist as it will throw on the second (wihtout the data) and

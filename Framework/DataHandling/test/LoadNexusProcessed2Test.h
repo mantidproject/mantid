@@ -297,4 +297,17 @@ public:
     // input. i.e. No geometry
     TS_ASSERT(!wsOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
   }
+
+  void test_non_hdf5_file() {
+    const std::string filename("WISH00043350.mat");
+    try {
+      auto wsOut = do_load_v2(filename);
+      TS_FAIL("Should not be able to load corrupt file: " + filename);
+    } catch (const std::invalid_argument &e) {
+      const std::string expected("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file");
+
+      const std::string msg = e.what();
+      TS_ASSERT(msg.starts_with(expected));
+    }
+  }
 };

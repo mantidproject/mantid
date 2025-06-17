@@ -123,7 +123,7 @@ Processing
 #. Select ``Save Can``.
 #. Click ``Process All``.
 #. After some seconds the rows should turn green.
-#. In the workspaces list, there should be a series of new workspaces; four
+#. In the workspaces list, there should be a series of new workspaces; five
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
    be saved. In total, there should be 20 workspaces saved. For each row, file type, and bank, there should be a

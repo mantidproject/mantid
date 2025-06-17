@@ -177,7 +177,7 @@ void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
  *
  * @param file :: previously opened NXS file.
  */
-void WorkspaceHistory::saveNexus(::NeXus::File *file) const {
+void WorkspaceHistory::saveNexus(Nexus::File *file) const {
   file->makeGroup("process", "NXprocess", true);
   std::stringstream output;
 
@@ -255,19 +255,17 @@ void getWordsInString(const std::string &words4, std::string &w1, std::string &w
  *
  * @param file :: previously opened NXS file.
  */
-void WorkspaceHistory::loadNexus(::NeXus::File *file) {
-  // Warn but continue if the group does not exist.
-  try {
+void WorkspaceHistory::loadNexus(Nexus::File *file) {
+  if (file->hasGroup("process", "NXprocess")) {
     file->openGroup("process", "NXprocess");
-  } catch (std::exception &) {
+    loadNestedHistory(file);
+    file->closeGroup();
+  } else {
+    // Warn but continue if the group does not exist.
     g_log.warning() << "Error opening the algorithm history field 'process'. "
                        "Workspace will have no history."
                     << "\n";
-    return;
   }
-
-  loadNestedHistory(file);
-  file->closeGroup();
 }
 
 /** Load every algorithm history object at this point in the hierarchy.
@@ -279,7 +277,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  *loaded histories are added to
  * the workspace history.
  */
-void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHistory_sptr &parent) {
+void WorkspaceHistory::loadNestedHistory(Nexus::File *file, const AlgorithmHistory_sptr &parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {
@@ -311,14 +309,14 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHis
  * @param file :: The handle to the nexus file
  * @returns set of integers. One for each algorithm at the level in the file.
  */
-std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File *file) {
+std::set<int> WorkspaceHistory::findHistoryEntries(Nexus::File *file) {
   std::set<int> historyNumbers;
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
 
   // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  for (auto &entry : entries) {
+  for (auto const &entry : entries) {
     std::string entryName = entry.first;
     if (entryName.find("MantidAlgorithm_") != std::string::npos) {
       // Just get the number
@@ -347,6 +345,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
     PARAMS = 4     //< the algorithm's parameters
   };
 
+  // split on lines
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
 

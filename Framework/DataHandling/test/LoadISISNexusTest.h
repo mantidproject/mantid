@@ -113,7 +113,7 @@ public:
     TS_ASSERT_EQUALS(mon_ws->y(0)[3], 0.);
 
     const std::vector<Property *> &logs = mon_ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 50);
+    TS_ASSERT_EQUALS(logs.size(), 51);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(mon_ws->run().getLogData("icp_event"));
@@ -187,7 +187,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 50);
+    TS_ASSERT_EQUALS(logs.size(), 51);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_event"));
@@ -402,7 +402,7 @@ public:
     ld.setPropertyValue("SpectrumMin", "10");
     ld.setPropertyValue("SpectrumMax", "20");
     //      ld.setPropertyValue("SpectrumList","29,30,31");
-    ld.setPropertyValue("EntryNumber", "5");
+    ld.setPropertyValue("EntryNumber", "1");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
@@ -561,7 +561,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234 - 2).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 50);
+    TS_ASSERT_EQUALS(logs.size(), 51);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_event"));

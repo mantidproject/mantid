@@ -18,8 +18,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <filesystem>
@@ -74,7 +74,9 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
 }
 
 // Return all valid instrument file name extensions
-std::vector<std::string> LoadEmptyInstrument::getValidInstrumentFilenameExtensions() { return validFilenameExtensions; }
+const std::vector<std::string> &LoadEmptyInstrument::getValidInstrumentFilenameExtensions() {
+  return validFilenameExtensions;
+}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -235,19 +237,19 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
   // Test if instrument XML definition exists in the file
   bool foundIDF{false};
   try {
-    ::NeXus::File nxsfile(filename);
-    nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
+    Nexus::File nxsfile(filename);
+    nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
     foundIDF = true;
-  } catch (::NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
   }
 
   if (!foundIDF) {
     instrumentParentEntryName = instrumentParentEntryName_2;
     try {
-      ::NeXus::File nxsfile(filename);
-      nxsfile.openPath("/" + instrumentParentEntryName + instrumentEntryName);
+      Nexus::File nxsfile(filename);
+      nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
       foundIDF = true;
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
     }
   }
 

@@ -12,7 +12,7 @@
 const int nFiles = 10;
 const int nEntry = 10;
 const int nData = 10;
-int array_dims[2] = {5, 4};
+int64_t array_dims[2] = {5, 4};
 short int i2_array[4] = {1000, 2000, 3000, 4000};
 int iFile, iReOpen, iEntry, iData, iNXdata, iSimpleArraySize = 4;
 
@@ -26,7 +26,7 @@ int main() {
     remove(strFile);
     printf("file %s\n", strFile);
     NXhandle fileid;
-    if (NXopen(strFile, access_mode, &fileid) != NXstatus::NX_OK) {
+    if (NXopen(strFile, access_mode, fileid) != NXstatus::NX_OK) {
       std::cerr << "NXopen failed!" << std::endl;
       return 1;
     }
@@ -60,7 +60,8 @@ int main() {
         for (iData = 0; iData < nData; iData++) {
           std::ostringstream oss3;
           oss3 << "i2_data_" << iData;
-          if (NXmakedata(fileid, PSZ(oss3.str()), NXnumtype::INT16, 1, &array_dims[1]) != NXstatus::NX_OK) {
+          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 1, &array_dims[1], NXcompression::NONE,
+                               &array_dims[1]) != NXstatus::NX_OK) {
             std::cerr << "NXmakedata failed!" << std::endl;
             return 1;
           }
@@ -93,7 +94,7 @@ int main() {
       }
     }
 
-    if (NXclose(&fileid) != NXstatus::NX_OK) {
+    if (NXclose(fileid) != NXstatus::NX_OK) {
       std::cerr << "NXclose failed!" << std::endl;
       return 1;
     }

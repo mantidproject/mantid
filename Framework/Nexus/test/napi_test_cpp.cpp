@@ -1,4 +1,4 @@
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include "napi_test_util.h"
 #include <cstdio>
 #include <cstdlib>
@@ -28,7 +28,7 @@ const std::string DMC02("dmc02cpp");
 
 static void writeTest(const string &filename, NXaccess create_code) {
   std::cout << "writeTest(" << filename << ") started\n";
-  NeXus::File file(filename, create_code);
+  Mantid::Nexus::File file(filename, create_code);
   // create group
   file.makeGroup("entry", "NXentry", true);
   // group attributes
@@ -38,7 +38,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.writeData("ch_data", "NeXus_data");
 
   // 2d array
-  NeXus::DimVector array_dims{5, 4};
+  Mantid::Nexus::DimVector array_dims{5, 4};
   char const c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
   file.makeData("c1_data", NXnumtype::CHAR, array_dims, true);
@@ -79,8 +79,8 @@ static void writeTest(const string &filename, NXaccess create_code) {
     r8_array.push_back(static_cast<double>(i + 20));
   }
   file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
-  NeXus::DimVector slab_start{4, 0};
-  NeXus::DimSizeVector slab_size{1, 4};
+  Mantid::Nexus::DimVector slab_start{4, 0};
+  Mantid::Nexus::DimSizeVector slab_size{1, 4};
   file.putSlab(&(r8_array[16]), slab_start, slab_size);
   slab_start[0] = 0;
   slab_start[1] = 0;
@@ -122,7 +122,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
       comp_array.push_back(i);
     }
   }
-  const NeXus::DimVector cdims{20, 20};
+  const Mantid::Nexus::DimVector cdims{20, 20};
   file.writeCompData("comp_data", comp_array, array_dims, NXcompression::LZW, cdims);
 
   // ---------- Test write Extendible Data --------------------------
@@ -160,7 +160,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.flush();
 
   // real flush test
-  file.makeData("flush_data", NeXus::getType<int>(), NX_UNLIMITED, true);
+  file.makeData("flush_data", Mantid::Nexus::getType<int>(), NX_UNLIMITED, true);
   vector<int> slab_array;
   slab_array.push_back(0);
   for (int i = 0; i < 7; i++) {
@@ -178,7 +178,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // make more links
   NXlink glink = file.getGroupID();
-  file.openPath("/");
+  file.openAddress("/");
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
   std::cout << "writeTest(" << filename << ") successful\n";
@@ -202,10 +202,10 @@ int readTest(const string &filename) {
   std::cout << "readTest(" << filename << ") started\n";
   const string SDS("SDS");
   // top level file information
-  NeXus::File file(filename);
-  vector<NeXus::AttrInfo> attr_infos = file.getAttrInfos();
+  Mantid::Nexus::File file(filename);
+  vector<Mantid::Nexus::AttrInfo> attr_infos = file.getAttrInfos();
   cout << "Number of global attributes: " << attr_infos.size() << endl;
-  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
+  for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
@@ -220,7 +220,7 @@ int readTest(const string &filename) {
   file.openGroup("entry", "NXentry");
   attr_infos = file.getAttrInfos();
   cout << "Number of group attributes: " << attr_infos.size() << endl;
-  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
+  for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
     if (it->type == NXnumtype::CHAR) {
       cout << file.getStrAttr(*it);
@@ -231,7 +231,7 @@ int readTest(const string &filename) {
   // print out the entry level fields
   map<string, string> entries = file.getEntries();
   cout << "Group contains " << entries.size() << " items" << endl;
-  NeXus::Info info;
+  Mantid::Nexus::Info info;
   for (map<string, string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
     cout << "   " << it->first;
     if (it->second == SDS) {
@@ -286,7 +286,7 @@ int readTest(const string &filename) {
         cout << toString(result);
       }
       cout << endl;
-      cout << "   Path = " << file.getPath() << endl;
+      cout << "   Address = " << file.getAddress() << endl;
       file.closeData();
     } else {
       cout << ":" << it->second << endl;
@@ -361,11 +361,11 @@ int readTest(const string &filename) {
   // Close the "entry" group
   file.closeGroup();
 
-  // openpath checks
-  file.openPath("/entry/data/comp_data");
-  file.openPath("/entry/data/comp_data");
-  file.openPath("../r8_data");
-  printf("NXopenpath checks OK\n");
+  // openaddress checks
+  file.openAddress("/entry/data/comp_data");
+  file.openAddress("/entry/data/comp_data");
+  file.openAddress("../r8_data");
+  printf("NXopenaddress checks OK\n");
 
   // everything went fine
   std::cout << "readTest(" << filename << ") successful\n";
@@ -374,9 +374,8 @@ int readTest(const string &filename) {
 
 int testLoadPath(const string &filename) {
   if (getenv("NX_LOAD_PATH") != NULL) {
-    NeXus::File file(filename);
+    Mantid::Nexus::File file(filename);
     cout << "Success loading NeXus file from path" << endl;
-    // cout << file.inquireFile() << endl; // DEBUG print
     return TEST_SUCCEED;
   } else {
     cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";

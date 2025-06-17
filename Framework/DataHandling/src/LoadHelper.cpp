@@ -15,9 +15,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 #include <strstream>
 
 namespace Mantid {
@@ -32,12 +32,12 @@ using namespace Kernel;
 using namespace API;
 
 /**
- * Finds the path for the instrument name in the nexus file
+ * Finds the address for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
-std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
+std::string LoadHelper::findInstrumentNexusAddress(const Mantid::Nexus::NXEntry &firstEntry) {
   std::string result("");
-  std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
+  std::vector<Mantid::Nexus::NXClassInfo> v = firstEntry.groups();
   const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == "NXinstrument"; });
   if (it != v.cend())
     result = it->nxname;
@@ -45,22 +45,24 @@ std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &fi
   return result;
 }
 
-std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
-  return firstEntry.getString(nexusPath);
+std::string LoadHelper::getStringFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
+                                                  const std::string &nexusAddress) {
+  return firstEntry.getString(nexusAddress);
 }
 
-double LoadHelper::getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
-  return firstEntry.getFloat(nexusPath);
+double LoadHelper::getDoubleFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
+                                             const std::string &nexusAddress) {
+  return firstEntry.getFloat(nexusAddress);
 }
 
 /**
  * Gets the time binning from a Nexus float array
  * Adds an extra bin at the end
  */
-std::vector<double> LoadHelper::getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
-                                                            const std::string &nexusPath) {
+std::vector<double> LoadHelper::getTimeBinningFromNexusAddress(const Mantid::Nexus::NXEntry &firstEntry,
+                                                               const std::string &nexusAddress) {
 
-  Mantid::NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
+  Mantid::Nexus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusAddress);
   timeBinningNexus.load();
 
   size_t numberOfBins = static_cast<size_t>(timeBinningNexus.dim0()) + 1; // boundaries
@@ -121,20 +123,16 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  * @param filehandle  :: Nexus file handle to be parsed, just after an NXopengroup
  * @param runDetails  :: where to add properties
  * @param entryName   :: entry name to load properties from
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
+ * @param useFullAddress :: use full address to entry in nexus tree to generate the log entry name in Mantid
  */
-void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName,
-                                       bool useFullPath) {
+void LoadHelper::addNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails, const std::string &entryName,
+                                       bool useFullAddress) {
   // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we
   // begin the parse on the first entry (entry0), or from a chosen entryName. This allow to avoid the bogus entries that
   // follows
   std::string entryNameActual(entryName);
   if (entryName.empty()) {
-    try {
-      const auto entryNameAndClass = filehandle.getNextEntry();
-      entryNameActual = entryNameAndClass.first;
-    } catch (const ::NeXus::Exception &) { /* ignore */
-    }
+    entryNameActual = filehandle.getTopLevelEntryName();
   }
 
   // open the group and parse down
@@ -142,14 +140,14 @@ void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runD
     constexpr int LEVEL_RECURSE{1};
     filehandle.openGroup(entryNameActual, "NXentry");
     const std::string EMPTY_STR;
-    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullPath);
+    recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, EMPTY_STR, EMPTY_STR, LEVEL_RECURSE, useFullAddress);
     filehandle.closeGroup();
   }
 }
 
 namespace {
 template <typename NumericType>
-void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, const std::string &property_name,
+void addNumericProperty(Nexus::File &filehandle, const Nexus::Info &nxinfo, const std::string &property_name,
                         API::Run &runDetails) {
   if (!runDetails.hasProperty(property_name)) {
     g_log.warning() << "Property " << property_name << " was set twice. Please check the Nexus file and your inputs.";
@@ -195,12 +193,12 @@ void addNumericProperty(::NeXus::File &filehandle, const ::NeXus::Info &nxinfo, 
  * @param parent_name :: nexus caller name
  * @param parent_class :: nexus caller class
  * @param level       :: current level in nexus tree
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
+ * @param useFullAddress :: use full address to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails,
+void LoadHelper::recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::Run &runDetails,
                                                  const std::string &parent_name, const std::string &parent_class,
-                                                 int level, bool useFullPath) {
+                                                 int level, bool useFullAddress) {
   const std::string SDS("SDS"); // denotes data field
 
   for (const auto &entry : filehandle.getEntries()) {
@@ -280,10 +278,11 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(::NeXus::File &filehandle, API:
         filehandle.openGroup(nxname, nxclass);
 
         const std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-        const std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
+        const std::string p_nxname =
+            useFullAddress ? property_name : nxname; // current names can be useful for next level
         const std::string p_nxclass(nxclass);
 
-        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
+        recurseAndAddNexusFieldsToWsRun(filehandle, runDetails, p_nxname, p_nxclass, level + 1, useFullAddress);
 
         filehandle.closeGroup();
       }
@@ -410,7 +409,7 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
  * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
  */
-void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum, bool pointData,
                                      const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
@@ -492,7 +491,7 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
  * tube-pixel-channel order
  */
-void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum,
                                      const std::set<int> &acceptedDetectorIDs,
                                      const std::vector<int> &customDetectorIDs,
@@ -554,7 +553,7 @@ void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double z
  * @param groupName Full name of the data group
  * @return NXInt data object
  */
-NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+Nexus::NXInt LoadHelper::getIntDataset(const Nexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openIntData();
 }
@@ -565,7 +564,7 @@ NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::s
  * @param groupName Full name of the data group
  * @return NXDouble data object
  */
-NeXus::NXDouble LoadHelper::getDoubleDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+Nexus::NXDouble LoadHelper::getDoubleDataset(const Nexus::NXEntry &entry, const std::string &groupName) {
   auto dataGroup = entry.openNXData(groupName);
   return dataGroup.openDoubleData();
 }

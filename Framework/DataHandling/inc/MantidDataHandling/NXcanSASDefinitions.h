@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <map>
 #include <string>
 
 namespace Mantid {
@@ -49,9 +50,6 @@ static const std::string SPIN_PARA = "+1";
 static const std::string SPIN_ANTIPARA = "-1";
 static const std::string SPIN_ZERO = "0";
 } // namespace SpinStateNXcanSAS
-
-// General
-enum class WorkspaceDimensionality { other, oneD, twoD };
 
 // NXcanSAS file extension
 const std::string NX_CANSAS_EXTENSION = ".h5";

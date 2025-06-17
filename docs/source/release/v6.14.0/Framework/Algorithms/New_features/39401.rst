@@ -1,0 +1,1 @@
+- :ref:`SNSPowderReduction<algm-SNSPowderReduction>` has been updated to more correctly apply absorption corrections.
