@@ -25,7 +25,7 @@ class TestProjection(unittest.TestCase):
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_min - np.pi / 2
         self.assertLess(proj._detector_x_coordinates[0], x_min)
-        proj._apply_x_correction(0)
+        proj._apply_x_correction()
         self.assertGreaterEqual(proj._detector_x_coordinates[0], x_min)
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
@@ -35,7 +35,7 @@ class TestProjection(unittest.TestCase):
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_max + np.pi / 2
         self.assertGreater(proj._detector_x_coordinates[0], x_max)
-        proj._apply_x_correction(0)
+        proj._apply_x_correction()
         self.assertGreaterEqual(proj._detector_x_coordinates[0], x_min)
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
