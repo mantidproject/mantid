@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABC, abstractmethod
 import numpy as np
-from joblib import Parallel, delayed
 from instrumentview.Detectors import DetectorPosition
 
 
@@ -58,21 +57,13 @@ class projection(ABC):
         self._y_axis = np.cross(self._projection_axis, self._x_axis)
 
     @abstractmethod
-    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[float, float]:
+    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         pass
 
     def _calculate_detector_coordinates(self):
         """Calculate 2D projection coordinates and store data"""
 
-        def store_2d_coordinates(self, index: int) -> None:
-            x, y = self._calculate_2d_coordinates(self._detector_positions[index])
-            self._detector_x_coordinates[index] = x
-            self._detector_y_coordinates[index] = y
-
-        detector_loop_indices = range(len(self._detector_positions))
-        Parallel(n_jobs=-1, prefer="threads")(
-            delayed(store_2d_coordinates)(self, detector_index) for detector_index in detector_loop_indices
-        )
+        self._detector_x_coordinates, self._detector_y_coordinates = self._calculate_2d_coordinates(np.array(self._detector_positions))
 
         self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
