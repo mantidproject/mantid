@@ -268,6 +268,33 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
   }
 
+  void test_make_data_lateral() {
+    // this ensures behavior making a dataset while a dataset is opened will instead
+    // anchor that dataset into the containing GROUP and not the DATASET
+    // this is not good hygienic behavior, but is requried by NexusClasses and can
+    // lead to test regressions that are otherwise very hard to track down
+    cout << "\ntest make data lateral\n";
+    FileResource resource("test_napi_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // make and open data
+    NXnumtype type(NXnumtype::CHAR);
+    file.makeData("data1", NXnumtype::CHAR, 3, true);
+    std::string address1 = file.getAddress();
+
+    // make and open lateral data
+    TS_ASSERT_THROWS_NOTHING(file.makeData("data2", NXnumtype::CHAR, 2, false));
+    TS_ASSERT_THROWS_NOTHING(file.openData("data2"));
+    std::string address2 = file.getAddress();
+
+    // make sure new data is created off of entry
+    TS_ASSERT_DIFFERS(address1, address2);
+    TS_ASSERT_EQUALS(address1, "/entry/data1");
+    TS_ASSERT_EQUALS(address2, "/entry/data2");
+  }
+
   void test_make_data_layers_bad() {
     cout << "\ntest makeData layers -- bad\n";
     FileResource resource("test_nexus_file_rdwr.h5");
@@ -539,6 +566,122 @@ public:
     // read the formula style
     std::string formulaStyle;
     TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Mantid::Nexus::Exception const &);
+  }
+
+  void test_data_string_array_as_char_array() {
+    // this test checks that string arrays saved a block char arrays can be read back
+    // this guards against a regression that would otherwise occur within PropertyNexusTest
+    cout << "\ntest dataset read existing -- char array properties\n";
+
+    // must first create the file by loading an empty instrument and then saving the nexus file
+    FileResource fileInfo("PropertyNexusTest.nxs");
+    std::string filename = fileInfo.fullPath();
+
+    // create a file and write string data through a char
+    // this mimics behavior from TimeSeriesProperty::saveProperty()
+    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+    // setup the string data
+    std::vector<std::string> values{"help me i", "am stuck in a NXS file", "forever"};
+    std::size_t numStr = values.size();
+    std::size_t maxlen = values[1].size() + 1;
+    // copy the strings into a char array
+    std::vector<char> strs(numStr * maxlen);
+    std::size_t index = 0;
+    for (auto const &prop : values) {
+      std::copy(prop.begin(), prop.end(), &strs[index]);
+      index += maxlen;
+    }
+    // write the strings as a flat array, but with dims for a block
+    Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(numStr),
+                                  static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
+    file.makeData("value", NXnumtype::CHAR, dims, true);
+    file.putData(strs.data());
+
+    // read the string data -- mimics ProperyNexus::makeStringProperty()
+    Mantid::Nexus::Info info = file.getInfo();
+    int64_t numStrings = info.dims[0];
+    int64_t span = info.dims[1];
+    auto data = std::make_unique<char[]>(numStrings * span);
+    file.getData(data.get());
+    std::vector<std::string> actual;
+    actual.reserve(static_cast<size_t>(numStrings));
+    for (int64_t i = 0; i < numStrings; i++)
+      actual.emplace_back(data.get() + i * span);
+    TS_ASSERT_EQUALS(actual, values);
+
+    // cleanup
+    file.closeData();
+    file.closeGroup();
+    file.close();
+  }
+
+  void test_data_zero_dims() {
+    // this test checks that string data lengths are still correctly determined
+    // even if the dimensions of a char block have been (stupidly) set to 0 by saving as a scalar
+    // this guards against a regression that would otherwise occur within NexusGeometrySave
+    cout << "\ntest dataset read existing -- zero dims\n";
+
+    // create a file and write string data with zero dimensions
+    // this has to be done using the hdf5 C library
+
+    std::string data("this is a string of data");
+
+    // open the file
+    FileResource resource("test_ess_instrument.nxs");
+    std::string filename = resource.fullPath();
+    // file permissions
+    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+    hid_t fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    H5Pclose(fapl);
+
+    // put an initial entry
+    hid_t groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    // make and put the data
+    hid_t datatype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(datatype, data.size());
+    // hsize_t dims[] = {0, data.size()}; // dims are zero
+    hid_t dataspace = H5Screate(H5S_SCALAR); // H5Screate_simple(2, dims, NULL);
+    hid_t dataid = H5Dcreate(groupid, "data", datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataid, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.c_str());
+
+    // verify the file was setup correctly
+    hsize_t mydim[4] = {4, 5}; // "junk" values
+    int iRank = H5Sget_simple_extent_dims(dataspace, mydim, NULL);
+    TS_ASSERT_EQUALS(iRank, 0);
+    TS_ASSERT_EQUALS(mydim[0], 4); // junk value unchanged
+    TS_ASSERT_EQUALS(mydim[1], 5); // ""
+    hsize_t len = H5Tget_size(datatype);
+    TS_ASSERT_EQUALS(len, data.size());
+
+    // cleanup and close file
+    H5Tclose(datatype);
+    H5Sclose(dataspace);
+    H5Dclose(dataid);
+    H5Gclose(groupid);
+    H5Fclose(fid);
+
+    // now open the file and read
+    Mantid::Nexus::File file(filename, NXACC_READ);
+    if (file.hasAddress("entry/data")) {
+      file.openAddress("entry/data");
+    } else {
+      TS_FAIL("Failed to find the written address");
+    }
+    Mantid::Nexus::Info info = file.getInfo();
+    char *value = new char[data.size() + 1];
+    file.getData(value);
+    std::string actual(value);
+    delete[] value;
+    TS_ASSERT_EQUALS(info.dims[0], data.size());
+    TS_ASSERT_EQUALS(actual, data);
+
+    // cleanup
+    file.closeData();
+    file.closeGroup();
+    file.close();
   }
 
   // #################################################################################################################
