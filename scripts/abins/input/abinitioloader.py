@@ -18,7 +18,7 @@ from mantid.kernel import logger
 from mantid.kernel import Atom
 import abins
 from abins.abinsdata import AbinsData
-from abins.atomsdata import _AtomData
+from abins.atomsdata import AtomData
 from abins.constants import MASS_EPS
 
 
@@ -32,7 +32,7 @@ class AbinsDataDict(TypedDict):
     k_vectors: np.ndarray
     atomic_displacements: np.ndarray  # indexed: (kpt, atom, mode, direction)
     unit_cell: np.ndarray  # 3x3 array, Å
-    atoms: dict[str, _AtomData]
+    atoms: dict[str, AtomData]
 
 
 # Make it easier to inspect program classes by cleaning up result from str()

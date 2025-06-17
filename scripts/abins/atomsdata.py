@@ -16,7 +16,7 @@ import abins
 from abins.constants import FLOAT_ID, FLOAT_TYPE
 
 
-class _AtomData(TypedDict):
+class AtomData(TypedDict):
     """Item within AtomsData"""
 
     coord: np.ndarray
@@ -26,7 +26,7 @@ class _AtomData(TypedDict):
 
 
 class AtomsData(collections.abc.Sequence):
-    def __init__(self, atoms_data: Dict[str, _AtomData]) -> None:
+    def __init__(self, atoms_data: Dict[str, AtomData]) -> None:
         """Data container for Atomic position information
 
         AtomsData objects can be iterated, indexed and sliced to obtain
@@ -75,7 +75,7 @@ class AtomsData(collections.abc.Sequence):
         self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
 
     @staticmethod
-    def _check_item(item: _AtomData, n_atoms: Optional[int] = None) -> _AtomData:
+    def _check_item(item: AtomData, n_atoms: Optional[int] = None) -> AtomData:
         """
         Check a dict of atom data is suitable for use as item in AtomsData
 
@@ -148,10 +148,10 @@ class AtomsData(collections.abc.Sequence):
         return len(self._data)
 
     @overload
-    def __getitem__(self, item: int) -> _AtomData: ...
+    def __getitem__(self, item: int) -> AtomData: ...
 
     @overload
-    def __getitem__(self, item: slice) -> List[_AtomData]: ...
+    def __getitem__(self, item: slice) -> List[AtomData]: ...
 
     def __getitem__(self, item):
         return self._data[item]
@@ -196,7 +196,7 @@ class AtomsData(collections.abc.Sequence):
                 method.
 
         """
-        atoms_data = {}  # type: Dict[str, _AtomData]
+        atoms_data = {}  # type: Dict[str, AtomData]
 
         for atom_key, atom_data in data.items():
             atoms_data[atom_key] = {
