@@ -29,16 +29,15 @@ class TextureCorrectionModel:
     def __init__(self):
         self.reference_ws = None
 
-    def load_all_orientations(self, wss, txt_file, use_euler, euler_scheme, euler_sense):
+    def load_all_orientations(self, wss, txt_file, use_euler, euler_scheme=None, euler_sense=None):
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
-                goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
+                goniometer_strings = [line.strip().replace("\t", ",") for line in f.readlines()]
                 goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
                 if not use_euler:
                     # if use euler angles not selected then assumes it is a scans output matrix
                     for iws, ws in enumerate(wss):
-                        # NewSetGoniometer(ws, transformation_str=goniometer_strings[iws])
                         SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
                 else:
                     axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
@@ -312,43 +311,3 @@ class TextureCorrectionModel:
                 axes = fig.gca()
                 mesh_polygon = Poly3DCollection(mesh, facecolors="cyan", edgecolors="black", linewidths=0.1, alpha=0.25)
                 axes.add_collection3d(mesh_polygon)
-
-
-# temporary methods until SetGoniometer PR is merged
-def NewSetGoniometer(
-    ws: str,
-    transformation_str: str = "",
-    trans_scale: float = 1.0,
-    axis0: str = "",
-    axis1: str = "",
-    axis2: str = "",
-    axis3: str = "",
-    axis4: str = "",
-    axis5: str = "",
-):
-    if isinstance(ws, str):
-        try:
-            ws = ADS.retrieve(ws)
-        except KeyError:
-            logger.error(f"{ws} not found")
-    if transformation_str:
-        # info = ws.componentInfo()
-        or_vals = transformation_str.split(",")
-        run_mat = np.asarray(or_vals[:9], dtype=float).reshape((3, 3))
-        # trans_vec = np.asarray(or_vals[9:], dtype=float) * trans_scale
-        SetGoniometer(ws, Axis0=get_rot_vec_and_angle(run_mat))
-        # info.setPosition(info.sample(), V3D(*trans_vec))
-    else:
-        SetGoniometer(ws, Axis0=axis0, Axis1=axis1, Axis2=axis2, Axis3=axis3, Axis4=axis4, Axis5=axis5)
-
-
-def get_rot_vec_and_angle(mat: np.ndarray) -> str:
-    from scipy.spatial.transform import Rotation
-
-    if np.square(mat - np.eye(3, 3)).sum() != 0:
-        rv = Rotation.from_matrix(mat).as_rotvec()
-        ang = np.linalg.norm(rv)
-        nv = rv / ang
-        return f"{np.rad2deg(ang)},{nv[0]},{nv[1]},{nv[2]},1"
-    else:
-        return "0,0,0,1,1"

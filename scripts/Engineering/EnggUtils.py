@@ -465,13 +465,16 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
 
     # directories for saved focused data
-    focus_dirs = [path.join(save_dir, "Focus")]
+    calib_is_texture = calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30
+    if calib_is_texture:
+        focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix())
+    else:
+        focus_sub_dir = "Focus"
+    focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:
-        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
-            focus_dir = path.join(save_dir, "User", rb_num, "Focus", calibration.get_foc_ws_suffix())
+        focus_dir = path.join(save_dir, "User", rb_num, focus_sub_dir)
+        if calib_is_texture:
             focus_dirs.pop(0)  # only save to RB directory to limit number files saved
-        else:
-            focus_dir = path.join(save_dir, "User", rb_num, "Focus")
         focus_dirs.append(focus_dir)
 
     # Loop over runs and focus
