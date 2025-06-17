@@ -15,6 +15,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/SpinStateValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
@@ -352,7 +353,7 @@ void PolarizationCorrectionWildes::init() {
  */
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
+  const auto flippers = Kernel::SpinStateHelpers::splitSpinStateString(flipperProperty);
   // Check if the input flipper configuration includes an analyser
   const bool hasAnalyser = flippers.front().size() > 1;
   const auto inputs = mapInputsToDirections(flippers);
@@ -411,14 +412,14 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
-  const auto flipperConfig = PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(Prop::FLIPPERS));
+  const auto flipperConfig = Kernel::SpinStateHelpers::splitSpinStateString(getPropertyValue(Prop::FLIPPERS));
   const auto flipperCount = flipperConfig.size();
   if (inputs.size() != flipperCount) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
                              ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
   }
   // SpinStates checks.
-  const auto spinStates = PolarizationCorrectionsHelpers::splitSpinStateString(getPropertyValue(Prop::SPIN_STATES));
+  const auto spinStates = Kernel::SpinStateHelpers::splitSpinStateString(getPropertyValue(Prop::SPIN_STATES));
   if (inputs.size() == 1 && !spinStates.empty()) {
     issues[Prop::SPIN_STATES] = "Output workspace order cannot be set for direct beam calculations.";
   } else if (!spinStates.empty()) {
@@ -530,7 +531,7 @@ API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const Workspa
 
   std::vector<std::string> names;
   if (!spinStateOrder.empty()) {
-    names.resize(PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder).size());
+    names.resize(Kernel::SpinStateHelpers::splitSpinStateString(spinStateOrder).size());
   }
 
   if (outputs.ppWS) {
@@ -583,8 +584,8 @@ void PolarizationCorrectionWildes::addSpinStateOutput(std::vector<std::string> &
     names.emplace_back(baseName + "_" + spinState);
     API::AnalysisDataService::Instance().addOrReplace(names.back(), ws);
   } else {
-    const auto &maybeIndex = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(
-        PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder), spinState);
+    const auto &maybeIndex = Kernel::SpinStateHelpers::indexOfWorkspaceForSpinState(
+        Kernel::SpinStateHelpers::splitSpinStateString(spinStateOrder), spinState);
     if (!maybeIndex.has_value()) {
       throw std::invalid_argument("Required spin state (" + spinState + ") not found in spin state order (" +
                                   spinStateOrder + ").");
