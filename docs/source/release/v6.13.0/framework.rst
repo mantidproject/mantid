@@ -167,36 +167,6 @@ Python
 
 New features
 ############
-- Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new
-  Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
-
-  - Improvements:
-
-    - Enhances the visual appearance and usability of in-app documentation.
-    - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
-    - Delivers a smoother and more consistent experience when navigating help and reference material.
-
-  - Key benefits:
-
-    - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future
-      potential for interactive elements in documentation.
-
-- Makes the large offline documentation an optional rather than a mandatory install, reducing installer/download size
-  significantly.
-
-  - Improvements:
-
-    - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space
-      (potentially hundreds of MB).
-    - Those who prefer local/offline usage can still opt to install the documentation package and continue working
-      without internet access.
-    - A clear indicator has been added to the Help Window’s toolbar to show whether Mantid is displaying ``Local Docs``
-      or ``Online Docs``.
-
-  - Key benefits:
-
-    - Greater flexibility in how Mantid is set up — you choose whether to save space or have full local, offline docs.
-
 - ``Instrument.getFilename()`` and ``Instrument.setFilename()`` have been exposed to python.
 
 Bugfixes
