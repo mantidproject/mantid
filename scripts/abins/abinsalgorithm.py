@@ -7,6 +7,7 @@
 
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
+from collections import defaultdict
 from math import isnan
 import multiprocessing
 import os
@@ -427,8 +428,6 @@ class AbinsAlgorithm:
 
         :returns: Mass data in form ``{el1: [m1, ...], ... }``
         """
-        from collections import defaultdict
-
         if "line_data" not in spectra.metadata:
             # Only one kind of atom
             return {spectra.metadata["symbol"]: [float(spectra.metadata["mass"])]}
@@ -994,7 +993,7 @@ class AbinsAlgorithm:
         Checks threshold for frequencies.
         :param message_end: closing part of the error message.
         """
-        from abins.parameters import sampling
+        sampling = abins.parameters.sampling
 
         freq_threshold = sampling["frequencies_threshold"]
         if not (isinstance(freq_threshold, float) and freq_threshold >= 0.0):
