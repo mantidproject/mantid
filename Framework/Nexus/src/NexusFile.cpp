@@ -1088,7 +1088,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector cons
   for (int i = 0; i < rank; i++) {
     myStart[i] = static_cast<hsize_t>(start[i]);
     mySize[i] = static_cast<hsize_t>(size[i]);
-    dsize[i] = static_cast<hsize_t>(start[i] + dsize[i]);
+    dsize[i] = static_cast<hsize_t>(start[i] + size[i]);
     if (maxdims[i] == H5S_UNLIMITED) {
       unlimiteddim = true;
     }
@@ -1630,6 +1630,11 @@ string File::getStrAttr(std::string const &name) {
   std::string res(value);
   delete[] value;
 
+  size_t end = res.find('\0');
+  if (end != std::string::npos) {
+    res = res.substr(0, end);
+  }
+
   return res;
 }
 
@@ -1726,16 +1731,9 @@ NXlink File::getGroupID() {
   if (pFile->iCurrentG == 0) {
     throw NXEXCEPTION("getGroupID failed, No current group open");
   }
-  int datalen = 1024;
-  link.targetAddress.resize(datalen, 0);
-
-  AttrInfo info;
-  info.name = "target";
-  info.type = NXnumtype::CHAR;
-  info.length = datalen;
 
   try {
-    this->getAttr(info, link.targetAddress.data(), datalen);
+    getAttr("target", link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = buildCurrentAddress(pFile);
   }
@@ -1754,15 +1752,8 @@ NXlink File::getDataID() {
     throw NXEXCEPTION("getDataID failed, No current dataset open");
   }
 
-  int datalen = 1024;
-  link.targetAddress.resize(datalen, 0);
-
-  AttrInfo info;
-  info.name = "target";
-  info.type = NXnumtype::CHAR;
-  info.length = datalen;
   try {
-    this->getAttr(info, link.targetAddress.data(), datalen);
+    getAttr("target", link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = buildCurrentAddress(pFile);
   }
