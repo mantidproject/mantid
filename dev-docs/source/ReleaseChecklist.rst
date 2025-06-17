@@ -309,6 +309,7 @@ Beta Testing Begins
      To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
      following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
      Alternatively, the nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
