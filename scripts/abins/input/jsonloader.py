@@ -94,6 +94,7 @@ class JSONLoader(AbInitioLoader):
 
         return new_array
 
+    @AbInitioLoader.abinsdata_saver
     def read_vibrational_or_phonon_data(self) -> AbinsData:
         """Get AbinsData (structure and modes) from force constants data.
 
@@ -111,9 +112,7 @@ class JSONLoader(AbInitioLoader):
             case PhononJSON.ABINS_DATA:
                 with open(json_file, "r") as fd:
                     data = json.load(fd)
-                abins_data = AbinsData.from_dict(data)
-                self.save_ab_initio_data(abins_data=abins_data)
-                return abins_data
+                return AbinsData.from_dict(data)
 
             case PhononJSON.EUPHONIC_MODES:
                 modes = QpointPhononModes.from_json_file(json_file)
@@ -126,6 +125,4 @@ class JSONLoader(AbInitioLoader):
                 raise ValueError(f"Cannot use JSON data of type {json_format.name}")
 
         file_data = EuphonicLoader.data_dict_from_modes(modes)
-        abins_data = self._rearrange_data(data=file_data)
-        self.save_ab_initio_data(abins_data=abins_data)
-        return abins_data
+        return self._rearrange_data(data=file_data)
