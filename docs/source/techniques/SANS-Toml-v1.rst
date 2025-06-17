@@ -18,7 +18,6 @@ Format Changes
 
 V1 (Mantid 6.4+) to V2 (Mantid 6.13+)
 -------------------------------------
-**NOTE: These are valid user file entries but have not yet been implemented as part of the reduction process.**
 
 *polarization* options have been added to the TOML format.
 
