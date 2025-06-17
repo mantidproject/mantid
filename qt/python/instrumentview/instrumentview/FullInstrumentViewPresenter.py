@@ -44,12 +44,12 @@ class FullInstrumentViewPresenter:
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
 
-        self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=False)
+        self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits)
         self._view.set_contour_range_limits(self._contour_limits)
 
         self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_positions())
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
-        self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility", pickable=True)
+        self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility")
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
@@ -108,7 +108,7 @@ class FullInstrumentViewPresenter:
         """For the given point, get the detector index and show all the information for that detector"""
         if point is None:
             return
-        detector_index = picker.GetPointId()
+        detector_index = picker.point_id
         self.update_picked_detectors([detector_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:

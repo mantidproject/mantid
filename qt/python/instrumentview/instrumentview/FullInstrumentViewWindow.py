@@ -212,35 +212,39 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
-    def add_main_mesh(self, mesh, pickable=False, scalars=None, clim=None) -> None:
+    def add_main_mesh(self, mesh, scalars=None, clim=None) -> None:
         """Draw the given mesh in the main plotter window"""
-        self.main_plotter.add_mesh(mesh, pickable=pickable, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
+        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
 
-    def add_pickable_main_mesh(self, point_cloud, scalars, pickable=True) -> None:
+    def add_pickable_main_mesh(self, point_cloud, scalars) -> None:
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
             opacity=[0.0, 0.5],
             show_scalar_bar=False,
-            pickable=pickable,
-            color="red",
+            pickable=True,
+            cmap="Oranges",
             point_size=20,
             render_points_as_spheres=True,
         )
 
     def add_rgba_mesh(self, mesh, scalars):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
-        self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, render_points_as_spheres=True, point_size=10)
+        self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
     def enable_point_picking(self, callback=None) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
-            self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
+            self.main_plotter.enable_point_picking(
+                show_message=False, callback=callback, use_picker=callback is not None, use_mesh=True, show_point=False
+            )
 
         self.projection_plotter.disable_picking()
         if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
+            self.projection_plotter.enable_point_picking(
+                show_message=False, callback=callback, use_picker=callback is not None, use_mesh=True, show_point=False
+            )
 
     def enable_rectangle_picking(self, callback=None) -> None:
         """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
@@ -248,23 +252,23 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
 
-    def add_projection_mesh(self, mesh, scalars=None, clim=None, pickable=False) -> None:
+    def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.clear()
-        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=pickable)
+        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False)
         self.projection_plotter.view_xy()
         if not self.projection_plotter.off_screen:
             self.projection_plotter.enable_image_style()
 
-    def add_pickable_projection_mesh(self, mesh, scalars=None, pickable=True) -> None:
+    def add_pickable_projection_mesh(self, mesh, scalars=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.add_mesh(
             mesh,
             scalars=scalars,
             opacity=[0.0, 0.5],
             show_scalar_bar=False,
-            pickable=pickable,
-            color="red",
+            pickable=True,
+            cmap="Oranges",
             point_size=20,
             render_points_as_spheres=True,
         )
@@ -284,7 +288,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def show_plot_for_detectors(self, workspace, workspace_indices: list) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
-
         for d in workspace_indices:
             self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=d)
 
