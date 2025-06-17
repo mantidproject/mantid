@@ -15,11 +15,6 @@ using namespace Mantid::PythonInterface::Registry;
 GET_POINTER_SPECIALIZATION(WorkspaceNearestNeighbourInfo)
 
 namespace {
-using NeighboursByDetectorFunc = std::map<Mantid::specnum_t, Mantid::Kernel::V3D> (WorkspaceNearestNeighbourInfo::*)(
-    const Mantid::Geometry::IDetector *, double) const;
-using NeighboursBySpecFunc = std::map<Mantid::specnum_t, Mantid::Kernel::V3D> (WorkspaceNearestNeighbourInfo::*)(
-    Mantid::specnum_t, double) const;
-
 WorkspaceNearestNeighbourInfo *createWorkspaceNearestNeighbourInfo(const boost::python::object &workspace,
                                                                    const bool ignoreMaskedDetectors,
                                                                    const int nNeighbours = 8) {
