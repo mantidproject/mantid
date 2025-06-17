@@ -21,7 +21,7 @@ class cylindrical_projection(projection):
     ):
         super().__init__(sample_position, root_position, detector_positions, axis)
 
-    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[float, float]:
+    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         detector_relative_position = detector_position - self._sample_position
         z = detector_relative_position.dot(self._projection_axis)
         x = detector_relative_position.dot(self._x_axis)
