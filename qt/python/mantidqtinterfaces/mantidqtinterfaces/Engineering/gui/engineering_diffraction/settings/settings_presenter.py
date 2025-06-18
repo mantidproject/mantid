@@ -282,7 +282,7 @@ class SettingsPresenter(object):
         self.settings["euler_angles_sense"] = self.view.get_euler_angles_sense()
         self.settings["plot_exp_pf"] = self.view.get_plot_exp_pf()
         self.settings["contour_kernel"] = self.view.get_contour_kernel()
-        self._validate_settings()
+        self._validate_settings(set_nullables_to_default=False)
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)

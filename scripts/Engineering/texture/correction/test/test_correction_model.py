@@ -352,9 +352,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.assertEqual(self.model._parse_param_values("abc"), "abc")
 
     @patch(correction_model_path + ".MonteCarloAbsorption")
-    @patch(correction_model_path + ".Scale")
     @patch(correction_model_path + ".ConvertUnits")
-    def test_calc_absorption_executes_expected_chain(self, mock_convert, mock_scale, mock_mc):
+    def test_calc_absorption_executes_expected_chain(self, mock_convert, mock_mc):
         ws = MagicMock()
         mock_convert.return_value = ws
         self.model.calc_absorption("ws1", "NumberOfWavelengthPoints:10")

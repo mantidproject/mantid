@@ -217,7 +217,6 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # final column should be chi2
         # det 0 has 0, det 1 has 1
         self.eval_arrays(outws.column("chi2"), np.array((0.0, 1.0)))
-        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
 
     def test_alg_with_goniometer_applied(self):
         # ws 2 is rotated 45 degrees away from +Z

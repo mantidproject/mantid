@@ -453,11 +453,12 @@ class FittingPlotModelTest(unittest.TestCase):
         }
         return mock_ws_list, mock_create_table, mock_create_ws, loaded_ws_list, active_ws_list, log_workspaces_name
 
+    @patch(plot_model_path + ".FittingPlotModel.create_bank_fit_summary_tables_by_run")
     @patch(plot_model_path + ".write_table_row")
     @patch(plot_model_path + ".GroupWorkspaces")
     @patch(plot_model_path + ".CreateEmptyTableWorkspace")
     @patch(plot_model_path + ".CreateWorkspace")
-    def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
+    def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow, mock_create_summary_table):
         (
             mock_ws_list,
             mock_create_table,
@@ -497,11 +498,14 @@ class FittingPlotModelTest(unittest.TestCase):
                     self.assertTrue(all(isnan(argsY[1])))
                     self.assertTrue(all(isnan(argsE[1])))
 
+    @patch(plot_model_path + ".FittingPlotModel.create_bank_fit_summary_tables_by_run")
     @patch(plot_model_path + ".write_table_row")
     @patch(plot_model_path + ".GroupWorkspaces")
     @patch(plot_model_path + ".CreateEmptyTableWorkspace")
     @patch(plot_model_path + ".CreateWorkspace")
-    def test_create_fit_tables_different_funcs(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
+    def test_create_fit_tables_different_funcs(
+        self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow, mock_create_summary_table
+    ):
         (
             mock_ws_list,
             mock_create_table,
