@@ -322,48 +322,6 @@ hid_t nxToHDF5Type(NXnumtype datatype) {
 /* --------------------------------------------------------------------- */
 /* ----------------------------------------------------------------- */
 /* ------------------------------------------------------------------- */
-
-NXstatus NX5putdata(NXhandle fid, const void *data) {
-  pNexusFile5 pFile;
-  herr_t iRet;
-  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
-  int rank;
-
-  pFile = NXI5assert(fid);
-  rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
-  if (rank < 0) {
-    NXReportError("ERROR: Cannot determine dataset rank");
-    return NXstatus::NX_ERROR;
-  }
-  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims.data(), maxdims.data());
-  if (iRet < 0) {
-    NXReportError("ERROR: Cannot determine dataset dimensions");
-    return NXstatus::NX_ERROR;
-  }
-  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
-  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
-  if (unlimiteddim) {
-    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
-    for (std::size_t i = 0; i < myStart.size(); i++) {
-      if (maxdims[i] == H5S_UNLIMITED) {
-        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
-        mySize[i] = 1;
-      } else {
-        myStart[i] = 0;
-        mySize[i] = static_cast<int64_t>(thedims[i]);
-      }
-    }
-    return NX5putslab64(fid, data, myStart.data(), mySize.data());
-  } else {
-    iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-    if (iRet < 0) {
-      NXReportError("ERROR: failure to write data");
-      return NXstatus::NX_ERROR;
-    }
-  }
-  return NXstatus::NX_OK;
-}
-
 /*------------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 /* ------------------------------------------------------------------- */

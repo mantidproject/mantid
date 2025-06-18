@@ -10,7 +10,6 @@
 /* HDF5 interface */
 
 NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
-NXstatus NX5putdata(NXhandle handle, const void *data);
 
 NXstatus NX5putattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
 NXstatus NX5putslab64(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
