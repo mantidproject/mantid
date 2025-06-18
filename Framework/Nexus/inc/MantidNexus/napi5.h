@@ -10,13 +10,6 @@
 /* HDF5 interface */
 
 NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
-
-NXstatus NX5makedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
-NXstatus NX5compmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[], int comp_typ,
-                           int64_t const bufsize[]);
-NXstatus NX5compress(NXhandle handle, int compr_type);
-NXstatus NX5opendata(NXhandle handle, CONSTCHAR *label);
-NXstatus NX5closedata(NXhandle handle);
 NXstatus NX5putdata(NXhandle handle, const void *data);
 
 NXstatus NX5putattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
