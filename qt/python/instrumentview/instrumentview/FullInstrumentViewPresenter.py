@@ -108,7 +108,7 @@ class FullInstrumentViewPresenter:
         """For the given point, get the detector index and show all the information for that detector"""
         if point is None:
             return
-        detector_index = picker.point_id
+        detector_index = picker.GetPointId()
         self.update_picked_detectors([detector_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:
