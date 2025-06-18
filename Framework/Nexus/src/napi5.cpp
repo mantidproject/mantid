@@ -479,115 +479,12 @@ NXstatus NX5putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
 }
 
 /* ------------------------------------------------------------------- */
-
-NXstatus NX5getdataID(NXhandle fid, NXlink *sRes) {
-  pNexusFile5 pFile;
-  int datalen;
-  NXnumtype type = NXnumtype::CHAR;
-
-  pFile = NXI5assert(fid);
-
-  /* we cannot return ID's when no datset is open */
-  if (pFile->iCurrentD <= 0) {
-    return NXstatus::NX_ERROR;
-  }
-
-  /*
-     this means: if the item is already linked: use the target attribute else,
-     the address to the current node
-   */
-  datalen = 1024;
-  char caddr[1024] = {0};
-  if (NX5getattr(fid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
-    sRes->targetAddress = buildCurrentAddress(pFile);
-  } else {
-    sRes->targetAddress = std::string(caddr);
-  }
-  sRes->linkType = NXentrytype::sds;
-  return NXstatus::NX_OK;
-}
-
-/* ------------------------------------------------------------------- */
-
-NXstatus NX5printlink(NXhandle fid, NXlink const *sLink) {
-  NXI5assert(fid);
-  printf("HDF5 link: targetAddress = \"%s\", linkType = \"%d\"\n", sLink->targetAddress.c_str(), sLink->linkType);
-  return NXstatus::NX_OK;
-}
-
+/* --------------------------------------------------------------------- */
 /*--------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------*/
-
-NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
-  pNexusFile5 pFile;
-  char linkTarget[NX_MAXADDRESSLEN];
-
-  pFile = NXI5assert(fid);
-  if (pFile->iCurrentG == 0) { /* root level, can not link here */
-    return NXstatus::NX_ERROR;
-  }
-
-  /*
-     build addressname to link from our current group and the name
-     of the thing to link
-   */
-  if (strlen(pFile->name_ref) + strlen(name) + 2 < NX_MAXADDRESSLEN) {
-    strcpy(linkTarget, "/");
-    strcat(linkTarget, pFile->name_ref);
-    strcat(linkTarget, "/");
-    strcat(linkTarget, name);
-  } else {
-    NXReportError("ERROR: address string to long");
-    return NXstatus::NX_ERROR;
-  }
-
-  H5Lcreate_hard(pFile->iFID, sLink->targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
-
-  return NX5settargetattribute(pFile, sLink);
-}
-
 /* ------------------------------------------------------------------- */
-
-NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
-  pNexusFile5 pFile;
-  char linkTarget[NX_MAXADDRESSLEN];
-  char *itemName = NULL;
-
-  pFile = NXI5assert(fid);
-  if (pFile->iCurrentG == 0) { /* root level, can not link here */
-    return NXstatus::NX_ERROR;
-  }
-
-  /*
-     locate name of the element to link
-   */
-  itemName = strrchr(sLink->targetAddress.data(), '/');
-  if (itemName == NULL) {
-    NXReportError("ERROR: bad link structure");
-    return NXstatus::NX_ERROR;
-  }
-  itemName++;
-
-  /*
-     build addressname to link from our current group and the name
-     of the thing to link
-   */
-  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXADDRESSLEN) {
-    strcpy(linkTarget, "/");
-    strcat(linkTarget, pFile->name_ref);
-    strcat(linkTarget, "/");
-    strcat(linkTarget, itemName);
-  } else {
-    NXReportError("ERROR: address string to long");
-    return NXstatus::NX_ERROR;
-  }
-
-  H5Lcreate_hard(pFile->iFID, sLink->targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
-
-  return NX5settargetattribute(pFile, sLink);
-}
 
 /*----------------------------------------------------------------------*/
 
@@ -1206,42 +1103,8 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
 }
 
 /*-------------------------------------------------------------------------*/
-NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
-  pNexusFile5 pFile;
-  NXnumtype type = NXnumtype::CHAR;
-
-  pFile = NXI5assert(fileid);
-  if (pFile->iCurrentG == 0) {
-    return NXstatus::NX_ERROR;
-  } else {
-    /*
-       this means: if the item is already linked: use the target attribute, else
-       the address to the current node
-     */
-    int datalen = 1024;
-    char caddr[1024] = {0};
-    if (NX5getattr(fileid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
-      sRes->targetAddress = buildCurrentAddress(pFile);
-    } else {
-      sRes->targetAddress = std::string(caddr);
-    }
-    sRes->linkType = NXentrytype::group;
-    return NXstatus::NX_OK;
-  }
-  /* not reached */
-  return NXstatus::NX_ERROR;
-}
 
 /* ------------------------------------------------------------------- */
-
-NXstatus NX5sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
-  NXI5assert(fileid);
-  if (pFirstID->targetAddress == pSecondID->targetAddress) {
-    return NXstatus::NX_OK;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
 
 /*-------------------------------------------------------------------------*/
 
