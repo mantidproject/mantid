@@ -168,6 +168,8 @@ Python
 New features
 ############
 - ``Instrument.getFilename()`` and ``Instrument.setFilename()`` have been exposed to python.
+- A new method named ``getFittingParameter`` has been added to ``Mantid::Geometry::Component`` class and exposed to
+  python. This allows access to fitting parameters from components in an instrument definition file.
 
 Bugfixes
 ############
