@@ -196,18 +196,15 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFile5 pFile;
-  hid_t attr1, atype, iVID;
-  herr_t iRet;
   char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
 
-  pFile = NXI5assert(fid);
+  pNexusFile5 pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) {
     strcpy(pBuffer, name);
   } else {
     sprintf(pBuffer, "%s/%s", pFile->name_tmp, name);
   }
-  iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
+  hid_t iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
   if (iVID < 0) {
     std::string msg = std::string("ERROR: group ") + pFile->name_tmp + " does not exist";
     NXReportError(const_cast<char *>(msg.c_str()));
@@ -219,7 +216,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
   if ((nxclass != NULL) && (strcmp(nxclass, NX_UNKNOWN_GROUP) != 0)) {
     /* check group attribute */
-    iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
+    herr_t iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
     if (iRet < 0) {
       NXReportError("ERROR: iterating through attribute list");
       return NXstatus::NX_ERROR;
@@ -231,12 +228,12 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
       return NXstatus::NX_ERROR;
     }
     /* check contents of group attribute */
-    attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    hid_t attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr1 < 0) {
       NXReportError("ERROR: opening NX_class group attribute");
       return NXstatus::NX_ERROR;
     }
-    atype = H5Tcopy(H5T_C_S1);
+    hid_t atype = H5Tcopy(H5T_C_S1);
     char data[128];
     H5Tset_size(atype, sizeof(data));
     iRet = readStringAttributeN(attr1, data, sizeof(data));
@@ -318,7 +315,7 @@ NXstatus NXclosegroup(NXhandle fid) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
+NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t const dimensions[]) {
   int64_t chunk_size[H5S_MAX_RANK];
   int i;
 
@@ -336,7 +333,7 @@ NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int ran
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
+NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t const dimensions[],
                           int compress_type, int64_t const chunk_size[]) {
   hid_t datatype1, dataspace, iNew;
   hid_t type, cparms = -1;
@@ -344,7 +341,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
   char pBuffer[256];
   size_t byte_zahl = 0;
   hsize_t chunkdims[H5S_MAX_RANK];
-  hsize_t mydim[H5S_MAX_RANK], mydim1[H5S_MAX_RANK];
+  hsize_t mydim[H5S_MAX_RANK];
   hsize_t size[H5S_MAX_RANK];
   hsize_t maxdims[H5S_MAX_RANK];
   unsigned int compress_level;
@@ -394,6 +391,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
      *  search for tests on H5T_STRING
      */
     byte_zahl = (size_t)mydim[rank - 1];
+    hsize_t mydim1[H5S_MAX_RANK];
     for (int i = 0; i < rank; i++) {
       mydim1[i] = mydim[i];
       if (dimensions[i] <= 0) {
@@ -403,7 +401,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
     }
     mydim1[rank - 1] = 1;
     if (mydim[rank - 1] > 1) {
-      mydim[rank - 1] = maxdims[rank - 1] = size[rank - 1] = 1;
+      maxdims[rank - 1] = size[rank - 1] = 1;
     }
     if (chunkdims[rank - 1] > 1) {
       chunkdims[rank - 1] = 1;
@@ -1001,10 +999,7 @@ static NXstatus gotoRoot(NXhandle hfil) {
     }
   }
   while (!isRoot(hfil)) {
-    status = NXclosegroup(hfil);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
+    NXclosegroup(hfil);
   }
   return NXstatus::NX_OK;
 }

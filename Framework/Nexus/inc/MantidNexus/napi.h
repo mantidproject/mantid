@@ -193,7 +193,8 @@ MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
+MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
+                                       int64_t const dim[]);
 
 /**
  * Create a compressed dataset. The dataset is NOT opened. Data from this set will automatically be compressed when
@@ -216,7 +217,7 @@ MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumt
  * \ingroup c_readwrite
  */
 MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
-                                           int64_t dim[], int comp_typ, int64_t const chunk_size[]);
+                                           int64_t const dim[], int comp_typ, int64_t const chunk_size[]);
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or
@@ -296,18 +297,6 @@ MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
  * \ingroup c_linking
  */
 MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
-
-/**
- * Create a link to the group or dataset described by pLink in the currently open
- * group. But give the linked item a new name.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param newname The new name of the item in the currently open group.
- * \param pLink A link data structure describing the object to link. This must have been initialized
- * by either a call to NXgetdataID or NXgetgroupID.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_NEXUS_DLL NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname, NXlink *pLink);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
