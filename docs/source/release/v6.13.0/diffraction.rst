@@ -90,15 +90,15 @@ Bugfixes
     unique to the specific ROI, and in the case where a file is loaded from the ADS which may be wrong, a warning is
     supplied to the user.
 
-- Resolve a formatting issue within ``CEO2.cif``, which was causing a loop error when trying to load into Mantid
+- ``CEO2.cif``, no longer contains a formatting issue which was causing a loop error when trying to load into Mantid
   Workbech using ``LoadCIF``. `#39148 <https://github.com/mantidproject/mantid/issues/39148>`_
 - Add ``<side-by-side-view-location>`` elements to the detector banks in ``SNAP_Definition.xml``.
 - Within  :ref:`algm-AbsorptionCorrection` algorithm, when ``Rasterize`` is called, it now takes both the Integration
   ``Volume Shape`` and the ``Sample Shape`` to calculate L1 paths. Before, it would only take the integration volume and
   would assume that the paths within this shape are equal to the paths within the sample.
-- Fix issue with ``GSAS-II GSASIIscriptable.py`` hard-coded path which is invalid for newer version of GSAS-II (versions
-  5758 and later). `#38882 <https://github.com/mantidproject/mantid/issues/38882>`_
-- :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`
+- ``GSAS-II GSASIIscriptable.py`` no longer uses a hard-coded path which is invalid for newer version of GSAS-II
+  (versions 5758 and later). `#38882 <https://github.com/mantidproject/mantid/issues/38882>`_
+- The :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`
   will no longer crash when deleting multiple workspaces in the ADS. This also fixed an issue of clearing the whole plot
   in the same tab when deleting workspaces in the ADS.
 
