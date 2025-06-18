@@ -1,9 +1,14 @@
 #include <cstring>
 // REMOVE
+#include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
+#include <H5Cpp.h>
 #include <algorithm>
+#include <array>
+#include <assert.h>
+#include <hdf5.h>
 #include <iostream>
 #include <numeric>
 #include <sstream>
@@ -14,6 +19,8 @@ using std::stringstream;
 using std::vector;
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
+#define NX5SIGNATURE 959695
+#define NX_UNKNOWN_GROUP ""
 
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
@@ -43,6 +50,146 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   result << "]";
   return result.str();
 }
+
+pNexusFile5 assertNXID(std::shared_ptr<NXhandle> fid) {
+  pNexusFile5 pRes;
+
+  assert(fid != NULL);
+  pRes = static_cast<pNexusFile5>(*fid);
+  assert(pRes->iNXID == NX5SIGNATURE);
+  return pRes;
+}
+
+herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata) {
+  UNUSED_ARG(loc_id);
+  UNUSED_ARG(unused);
+  UNUSED_ARG(opdata);
+  char attr_name[8 + 1]; /* need to leave space for \0 as well */
+
+  strcpy(attr_name, "NX_class");
+  return strstr(member_name, attr_name) ? 1 : 0;
+}
+
+hid_t toHDF5Type(NXnumtype datatype) {
+  hid_t type;
+  switch (datatype) {
+  case NXnumtype::CHAR: {
+    type = H5T_C_S1;
+    break;
+  }
+  case NXnumtype::INT8: {
+    type = H5T_NATIVE_CHAR;
+    break;
+  }
+  case NXnumtype::UINT8: {
+    type = H5T_NATIVE_UCHAR;
+    break;
+  }
+  case NXnumtype::INT16: {
+    type = H5T_NATIVE_SHORT;
+    break;
+  }
+  case NXnumtype::UINT16: {
+    type = H5T_NATIVE_USHORT;
+    break;
+  }
+  case NXnumtype::INT32: {
+    type = H5T_NATIVE_INT;
+    break;
+  }
+  case NXnumtype::UINT32: {
+    type = H5T_NATIVE_UINT;
+    break;
+  }
+  case NXnumtype::INT64: {
+    type = H5T_NATIVE_INT64;
+    break;
+  }
+  case NXnumtype::UINT64: {
+    type = H5T_NATIVE_UINT64;
+    break;
+  }
+  case NXnumtype::FLOAT32: {
+    type = H5T_NATIVE_FLOAT;
+    break;
+  }
+  case NXnumtype::FLOAT64: {
+    type = H5T_NATIVE_DOUBLE;
+    break;
+  }
+  default: {
+    type = -1;
+  }
+  }
+  return type;
+}
+
+hid_t h5MemType(hid_t atype) {
+  hid_t memtype_id = -1;
+  size_t size;
+  H5T_sign_t sign;
+  H5T_class_t tclass;
+
+  tclass = H5Tget_class(atype);
+
+  if (tclass == H5T_INTEGER) {
+    size = H5Tget_size(atype);
+    sign = H5Tget_sign(atype);
+    if (size == 1) {
+      if (sign == H5T_SGN_2) {
+        memtype_id = H5T_NATIVE_INT8;
+      } else {
+        memtype_id = H5T_NATIVE_UINT8;
+      }
+    } else if (size == 2) {
+      if (sign == H5T_SGN_2) {
+        memtype_id = H5T_NATIVE_INT16;
+      } else {
+        memtype_id = H5T_NATIVE_UINT16;
+      }
+    } else if (size == 4) {
+      if (sign == H5T_SGN_2) {
+        memtype_id = H5T_NATIVE_INT32;
+      } else {
+        memtype_id = H5T_NATIVE_UINT32;
+      }
+    } else if (size == 8) {
+      if (sign == H5T_SGN_2) {
+        memtype_id = H5T_NATIVE_INT64;
+      } else {
+        memtype_id = H5T_NATIVE_UINT64;
+      }
+    }
+  } else if (tclass == H5T_FLOAT) {
+    size = H5Tget_size(atype);
+    if (size == 4) {
+      memtype_id = H5T_NATIVE_FLOAT;
+    } else if (size == 8) {
+      memtype_id = H5T_NATIVE_DOUBLE;
+    }
+  }
+  if (memtype_id == -1) {
+    throw std::invalid_argument("h5MemType: invalid type");
+  }
+  return memtype_id;
+}
+
+std::string buildCurrentAddress(pNexusFile5 fid) {
+  hid_t current;
+  if (fid->iCurrentD != 0) {
+    current = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    current = fid->iCurrentG;
+  } else {
+    current = fid->iFID;
+  }
+  char caddr[2048];
+  H5Iget_name(current, caddr, 2048);
+  return std::string(caddr);
+}
+
+void killAttDir(pNexusFile5 self) { self->iCurrentIDX = 0; }
+void killDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -162,7 +309,22 @@ void File::close() {
   }
 }
 
-void File::flush() { NAPI_CALL(NXflush(*m_pfile_id), "NXflush failed"); }
+void File::flush() {
+  pNexusFile5 pFile = NULL;
+  herr_t iRet;
+
+  pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentD != 0) {
+    iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
+  } else if (pFile->iCurrentG != 0) {
+    iRet = H5Fflush(pFile->iCurrentG, H5F_SCOPE_LOCAL);
+  } else {
+    iRet = H5Fflush(pFile->iFID, H5F_SCOPE_LOCAL);
+  }
+  if (iRet < 0) {
+    throw NXEXCEPTION("The object cannot be flushed");
+  }
+}
 
 //------------------------------------------------------------------------------------------------------------------
 // FILE NAVIGATION METHODS
@@ -272,8 +434,40 @@ void File::makeGroup(const std::string &name, const std::string &class_name, boo
   if (class_name.empty()) {
     throw NXEXCEPTION("Supplied empty class name to makeGroup");
   }
-  NAPI_CALL(NXmakegroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
-            "NXmakegroup(" + name + ", " + class_name + ") failed");
+
+  pNexusFile5 pFile;
+  hid_t iVID;
+  hid_t attr1, aid1, aid2;
+  std::string pBuffer;
+
+  pFile = assertNXID(m_pfile_id);
+  /* create and configure the group */
+  if (pFile->iCurrentG == 0) {
+    pBuffer = "/" + std::string(name);
+  } else {
+    pBuffer = "/" + std::string(pFile->name_ref) + "/" + std::string(name);
+  }
+  iVID = H5Gcreate(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if (iVID < 0) {
+    throw NXEXCEPTION("Could not create Group");
+  }
+  aid2 = H5Screate(H5S_SCALAR);
+  aid1 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(aid1, class_name.length());
+  attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr1 < 0) {
+    throw NXEXCEPTION("Failed to store class name");
+  }
+  if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(class_name.c_str()))) < 0) {
+    throw NXEXCEPTION("Failed to store class name");
+  }
+  /* close group */
+  hid_t iRet = H5Sclose(aid2);
+  iRet += H5Tclose(aid1);
+  iRet += H5Aclose(attr1);
+  iRet += H5Gclose(iVID);
+  UNUSED_ARG(iRet);
+
   registerEntry(formAbsoluteAddress(name), class_name);
   if (open_group) {
     this->openGroup(name, class_name);
@@ -287,11 +481,112 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   if (class_name.empty()) {
     throw NXEXCEPTION("Supplied empty class name");
   }
-  NAPI_CALL(NXopengroup(*(this->m_pfile_id), name.c_str(), class_name.c_str()),
-            "The supplied group name=" + name + ", " + class_name + " does not exist");
+  pNexusFile5 pFile;
+  hid_t attr1, iVID;
+  herr_t iRet;
+  char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
+
+  pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentG == 0) {
+    strcpy(pBuffer, name.c_str());
+  } else {
+    sprintf(pBuffer, "%s/%s", pFile->name_tmp, name.c_str());
+  }
+  iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
+  if (iVID < 0) {
+    std::stringstream msg;
+    msg << "Group " << pFile->name_tmp << " does not exist";
+    throw NXEXCEPTION(msg.str());
+  }
+  pFile->iCurrentG = iVID;
+  strcpy(pFile->name_tmp, pBuffer);
+  strcpy(pFile->name_ref, pBuffer);
+
+  if ((!class_name.empty()) && (strcmp(class_name.c_str(), NX_UNKNOWN_GROUP) != 0)) {
+    /* check group attribute */
+    iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Error iterating through attribute list");
+    } else if (iRet == 1) {
+      /* group attribute was found */
+    } else {
+      /* no group attribute available */
+      throw NXEXCEPTION("No group attribute available");
+    }
+    /* check contents of group attribute */
+    attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    if (attr1 < 0) {
+      throw NXEXCEPTION("Error opening NX_class group attribute");
+    }
+    const H5::Group group(pFile->iCurrentG);
+    std::string data;
+    Mantid::NeXus::H5Util::readStringAttribute(group, "NX_class", data);
+    if (data == class_name) {
+      /* test OK */
+    } else {
+      H5Aclose(attr1);
+      std::stringstream msg;
+      msg << "Group class is not identical: '" << data << "' != '" << class_name << "'";
+      throw NXEXCEPTION(msg.str());
+    }
+    H5Aclose(attr1);
+  }
+
+  /* maintain stack */
+  pFile->iStackPtr++;
+  pFile->iStack5[pFile->iStackPtr].iVref = pFile->iCurrentG;
+  strcpy(pFile->iStack5[pFile->iStackPtr].irefn, name.c_str());
+  pFile->iCurrentIDX = 0;
+  pFile->iCurrentD = 0;
+  killDir(pFile);
 }
 
-void File::closeGroup() { NAPI_CALL(NXclosegroup(*(this->m_pfile_id.get())), "NXclosegroup failed"); }
+void File::closeGroup() {
+  pNexusFile5 pFile;
+
+  pFile = assertNXID(m_pfile_id);
+  /* first catch the trivial case: we are at root and cannot get
+     deeper into a negative directory hierarchy (anti-directory)
+   */
+  if (pFile->iCurrentG == 0) {
+    killDir(pFile);
+  } else {
+    /* close the current group and decrement name_ref */
+    H5Gclose(pFile->iCurrentG);
+    size_t i = strlen(pFile->iStack5[pFile->iStackPtr].irefn);
+    size_t ii = strlen(pFile->name_ref);
+    if (pFile->iStackPtr > 1) {
+      ii = ii - i - 1;
+    } else {
+      ii = ii - i;
+    }
+    if (ii > 0) {
+      char *u1name = NULL;
+      u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
+      memset(u1name, 0, ii);
+      for (i = 0; i < ii; i++) {
+        *(u1name + i) = *(pFile->name_ref + i);
+      }
+      *(u1name + i) = '\0';
+      /*
+         strncpy(u1name, uname, ii);
+       */
+      strcpy(pFile->name_ref, u1name);
+      strcpy(pFile->name_tmp, u1name);
+      free(u1name);
+    } else {
+      strcpy(pFile->name_ref, "");
+      strcpy(pFile->name_tmp, "");
+    }
+    killDir(pFile);
+    pFile->iStackPtr--;
+    if (pFile->iStackPtr > 0) {
+      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    } else {
+      pFile->iCurrentG = 0;
+    }
+  }
+}
 
 //------------------------------------------------------------------------------------------------------------------
 // DATA MAKE / OPEN / PUT / GET / CLOSE
@@ -320,14 +615,72 @@ void File::openData(std::string const &name) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to openData");
   }
-  NAPI_CALL(NXopendata(*(this->m_pfile_id), name.c_str()), "NXopendata(" + name + ") failed");
+  pNexusFile5 pFile;
+
+  pFile = assertNXID(m_pfile_id);
+  /* clear pending attribute directories first */
+  killAttDir(pFile);
+
+  /* find the ID number and open the dataset */
+  pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
+  if (pFile->iCurrentD < 0) {
+    throw NXEXCEPTION("dataset (" + name + ") not found at this level");
+  }
+  /* find the ID number of datatype */
+  pFile->iCurrentT = H5Dget_type(pFile->iCurrentD);
+  if (pFile->iCurrentT < 0) {
+    pFile->iCurrentT = 0;
+    throw NXEXCEPTION("error opening dataset (" + name + ")");
+  }
+  /* find the ID number of dataspace */
+  pFile->iCurrentS = H5Dget_space(pFile->iCurrentD);
+  if (pFile->iCurrentS < 0) {
+    pFile->iCurrentS = 0;
+    throw NXEXCEPTION("HDF error opening dataset (" + name + ")");
+  }
 }
 
 template <typename NumT> void File::putData(NumT const *data) {
   if (data == NULL) {
     throw NXEXCEPTION("Data specified as null");
   }
-  NAPI_CALL(NXputdata(*(this->m_pfile_id), data), "NXputdata failed");
+  pNexusFile5 pFile;
+  herr_t iRet;
+  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
+  int rank;
+
+  pFile = assertNXID(m_pfile_id);
+  rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+  if (rank < 0) {
+    throw NXEXCEPTION("Cannot determine dataset rank");
+  }
+  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims.data(), maxdims.data());
+  if (iRet < 0) {
+    throw NXEXCEPTION("Cannot determine dataset dimensions");
+  }
+  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
+  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
+  if (unlimiteddim) {
+    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
+    for (std::size_t i = 0; i < myStart.size(); i++) {
+      if (maxdims[i] == H5S_UNLIMITED) {
+        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
+        mySize[i] = 1;
+      } else {
+        myStart[i] = 0;
+        mySize[i] = static_cast<int64_t>(thedims[i]);
+      }
+    }
+    DimSizeVector vecStart(myStart.begin(), myStart.end());
+    DimSizeVector vecSize(mySize.begin(), mySize.end());
+
+    return putSlab(data, vecStart, vecSize);
+  } else {
+    iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      throw NXEXCEPTION("failure to write data");
+    }
+  }
 }
 
 template <> MANTID_NEXUS_DLL void File::putData(std::string const *data) { this->putData(*data); }
@@ -398,7 +751,19 @@ string File::getStrData() {
   return res;
 }
 
-void File::closeData() { NAPI_CALL(NXclosedata(*(this->m_pfile_id).get()), "NXclosedata() failed"); }
+void File::closeData() {
+  pNexusFile5 pFile;
+  herr_t iRet;
+
+  pFile = assertNXID(m_pfile_id);
+  iRet = H5Sclose(pFile->iCurrentS);
+  iRet += H5Tclose(pFile->iCurrentT);
+  iRet += H5Dclose(pFile->iCurrentD);
+  if (iRet < 0) {
+    throw NXEXCEPTION("Cannot end access to dataset");
+  }
+  pFile->iCurrentD = 0;
+}
 
 //------------------------------------------------------------------------------------------------------------------
 // DATA MAKE COMP / PUT/GET SLAB / COERCE
@@ -425,15 +790,159 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // do the work
   int i_type = static_cast<int>(type);
-  int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(*(this->m_pfile_id), name.c_str(), type, static_cast<int>(dims.size()),
-                                     const_cast<int64_t *>(dims.data()), i_comp, const_cast<int64_t *>(chunk.data()));
+  int compress_type = static_cast<int>(comp);
 
-  // report errors
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", "
-        << comp << ", " << toString(chunk) << ") failed";
+  hid_t datatype1, dataspace, iNew;
+  hid_t dtype, cparms = -1;
+  pNexusFile5 pFile;
+  size_t byte_zahl = 0;
+  hsize_t chunkdims[H5S_MAX_RANK];
+  hsize_t mydim[H5S_MAX_RANK], mydim1[H5S_MAX_RANK];
+  hsize_t dsize[H5S_MAX_RANK];
+  hsize_t maxdims[H5S_MAX_RANK];
+  unsigned int compress_level;
+  bool unlimiteddim = false;
+  int rank = static_cast<int>(dims.size());
+  const int64_t *chunk_size = const_cast<int64_t *>(chunk.data());
+  const int64_t *dimensions = const_cast<int64_t *>(dims.data());
+  stringstream msg;
+  msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
+      << ", " << toString(chunk) << ") failed: ";
+
+  pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentG <= 0) {
+    msg << "No group open for makedata on " << name;
+    throw NXEXCEPTION(msg.str());
+  }
+
+  if (rank <= 0) {
+    msg << "Invalid rank specified " << name;
+    throw NXEXCEPTION(msg.str());
+  }
+
+  dtype = toHDF5Type(type);
+
+  /*
+     Check dimensions for consistency. Dimension may be -1
+     thus denoting an unlimited dimension.
+   */
+  for (int i = 0; i < rank; i++) {
+    chunkdims[i] = static_cast<hsize_t>(chunk_size[i]);
+    mydim[i] = static_cast<hsize_t>(dimensions[i]);
+    maxdims[i] = static_cast<hsize_t>(dimensions[i]);
+    dsize[i] = static_cast<hsize_t>(dimensions[i]);
+    if (dimensions[i] <= 0) {
+      mydim[i] = 1;
+      maxdims[i] = H5S_UNLIMITED;
+      dsize[i] = 1;
+      unlimiteddim = true;
+    } else {
+      mydim[i] = static_cast<hsize_t>(dimensions[i]);
+      maxdims[i] = static_cast<hsize_t>(dimensions[i]);
+      dsize[i] = static_cast<hsize_t>(dimensions[i]);
+    }
+  }
+
+  if (type == NXnumtype::CHAR) {
+    /*
+     *  This assumes string lenght is in the last dimensions and
+     *  the logic must be the same as used in NX5getslab and NX5getinfo
+     *
+     *  search for tests on H5T_STRING
+     */
+    byte_zahl = (size_t)mydim[rank - 1];
+    for (int i = 0; i < rank; i++) {
+      mydim1[i] = mydim[i];
+      if (dimensions[i] <= 0) {
+        mydim1[0] = 1;
+        maxdims[0] = H5S_UNLIMITED;
+      }
+    }
+    mydim1[rank - 1] = 1;
+    if (mydim[rank - 1] > 1) {
+      mydim[rank - 1] = maxdims[rank - 1] = dsize[rank - 1] = 1;
+    }
+    if (chunkdims[rank - 1] > 1) {
+      chunkdims[rank - 1] = 1;
+    }
+    dataspace = H5Screate_simple(rank, mydim1, maxdims);
+  } else {
+    if (unlimiteddim) {
+      dataspace = H5Screate_simple(rank, mydim, maxdims);
+    } else {
+      /* dataset creation */
+      dataspace = H5Screate_simple(rank, mydim, NULL);
+    }
+  }
+  datatype1 = H5Tcopy(dtype);
+  if (type == NXnumtype::CHAR) {
+    H5Tset_size(datatype1, byte_zahl);
+    /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
+  }
+  compress_level = 6;
+  if ((compress_type / 100) == NX_COMP_LZW) {
+    compress_level = static_cast<unsigned int>(compress_type % 100);
+    compress_type = NX_COMP_LZW;
+  }
+  hid_t dID;
+  if (compress_type == NX_COMP_LZW) {
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
+    iNew = H5Pset_chunk(cparms, rank, chunkdims);
+    if (iNew < 0) {
+      msg << "Size of chunks could not be set";
+      throw NXEXCEPTION(msg.str());
+    }
+    H5Pset_shuffle(cparms); // mrt: improves compression
+    H5Pset_deflate(cparms, compress_level);
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  } else if (compress_type == NX_COMP_NONE) {
+    if (unlimiteddim) {
+      cparms = H5Pcreate(H5P_DATASET_CREATE);
+      iNew = H5Pset_chunk(cparms, rank, chunkdims);
+      if (iNew < 0) {
+        msg << "Size of chunks could not be set";
+        throw NXEXCEPTION(msg.str());
+      }
+      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+    } else {
+      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
+  } else if (compress_type == NX_CHUNK) {
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
+    iNew = H5Pset_chunk(cparms, rank, chunkdims);
+    if (iNew < 0) {
+      msg << "Size of chunks could not be set";
+      throw NXEXCEPTION(msg.str());
+    }
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+
+  } else {
+    NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  }
+  if (dID < 0) {
+    msg << "Creating chunked dataset failed";
+    throw NXEXCEPTION(msg.str());
+  } else {
+    pFile->iCurrentD = dID;
+  }
+  if (unlimiteddim) {
+    iNew = H5Dset_extent(pFile->iCurrentD, dsize);
+    if (iNew < 0) {
+      msg << "Cannot create dataset " << name;
+      throw NXEXCEPTION(msg.str());
+    }
+  }
+  herr_t iRet;
+  if (cparms != -1) {
+    H5Pclose(cparms);
+  }
+  iRet = H5Sclose(dataspace);
+  iRet += H5Tclose(datatype1);
+  iRet += H5Dclose(pFile->iCurrentD);
+  pFile->iCurrentD = 0;
+  if (iRet < 0) {
+    msg << "HDF cannot close dataset";
     throw NXEXCEPTION(msg.str());
   }
   registerEntry(formAbsoluteAddress(name), scientific_data_set);
@@ -462,10 +971,101 @@ template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector cons
     msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
     throw NXEXCEPTION(msg.str());
   }
-  NXstatus status = NXputslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0]));
-  if (status != NXstatus::NX_OK) {
-    stringstream msg;
-    msg << "NXputslab64(data, " << toString(start) << ", " << toString(size) << ") failed";
+
+  pNexusFile5 pFile;
+  int iRet, rank;
+  hsize_t myStart[H5S_MAX_RANK];
+  hsize_t mySize[H5S_MAX_RANK];
+  hsize_t dsize[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
+  hid_t filespace, dataspace;
+  bool unlimiteddim = false;
+  stringstream msg;
+  msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
+
+  pFile = assertNXID(m_pfile_id);
+  /* check if there is an Dataset open */
+  if (pFile->iCurrentD == 0) {
+    msg << "no dataset open";
+    throw NXEXCEPTION(msg.str());
+  }
+  rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+  if (rank < 0) {
+    msg << "cannot get rank";
+    throw NXEXCEPTION(msg.str());
+  }
+  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims, maxdims);
+  if (iRet < 0) {
+    msg << "cannot get dimensions";
+    throw NXEXCEPTION(msg.str());
+  }
+
+  for (int i = 0; i < rank; i++) {
+    myStart[i] = static_cast<hsize_t>(start[i]);
+    mySize[i] = static_cast<hsize_t>(size[i]);
+    dsize[i] = static_cast<hsize_t>(start[i] + size[i]);
+    if (maxdims[i] == H5S_UNLIMITED) {
+      unlimiteddim = true;
+    }
+  }
+  if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
+    mySize[rank - 1] = 1;
+    myStart[rank - 1] = 0;
+    dsize[rank - 1] = 1;
+  }
+  dataspace = H5Screate_simple(rank, mySize, NULL);
+  if (unlimiteddim) {
+    for (int i = 0; i < rank; i++) {
+      if (dsize[i] < thedims[i]) {
+        dsize[i] = thedims[i];
+      }
+    }
+    iRet = H5Dset_extent(pFile->iCurrentD, dsize);
+    if (iRet < 0) {
+      msg << "extend slab failed";
+      throw NXEXCEPTION(msg.str());
+    }
+
+    filespace = H5Dget_space(pFile->iCurrentD);
+
+    /* define slab */
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      msg << "selecting slab failed";
+      throw NXEXCEPTION(msg.str());
+    }
+    /* write slab */
+    iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, dataspace, filespace, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      msg << "writing slab failed";
+      throw NXEXCEPTION(msg.str());
+    }
+    /* update with new size */
+    iRet = H5Sclose(pFile->iCurrentS);
+    if (iRet < 0) {
+      msg << "updating size failed";
+      throw NXEXCEPTION(msg.str());
+    }
+    pFile->iCurrentS = filespace;
+  } else {
+    /* define slab */
+    iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      msg << "selecting slab failed";
+      throw NXEXCEPTION(msg.str());
+    }
+    /* write slab */
+    iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, dataspace, pFile->iCurrentS, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      msg << "writing slab failed";
+      throw NXEXCEPTION(msg.str());
+    }
+  }
+  /* deal with HDF errors */
+  iRet = H5Sclose(dataspace);
+  if (iRet < 0) {
+    msg << "closing slab failed";
     throw NXEXCEPTION(msg.str());
   }
 }
@@ -499,7 +1099,90 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     throw NXEXCEPTION(msg.str());
   }
 
-  NAPI_CALL(NXgetslab64(*(this->m_pfile_id), data, &(start[0]), &(size[0])), "NXgetslab failed");
+  pNexusFile5 pFile;
+  hsize_t myStart[H5S_MAX_RANK];
+  hsize_t mySize[H5S_MAX_RANK];
+  hsize_t mStart[H5S_MAX_RANK];
+  hid_t memspace, iRet;
+  H5T_class_t tclass;
+  hid_t memtype_id;
+  char *tmp_data = NULL;
+  int iRank;
+
+  pFile = assertNXID(m_pfile_id);
+  /* check if there is an Dataset open */
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("No dataset open");
+  }
+  tclass = H5Tget_class(pFile->iCurrentT);
+  /* map datatypes of other platforms */
+  if (tclass == H5T_STRING) {
+    memtype_id = pFile->iCurrentT;
+  } else {
+    memtype_id = h5MemType(pFile->iCurrentT);
+  }
+
+  iRank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+
+  if (iRank == 0) {
+    /* this is an unslabbale SCALAR */
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
+    memspace = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace);
+    iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, filespace, H5P_DEFAULT, data);
+    H5Sclose(filespace);
+  } else {
+
+    for (int i = 0; i < iRank; i++) {
+      myStart[i] = static_cast<hsize_t>(start[i]);
+      mySize[i] = static_cast<hsize_t>(size[i]);
+      mStart[i] = static_cast<hsize_t>(0);
+    }
+
+    /*
+     * this does not work for multidimensional string arrays.
+     */
+    int mtype = 0;
+    if (tclass == H5T_STRING) {
+      mtype = NX_CHAR;
+      if (mySize[0] == 1) {
+        mySize[0] = H5Tget_size(pFile->iCurrentT);
+      }
+      tmp_data = static_cast<char *>(malloc((size_t)mySize[0]));
+      memset(tmp_data, 0, sizeof(mySize[0]));
+      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    } else {
+      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    }
+    /* define slab */
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      throw NXEXCEPTION("Selecting slab failed");
+    }
+
+    memspace = H5Screate_simple(iRank, mySize, NULL);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Selecting memspace failed");
+    }
+    /* read slab */
+    if (mtype == NX_CHAR) {
+      iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
+      char const *data1;
+      data1 = tmp_data + myStart[0];
+      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
+      free(tmp_data);
+    } else {
+      iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, pFile->iCurrentS, H5P_DEFAULT, data);
+    }
+  }
+  /* cleanup */
+  H5Sclose(memspace);
+  H5Tclose(tclass);
+
+  if (iRet < 0) {
+    throw NXEXCEPTION("Reading slab failed");
+  }
 }
 
 void File::getDataCoerce(vector<int> &data) {
@@ -951,17 +1634,115 @@ bool File::hasAttr(const std::string &name) {
 
 NXlink File::getGroupID() {
   NXlink link;
-  NAPI_CALL(NXgetgroupID(*(this->m_pfile_id), &link), "NXgetgroupID failed");
+  pNexusFile5 pFile;
+
+  pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentG == 0) {
+    throw NXEXCEPTION("getGroupID failed, No current group open");
+  }
+
+  try {
+    getAttr("target", link.targetAddress);
+  } catch (const Mantid::Nexus::Exception &) {
+    link.targetAddress = buildCurrentAddress(pFile);
+  }
+  link.linkType = NXentrytype::group;
   return link;
 }
 
 NXlink File::getDataID() {
   NXlink link;
-  NAPI_CALL(NXgetdataID(*(this->m_pfile_id), &link), "NXgetdataID failed");
+  pNexusFile5 pFile;
+
+  pFile = assertNXID(m_pfile_id);
+
+  /* we cannot return ID's when no datset is open */
+  if (pFile->iCurrentD <= 0) {
+    throw NXEXCEPTION("getDataID failed, No current dataset open");
+  }
+
+  try {
+    getAttr("target", link.targetAddress);
+  } catch (const Mantid::Nexus::Exception &) {
+    link.targetAddress = buildCurrentAddress(pFile);
+  }
+
+  link.linkType = NXentrytype::sds;
   return link;
 }
 
-void File::makeLink(NXlink &link) { NAPI_CALL(NXmakelink(*(this->m_pfile_id), &link), "NXmakelink failed"); }
+void File::makeLink(NXlink const &link) {
+  pNexusFile5 pFile;
+  char linkTarget[NX_MAXADDRESSLEN];
+
+  pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentG == 0) { /* root level, can not link here */
+    throw NXEXCEPTION("makeLink failed");
+  }
+
+  /*
+     locate name of the element to link
+   */
+  const char *itemName = strrchr(link.targetAddress.data(), '/');
+  if (itemName == NULL) {
+    throw NXEXCEPTION("makeLink failed bad link structure");
+  }
+  itemName++;
+
+  /*
+     build addressname to link from our current group and the name
+     of the thing to link
+   */
+  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXADDRESSLEN) {
+    strcpy(linkTarget, "/");
+    strcat(linkTarget, pFile->name_ref);
+    strcat(linkTarget, "/");
+    strcat(linkTarget, itemName);
+  } else {
+    throw NXEXCEPTION("makeLink failed address string to long");
+  }
+
+  H5Lcreate_hard(pFile->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+
+  hid_t dataID, aid2, aid1, attID;
+  char name[] = "target";
+
+  /*
+     set the target attribute
+   */
+  if (link.linkType > 0) {
+    dataID = H5Dopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
+  } else {
+    dataID = H5Gopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
+  }
+  if (dataID < 0) {
+    throw NXEXCEPTION("Internal error, address to link does not exist");
+  }
+  hid_t status = H5Aopen_by_name(dataID, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+  if (status > 0) {
+    H5Aclose(status);
+    status = H5Adelete(dataID, name);
+    if (status < 0) {
+      return;
+    }
+  }
+  aid2 = H5Screate(H5S_SCALAR);
+  aid1 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(aid1, link.targetAddress.size());
+  attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+  if (attID < 0) {
+    return;
+  }
+  UNUSED_ARG(H5Awrite(attID, aid1, link.targetAddress.c_str()));
+  H5Tclose(aid1);
+  H5Sclose(aid2);
+  H5Aclose(attID);
+  if (link.linkType > 0) {
+    H5Dclose(dataID);
+  } else {
+    H5Gclose(dataID);
+  }
+}
 
 } // namespace Mantid::Nexus
 

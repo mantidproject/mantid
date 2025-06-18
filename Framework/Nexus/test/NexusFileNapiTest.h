@@ -35,13 +35,13 @@ const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
 } // namespace
 
-class NeXusFileNapiTest : public CxxTest::TestSuite {
+class NexusFileNapiTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NeXusFileNapiTest *createSuite() { return new NeXusFileNapiTest(); }
-  static void destroySuite(NeXusFileNapiTest *suite) { delete suite; }
+  static NexusFileNapiTest *createSuite() { return new NexusFileNapiTest(); }
+  static void destroySuite(NexusFileNapiTest *suite) { delete suite; }
 
 private:
   void do_test_write(const string &filename, NXaccess create_code) {

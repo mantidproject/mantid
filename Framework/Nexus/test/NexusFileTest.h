@@ -31,13 +31,13 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-class NeXusFileTest : public CxxTest::TestSuite {
+class NexusFileTest : public CxxTest::TestSuite {
 
 public:
   // // This pair of boilerplate methods prevent the suite being created statically
   // // This means the constructor isn't called when running other tests
-  static NeXusFileTest *createSuite() { return new NeXusFileTest(); }
-  static void destroySuite(NeXusFileTest *suite) { delete suite; }
+  static NexusFileTest *createSuite() { return new NexusFileTest(); }
+  static void destroySuite(NexusFileTest *suite) { delete suite; }
 
   // #################################################################################################################
   // TEST CONSTRUCTORS

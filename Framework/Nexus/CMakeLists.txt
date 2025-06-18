@@ -25,10 +25,10 @@ set(TEST_FILES
     NexusIOHelperTest.h
     NexusClassesTest.h
     NexusDescriptorTest.h
-    NeXusFileTest.h
-    NeXusFileLeakTest.h
-    NeXusFileNapiTest.h
-    NeXusFileReadWriteTest.h
+    NexusFileTest.h
+    NexusFileLeakTest.h
+    NexusFileNapiTest.h
+    NexusFileReadWriteTest.h
     NapiUnitTest.h
 )
 
