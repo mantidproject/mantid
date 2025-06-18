@@ -520,6 +520,11 @@ QGroupBox:title {
           <string>Custom Shape</string>
          </property>
         </item>
+           <item>
+         <property name="text">
+          <string>No Gauge Volume</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

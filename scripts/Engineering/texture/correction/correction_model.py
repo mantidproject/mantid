@@ -128,6 +128,8 @@ class TextureCorrectionModel:
         <centre x='0.0' y='0.0' z='0.0'  />  \
         </cuboid>  \
         <algebra val='some-gv' /> \\ """
+        elif preset == "No Gauge Volume":
+            gauge_str = None
         else:
             try:
                 gauge_str = self._read_xml(custom)
