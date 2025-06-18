@@ -1,8 +1,10 @@
 #include <cstring>
 // REMOVE
+#include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
+#include <H5Cpp.h>
 #include <algorithm>
 #include <assert.h>
 #include <hdf5.h>
@@ -65,88 +67,6 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
 
   strcpy(attr_name, "NX_class");
   return strstr(member_name, attr_name) ? 1 : 0;
-}
-
-herr_t readStringAttribute(hid_t attr, char **data) {
-  herr_t iRet = 0;
-  hid_t atype = -1;
-  hid_t space;
-  int ndims;
-  hsize_t thedims[H5S_MAX_RANK], sdim;
-
-  atype = H5Aget_type(attr);
-  sdim = H5Tget_size(atype);
-  space = H5Aget_space(attr);
-  ndims = H5Sget_simple_extent_dims(space, thedims, NULL);
-
-  if (ndims == 0) {
-    if (H5Tis_variable_str(atype)) {
-      hid_t btype = H5Tget_native_type(atype, H5T_DIR_ASCEND);
-      iRet = H5Aread(attr, btype, data);
-      H5Tclose(btype);
-    } else {
-      *data = static_cast<char *>(malloc(sdim + 1));
-      iRet = H5Aread(attr, atype, *data);
-      (*data)[sdim] = '\0';
-    }
-  } else if (ndims == 1) {
-    char **strings;
-
-    strings = static_cast<char **>(malloc(thedims[0] * sizeof(char *)));
-
-    if (!H5Tis_variable_str(atype)) {
-      strings[0] = static_cast<char *>(malloc(thedims[0] * sdim * sizeof(char)));
-      for (hsize_t i = 1; i < thedims[0]; i++) {
-        strings[i] = strings[0] + i * sdim;
-      }
-    }
-
-    iRet = H5Aread(attr, atype, strings[0]);
-    *data = static_cast<char *>(calloc((sdim + 2) * thedims[0], sizeof(char)));
-    for (hsize_t i = 0; i < thedims[0]; i++) {
-      if (i == 0) {
-        strncpy(*data, strings[i], sdim);
-      } else {
-        strcat(*data, ", ");
-        strncat(*data, strings[i], sdim);
-      }
-    }
-    if (H5Tis_variable_str(atype)) {
-      H5Dvlen_reclaim(atype, space, H5P_DEFAULT, strings);
-    } else {
-      free(strings[0]);
-    }
-
-    free(strings);
-  } else {
-    *data = strdup(" higher dimensional string array");
-  }
-
-  H5Tclose(atype);
-  H5Sclose(space);
-  if (iRet < 0)
-    return static_cast<herr_t>(NXstatus::NX_ERROR);
-  return static_cast<herr_t>(NXstatus::NX_OK);
-}
-
-herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
-  herr_t iRet;
-  char *vdat = NULL;
-  iRet = readStringAttribute(attr, &vdat);
-  if (iRet >= 0) {
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
-    // there is a danger of overflowing output string
-    std::strncpy(data, vdat, static_cast<size_t>(maxlen));
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic pop
-#endif
-    free(vdat);
-  }
-  data[maxlen - 1] = '\0';
-  return iRet;
 }
 
 hid_t toHDF5Type(NXnumtype datatype) {
@@ -561,7 +481,7 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
     throw NXEXCEPTION("Supplied empty class name");
   }
   pNexusFile5 pFile;
-  hid_t attr1, atype, iVID;
+  hid_t attr1, iVID;
   herr_t iRet;
   char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
 
@@ -597,20 +517,17 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
     if (attr1 < 0) {
       throw NXEXCEPTION("Error opening NX_class group attribute");
     }
-    atype = H5Tcopy(H5T_C_S1);
-    char data[128];
-    H5Tset_size(atype, sizeof(data));
-    iRet = readStringAttributeN(attr1, data, sizeof(data));
-    if (strcmp(data, class_name.c_str()) == 0) {
+    const H5::Group group(pFile->iCurrentG);
+    std::string data;
+    Mantid::NeXus::H5Util::readStringAttribute(group, "NX_class", data);
+    if (data == class_name) {
       /* test OK */
     } else {
-      H5Tclose(atype);
       H5Aclose(attr1);
       std::stringstream msg;
       msg << "Group class is not identical: '" << data << "' != '" << class_name << "'";
       throw NXEXCEPTION(msg.str());
     }
-    H5Tclose(atype);
     H5Aclose(attr1);
   }
 
@@ -643,12 +560,11 @@ void File::closeGroup() {
       ii = ii - i;
     }
     if (ii > 0) {
-      char *uname = strdup(pFile->name_ref);
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
       for (i = 0; i < ii; i++) {
-        *(u1name + i) = *(uname + i);
+        *(u1name + i) = *(pFile->name_ref + i);
       }
       *(u1name + i) = '\0';
       /*
@@ -656,7 +572,6 @@ void File::closeGroup() {
        */
       strcpy(pFile->name_ref, u1name);
       strcpy(pFile->name_tmp, u1name);
-      free(uname);
       free(u1name);
     } else {
       strcpy(pFile->name_ref, "");
