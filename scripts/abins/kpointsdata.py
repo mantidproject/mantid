@@ -138,15 +138,6 @@ class KpointsData(collections.abc.Sequence):
         }
         return extracted
 
-    def extract_arrays(self):
-        return {
-            "unit_cell": self.unit_cell,
-            "weights": self._weights,
-            "k_vectors": self._k_vectors,
-            "frequencies": self._frequencies,
-            "atomic_displacements": self._atomic_displacements,
-        }
-
     def __str__(self):
         return "K-points data"
 
