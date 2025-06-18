@@ -37,16 +37,3 @@ class DetectorInfo:
         self.spherical_position = spherical_position
         self.component_path = component_path
         self.pixel_counts = pixel_counts
-
-
-class Detector:
-    """Class for wrapping up information relating to a detector. We need the detector ID,
-    position, whether it is a monitor, and the index in the whole list of detectors."""
-
-    def __init__(self, index: int, id: int, detector_info):
-        self.index_in_whole_list = index
-        self.id = id
-        position = detector_info.position(index)
-        self.position = DetectorPosition(position)
-        self.spherical_position = position.getSpherical()
-        self.is_monitor = detector_info.isMonitor(index)

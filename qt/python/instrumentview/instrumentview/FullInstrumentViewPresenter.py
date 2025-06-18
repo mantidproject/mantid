@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
-from collections.abc import Iterable
 import numpy as np
 import pyvista as pv
 
@@ -132,9 +131,8 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
 
-        picked_detector_ids = self._model.picked_detector_ids()
-        self.show_plot_for_detectors(picked_detector_ids)
-        self.show_info_text_for_detectors(picked_detector_ids)
+        self._view.show_plot_for_detectors(self._model.workspace(), self._model.picked_workspace_indices())
+        self._view.update_selected_detector_info(self._model.picked_detectors_info_text())
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
@@ -149,12 +147,3 @@ class FullInstrumentViewPresenter:
         rgba[:, 2] = blue
         rgba[:, 3] = alpha
         return rgba
-
-    def show_plot_for_detectors(self, detector_ids: Iterable[int]) -> None:
-        """Show line plot for specified detectors"""
-        self._view.show_plot_for_detectors(self._model.workspace(), [self._model.workspace_index_from_detector_id(d) for d in detector_ids])
-
-    def show_info_text_for_detectors(self, detector_ids: Iterable[int]) -> None:
-        """Show text information for specified detectors"""
-        detector_infos = [self._model.get_detector_info_text(d) for d in detector_ids]
-        self._view.update_selected_detector_info(detector_infos)
