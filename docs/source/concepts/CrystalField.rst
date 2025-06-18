@@ -432,6 +432,8 @@ where :math:`\theta_k` are the Stevens operator equivalent factors tabulated in 
 
 ----
 
+.. _Crystal Field Tables:
+
 Appendix B: Tables
 ------------------
 
