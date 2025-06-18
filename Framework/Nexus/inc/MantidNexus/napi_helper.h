@@ -31,3 +31,16 @@ MANTID_NEXUS_DLL NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype);
 MANTID_NEXUS_DLL hid_t h5MemType(hid_t atype);
 
 MANTID_NEXUS_DLL herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata);
+
+/*------------------------------------------------------------------------
+  Implementation of NXopenaddress
+  --------------------------------------------------------------------------*/
+MANTID_NEXUS_DLL int isDataSetOpen(NXhandle hfil);
+MANTID_NEXUS_DLL int isRoot(NXhandle hfil);
+MANTID_NEXUS_DLL char *extractNextAddress(char *address, NXname element);
+MANTID_NEXUS_DLL NXstatus gotoRoot(NXhandle hfil);
+MANTID_NEXUS_DLL int isRelative(char const *address);
+MANTID_NEXUS_DLL NXstatus moveOneDown(NXhandle hfil);
+MANTID_NEXUS_DLL char *moveDown(NXhandle hfil, char *address, NXstatus *code);
+MANTID_NEXUS_DLL NXstatus stepOneUp(NXhandle hfil, char const *name);
+MANTID_NEXUS_DLL NXstatus stepOneGroupUp(NXhandle hfil, char const *name);

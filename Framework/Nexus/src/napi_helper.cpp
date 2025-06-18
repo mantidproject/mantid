@@ -306,3 +306,183 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
   strcpy(attr_name, "NX_class");
   return strstr(member_name, attr_name) ? 1 : 0;
 }
+
+/*------------------------------------------------------------------------
+  Implementation of NXopenaddress
+  The below methods all help NXopenaddress move around inside an address stack
+  --------------------------------------------------------------------------*/
+
+int isDataSetOpen(NXhandle hfil) {
+  NXlink id;
+
+  /*
+     This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
+     when no dataset is open
+   */
+  if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+/*----------------------------------------------------------------------*/
+int isRoot(NXhandle hfil) {
+  NXlink id;
+
+  /*
+     This uses the feauture that NXgetgroupID returns NX_ERROR
+     when we are at root level
+   */
+  if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+/*--------------------------------------------------------------------
+  copies the next address element into element.
+  returns a pointer into address beyond the extracted address
+  ---------------------------------------------------------------------*/
+char *extractNextAddress(char *address, NXname element) {
+  char *pStart = address;
+  /*
+     skip over leading /
+   */
+  if (*pStart == '/') {
+    pStart++;
+  }
+
+  /*
+     find next /
+   */
+  char *pNext = strchr(pStart, '/');
+  if (pNext == NULL) {
+    /*
+       this is the last address element
+     */
+    strcpy(element, pStart);
+    return NULL;
+  } else {
+    size_t length = (size_t)(pNext - pStart);
+    strncpy(element, pStart, length);
+    element[length] = '\0';
+  }
+  return pNext++;
+}
+
+/*-------------------------------------------------------------------*/
+NXstatus gotoRoot(NXhandle hfil) {
+  if (isDataSetOpen(hfil)) {
+    NXstatus status = NXclosedata(hfil);
+    if (status == NXstatus::NX_ERROR) {
+      return status;
+    }
+  }
+  while (!isRoot(hfil)) {
+    NXclosegroup(hfil);
+  }
+  return NXstatus::NX_OK;
+}
+
+/*--------------------------------------------------------------------*/
+int isRelative(char const *address) {
+  if (address[0] == '.' && address[1] == '.')
+    return 1;
+  else
+    return 0;
+}
+
+/*------------------------------------------------------------------*/
+NXstatus moveOneDown(NXhandle hfil) {
+  if (isDataSetOpen(hfil)) {
+    return NXclosedata(hfil);
+  } else {
+    return NXclosegroup(hfil);
+  }
+}
+
+/*-------------------------------------------------------------------
+  returns a pointer to the remaining address string to move up
+  --------------------------------------------------------------------*/
+char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
+  *code = NXstatus::NX_OK;
+
+  if (address[0] == '/') {
+    *code = gotoRoot(hfil);
+    return address;
+  } else {
+    char *pPtr;
+    pPtr = address;
+    while (isRelative(pPtr)) {
+      NXstatus status = moveOneDown(hfil);
+      if (status == NXstatus::NX_ERROR) {
+        *code = status;
+        return pPtr;
+      }
+      pPtr += 3;
+    }
+    return pPtr;
+  }
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus stepOneUp(NXhandle hfil, char const *name) {
+  NXnumtype datatype;
+  NXname name2, xclass;
+  char pBueffel[256];
+
+  /*
+     catch the case when we are there: i.e. no further stepping
+     necessary. This can happen with address like ../
+   */
+  if (strlen(name) < 1) {
+    return NXstatus::NX_OK;
+  }
+
+  NXinitgroupdir(hfil);
+
+  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+    if (strcmp(name2, name) == 0) {
+      if (strcmp(xclass, "SDS") == 0) {
+        return NXopendata(hfil, name);
+      } else {
+        return NXopengroup(hfil, name, xclass);
+      }
+    }
+  }
+  snprintf(pBueffel, 255, "ERROR: NXopenaddress cannot step into %s", name);
+  NXReportError(pBueffel);
+  return NXstatus::NX_ERROR;
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
+  NXnumtype datatype;
+  NXname name2, xclass;
+  char pBueffel[256];
+
+  /*
+     catch the case when we are there: i.e. no further stepping
+     necessary. This can happen with address like ../
+   */
+  if (strlen(name) < 1) {
+    return NXstatus::NX_OK;
+  }
+
+  NXinitgroupdir(hfil);
+  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+
+    if (strcmp(name2, name) == 0) {
+      if (strcmp(xclass, "SDS") == 0) {
+        return NXstatus::NX_EOD;
+      } else {
+        return NXopengroup(hfil, name, xclass);
+      }
+    }
+  }
+  snprintf(pBueffel, 255, "ERROR: NXopengroupaddress cannot step into %s", name);
+  NXReportError(pBueffel);
+  return NXstatus::NX_ERROR;
+}

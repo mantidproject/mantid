@@ -449,11 +449,6 @@ MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
  * \return NX_OK when allocation succeeds, NX_ERROR in the case of an error.
  * \ingroup c_memory
  */
-MANTID_NEXUS_DLL NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype);
-
-/**
- * @copydoc NXmalloc()
- */
 MANTID_NEXUS_DLL NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype);
 
 /**
