@@ -111,7 +111,10 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     @validate_call
     def _rearrange_data(data: AbinsDataDict) -> abins.AbinsData:
         """
-        This method rearranges data read from input ab initio file.
+        This method rearranges data to an AbinsData from an equivalent dict format
+
+        This dictionary format exists for use with HDF caching, but is also a legacy implementation detail of Abins loaders.
+
         :param data: dictionary with the data to rearrange
         """
 
