@@ -6,6 +6,7 @@
 #include "MantidNexus/napi.h"
 #include <H5Cpp.h>
 #include <algorithm>
+#include <array>
 #include <assert.h>
 #include <hdf5.h>
 #include <iostream>
@@ -645,37 +646,35 @@ template <typename NumT> void File::putData(NumT const *data) {
   }
   pNexusFile5 pFile;
   herr_t iRet;
-  int64_t myStart[H5S_MAX_RANK];
-  int64_t mySize[H5S_MAX_RANK];
-  hsize_t thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  int i, rank, unlimiteddim = 0;
+  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
+  int rank;
 
   pFile = assertNXID(m_pfile_id);
   rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
   if (rank < 0) {
     throw NXEXCEPTION("Cannot determine dataset rank");
   }
-  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims, maxdims);
+  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims.data(), maxdims.data());
   if (iRet < 0) {
     throw NXEXCEPTION("Cannot determine dataset dimensions");
   }
-  for (i = 0; i < rank; ++i) {
-    myStart[i] = 0;
-    mySize[i] = static_cast<int64_t>(thedims[i]);
-    if (maxdims[i] == H5S_UNLIMITED) {
-      unlimiteddim = 1;
-      myStart[i] = static_cast<int64_t>(thedims[i] + 1);
-      mySize[i] = 1;
-    }
-  }
-  /* If we are using putdata on an unlimied dimesnion dataset, assume we want to append one single new slab */
+  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
+  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
   if (unlimiteddim) {
-    DimSizeVector startVec(rank), sizeVec(rank);
-    for (i = 0; i < rank; ++i) {
-      startVec[i] = static_cast<dimsize_t>(myStart[i]);
-      sizeVec[i] = static_cast<dimsize_t>(mySize[i]);
+    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
+    for (std::size_t i = 0; i < myStart.size(); i++) {
+      if (maxdims[i] == H5S_UNLIMITED) {
+        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
+        mySize[i] = 1;
+      } else {
+        myStart[i] = 0;
+        mySize[i] = static_cast<int64_t>(thedims[i]);
+      }
     }
-    return putSlab(data, startVec, sizeVec);
+    DimSizeVector vecStart(myStart.begin(), myStart.end());
+    DimSizeVector vecSize(mySize.begin(), mySize.end());
+
+    return putSlab(data, vecStart, vecSize);
   } else {
     iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (iRet < 0) {
@@ -1544,11 +1543,6 @@ string File::getStrAttr(std::string const &name) {
   }
   std::string res(value);
   delete[] value;
-
-  size_t end = res.find('\0');
-  if (end != std::string::npos) {
-    res.resize(end);
-  }
 
   return res;
 }
