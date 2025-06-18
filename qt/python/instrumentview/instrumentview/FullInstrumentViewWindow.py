@@ -287,7 +287,7 @@ class FullInstrumentViewWindow(QMainWindow):
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
         for d in workspace_indices:
-            self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=d)
+            self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=int(d))
 
         self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
         self._detector_figure_canvas.draw()
