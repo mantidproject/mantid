@@ -261,46 +261,53 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-template <typename CountsType> class ProcessEventsTask {
+class ProcessEventsTask {
 public:
   ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
-                    const AlignAndFocusPowderSlim::BankCalibration *calibration, std::vector<CountsType> *y_temp,
-                    const std::vector<double> *binedges, const std::set<detid_t> *masked)
-      : m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp), m_binedges(binedges),
-        masked(masked), no_mask(masked->empty()) {}
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges,
+                    const std::set<detid_t> *masked)
+      : m_detids(detids), m_tofs(tofs), m_calibration(calibration), m_binedges(binedges), masked(masked),
+        no_mask(masked->empty()) {
+    y_temp.resize(m_binedges->size() - 1, 0);
+  }
+  // Local histogram for this block/thread
+  std::vector<uint32_t> y_temp;
 
-  void operator()(const tbb::blocked_range<size_t> &range) const {
+  void operator()(const tbb::blocked_range<size_t> &range) {
     // Fast histogramming without sorting or cumulative counting
 
     // Precompute bin edges for fast lookup
     const auto &binedges = *m_binedges;
     const size_t nbins = binedges.size() - 1;
 
-    // Local histogram for this block/thread
-    std::vector<uint32_t> local_hist(nbins, 0);
-
     for (size_t i = range.begin(); i < range.end(); ++i) {
       const detid_t detid = (*m_detids)[i];
       if (no_mask || (masked->find(detid) == masked->end())) {
         // Apply calibration
-        double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
+        const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
 
         // Find the bin index using binary search
-        auto it = std::upper_bound(binedges.begin(), binedges.end(), tof);
-        size_t bin =
+        const auto it = std::upper_bound(binedges.begin(), binedges.end(), tof);
+        const size_t bin =
             (it == binedges.begin() || it == binedges.end()) ? nbins : static_cast<size_t>(it - binedges.begin() - 1);
 
         if (bin < nbins) {
-          local_hist[bin]++;
+          y_temp[bin]++;
         }
       }
     }
+  }
 
-    // Atomically add local histogram to global
-    for (size_t i = 0; i < nbins; ++i) {
-      if (local_hist[i] > 0) {
-        (*y_temp)[i].fetch_add(local_hist[i], std::memory_order_relaxed);
-      }
+  ProcessEventsTask(ProcessEventsTask &other, tbb::split)
+      : m_detids(other.m_detids), m_tofs(other.m_tofs), m_calibration(other.m_calibration),
+        m_binedges(other.m_binedges), masked(other.masked), no_mask(other.no_mask) {
+    y_temp.resize(m_binedges->size() - 1, 0);
+  }
+
+  void join(const ProcessEventsTask &other) {
+    // Combine local histograms
+    for (size_t i = 0; i < m_binedges->size() - 1; ++i) {
+      y_temp[i] += other.y_temp[i];
     }
   }
 
@@ -308,7 +315,6 @@ private:
   const std::vector<detid_t> *m_detids;
   const std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
-  std::vector<CountsType> *y_temp;
   const std::vector<double> *m_binedges;
   const std::set<detid_t> *masked;
   const bool no_mask; // whether there are any masked pixels
@@ -370,8 +376,8 @@ public:
 
         // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
         // counting things
-        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+        // std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+        std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
         // read parts of the bank at a time
         size_t event_index_start = eventRangeFull.first;
@@ -398,15 +404,18 @@ public:
           const auto numEvent = event_time_of_flight->size();
 
           // threaded processing of the events
-          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &y_temp,
-                                 &spectrum.readX(), &m_masked);
+          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX(),
+                                 &m_masked);
           if (numEvent > m_grainsize_event) {
             // use tbb
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
+            tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
           } else {
             // single thread
             task(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event));
           }
+
+          for (size_t i = 0; i < y_temp.size(); ++i)
+            y_temp[i] += task.y_temp[i]; // accumulate the results
 
           event_index_start += m_events_per_chunk;
         }
