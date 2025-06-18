@@ -29,6 +29,8 @@
 #include <string>
 #define H5Aiterate_vers 2
 
+#include <algorithm>
+#include <array>
 #include <assert.h>
 #include <cstring>
 #include <map>
@@ -920,10 +922,8 @@ NXstatus NX5closedata(NXhandle fid) {
 NXstatus NX5putdata(NXhandle fid, const void *data) {
   pNexusFile5 pFile;
   herr_t iRet;
-  int64_t myStart[H5S_MAX_RANK];
-  int64_t mySize[H5S_MAX_RANK];
-  hsize_t thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  int i, rank, unlimiteddim = 0;
+  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
+  int rank;
 
   pFile = NXI5assert(fid);
   rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
@@ -931,23 +931,25 @@ NXstatus NX5putdata(NXhandle fid, const void *data) {
     NXReportError("ERROR: Cannot determine dataset rank");
     return NXstatus::NX_ERROR;
   }
-  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims, maxdims);
+  iRet = H5Sget_simple_extent_dims(pFile->iCurrentS, thedims.data(), maxdims.data());
   if (iRet < 0) {
     NXReportError("ERROR: Cannot determine dataset dimensions");
     return NXstatus::NX_ERROR;
   }
-  for (i = 0; i < rank; ++i) {
-    myStart[i] = 0;
-    mySize[i] = static_cast<int64_t>(thedims[i]);
-    if (maxdims[i] == H5S_UNLIMITED) {
-      unlimiteddim = 1;
-      myStart[i] = static_cast<int64_t>(thedims[i] + 1);
-      mySize[i] = 1;
-    }
-  }
-  /* If we are using putdata on an unlimied dimesnion dataset, assume we want to append one single new slab */
+  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
+  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
   if (unlimiteddim) {
-    return NX5putslab64(fid, data, myStart, mySize);
+    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
+    for (std::size_t i = 0; i < myStart.size(); i++) {
+      if (maxdims[i] == H5S_UNLIMITED) {
+        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
+        mySize[i] = 1;
+      } else {
+        myStart[i] = 0;
+        mySize[i] = static_cast<int64_t>(thedims[i]);
+      }
+    }
+    return NX5putslab64(fid, data, myStart.data(), mySize.data());
   } else {
     iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (iRet < 0) {
@@ -1701,13 +1703,50 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 
 /*-------------------------------------------------------------------------*/
 
+NXstatus NX5getchardata(NXhandle fid, void *data) {
+  fflush(stdout);
+  pNexusFile5 pFile = NXI5assert(fid);
+  NXstatus status = NXstatus::NX_ERROR;
+
+  if (H5Tis_variable_str(pFile->iCurrentT)) {
+    char *cdata = nullptr;
+    herr_t ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
+    if (ret < 0 || cdata == nullptr) {
+      status = NXstatus::NX_ERROR;
+    } else {
+      memcpy(data, cdata, strlen(cdata) * sizeof(char));
+      H5free_memory(cdata);
+      status = NXstatus::NX_OK;
+    }
+  } else {
+    hsize_t dims[NX_MAXRANK] = {0};
+    hsize_t len = H5Tget_size(pFile->iCurrentT);
+    // for a 2D char array, handle block size
+    int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL);
+    if (rank >= 0) {
+      len *= (dims[0] > 1 ? dims[0] : 1); // min of dims[0], 1
+    }
+    // reserve space in memory
+    char *cdata = new char[len + 1];
+    memset(cdata, 0, (len + 1) * sizeof(char));
+    herr_t ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata);
+    if (ret < 0) {
+      status = NXstatus::NX_ERROR;
+    } else {
+      cdata[len] = '\0';                       // ensure null termination
+      memcpy(data, cdata, len * sizeof(char)); // NOTE cdata may have \0 bw char arrays, len is correct length
+      status = NXstatus::NX_OK;
+    }
+    delete[] cdata;
+  }
+  return status;
+}
+
 NXstatus NX5getdata(NXhandle fid, void *data) {
   pNexusFile5 pFile;
   int iStart[H5S_MAX_RANK], status;
   hid_t memtype_id;
-  H5T_class_t tclass;
   hsize_t ndims, dims[H5S_MAX_RANK];
-  char **vstrdata = NULL;
 
   pFile = NXI5assert(fid);
   /* check if there is an Dataset open */
@@ -1717,33 +1756,18 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
   }
   ndims = static_cast<hsize_t>(H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL));
 
+  if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
+    return NX5getchardata(fid, data);
+  }
+
   if (ndims == 0) { /* SCALAR dataset */
     hid_t datatype = H5Dget_type(pFile->iCurrentD);
     hid_t filespace = H5Dget_space(pFile->iCurrentD);
 
-    tclass = H5Tget_class(datatype);
-
-    if (H5Tis_variable_str(pFile->iCurrentT)) {
-      char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
-      status = H5Dread(pFile->iCurrentD, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
-      if (status >= 0) {
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
-        // there is a danger of overflowing output string
-        std::strncpy(static_cast<char *>(data), strdata, strlen(strdata));
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic pop
-#endif
-      }
-      free(strdata);
-    } else {
-      memtype_id = H5Screate(H5S_SCALAR);
-      H5Sselect_all(filespace);
-      status = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
-      H5Sclose(memtype_id);
-    }
+    memtype_id = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace);
+    status = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+    H5Sclose(memtype_id);
 
     H5Sclose(filespace);
     H5Tclose(datatype);
@@ -1754,29 +1778,8 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
 
   memset(iStart, 0, H5S_MAX_RANK * sizeof(int));
   /* map datatypes of other plateforms */
-  tclass = H5Tget_class(pFile->iCurrentT);
-  if (H5Tis_variable_str(pFile->iCurrentT)) {
-    vstrdata = static_cast<char **>(malloc((size_t)dims[0] * sizeof(char *)));
-    memtype_id = H5Tcopy(H5T_C_S1);
-    H5Tset_size(memtype_id, H5T_VARIABLE);
-    status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vstrdata);
-    static_cast<char *>(data)[0] = '\0';
-    if (status >= 0) {
-      for (hsize_t i = 0; i < dims[0]; ++i) {
-        if (vstrdata[i] != NULL) {
-          strcat(static_cast<char *>(data), vstrdata[i]);
-        }
-      }
-    }
-    H5Dvlen_reclaim(memtype_id, pFile->iCurrentS, H5P_DEFAULT, vstrdata);
-    free(vstrdata);
-    H5Tclose(memtype_id);
-  } else if (tclass == H5T_STRING) {
-    status = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-  } else {
-    memtype_id = h5MemType(pFile->iCurrentT);
-    status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-  }
+  memtype_id = h5MemType(pFile->iCurrentT);
+  status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   if (status < 0) {
     NXReportError("ERROR: failed to transfer dataset");
     return NXstatus::NX_ERROR;
