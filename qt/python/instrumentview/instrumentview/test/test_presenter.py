@@ -71,20 +71,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.point_picked(MagicMock(), mock_picker)
         mock_update_picked_detectors.assert_called_with([1])
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_info_text_for_detectors")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.show_plot_for_detectors")
-    def test_update_picked_detectors(self, mock_show_plot, mock_show_info_text):
+    def test_update_picked_detectors(self):
         mock_model = MagicMock()
         self._presenter._model = mock_model
-
-        def picked_detector_ids():
-            return [1, 2]
 
         def picked_visibility():
             return [True, True, False]
 
-        mock_model.picked_detector_ids = picked_detector_ids
+        def picked_workspace_indices():
+            return [0, 1]
+
+        def picked_detectors_info_text():
+            return ["a", "a"]
+
         mock_model.picked_visibility = picked_visibility
+        mock_model.picked_workspace_indices = picked_workspace_indices
+        mock_model.picked_detectors_info_text = picked_detectors_info_text
 
         self._presenter._pickable_main_mesh = {}
         self._presenter._pickable_projection_mesh = {}
@@ -95,30 +97,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self.assertEqual(self._presenter._pickable_main_mesh["visibility"], [True, True, False])
         self.assertEqual(self._presenter._pickable_projection_mesh["visibility"], [True, True, False])
-        mock_show_plot.assert_called_with([1, 2])
-        mock_show_info_text.assert_called_with([1, 2])
+
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 1])
+        self._mock_view.update_selected_detector_info.assert_called_once_with(["a", "a"])
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generateSingleColour([[1, 0, 0], [0, 1, 0]], 0, 1, 0, 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
-
-    def test_show_plot_for_detectors(self):
-        mock_model = MagicMock()
-        self._presenter._model = mock_model
-
-        def mock_workspace_index(i):
-            return 2 * i
-
-        mock_model.workspace_index_from_detector_id = mock_workspace_index
-        self._presenter.show_plot_for_detectors([0, 1, 2])
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 2, 4])
-
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_detector_info_text")
-    def test_show_info_text_for_detectors(self, mock_get_detector_info_text):
-        mock_get_detector_info_text.return_value = "a"
-        self._presenter.show_info_text_for_detectors([0, 1, 2])
-        self._mock_view.update_selected_detector_info.assert_called_once_with(["a", "a", "a"])
 
     def test_set_multi_select_enabled(self):
         self._presenter.set_multi_select_enabled(True)

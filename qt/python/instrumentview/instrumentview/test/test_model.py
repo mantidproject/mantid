@@ -6,7 +6,6 @@ from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
-import numpy as np
 
 
 class TestFullInstrumentViewModel(unittest.TestCase):
@@ -37,12 +36,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(min(integrated_spectra), self._model._data_min)
         self.assertEqual(max(integrated_spectra), self._model._data_max)
 
-    def test_get_detector_info_text(self):
-        detector_info = self._ws.detectorInfo()
-        det_id = detector_info.detectorIDs()[0]
-        info = self._model.get_detector_info_text(det_id)
-        self.assertEquals(det_id, info.detector_id)
-        np.testing.assert_almost_equal(detector_info.position(0), info.xyz_position)
+    # TODO: Add test for picked_detectors_info_text
+    # TODO: Add tests for other picking methods
 
     @mock.patch("instrumentview.Projections.spherical_projection.spherical_projection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
@@ -54,8 +49,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     def _run_projection_test(self, mock_projection_constructor, is_spherical):
         mock_projection = mock.MagicMock()
-        mock_projection.coordinate_for_detector.return_value = (1, 2)
+        mock_projection.positions.return_value = [[1, 2], [1, 2]]
         mock_projection_constructor.return_value = mock_projection
         points = self._model.calculate_projection(is_spherical, axis=[0, 1, 0])
         mock_projection_constructor.assert_called_once()
-        self.assertTrue(all(point == [1, 2, 0] for point in points))
+        self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
