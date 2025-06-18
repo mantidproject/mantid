@@ -41,6 +41,8 @@
 #include "MantidNexus/napi5.h"
 #include "MantidNexus/napi_helper.h"
 
+#define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
+
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
@@ -149,15 +151,168 @@ NXstatus NXclose(NXhandle &fid) {
 
 /*-----------------------------------------------------------------------*/
 
-NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) { return NX5makegroup(fid, name, nxclass); }
+NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
+  pNexusFile5 pFile;
+  hid_t iVID;
+  hid_t attr1, aid1, aid2;
+  std::string pBuffer;
+
+  pFile = NXI5assert(fid);
+  /* create and configure the group */
+  if (pFile->iCurrentG == 0) {
+    pBuffer = "/" + std::string(name);
+  } else {
+    pBuffer = "/" + std::string(pFile->name_ref) + "/" + std::string(name);
+  }
+  iVID = H5Gcreate(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if (iVID < 0) {
+    NXReportError("ERROR: could not create Group");
+    return NXstatus::NX_ERROR;
+  }
+  aid2 = H5Screate(H5S_SCALAR);
+  aid1 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(aid1, strlen(nxclass));
+  attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr1 < 0) {
+    NXReportError("ERROR: failed to store class name");
+    return NXstatus::NX_ERROR;
+  }
+  if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(nxclass))) < 0) {
+    NXReportError("ERROR: failed to store class name");
+    return NXstatus::NX_ERROR;
+  }
+  /* close group */
+  hid_t iRet = H5Sclose(aid2);
+  iRet += H5Tclose(aid1);
+  iRet += H5Aclose(attr1);
+  iRet += H5Gclose(iVID);
+  UNUSED_ARG(iRet);
+  // always return that it worked
+  return NXstatus::NX_OK;
+}
 
 /*------------------------------------------------------------------------*/
 
-NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) { return NX5opengroup(fid, name, nxclass); }
+NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
+  pNexusFile5 pFile;
+  hid_t attr1, atype, iVID;
+  herr_t iRet;
+  char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
+
+  pFile = NXI5assert(fid);
+  if (pFile->iCurrentG == 0) {
+    strcpy(pBuffer, name);
+  } else {
+    sprintf(pBuffer, "%s/%s", pFile->name_tmp, name);
+  }
+  iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
+  if (iVID < 0) {
+    std::string msg = std::string("ERROR: group ") + pFile->name_tmp + " does not exist";
+    NXReportError(const_cast<char *>(msg.c_str()));
+    return NXstatus::NX_ERROR;
+  }
+  pFile->iCurrentG = iVID;
+  strcpy(pFile->name_tmp, pBuffer);
+  strcpy(pFile->name_ref, pBuffer);
+
+  if ((nxclass != NULL) && (strcmp(nxclass, NX_UNKNOWN_GROUP) != 0)) {
+    /* check group attribute */
+    iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
+    if (iRet < 0) {
+      NXReportError("ERROR: iterating through attribute list");
+      return NXstatus::NX_ERROR;
+    } else if (iRet == 1) {
+      /* group attribute was found */
+    } else {
+      /* no group attribute available */
+      NXReportError("ERROR: no group attribute available");
+      return NXstatus::NX_ERROR;
+    }
+    /* check contents of group attribute */
+    attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    if (attr1 < 0) {
+      NXReportError("ERROR: opening NX_class group attribute");
+      return NXstatus::NX_ERROR;
+    }
+    atype = H5Tcopy(H5T_C_S1);
+    char data[128];
+    H5Tset_size(atype, sizeof(data));
+    iRet = readStringAttributeN(attr1, data, sizeof(data));
+    if (strcmp(data, nxclass) == 0) {
+      /* test OK */
+    } else {
+      snprintf(pBuffer, sizeof(pBuffer), "ERROR: group class is not identical: \"%s\" != \"%s\"", data, nxclass);
+      NXReportError(pBuffer);
+      H5Tclose(atype);
+      H5Aclose(attr1);
+      return NXstatus::NX_ERROR;
+    }
+    H5Tclose(atype);
+    H5Aclose(attr1);
+  }
+
+  /* maintain stack */
+  pFile->iStackPtr++;
+  pFile->iStack5[pFile->iStackPtr].iVref = pFile->iCurrentG;
+  strcpy(pFile->iStack5[pFile->iStackPtr].irefn, name);
+  pFile->iCurrentIDX = 0;
+  pFile->iCurrentD = 0;
+  NXI5KillDir(pFile);
+  return NXstatus::NX_OK;
+}
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXclosegroup(NXhandle fid) { return NX5closegroup(fid); }
+NXstatus NXclosegroup(NXhandle fid) {
+  pNexusFile5 pFile;
+
+  pFile = NXI5assert(fid);
+  /* first catch the trivial case: we are at root and cannot get
+     deeper into a negative directory hierarchy (anti-directory)
+   */
+  if (pFile->iCurrentG == 0) {
+    NXI5KillDir(pFile);
+    return NXstatus::NX_OK;
+  } else {
+    /* close the current group and decrement name_ref */
+    H5Gclose(pFile->iCurrentG);
+    size_t i = strlen(pFile->iStack5[pFile->iStackPtr].irefn);
+    size_t ii = strlen(pFile->name_ref);
+    if (pFile->iStackPtr > 1) {
+      ii = ii - i - 1;
+    } else {
+      ii = ii - i;
+    }
+    if (ii > 0) {
+      char *uname = strdup(pFile->name_ref);
+      char *u1name = NULL;
+      u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
+      memset(u1name, 0, ii);
+      for (i = 0; i < ii; i++) {
+        *(u1name + i) = *(uname + i);
+      }
+      *(u1name + i) = '\0';
+      /*
+         strncpy(u1name, uname, ii);
+       */
+      strcpy(pFile->name_ref, u1name);
+      strcpy(pFile->name_tmp, u1name);
+      free(uname);
+      free(u1name);
+    } else {
+      strcpy(pFile->name_ref, "");
+      strcpy(pFile->name_tmp, "");
+    }
+    NXI5KillDir(pFile);
+    pFile->iStackPtr--;
+    if (pFile->iStackPtr > 0) {
+      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    } else {
+      pFile->iCurrentG = 0;
+    }
+  }
+  return NXstatus::NX_OK;
+}
 
 /* --------------------------------------------------------------------- */
 

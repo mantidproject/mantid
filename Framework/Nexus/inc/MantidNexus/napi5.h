@@ -11,10 +11,6 @@
 
 NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
 
-NXstatus NX5makegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
-NXstatus NX5opengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
-NXstatus NX5closegroup(NXhandle handle);
-
 NXstatus NX5makedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[]);
 NXstatus NX5compmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank, int64_t dim[], int comp_typ,
                            int64_t const bufsize[]);
