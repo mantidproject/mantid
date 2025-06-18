@@ -26,7 +26,7 @@ class MoldenLoader(AbInitioLoader):
             raw_data = self._read_blocks(fd)
 
         atoms_data = self.parse_atoms_data(raw_data)
-        k_points_data = self.parse_k_points_data(raw_data)
+        k_points_data = self.parse_k_points_data(raw_data, atoms_data)
         abins_data = AbinsData(atoms_data=atoms_data, k_points_data=k_points_data)
         return abins_data
 
@@ -79,19 +79,58 @@ class MoldenLoader(AbInitioLoader):
         return AtomsData(atoms_data)
 
     @classmethod
-    def parse_k_points_data(cls, raw_data: dict[str, list[str]]) -> KpointsData:
-        "Read frequencies in recip cm and normalised atomic displacements"
+    def parse_k_points_data(cls, raw_data: dict[str, list[str]], atoms_data: AtomsData) -> KpointsData:
+        """Read frequencies in recip cm and normalised atomic displacements
+
+        Masses are applied for normalisation.
+
+        Args:
+            raw_data: .mol file data as Python dict
+            atoms_data: Atomic positions and masses from the same .mol file.
+                (Masses are required for appropriate weighting of the atomic
+                displacements.)
+
+        Returns:
+            Vibration/phonon mode data from .mol file
+        """
         frequencies = [list(map(float, raw_data["[FREQ]"]))]
 
-        displacements = cls._parse_displacements(raw_data)
+        displacements = np.array(cls._parse_displacements(raw_data), dtype=FLOAT_TYPE).view(COMPLEX_TYPE)
+
+        masses = np.array([atom["mass"] for atom in atoms_data], dtype=FLOAT_TYPE)
+        displacements = cls._normalise_displacements(displacements, masses)
 
         return KpointsData(
             k_vectors=np.array([[0.0, 0.0, 0.0]], dtype=FLOAT_TYPE),
             unit_cell=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]], dtype=FLOAT_TYPE),
             weights=np.array([1.0], dtype=FLOAT_TYPE),
             frequencies=np.array(frequencies, dtype=FLOAT_TYPE),
-            atomic_displacements=np.array(displacements, dtype=FLOAT_TYPE).view(COMPLEX_TYPE),
+            atomic_displacements=displacements,
         )
+
+    @staticmethod
+    def _normalise_displacements(displacements: np.ndarray, masses: np.ndarray) -> np.ndarray:
+        """Renormalise modes, like Abins GAUSSIAN loader
+
+        Args:
+            displacements: complex float array with indices (kpt, atom, mode, axis)
+            masses: atomic masses corresponding to atom indices
+
+        Returns:
+            Normalised copy of displacements array
+        """
+
+        # Sum over squares of cartesian displacement directions
+        b_traces = np.einsum("ijkl,ijkl -> ijk", displacements, displacements)
+
+        # Multiply by masses and sum over atoms to obtain mode normalisation
+        norm = np.einsum("ijk, j->ik", b_traces, masses)
+
+        # Scale along mode and atom axes
+        displacements = np.einsum("ijkl,ik->ijkl", displacements, 1.0 / np.sqrt(norm))
+        displacements = np.einsum("ijkl,j->ijkl", displacements, np.sqrt(masses))
+
+        return displacements
 
     @staticmethod
     def _parse_displacements(raw_data: dict[str, list[str]]) -> list[list[list[list[float]]]]:
