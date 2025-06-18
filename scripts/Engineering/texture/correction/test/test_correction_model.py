@@ -286,8 +286,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol):
         preset = "4mmCube"
         expected_str = (
-            "\n        <cuboid id='some-gv'>         <height val='0.04'  />         "
-            "<width val='0.04' />          <depth  val='0.04' />          "
+            "\n        <cuboid id='some-gv'>         <height val='0.004'  />         "
+            "<width val='0.004' />          <depth  val='0.004' />          "
             "<centre x='0.0' y='0.0' z='0.0'  />          </cuboid>          "
             "<algebra val='some-gv' /> \\ "
         )

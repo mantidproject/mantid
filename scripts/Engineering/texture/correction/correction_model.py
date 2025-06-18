@@ -5,7 +5,6 @@ from mantid.simpleapi import (
     SetSampleMaterial,
     DefineGaugeVolume,
     ConvertUnits,
-    Scale,
     MonteCarloAbsorption,
     EstimateDivergence,
     CloneWorkspace,
@@ -123,9 +122,9 @@ class TextureCorrectionModel:
         if preset == "4mmCube":
             gauge_str = """
         <cuboid id='some-gv'> \
-        <height val='0.04'  /> \
-        <width val='0.04' />  \
-        <depth  val='0.04' />  \
+        <height val='0.004'  /> \
+        <width val='0.004' />  \
+        <depth  val='0.004' />  \
         <centre x='0.0' y='0.0' z='0.0'  />  \
         </cuboid>  \
         <algebra val='some-gv' /> \\ """
@@ -161,7 +160,7 @@ class TextureCorrectionModel:
     def calc_absorption(self, ws, mc_param_str):
         method_dict = self._param_str_to_dict(mc_param_str)
         temp_ws = ConvertUnits(ws, Target="Wavelength")
-        Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
+        # Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
         method_dict["OutputWorkspace"] = "_abs_corr"
         MonteCarloAbsorption(temp_ws, **method_dict)
 

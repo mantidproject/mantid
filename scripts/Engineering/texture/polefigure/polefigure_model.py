@@ -133,7 +133,7 @@ class TextureProjection:
         ax_labels=("Dir1", "Dir2"),
         contour_kernel=2.0,
         **kwargs,
-    ) -> None:
+    ) -> plt.Figure:
         pfi = self.get_pole_figure_data(ws_name, projection, readout_col)
 
         if plot_exp:
@@ -145,6 +145,8 @@ class TextureProjection:
         if save_dirs:
             for save_dir in save_dirs:
                 fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
+
+        return fig
 
     def plot_exp_pf(self, pfi, ax_labels, fig=None, **kwargs):
         u = np.linspace(0, 2 * np.pi, 100)
