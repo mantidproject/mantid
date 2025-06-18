@@ -171,27 +171,11 @@ NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen,
   return NX5putattr(fid, name, data, datalen, iType);
 }
 
-/* ------------------------------------------------------------------- */
-
-NXstatus NXputslab(NXhandle fid, const void *data, const int iStart[], const int iSize[]) {
-  int i, rank;
-  NXnumtype iType;
-  int64_t iStart64[NX_MAXRANK], iSize64[NX_MAXRANK];
-  if (NXgetinfo64(fid, &rank, iStart64, &iType) != NXstatus::NX_OK) {
-    return NXstatus::NX_ERROR;
-  }
-  for (i = 0; i < rank; ++i) {
-    iStart64[i] = iStart[i];
-    iSize64[i] = iSize[i];
-  }
-  return NXputslab64(fid, data, iStart64, iSize64);
-}
-
 NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
   return NX5putslab64(fid, data, iStart, iSize);
 }
 
-/* ------------------------------------------------------------------- */
+/* ---- --------------------------------------------------------------- */
 
 NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) { return NX5getdataID(fid, sRes); }
 
@@ -199,26 +183,13 @@ NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) { return NX5getdataID(fid, sRes
 
 NXstatus NXmakelink(NXhandle fid, NXlink *sLink) { return NX5makelink(fid, sLink); }
 
-/* ------------------------------------------------------------------- */
+/* ----------------- -------------------------------------------------- */
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   return NX5makenamedlink(fid, newname, sLink);
 }
 
 /* -------------------------------------------------------------------- */
-NXstatus NXopensourcegroup(NXhandle fid) {
-  char target_address[512];
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 511;
-  NXstatus status;
-
-  status = NXgetattr(fid, "target", target_address, &length, &type);
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: item not linked");
-    return NXstatus::NX_ERROR;
-  }
-  return NXopengroupaddress(fid, target_address);
-}
 
 /*----------------------------------------------------------------------*/
 
@@ -352,11 +323,6 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
     status = NX5getdata(fid, data);
   }
   return status;
-}
-
-/*---------------------------------------------------------------------------*/
-NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  return NX5getinfo64(fid, rank, dimension, iType);
 }
 
 /*-------------------------------------------------------------------------*/

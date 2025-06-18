@@ -273,11 +273,6 @@ MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle handle, CONSTCHAR *name, const void
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXputslab(NXhandle handle, const void *data, const int start[], const int size[]);
-
-/**
- * @copydoc NXputdata()
- */
 MANTID_NEXUS_DLL NXstatus NXputslab64(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
 
 /**
@@ -313,15 +308,6 @@ MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
  * \ingroup c_linking
  */
 MANTID_NEXUS_DLL NXstatus NXmakenamedlink(NXhandle handle, CONSTCHAR *newname, NXlink *pLink);
-
-/**
- * Open the source group of a linked group or dataset. Returns an error when the item is
- * not a linked item.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXopensourcegroup(NXhandle handle);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -498,20 +484,6 @@ MANTID_NEXUS_DLL const char *NXgetversion();
 MANTID_NEXUS_DLL NXstatus NXfree(void **data);
 
 MANTID_NEXUS_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
-
-/**
- * Retrieve information about the currently open dataset. In contrast to the main function below,
- * this function does not try to find out about the size of strings properly.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param rank A pointer to an integer which will be filled with the rank of
- * the dataset.
- * \param dimension An array which will be initialized with the size of the dataset in any of its
- * dimensions. The array must have at least the size of rank.
- * \param datatype A pointer to an integer which be set to the NeXus data type code for this dataset.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 
 /**
  * Dispatches the error message
