@@ -39,6 +39,7 @@
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
+#include "MantidNexus/napi_helper.h"
 
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
@@ -105,22 +106,45 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
 
 /*-----------------------------------------------------------------------*/
 
-NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) { return NX5reopen(origHandle, newHandle); }
+NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
+  pNexusFile5 pNew = NULL, pOrig = NULL;
+  newHandle = NULL;
+  pOrig = static_cast<pNexusFile5>(origHandle);
+  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
+  if (!pNew) {
+    NXReportError("ERROR: no memory to create File datastructure");
+    return NXstatus::NX_ERROR;
+  }
+  memset(pNew, 0, sizeof(NexusFile5));
+  pNew->iFID = H5Freopen(pOrig->iFID);
+  if (pNew->iFID <= 0) {
+    NXReportError("cannot clone file");
+    free(pNew);
+    return NXstatus::NX_ERROR;
+  }
+  pNew->iNXID = NX5SIGNATURE;
+  pNew->iStack5[0].iVref = 0; /* root! */
+  newHandle = static_cast<NXhandle>(pNew);
+  return NXstatus::NX_OK;
+}
 
 /* ------------------------------------------------------------------------- */
 
 NXstatus NXclose(NXhandle &fid) {
-  NXstatus status;
   if (fid == NULL) {
     return NXstatus::NX_OK;
   }
-  status = NX5close(fid);
-  if (status == NXstatus::NX_OK) {
-    delete fid;
-    fid = NULL;
+  pNexusFile5 pFile = NXI5assert(fid);
+  herr_t iRet = H5Fclose(pFile->iFID);
+  if (iRet < 0) {
+    NXReportError("ERROR: cannot close HDF file");
   }
-
-  return status;
+  /* release memory */
+  NXI5KillDir(pFile);
+  free(pFile);
+  fid = NULL;
+  H5garbage_collect();
+  return NXstatus::NX_OK;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -193,7 +217,24 @@ NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NXflush(NXhandle &fid) { return NX5flush(fid); }
+NXstatus NXflush(NXhandle &fid) {
+  pNexusFile5 pFile = NULL;
+  herr_t iRet;
+
+  pFile = NXI5assert(fid);
+  if (pFile->iCurrentD != 0) {
+    iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
+  } else if (pFile->iCurrentG != 0) {
+    iRet = H5Fflush(pFile->iCurrentG, H5F_SCOPE_LOCAL);
+  } else {
+    iRet = H5Fflush(pFile->iFID, H5F_SCOPE_LOCAL);
+  }
+  if (iRet < 0) {
+    NXReportError("ERROR: The object cannot be flushed");
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
+}
 
 /*-------------------------------------------------------------------------*/
 

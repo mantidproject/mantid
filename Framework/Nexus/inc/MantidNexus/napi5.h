@@ -10,10 +10,6 @@
 /* HDF5 interface */
 
 NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
-NXstatus NX5reopen(NXhandle origHandle, NXhandle &newHandle);
-
-NXstatus NX5close(NXhandle &handle);
-NXstatus NX5flush(NXhandle &handle);
 
 NXstatus NX5makegroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);
 NXstatus NX5opengroup(NXhandle handle, CONSTCHAR *name, CONSTCHAR *NXclass);

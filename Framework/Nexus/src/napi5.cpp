@@ -63,29 +63,7 @@ extern void *NXpData;
 
    Definition of NeXus API
 
-   --------------------------------------------------------------------- */
-
-NXstatus NX5reopen(NXhandle origHandle, NXhandle &newHandle) {
-  pNexusFile5 pNew = NULL, pOrig = NULL;
-  newHandle = NULL;
-  pOrig = static_cast<pNexusFile5>(origHandle);
-  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: no memory to create File datastructure");
-    return NXstatus::NX_ERROR;
-  }
-  memset(pNew, 0, sizeof(NexusFile5));
-  pNew->iFID = H5Freopen(pOrig->iFID);
-  if (pNew->iFID <= 0) {
-    NXReportError("cannot clone file");
-    free(pNew);
-    return NXstatus::NX_ERROR;
-  }
-  pNew->iNXID = NX5SIGNATURE;
-  pNew->iStack5[0].iVref = 0; /* root! */
-  newHandle = static_cast<NXhandle>(pNew);
-  return NXstatus::NX_OK;
-}
+---------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------
  * private functions used in NX5open
@@ -274,46 +252,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
   handle = static_cast<NXhandle>(pNew);
-  return NXstatus::NX_OK;
-}
-
-/* ------------------------------------------------------------------------- */
-
-NXstatus NX5close(NXhandle &fid) {
-  pNexusFile5 pFile = NULL;
-  herr_t iRet;
-
-  pFile = NXI5assert(fid);
-
-  iRet = 0;
-  /*
-     printf("HDF5 object count before close: %d\n",
-     H5Fget_obj_count(pFile->iFID,H5F_OBJ_ALL));
-   */
-  iRet = H5Fclose(pFile->iFID);
-
-  /*
-     leave this here: it helps in debugging leakage problems
-     printf("HDF5 object count after close: %d\n",
-     H5Fget_obj_count(H5F_OBJ_ALL,H5F_OBJ_ALL));
-     printf("HDF5 dataset count after close: %d\n",
-     H5Fget_obj_count(H5F_OBJ_ALL,H5F_OBJ_DATASET));
-     printf("HDF5 group count after close: %d\n",
-     H5Fget_obj_count(H5F_OBJ_ALL,H5F_OBJ_GROUP));
-     printf("HDF5 datatype count after close: %d\n",
-     H5Fget_obj_count(H5F_OBJ_ALL,H5F_OBJ_DATATYPE));
-     printf("HDF5 attribute count after close: %d\n",
-     H5Fget_obj_count(H5F_OBJ_ALL,H5F_OBJ_ATTR));
-   */
-
-  if (iRet < 0) {
-    NXReportError("ERROR: cannot close HDF file");
-  }
-  /* release memory */
-  NXI5KillDir(pFile);
-  free(pFile);
-  fid = NULL;
-  H5garbage_collect();
   return NXstatus::NX_OK;
 }
 
@@ -1098,25 +1036,6 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
 }
 
 /*----------------------------------------------------------------------*/
-
-NXstatus NX5flush(NXhandle &handle) {
-  pNexusFile5 pFile = NULL;
-  herr_t iRet;
-
-  pFile = NXI5assert(handle);
-  if (pFile->iCurrentD != 0) {
-    iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
-  } else if (pFile->iCurrentG != 0) {
-    iRet = H5Fflush(pFile->iCurrentG, H5F_SCOPE_LOCAL);
-  } else {
-    iRet = H5Fflush(pFile->iFID, H5F_SCOPE_LOCAL);
-  }
-  if (iRet < 0) {
-    NXReportError("ERROR: The object cannot be flushed");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
 
 /*-------------------------------------------------------------------------*/
 
