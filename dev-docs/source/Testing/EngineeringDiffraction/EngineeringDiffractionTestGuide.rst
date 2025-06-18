@@ -11,7 +11,7 @@ Preamble
 - This document is tailored towards developers intending to test the Engineering Diffraction interface.
 - Runs can be loaded from the archive, however it is possible that different run numbers will be needed as older runs may be deleted.
 - The nexus files for all the runs used below are available from ``<mantidBuildDir>/ExternalData/Testing/Data/DocTest`` path
-- Data loading time from the archive can be heavily deducted by adding the above path at ``File`` -> ``Manage User Directories`` -> ``Data Search Directories`` before starting the tests.
+- Data loading time from the archive can be reduced by adding the above path at ``File`` -> ``Manage User Directories`` -> ``Data Search Directories`` before starting the tests.
 
 
 Overview
