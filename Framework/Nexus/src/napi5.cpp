@@ -1704,7 +1704,6 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getchardata(NXhandle fid, void *data) {
-  fflush(stdout);
   pNexusFile5 pFile = NXI5assert(fid);
   NXstatus status = NXstatus::NX_ERROR;
 
@@ -1714,7 +1713,7 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     if (ret < 0 || cdata == nullptr) {
       status = NXstatus::NX_ERROR;
     } else {
-      memcpy(data, cdata, strlen(cdata) * sizeof(char));
+      memcpy(data, cdata, (strlen(cdata) + 1) * sizeof(char));
       H5free_memory(cdata);
       status = NXstatus::NX_OK;
     }
@@ -1723,8 +1722,8 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     hsize_t len = H5Tget_size(pFile->iCurrentT);
     // for a 2D char array, handle block size
     int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL);
-    if (rank >= 0) {
-      len *= (dims[0] > 1 ? dims[0] : 1); // min of dims[0], 1
+    for (int i = 0; i < rank - 1; i++) {
+      len *= (dims[i] > 1 ? dims[i] : 1); // min of dims[0], 1
     }
     // reserve space in memory
     char *cdata = new char[len + 1];

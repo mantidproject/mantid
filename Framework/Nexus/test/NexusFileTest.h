@@ -271,7 +271,7 @@ public:
   void test_make_data_lateral() {
     // this ensures behavior making a dataset while a dataset is opened will instead
     // anchor that dataset into the containing GROUP and not the DATASET
-    // this is not good hygienic behavior, but is requried by NexusClasses and can
+    // this is not good hygienic behavior, but is required by NexusClasses and can
     // lead to test regressions that are otherwise very hard to track down
     cout << "\ntest make data lateral\n";
     FileResource resource("test_napi_file_rdwr.h5");
