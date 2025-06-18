@@ -17,7 +17,7 @@ New Features
   parameter file.
 - When a workspace is loaded on the ISIS Reflectometry GUI :ref:`Reduction Preview <refl_preview>` tab, region
   selectors are now added to the slice viewer plot to display any ROIs from matching experiment settings.
-- The :ref:`algm-PolarizationEfficienciesWildes` algorithm now propagates errors correctly using the taylor series
+- The :ref:`algm-PolarizationEfficienciesWildes` algorithm now propagates errors correctly using the Taylor series
   method (first order). A new helper class has been introduced to do this using the Eigen ``autodiff`` module to
   calculate partials.
 - A new :ref:`algm-ReflectometryISISCalculatePolEff` algorithm has been added. This algorithm provides a convenient
