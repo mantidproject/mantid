@@ -396,7 +396,7 @@ def create_pf_loop(
     dir2: Sequence[float],
     dir3: Sequence[float],
     dir_names: Sequence[str],
-    scatter: bool,
+    scatter: Union[str, bool],
     kernel: Optional[float],
     scat_vol_pos: Sequence[float],
     chi2_thresh: Optional[float],
@@ -425,7 +425,8 @@ def create_pf_loop(
     dir2: vector of the second (projection) principle direction of the sample
     dir3: vector of the third principle direction of the sample
     dir_names: Names of the first, second and third principle directions
-    scatter: flag as to whether the plotted pole figure should be a scatter plot of experimental points or a fitted contour plot
+    scatter: flag as to whether the plotted pole figure should be a scatter plot of experimental points or a fitted contour plot.
+            the string "both" is also a valid argument and that will create both
     kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
     scat_vol_pos: position of the centre of mass of the scattering gauge volume
     chi2_thresh: if chi2 column present in params, the maximum value which will still get added to the pole figure table
@@ -455,26 +456,52 @@ def create_pf_loop(
         hkl = hkls if len(peaks) == 1 else hkls[ipeak]
 
         for readout_column in make_iterable(readout_columns):
-            create_pf(
-                wss=wss,
-                params=params,
-                include_scatt_power=include_scatt_power,
-                cif=cif,
-                lattice=lattice,
-                space_group=space_group,
-                basis=basis,
-                hkl=hkl,
-                readout_column=readout_column,
-                dir1=dir1,
-                dir2=dir2,
-                dir3=dir3,
-                dir_names=dir_names,
-                scatter=scatter,
-                kernel=kernel,
-                scat_vol_pos=scat_vol_pos,
-                chi2_thresh=chi2_thresh,
-                peak_thresh=peak_thresh,
-                root_dir=save_root,
-                exp_name=exp_name,
-                projection_method=projection_method,
-            )
+            if scatter == "both":
+                for scat in (True, False):
+                    create_pf(
+                        wss=wss,
+                        params=params,
+                        include_scatt_power=include_scatt_power,
+                        cif=cif,
+                        lattice=lattice,
+                        space_group=space_group,
+                        basis=basis,
+                        hkl=hkl,
+                        readout_column=readout_column,
+                        dir1=dir1,
+                        dir2=dir2,
+                        dir3=dir3,
+                        dir_names=dir_names,
+                        scatter=scat,
+                        kernel=kernel,
+                        scat_vol_pos=scat_vol_pos,
+                        chi2_thresh=chi2_thresh,
+                        peak_thresh=peak_thresh,
+                        root_dir=save_root,
+                        exp_name=exp_name,
+                        projection_method=projection_method,
+                    )
+            else:
+                create_pf(
+                    wss=wss,
+                    params=params,
+                    include_scatt_power=include_scatt_power,
+                    cif=cif,
+                    lattice=lattice,
+                    space_group=space_group,
+                    basis=basis,
+                    hkl=hkl,
+                    readout_column=readout_column,
+                    dir1=dir1,
+                    dir2=dir2,
+                    dir3=dir3,
+                    dir_names=dir_names,
+                    scatter=scatter,
+                    kernel=kernel,
+                    scat_vol_pos=scat_vol_pos,
+                    chi2_thresh=chi2_thresh,
+                    peak_thresh=peak_thresh,
+                    root_dir=save_root,
+                    exp_name=exp_name,
+                    projection_method=projection_method,
+                )
