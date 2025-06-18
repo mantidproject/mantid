@@ -117,7 +117,7 @@ void NXDataSet::getAttributes() {
 
     switch (ainfo.type) {
     case NXnumtype::CHAR: {
-      attributes.set(ainfo.name, m_fileID->getStrAttr(ainfo));
+      attributes.set(ainfo.name, m_fileID->getStrAttr(ainfo.name));
       break;
     }
     case NXnumtype::INT16: {
