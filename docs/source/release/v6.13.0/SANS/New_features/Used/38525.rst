@@ -1,0 +1,3 @@
+- ISIS SANS Batch Reductions (such as those performed by ``WavRangeReduction`` from the
+  :ref:`ISIS Command Interface <ScriptingSANSReductions>`) can now make use of polarization
+  properties defined in the V2 User File to save using :ref:`algm-SavePolarizedNXcanSAS`.

@@ -1,0 +1,5 @@
+- Several improvements to :ref:`algm-PEARLTransfit`:
+
+  - Perform an intial fit with fixed ``GaussianFWHM`` for calibration runs
+  - Accounted for covariance in error calculation for effective temperature
+  - Added new input parameter ``RebinInEnergy`` - if False then the energy bins will be determined from the TOF bins in the input workspace and not the ``Ediv`` parameter.

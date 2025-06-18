@@ -1,0 +1,2 @@
+- Polarization options have been added the :ref:`sans_toml_v1-ref` format.
+  As a result, the most up-to-date version of SANS TOML, which supports these options, has been bumped to 2.

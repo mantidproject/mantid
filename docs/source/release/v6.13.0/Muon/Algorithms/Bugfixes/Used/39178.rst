@@ -1,0 +1,1 @@
+- Improved the numerical stability of :ref:`PhaseQuad <algm-PhaseQuad-v1>`. This algorithm was inverting a 2x2 matrix manually, which resulted in numerically unstable results. Performance should also be improved.

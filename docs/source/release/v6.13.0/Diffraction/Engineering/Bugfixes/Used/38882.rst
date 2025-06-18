@@ -1,0 +1,1 @@
+- `#38882 <https://github.com/mantidproject/mantid/issues/38882>`_ : Fix issue with ``GSAS-II GSASIIscriptable.py`` hard-coded path which is invalid for newer version of GSAS-II (versions 5758 and later).
