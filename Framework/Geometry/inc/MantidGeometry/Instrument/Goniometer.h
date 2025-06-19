@@ -110,12 +110,12 @@ public:
 
 private:
   /// Global rotation matrix of the goniometer
-  Kernel::DblMatrix R;
+  Kernel::DblMatrix m_R;
   /// Motors vector contains GoniometerAxis objects, the last one is the closest
   /// to the sample
-  std::vector<GoniometerAxis> motors;
+  std::vector<GoniometerAxis> m_motors;
   /// Flag to specify if the goniometer is initialized from a rotation matrix
-  bool initFromR;
+  bool m_initFromR;
   /// Private function to recalculate R when setRotationAngle is called
   void recalculateR();
 };

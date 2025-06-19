@@ -244,7 +244,7 @@ public:
   }
 
   /** Save and load to NXS file */
-  void test_nexus() {
+  void test_nexus_from_set_axes() {
     NexusTestHelper th(true);
     th.createFile("GoniometerTest.nxs");
 
@@ -260,6 +260,23 @@ public:
     Goniometer G2;
     G2.loadNexus(th.file.get(), "goniometer");
     TS_ASSERT_EQUALS(G2.getNumberAxes(), 3);
+    // Rotation matrices should be the same after loading
+    TS_ASSERT_EQUALS(G2.getR(), G.getR());
+  }
+
+  void test_nexus_from_set_matrix() {
+    NexusTestHelper th(true);
+    th.createFile("GoniometerTest2.nxs");
+
+    Mantid::Kernel::DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    Goniometer G(rotation_x);
+    TS_ASSERT_EQUALS(G.getR().equals(rotation_x), true);
+    G.saveNexus(th.file.get(), "goniometer");
+
+    // Reload from the file
+    th.reopenFile();
+    Goniometer G2;
+    G2.loadNexus(th.file.get(), "goniometer");
     // Rotation matrices should be the same after loading
     TS_ASSERT_EQUALS(G2.getR(), G.getR());
   }
