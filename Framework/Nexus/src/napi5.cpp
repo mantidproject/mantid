@@ -1733,10 +1733,10 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
       status = NXstatus::NX_ERROR;
     } else {
       cdata[len] = '\0'; // ensure null termination
-      /** NOTE len is truly the correct length to use here.
-      /* It is not necessary to use (len + 1); null termination is already handled,
-      /* and even-more-handling it causes errors downstream.
-      /* It is not preferable to use strlen(cdata), as the cdata may have \0 between char arrays. */
+      /* NOTE len is truly the correct length to use here.
+       * It is not necessary to use (len + 1); null termination is already handled,
+       * and even-more-handling it causes errors downstream.
+       * It is not preferable to use strlen(cdata), as the cdata may have \0 between char arrays. */
       memcpy(data, cdata, len * sizeof(char));
       status = NXstatus::NX_OK;
     }
