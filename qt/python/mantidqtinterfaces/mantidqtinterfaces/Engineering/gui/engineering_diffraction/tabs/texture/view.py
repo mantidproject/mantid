@@ -147,7 +147,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         selected_wss = []
         selected_params = []
         for row in range(self.table_loaded_data.rowCount()):
-            cell_widget = self.table_loaded_data.cellWidget(row, 3)
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox and checkbox.isChecked():
@@ -157,7 +157,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
     def set_all_workspaces_selected(self, selected):
         for row in range(self.table_loaded_data.rowCount()):
-            cell_widget = self.table_loaded_data.cellWidget(row, 3)
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:

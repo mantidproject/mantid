@@ -24,7 +24,10 @@ class TexturePresenter:
         self.show_sample_presenter = ShowSamplePresenter(model, view, False)
 
         self.ws_names = []
-        self.fit_param_files = []
+        self.ws_assignments = {}
+        self.param_assignments = {}
+        self.unassigned_params = []
+        self.unassigned_wss = []
         self.ws_info = {}
 
         self.correction_notifier = GenericObservable()
@@ -69,39 +72,73 @@ class TexturePresenter:
                     continue
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
+            if not self.ws_has_param(ws_name):
+                self.unassigned_wss.append(ws_name)
 
         self.redraw_table()
+
+    def ws_has_param(self, ws):
+        return ws in self.ws_assignments.keys()
+
+    def param_has_ws(self, param):
+        return param in self.param_assignments.keys()
+
+    def get_assigned_params(self):
+        return list(self.param_assignments.keys())
 
     def load_param_files(self):
         filenames = self.view.finder_texture_tables.getFilenames()
 
         for path in filenames:
-            param_file_name = os.path.splitext(os.path.basename(path))[0]
+            param = os.path.splitext(os.path.basename(path))[0]
             try:
-                Load(Filename=path, OutputWorkspace=param_file_name)
+                Load(Filename=path, OutputWorkspace=param)
             except Exception as e:
                 logger.warning(f"Failed to load {path}: {e}")
                 continue
-            if param_file_name not in self.fit_param_files:
-                self.fit_param_files.append(param_file_name)
+            if not self.param_has_ws(param):
+                self.unassigned_params.append(param)
 
         self.redraw_table()
 
     def delete_selected_files(self):
         selected_wss, selected_params = self.view.get_selected_workspaces()
         for ws in selected_wss:
+            # remove from ws_names
             self.ws_names.pop(self.ws_names.index(ws))
-        for param in selected_params:
-            if param != "Not set":
-                self.fit_param_files.pop(self.fit_param_files.index(param))
+            if self.ws_has_param(ws):
+                # remove assignment between ws and param
+                param = self.ws_assignments[ws]
+                self.ws_assignments.pop(ws)
+                self.param_assignments.pop(param)
+                # do not add either back to the unassigned piles
+            else:
+                self.unassigned_wss.pop(self.unassigned_wss.index(ws))
         self.redraw_table()
 
     def delete_selected_param_files(self):
         selected_wss, selected_params = self.view.get_selected_workspaces()
-        for param in selected_params:
-            if param != "Not set":
-                self.fit_param_files.pop(self.fit_param_files.index(param))
+        self.unassign_params(selected_params)
         self.redraw_table()
+
+    def unassign_params(self, params):
+        for param in params:
+            if self.param_has_ws(param):
+                # remove assignment between ws and param
+                assigned_ws = self.param_assignments[param]
+                self.param_assignments.pop(param)
+                self.ws_assignments.pop(assigned_ws)
+                # add ws to the unassigned pile
+                self.unassigned_wss.append(assigned_ws)
+
+    def assign_unpaired_wss_and_params(self):
+        while (len(self.unassigned_params) > 0) and (len(self.unassigned_wss) > 0):
+            ws = self.unassigned_wss.pop(0)
+            param = self.unassigned_params.pop(0)
+            self.ws_assignments[ws] = param
+            self.param_assignments[param] = ws
+        # don't want to keep an unseen stack of unassigned parameter files
+        self.unassigned_params = []
 
     def select_all(self):
         self.view.set_all_workspaces_selected(True)
@@ -110,6 +147,7 @@ class TexturePresenter:
         self.view.set_all_workspaces_selected(False)
 
     def redraw_table(self):
+        self.assign_unpaired_wss_and_params()
         self.update_ws_info()
         self.view.populate_workspace_table(self.ws_info)
         self.view.populate_workspace_list(self.ws_names)
@@ -119,8 +157,8 @@ class TexturePresenter:
         ws_info = {}
         selected_ws, _ = self.view.get_selected_workspaces()
         for pos_ind, ws_name in enumerate(self.ws_names):
-            param_status = self.fit_param_files[pos_ind] if pos_ind < len(self.fit_param_files) else "Not set"
-            ws_info[ws_name] = self.model.get_ws_info(ws_name, param_status, ws_name in selected_ws)  # maintain state of selected boxes
+            param = self.ws_assignments[ws_name] if self.ws_has_param(ws_name) else "Not set"
+            ws_info[ws_name] = self.model.get_ws_info(ws_name, param, ws_name in selected_ws)  # maintain state of selected boxes
         self.ws_info = ws_info
 
     def on_set_crystal_clicked(self):
@@ -139,57 +177,60 @@ class TexturePresenter:
 
     def on_calc_pf_clicked(self):
         wss, params = self.view.get_selected_workspaces()
-        # remove any 'not set' parameters workspaces from the list
-        params = [p for p in params if p != "Not set"]
-        projection_method = self.view.get_projection_method()
-        inc_scatt = self.view.get_inc_scatt_power()
-        hkl = self.model._parse_hkl(*self.view.get_hkl()) if inc_scatt else None
-        readout_col = self.view.get_readout_column()
-        out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl, readout_col)
-        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
-        plot_exp = self._get_setting("plot_exp_pf", bool)
-        contour_kernel = float(self._get_setting("contour_kernel", str))
+        # require at least one wss to be selected
+        if len(wss) > 0:
+            # remove any 'not set' parameters workspaces from the list
+            params = [p for p in params if p != "Not set"]
+            projection_method = self.view.get_projection_method()
+            inc_scatt = self.view.get_inc_scatt_power()
+            hkl = self.model.parse_hkl(*self.view.get_hkl()) if inc_scatt else None
+            readout_col = self.view.get_readout_column()
+            out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl, readout_col)
+            ax_transform, ax_labels = output_settings.get_texture_axes_transform()
+            plot_exp = self._get_setting("plot_exp_pf", bool)
+            contour_kernel = float(self._get_setting("contour_kernel", str))
 
-        # default for now
-        scat_vol_pos = (0.0, 0.0, 0.0)
-        has_chi2_col, has_x0_col = False, False
-        if len(params) > 0:
-            has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
-        chi2_thresh = (
-            get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "cost_func_thresh")
-            if has_chi2_col
-            else 0.0
-        )
-        peak_thresh = (
-            get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "peak_pos_thresh")
-            if has_x0_col
-            else 0.0
-        )
+            # default for now
+            scat_vol_pos = (0.0, 0.0, 0.0)
+            has_chi2_col, has_x0_col = False, False
+            if self.all_wss_have_params() and self.at_least_one_param_assigned():
+                has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
+            chi2_thresh = self._get_setting("cost_func_thresh") if has_chi2_col else 0.0
+            peak_thresh = self._get_setting("peak_pos_thresh") if has_x0_col else 0.0
 
-        self.worker = AsyncTask(
-            self.calc_pf,
-            (
-                wss,
-                params,
-                out_ws,
-                hkl,
-                projection_method,
-                inc_scatt,
-                scat_vol_pos,
-                chi2_thresh,
-                peak_thresh,
-                self.rb_num,
-                ax_transform,
-                ax_labels,
-                readout_col,
-                grouping,
-                plot_exp,
-                contour_kernel,
-            ),
-            error_cb=self._on_worker_error,
-            finished_cb=self._on_worker_success,
-        )
-        self.worker.start()
+            self.set_worker(
+                AsyncTask(
+                    self.calc_pf,
+                    (
+                        wss,
+                        params,
+                        out_ws,
+                        hkl,
+                        projection_method,
+                        inc_scatt,
+                        scat_vol_pos,
+                        chi2_thresh,
+                        peak_thresh,
+                        self.rb_num,
+                        ax_transform,
+                        ax_labels,
+                        readout_col,
+                        grouping,
+                        plot_exp,
+                        contour_kernel,
+                    ),
+                    error_cb=self._on_worker_error,
+                    finished_cb=self._on_worker_success,
+                )
+            )
+            self.worker = self.get_worker()
+            self.worker.start()
+
+    def set_worker(self, worker):
+        self.worker = worker
+
+    def get_worker(self):
+        return self.worker
 
     def calc_pf(
         self,
@@ -272,10 +313,21 @@ class TexturePresenter:
         self.instrument = instrument
 
     def update_readout_column_list(self):
-        params = self.fit_param_files
-        col_list, starting_index = self.model.read_param_cols(params[0]) if len(params) > 0 else ([], None)
-        self.view.populate_readout_column_list(col_list, starting_index)
-        self.view.update_col_select_visibility(len(col_list) > 0)
+        params = self.get_assigned_params()
+        show_col = False
+        # only if all wss have param files should plotting with a column readout be an option
+        if self.all_wss_have_params() and self.at_least_one_param_assigned():
+            col_list, starting_index = self.model.read_param_cols(params[0])
+            self.view.populate_readout_column_list(col_list, starting_index)
+            # only have the option to pick a column if columns are present
+            show_col = len(col_list) > 0
+        self.view.update_col_select_visibility(show_col)
+
+    def all_wss_have_params(self):
+        return len(self.get_assigned_params()) == len(self.ws_names)
+
+    def at_least_one_param_assigned(self):
+        return len(self.get_assigned_params()) > 0
 
     def _get_setting(self, setting_name, return_type=str):
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)

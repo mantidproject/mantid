@@ -113,10 +113,10 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # cube in lab frame is:                  coords
         #  (0,3,4)    o--------o (2,3,4)         z  y
         #            /┃       /┃                 ┃ /
-        # (0,1,4)    o--------o ┃ (2,1,4)         ┃/
+        # (0,1,4)   o--------o ┃ (2,1,4)         ┃/
         #  (0,3,2)  ┃ o------┃-o    (2,3,2)      +-----x
         #           ┃/       ┃/
-        # (0,1,2)    o--------o   (2,1,2)
+        # (0,1,2)   o--------o   (2,1,2)
         expected_verts = np.array(((0, 1, 2), (2, 1, 2), (0, 3, 2), (2, 3, 2), (0, 1, 4), (2, 1, 4), (0, 3, 4), (2, 3, 4)))
         self.assertTrue(np.all(get_mesh_vertices(mesh) in expected_verts))
 
@@ -132,18 +132,18 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # cube in lab frame is:                  lab coords  sample directions
         #  (-1,1,2)   o--------o (1,1,2)         z  y        D2 D1
         #            /┃       /┃                 ┃ /         ┃ /
-        # (-1,-1,2)  o--------o ┃ (1,-1,2)        ┃/          ┃/
+        # (-1,-1,2) o--------o ┃ (1,-1,2)        ┃/          ┃/
         #  (-1,1,0) ┃ o------┃-o    (1,1,0)      +-----x     +------D3
         #           ┃/   x   ┃/
-        # (-1,-1,0)  o--------o   (1,-1,0)
+        # (-1,-1,0) o--------o   (1,-1,0)
         #
         # cube in sample frame is:
         #  (-1,2,1)   o--------o (1,2,1)      D3(z) D2(y)
         #            /┃       /┃                 ┃ /
-        # (-1,0,1)   o--------o ┃ (1,0,1)         ┃/
+        # (-1,0,1)  o--------o ┃ (1,0,1)         ┃/
         #  (-1,2,-1)┃ o------┃-o    (1,2,-1)     +-----D1(x)
         #           ┃/       ┃/
-        # (-1,0,-1)  o--------o   (1,0,-1)
+        # (-1,0,-1) o--------o   (1,0,-1)
 
         # new mesh is same as a cube translated along y
         expected_mesh = self.get_cube_mesh(2) + np.array((0, 1, 0))
@@ -165,7 +165,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         #  (-1,1,0)   o--------o (1,1,0)         z  y
         #            /┃  x    /┃                 ┃ /
         # (-1,-1,0) o--------o ┃ (1,-1,0)        ┃/          sample directions
-        #  (-1,1,-2)┃ o------┃-o    (1,1,-2)      +-----x    +------D3
+        #  (-1,1,-2)┃ o------┃-o    (1,1,-2)     +-----x     +------D3
         #           ┃/       ┃/                             /┃
         # (-1,-1,-2)o--------o   (1,-1,-2)                 / ┃
         #                                                 D1 D2

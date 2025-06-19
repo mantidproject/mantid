@@ -223,7 +223,7 @@ class TextureProjection:
             table_name = f"{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
         return table_name, grouping
 
-    def _parse_hkl(self, H, K, L):
+    def parse_hkl(self, H, K, L):
         try:
             return [int(H), int(K), int(L)]
         except Exception:
