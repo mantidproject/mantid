@@ -72,7 +72,7 @@ void ALCDataLoadingView::initialize() {
   m_ui.forwardEdit->setValidator(validator);
   m_ui.forwardEdit->setMaxLength(LINE_EDIT_MAX_LENGTH);
   m_ui.backwardEdit->setValidator(validator);
-  m_ui.forwardEdit->setMaxLength(LINE_EDIT_MAX_LENGTH);
+  m_ui.backwardEdit->setMaxLength(LINE_EDIT_MAX_LENGTH);
 
   // Alpha to only accept positive doubles
   m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
