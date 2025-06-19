@@ -21,8 +21,6 @@ New features
   - Added a new input parameter ``RebinInEnergy``. If False then the energy bins will be determined from the TOF bins in
     the input workspace rather than the ``Ediv`` parameter.
 
-- A new method named ``getFittingParameter`` has been added to ``Mantid::Geometry::Component`` class and exposed to
-  python. This allows access to fitting parameters from components in an instrument definition file.
 - Both user-defined sample and container geometry have been enabled together with the definition of gauge volume to
   account for the beam size. This has been implemented in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and
   ``mantid.utils.absorptioncorrutils``.
