@@ -274,22 +274,20 @@ public:
   std::vector<uint32_t> y_temp;
 
   void operator()(const tbb::blocked_range<size_t> &range) {
-    // Fast histogramming without sorting or cumulative counting
-
-    // Precompute bin edges for fast lookup
     const auto &binedges = *m_binedges;
     const size_t nbins = binedges.size() - 1;
 
     for (size_t i = range.begin(); i < range.end(); ++i) {
-      const detid_t detid = (*m_detids)[i];
+      const detid_t &detid = (*m_detids)[i];
       if (no_mask || (masked->find(detid) == masked->end())) {
         // Apply calibration
         const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
 
         // Find the bin index using binary search
-        const auto it = std::upper_bound(binedges.begin(), binedges.end(), tof);
-        const size_t bin =
-            (it == binedges.begin() || it == binedges.end()) ? nbins : static_cast<size_t>(it - binedges.begin() - 1);
+        const auto it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
+        const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
+                               ? nbins
+                               : static_cast<size_t>(it - binedges.cbegin() - 1);
 
         if (bin < nbins) {
           y_temp[bin]++;
@@ -306,9 +304,7 @@ public:
 
   void join(const ProcessEventsTask &other) {
     // Combine local histograms
-    for (size_t i = 0; i < m_binedges->size() - 1; ++i) {
-      y_temp[i] += other.y_temp[i];
-    }
+    std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
   }
 
 private:
@@ -324,13 +320,12 @@ class ProcessBankTask {
 public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
-                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked, const double binWidth,
-                  const bool linearBins, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::shared_ptr<API::Progress> &progress)
+                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
+                  const size_t events_per_chunk, const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
-        m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins), m_events_per_chunk(events_per_chunk),
-        m_grainsize_event(grainsize_event), m_progress(progress) {
+        m_masked(masked), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
+        m_progress(progress) {
     if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
       throw std::runtime_error("failed to reopen async");
     }
@@ -414,8 +409,7 @@ public:
             task(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event));
           }
 
-          for (size_t i = 0; i < y_temp.size(); ++i)
-            y_temp[i] += task.y_temp[i]; // accumulate the results
+          std::transform(y_temp.begin(), y_temp.end(), task.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
 
           event_index_start += m_events_per_chunk;
         }
@@ -436,8 +430,6 @@ private:
   MatrixWorkspace_sptr m_wksp;
   const std::map<detid_t, double> m_calibration; // detid: 1/difc
   const std::set<detid_t> m_masked;
-  const double m_binWidth;
-  const bool m_linearBins;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
@@ -654,7 +646,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
+                         m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
