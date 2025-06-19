@@ -21,7 +21,7 @@ New Features
     will help us to diagnose some problems where previously no stacktrace was available
     after a crash.
   - On Linux, core dumps are now always turned on for the workbench process.
-
+  - This property and additional stack trace information are not currently available on macOS or Windows.
 
 Bugfixes
 --------
@@ -47,7 +47,7 @@ SliceViewer
 
 New features
 ############
-- When plotting peaks in HKL to use the peak positions calculated from Q\ :sub:`sample`, it it now possible to use the
+- When plotting peaks in HKL to use the peak positions calculated from Q\ :sub:`sample`, it is now possible to use the
   UB instead of peak index.
 
 Bugfixes
