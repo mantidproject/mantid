@@ -332,9 +332,6 @@ public:
   }
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-    // re-use vectors to save malloc/free calls
-    std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
-    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
 
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
@@ -371,9 +368,10 @@ public:
 
         // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
         // counting things
-        // std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        std::vector<uint32_t> y_temp(spectrum.dataY().size());
+        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
+        tbb::task_group tg;
         // read parts of the bank at a time
         size_t event_index_start = eventRangeFull.first;
         while (event_index_start < eventRangeFull.second) {
@@ -382,8 +380,8 @@ public:
                                                                 event_index_start + m_events_per_chunk};
 
           // load data and reuse chunk memory
-          event_detid->clear();
-          event_time_of_flight->clear();
+          std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
+          std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
           m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
           m_loader.loadDetid(event_group, event_detid, eventRangePartial);
 
@@ -396,23 +394,27 @@ public:
                 static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
           }
 
-          const auto numEvent = event_time_of_flight->size();
+          // Non-blocking processing of the events
+          // Each thread needs its own ProcessEventsTask
+          tg.run([event_detid = std::move(event_detid), event_time_of_flight = std::move(event_time_of_flight),
+                  calibration = std::move(calibration), x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp,
+                  grainsize = m_grainsize_event]() {
+            const auto numEvent = event_time_of_flight->size();
 
-          // threaded processing of the events
-          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX(),
-                                 &m_masked);
-          if (numEvent > m_grainsize_event) {
-            // use tbb
-            tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
-          } else {
-            // single thread
-            task(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event));
-          }
-
-          std::transform(y_temp.begin(), y_temp.end(), task.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
+            // Create a local task for this thread
+            ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr, masked_ptr);
+            tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
+            // Atomically accumulate results into shared y_temp
+            for (size_t i = 0; i < y_temp.size(); ++i) {
+              y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
+            }
+          });
 
           event_index_start += m_events_per_chunk;
         }
+
+        tg.wait();
+
         // copy the data out into the correct spectrum
         auto &y_values = spectrum.dataY();
         std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
