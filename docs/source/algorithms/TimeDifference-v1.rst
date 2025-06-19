@@ -44,12 +44,13 @@ Usage
         AddSampleLog(Workspace=names[-1], LogName='end_time', LogText=str(end_time), LogType='String')
 
     table = TimeDifference(Workspaces=','.join(names))
-    print('Time Differences are, in seconds: ', table.column(2))
+    print("Time Differences are, in seconds: " + str(table.column(2)))
 
 Output:
 
 .. testoutput:: ExTimeDifferences
-    Time Differences are, in seconds: [0,100,200,300]
+
+    Time Differences are, in seconds: [0.0, 100.0, 200.0, 300.0]
 
 .. categories::
 
