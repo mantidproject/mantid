@@ -236,11 +236,11 @@ public:
       maxval = *maxele;
   }
 
-  MinMax(MinMax &other, tbb::split)
-      : vec(other.vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+  // copy min/max from the other. we're all friends
+  MinMax(MinMax &other, tbb::split) : vec(other.vec), minval(other.minval), maxval(other.maxval) {}
 
-  MinMax(const std::vector<Type> *vec)
-      : vec(vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+  // set the min=max=first element supplied
+  MinMax(const std::vector<Type> *vec) : vec(vec), minval(vec->front()), maxval(vec->front()) {}
 
   void join(const MinMax &other) {
     if (other.minval < minval)
@@ -266,12 +266,13 @@ public:
   ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges,
                     const std::set<detid_t> *masked)
-      : m_detids(detids), m_tofs(tofs), m_calibration(calibration), m_binedges(binedges), masked(masked),
-        no_mask(masked->empty()) {
-    y_temp.resize(m_binedges->size() - 1, 0);
+      : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
+        m_binedges(binedges), masked(masked), no_mask(masked->empty()) {}
+
+  ProcessEventsTask(ProcessEventsTask &other, tbb::split)
+      : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
+        m_calibration(other.m_calibration), m_binedges(other.m_binedges), masked(other.masked), no_mask(other.no_mask) {
   }
-  // Local histogram for this block/thread
-  std::vector<uint32_t> y_temp;
 
   void operator()(const tbb::blocked_range<size_t> &range) {
     const auto &binedges = *m_binedges;
@@ -284,7 +285,7 @@ public:
         const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
 
         // Find the bin index using binary search
-        const auto it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
+        const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
         const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
                                ? nbins
                                : static_cast<size_t>(it - binedges.cbegin() - 1);
@@ -296,16 +297,14 @@ public:
     }
   }
 
-  ProcessEventsTask(ProcessEventsTask &other, tbb::split)
-      : m_detids(other.m_detids), m_tofs(other.m_tofs), m_calibration(other.m_calibration),
-        m_binedges(other.m_binedges), masked(other.masked), no_mask(other.no_mask) {
-    y_temp.resize(m_binedges->size() - 1, 0);
-  }
-
   void join(const ProcessEventsTask &other) {
     // Combine local histograms
     std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
   }
+
+public:
+  /// Local histogram for this block/thread
+  std::vector<uint32_t> y_temp;
 
 private:
   const std::vector<detid_t> *m_detids;
@@ -313,7 +312,7 @@ private:
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
   const std::set<detid_t> *masked;
-  const bool no_mask; // whether there are any masked pixels
+  const bool no_mask; ///< whether there are any masked pixels
 };
 
 class ProcessBankTask {
@@ -325,11 +324,7 @@ public:
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
         m_masked(masked), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
-        m_progress(progress) {
-    if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
-      throw std::runtime_error("failed to reopen async");
-    }
-  }
+        m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
 
@@ -379,20 +374,21 @@ public:
           const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
                                                                 event_index_start + m_events_per_chunk};
 
-          // load data and reuse chunk memory
+          // load detid
           std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
-          std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
           m_loader.loadDetid(event_group, event_detid, eventRangePartial);
-
-          // process the events that were loaded
+          // immediately find min/max to allow for other things to read disk
           const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-          // only recreate if it doesn't already have the useful information
+          // only recreate calibraion if it doesn't already have the useful information
           if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
               (calibration->idmax() < static_cast<detid_t>(maxval))) {
             calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
                 static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
           }
+
+          // load time-of-flight
+          std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
 
           // Non-blocking processing of the events
           // Each thread needs its own ProcessEventsTask
