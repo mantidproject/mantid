@@ -10,12 +10,13 @@ Powder Diffraction
 
 New features
 ############
-- A new algorithm, :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>`, has been added (for VULCAN only),
-  which replicates the functionality of :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, but
-  performs all the work on the events directly from the file.
+- A new algorithm, :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` has been added - for VULCAN only. This
+  replicates the functionality of :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, but performs
+  all the work on the events directly from the file to reduce memory usage.
 - Several improvements have been made to :ref:`algm-PEARLTransfit`:
 
-  - Perform an initial fit with fixed ``GaussianFWHM`` for calibration runs.
+  - Perform an initial fit with a fixed ``GaussianFWHM`` for calibration runs to improve the robustness of the
+    calibration.
   - Accounted for covariance in error calculation for effective temperature.
   - Added a new input parameter ``RebinInEnergy``. If False then the energy bins will be determined from the TOF bins in
     the input workspace rather than the ``Ediv`` parameter.
@@ -69,16 +70,18 @@ New features
 
 - Added a warning to the :ref:`Focus tab <ui engineering focus>` for when the vanadium normalisation has been loaded
   from the ADS.
-- Type driven refactor of the :ref:`ui engineering gsas` tab model and centralisation of how ``GSAS-II`` call is
-  configured. The refactor removes the need for hard-coded paths in favour of recursively searching for files within a
-  user defined path.
+- The :ref:`ui engineering gsas` tab's error messages have been improved to allow easier troubleshooting of problems
+  relating to the import of the GSAS-II scripting interface.
+
+  - This also avoids using a hard-coded path, which is invalid for newer version of GSAS-II (versions 5758 and later).
+
 - A new algorithm :ref:`algm-CreatePoleFigureTableWorkspace` has been added which creates a table with the information
   required to produce a pole figure (a collection of alphas, betas, and intensities), for use in texture analysis.
 
 Bugfixes
 ############
-- Disable ``Rietveld`` from :ref:`GSAS-II UI <ui engineering gsas>` Refinement Method combobox options. Add on-hover
-  tooltip to inform users that ``Rietveld`` is not currently supported.
+- The ``Rietveld`` option in the :ref:`GSAS-II UI <ui engineering gsas>` ``Refinement Method`` combo box has been
+  disabled - only ``Pawley`` refinements are currently supported.
 - When Focusing, either within the interface or in a script, you should no longer be able to unknowingly apply an
   outdated vanadium correction.
 
@@ -95,8 +98,6 @@ Bugfixes
 - Within  :ref:`algm-AbsorptionCorrection` algorithm, when ``Rasterize`` is called, it now takes both the Integration
   ``Volume Shape`` and the ``Sample Shape`` to calculate L1 paths. Before, it would only take the integration volume and
   would assume that the paths within this shape are equal to the paths within the sample.
-- ``GSAS-II GSASIIscriptable.py`` no longer uses a hard-coded path which is invalid for newer version of GSAS-II
-  (versions 5758 and later).
 - The :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`
   will no longer crash when deleting multiple workspaces in the ADS. This also fixed an issue of clearing the whole plot
   in the same tab when deleting workspaces in the ADS.
