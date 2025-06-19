@@ -13,15 +13,13 @@ from mantid.simpleapi import (
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
-    CreateSampleWorkspace,
-    CreateSampleShape,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.EnggUtils import GROUP
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from Engineering.common.texture_sample_viewer import has_no_valid_shape, plot_sample_directions, plot_gauge_vol
 
 
 class TextureCorrectionModel:
@@ -96,17 +94,6 @@ class TextureCorrectionModel:
         except RuntimeError:
             return True
 
-    def _is_valid_mesh(self, mesh):
-        return len(mesh) > 3
-
-    def _has_no_valid_shape(self, ws_name):
-        no_shape = False
-        try:
-            no_shape = not self._is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
-        except RuntimeError:
-            no_shape = True
-        return no_shape
-
     def _get_material_name(self, ws_name):
         return ADS.retrieve(ws_name).sample().getMaterial().name()
 
@@ -136,13 +123,6 @@ class TextureCorrectionModel:
             except RuntimeError:
                 gauge_str = None
         return gauge_str
-
-    def get_xml_mesh(self, xml):
-        tmp_ws = CreateSampleWorkspace()
-        CreateSampleShape(tmp_ws, xml)
-        mesh = tmp_ws.sample().getShape().getMesh()
-        ADS.remove("tmp_ws")
-        return mesh
 
     def _read_xml(self, file):
         out = None
@@ -248,7 +228,7 @@ class TextureCorrectionModel:
     def write_atten_val_table(self, ws, vals, eval_val, unit, rb_num, calibration, root_dir):
         out_ws = self.get_atten_table_name(ws, eval_val, unit)
         table = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
-        table.addColumn("float", "I")
+        table.addColumn("float", "mu")
         for r in range(ADS.retrieve(ws).getNumberHistograms()):
             table.addRow(
                 [
@@ -276,39 +256,12 @@ class TextureCorrectionModel:
             shape_enabled = not self._has_no_valid_shape(self.reference_ws)
         return self.reference_ws, shape_enabled, material
 
-    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels):
-        ax = fig.axes[0]
-        if not ws_name:
-            ws_name = self.reference_ws
-            # if we are looking at the reference, we want to rotate the sample independently of our definition axes
-            rotation_matrix = np.eye(3)
-            ws = ADS.retrieve(ws_name)
-        else:
-            ws = ADS.retrieve(ws_name)
-            # if not looking at the reference, we want our definition axes to rotate with the sample
-            rotation_matrix = ws.getRun().getGoniometer().getR()
-        sample_mesh = ws.sample().getShape().getMesh()
-        # apply the rotation matrix to the axes
-        rotated_ax_transform = rotation_matrix @ ax_transform
-        # transform the mesh vertices into new axes frame
-        rot_vert = np.asarray([rotated_ax_transform.T @ sm[0, :] @ rotated_ax_transform for sm in sample_mesh]).T
-        # find the furthest vertex projected along each axis
-        arrow_lens = np.dot(rotated_ax_transform, rot_vert).max(axis=1) * 1.2
-        rd = rotated_ax_transform[:, 0] * arrow_lens[0]
-        nd = rotated_ax_transform[:, 1] * arrow_lens[1]
-        td = rotated_ax_transform[:, 2] * arrow_lens[2]
-        ax.quiver(0, 0, 0, *rd, color="red", length=arrow_lens[0], normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *nd, color="green", length=arrow_lens[1], normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *td, color="blue", length=arrow_lens[2], normalize=True, arrow_length_ratio=0.05)
-        ax.text(*rd, ax_labels[0])
-        ax.text(*nd, ax_labels[1])
-        ax.text(*td, ax_labels[2])
+    def plot_gauge_vol(self, preset, custom_shape, fig):
+        gauge_vol_str = self.get_gauge_vol_str(preset, custom_shape)
+        plot_gauge_vol(gauge_vol_str, fig)
 
-    def plot_gauge_vol(self, preset, custom, fig):
-        gauge_str = self.get_gauge_vol_str(preset, custom)
-        if gauge_str:
-            mesh = self.get_xml_mesh(gauge_str)
-            if self._is_valid_mesh(mesh):
-                axes = fig.gca()
-                mesh_polygon = Poly3DCollection(mesh, facecolors="cyan", edgecolors="black", linewidths=0.1, alpha=0.25)
-                axes.add_collection3d(mesh_polygon)
+    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels):
+        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, self.reference_ws)
+
+    def _has_no_valid_shape(self, ws_name):
+        has_no_valid_shape(ws_name)
