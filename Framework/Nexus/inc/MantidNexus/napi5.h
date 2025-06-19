@@ -12,20 +12,15 @@
 NXstatus NX5open(CONSTCHAR *filename, NXaccess access_method, NXhandle &handle);
 
 NXstatus NX5putattr(NXhandle handle, CONSTCHAR *name, const void *data, int iDataLen, NXnumtype iType);
-NXstatus NX5putslab64(NXhandle handle, const void *data, const int64_t start[], const int64_t size[]);
 
 NXstatus NX5getdata(NXhandle handle, void *data);
 NXstatus NX5getinfo64(NXhandle handle, int *rank, int64_t dimension[], NXnumtype *datatype);
 NXstatus NX5getnextentry(NXhandle handle, NXname name, NXname nxclass, NXnumtype *datatype);
 
-NXstatus NX5getslab64(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
 NXstatus NX5getnextattr(NXhandle handle, NXname pName, int *iLength, NXnumtype *iType);
 NXstatus NX5getattr(NXhandle handle, const char *name, void *data, int *iDataLen, NXnumtype *iType);
 NXstatus NX5getattrinfo(NXhandle handle, int *no_items);
 NXstatus NX5getgroupinfo(NXhandle handle, int *no_items, NXname name, NXname nxclass);
-
-NXstatus NX5initgroupdir(NXhandle handle);
-NXstatus NX5initattrdir(NXhandle handle);
 
 NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType);
 NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *pName, int *rank, int dim[], NXnumtype *iType);
