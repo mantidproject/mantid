@@ -608,7 +608,7 @@ NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], con
   hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
   hsize_t size[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  hid_t filespace, dataspace;
+  hid_t dataspace;
   int unlimiteddim = 0;
 
   pFile = NXI5assert(fid);
@@ -654,7 +654,7 @@ NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], con
       return NXstatus::NX_ERROR;
     }
 
-    filespace = H5Dget_space(pFile->iCurrentD);
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
 
     /* define slab */
     iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
@@ -930,9 +930,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 
 NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
   pNexusFile5 pFile;
-  hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
-  hsize_t mStart[H5S_MAX_RANK];
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
@@ -963,7 +961,8 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
     iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, filespace, H5P_DEFAULT, data);
     H5Sclose(filespace);
   } else {
-
+    hsize_t myStart[H5S_MAX_RANK];
+    hsize_t mStart[H5S_MAX_RANK];
     for (int i = 0; i < iRank; i++) {
       myStart[i] = static_cast<hsize_t>(iStart[i]);
       mySize[i] = static_cast<hsize_t>(iSize[i]);
