@@ -1713,8 +1713,8 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     if (ret < 0 || cdata == nullptr) {
       status = NXstatus::NX_ERROR;
     } else {
-      memcpy(data, cdata, (strlen(cdata) + 1) * sizeof(char));
-      H5free_memory(cdata);
+      memcpy(data, cdata, strlen(cdata) * sizeof(char));
+      H5free_memory(cdata); // NOTE must free cdata within hdf5
       status = NXstatus::NX_OK;
     }
   } else {
@@ -1732,8 +1732,12 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     if (ret < 0) {
       status = NXstatus::NX_ERROR;
     } else {
-      cdata[len] = '\0';                       // ensure null termination
-      memcpy(data, cdata, len * sizeof(char)); // NOTE cdata may have \0 bw char arrays, len is correct length
+      cdata[len] = '\0'; // ensure null termination
+      /** NOTE len is truly the correct length to use here.
+      /* It is not necessary to use (len + 1); null termination is already handled,
+      /* and even-more-handling it causes errors downstream.
+      /* It is not preferable to use strlen(cdata), as the cdata may have \0 between char arrays. */
+      memcpy(data, cdata, len * sizeof(char));
       status = NXstatus::NX_OK;
     }
     delete[] cdata;

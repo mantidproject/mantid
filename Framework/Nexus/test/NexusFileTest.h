@@ -684,6 +684,33 @@ public:
     file.close();
   }
 
+  void test_data_existing_str_len() {
+    // this test protects against a regression that can occur inside LoadNexusLogs
+    // the correct length to use for rank-2 char blocks is H5Tget_size() x dims[0],
+    // and not a single char more.  Null-termination will be correctly handled this way.
+    // Trying to be even-more-null-terminated will lead to buffer overflow errors.
+    cout << "\ntest dataset read existing -- string block logs\n";
+
+    // open a file
+    std::string filename = getFullPath("SANS2D00022048.nxs");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // this is the dataset that can cause the buffer errors
+    std::string addressOfBad("/raw_data_1/selog/S6/value_log/value");
+
+    // this is meant to mimic the behavior inside LoadNexusLogs::createTimeSeries
+    // at around L202 - L243, the section handling NXnumtype::CHAR
+    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
+    file.openAddress(addressOfBad);
+    Mantid::Nexus::Info info = file.getInfo();
+    std::size_t total_length = info.dims[0] * info.dims[1];
+    char *val_array = new char[total_length];
+    TS_ASSERT_THROWS_NOTHING(file.getData(val_array));
+    std::string values(val_array, total_length);
+    TS_ASSERT_EQUALS(values, "MediumMediumMediumMedium");
+    delete[] val_array;
+  }
+
   // #################################################################################################################
   // TEST ADDRESS METHODS
   // #################################################################################################################
