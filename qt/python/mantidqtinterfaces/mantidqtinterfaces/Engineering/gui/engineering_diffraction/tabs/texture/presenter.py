@@ -12,8 +12,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     INSTRUMENT_DICT,
     CalibrationObserver,
 )
-
 import os
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
 
 class TexturePresenter:
@@ -21,6 +21,7 @@ class TexturePresenter:
         self.model = model
         self.view = view
         self.worker = None
+        self.show_sample_presenter = ShowSamplePresenter(model, view, False)
 
         self.ws_names = []
         self.fit_param_files = []

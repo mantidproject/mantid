@@ -15,11 +15,13 @@ from mantid.geometry import CrystalStructure
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
+from Engineering.common.texture_sample_viewer import has_no_valid_shape, plot_sample_directions
 
 
 class TextureProjection:
     def get_ws_info(self, ws_name, parameter_file, select=True):
         return {
+            "shape": "Not set" if self._has_no_valid_shape(ws_name) else "set",
             "fit_parameters": parameter_file,
             "crystal": "Not set" if not self._has_xtal(ws_name) else self._get_xtal_info(ws_name),
             "select": select,
@@ -260,6 +262,12 @@ class TextureProjection:
         col_names = ws.getColumnNames()
         index = col_names.index(target_default) if target_default in col_names else 0
         return col_names, index
+
+    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample):
+        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
+
+    def _has_no_valid_shape(self, ws_name):
+        has_no_valid_shape(ws_name)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:

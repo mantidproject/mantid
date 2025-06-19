@@ -260,8 +260,8 @@ class TextureCorrectionModel:
         gauge_vol_str = self.get_gauge_vol_str(preset, custom_shape)
         plot_gauge_vol(gauge_vol_str, fig)
 
-    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels):
-        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, self.reference_ws)
+    def plot_sample_directions(self, fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample):
+        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
 
     def _has_no_valid_shape(self, ws_name):
         has_no_valid_shape(ws_name)

@@ -5,7 +5,6 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
 from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
-from mantidqt.plotting import sample_shape
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
     INSTRUMENT_DICT,
@@ -15,6 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 import os
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
 
 class TextureCorrectionPresenter:
@@ -22,6 +22,8 @@ class TextureCorrectionPresenter:
         self.model = model
         self.view = view
         self.worker = None
+
+        self.show_sample_presenter = ShowSamplePresenter(model, view, True)
 
         self.ws_names = []
         self.ws_info = {}
@@ -40,12 +42,10 @@ class TextureCorrectionPresenter:
         self.view.set_on_apply_clicked(self.on_apply_clicked)
         self.view.set_on_delete_clicked(self.delete_selected_files)
 
-        self.view.sig_view_shape_requested.connect(self._on_view_shape_clicked)
-
         self.view.set_on_create_ref_ws_clicked(self.on_create_ref_sample_clicked)
         self.view.set_on_set_ref_ws_orientation_clicked(self.open_goniometer_dialog)
         self.view.set_on_save_ref_clicked(self._on_save_ref_clicked)
-        self.view.set_on_view_reference_shape_clicked(self._on_view_ref_shape_clicked)
+        self.view.set_on_view_reference_shape_clicked(self.show_sample_presenter.on_view_reference_shape_clicked)
         self.view.set_on_load_ref_clicked(self._on_load_ref_clicked)
 
         self.view.set_on_set_orientation_clicked(self.open_goniometer_dialog)
@@ -119,21 +119,6 @@ class TextureCorrectionPresenter:
 
     def deselect_all(self):
         self.view.set_all_workspaces_selected(False)
-
-    def _on_view_shape_clicked(self, ws_name):
-        try:
-            fig = sample_shape.plot_sample_container_and_components(ws_name, alpha=0.5, custom_color="grey")
-            ax_transform, ax_labels = output_settings.get_texture_axes_transform()
-            self.model.plot_sample_directions(fig, ws_name, ax_transform, ax_labels)
-            self._add_gauge_vol_view(fig)
-        except Exception as exception:
-            logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(ws_name, exception))
-
-    def _on_view_ref_shape_clicked(self):
-        fig = sample_shape.plot_sample_container_and_components(self.model.reference_ws, alpha=0.5, custom_color="grey")
-        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
-        self.model.plot_sample_directions(fig, None, ax_transform, ax_labels)
-        self._add_gauge_vol_view(fig)
 
     def _add_gauge_vol_view(self, fig):
         if self.view.include_absorption():
