@@ -1,1 +1,0 @@
-- Hidden workspaces within a workspace group are no longer shown in WorkspaceTreeWidget
