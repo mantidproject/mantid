@@ -71,7 +71,7 @@ New features
   from the ADS.
 - Type driven refactor of the :ref:`ui engineering gsas` tab model and centralisation of how ``GSAS-II`` call is
   configured. The refactor removes the need for hard-coded paths in favour of recursively searching for files within a
-  user defined path. See `#39139 <https://github.com/mantidproject/mantid/issues/39139>`_ for more information.
+  user defined path.
 - A new algorithm :ref:`algm-CreatePoleFigureTableWorkspace` has been added which creates a table with the information
   required to produce a pole figure (a collection of alphas, betas, and intensities), for use in texture analysis.
 
@@ -79,7 +79,6 @@ Bugfixes
 ############
 - Disable ``Rietveld`` from :ref:`GSAS-II UI <ui engineering gsas>` Refinement Method combobox options. Add on-hover
   tooltip to inform users that ``Rietveld`` is not currently supported.
-  `#38668 <https://github.com/mantidproject/mantid/issues/38668>`_
 - When Focusing, either within the interface or in a script, you should no longer be able to unknowingly apply an
   outdated vanadium correction.
 
@@ -91,13 +90,13 @@ Bugfixes
     supplied to the user.
 
 - ``CEO2.cif``, no longer contains a formatting issue which was causing a loop error when trying to load into Mantid
-  Workbech using ``LoadCIF``. `#39148 <https://github.com/mantidproject/mantid/issues/39148>`_
+  Workbech using ``LoadCIF``.
 - Add ``<side-by-side-view-location>`` elements to the detector banks in ``SNAP_Definition.xml``.
 - Within  :ref:`algm-AbsorptionCorrection` algorithm, when ``Rasterize`` is called, it now takes both the Integration
   ``Volume Shape`` and the ``Sample Shape`` to calculate L1 paths. Before, it would only take the integration volume and
   would assume that the paths within this shape are equal to the paths within the sample.
 - ``GSAS-II GSASIIscriptable.py`` no longer uses a hard-coded path which is invalid for newer version of GSAS-II
-  (versions 5758 and later). `#38882 <https://github.com/mantidproject/mantid/issues/38882>`_
+  (versions 5758 and later).
 - The :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`
   will no longer crash when deleting multiple workspaces in the ADS. This also fixed an issue of clearing the whole plot
   in the same tab when deleting workspaces in the ADS.
