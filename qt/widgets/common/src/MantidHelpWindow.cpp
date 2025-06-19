@@ -346,6 +346,7 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
   UNUSED_ARG(searchDir.cdUp());
   UNUSED_ARG(searchDir.cd("share"));
   UNUSED_ARG(searchDir.cd("doc"));
+  UNUSED_ARG(searchDir.cd("html"));
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {
@@ -359,6 +360,7 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
   UNUSED_ARG(searchDir.cdUp());
   UNUSED_ARG(searchDir.cd("share"));
   UNUSED_ARG(searchDir.cd("doc"));
+  UNUSED_ARG(searchDir.cd("html"));
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {
