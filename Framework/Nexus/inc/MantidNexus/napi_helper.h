@@ -28,6 +28,8 @@ MANTID_NEXUS_DLL int countObjectsInGroup(hid_t loc_id);
 
 MANTID_NEXUS_DLL NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype);
 
+MANTID_NEXUS_DLL hid_t nxToHDF5Type(NXnumtype datatype);
+
 MANTID_NEXUS_DLL hid_t h5MemType(hid_t atype);
 
 MANTID_NEXUS_DLL herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata);
@@ -44,3 +46,11 @@ MANTID_NEXUS_DLL NXstatus moveOneDown(NXhandle hfil);
 MANTID_NEXUS_DLL char *moveDown(NXhandle hfil, char *address, NXstatus *code);
 MANTID_NEXUS_DLL NXstatus stepOneUp(NXhandle hfil, char const *name);
 MANTID_NEXUS_DLL NXstatus stepOneGroupUp(NXhandle hfil, char const *name);
+
+/*---------------------------------------------------------------------
+ * private functions used in NX5open
+ */
+
+pNexusFile5 create_file_struct();
+hid_t create_file_access_plist(CONSTCHAR *filename);
+herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer);

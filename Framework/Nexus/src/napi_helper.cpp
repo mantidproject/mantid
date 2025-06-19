@@ -69,7 +69,8 @@ herr_t readStringAttribute(hid_t attr, char **data) {
 
     free(strings);
   } else {
-    *data = strdup(" higher dimensional string array");
+    *data = nullptr;
+    return static_cast<herr_t>(NXstatus::NX_ERROR);
   }
 
   H5Tclose(atype);
@@ -245,6 +246,61 @@ NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
   }
 
   return iPtype;
+}
+
+hid_t nxToHDF5Type(NXnumtype datatype) {
+  hid_t type;
+  switch (datatype) {
+  case NXnumtype::CHAR: {
+    type = H5T_C_S1;
+    break;
+  }
+  case NXnumtype::INT8: {
+    type = H5T_NATIVE_CHAR;
+    break;
+  }
+  case NXnumtype::UINT8: {
+    type = H5T_NATIVE_UCHAR;
+    break;
+  }
+  case NXnumtype::INT16: {
+    type = H5T_NATIVE_SHORT;
+    break;
+  }
+  case NXnumtype::UINT16: {
+    type = H5T_NATIVE_USHORT;
+    break;
+  }
+  case NXnumtype::INT32: {
+    type = H5T_NATIVE_INT;
+    break;
+  }
+  case NXnumtype::UINT32: {
+    type = H5T_NATIVE_UINT;
+    break;
+  }
+  case NXnumtype::INT64: {
+    type = H5T_NATIVE_INT64;
+    break;
+  }
+  case NXnumtype::UINT64: {
+    type = H5T_NATIVE_UINT64;
+    break;
+  }
+  case NXnumtype::FLOAT32: {
+    type = H5T_NATIVE_FLOAT;
+    break;
+  }
+  case NXnumtype::FLOAT64: {
+    type = H5T_NATIVE_DOUBLE;
+    break;
+  }
+  default: {
+    NXReportError("ERROR: nxToHDF5Type: unknown type");
+    type = -1;
+  }
+  }
+  return type;
 }
 
 hid_t h5MemType(hid_t atype) {
@@ -485,4 +541,74 @@ NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
   snprintf(pBueffel, 255, "ERROR: NXopengroupaddress cannot step into %s", name);
   NXReportError(pBueffel);
   return NXstatus::NX_ERROR;
+}
+
+/*---------------------------------------------------------------------
+ * private functions used in NX5open
+ */
+
+pNexusFile5 create_file_struct() {
+  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
+  if (!pNew) {
+    NXReportError("ERROR: not enough memory to create file structure");
+  } else {
+    memset(pNew, 0, sizeof(NexusFile5));
+  }
+
+  return pNew;
+}
+
+hid_t create_file_access_plist(CONSTCHAR *filename) {
+  char pBuffer[512];
+  hid_t fapl = -1;
+
+  /* create file access property list - required in all cases*/
+  if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+    sprintf(pBuffer,
+            "Error: failed to create file access property "
+            "list for file %s",
+            filename);
+    NXReportError(pBuffer);
+    return fapl;
+  }
+
+  /* set file close policy - need this in all cases*/
+  if (H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG) < 0) {
+    sprintf(pBuffer,
+            "Error: cannot set close policy for file "
+            "%s",
+            filename);
+    NXReportError(pBuffer);
+    return fapl;
+  }
+
+  return fapl;
+}
+
+herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
+  char pBuffer[512];
+  hid_t attr_id;
+  hid_t space_id = H5Screate(H5S_SCALAR);
+  hid_t type_id = H5Tcopy(H5T_C_S1);
+
+  H5Tset_size(type_id, strlen(buffer));
+
+  attr_id = H5Acreate(parent_id, name, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr_id < 0) {
+    sprintf(pBuffer, "ERROR: failed to create %s attribute", name);
+    NXReportError(pBuffer);
+    return -1;
+  }
+
+  if (H5Awrite(attr_id, type_id, buffer) < 0) {
+    sprintf(pBuffer, "ERROR: failed writting %s attribute", name);
+    NXReportError(pBuffer);
+    return -1;
+  }
+
+  H5Tclose(type_id);
+  H5Sclose(space_id);
+  H5Aclose(attr_id);
+
+  return 0;
 }

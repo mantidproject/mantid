@@ -33,5 +33,3 @@ NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *pName, int *rank, int dim[]
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata);
 herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *unused, void *opdata);
 herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *unused, void *op_data);
-
-hid_t nxToHDF5Type(NXnumtype datatype);
