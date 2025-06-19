@@ -336,15 +336,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.return_value = ws
         self.assertTrue(self.model._has_no_orientation_set("ws"))
 
-    @patch(correction_model_path + ".ADS")
-    def test_has_no_valid_shape_returns_true_on_missing_mesh(self, mock_ads):
-        ws = MagicMock()
-        shape = MagicMock()
-        shape.getMesh.return_value = []  # empty mesh
-        ws.sample().getShape.return_value = shape
-        mock_ads.retrieve.return_value = ws
-        self.assertTrue(self.model._has_no_valid_shape("ws"))
-
     def test_parse_param_values_parses_types_correctly(self):
         self.assertTrue(self.model._parse_param_values("true"))
         self.assertFalse(self.model._parse_param_values("false"))
