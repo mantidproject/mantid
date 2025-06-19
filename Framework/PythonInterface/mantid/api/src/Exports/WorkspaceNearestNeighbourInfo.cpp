@@ -6,6 +6,7 @@
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/make_constructor.hpp>
 
 using namespace boost::python;
