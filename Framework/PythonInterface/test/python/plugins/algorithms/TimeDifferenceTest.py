@@ -50,6 +50,17 @@ def _add_time_log_to_workspace(ws_name: str = TEST_NAME, time: str = ISO_TIME_ST
     AnalysisDataService.retrieve(ws_name).getRun().setStartAndEndTime(start_time, end_time)
 
 
+def _correct_midtimes(time_stamps, duration=DEFAULT_DURATION):
+    """
+    This correction is done for the test data, as TimeDifference algorithm will retrieve the time stamps
+    of the middle of the run.
+    :param time_stamps: Middle of the run time stamps
+    :param duration: Set duration of each experiment, by default is 1 second
+    :return: Corrected time stamps
+    """
+    return [time + np.timedelta64(int(duration / 2 * NANO_FACTOR), "ns") for time in time_stamps]
+
+
 def _prepare_workspaces(start_times, unit: str = "s"):
     names = []
     times = []
@@ -60,10 +71,6 @@ def _prepare_workspaces(start_times, unit: str = "s"):
         CreateWorkspace(OutputWorkspace=names[-1], DataX=0, DataY=1)
         _add_time_log_to_workspace(ws_name=names[-1], time=str(times[-1]))
     return names, times
-
-
-def _correct_midtimes(time_stamps, duration=DEFAULT_DURATION):
-    return [time + np.timedelta64(int(duration / 2 * NANO_FACTOR), "ns") for time in time_stamps]
 
 
 class TimeDifferenceTest(unittest.TestCase):

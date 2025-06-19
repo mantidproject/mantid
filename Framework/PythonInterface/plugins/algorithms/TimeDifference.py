@@ -29,12 +29,8 @@ if TYPE_CHECKING:
     from mantid.dataobjects import TableWorkspace
 
 # TIME LOGS
-START_TIME = "start_time"
-RUN_START = "run_start"
-END_TIME = "end_time"
-RUN_END = "run_end"
-START_LOGS = [RUN_START, START_TIME]
-END_LOGS = [RUN_END, END_TIME]
+START_LOGS = ["start_time", "run_start"]
+END_LOGS = ["end_time", "run_end"]
 ONE_SECOND = np.timedelta64(1, "s")
 
 
@@ -108,12 +104,12 @@ class TimeDifference(PythonAlgorithm):
         hours_diff = seconds_diff / 3600
         hours_diff_err = seconds_diff_err / 3600
         row = {
-            "WsName": name,
-            "MidTimeStamp": str(time),
-            "Seconds": seconds_diff,
-            "SecondsError": seconds_diff_err,
-            "Hours": hours_diff,
-            "HoursError": hours_diff_err,
+            "ws_name": name,
+            "midtime_stamp": str(time),
+            "seconds": seconds_diff,
+            "seconds_error": seconds_diff_err,
+            "hours": hours_diff,
+            "hours_error": hours_diff_err,
         }
         return row
 
@@ -121,7 +117,7 @@ class TimeDifference(PythonAlgorithm):
         # Create Times Table
         table = WorkspaceFactory.Instance().createTable()
         column_types = ["str", "str", *["float"] * 4]
-        column_names = ["WsName", "MidTimeStamp", "Seconds", "SecondsError", "Hours", "HoursError"]
+        column_names = ["ws_name", "midtime_stamp", "seconds", "seconds_error", "hours", "hours_error"]
         for col_name, col_type in zip(column_names, column_types):
             table.addColumn(type=col_type, name=col_name)
         for name, time in zip(names, times):
