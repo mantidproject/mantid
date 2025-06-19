@@ -141,31 +141,38 @@ Directory Properties
 Logging Properties
 ******************
 
-The details of configuring the logging functionality within Mantid will not be explained here. For those who want more
-details look into the `POCO logging classes <https://pocoproject.org/docs/package-Foundation.Logging.html>`_ and the
-`Log4J logging module <https://logging.apache.org/log4j/>`_ that it closely emulates. There are several comments in the
-properties file itself that explain the configuration we provide by default.  However there are some obvious areas that
-you may want to alter and those properties are detailed below.
+Mantid uses the `POCO <https://pocoproject.org/>`_ C++ libraries for logging. The details of configuring the logging
+functionality within Mantid will not be explained here. For those who want more details look into the
+`POCO logging classes <https://pocoproject.org/docs/package-Foundation.Logging.html>`_ and the
+`Log4J logging module <https://logging.apache.org/log4j/>`_ that it closely emulates.
+There are several comments in the properties file itself that explain the configuration we provide by default.
+However there are some obvious areas that you may want to alter and those properties are detailed below.
+Information on how to customize the logging system can be found in the
+`POCO documentation <https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders>`_.
 
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
-|Property                                         |Description                                        |Example value                |
-+=================================================+===================================================+=============================+
-| ``logging.loggers.root.level``                  |Defines the level of messages to be output         | ``debug``, ``information``, |
-|                                                 |by the system.                                     | ``notice``, ``warning``,    |
-|                                                 |The default is information, but                    | ``error``, ``critical``     |
-|                                                 |this can be lowered to debug for more detailed     | or ``fatal``                |
-|                                                 |feedback.                                          |                             |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
-| ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,         |
-|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``,          |
-|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``, or |
-|                                                 | redirected using pipes.                           | ``PythonLoggingChannel``    |
-|                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
-|                                                 | python and is visible in jupyter notebooks.       |                             |
-|                                                 | ``PythonLoggingChannel`` sends messages to a      |                             |
-|                                                 | logger called ``'Mantid'`` from the ``logging``   |                             |
-|                                                 | framework of Python's standard library.           |                             |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
+
++-------------------------------------------------+---------------------------------------------------+-------------------------------------+
+|Property                                         |Description                                        |Example value                        |
++=================================================+===================================================+=====================================+
+| ``logging.loggers.root.level``                  |Defines the level of messages to be output         | ``debug``, ``information``,         |
+|                                                 |by the system.                                     | ``notice``, ``warning``,            |
+|                                                 |The default is information, but                    | ``error``, ``critical``             |
+|                                                 |this can be lowered to debug for more detailed     | or ``fatal``                        |
+|                                                 |feedback.                                          |                                     |
++-------------------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,                 |
+|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``,                  |
+|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``, or         |
+|                                                 | redirected using pipes.                           | ``PythonLoggingChannel``            |
+|                                                 | ``PythonStdoutChannel`` writes to stdout through  |                                     |
+|                                                 | python and is visible in jupyter notebooks.       |                                     |
+|                                                 | ``PythonLoggingChannel`` sends messages to a      |                                     |
+|                                                 | logger called ``'Mantid'`` from the ``logging``   |                                     |
+|                                                 | framework of Python's standard library.           |                                     |
++-------------------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``logging.formatters.f1.pattern``               | The format of the log messages.                   | ``[%H:%M:%S][%q] %s %U:%u - %t``    |
+|                                                 | The default is ``%s-[%p] %t``.                    |                                     |
++-------------------------------------------------+---------------------------------------------------+-------------------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
 

@@ -29,7 +29,7 @@ Improvements
 - The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
 - Sample thickness, height, and width can be read from a batch file. These parameters are also included in the batch file generated from exporting the table.
 - The beam centre HAB/LAB update checkboxes are automatically deselected if you select LAB/HAB as the reduction mode, respectively.
-- The run numbers for sample transmission, sample direct, can scatter, and can direct workspaces are now added to NXCanSAS and CanSAS files.
+- The run numbers for sample transmission, sample direct, can scatter, and can direct workspaces are now added to NXcanSAS and CanSAS files.
 
 
 Bug Fixes

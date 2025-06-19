@@ -1,0 +1,4 @@
+- Fixed a bug in 'Unweighted least squares' cost function in Mantid fit. It was discovered not to work as expected when the fit was compared with scipy library.
+- As part of the fix a new parameter named ``IgnoreInvalidData`` defaulted to ``false`` has been introduced into :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>` and :ref:`algm-DirectILLTubeBackground` algorithms so that it can be forwarded into the :ref:`algm-Fit` algorithm.
+- In :ref:`algm-PoldiFitPeaks2D` ``IgnoreInvalidData`` parameter is defaulted to ``true`` when invoking :ref:`algm-Fit` to preserve existing behaviour.
+- The ``IgnoreInvalidData`` parameter defaulted to ``false`` has been introduced into :ref:`algm-ReflectometryBackgroundSubtraction`

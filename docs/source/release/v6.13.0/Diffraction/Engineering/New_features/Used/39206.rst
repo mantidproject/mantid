@@ -1,0 +1,1 @@
+- In fitting tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` data can now be loaded that is in d-spacing as well as Time-of-flight.

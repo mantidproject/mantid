@@ -52,6 +52,8 @@ Next, add the other function : `GausOsc` and run the Fit again. You should find 
 Custom fitting function
 =======================
 
+.. _user_defined_function:
+
 User defined function
 ---------------------
 

@@ -1,0 +1,1 @@
+- Fixed an out of bounds error coming from :ref:`algm-IntegratePeaksShoeboxTOF` when integrating peaks.

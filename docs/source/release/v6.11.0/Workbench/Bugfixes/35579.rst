@@ -1,1 +1,0 @@
-- Fixed a bug where deleting or moving the Script Repository install directory could cause a crash.
