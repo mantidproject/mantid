@@ -2,7 +2,7 @@ from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt import load_ui
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitFactory
-
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
 
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
 
@@ -15,6 +15,8 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def __init__(self, parent=None):
         super(TextureCorrectionView, self).__init__(parent)
         self.setupUi(self)
+
+        self.show_sample_view = ShowSampleView()
 
         self.finder_corr.setLabelText("Sample Run(s)")
         self.finder_corr.allowMultipleFiles(True)
@@ -111,19 +113,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
             self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
             self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
 
-            if metadata.get("shape", "Not set") == "Not set":
-                self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem("Not set"))
-            else:
-                self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(""))
-                view_btn = QtWidgets.QPushButton()
-                view_btn.setProperty("text", "View Shape")
-                view_btn.clicked.connect(lambda _, ws_name=ws: self.sig_view_shape_requested.emit(ws_name))
-                cell_widget = QtWidgets.QWidget()
-                layout = QtWidgets.QHBoxLayout(cell_widget)
-                layout.addWidget(view_btn)
-                layout.setAlignment(QtCore.Qt.AlignCenter)
-                layout.setContentsMargins(0, 0, 0, 0)
-                self.table_loaded_data.setCellWidget(row, 1, cell_widget)
+            self.show_sample_view.add_show_button_to_table_if_shape(
+                self.sig_view_shape_requested, self.table_loaded_data, ws, row, 1, metadata.get("shape", "Not set") != "Not set"
+            )
 
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(metadata["select"])

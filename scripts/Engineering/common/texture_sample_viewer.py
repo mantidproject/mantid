@@ -53,17 +53,10 @@ def get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform, sample_mesh
     return np.asarray([rotated_ax_transform.T @ v @ rotated_ax_transform for v in verts]).T
 
 
-def plot_sample_directions(fig, ws_name, ax_transform, ax_labels, reference_ws=None):
+def plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample=True):
     ax = fig.axes[0]
-    if not ws_name:
-        ws_name = reference_ws
-        # if we are looking at the reference, we want to rotate the sample independently of our definition axes
-        rotation_matrix = np.eye(3)
-        ws = ADS.retrieve(ws_name)
-    else:
-        ws = ADS.retrieve(ws_name)
-        # if not looking at the reference, we want our definition axes to rotate with the sample
-        rotation_matrix = ws.getRun().getGoniometer().getR()
+    ws = ADS.retrieve(ws_name)
+    rotation_matrix = ws.getRun().getGoniometer().getR() if fix_axes_to_sample else np.eye(3)
     sample_mesh = ws.sample().getShape().getMesh()
     rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_matrix, sample_mesh, scale=1.2)
     s_rd, s_nd, s_td = rd * arrow_lens[0], nd * arrow_lens[1], td * arrow_lens[2]
