@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
+#include <QObject>
 #include <QString>
 #include <QUrl>
 #include <string>
@@ -16,6 +17,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON PythonHelpWindow : public MantidQt::API::MantidHelpInterface {
+  Q_OBJECT
 public:
   PythonHelpWindow();
   void showPage(const std::string &url = std::string()) override;
