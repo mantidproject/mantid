@@ -1,1 +1,0 @@
-- The ``ReadBanksInThread`` experimental parameter in :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` was removed and the default of 1 will always be used.
