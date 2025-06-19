@@ -25,9 +25,8 @@ namespace {
 WorkspaceNearestNeighbourInfo *createWorkspaceNearestNeighbourInfo(const boost::python::object &workspace,
                                                                    const bool ignoreMaskedDetectors,
                                                                    const int nNeighbours = 8) {
-
-  std::shared_ptr<Mantid::API::MatrixWorkspace> matrixWorkspace =
-      extract<std::shared_ptr<Mantid::API::MatrixWorkspace>>(workspace)();
+  Mantid::API::MatrixWorkspace_sptr matrixWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(workspace)());
 
   return new WorkspaceNearestNeighbourInfo(*matrixWorkspace, ignoreMaskedDetectors, nNeighbours);
 }
