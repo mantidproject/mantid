@@ -56,7 +56,7 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}")
 endif()
 
-# Define a new configuration for debugging with Conda. Crucially it must link to the MSVC release runtime but we switch
+# Define a new configuration for debugging with conda. Crucially it must link to the MSVC release runtime but we switch
 # off all optimzations
 set(_conda_debug_cfg_name DebugWithRelRuntime)
 string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
@@ -91,7 +91,7 @@ set(CMAKE_CONFIGURATION_TYPES
 )
 message(
   STATUS
-    "Detected a build with Conda on Windows. Resetting available build configurations to ${CMAKE_CONFIGURATION_TYPES}"
+    "Detected a build with conda on Windows. Resetting available build configurations to ${CMAKE_CONFIGURATION_TYPES}"
 )
 
 # HDF5 uses threads::threads target

@@ -11,7 +11,7 @@ Mantid to users.
 Conda
 -----
 
-Mantid provides packages to be consumed by the `Conda <conda_>`_ package manager.
+Mantid provides packages to be consumed by the `conda <conda_>`_ package manager.
 Even though it is a single codebase the repository is split across four conda
 packages for users, and a metapackage used to create a development environment:
 
@@ -33,8 +33,8 @@ Each package is built separately for ``x64`` Windows, Linux and macOS with the
 exception of ``mantiddocs`` where a single, ``noarch`` package is created for all
 operating systems as it only contains static HTML.
 
-All mantid-conda packages are available to users through Mantid's
-`Conda organization <mantid-conda-org_>`_.
+All mantid conda packages are available to users through Mantid's
+`conda organization <mantid-conda-org_>`_.
 
 .. _building-conda-packages:
 

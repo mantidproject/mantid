@@ -14,14 +14,14 @@ There are two versions of PyCharm that are in use in the team, Community and Pro
 
 If you haven't installed PyCharm yet do that now, PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
 
-Setup Python development environment with Conda
+Setup Python development environment with conda
 ###############################################
 
 The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted.html>`_.
 
 At any point in these instructions where ``DebugWithRelRuntime`` is used (including in file paths),
 you can replace it with any other build type such as ``Debug`` or ``Release``.
-We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
+We use ``DebugWithRelRuntime`` for conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
 
 - Open PyCharm
 - If no project has been selected already, open the Mantid source code as a project.
@@ -30,7 +30,7 @@ We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due 
 - Select the ``Python Interpreter`` option.
 - Click ``Add Interpreter`` on the top right, then ``Add Local Interpreter...``.
 - From the left side of the window select ``Conda Environment``.
-- Add the path to your Conda executable, e.g. ``C:\Users\<username>\AppData\Local\mambaforge\Scripts\conda.exe`` and click ``Load Environments``.
+- Add the path to your conda executable, e.g. ``C:\Users\<username>\AppData\Local\mambaforge\Scripts\conda.exe`` and click ``Load Environments``.
 - Click the ``Use Existing environment`` radio button and select the ``mantid-developer`` environment in the drop down list.
 - Click OK to close the window.
 - Ensure that next to ``Python Interpreter:`` it says ``mantid-developer``. You will also see a list of the python packages installed in your mantid-developer environment.
@@ -65,7 +65,7 @@ Now that your Python development environment has been setup we can setup the deb
 - Click the down arrow next to ``Script path:`` and change the selection to ``Module name``. Set the ``Module name`` to ``workbench``.
 - In the ``Parameters`` box add ``--single-process`` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
 - In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/DebugWithRelRuntime`` directory.
-- Ensure the ``Python Interpreter:`` box is set to use your ``(mantid-developer)`` Conda environment.
+- Ensure the ``Python Interpreter:`` box is set to use your ``(mantid-developer)`` conda environment.
 - Click OK to save and exit the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
@@ -80,15 +80,15 @@ Now that your Python development environment has been setup we can setup the deb
     C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\plugins\python-ce\helpers\pydev\_pydev_bundle\_pydev_calltip_util.py
     ...
 
-  To resolve the error, remove **only** the debugpy package from your Conda environment with
+  To resolve the error, remove **only** the debugpy package from your conda environment with
 
   .. code-block:: bash
 
     conda remove debugpy --force
 
-  The ``--force`` argument tells Conda to remove the single package only, ignoring the packages that depend on debugpy.
+  The ``--force`` argument tells conda to remove the single package only, ignoring the packages that depend on debugpy.
   Note that the Mamba implementation of ``remove --force`` did not skip dependency checking until version 1.5.2 (October 2023).
-  If your version of Mamba is older than this, use the Conda command.
+  If your version of Mamba is older than this, use the conda command.
 
 .. include:: ./macos-opengl-version-warning.txt
 
@@ -145,7 +145,7 @@ This section assumes you have followed all previous instructions for debugging P
 - Any new breakpoints can be added like normal but they must come after the remote code snippet pasted earlier.
 
 ==================================================================================
-Legacy and not maintained past this point (Only use if explicitly not using Conda)
+Legacy and not maintained past this point (Only use if explicitly not using conda)
 ==================================================================================
 
 Setting up PyCharm on Windows
@@ -155,7 +155,7 @@ Setting up PyCharm on Windows
 
    Go to ``File->Settings``, then under ``Project`` you will set two sub-menus ``Project Interpreter`` and ``Project Structure``. The interpreter defines the Python executable that will be used to run your code, and the structure menu allows you to decide which folders within the project to include and index.
 
-2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, if you are using Conda select "Conda Environment", if you haven't set up Conda follow the Getting Started guidance for it, select existing environment and if not present already put in the path to your Python interpreter, and your conda executable. Alternatively select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid, if you are not using Conda). Click on the ``...`` to open a file browser, and navigate to;
+2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, if you are using conda select "Conda Environment", if you haven't set up conda follow the Getting Started guidance for it, select existing environment and if not present already put in the path to your Python interpreter, and your conda executable. Alternatively select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid, if you are not using Conda). Click on the ``...`` to open a file browser, and navigate to;
 
    .. code-block:: sh
 
@@ -196,7 +196,7 @@ NOTE : In some cases, imports in the code will still be highlighted red when the
 Running Files in the Debugger with EnvFile extension
 ####################################################
 
-Do not run files in the debugger with EnvFile extension with Conda, as Conda does this job for you.
+Do not run files in the debugger with EnvFile extension with conda, as conda does this job for you.
 
 Running Python code from within PyCharm which depends on the Python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
 

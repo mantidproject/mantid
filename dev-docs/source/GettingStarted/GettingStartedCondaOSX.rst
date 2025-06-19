@@ -1,7 +1,7 @@
 .. _GettingStartedCondaOSX:
 
 ===========================
-Develop with Conda on MacOS
+Develop with conda on MacOS
 ===========================
 
 Install `Git <https://git-scm.com/>`_
@@ -42,7 +42,7 @@ How to build
 * To build Mantid Workbench use: ``ninja``
 * To build Unit Tests use: ``ninja AllTests``
 
-CMake Conda variables
+CMake conda variables
 -----------------------
 The ``CONDA_BUILD`` parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid.
 This option can be passed to CMake on the command line using ``-DCONDA_BUILD=True``.
