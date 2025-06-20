@@ -113,6 +113,8 @@ public:
   void removeConstraint(const std::string &parName) override;
   /// Set parameters of decorated function to satisfy constraints.
   void setUpForFit() override;
+  /// Add ties to the decorated function.
+  void addTies(const std::string &ties, bool isDefault = false) override;
 
 protected:
   /// Does nothing.
