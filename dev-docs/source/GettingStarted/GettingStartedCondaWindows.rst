@@ -1,7 +1,7 @@
 .. _GettingStartedCondaWindows:
 
 =============================
-Develop with Conda on Windows
+Develop with conda on Windows
 =============================
 
 Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/downloads/>`_
@@ -39,7 +39,7 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
 
 * Choose the latest version of ``Mambaforge-Windows-x86_64.exe``
-* Run your downloaded ``Mambaforge-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds Conda to your path.
+* Run your downloaded ``Mambaforge-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds conda to your path.
 
 Setup the mantid conda environment
 ----------------------------------
@@ -95,6 +95,6 @@ Building and debugging with CLion
 ---------------------------------
 Please follow the Windows related instructions on :ref:`this page <clion-ref>`.
 
-CMake Conda variables
+CMake conda variables
 ---------------------
 The `CONDA_BUILD` parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. This option can be passed to CMake on the command line using -DCONDA_BUILD=True.

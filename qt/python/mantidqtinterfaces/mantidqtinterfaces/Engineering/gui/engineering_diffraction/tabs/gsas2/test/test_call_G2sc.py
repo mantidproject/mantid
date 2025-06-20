@@ -1,12 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
 import os
+import sys
 import shutil
 import tempfile
 
@@ -25,12 +26,17 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     export_reflections,
     export_refined_instrument_parameters,
     export_lattice_parameters,
+    import_gsasii,
 )
 
 import numpy as np
+from pathlib import Path
+from types import ModuleType
 
 
 class GSAS2ViewTest(unittest.TestCase):
+    temp_save_directory: str
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.temp_save_directory = tempfile.mkdtemp()
@@ -268,3 +274,59 @@ class GSAS2ViewTest(unittest.TestCase):
         with open(os.path.join(self.temp_save_directory, "project_cell_parameters_phase_2.txt"), "rt", encoding="utf-8") as file:
             str_2 = file.read()
             self.assertEqual(str_2, """{"Microstrain":10}""")
+
+
+class TestLimitedRglob(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.test_dir)
+
+    def create_test_files(self, files):
+        for file in files:
+            file_path = os.path.join(self.test_dir, file)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, "w") as f:
+                f.write("test")
+
+    def test_import_gsasii_file_not_found(self):
+        """
+        Test that FileNotFoundError is raised when the specified file does not exist.
+        """
+        non_existent_path = Path("/non/existent/path/GSASIIscriptable.py")
+        with self.assertRaises(FileNotFoundError) as context:
+            import_gsasii(non_existent_path)
+        self.assertEqual(str(context.exception), f"The specified GSASIIscriptable.py file does not exist: {non_existent_path}")
+
+    def test_import_gsasii_import_error(self):
+        """
+        Test that ImportError is raised when the module cannot be imported.
+        """
+        gsasii_path = Path(self.test_dir) / "GSASIIscriptable.py"
+        gsasii_path.parent.mkdir(parents=True, exist_ok=True)
+        gsasii_path.touch()
+
+        expected_message = f"GSASIIscriptable module found at {gsasii_path}, but it could not be imported."
+        with mock.patch("builtins.__import__", side_effect=ImportError(expected_message)):
+            with self.assertRaises(ImportError) as context:
+                import_gsasii(gsasii_path)
+        self.assertEqual(str(context.exception), expected_message)
+
+    @mock.patch.object(sys, "path", new_callable=list)
+    @mock.patch("builtins.__import__", return_value=mock.Mock(spec=ModuleType))
+    def test_import_gsasii_success(self, mock_import, mock_sys_path):
+        """
+        Test that the GSASIIscriptable module is successfully imported.
+        """
+        gsasii_path = Path(self.test_dir) / "GSASIIscriptable.py"
+        gsasii_path.parent.mkdir(parents=True, exist_ok=True)
+        gsasii_path.touch()
+
+        # Use mock_sys_path to simulate sys.path modification
+        mock_sys_path.append(str(gsasii_path.parent))
+
+        result = import_gsasii(gsasii_path)
+        self.assertIsInstance(result, ModuleType)
+        self.assertIn(str(gsasii_path.parent), mock_sys_path)
+        mock_import.assert_called()
+        args = mock_import.call_args[0]
+        self.assertEqual(args[0], "GSASIIscriptable")

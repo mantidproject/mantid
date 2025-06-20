@@ -90,8 +90,8 @@ class GSAS2Presenter(object):
         self.current_plot_index = None
 
     def set_x_limits(self, current_histogram_index):
-        x_minimum = self.model.x_min[int(current_histogram_index) - 1]
-        x_maximum = self.model.x_max[int(current_histogram_index) - 1]
+        x_minimum = self.model.x_limits.x_min[int(current_histogram_index) - 1]
+        x_maximum = self.model.x_limits.x_max[int(current_histogram_index) - 1]
         self.view.set_x_limits(x_minimum, x_maximum)
 
     # ========================

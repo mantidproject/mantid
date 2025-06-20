@@ -28,7 +28,7 @@ Setting up a New Agent
 Windows
 -------
 
-First install the prerequisites tools that cannot be provided through Conda:
+First install the prerequisites tools that cannot be provided through conda:
 
 #. Install the `Command line Visual C++ 2019 build tools <https://visualstudio.microsoft.com/downloads/>`__.
    2019 matches the version used by conda-forge.

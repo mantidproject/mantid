@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,6 +8,8 @@
 import os
 import sys
 import json
+from pathlib import Path
+from types import ModuleType
 
 
 def print_histogram_R_factors(project):
@@ -164,37 +166,76 @@ def export_lattice_parameters(temp_save_directory, name_of_project, project):
             file.write(parameters_json)
 
 
+def import_gsasii(gsasii_scriptable: Path) -> ModuleType:
+    """
+    Try to import the GSASIIscriptable module using the provided file path.
+
+    Args:
+        gsasii_scriptable: The full path to the GSASIIscriptable.py file.
+
+    Returns:
+        The imported GSASIIscriptable module.
+
+    Raises:
+        ImportError: If the module cannot be imported.
+        FileNotFoundError: If the specified file does not exist.
+    """
+    if not gsasii_scriptable.is_file():
+        raise FileNotFoundError(
+            f"The specified GSASIIscriptable.py file does not exist: {gsasii_scriptable}\n"
+            f"Please ensure you have installed GSAS-II from https://advancedphotonsource.github.io/GSAS-II-tutorials/install.html"
+        )
+
+    gsasii_dir = gsasii_scriptable.parent
+    gsasii_package_parent = gsasii_dir.parent
+
+    try:
+        if str(gsasii_package_parent) not in sys.path:
+            sys.path.insert(0, str(gsasii_package_parent))
+        import GSASII.GSASIIscriptable as G2sc
+
+        return G2sc
+    except ImportError as exc1:
+        try:
+            if str(gsasii_dir) not in sys.path:
+                sys.path.insert(0, str(gsasii_dir))
+            import GSASIIscriptable as G2sc
+
+            return G2sc
+        except ImportError as exc2:
+            raise ImportError(
+                f"GSASIIscriptable module found at {gsasii_scriptable}, but it could not be imported.\n"
+                f"Package import failed: {exc1}\n"
+                f"Top-level import failed: {exc2}\n"
+                f"Check that your PYTHONPATH and sys.path are set correctly for your GSAS-II installation.\n"
+            )
+
+
 def main():
     # Parse Inputs from Mantid
     inputs_dict = json.loads(sys.argv[1])
 
-    path_to_gsas2 = inputs_dict["path_to_gsas2"]
     temporary_save_directory = inputs_dict["temporary_save_directory"]
     project_name = inputs_dict["project_name"]
-    refinement_method = inputs_dict["refinement_method"]
-    refine_background = inputs_dict["refine_background"]
-    refine_microstrain = inputs_dict["refine_microstrain"]
-    refine_sigma_one = inputs_dict["refine_sigma_one"]
-    refine_gamma = inputs_dict["refine_gamma"]
-    refine_histogram_scale_factor = inputs_dict["refine_histogram_scale_factor"]
-    refine_unit_cell = inputs_dict["refine_unit_cell"]
+    refinement_method = inputs_dict["refinement_settings"]["method"]
+    refine_background = inputs_dict["refinement_settings"]["background"]
+    refine_microstrain = inputs_dict["refinement_settings"]["microstrain"]
+    refine_sigma_one = inputs_dict["refinement_settings"]["sigma_one"]
+    refine_gamma = inputs_dict["refinement_settings"]["gamma"]
+    refine_histogram_scale_factor = inputs_dict["refinement_settings"]["histogram_scale_factor"]
+    refine_unit_cell = inputs_dict["refinement_settings"]["unit_cell"]
     override_cell_lengths = inputs_dict["override_cell_lengths"]
-    data_files = inputs_dict["data_files"]
-    phase_files = inputs_dict["phase_files"]
-    instrument_files = inputs_dict["instrument_files"]
+    data_files = inputs_dict["file_paths"]["data_files"]
+    phase_files = inputs_dict["file_paths"]["phase_filepaths"]
+    instrument_files = inputs_dict["file_paths"]["instrument_files"]
     limits = inputs_dict["limits"]
     mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
     d_spacing_min = inputs_dict["d_spacing_min"]
     number_of_regions = inputs_dict["number_of_regions"]
+    gsasii_scriptable_path = inputs_dict["gsasii_scriptable_path"]
 
     # Call GSASIIscriptable
-    import_path = None
-    try:
-        import_path = os.path.join(path_to_gsas2, "GSASII")
-        sys.path.insert(0, import_path)
-        import GSASIIscriptable as G2sc
-    except ModuleNotFoundError:
-        raise ImportError(f"GSAS-II was not found at {import_path}")
+    G2sc = import_gsasii(Path(gsasii_scriptable_path))
 
     project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
     gsas_project = G2sc.G2Project(filename=project_path)

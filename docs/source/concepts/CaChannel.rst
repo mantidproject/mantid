@@ -17,7 +17,7 @@ Installation
 
 The installation of the ``CaChannel`` depends on how you have installed mantid.
 See https://www.mantidproject.org/installation the available methods.
-Developers should use the `Conda Package` method
+Developers should install the conda package.
 
 Full Installation
 #################
@@ -44,7 +44,7 @@ CaChannel is to run the following script in the Workbench Script Window
 Conda Package
 #############
 
-If you installed mantid via Conda then you can add CaChannel to your existing
+If you installed mantid via conda then you can add CaChannel to your existing
 environment:
 
 .. code-block:: sh
