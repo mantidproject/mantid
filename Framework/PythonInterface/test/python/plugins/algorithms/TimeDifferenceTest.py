@@ -83,18 +83,12 @@ class TimeDifferenceTest(unittest.TestCase):
     def test_time_difference_throws_for_incorrect_workspace_entry(self):
         CreateEmptyTableWorkspace(OutputWorkspace="test_table")
         with self.assertRaisesRegex(RuntimeError, "Workspace test_table is not a Group or Matrix Workspace."):
-            _ = TimeDifference(Workspaces="test_table")
-
-    def test_time_difference_throws_for_deleted_workspace(self):
-        CreateWorkspace(OutputWorkspace=TEST_NAME, DataX=0, DataY=1)
-        AnalysisDataService.remove(TEST_NAME)
-        with self.assertRaisesRegex(RuntimeError, f"Workspace {TEST_NAME} does not exists in the ADS."):
-            _ = TimeDifference(Workspaces=TEST_NAME)
+            _ = TimeDifference(InputWorkspaces="test_table")
 
     def test_algorithm_creates_NaT_if_time_logs_are_not_present(self):
         CreateWorkspace(OutputWorkspace=TEST_NAME, DataX=0, DataY=1)
 
-        table = TimeDifference(Workspaces=TEST_NAME)
+        table = TimeDifference(InputWorkspaces=TEST_NAME)
 
         # NaT : Not a Time
         self.assertEqual(["NaT"], table.column(TimeTable.time_stamp))
@@ -103,7 +97,7 @@ class TimeDifferenceTest(unittest.TestCase):
         start_times = [0, 1, 2, 3]
         names, times = _prepare_workspaces(start_times)
 
-        table = TimeDifference(Workspaces=",".join(names))
+        table = TimeDifference(InputWorkspaces=names)
 
         self._assert_table(table, names, _correct_midtimes(times), start_times)
 
@@ -118,7 +112,7 @@ class TimeDifferenceTest(unittest.TestCase):
                 run.addProperty(name=start, value=ISO_TIME_STAMP, replace=False)
                 run.addProperty(name=end, value=ISO_TIME_STAMP.replace("00.", "02."), replace=False)
 
-                table = TimeDifference(Workspaces=TEST_NAME)
+                table = TimeDifference(InputWorkspaces=TEST_NAME)
 
                 midtime = ISO_TIME_STAMP.replace("00.", "01.")
                 self.assertEqual([midtime], table.column(1))
@@ -133,7 +127,7 @@ class TimeDifferenceTest(unittest.TestCase):
         _add_time_log_to_workspace(ws_name=REFERENCE_NAME, time=str(ref_time))
         names, times = _prepare_workspaces(start_times, "s")
 
-        table = TimeDifference(Workspaces=",".join(names), ReferenceWorkspace=AnalysisDataService.retrieve(REFERENCE_NAME))
+        table = TimeDifference(InputWorkspaces=names, ReferenceWorkspace=AnalysisDataService.retrieve(REFERENCE_NAME))
 
         start_times = [d + reference for d in start_times]
         start_times.insert(0, 0)
@@ -145,7 +139,7 @@ class TimeDifferenceTest(unittest.TestCase):
         start_times = [0, 1, 2, 3]
         names, _ = _prepare_workspaces(start_times)
         GroupWorkspaces(names, OutputWorkspace=GROUP_NAME)
-        table = TimeDifference(Workspaces="group")
+        table = TimeDifference(InputWorkspaces="group")
 
         # Notice every experiment lasts for 1 seconds by default, so final time is at 4 seconds
         # and midtime is 2 seconds.
@@ -162,7 +156,7 @@ class TimeDifferenceTest(unittest.TestCase):
         # Add group to names lists
         names.append(GROUP_NAME)
 
-        table = TimeDifference(Workspaces=",".join(names))
+        table = TimeDifference(InputWorkspaces=names)
 
         # Add test data for group column
         errors = [DEFAULT_DURATION * 2] * len(start_times)
@@ -180,7 +174,7 @@ class TimeDifferenceTest(unittest.TestCase):
         start_times = [0, 100]
         names, times = _prepare_workspaces(start_times, "ns")
 
-        table = TimeDifference(Workspaces=",".join(names))
+        table = TimeDifference(InputWorkspaces=names)
 
         # convert initial times back to seconds to compare results in table
         start_times = [time / NANO_FACTOR for time in start_times]

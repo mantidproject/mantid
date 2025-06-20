@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from mantid.api import (
+    ADSValidator,
     AlgorithmFactory,
     AnalysisDataService,
     PythonAlgorithm,
@@ -20,7 +21,7 @@ from mantid.api import (
     PropertyMode,
 )
 
-from mantid.kernel import Direction, StringMandatoryValidator, logger
+from mantid.kernel import Direction, StringArrayProperty, logger
 
 import numpy as np
 from typing import TYPE_CHECKING
@@ -55,11 +56,8 @@ class TimeDifference(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            name="Workspaces",
-            defaultValue="",
-            validator=StringMandatoryValidator(),
-            direction=Direction.Input,
-            doc="Input workspaces. Comma separated workspace names",
+            StringArrayProperty("InputWorkspaces", direction=Direction.Input, validator=ADSValidator()),
+            doc="Input workspaces. Comma separated workspace names of either Matrix or Group Workspaces. Must be on the ADS",
         )
 
         self.declareProperty(
@@ -80,16 +78,12 @@ class TimeDifference(PythonAlgorithm):
             return isinstance(workspace, (MatrixWorkspace, WorkspaceGroup))
 
         issues = dict()
-        workspace_names = self.getProperty("Workspaces").value.split(",")
+        workspace_names = self.getProperty("InputWorkspaces").value
         for name in workspace_names:
-            if not AnalysisDataService.doesExist(name):
-                issues["Workspaces"] = f"Workspace {name} does not exists in the ADS."
+            ws = AnalysisDataService.retrieve(name)
+            if not group_or_matrix(ws):
+                issues["InputWorkspaces"] = f"Workspace {name} is not a Group or Matrix Workspace."
                 return issues
-            else:
-                ws = AnalysisDataService.retrieve(name)
-                if not group_or_matrix(ws):
-                    issues["Workspaces"] = f"Workspace {name} is not a Group or Matrix Workspace."
-                    return issues
 
         reference_workspace = self.getProperty("ReferenceWorkspace").value
         if reference_workspace:
@@ -155,7 +149,7 @@ class TimeDifference(PythonAlgorithm):
         return _calculate_midtime_and_duration(start, end)
 
     def PyExec(self):
-        ws_names = self.getProperty("Workspaces").value.split(",")
+        ws_names = self.getProperty("InputWorkspaces").value
         reference_ws = self.getProperty("ReferenceWorkspace").value
 
         times = []
