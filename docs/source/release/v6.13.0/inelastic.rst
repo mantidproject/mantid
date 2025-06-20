@@ -26,7 +26,7 @@ Algorithms
 New features
 ############
 - :ref:`BayesQuasi2 <algm-BayesQuasi2>` and :ref:`BayesStretch2 <algm-BayesStretch2>` are now available for all Mantid
-  users now that ``quickbayes`` v1.0.2 is installed as a ``mantid`` dependency via Conda.
+  users now that ``quickbayes`` v1.0.2 is installed as a ``mantid`` dependency via conda.
 
 Bugfixes
 ############
