@@ -160,12 +160,8 @@ public:
 
   template <typename NumT>
   void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<NumT>> &data, const size_t offset,
-               const size_t slabsize, const std::string &tof_unit) {
+               const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-
-    // Convert Tof to microseconds
-    if (tof_unit != MICROSEC)
-      Kernel::Units::timeConversionVector(*data, tof_unit, MICROSEC);
   }
 
   void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<detid_t>> &data, const size_t offset,
@@ -245,8 +241,6 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-constexpr double TOF_BAD{-1000.}; // large tof that nothing should ever generate
-
 template <typename TofType> class ProcessEventsTask {
 public:
   ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<TofType> *tofs,
@@ -262,24 +256,19 @@ public:
 
   void operator()(const tbb::blocked_range<size_t> &range) {
     const auto &binedges = *m_binedges;
-    const size_t nbins = binedges.size() - 1;
 
     for (size_t i = range.begin(); i < range.end(); ++i) {
-      // const detid_t &detid = (*m_detids)[i];
-      if (true) { // no_mask || (masked->find(detid) == masked->end())) {
+      const detid_t &detid = (*m_detids)[i];
+      if (no_mask || (!masked->contains(detid))) {
         // Apply calibration
-        const double &tof = static_cast<double>((*m_tofs)[i]);
+        const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
+        // Find the bin index using binary search
+        const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
 
-        if (tof != TOF_BAD) {
-          // Find the bin index using binary search
-          const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
-          const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
-                                 ? nbins
-                                 : static_cast<size_t>(it - binedges.cbegin() - 1);
-
-          if (bin < nbins) {
-            y_temp[bin]++;
-          }
+        // Increment the count if a bin was found
+        if (!(it == binedges.cbegin() || it == binedges.cend())) {
+          const size_t bin = static_cast<size_t>(it - binedges.cbegin() - 1);
+          y_temp[bin]++;
         }
       }
     }
@@ -360,6 +349,7 @@ public:
         // and the units
         std::string tof_unit;
         NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+        const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
         // read parts of the bank at a time
         size_t event_index_start = eventRangeFull.first;
@@ -380,28 +370,16 @@ public:
           if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
               (calibration->idmax() < static_cast<detid_t>(maxval))) {
             calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
+                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration);
           }
 
           // load time-of-flight
-          auto event_time_of_flight = std::make_unique<std::vector<double>>();
-          m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize, tof_unit);
-          const auto numEvent = event_time_of_flight->size();
-          { // convert values - TODO? convert to a task
-            const bool no_mask = m_masked.empty();
-            tbb::parallel_for(size_t(0), numEvent, [&](const size_t &index) {
-              const detid_t &detid = (*event_detid)[index];
-              if (no_mask || (!m_masked.contains(detid))) {
-                (*event_time_of_flight)[index] *= calibration->value(detid);
-              } else {
-                // event is masked
-                (*event_time_of_flight)[index] = TOF_BAD;
-              }
-            });
-          }
+          auto event_time_of_flight = std::make_unique<std::vector<float>>();
+          m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
 
           // Non-blocking processing of the events
           // Each thread needs its own ProcessEventsTask
+          const auto numEvent = event_time_of_flight->size();
           tg.run([numEvent, event_detid = std::move(event_detid),
                   event_time_of_flight = std::move(event_time_of_flight), calibration = std::move(calibration),
                   x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp, grainsize = m_grainsize_event]() {
@@ -815,7 +793,18 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
 }
 
 // ------------------------ BankCalibration object
+/**
+ * Calibration of a subset of pixels as requested in the constructor. This is used because a vector is faster lookup
+ * than a map for dense array of values.
+ *
+ * @param idmin Minimum detector id to include in the calibration
+ * @param idmax Maximum detector id to include in the calibration
+ * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
+ * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
+ * @param calibration_map Calibration for the entire instrument.
+ */
 AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
+                                                          const double time_conversion,
                                                           const std::map<detid_t, double> &calibration_map)
     : m_detid_offset(idmin) {
   // error check the id-range
@@ -825,16 +814,24 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
   // allocate memory and set the default value to 1
   m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
 
-  // copy over values that matter
+  // set up iterators for copying data
   auto iter = calibration_map.find(idmin);
   if (iter == calibration_map.end())
     throw std::runtime_error("ALSO BAD!");
   auto iter_end = calibration_map.find(idmax);
   if (iter_end != calibration_map.end())
     ++iter_end;
+
+  // copy over values that matter
   for (; iter != iter_end; ++iter) {
     const auto index = static_cast<size_t>(iter->first - m_detid_offset);
     m_calibration[index] = iter->second;
+  }
+
+  // apply time conversion here so it is effectively applied for each detector once rather than on each event
+  if (time_conversion != 1.) {
+    std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
+                   [time_conversion](const auto &value) { return std::move(time_conversion * value); });
   }
 }
 

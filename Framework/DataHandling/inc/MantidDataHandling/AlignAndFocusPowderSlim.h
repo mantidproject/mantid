@@ -26,14 +26,15 @@ public:
 
   class MANTID_DATAHANDLING_DLL BankCalibration {
   public:
-    BankCalibration(const detid_t idmin, const detid_t idmax, const std::map<detid_t, double> &calibration_map);
+    BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
+                    const std::map<detid_t, double> &calibration_map);
     const double &value(const detid_t detid) const;
     const detid_t &idmin() const;
     detid_t idmax() const;
 
   private:
     std::vector<double> m_calibration;
-    detid_t m_detid_offset;
+    const detid_t m_detid_offset;
   };
 
 private:
