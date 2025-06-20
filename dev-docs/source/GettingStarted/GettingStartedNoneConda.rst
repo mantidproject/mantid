@@ -1,7 +1,7 @@
 .. _GettingStartedNoneConda:
 
 =====================
-Develop without Conda
+Develop without conda
 =====================
 
 Environment
