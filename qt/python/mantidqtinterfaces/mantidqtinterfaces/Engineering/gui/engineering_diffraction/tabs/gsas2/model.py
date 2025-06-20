@@ -393,7 +393,7 @@ class GSAS2Model:
         """
         Notes:
         1. **Binary Search Order**:
-            - The GSAS-II binaries are searched in the GSASII directory before the Mantid Conda environment.
+            - The GSAS-II binaries are searched in the GSASII directory before the Mantid conda environment.
             - Ensure that the GSASII conda environment is activated by calling the "activate" script for proper functionality.
 
         2. **PyCharm Debugger Behavior**:

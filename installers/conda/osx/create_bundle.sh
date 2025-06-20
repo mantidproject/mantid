@@ -129,12 +129,12 @@ function usage() {
   local exitcode=$1
   echo "Usage: $0 [options]"
   echo
-  echo "Create a DragNDrop bundle out of a Conda package. The package is built in $BUILD_DIR."
+  echo "Create a DragNDrop bundle out of a conda package. The package is built in $BUILD_DIR."
   echo "The final name will be '${BUNDLENAME}${suffix}.app'"
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
-  echo "  -c Optional Conda channel overriding the default mantid"
+  echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo "  -p Target platform, e.g. osx-64 or osx-arm64"
   exit $exitcode
@@ -185,7 +185,7 @@ bundle_name="$BUNDLE_PREFIX$suffix"
 bundle_icon="${ICON_DIR}/mantid_workbench$(echo $suffix | tr '[:upper:]' '[:lower:]').icns"
 bundle_dirname="$bundle_name".app
 bundle_contents="$BUILD_DIR"/"$bundle_dirname"/Contents
-echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' Conda channel"
+echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' conda channel"
 echo "Using bundle icon ${bundle_icon}"
 
 # Build directory needs to be empty before we start
@@ -214,7 +214,7 @@ if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
   mantid_channel=mantid/label/nightly
 fi
 
-echo "Creating Conda environment in '$bundle_conda_prefix'"
+echo "Creating conda environment in '$bundle_conda_prefix'"
 CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \

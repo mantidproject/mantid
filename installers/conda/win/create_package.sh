@@ -10,10 +10,10 @@ function usage() {
   local exitcode=$1
   echo "Usage: $0 [options] package_name"
   echo
-  echo "Create a standalone installable package out of a mantidworkbench Conda package."
+  echo "Create a standalone installable package out of a mantidworkbench conda package."
   echo "Requires mamba to be installed in the running environment, and on the path."
   echo "Options:"
-  echo "  -c Optional Conda channel overriding the default mantid"
+  echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo
   echo "Positional Arguments"
@@ -221,7 +221,7 @@ OUTFILE_NAME=$PWD/$VERSION_NAME
 OUTFILE_NAME=${OUTFILE_NAME////\\}
 OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
-# Run the makensis command from our nsis Conda environment
+# Run the makensis command from our nsis conda environment
 echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
 cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
 

@@ -7,7 +7,7 @@ Access Mantid in Python and Notebook
 All the functionality of Mantid can be accessed outside of the Workbench interface.
 
 To access Mantid in python, simply install the
-mantid framework alongside python (we recommend using `Conda <https://download.mantidproject.org/conda.html>`_).
+mantid framework alongside python (we recommend using `conda <https://download.mantidproject.org/conda.html>`_).
 Alternatively, the python packaged with MantidWorkbench can be launched from the command line,
 using the correct path detailed below.
 
@@ -15,7 +15,7 @@ A Jupyter Notebook is a web-based interactive computational environment where yo
 mathematics, plots and rich media into a single document.
 To access this, you need to install ``notebook`` onto the Python version that has ``mantid`` installed.
 Again, we recommend using a conda environment that contains both ``notebook`` and ``mantid``.
-If you want to launch a Jupyter Notebook from MantidWorkbench, then you will have to use Conda or Pip to install
+If you want to launch a Jupyter Notebook from MantidWorkbench, then you will have to use conda or pip to install
 ``notebook`` onto the packaged python version.
 
 Packaged Python Path

@@ -188,7 +188,7 @@ widget written in either Python or C++. These generated files serve as a
 foundation or template for creating any widget using the MVP design pattern.
 It can also be used to create the necessary files when refactoring an existing
 widget which is not currently using MVP. The script is designed to be run from
-within a `mantid-developer` Conda environment.
+within a `mantid-developer` conda environment.
 
 Python
 ------
