@@ -41,6 +41,7 @@ class FullInstrumentViewModel:
         self._is_valid = np.array(
             [not self._detector_info.isMonitor(i) and self._workspace_indices[i] != -1 for i in range(len(self._detector_ids))]
         )
+        self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
         self._bin_min = math.inf
@@ -85,8 +86,7 @@ class FullInstrumentViewModel:
         return self._detector_projection_positions[self._is_valid]
 
     def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
-        for i in indices:
-            self._detector_is_picked[i] = ~self._detector_is_picked[i]
+        self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
 
     def picked_visibility(self) -> np.ndarray:
         return self._detector_is_picked.astype(int)
@@ -135,13 +135,11 @@ class FullInstrumentViewModel:
 
     def calculate_projection(self, is_spherical: bool, axis: list[int]):
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        sample_position = np.array(self._component_info.samplePosition())
         root_position = np.array(self._component_info.position(0))
         projection = (
-            iv_spherical.spherical_projection(sample_position, root_position, self._detector_positions, np.array(axis))
+            iv_spherical.spherical_projection(self._sample_position, root_position, self._detector_positions, np.array(axis))
             if is_spherical
-            else iv_cylindrical.cylindrical_projection(sample_position, root_position, self._detector_positions, np.array(axis))
+            else iv_cylindrical.cylindrical_projection(self._sample_position, root_position, self._detector_positions, np.array(axis))
         )
-        xy_positions = projection.positions()
-        self._detector_projection_positions = np.hstack([xy_positions, np.zeros((len(xy_positions), 1))])
+        self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions
