@@ -34,7 +34,6 @@ class FullInstrumentViewPresenter:
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
         self._view.add_simple_shape(origin, colour="orange", pickable=False)
 
-        self._view.enable_point_picking(callback=self.point_picked)
         self._view.show_axes()
         self._view.set_camera_focal_point(self._model.sample_position())
 
@@ -48,7 +47,9 @@ class FullInstrumentViewPresenter:
 
         self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_positions())
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
+
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility")
+        self._view.enable_main_point_picking(main_callback=self.point_picked)
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
@@ -93,6 +94,7 @@ class FullInstrumentViewPresenter:
         self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
+        self._view.enable_projection_point_picking(projection_callback=self.point_picked)
 
     def set_contour_limits(self, min: int, max: int) -> None:
         self._contour_limits = [min, max]
@@ -103,29 +105,29 @@ class FullInstrumentViewPresenter:
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self.set_contour_limits(self._model.data_limits()[0], self._model.data_limits()[1])
 
-    def point_picked(self, point, picker):
-        """For the given point, get the detector index and show all the information for that detector"""
-        if point is None:
+    def point_picked(self, point_position, picker):
+        if point_position is None:
             return
-        detector_index = picker.GetPointId()
-        self.update_picked_detectors([detector_index])
+        point_index = picker.GetPointId()
+        self.update_picked_detectors([point_index])
 
     def set_multi_select_enabled(self, is_enabled: bool) -> None:
         """Change between single and multi point picking"""
         if is_enabled:
             self._view.enable_rectangle_picking(callback=self.rectangle_picked)
         else:
-            self._view.enable_point_picking(callback=self.point_picked)
+            self._view.enable_main_point_picking(main_callback=self.point_picked)
+            self._view.enable_projection_point_picking(projection_callback=self.point_picked)
 
     def rectangle_picked(self, rectangle):
         """Get points within the selection rectangle and display information for those detectors"""
         selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
         selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-        selected_detector_indices = np.argwhere(selected_mask).flatten()
-        self.update_picked_detectors(selected_detector_indices)
+        selected_point_indices = np.argwhere(selected_mask).flatten()
+        self.update_picked_detectors(selected_point_indices)
 
-    def update_picked_detectors(self, detector_indices: list[int] | np.ndarray) -> None:
-        self._model.negate_picked_visibility(detector_indices)
+    def update_picked_detectors(self, point_indices: list[int] | np.ndarray) -> None:
+        self._model.negate_picked_visibility(point_indices)
 
         # Update to visibility shows up in real time
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
