@@ -156,32 +156,6 @@ Linux only. Install it from your distro's repository.
 Wonder Shaper allows the user to limit the bandwidth of one or more network adapters. This is useful for debugging
 issues when a network interface is still active but very slow. More details can be found at http://xmodulo.com/limit-network-bandwidth-linux.html.
 
-Convert Wiki Docs to Sphinx
----------------------------
-
-``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use
-in ``Sphinx``. The code attempts to take all images and internal links and re-create the
-documentation structure in the ``Sphinx`` format.
-
-Use
-~~~
-
-- Having added ``mantid`` to your Python path ``wiki2rst`` is run by:
-
-.. code:: sh
-
-    python wiki2rst.py -o <output_file.rst> <url_extension>
-
-- The ``<url_extension>`` is the part of the url after the main address (``https://www.mantidproject.org/``).
-- There are several additional options:
-	- ``--index_url`` change the name of the main url address
-	- ``--images-dir`` set a relative location for the images directory
-	- ``--ref-link`` give a reference link
-	- ``--ref-link-prefix`` give a link prefix
-	- ``--add_handle`` add a handle for linking to the page
-	- ``--page_handle`` the page handle to use [default page name]
-	- ``--add_heading`` add a heading to the page (uses the page name)
-
 Clang-tidy
 ----------
 
@@ -193,15 +167,24 @@ The full list of clang-tidy checks can be seen `here <https://clang.llvm.org/ext
 Installing
 ~~~~~~~~~~
 
-Mantid does not come packaged with clang-tidy; each developer must download it themselves. Windows users can utilise clang-tidy support for Visual Studio.
-For other operating systems, Mantid provides clang-tidy functionality through cmake.
-The guide `How To Setup Clang Tooling For LLVM <https://clang.llvm.org/docs/HowToSetupToolingForLLVM.html>`_ gives valuable information for configuration.
-Two keys are to add ``-DCMAKE_EXPORT_COMPILE_COMMANDS=on`` and to symbolically link the ``compile_commands.json`` from the build tree into the source tree.
+Mantid does not come packaged with clang-tidy; each developer must download it themselves.
 
 - **Ubuntu**: Run ``sudo apt-get install clang clang-tidy`` in the command line. The ``clang`` package is needed to get the system headers.
 - **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
+- **Conda** install ``clang-tools`` (for ``clang-tidy``) and ``clangxx`` (for system headers and compiler to reduce clang-tidy diagnostic errors)
+- Alternatively, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
 
-For non-Ubuntu systems, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
+
+To make use of the sanitizers on the command line, on needs the re-run
+
+.. code-block:: sh
+
+   cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=on .
+
+in the build tree.
+Then symbolically link the ``compile_commands.json`` from the build tree into the source tree.
+
+Many IDEs support which is described in the `clang-tidy documentation <https://clang.llvm.org/extra/clang-tidy/Integrations.html>`_.
 
 Visual Studio
 ~~~~~~~~~~~~~
@@ -209,7 +192,7 @@ Visual Studio
 Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
 Here you can select which checks to run via a checkbox or by supplying a custom check string. For example::
 
-    -*,modernize-*
+    -*,cppcoreguidelines-*,modernize-*
 
 will disable basic default checks (``-*``) and run all conversions to modern C++ (``modernize-*``), such as converting to range-based for loops or using the auto keyword.
 Other settings *should* not require alteration for clang-tidy to work.
@@ -222,12 +205,15 @@ To run clang-tidy, right click on a target and highlight ``Clang Power Tools``. 
 Cmake
 ~~~~~
 
+**Not advised:** Mantid provides clang-tidy functionality through cmake.
+The guide `How To Setup Clang Tooling For LLVM <https://clang.llvm.org/docs/HowToSetupToolingForLLVM.html>`_ gives valuable information for configuration.
+
 In the cmake gui, find the ``CLANG_TIDY_EXE`` parameter. If you are a non-Linux developer, you may have to manually point to your clang-tidy install.
 Configure, and check the cmake log for the message `clang-tidy found`. If the `clang-tidy not found` warning was posted instead then it has not worked.
 
 Once you have clang-tidy, there are several relevant parameters you will want to change:
 
-- ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
+- ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support. This will run clang-tidy as part of the compile step and greatly slow-down compilation. It can be disabled again with this variable.
 - ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. This defaults to all ``modernize-`` checks.
 - ``APPLY_CLANG_TIDY_FIX`` will automatically change the code whenever a check has returned a result. The behaviour of ``ENABLE_CLANG_TIDY`` without this checked is to highlight issues only.
 
@@ -236,8 +222,31 @@ When you next build, clang-tidy will perform the selected checks on the code inc
 
 *Note: There is a known issue that clang-tidy is only being applied to certain directories within* ``Framework`` *and* ``Mantidplot``.
 
+Command line
+~~~~~~~~~~~~
+
+The ``run-clang-tidy`` wrapper will run multiple instances of ``clang-tidy`` in parallel.
+
+.. code-block:: sh
+
+   run-clang-tidy -config-file=/full/path/to/src/code/.clang-tidy  Framework/Nexus/src/Nexus
+
+will run ``clang-tidy`` in parallel on all files that contain the path ``Framework/Nexus/src/Nexus``.
+One can also supply a single file (e.g. ``Framework/Nexus/src/NexusFile.cpp``) or a single target (e.g. ``NexusTest``) which will analyze all files that contribute to that target.
+A notable limitation of the wrapper is that it needs a full path to the configuration file, but not to the source files.
+
+To run a specific check and apply it
+
+.. code-block:: sh
+
+   run-clang-tidy -config "{Checks: '-*,modernize-use-nullptr'}" -p $(pwd) Framework/Nexus/src/NexusFile.cpp -fix
+
+will automatically change the file in the source tree.
+
 Options
 ~~~~~~~
+
+The full list of `current clang-tidy checks <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
 
 Some clang-tidy checks have optional arguments. For example, ``modernize-loop-convert``, which changes loops to range-based,
 assigns a riskiness to each loop and can accept a ``MinConfidence`` argument to determine which risk levels to address.
@@ -245,8 +254,24 @@ assigns a riskiness to each loop and can accept a ``MinConfidence`` argument to 
 Adding the optional arguments is clunky and will rarely be required, so it has not been directly added to Mantid's cmake setup.
 To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS``::
 
-    ;-config={CheckOptions: [ {key: check-to-choose-option.option-name, value: option-value} ]}
+    -config={CheckOptions: [ {key: check-to-choose-option.option-name, value: option-value} ]}
 
 For example, to convert all loops classified as *risky* or above, we would append::
 
-    ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+    -config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
+clang-tidy does not have a concept of c++ standards it should use and leaves it to the developer to know which to turn on and off.
+
+Cmake chart of target dependencies
+----------------------------------
+
+Cmake has the ability to make graphviz dot files of the dependencies for targets in mantid.
+This is useful for understanding why compilation will wait for individual libraries to link before compiling more files.
+
+.. code:: sh
+
+    cmake --graphviz=dependencies.dot .
+    dot -O -Tsvg dependencies.dot.WorkflowAlgorithms
+
+
+`Cmake reference <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_ for configuring the tool options.
