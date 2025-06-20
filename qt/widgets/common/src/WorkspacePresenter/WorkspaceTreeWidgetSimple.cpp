@@ -64,7 +64,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_sampleShape(new QAction("Show Sample Shape", this)), m_superplot(new QAction("Superplot...", this)),
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
       m_superplotBins(new QAction("Superplot bins...", this)),
-      m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)) {
+      m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)),
+      m_showNewInstrumentView(new QAction("Show Instrument (New)...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
@@ -98,6 +99,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_superplotWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotWithErrsClicked()));
   connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
   connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
+  connect(m_showNewInstrumentView, SIGNAL(triggered()), this, SLOT(onShowNewInstrumentViewClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() = default;
@@ -224,6 +226,10 @@ void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
   emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
+void WorkspaceTreeWidgetSimple::onShowNewInstrumentViewClicked() {
+  emit showNewInstrumentViewClicked(getSelectedWorkspaceNamesAsQList());
+}
+
 /**
  * Create a new QMenu object filled with appropriate items for the given workspace
  * The created object has this as its parent and WA_DeleteOnClose set
@@ -269,6 +275,9 @@ void WorkspaceTreeWidgetSimple::addMatrixWorkspaceActions(QMenu *menu, const Man
     menu->addAction(m_sampleMaterial);
     menu->addAction(m_sampleShape);
   }
+  menu->addAction(m_showNewInstrumentView);
+  m_showNewInstrumentView->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
+                                      workspace.getAxis(1)->isSpectra());
 }
 
 void WorkspaceTreeWidgetSimple::addTableWorkspaceActions(QMenu *menu, const Mantid::API::ITableWorkspace &workspace) {
