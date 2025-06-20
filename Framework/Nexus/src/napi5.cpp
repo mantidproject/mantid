@@ -1704,7 +1704,6 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getchardata(NXhandle fid, void *data) {
-  fflush(stdout);
   pNexusFile5 pFile = NXI5assert(fid);
   NXstatus status = NXstatus::NX_ERROR;
 
@@ -1715,7 +1714,7 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
       status = NXstatus::NX_ERROR;
     } else {
       memcpy(data, cdata, strlen(cdata) * sizeof(char));
-      H5free_memory(cdata);
+      H5free_memory(cdata); // NOTE must free cdata within hdf5
       status = NXstatus::NX_OK;
     }
   } else {
@@ -1723,8 +1722,8 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     hsize_t len = H5Tget_size(pFile->iCurrentT);
     // for a 2D char array, handle block size
     int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL);
-    if (rank >= 0) {
-      len *= (dims[0] > 1 ? dims[0] : 1); // min of dims[0], 1
+    for (int i = 0; i < rank - 1; i++) {
+      len *= (dims[i] > 1 ? dims[i] : 1); // min of dims[0], 1
     }
     // reserve space in memory
     char *cdata = new char[len + 1];
@@ -1733,8 +1732,12 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     if (ret < 0) {
       status = NXstatus::NX_ERROR;
     } else {
-      cdata[len] = '\0';                       // ensure null termination
-      memcpy(data, cdata, len * sizeof(char)); // NOTE cdata may have \0 bw char arrays, len is correct length
+      cdata[len] = '\0'; // ensure null termination
+      /* NOTE len is truly the correct length to use here.
+       * It is not necessary to use (len + 1); null termination is already handled,
+       * and even-more-handling it causes errors downstream.
+       * It is not preferable to use strlen(cdata), as the cdata may have \0 between char arrays. */
+      memcpy(data, cdata, len * sizeof(char));
       status = NXstatus::NX_OK;
     }
     delete[] cdata;
@@ -1743,48 +1746,43 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
 }
 
 NXstatus NX5getdata(NXhandle fid, void *data) {
-  pNexusFile5 pFile;
-  int iStart[H5S_MAX_RANK], status;
-  hid_t memtype_id;
-  hsize_t ndims, dims[H5S_MAX_RANK];
-
-  pFile = NXI5assert(fid);
+  pNexusFile5 pFile = NXI5assert(fid);
   /* check if there is an Dataset open */
   if (pFile->iCurrentD == 0) {
     NXReportError("ERROR: no dataset open");
     return NXstatus::NX_ERROR;
   }
-  ndims = static_cast<hsize_t>(H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL));
 
+  NXstatus status;
   if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
-    return NX5getchardata(fid, data);
+    status = NX5getchardata(fid, data);
+  } else {
+    int ret;
+    hsize_t ndims, dims[H5S_MAX_RANK];
+    ndims = static_cast<hsize_t>(H5Sget_simple_extent_dims(pFile->iCurrentS, dims, NULL));
+    if (ndims == 0) { /* SCALAR dataset */
+      hid_t datatype = H5Dget_type(pFile->iCurrentD);
+      hid_t filespace = H5Dget_space(pFile->iCurrentD);
+      hid_t memtype_id = H5Screate(H5S_SCALAR);
+      H5Sselect_all(filespace);
+      ret = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+      // cleanup
+      H5Sclose(memtype_id);
+      H5Sclose(filespace);
+      H5Tclose(datatype);
+    } else {
+      /* map datatypes of other plateforms */
+      hid_t memtype_id = h5MemType(pFile->iCurrentT);
+      ret = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    }
+    if (ret < 0) {
+      NXReportError("ERROR: failed to transfer dataset");
+      status = NXstatus::NX_ERROR;
+    } else {
+      status = NXstatus::NX_OK;
+    }
   }
-
-  if (ndims == 0) { /* SCALAR dataset */
-    hid_t datatype = H5Dget_type(pFile->iCurrentD);
-    hid_t filespace = H5Dget_space(pFile->iCurrentD);
-
-    memtype_id = H5Screate(H5S_SCALAR);
-    H5Sselect_all(filespace);
-    status = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
-    H5Sclose(memtype_id);
-
-    H5Sclose(filespace);
-    H5Tclose(datatype);
-    if (status < 0)
-      return NXstatus::NX_ERROR;
-    return NXstatus::NX_OK;
-  }
-
-  memset(iStart, 0, H5S_MAX_RANK * sizeof(int));
-  /* map datatypes of other plateforms */
-  memtype_id = h5MemType(pFile->iCurrentT);
-  status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-  if (status < 0) {
-    NXReportError("ERROR: failed to transfer dataset");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
+  return status;
 }
 
 /*-------------------------------------------------------------------------*/
