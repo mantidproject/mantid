@@ -463,16 +463,12 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
-  auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
-  positiveDblValidator->setLower(0);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveDblValidator,
-                                                                      Direction::Input),
+
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{10}),
                   "Minimum x-value for the output binning");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016,
-                                                                      positiveDblValidator, Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_DELTA, std::vector<double>{0.0016}),
                   "Bin size for output data");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 16667, positiveDblValidator,
-                                                                      Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logorithmic')");
@@ -507,6 +503,30 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
+  const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
+  const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
+  const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
+
+  constexpr size_t numHist{6}; // TODO make this determined from grouping
+  const auto numMin = xmins.size();
+  const auto numMax = xmaxs.size();
+  const auto numDelta = deltas.size();
+
+  if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
+    errors[PropertyNames::X_DELTA] = "All must be nonzero";
+  else if (!(numDelta == 1 || numDelta == numHist))
+    errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
+
+  if (std::any_of(xmins.cbegin(), xmins.cend(), [](double x) { return !std::isfinite(x) || x < 0; }))
+    errors[PropertyNames::X_MIN] = "All must be non-negative";
+  else if (!(numMin == 1 || numMin == numHist))
+    errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
+
+  if (std::any_of(xmaxs.cbegin(), xmaxs.cend(), [](double x) { return !std::isfinite(x) || x <= 0; }))
+    errors[PropertyNames::X_MAX] = "All must be positive";
+  else if (!(numMax == 1 || numMax == numHist))
+    errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
+
   return errors;
 }
 
@@ -524,9 +544,9 @@ void AlignAndFocusPowderSlim::exec() {
   // set up the output workspace binning
   this->progress(.0, "Create output workspace");
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
-  const bool linearBins = bool(binmode == BinningMode::LINEAR); // this is needed later
-  const double x_delta = getProperty(PropertyNames::X_DELTA);   // this is needed later
-  MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta);
+  const bool linearBins = bool(binmode == BinningMode::LINEAR);            // this is needed later
+  const std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA); // this is needed later
+  MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta[0]);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
@@ -688,19 +708,19 @@ void AlignAndFocusPowderSlim::exec() {
 
 MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const size_t numHist, const bool linearBins,
                                                                     const double x_delta) {
-  const double x_min = getProperty(PropertyNames::X_MIN);
-  const double x_max = getProperty(PropertyNames::X_MAX);
+  const std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
+  const std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
 
   constexpr bool resize_xnew{true};
   constexpr bool full_bins_only{false};
 
   HistogramData::BinEdges XValues_new(0);
   if (linearBins) {
-    const std::vector<double> params{x_min, x_delta, x_max};
+    const std::vector<double> params{x_min[0], x_delta, x_max[0]};
     UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
                                                                full_bins_only));
   } else {
-    const std::vector<double> params{x_min, -1. * x_delta, x_max};
+    const std::vector<double> params{x_min[0], -1. * x_delta, x_max[0]};
     UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
                                                                full_bins_only));
   }

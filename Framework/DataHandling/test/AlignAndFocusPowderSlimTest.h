@@ -43,9 +43,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
     if (xmin >= 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmin));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", std::vector<double>{xmin}));
     if (xmax >= 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmax));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", std::vector<double>{xmax}));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
