@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+using namespace Nexus;
 using namespace NexusTest;
 using std::cout;
 using std::endl;
@@ -75,22 +76,72 @@ public:
     std::string filename = resource.fullPath();
 
     // create the file and ensure it exists
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.close();
     TS_ASSERT(std::filesystem::exists(filename));
+  }
+
+  void test_can_readwrite() {
+    cout << "\ntest readwrite\n";
+
+    // create the file and ensure it exists
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read/write mode, edit it
+    file.openFile(filename, NXACC_RDWR);
+    string groupName("test_grp"), input("test"), output;
+    file.createGroup(groupName);
+    file.setComment(groupName, input);
+    file.close();
+
+    // reopen, check still there
+    file.openFile(filename, NXACC_READ);
+    output = file.getComment(groupName);
+    TS_ASSERT_EQUALS(input, output);
+    file.close();
+  }
+
+  void test_create_readonly() {
+    cout << "\ntest readonly\n";
+    fflush(stdout);
+
+    FileResource resource("test_nexus_file_rdwr.h5");
+    std::string filename = resource.fullPath();
+
+    string grp("test_grp"), expected("teststring"), notexpected("never used"), actual;
+
+    // create the file and ensure it exists
+    NeXus::File file(filename, NXACC_CREATE5);
+    file.createGroup(grp);
+    file.setComment(grp, expected);
+    file.close();
+    TS_ASSERT(std::filesystem::exists(filename));
+
+    // open in read-only mode, edit it -- should fail, and still be same
+    file.openFile(filename, NXACC_READ);
+    TS_ASSERT(file.exists(grp));
+    TS_ASSERT_THROWS_ANYTHING(file.setComment(grp, notexpected));
+    actual = file.getComment(grp);
+    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_DIFFERS(actual, notexpected);
+    file.close();
   }
 
   void test_fail_open() {
     // test opening a file that exists, but is unreadable
     std::string filename = getFullPath("Test_characterizations_char.txt");
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(filename, NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Nexus::File file(filename, NXACC_READ));
 
     // test opening an empty file
     FileResource resource("fake_empty_file.nxs.h5");
     std::ofstream file(resource.fullPath());
     file << "mock";
     file.close();
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Nexus::File file(resource.fullPath(), NXACC_READ));
   }
 
   void test_clear_on_create() {
@@ -101,10 +152,10 @@ public:
     file.close();
 
     // this file cannot be opened for read
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Nexus::File file(resource.fullPath(), NXACC_READ));
 
     // but no issue if opened for create
-    TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_CREATE5));
+    TS_ASSERT_THROWS_NOTHING(Nexus::File file(resource.fullPath(), NXACC_CREATE5));
   }
 
   void test_flush() {
@@ -113,7 +164,7 @@ public:
     // TODO actually test the buffers
     FileResource resource("test_nexus_file_flush.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.flush();
   }
 
@@ -125,49 +176,62 @@ public:
     cout << "\ntest makeGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
 
     string grp("test_group"), cls("NXsample");
 
+    // check there are no groups
+    TS_ASSERT_EQUALS(file.getNumObjs(), 0);
     // check error conditions
-    TS_ASSERT_THROWS(file.makeGroup(grp, ""), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.makeGroup("", cls), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeGroup(grp, ""), Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeGroup("", cls), Nexus::Exception const &);
     // check works when correct
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
   }
 
   void test_open_group() {
     cout << "\ntest openGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
+
+    // get location of root file
+    auto loc = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", loc.get());
 
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // check error conditions
-    TS_ASSERT_THROWS(file.openGroup(string(), cls), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openGroup(grp, string()), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup(string(), cls), Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup("tacos1", cls), Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup(grp, string()), Nexus::Exception const &);
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
+    auto new_loc = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", new_loc.get());
+    TS_ASSERT_DIFFERS(loc, new_loc);
   }
 
   void test_open_group_bad() {
     cout << "\ntest openGroup bad\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // create a group, to be opened
     string grp("test_group"), cls("NXpants");
     file.makeGroup(grp, cls, false);
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
 
     // try to open it with wrong class name
     string notcls("NXshorts");
-    TS_ASSERT_THROWS(file.openGroup(grp, notcls), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openGroup(grp, notcls), Nexus::Exception const &);
   }
 
   void test_open_group_layers() {
@@ -177,20 +241,27 @@ public:
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
 
     // create a file with group -- open it
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
+    auto layer1 = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 0);
 
     // create a group inside the group -- open it
     file.makeGroup(grp2, cls2, false);
     file.openGroup(grp2, cls2);
+    auto layer2 = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    TS_ASSERT_EQUALS(layer1->getNumObjs(), 1);
+    TS_ASSERT_DIFFERS(layer1->getObjName(), layer2->getObjName());
   }
 
   void test_closeGroup() {
     cout << "\ntest closeGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // check error at root
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
@@ -198,9 +269,11 @@ public:
     // now make group, close it, and check we are back at root
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, true);
-    file.closeGroup();
-
+    auto ingrp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_DIFFERS(ingrp->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
+    // if the group is closed, then its ID will be set to -1
+    TS_ASSERT_EQUALS(ingrp->getId(), -1);
   }
 
   // #################################################################################################################
@@ -213,23 +286,29 @@ public:
     std::string filename = resource.fullPath();
 
     string name("some_data");
-    Mantid::Nexus::DimVector dims({1});
+    Nexus::DimVector dims({1});
     NXnumtype type(NXnumtype::CHAR);
 
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // if there is not a top-level NXentry, should throw error
-    TS_ASSERT_THROWS(file.makeData(name, type, dims), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeData(name, type, dims), Nexus::Exception const &);
 
     // now make a NXentry group and try
     file.makeGroup("entry", "NXentry", true);
+    auto grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     // check some failing cases
-    TS_ASSERT_THROWS(file.makeData("", type, dims), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.makeData(name, type, Mantid::Nexus::DimVector()), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeData("", type, dims), Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.makeData(name, type, Nexus::DimVector()), Nexus::Exception const &);
 
     // check it works when it works
-    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims));
+    TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, dims, true));
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 1);
+
+    auto data = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_EQUALS(data->getObjName(), "/entry/some_data");
   }
 
   void test_makeData_length() {
@@ -237,14 +316,16 @@ public:
     FileResource resource("test_nexus_file_data.h5");
     std::string filename = resource.fullPath();
 
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
+    auto grp = file.getCurrentLocationAs<H5::Group>();
+    TS_ASSERT_EQUALS(grp->getNumObjs(), 0);
 
     NXnumtype type(NXnumtype::CHAR);
 
     // check it works when it works -- int
     string name("some_data_int");
-    Mantid::Nexus::dimsize_t len(3);
+    Nexus::dimsize_t len(3);
     TS_ASSERT_THROWS_NOTHING(file.makeData(name, type, len));
   }
 
@@ -252,20 +333,28 @@ public:
     cout << "\ntest openData\n";
     FileResource resource("test_nexus_file_data.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
+
+    // get location of top-level
+    auto top = file.getCurrentLocationAs<H5::Group>();
+    cout << strmakef("Located at %p\n", top.get());
 
     // create a dataset, to be opened
     string data("test_group");
     NXnumtype type(NXnumtype::CHAR);
     file.makeData(data, type, 3, false);
+    TS_ASSERT_EQUALS(top->getNumObjs(), 1);
 
     // check error conditions
-    TS_ASSERT_THROWS(file.openData(string()), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openData("tacos1"), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openData(string()), Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.openData("tacos1"), Nexus::Exception const &);
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openData(data));
+    auto layer1 = file.getCurrentLocationAs<H5::DataSet>();
+    cout << strmakef("Located at %p\n", layer1.get());
+    TS_ASSERT_DIFFERS(top->getId(), layer1->getId());
   }
 
   void test_make_data_lateral() {
@@ -276,7 +365,7 @@ public:
     cout << "\ntest make data lateral\n";
     FileResource resource("test_napi_file_rdwr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // make and open data
@@ -299,7 +388,7 @@ public:
     cout << "\ntest makeData layers -- bad\n";
     FileResource resource("test_nexus_file_rdwr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     NXnumtype type(NXnumtype::CHAR);
     string data1("layer1"), data2("layer2");
@@ -308,28 +397,38 @@ public:
     file.makeGroup("entry", "NXentry", true);
     file.makeData(data1, type, 1, false);
     file.openData(data1);
+
+    // try to create a dataset inside the dataset -- this throws an errpr
+    TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), NeXus::Exception &);
+    // make the dataset one layer up, open data 1, then try opening data2 from within
+    file.closeData();
+    file.makeData(data2, type, 2, false);
+    file.openData(data1);
+    TS_ASSERT_THROWS_NOTHING(file.openData(data2));
   }
 
   void test_closeData() {
     cout << "\ntest closeData\n";
     FileResource resource("test_nexus_file_dataclose.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
-    // check error at root
-    TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
+    // check error at top-level
+    TS_ASSERT_THROWS(file.closeData(), Nexus::Exception const &);
 
-    // now make data, close it, and check we are back at root
+    // now make data, close it, and check we are back at beginning
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
+    auto indata = file.getCurrentLocationAs<H5::DataSet>();
+    TS_ASSERT_DIFFERS(indata->getId(), -1);
     TS_ASSERT_THROWS_NOTHING(file.closeData());
 
-    TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.closeData(), Nexus::Exception const &);
   }
 
-  template <typename T> void do_test_data_putget(Mantid::Nexus::File &file, string name, T in) {
+  template <typename T> void do_test_data_putget(Nexus::File &file, string name, T in) {
     T out;
-    file.makeData(name, Mantid::Nexus::getType<T>(), 1, true);
+    file.makeData(name, Nexus::getType<T>(), 1, true);
     file.putData(&in);
     file.getData(&out);
     file.closeData();
@@ -342,7 +441,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
@@ -381,13 +480,13 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // try to put data when not in a dataset -- should fail
     int data = 1;
     file.makeGroup("a_group", "NXshirt", true);
-    TS_ASSERT_THROWS(file.putData(&data), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.putData(&data), Nexus::Exception const &);
   }
 
   void test_data_putget_string() {
@@ -396,12 +495,29 @@ public:
     // open a file
     FileResource resource("test_nexus_file_stringrw.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get a string
     cout << "\nread/write string...\n";
     string in("this is a string"), out;
+    file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // do it another way
+    in = "this is some different data";
+    DimVector dims({(dimsize_t)in.size()});
+    file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
+    file.putData(&in);
+    file.getData(&out);
+    file.closeData();
+    TS_ASSERT_EQUALS(in, out);
+
+    // yet another way
+    in = "even more data";
     file.makeData("string_data_2", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
     out = file.getStrData();
@@ -411,7 +527,7 @@ public:
   void test_check_str_length() {
     FileResource resource("test_nexus_str_len.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     std::string testStr("some_str_data");
@@ -422,7 +538,7 @@ public:
     file.closeData();
 
     file.openAddress("/entry/string_data");
-    Mantid::Nexus::Info info = file.getInfo();
+    Nexus::Info info = file.getInfo();
     auto data = file.getStrData();
 
     TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
@@ -439,14 +555,14 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
-    file.makeData("data_int", NXnumtype::INT32, 4, true);
+    file.makeData("data_int", Nexus::getType<int32_t>(), 4, true);
     int in[] = {12, 7, 2, 3}, out[4];
     file.putData(&(in[0]));
-    Mantid::Nexus::Info info = file.getInfo();
+    Nexus::Info info = file.getInfo();
     file.getData(&(out[0]));
     file.closeData();
     // confirm
@@ -457,7 +573,7 @@ public:
     }
 
     // put/get double array
-    file.makeData("data_double", NXnumtype::FLOAT64, 4, true);
+    file.makeData("data_double", Nexus::getType<double>(), 4, true);
     double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
     file.putData(&(ind[0]));
     info = file.getInfo();
@@ -471,10 +587,10 @@ public:
     }
 
     // put/get double 2D array
-    Mantid::Nexus::DimVector dims{3, 2};
+    Nexus::DimVector dims{3, 2};
     double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}};
     double outdd[3][2];
-    file.makeData("data_double_2d", NXnumtype::FLOAT64, dims, true);
+    file.makeData("data_double_2d", Nexus::getType<double>(), dims, true);
     file.putData(&(indd[0][0]));
     info = file.getInfo();
     file.getData(&(outdd[0][0]));
@@ -483,16 +599,16 @@ public:
     TS_ASSERT_EQUALS(info.dims.size(), 2);
     TS_ASSERT_EQUALS(info.dims.front(), 3);
     TS_ASSERT_EQUALS(info.dims.back(), 2);
-    for (Mantid::Nexus::dimsize_t i = 0; i < dims[0]; i++) {
-      for (Mantid::Nexus::dimsize_t j = 0; j < dims[1]; j++) {
+    for (Nexus::dimsize_t i = 0; i < dims[0]; i++) {
+      for (Nexus::dimsize_t j = 0; j < dims[1]; j++) {
         TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
       }
     }
 
     // put/get a char array
     char word[] = "silicovolcaniosis";
-    char read[20] = {'A'};
-    file.makeData("data_char", NXnumtype::CHAR, 17, true);
+    char read[18];
+    file.makeData("data_char", Nexus::getType<char>(), 17, true);
     file.putData(word);
     info = file.getInfo();
     file.getData(read);
@@ -503,6 +619,23 @@ public:
     TS_ASSERT_EQUALS(info.dims.front(), 17);
     TS_ASSERT_EQUALS(std::string(read), "silicovolcaniosis");
     TS_ASSERT_EQUALS(std::string(read), std::string(word));
+
+    // put/get a 2D char array
+    char words[3][10] = {"First row", "2", ""};
+    char reads[3][10];
+    dims = {3, 9};
+    file.makeData("data_char_2d", NeXus::getType<char>(), dims, true);
+    file.putData(&(words[0][0]));
+    info = file.getInfo();
+    file.getData(&(reads[0][0]));
+    file.closeData();
+    // confirm
+    TS_ASSERT_EQUALS(info.dims.size(), 2);
+    TS_ASSERT_EQUALS(info.dims.front(), 3);
+    TS_ASSERT_EQUALS(info.dims.back(), 9);
+    for (dimsize_t i = 0; i < dims[0]; i++) {
+      TS_ASSERT_EQUALS(string(words[i]), string(reads[i]));
+    }
   }
 
   void test_data_putget_vector() {
@@ -511,15 +644,15 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW_vec.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int vector
     vector<int32_t> in{11, 8, 9, 12}, out;
-    file.makeData("data_int", NXnumtype::INT32, in.size(), true);
+    file.makeData("data_int", Nexus::getType<int32_t>(), in.size(), true);
     file.putData(in);
     file.getData(out);
-    Mantid::Nexus::Info info = file.getInfo();
+    Nexus::Info info = file.getInfo();
     file.closeData();
     // confirm
     TS_ASSERT_EQUALS(info.dims.size(), 1);
@@ -528,7 +661,7 @@ public:
 
     // put/get a double vector
     vector<double> ind{101.1, 0.008, 9.1123e12, 12.4}, outd;
-    file.makeData("data_dbl", NXnumtype::FLOAT64, ind.size(), true);
+    file.makeData("data_dbl", Nexus::getType<double>(), ind.size(), true);
     file.putData(ind);
     file.getData(outd);
     info = file.getInfo();
@@ -545,7 +678,7 @@ public:
 
     // open a file
     std::string filename = getFullPath("md_missing_paramater_map.nxs");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Nexus::File file(filename, NXACC_READ);
 
     std::string addressOfBad("/MDHistoWorkspace/experiment0/sample");
     TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
@@ -565,7 +698,7 @@ public:
 
     // read the formula style
     std::string formulaStyle;
-    TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Nexus::Exception const &);
   }
 
   void test_data_string_array_as_char_array() {
@@ -579,7 +712,7 @@ public:
 
     // create a file and write string data through a char
     // this mimics behavior from TimeSeriesProperty::saveProperty()
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
     // setup the string data
     std::vector<std::string> values{"help me i", "am stuck in a NXS file", "forever"};
@@ -593,13 +726,12 @@ public:
       index += maxlen;
     }
     // write the strings as a flat array, but with dims for a block
-    Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(numStr),
-                                  static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
+    Nexus::DimVector dims{static_cast<Nexus::dimsize_t>(numStr), static_cast<Nexus::dimsize_t>(maxlen)};
     file.makeData("value", NXnumtype::CHAR, dims, true);
     file.putData(strs.data());
 
     // read the string data -- mimics ProperyNexus::makeStringProperty()
-    Mantid::Nexus::Info info = file.getInfo();
+    Nexus::Info info = file.getInfo();
     int64_t numStrings = info.dims[0];
     int64_t span = info.dims[1];
     auto data = std::make_unique<char[]>(numStrings * span);
@@ -664,13 +796,13 @@ public:
     H5Fclose(fid);
 
     // now open the file and read
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Nexus::File file(filename, NXACC_READ);
     if (file.hasAddress("entry/data")) {
       file.openAddress("entry/data");
     } else {
       TS_FAIL("Failed to find the written address");
     }
-    Mantid::Nexus::Info info = file.getInfo();
+    Nexus::Info info = file.getInfo();
     char *value = new char[data.size() + 1];
     file.getData(value);
     std::string actual(value);
@@ -721,7 +853,7 @@ public:
     cout << "\ntest get_address -- groups only\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // at root, address should be "/"
     TS_ASSERT_EQUALS("/", file.getAddress());
@@ -747,7 +879,7 @@ public:
     cout << "\ntest get_address -- groups and data!\n";
     FileResource resource("test_nexus_file_grpdata.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // at root, address should be "/"
     TS_ASSERT_EQUALS("/", file.getAddress());
@@ -765,25 +897,26 @@ public:
   }
 
   void test_openAddress() {
-    using Mantid::Nexus::Entry;
+    using Nexus::Entry;
     cout << "\ntest openAddress\n";
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
+    const std::string NXENTRY("NXentry");
 
     // setup a recursive group tree
-    std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
-                            Entry{"/entry1/layer2a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2a/layer3b", "NXentry"},
+    std::vector<Entry> tree{Entry{"/entry1", NXENTRY},
+                            Entry{"/entry1/layer2a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2a/layer3b", NXENTRY},
                             Entry{"/entry1/layer2a/data1", "SDS"},
-                            Entry{"/entry1/layer2b", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3a", "NXentry"},
-                            Entry{"/entry1/layer2b/layer3b", "NXentry"},
-                            Entry{"/entry2", "NXentry"},
-                            Entry{"/entry2/layer2c", "NXentry"},
-                            Entry{"/entry2/layer2c/layer3c", "NXentry"}};
+                            Entry{"/entry1/layer2b", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3a", NXENTRY},
+                            Entry{"/entry1/layer2b/layer3b", NXENTRY},
+                            Entry{"/entry2", NXENTRY},
+                            Entry{"/entry2/layer2c", NXENTRY},
+                            Entry{"/entry2/layer2c/layer3c", NXENTRY}};
 
     string current;
     for (auto it = tree.begin(); it != tree.end(); it++) {
@@ -794,7 +927,7 @@ public:
         current = file.getAddress();
       }
       string name = address.substr(address.find_last_of("/") + 1, address.npos);
-      if (it->second == "NXentry") {
+      if (it->second == NXENTRY) {
         file.makeGroup(name, it->second, true);
       } else if (it->second == "SDS") {
         string data = "Data";
@@ -807,30 +940,46 @@ public:
     file.closeGroup();
     file.closeGroup();
 
-    // tests invalid cases
-    TS_ASSERT_THROWS(file.openAddress(""), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception const &);
-    TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), Mantid::Nexus::Exception const &);
-
     // make sure we are at root
     file.openAddress("/");
 
-    // open the root
+    // tests invalid cases
+    TS_ASSERT_THROWS(file.openAddress(""), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
+    TS_ASSERT_THROWS_NOTHING(file.openAddress("entry1"));
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry1");
+    file.closeGroup();
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
+    TS_ASSERT_THROWS(file.openAddress("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
+    TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
+
+    // move to inside the entry
     file.openGroup("entry1", "NXentry");
-    std::string actual, expected = "/";
+
+    // open the root
+    std::string expected = "/";
     file.openAddress(expected);
-    actual = file.getAddress();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getAddress(), expected);
 
     expected = "/entry1/layer2b/layer3a";
     file.openAddress(expected);
-    actual = file.getAddress();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getAddress(), expected);
 
     expected = "/entry1/layer2a/data1";
     file.openAddress(expected);
-    actual = file.getAddress();
-    TS_ASSERT_EQUALS(actual, expected);
+    TS_ASSERT_EQUALS(file.getAddress(), expected);
+
+    // failling should leave path alone
+    TS_ASSERT_THROWS(file.openAddress("/pants"), NeXus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), expected);
+
+    // intermingle working and failing opens
+    file.openAddress("/entry1/layer2a/");
+    TS_ASSERT_THROWS(file.openGroup("pants", NXENTRY), NeXus::Exception &);
+    file.openGroup("layer3a", NXENTRY);
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry1/layer2a/layer3a");
   }
 
   void test_getInfo() {
@@ -839,17 +988,17 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put an integer
     int in = 17;
-    file.makeData("int_data", NXnumtype::INT32, 1, true);
+    file.makeData("int_data", Nexus::getType<int32_t>(), 1, true);
     file.putData(&in);
 
     // get the info and check
-    Mantid::Nexus::Info info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, NXnumtype::INT32);
+    Info info = file.getInfo();
+    TS_ASSERT_EQUALS(info.type, Nexus::getType<int32_t>());
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 1);
 
@@ -857,12 +1006,12 @@ public:
 
     // put a double
     double ind = 107.2345;
-    file.makeData("double_data", NXnumtype::FLOAT64, 1, true);
+    file.makeData("double_data", Nexus::getType<double>(), 1, true);
     file.putData(&ind);
 
     // get the info and check
     info = file.getInfo();
-    TS_ASSERT_EQUALS(info.type, NXnumtype::FLOAT64);
+    TS_ASSERT_EQUALS(info.type, Nexus::getType<double>());
     TS_ASSERT_EQUALS(info.dims.size(), 1);
     TS_ASSERT_EQUALS(info.dims.front(), 1);
   }
@@ -872,25 +1021,25 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put an integer
     int in = 17;
-    file.makeData("int_data", NXnumtype::INT32, 1, true);
+    file.makeData("int_data", Nexus::getType<int32_t>(), 1, true);
     file.putData(&in);
     file.closeData();
 
     // open a group and try to get info
     file.makeGroup("a_group", "NXshorts", true);
-    TS_ASSERT_THROWS(file.getInfo(), Mantid::Nexus::Exception const &);
+    TS_ASSERT_THROWS(file.getInfo(), Nexus::Exception const &);
   }
 
   // ##################################################################################################################
   // TEST ATTRIBUTE METHODS
   // ################################################################################################################
 
-  template <typename T> void do_test_putget_attr(Mantid::Nexus::File &file, string name, T const &data) {
+  template <typename T> void do_test_putget_attr(Nexus::File &file, string name, T const &data) {
     // test put/get by pointer to data
     T out;
     file.putAttr(name, data);
@@ -904,17 +1053,20 @@ public:
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
 
-    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_"};
+    std::vector<std::string> expected_names{"int_attr_", "dbl_attr_", "char_attr_"};
 
     // put/get an int attribute
     do_test_putget_attr(file, expected_names[0], 12);
 
     // put/get a double attribute
     do_test_putget_attr(file, expected_names[1], 120.2e6);
+
+    // put/get a single char attribute
+    do_test_putget_attr(file, expected_names[2], 'x');
 
     // check attr infos
     auto attrInfos = file.getAttrInfos();
@@ -931,7 +1083,7 @@ public:
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
 
@@ -966,7 +1118,7 @@ public:
 
     // open the file in read-only mode
     std::string filename = getFullPath("md_missing_paramater_map.nxs");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Nexus::File file(filename, NXACC_READ);
 
     // go to main entry (for this file, MDHistoWorkspace)
     file.openGroup("MDHistoWorkspace", "NXentry");
@@ -978,8 +1130,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version64));
 
     // get attribute asserting the type -- make sure there is a failure
-    Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
-    Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
+    Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
+    Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
     TS_ASSERT_THROWS_NOTHING(file.getAttr(info32, &version32))
     TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
   }
@@ -991,7 +1143,7 @@ public:
 
     // open the file in read-only mode
     std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Nexus::File file(filename, NXACC_READ);
 
     // go to the trouble spot -- /entry/bank39_events/event_time_offset
     std::string entryName("/entry/bank39_events/event_time_offset");
@@ -1008,15 +1160,15 @@ public:
   }
 
   void test_getEntries() {
-    using Mantid::Nexus::Entries;
-    using Mantid::Nexus::Entry;
+    using Nexus::Entries;
+    using Nexus::Entry;
 
     cout << "\ntest getEntries\n";
 
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Nexus::File file(filename, NXACC_CREATE5);
 
     // setup a recursive group tree
     std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
@@ -1082,6 +1234,16 @@ public:
     actual = file.getEntries();
     expected = Entries({Entry{"layer3c", "NXentry"}});
     for (auto it = expected.begin(); it != expected.end(); it++) {
+      TS_ASSERT_EQUALS(actual.count(it->first), 1);
+      TS_ASSERT_EQUALS(it->second, actual[it->first]);
+    }
+
+    // also test root level name
+    TS_ASSERT_EQUALS("/entry1", file.getTopLevelEntryName());
+
+    // also test getting the directory
+    file.getEntryDirectory(actual);
+    for (auto it = tree.cbegin(); it != tree.cend(); it++) {
       TS_ASSERT_EQUALS(actual.count(it->first), 1);
       TS_ASSERT_EQUALS(it->second, actual[it->first]);
     }
