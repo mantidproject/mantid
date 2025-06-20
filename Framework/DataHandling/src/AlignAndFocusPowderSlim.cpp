@@ -244,22 +244,20 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
 template <typename TofType> class ProcessEventsTask {
 public:
   ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<TofType> *tofs,
-                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges,
-                    const std::set<detid_t> *masked)
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
       : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
-        m_binedges(binedges), masked(masked), no_mask(masked->empty()) {}
+        m_binedges(binedges), no_mask(calibration->useAll()) {}
 
   ProcessEventsTask(ProcessEventsTask &other, tbb::split)
       : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
-        m_calibration(other.m_calibration), m_binedges(other.m_binedges), masked(other.masked), no_mask(other.no_mask) {
-  }
+        m_calibration(other.m_calibration), m_binedges(other.m_binedges), no_mask(other.no_mask) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) {
     const auto &binedges = *m_binedges;
-
-    for (size_t i = range.begin(); i < range.end(); ++i) {
+    const auto &range_end = range.end();
+    for (size_t i = range.begin(); i < range_end; ++i) {
       const detid_t &detid = (*m_detids)[i];
-      if (no_mask || (!masked->contains(detid))) {
+      if (no_mask || m_calibration->use(detid)) {
         // Apply calibration
         const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
         // Find the bin index using binary search
@@ -288,7 +286,6 @@ private:
   const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
-  const std::set<detid_t> *masked;
   const bool no_mask; ///< whether there are any masked pixels
 };
 
@@ -322,9 +319,6 @@ public:
         eventRangeFull.second = length_actual;
       }
 
-      // create object so bank calibration can be re-used
-      std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
-
       if (eventRangeFull.first == eventRangeFull.second) {
         // g_log.warning() << "No data for bank " << entry_name << '\n';
       } else {
@@ -342,7 +336,12 @@ public:
         std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
         // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
+        // task group allows for separate of disk read from processing
         tbb::task_group tg;
+
+        // create object so bank calibration can be re-used
+        std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
+
         // get handle to the data
         auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
         auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
@@ -366,11 +365,11 @@ public:
           m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
           // immediately find min/max to allow for other things to read disk
           const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-          // only recreate calibraion if it doesn't already have the useful information
+          // only recreate calibration if it doesn't already have the useful information
           if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
               (calibration->idmax() < static_cast<detid_t>(maxval))) {
             calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration);
+                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration, m_masked);
           }
 
           // load time-of-flight
@@ -382,9 +381,9 @@ public:
           const auto numEvent = event_time_of_flight->size();
           tg.run([numEvent, event_detid = std::move(event_detid),
                   event_time_of_flight = std::move(event_time_of_flight), calibration = std::move(calibration),
-                  x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp, grainsize = m_grainsize_event]() {
+                  x_ptr = &spectrum.readX(), &y_temp, grainsize = m_grainsize_event]() {
             // Create a local task for this thread
-            ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr, masked_ptr);
+            ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr);
             tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
             // Atomically accumulate results into shared y_temp
             for (size_t i = 0; i < y_temp.size(); ++i) {
@@ -805,7 +804,8 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
  */
 AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
                                                           const double time_conversion,
-                                                          const std::map<detid_t, double> &calibration_map)
+                                                          const std::map<detid_t, double> &calibration_map,
+                                                          const std::set<detid_t> &mask)
     : m_detid_offset(idmin) {
   // error check the id-range
   if (idmax < idmin)
@@ -833,14 +833,28 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
     std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
                    [time_conversion](const auto &value) { return std::move(time_conversion * value); });
   }
+
+  // setup the detector mask - this assumes there are not many pixels in the overall mask
+  // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
+  for (const auto &detid : mask) {
+    if (detid >= idmin && detid <= idmax)
+      m_mask.insert(detid);
+  }
 }
 
-/*
+/**
  * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
  */
 const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
   return m_calibration[detid - m_detid_offset];
 }
+
+bool AlignAndFocusPowderSlim::BankCalibration::use(const detid_t detid) const { return !(m_mask.contains(detid)); }
+
+/**
+ * Returns true if all pixels should be used
+ */
+bool AlignAndFocusPowderSlim::BankCalibration::useAll() const { return m_mask.empty(); }
 
 const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
 detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
