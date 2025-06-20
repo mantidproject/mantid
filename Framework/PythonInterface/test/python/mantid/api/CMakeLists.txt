@@ -55,6 +55,7 @@ set(TEST_PY_FILES
     WorkspacePropertiesTest.py
     WorkspaceUnaryOpsTest.py
     WorkspaceValidatorsTest.py
+    WorkspaceNearestNeighbourInfoTest.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
