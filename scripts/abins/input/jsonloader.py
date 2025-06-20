@@ -94,21 +94,7 @@ class JSONLoader(AbInitioLoader):
 
         return new_array
 
-    def save_from_abins_data(self, abins_data: AbinsData) -> None:
-        """Save data to hdf5 cache from AbinsData format
-
-        Usually we construct a data dict for the cache and then use it to
-        construct AbinsData. Sometimes it makes sense to do it the other way
-        around, so this method provides the reverse operation.
-        """
-        data = abins_data.get_kpoints_data().extract()
-        data["atoms"] = abins_data.get_atoms_data().extract()
-        for key in ("weights", "k_vectors", "frequencies"):
-            data[key] = self.array_from_dict(data[key])
-        data["atomic_displacements"] = self.array_from_dict(data["atomic_displacements"], complex=True)
-
-        self.save_ab_initio_data(data=data)
-
+    @AbInitioLoader.abinsdata_saver
     def read_vibrational_or_phonon_data(self) -> AbinsData:
         """Get AbinsData (structure and modes) from force constants data.
 
@@ -126,9 +112,7 @@ class JSONLoader(AbInitioLoader):
             case PhononJSON.ABINS_DATA:
                 with open(json_file, "r") as fd:
                     data = json.load(fd)
-                abins_data = AbinsData.from_dict(data)
-                self.save_from_abins_data(abins_data)
-                return abins_data
+                return AbinsData.from_dict(data)
 
             case PhononJSON.EUPHONIC_MODES:
                 modes = QpointPhononModes.from_json_file(json_file)
@@ -141,5 +125,4 @@ class JSONLoader(AbInitioLoader):
                 raise ValueError(f"Cannot use JSON data of type {json_format.name}")
 
         file_data = EuphonicLoader.data_dict_from_modes(modes)
-        self.save_ab_initio_data(data=file_data)
         return self._rearrange_data(data=file_data)
