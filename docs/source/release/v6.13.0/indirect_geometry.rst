@@ -10,7 +10,7 @@ New Features
 - :ref:`algm-VesuvioPeakPrediction` now supports a ``Classical`` option. It is used to estimate the lower bounds of the
   width of the Neutron Compton Profiles when running analysis routines.
 - :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>` now supports an output label that is appended to the output name
-  and doesn't override previous outputs
+  and doesn't override previous outputs.
 
 
 Bugfixes
