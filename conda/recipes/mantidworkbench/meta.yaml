@@ -45,6 +45,8 @@ requirements:
     - mslice {{ mslice }}
     - python.app  # [osx]
     - pystack  # [linux]
+    - pyvista
+    - pyvistaqt
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
