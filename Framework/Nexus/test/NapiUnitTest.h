@@ -994,7 +994,7 @@ public:
 
     // create a link target
     NXlink datalink;
-    NX_ASSERT_OKAY(NXgetdataID(fid, &datalink), "failed to make link");
+    NX_ASSERT_OKAY(NXgetdataID(fid, datalink), "failed to make link");
     TS_ASSERT_EQUALS(datalink.targetAddress, "/entry/some_data");
     TS_ASSERT_EQUALS(datalink.linkType, NXentrytype::sds);
 
@@ -1005,13 +1005,13 @@ public:
     cout << "create group at /entry/data to link to the data\n";
     NX_ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakelink(fid, &datalink), "failed to make link");
+    NX_ASSERT_OKAY(NXmakelink(fid, datalink), "failed to make link");
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close");
 
     // check data link
     NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/data/some_data"), "failed to open linked address");
     NXlink res1;
-    NX_ASSERT_OKAY(NXgetdataID(fid, &res1), "failed to get data ID from link");
+    NX_ASSERT_OKAY(NXgetdataID(fid, res1), "failed to get data ID from link");
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
     cout << "data link works\n";
@@ -1027,7 +1027,7 @@ public:
     NX_ASSERT_OKAY(NXmakegroup(fid, "group1", "NXpants"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group1", "NXpants"), "failed to open group");
     NXlink grouplink;
-    NX_ASSERT_OKAY(NXgetgroupID(fid, &grouplink), "failed to get group ID");
+    NX_ASSERT_OKAY(NXgetgroupID(fid, grouplink), "failed to get group ID");
     TS_ASSERT_EQUALS(grouplink.targetAddress, "/entry/group1");
     TS_ASSERT_EQUALS(grouplink.linkType, NXentrytype::group);
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
@@ -1036,13 +1036,13 @@ public:
     cout << "create group /entry/group2/group1\n";
     NX_ASSERT_OKAY(NXmakegroup(fid, "group2", "NXshorts"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group2", "NXshorts"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakelink(fid, &grouplink), "failed to make link");
+    NX_ASSERT_OKAY(NXmakelink(fid, grouplink), "failed to make link");
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close");
 
     // check group link
     NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/group2/group1"), "failed to open linked address");
     NXlink res2;
-    NX_ASSERT_OKAY(NXgetgroupID(fid, &res2), "failed to get linked group ID");
+    NX_ASSERT_OKAY(NXgetgroupID(fid, res2), "failed to get linked group ID");
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
     cout << "group link works\n";

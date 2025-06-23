@@ -60,7 +60,7 @@ int main() {
         if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::NX_OK)
           ON_ERROR("NXopengroup failed!")
 
-        NXgetgroupID(fileid, &aLink);
+        NXgetgroupID(fileid, aLink);
         for (iData = 0; iData < nData; iData++) {
           ostringstream oss3;
           oss3 << "i2_data_" << iData;

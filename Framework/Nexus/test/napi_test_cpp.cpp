@@ -20,6 +20,10 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+#define DEBUG_LOG()                                                                                                    \
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
+  fflush(stdout);
+
 namespace { // anonymous namespace
 const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
@@ -127,13 +131,11 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // ---------- Test write Extendible Data --------------------------
   std::vector<int> data(10, 123);
-  file.makeGroup("extendible_data", "NXdata", 1);
+  file.makeGroup("extendible_data", "NXdata", true);
   file.writeExtendibleData("mydata1", data);
   file.writeExtendibleData("mydata2", data, 1000);
-  std::vector<int64_t> dims(2);
-  dims[0] = 5;
-  dims[1] = 2;
-  std::vector<int64_t> chunk(2, 2);
+  Mantid::Nexus::DimVector dims{5, 2};
+  Mantid::Nexus::DimSizeVector chunk{2, 2};
   file.writeExtendibleData("my2Ddata", data, dims, chunk);
   file.putAttr("string_attrib", "some short string");
 

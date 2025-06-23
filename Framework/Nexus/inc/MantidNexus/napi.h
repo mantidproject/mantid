@@ -271,7 +271,7 @@ MANTID_NEXUS_DLL NXstatus NXputslab64(NXhandle handle, const void *data, const i
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink &pLink);
 
 /**
  * Create a link to the group or dataset described by pLink in the currently open
@@ -282,7 +282,7 @@ MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink *pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink &pLink);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -383,7 +383,7 @@ MANTID_NEXUS_DLL NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *ran
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink *pLink);
+MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink &pLink);
 
 /**
  * Retrieve information about the currently open group.
@@ -406,7 +406,7 @@ MANTID_NEXUS_DLL NXstatus NXgetgroupinfo(NXhandle handle, int *no_items, NXname 
  * \return NX_OK when both link data structures describe the same item, NX_ERROR else.
  * \ingroup c_linking
  */
-MANTID_NEXUS_DLL NXstatus NXsameID(NXhandle handle, NXlink const *pFirstID, NXlink const *pSecondID);
+MANTID_NEXUS_DLL NXstatus NXsameID(NXhandle handle, NXlink const &pFirstID, NXlink const &pSecondID);
 
 /**
  * Resets a pending group search to the start again. To be called in a #NXgetnextentry loop when

@@ -20,9 +20,6 @@ typedef const char CONSTCHAR;
  * (8, 16, 32, etc) so that they can be bit masked and tested easily.
  */
 
-constexpr int NX_UNLIMITED = -1;
-
-constexpr int NX_MAXRANK = 32;
 constexpr int NX_MAXNAMELEN = 64;
 constexpr int NX_MAXADDRESSLEN = 1024;
 
@@ -31,12 +28,17 @@ constexpr int NXMAXSTACK = 50;
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
+#define NX5SIGNATURE 959695
+
+struct stackEntry {
+  std::string irefn;
+  hid_t iVref;
+  hsize_t iCurrentIDX;
+};
+
 struct NexusFile5 {
-  struct iStack5 {
-    char irefn[1024];
-    hid_t iVref;
-    hsize_t iCurrentIDX;
-  } iStack5[NXMAXSTACK];
+  std::vector<stackEntry> iStack5;
+  stackEntry iAtt5;
   hid_t iFID;
   hid_t iCurrentG;
   hid_t iCurrentD;
@@ -45,9 +47,13 @@ struct NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  int iStackPtr;
-  char name_ref[1024];
-  char name_tmp[1024];
+  std::size_t iStackPtr;
+  std::string name_ref;
+  std::string name_tmp;
+
+  NexusFile5()
+      : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
+        iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {};
 };
 
 typedef NexusFile5 *pNexusFile5;
@@ -194,3 +200,6 @@ struct AttrInfo {
 /** Forward declare of NeXus::File */
 class File;
 } // namespace Mantid::Nexus
+
+constexpr std::size_t NX_MAXRANK(32);
+constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long

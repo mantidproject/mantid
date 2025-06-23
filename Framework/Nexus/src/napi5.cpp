@@ -65,16 +65,15 @@ extern void *NXpData;
 
 ---------------------------------------------------------------------*/
 
-NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
+NXstatus NX5open(CONSTCHAR *filename, NXaccess const am, NXhandle &fid) {
   hid_t root_id;
-  pNexusFile5 pNew = NULL;
   char pBuffer[512];
   char *time_buffer = NULL;
   char version_nr[10];
   unsigned int vers_major, vers_minor, vers_release, am1;
   hid_t fapl = -1;
 
-  handle = NULL;
+  fid = nullptr;
 
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
     NXReportError("ERROR: cannot determine HDF5 library version");
@@ -91,65 +90,68 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   struct timeb timeb_struct;
 #endif
 
-  /* create the new file structure */
-  if (!(pNew = create_file_struct()))
-    return NXstatus::NX_ERROR;
-
   /* create the file access property list*/
   if ((fapl = create_file_access_plist(filename)) < 0) {
-    free(pNew);
     return NXstatus::NX_ERROR;
   }
 
   /* start HDF5 interface */
+  fid = new NexusFile5;
   if (am == NXaccess::CREATE5) {
     am1 = H5F_ACC_TRUNC;
-    pNew->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
+    fid->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
   } else {
     if (am == NXaccess::READ)
       am1 = H5F_ACC_RDONLY;
     else
       am1 = H5F_ACC_RDWR;
 
-    pNew->iFID = H5Fopen(filename, am1, fapl);
+    fid->iFID = H5Fopen(filename, am1, fapl);
   }
 
   if (fapl != -1)
     H5Pclose(fapl); /*close file access property list*/
 
-  if (pNew->iFID <= 0) {
+  if (fid->iFID <= 0) {
     snprintf(pBuffer, sizeof(pBuffer) - 1, "ERROR: cannot open file: %s", filename);
     NXReportError(pBuffer);
-    free(pNew);
+    delete fid;
+    fid = nullptr;
     return NXstatus::NX_ERROR;
   }
 
   /*
-   * need to create global attributes         file_name file_time NeXus_version
+   * need to create global attributes
+      file_name
+      file_time
+      NeXus_version
    * at some point for new files
    */
 
   if (am == NXaccess::CREATE5) {
-    root_id = H5Gopen(pNew->iFID, "/", H5P_DEFAULT);
+    root_id = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
     if (set_str_attribute(root_id, "NeXus_version", NEXUS_VERSION) < 0) {
       H5Gclose(root_id);
-      H5Fclose(pNew->iFID);
-      free(pNew);
+      H5Fclose(fid->iFID);
+      delete fid;
+      fid = nullptr;
       return NXstatus::NX_ERROR;
     }
 
     if (set_str_attribute(root_id, "file_name", filename) < 0) {
       H5Gclose(root_id);
-      H5Fclose(pNew->iFID);
-      free(pNew);
+      H5Fclose(fid->iFID);
+      delete fid;
+      fid = nullptr;
       return NXstatus::NX_ERROR;
     }
 
     sprintf(version_nr, "%u.%u.%u", vers_major, vers_minor, vers_release);
     if (set_str_attribute(root_id, "HDF5_Version", version_nr) < 0) {
       H5Gclose(root_id);
-      H5Fclose(pNew->iFID);
-      free(pNew);
+      H5Fclose(fid->iFID);
+      delete fid;
+      fid = nullptr;
       return NXstatus::NX_ERROR;
     }
 
@@ -157,8 +159,9 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     if (time_buffer != NULL) {
       if (set_str_attribute(root_id, "file_time", time_buffer) < 0) {
         H5Gclose(root_id);
-        H5Fclose(pNew->iFID);
-        free(pNew);
+        H5Fclose(fid->iFID);
+        delete fid;
+        fid = nullptr;
         free(time_buffer);
         return NXstatus::NX_ERROR;
       }
@@ -168,15 +171,16 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     /*finally we set the NXroot NX_class attribute*/
     if (set_str_attribute(root_id, "NX_class", "NXroot") < 0) {
       H5Gclose(root_id);
-      H5Fclose(pNew->iFID);
-      free(pNew);
+      H5Fclose(fid->iFID);
+      delete fid;
+      fid = nullptr;
       return NXstatus::NX_ERROR;
     }
 
     H5Gclose(root_id);
   }
-  pNew->iStack5[0].iVref = 0; /* root! */
-  handle = static_cast<NXhandle>(pNew);
+
+  fid->iStack5[0].iVref = 0; /* root! */
   return NXstatus::NX_OK;
 }
 
@@ -328,7 +332,7 @@ NXstatus NX5getgroupinfo_recurse(NXhandle fid, int *iN, NXname pName, NXname pCl
     H5Gclose(grp);
     *iN = pFile->iNX;
   } else {
-    strcpy(pName, pFile->name_ref);
+    strcpy(pName, pFile->name_ref.c_str());
     attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0) {
       strcpy(pClass, NX_UNKNOWN_GROUP);
@@ -339,7 +343,7 @@ NXstatus NX5getgroupinfo_recurse(NXhandle fid, int *iN, NXname pName, NXname pCl
       readStringAttributeN(attr_id, data, sizeof(data));
       strcpy(pClass, data);
       pFile->iNX = 0;
-      grp = H5Gopen(pFile->iFID, pFile->name_ref, H5P_DEFAULT);
+      grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
       H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
       H5Gclose(grp);
       *iN = pFile->iNX;
@@ -363,7 +367,7 @@ NXstatus NX5getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
     *iN = countObjectsInGroup(gid);
     H5Gclose(gid);
   } else {
-    strcpy(pName, pFile->name_ref);
+    strcpy(pName, pFile->name_ref.c_str());
     attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0) {
       strcpy(pClass, NX_UNKNOWN_GROUP);
@@ -399,11 +403,11 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
      iterate to next entry in group list
    */
   idx = pFile->iStack5[pFile->iStackPtr].iCurrentIDX;
-  if (strlen(pFile->name_ref) == 0) {
+  if (pFile->name_ref.size() == 0) {
     /* root group */
-    strcpy(pFile->name_ref, "/");
+    pFile->name_ref = "/";
   }
-  grp = H5Gopen(pFile->iFID, pFile->name_ref, H5P_DEFAULT);
+  grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
   // index can be wrong here
   iRet = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, &idx, nxgroup_info, &op_data);
   H5Gclose(grp);
@@ -421,7 +425,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
     H5Gclose(grp);
   } else {
     pFile->iNX = 0;
-    grp = H5Gopen(pFile->iFID, pFile->name_ref, H5P_DEFAULT);
+    grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
     // index can be wrong here
     iRet_iNX = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
     H5Gclose(grp);
@@ -447,8 +451,8 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
       size_t const Nbuff(2048), Nname(1024);
       char ph_name[Nname];
       strcpy(ph_name, "");
-      for (int i = 1; i < (pFile->iStackPtr + 1); i++) {
-        strcat(ph_name, pFile->iStack5[i].irefn);
+      for (std::size_t i = 1; i < (pFile->iStackPtr + 1); i++) {
+        strcat(ph_name, pFile->iStack5[i].irefn.c_str());
         strcat(ph_name, "/");
       }
       strcat(ph_name, name);

@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -73,7 +74,7 @@ herr_t readStringAttribute(hid_t attr, char **data) {
   return static_cast<herr_t>(NXstatus::NX_OK);
 }
 
-herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
+herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen) {
   herr_t iRet;
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
@@ -83,7 +84,7 @@ herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
     // there is a danger of overflowing output string
-    std::strncpy(data, vdat, static_cast<size_t>(maxlen));
+    std::strncpy(data, vdat, maxlen);
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
@@ -130,7 +131,7 @@ void killAttVID(const pNexusFile5 pFile, hid_t vid) {
   }
 }
 
-NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
+NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink &sLink) {
   hid_t dataID, aid2, aid1, attID;
   char name[] = "target";
 
@@ -140,7 +141,7 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   if (sLink->linkType == NXentrytype::sds) {
     dataID = H5Dopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
   } else {
-    dataID = H5Gopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
+    dataID = H5Gopen(pFile->iFID, sLink.targetAddress.c_str(), H5P_DEFAULT);
   }
   if (dataID < 0) {
     NXReportError("Internal error, address to link does not exist");
@@ -156,12 +157,12 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   }
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, sLink->targetAddress.size());
+  H5Tset_size(aid1, sLink.targetAddress.size());
   attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attID < 0) {
     return NXstatus::NX_OK;
   }
-  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetAddress.c_str()));
+  UNUSED_ARG(H5Awrite(attID, aid1, sLink.targetAddress.c_str()));
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
@@ -350,10 +351,8 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
   UNUSED_ARG(loc_id);
   UNUSED_ARG(unused);
   UNUSED_ARG(opdata);
-  char attr_name[8 + 1]; /* need to leave space for \0 as well */
-
-  strcpy(attr_name, "NX_class");
-  return strstr(member_name, attr_name) ? 1 : 0;
+  std::string attr_name("NX_class");
+  return strstr(member_name, attr_name.c_str()) ? 1 : 0;
 }
 
 /*------------------------------------------------------------------------
@@ -368,7 +367,7 @@ int isDataSetOpen(NXhandle hfil) {
      This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
      when no dataset is open
    */
-  if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(hfil, id) == NXstatus::NX_ERROR) {
     return 0;
   } else {
     return 1;
@@ -383,7 +382,7 @@ int isRoot(NXhandle hfil) {
      This uses the feauture that NXgetgroupID returns NX_ERROR
      when we are at root level
    */
-  if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetgroupID(hfil, id) == NXstatus::NX_ERROR) {
     return 1;
   } else {
     return 0;
@@ -539,17 +538,6 @@ NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
 /*---------------------------------------------------------------------
  * private functions used in NX5open
  */
-
-pNexusFile5 create_file_struct() {
-  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: not enough memory to create file structure");
-  } else {
-    memset(pNew, 0, sizeof(NexusFile5));
-  }
-
-  return pNew;
-}
 
 hid_t create_file_access_plist(CONSTCHAR *filename) {
   char pBuffer[512];

@@ -34,6 +34,10 @@
 #include <string.h> // for copy and compare
 #include <string>
 
+#define DEBUG_LOG()                                                                                                    \
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
+  fflush(stdout);
+
 static int testLoadPath();
 
 using NexusNapiTest::print_data;
@@ -152,7 +156,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXputattr(fileid, "i4_attribute", &i, 1, NXnumtype::INT32), "");
   r = static_cast<float>(3.14159265);
   ASSERT_NO_ERROR(NXputattr(fileid, "r4_attribute", &r, 1, NXnumtype::FLOAT32), "");
-  ASSERT_NO_ERROR(NXgetdataID(fileid, &dlink), "");
+  ASSERT_NO_ERROR(NXgetdataID(fileid, dlink), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
   // END DOUBLE SLAB
 
@@ -161,7 +165,7 @@ int main(int argc, char *argv[]) {
   // open group entry/data
   ASSERT_NO_ERROR(NXmakegroup(fileid, "data", "NXdata"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "data", "NXdata"), "");
-  ASSERT_NO_ERROR(NXmakelink(fileid, &dlink), "");
+  ASSERT_NO_ERROR(NXmakelink(fileid, dlink), "");
   int64_t dims[2] = {100, 20};
   for (i = 0; i < 100; i++) {
     for (j = 0; j < 20; j++) {
@@ -195,7 +199,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopendata(fileid, "ch_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, "NeXus sample"), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXgetgroupID(fileid, &glink), "");
+  ASSERT_NO_ERROR(NXgetgroupID(fileid, glink), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // close group entry/sample
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
@@ -203,7 +207,7 @@ int main(int argc, char *argv[]) {
   // open group link
   ASSERT_NO_ERROR(NXmakegroup(fileid, "link", "NXentry"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "link", "NXentry"), "");
-  ASSERT_NO_ERROR(NXmakelink(fileid, &glink), "");
+  ASSERT_NO_ERROR(NXmakelink(fileid, glink), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // close group link
   ASSERT_NO_ERROR(NXclose(fileid), "");
@@ -363,17 +367,17 @@ int main(int argc, char *argv[]) {
   NXlink blink;
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "sample", "NXsample"), "");
-  ASSERT_NO_ERROR(NXgetgroupID(fileid, &glink), "");
+  ASSERT_NO_ERROR(NXgetgroupID(fileid, glink), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "data", "NXdata"), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "r8_data"), "");
-  ASSERT_NO_ERROR(NXgetdataID(fileid, &dlink), "");
+  ASSERT_NO_ERROR(NXgetdataID(fileid, dlink), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "r8_data"), "");
-  ASSERT_NO_ERROR(NXgetdataID(fileid, &blink), "");
+  ASSERT_NO_ERROR(NXgetdataID(fileid, blink), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
+  if (NXsameID(fileid, dlink, blink) != NXstatus::NX_OK) {
     std::cout << "Link check FAILED (r8_data)\n";
     return TEST_FAILED;
   }
@@ -383,8 +387,8 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopengroup(fileid, "sample", "NXsample"), "");
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "Group address " << address << "\n";
-  ASSERT_NO_ERROR(NXgetgroupID(fileid, &blink), "");
-  if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
+  ASSERT_NO_ERROR(NXgetgroupID(fileid, blink), "");
+  if (NXsameID(fileid, glink, blink) != NXstatus::NX_OK) {
     std::cout << "Link check FAILED (sample)\n";
     return TEST_FAILED;
   }

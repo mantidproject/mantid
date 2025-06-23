@@ -45,6 +45,10 @@
 
 #define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
 
+#define DEBUG_LOG()                                                                                                    \
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
+  fflush(stdout);
+
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
@@ -87,7 +91,7 @@ static bool canBeOpened(CONSTCHAR *filename) {
 /*----------------------------------------------------------------------*/
 NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   // allocate the object on the heap
-  gHandle = NULL;
+  gHandle = nullptr;
   // determine the filename for opening
   std::string filename(userfilename);
   // determine if the file can be opened
@@ -111,30 +115,22 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
-  pNexusFile5 pNew = NULL, pOrig = NULL;
-  newHandle = NULL;
-  pOrig = static_cast<pNexusFile5>(origHandle);
-  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: no memory to create File datastructure");
-    return NXstatus::NX_ERROR;
-  }
-  memset(pNew, 0, sizeof(NexusFile5));
-  pNew->iFID = H5Freopen(pOrig->iFID);
-  if (pNew->iFID <= 0) {
+  newHandle = new NexusFile5;
+  newHandle->iFID = H5Freopen(origHandle->iFID);
+  if (newHandle->iFID <= 0) {
     NXReportError("cannot clone file");
-    free(pNew);
+    delete newHandle;
+    newHandle = NULL;
     return NXstatus::NX_ERROR;
   }
-  pNew->iStack5[0].iVref = 0; /* root! */
-  newHandle = static_cast<NXhandle>(pNew);
+  newHandle->iStack5[0].iVref = 0; /* root! */
   return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------------- */
 
 NXstatus NXclose(NXhandle &fid) {
-  if (fid == NULL) {
+  if (fid == nullptr) {
     return NXstatus::NX_OK;
   }
   pNexusFile5 pFile = NXI5assert(fid);
@@ -144,8 +140,8 @@ NXstatus NXclose(NXhandle &fid) {
   }
   /* release memory */
   NXI5KillDir(pFile);
-  free(pFile);
-  fid = NULL;
+  delete fid;
+  fid = nullptr;
   H5garbage_collect();
   return NXstatus::NX_OK;
 }
@@ -195,23 +191,23 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
+  std::string pBuffer;
 
   pNexusFile5 pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) {
-    strcpy(pBuffer, name);
+    pBuffer = name;
   } else {
-    sprintf(pBuffer, "%s/%s", pFile->name_tmp, name);
+    pBuffer = pFile->name_tmp + "/" + name;
   }
-  hid_t iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
+  hid_t iVID = H5Gopen(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT);
   if (iVID < 0) {
     std::string msg = std::string("ERROR: group ") + pFile->name_tmp + " does not exist";
     NXReportError(const_cast<char *>(msg.c_str()));
     return NXstatus::NX_ERROR;
   }
   pFile->iCurrentG = iVID;
-  strcpy(pFile->name_tmp, pBuffer);
-  strcpy(pFile->name_ref, pBuffer);
+  pFile->name_tmp = pBuffer;
+  pFile->name_ref = pBuffer;
 
   if ((nxclass != NULL) && (strcmp(nxclass, NX_UNKNOWN_GROUP) != 0)) {
     /* check group attribute */
@@ -239,8 +235,12 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     if (strcmp(data, nxclass) == 0) {
       /* test OK */
     } else {
-      snprintf(pBuffer, sizeof(pBuffer), "ERROR: group class is not identical: \"%s\" != \"%s\"", data, nxclass);
-      NXReportError(pBuffer);
+      std::string warning("ERROR: group class is not identical: \"");
+      warning += data;
+      warning += "\" != \"";
+      warning += nxclass;
+      warning += "\"";
+      NXReportError(warning.c_str());
       H5Tclose(atype);
       H5Aclose(attr1);
       return NXstatus::NX_ERROR;
@@ -250,9 +250,8 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   }
 
   /* maintain stack */
+  pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
   pFile->iStackPtr++;
-  pFile->iStack5[pFile->iStackPtr].iVref = pFile->iCurrentG;
-  strcpy(pFile->iStack5[pFile->iStackPtr].irefn, name);
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
   NXI5KillDir(pFile);
@@ -274,15 +273,15 @@ NXstatus NXclosegroup(NXhandle fid) {
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = strlen(pFile->iStack5[pFile->iStackPtr].irefn);
-    size_t ii = strlen(pFile->name_ref);
+    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t ii = pFile->name_ref.size();
     if (pFile->iStackPtr > 1) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
     }
     if (ii > 0) {
-      char *uname = strdup(pFile->name_ref);
+      char *uname = strdup(pFile->name_ref.c_str());
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
@@ -293,13 +292,13 @@ NXstatus NXclosegroup(NXhandle fid) {
       /*
          strncpy(u1name, uname, ii);
        */
-      strcpy(pFile->name_ref, u1name);
-      strcpy(pFile->name_tmp, u1name);
+      pFile->name_ref = u1name;
+      pFile->name_tmp = u1name;
       free(uname);
       free(u1name);
     } else {
-      strcpy(pFile->name_ref, "");
-      strcpy(pFile->name_tmp, "");
+      pFile->name_ref = "";
+      pFile->name_tmp = "";
     }
     NXI5KillDir(pFile);
     pFile->iStackPtr--;
@@ -308,6 +307,7 @@ NXstatus NXclosegroup(NXhandle fid) {
     } else {
       pFile->iCurrentG = 0;
     }
+    pFile->iStack5.pop_back();
   }
   return NXstatus::NX_OK;
 }
@@ -694,7 +694,7 @@ NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], con
 
 /* ---- --------------------------------------------------------------- */
 
-NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
+NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
   pNexusFile5 pFile;
   int datalen;
   NXnumtype type = NXnumtype::CHAR;
@@ -713,19 +713,19 @@ NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
   datalen = 1024;
   char caddr[1024] = {0};
   if (NX5getattr(fid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
-    sRes->targetAddress = buildCurrentAddress(pFile);
+    sRes.targetAddress = buildCurrentAddress(pFile);
   } else {
-    sRes->targetAddress = std::string(caddr);
+    sRes.targetAddress = std::string(caddr);
   }
-  sRes->linkType = NXentrytype::sds;
+  sRes.linkType = NXentrytype::sds;
   return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
+NXstatus NXmakelink(NXhandle fid, NXlink &sLink) {
   pNexusFile5 pFile;
-  char linkTarget[NX_MAXADDRESSLEN];
+  std::string linkTarget;
   char *itemName = NULL;
 
   pFile = NXI5assert(fid);
@@ -736,7 +736,7 @@ NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
   /*
      locate name of the element to link
    */
-  itemName = strrchr(sLink->targetAddress.data(), '/');
+  itemName = strrchr(sLink.targetAddress.data(), '/');
   if (itemName == NULL) {
     NXReportError("ERROR: bad link structure");
     return NXstatus::NX_ERROR;
@@ -747,17 +747,9 @@ NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
      build addressname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXADDRESSLEN) {
-    strcpy(linkTarget, "/");
-    strcat(linkTarget, pFile->name_ref);
-    strcat(linkTarget, "/");
-    strcat(linkTarget, itemName);
-  } else {
-    NXReportError("ERROR: address string to long");
-    return NXstatus::NX_ERROR;
-  }
+  linkTarget = "/" + pFile->name_ref + "/" + itemName;
 
-  H5Lcreate_hard(pFile->iFID, sLink->targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(pFile->iFID, sLink.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   return NX5settargetattribute(pFile, sLink);
 }
@@ -767,7 +759,7 @@ NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
 /*----------------------------------------------------------------------*/
 
 NXstatus NXflush(NXhandle &fid) {
-  pNexusFile5 pFile = NULL;
+  pNexusFile5 pFile = nullptr;
   herr_t iRet;
 
   pFile = NXI5assert(fid);
@@ -790,7 +782,7 @@ NXstatus NXflush(NXhandle &fid) {
 NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype) {
   int i;
   size_t size = 1;
-  *data = NULL;
+  *data = nullptr;
   for (i = 0; i < rank; i++) {
     size *= (size_t)dimensions[i];
   }
@@ -810,7 +802,7 @@ NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype
     return NXstatus::NX_ERROR;
   }
   *data = malloc(size);
-  if (*data != NULL) {
+  if (*data != nullptr) {
     memset(*data, 0, size);
   }
   return NXstatus::NX_OK;
@@ -819,16 +811,16 @@ NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXfree(void **data) {
-  if (data == NULL) {
+  if (data == nullptr) {
     NXReportError("ERROR: passing NULL to NXfree");
     return NXstatus::NX_ERROR;
   }
-  if (*data == NULL) {
+  if (*data == nullptr) {
     NXReportError("ERROR: passing already freed pointer to NXfree");
     return NXstatus::NX_ERROR;
   }
   free(*data);
-  *data = NULL;
+  *data = nullptr;
   return NXstatus::NX_OK;
 }
 
@@ -902,7 +894,7 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 
 NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   NXstatus status;
-  char *pPtr = NULL;
+  char *pPtr = nullptr;
   *rank = 0;
   status = NX5getinfo64(fid, rank, dimension, iType);
   /*
@@ -911,7 +903,7 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
   /* only strip one dimensional strings */
   if ((*iType == NXnumtype::CHAR) && (*rank == 1)) {
     pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
-    if (pPtr != NULL) {
+    if (pPtr != nullptr) {
       memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
       NX5getdata(fid, pPtr);
       dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
@@ -929,7 +921,7 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
-  char *tmp_data = NULL;
+  char *tmp_data = nullptr;
   int iRank;
 
   pFile = NXI5assert(fid);
@@ -1030,7 +1022,7 @@ NXstatus NXgetattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[], 
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
+NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
   pNexusFile5 pFile;
   NXnumtype type = NXnumtype::CHAR;
 
@@ -1045,11 +1037,11 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
     int datalen = 1024;
     char caddr[1024] = {0};
     if (NX5getattr(fileid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
-      sRes->targetAddress = buildCurrentAddress(pFile);
+      sRes.targetAddress = buildCurrentAddress(pFile);
     } else {
-      sRes->targetAddress = std::string(caddr);
+      sRes.targetAddress = std::string(caddr);
     }
-    sRes->linkType = NXentrytype::group;
+    sRes.linkType = NXentrytype::group;
     return NXstatus::NX_OK;
   }
   /* not reached */
@@ -1064,9 +1056,9 @@ NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
+NXstatus NXsameID(NXhandle fileid, NXlink const &pFirstID, NXlink const &pSecondID) {
   NXI5assert(fileid);
-  if (pFirstID->targetAddress == pSecondID->targetAddress) {
+  if (pFirstID.targetAddress == pSecondID.targetAddress) {
     return NXstatus::NX_OK;
   } else {
     return NXstatus::NX_ERROR;
@@ -1110,7 +1102,7 @@ NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
   NXname addressElement;
   char *pPtr;
 
-  if (hfil == NULL || address == NULL) {
+  if (hfil == nullptr || address == NULL) {
     NXReportError("ERROR: NXopendata needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
@@ -1141,7 +1133,7 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
   char *pPtr;
   char buffer[256];
 
-  if (hfil == NULL || address == NULL) {
+  if (hfil == nullptr || address == NULL) {
     NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
@@ -1237,7 +1229,5 @@ char *NXIformatNeXusTime() {
   }
   return time_buffer;
 }
-
-const char *NXgetversion() { return NEXUS_VERSION; }
 
 // cppcheck-suppress-end [constVariablePointer, unmatchedSuppression]

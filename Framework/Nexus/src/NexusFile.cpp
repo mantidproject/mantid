@@ -4,6 +4,7 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
+#include "MantidNexus/napi_helper.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <array>
@@ -18,6 +19,10 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+#ifdef WIN32
+#define strdup _strdup
+#endif
+
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
 #define NX_UNKNOWN_GROUP ""
 
@@ -26,6 +31,10 @@ using std::vector;
   if (tmp != NXstatus::NX_OK) {                                                                                        \
     throw NXEXCEPTION(msg);                                                                                            \
   }
+
+#define DEBUG_LOG()                                                                                                    \
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
+  fflush(stdout);
 
 /**
  * \file NexusFile.cpp
@@ -49,139 +58,6 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   result << "]";
   return result.str();
 }
-
-pNexusFile5 assertNXID(std::shared_ptr<NXhandle> fid) { return *fid; }
-
-herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata) {
-  UNUSED_ARG(loc_id);
-  UNUSED_ARG(unused);
-  UNUSED_ARG(opdata);
-  char attr_name[8 + 1]; /* need to leave space for \0 as well */
-
-  strcpy(attr_name, "NX_class");
-  return strstr(member_name, attr_name) ? 1 : 0;
-}
-
-hid_t toHDF5Type(NXnumtype datatype) {
-  hid_t type;
-  switch (datatype) {
-  case NXnumtype::CHAR: {
-    type = H5T_C_S1;
-    break;
-  }
-  case NXnumtype::INT8: {
-    type = H5T_NATIVE_CHAR;
-    break;
-  }
-  case NXnumtype::UINT8: {
-    type = H5T_NATIVE_UCHAR;
-    break;
-  }
-  case NXnumtype::INT16: {
-    type = H5T_NATIVE_SHORT;
-    break;
-  }
-  case NXnumtype::UINT16: {
-    type = H5T_NATIVE_USHORT;
-    break;
-  }
-  case NXnumtype::INT32: {
-    type = H5T_NATIVE_INT;
-    break;
-  }
-  case NXnumtype::UINT32: {
-    type = H5T_NATIVE_UINT;
-    break;
-  }
-  case NXnumtype::INT64: {
-    type = H5T_NATIVE_INT64;
-    break;
-  }
-  case NXnumtype::UINT64: {
-    type = H5T_NATIVE_UINT64;
-    break;
-  }
-  case NXnumtype::FLOAT32: {
-    type = H5T_NATIVE_FLOAT;
-    break;
-  }
-  case NXnumtype::FLOAT64: {
-    type = H5T_NATIVE_DOUBLE;
-    break;
-  }
-  default: {
-    type = -1;
-  }
-  }
-  return type;
-}
-
-hid_t h5MemType(hid_t atype) {
-  hid_t memtype_id = -1;
-  size_t size;
-  H5T_sign_t sign;
-  H5T_class_t tclass;
-
-  tclass = H5Tget_class(atype);
-
-  if (tclass == H5T_INTEGER) {
-    size = H5Tget_size(atype);
-    sign = H5Tget_sign(atype);
-    if (size == 1) {
-      if (sign == H5T_SGN_2) {
-        memtype_id = H5T_NATIVE_INT8;
-      } else {
-        memtype_id = H5T_NATIVE_UINT8;
-      }
-    } else if (size == 2) {
-      if (sign == H5T_SGN_2) {
-        memtype_id = H5T_NATIVE_INT16;
-      } else {
-        memtype_id = H5T_NATIVE_UINT16;
-      }
-    } else if (size == 4) {
-      if (sign == H5T_SGN_2) {
-        memtype_id = H5T_NATIVE_INT32;
-      } else {
-        memtype_id = H5T_NATIVE_UINT32;
-      }
-    } else if (size == 8) {
-      if (sign == H5T_SGN_2) {
-        memtype_id = H5T_NATIVE_INT64;
-      } else {
-        memtype_id = H5T_NATIVE_UINT64;
-      }
-    }
-  } else if (tclass == H5T_FLOAT) {
-    size = H5Tget_size(atype);
-    if (size == 4) {
-      memtype_id = H5T_NATIVE_FLOAT;
-    } else if (size == 8) {
-      memtype_id = H5T_NATIVE_DOUBLE;
-    }
-  }
-  if (memtype_id == -1) {
-    throw std::invalid_argument("h5MemType: invalid type");
-  }
-  return memtype_id;
-}
-
-std::string buildCurrentAddress(pNexusFile5 fid) {
-  hid_t current;
-  if (fid->iCurrentD != 0) {
-    current = fid->iCurrentD;
-  } else if (fid->iCurrentG != 0) {
-    current = fid->iCurrentG;
-  } else {
-    current = fid->iFID;
-  }
-  char caddr[2048];
-  H5Iget_name(current, caddr, 2048);
-  return std::string(caddr);
-}
-
-void killAttDir(pNexusFile5 self) { self->iCurrentIDX = 0; }
-void killDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -367,7 +243,7 @@ bool File::hasData(std::string const &name) {
 
 bool File::isDataSetOpen() {
   NXlink id;
-  if (NXgetdataID(*(this->m_pfile_id), &id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(*(this->m_pfile_id), id) == NXstatus::NX_ERROR) {
     return false;
   } else {
     return true;
@@ -476,23 +352,23 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   pNexusFile5 pFile;
   hid_t attr1, iVID;
   herr_t iRet;
-  char pBuffer[NX_MAXADDRESSLEN + 12]; // no idea what the 12 is about
+  std::string pBuffer;
 
   pFile = assertNXID(m_pfile_id);
   if (pFile->iCurrentG == 0) {
-    strcpy(pBuffer, name.c_str());
+    pBuffer = name;
   } else {
-    sprintf(pBuffer, "%s/%s", pFile->name_tmp, name.c_str());
+    pBuffer = pFile->name_tmp + "/" + name;
   }
-  iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
+  iVID = H5Gopen(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT);
   if (iVID < 0) {
     std::stringstream msg;
     msg << "Group " << pFile->name_tmp << " does not exist";
     throw NXEXCEPTION(msg.str());
   }
   pFile->iCurrentG = iVID;
-  strcpy(pFile->name_tmp, pBuffer);
-  strcpy(pFile->name_ref, pBuffer);
+  pFile->name_tmp = pBuffer;
+  pFile->name_ref = pBuffer;
 
   if ((!class_name.empty()) && (strcmp(class_name.c_str(), NX_UNKNOWN_GROUP) != 0)) {
     /* check group attribute */
@@ -525,12 +401,11 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
   }
 
   /* maintain stack */
+  pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
   pFile->iStackPtr++;
-  pFile->iStack5[pFile->iStackPtr].iVref = pFile->iCurrentG;
-  strcpy(pFile->iStack5[pFile->iStackPtr].irefn, name.c_str());
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
-  killDir(pFile);
+  NXI5KillDir(pFile);
 }
 
 void File::closeGroup() {
@@ -541,42 +416,44 @@ void File::closeGroup() {
      deeper into a negative directory hierarchy (anti-directory)
    */
   if (pFile->iCurrentG == 0) {
-    killDir(pFile);
+    NXI5KillDir(pFile);
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = strlen(pFile->iStack5[pFile->iStackPtr].irefn);
-    size_t ii = strlen(pFile->name_ref);
+    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t ii = pFile->name_ref.size();
     if (pFile->iStackPtr > 1) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
     }
     if (ii > 0) {
+      char *uname = strdup(pFile->name_ref.c_str());
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
       for (i = 0; i < ii; i++) {
-        *(u1name + i) = *(pFile->name_ref + i);
+        *(u1name + i) = *(uname + i);
       }
       *(u1name + i) = '\0';
       /*
          strncpy(u1name, uname, ii);
        */
-      strcpy(pFile->name_ref, u1name);
-      strcpy(pFile->name_tmp, u1name);
-      free(u1name);
+      pFile->name_ref = u1name;
+      pFile->name_tmp = u1name;
     } else {
-      strcpy(pFile->name_ref, "");
-      strcpy(pFile->name_tmp, "");
+      pFile->name_ref = "";
+      pFile->name_tmp = "";
     }
-    killDir(pFile);
+    NXI5KillDir(pFile);
+    pFile->iCurrentD = 0;
     pFile->iStackPtr--;
     if (pFile->iStackPtr > 0) {
       pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
     } else {
       pFile->iCurrentG = 0;
     }
+    pFile->iStack5.pop_back();
   }
 }
 
@@ -611,7 +488,7 @@ void File::openData(std::string const &name) {
 
   pFile = assertNXID(m_pfile_id);
   /* clear pending attribute directories first */
-  killAttDir(pFile);
+  NXI5KillAttDir(pFile);
 
   /* find the ID number and open the dataset */
   pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
@@ -811,7 +688,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     throw NXEXCEPTION(msg.str());
   }
 
-  dtype = toHDF5Type(type);
+  dtype = nxToHDF5Type(type);
 
   /*
      Check dimensions for consistency. Dimension may be -1
@@ -1660,7 +1537,7 @@ NXlink File::getDataID() {
 
 void File::makeLink(NXlink const &link) {
   pNexusFile5 pFile;
-  char linkTarget[NX_MAXADDRESSLEN];
+  std::string linkTarget;
 
   pFile = assertNXID(m_pfile_id);
   if (pFile->iCurrentG == 0) { /* root level, can not link here */
@@ -1680,16 +1557,8 @@ void File::makeLink(NXlink const &link) {
      build addressname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXADDRESSLEN) {
-    strcpy(linkTarget, "/");
-    strcat(linkTarget, pFile->name_ref);
-    strcat(linkTarget, "/");
-    strcat(linkTarget, itemName);
-  } else {
-    throw NXEXCEPTION("makeLink failed address string to long");
-  }
-
-  H5Lcreate_hard(pFile->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget, H5P_DEFAULT, H5P_DEFAULT);
+  linkTarget = "/" + pFile->name_ref + "/" + itemName;
+  H5Lcreate_hard(pFile->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   hid_t dataID, aid2, aid1, attID;
   char name[] = "target";
