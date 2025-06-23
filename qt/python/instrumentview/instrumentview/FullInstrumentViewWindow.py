@@ -232,17 +232,24 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
-    def enable_main_point_picking(self, main_callback) -> None:
+    def enable_point_picking(self, callback) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
-            self.main_plotter.enable_point_picking(show_message=False, use_picker=True, callback=main_callback, show_point=False)
+            self.main_plotter.enable_surface_point_picking(
+                show_message=False, use_picker=True, callback=callback, show_point=False, pickable_window=False, picker="point"
+            )
 
-    def enable_projection_point_picking(self, projection_callback) -> None:
         self.projection_plotter.disable_picking()
         if not self.projection_plotter.off_screen:
             self.projection_plotter.enable_point_picking(
-                show_message=False, use_picker=True, callback=projection_callback, show_point=False
+                show_message=False,
+                use_picker=True,
+                callback=callback,
+                show_point=False,
+                pickable_window=False,
+                picker="point",
+                tolerance=0.01,
             )
 
     def enable_rectangle_picking(self, callback=None) -> None:
