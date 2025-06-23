@@ -49,7 +49,6 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
 
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility")
-        self._view.enable_main_point_picking(main_callback=self.point_picked)
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
@@ -60,6 +59,7 @@ class FullInstrumentViewPresenter:
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
         self.projection_option_selected(0)
+        self._view.enable_point_picking(callback=self.point_picked)
 
     def projection_combo_options(self) -> list[str]:
         return self._PROJECTION_OPTIONS
@@ -94,7 +94,6 @@ class FullInstrumentViewPresenter:
         self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
-        self._view.enable_projection_point_picking(projection_callback=self.point_picked)
 
     def set_contour_limits(self, min: int, max: int) -> None:
         self._contour_limits = [min, max]
@@ -116,8 +115,7 @@ class FullInstrumentViewPresenter:
         if is_enabled:
             self._view.enable_rectangle_picking(callback=self.rectangle_picked)
         else:
-            self._view.enable_main_point_picking(main_callback=self.point_picked)
-            self._view.enable_projection_point_picking(projection_callback=self.point_picked)
+            self._view.enable_point_picking(callback=self.point_picked)
 
     def rectangle_picked(self, rectangle):
         """Get points within the selection rectangle and display information for those detectors"""
