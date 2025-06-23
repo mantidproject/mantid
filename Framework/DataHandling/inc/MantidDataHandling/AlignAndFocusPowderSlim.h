@@ -41,7 +41,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr createOutputWorkspace(const size_t numHist, const bool linearBins, const double x_delta);
+  API::MatrixWorkspace_sptr createOutputWorkspace();
   API::MatrixWorkspace_sptr editInstrumentGeometry(API::MatrixWorkspace_sptr &wksp, const double l1,
                                                    const std::vector<double> &polars,
                                                    const std::vector<specnum_t> &specids,

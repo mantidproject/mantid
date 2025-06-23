@@ -76,6 +76,8 @@ const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
 
+const size_t NUM_HIST{6}; // TODO make this determined from groupin
+
 // TODO refactor this to use the actual grouping
 double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus) {
   // grouping taken from the IDF for VULCAN
@@ -507,24 +509,23 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
   const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
 
-  constexpr size_t numHist{6}; // TODO make this determined from grouping
   const auto numMin = xmins.size();
   const auto numMax = xmaxs.size();
   const auto numDelta = deltas.size();
 
   if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
     errors[PropertyNames::X_DELTA] = "All must be nonzero";
-  else if (!(numDelta == 1 || numDelta == numHist))
+  else if (!(numDelta == 1 || numDelta == NUM_HIST))
     errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
 
   if (std::any_of(xmins.cbegin(), xmins.cend(), [](double x) { return !std::isfinite(x) || x < 0; }))
     errors[PropertyNames::X_MIN] = "All must be non-negative";
-  else if (!(numMin == 1 || numMin == numHist))
+  else if (!(numMin == 1 || numMin == NUM_HIST))
     errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
 
   if (std::any_of(xmaxs.cbegin(), xmaxs.cend(), [](double x) { return !std::isfinite(x) || x <= 0; }))
     errors[PropertyNames::X_MAX] = "All must be positive";
-  else if (!(numMax == 1 || numMax == numHist))
+  else if (!(numMax == 1 || numMax == NUM_HIST))
     errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
 
   return errors;
@@ -535,18 +536,14 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
  */
 void AlignAndFocusPowderSlim::exec() {
   // create a histogram workspace
-  constexpr size_t numHist{6}; // TODO make this determined from grouping
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
   loadSize.resize(1, 0);
 
-  // set up the output workspace binning
   this->progress(.0, "Create output workspace");
-  const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
-  const bool linearBins = bool(binmode == BinningMode::LINEAR);            // this is needed later
-  const std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA); // this is needed later
-  MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta[0]);
+
+  MatrixWorkspace_sptr wksp = createOutputWorkspace();
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
@@ -706,25 +703,56 @@ void AlignAndFocusPowderSlim::exec() {
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const size_t numHist, const bool linearBins,
-                                                                    const double x_delta) {
-  const std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
-  const std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
+  // set up the output workspace binning
+  const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
+  const bool linearBins = bool(binmode == BinningMode::LINEAR);
+  std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA);
+  std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
+  std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
+  const bool raggedBins = (x_delta.size() != 1 || x_min.size() != 1 || x_max.size() != 1);
 
   constexpr bool resize_xnew{true};
   constexpr bool full_bins_only{false};
 
-  HistogramData::BinEdges XValues_new(0);
+  // always use the first histogram x-values for initialization
+  HistogramData::BinEdges XValues(0);
   if (linearBins) {
-    const std::vector<double> params{x_min[0], x_delta, x_max[0]};
-    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                               full_bins_only));
+    const std::vector<double> params{x_min[0], x_delta[0], x_max[0]};
+    UNUSED_ARG(
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   } else {
-    const std::vector<double> params{x_min[0], -1. * x_delta, x_max[0]};
-    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                               full_bins_only));
+    const std::vector<double> params{x_min[0], -1. * x_delta[0], x_max[0]};
+    UNUSED_ARG(
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(NUM_HIST, XValues);
+
+  if (raggedBins) {
+    // if ragged bins, we need to resize the x-values for each histogram after the first one
+    if (x_delta.size() == 1)
+      x_delta.resize(NUM_HIST, x_delta[0]);
+    if (x_min.size() == 1)
+      x_min.resize(NUM_HIST, x_min[0]);
+    if (x_max.size() == 1)
+      x_max.resize(NUM_HIST, x_max[0]);
+
+    for (size_t i = 1; i < NUM_HIST; ++i) {
+      HistogramData::BinEdges XValues_new(0);
+
+      if (linearBins) {
+        const std::vector<double> params{x_min[i], x_delta[i], x_max[i]};
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                        full_bins_only);
+      } else {
+        const std::vector<double> params{x_min[i], -1. * x_delta[i], x_max[i]};
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                        full_bins_only);
+      }
+      HistogramData::Histogram hist(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0));
+      wksp->setHistogram(i, hist);
+    }
+  }
   return wksp;
 }
 
