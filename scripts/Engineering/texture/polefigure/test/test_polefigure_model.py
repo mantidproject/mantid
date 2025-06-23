@@ -41,7 +41,9 @@ class TextureProjectionTest(unittest.TestCase):
         self.mock_ws.getInstrument.return_value = mock_inst
 
     @patch(correction_model_path + ".ADS")
-    def test_get_ws_info_with_crystal_structure(self, mock_ads):
+    @patch(correction_model_path + ".TextureProjection._has_no_valid_shape")
+    def test_get_ws_info_with_crystal_structure(self, mock_has_no_valid_shape, mock_ads):
+        mock_has_no_valid_shape.return_value = False
         mock_ads.retrieve.return_value = self.mock_ws
         result = self.model.get_ws_info("ws1", "param_file")
         self.assertEqual(result["fit_parameters"], "param_file")
@@ -110,11 +112,11 @@ class TextureProjectionTest(unittest.TestCase):
         self.assertEqual("instrument_123456-123456_2.0_Texture20_pf_table_I", table_name)
 
     def test_parse_hkl_valid(self):
-        hkl = self.model._parse_hkl("1", "2", "3")
+        hkl = self.model.parse_hkl("1", "2", "3")
         self.assertEqual(hkl, [1, 2, 3])
 
     def test_parse_hkl_invalid(self):
-        hkl = self.model._parse_hkl("a", "b", "c")
+        hkl = self.model.parse_hkl("a", "b", "c")
         self.assertIsNone(hkl)
 
     @patch(correction_model_path + ".ADS")
