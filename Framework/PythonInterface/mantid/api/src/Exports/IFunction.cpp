@@ -336,6 +336,10 @@ void export_IFunction() {
            (arg("self"), arg("workspace"), arg("wi"), arg("startX"), arg("endX")),
            "Set matrix workspace to parse Parameters.xml")
 
+      .def("applyTies", &IFunction::applyTies, arg("self"), "Apply ties.")
+
+      .def("clearAllParameters", &IFunctionAdapter::clearAllParameters, (arg("self")), "Clear all declared parameters")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"), "Returns a list of the categories for an algorithm")
       .def("numParams", &IFunction::nParams, arg("self"), "Return the number of parameters")

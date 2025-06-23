@@ -105,6 +105,14 @@ const std::string IFunctionAdapter::category() const {
   }
 }
 
+// void IFunctionAdapter::clearAllParameters() {
+//   try {
+//     callMethod<void>(getSelf(), "clearAllParameters");
+//   } catch (UndefinedAttributeError &) {
+//     // nothing to do
+//   }
+// }
+
 void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
 
 /**

@@ -53,6 +53,9 @@ public:
   void setAttribute(const std::string &attName, const API::IFunction::Attribute &attr) override;
   /// Split this function (if needed) into a list of independent functions
   static boost::python::list createPythonEquivalentFunctions(const IFunction &self);
+  // override?
+  // void clearAllParameters();
+  inline void clearAllParameters() { this->clearAllParameters(); }
 
   // Each overload of declareParameter requires a different name as we
   // can't use a function pointer with a virtual base class
