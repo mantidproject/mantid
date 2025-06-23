@@ -203,7 +203,7 @@ def get_numerical_integ(ws: str, ispec: int):
     return np.trapezoid(diffy, np.convolve(diffx, np.ones(2) / 2, "valid"))
 
 
-def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str):
+def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, do_numeric_integ: bool = True):
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
 
@@ -211,6 +211,8 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
     peaks: Sequence of peak positions in d-spacing
     peak_window: size of the window to create around the desired peak for purpose of fitting
     save_dir: directory to save the results in
+    do_numeric_integ: flag for whether a results column should be added which performs a linear background subtraction
+                      followed by a numerical integration of the peak window
     """
     for wsname in wss:
         ws = ADS.retrieve(wsname)
@@ -270,8 +272,9 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
                         out_tab.addColumn("double", col_name)
                     out_tab.addColumn("double", "I_est")
 
-                intensity_est = get_numerical_integ(crop_ws, ispec)
-                out_tab.addRow([ispec] + spec_fit.column("Value") + [intensity_est])
+                if do_numeric_integ:
+                    intensity_est = get_numerical_integ(crop_ws, ispec)
+                    out_tab.addRow([ispec] + spec_fit.column("Value") + [intensity_est])
 
             SaveNexus(InputWorkspace=out_ws, Filename=out_path)
 
