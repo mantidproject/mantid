@@ -36,9 +36,12 @@ class FullInstrumentViewModel:
         self._detector_positions = np.array([self._detector_info.position(i) for i in range(len(self._detector_ids))])
         self._spherical_positions = np.array([self._detector_info.position(i).getSpherical() for i in range(len(self._detector_ids))])
         self._counts = np.zeros_like(self._detector_ids)
-        self._is_monitor = np.array([self._detector_info.isMonitor(i) for i in range(len(self._detector_ids))])
-        self._workspace_indices = np.array(self._workspace.getIndicesFromDetectorIDs([int(i) for i in self._detector_ids]))
-        self._detector_is_picked = np.full(len(self._detector_ids[~self._is_monitor]), False)
+        workspace_map = self._workspace.getDetectorIDToWorkspaceIndexMap(False, False)
+        self._workspace_indices = np.array([workspace_map.get(int(i), -1) for i in self._detector_ids])
+        self._is_valid = np.array(
+            [not self._detector_info.isMonitor(i) and self._workspace_indices[i] != -1 for i in range(len(self._detector_ids))]
+        )
+        self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
         self._bin_min = math.inf
         self._bin_max = -math.inf
@@ -58,7 +61,7 @@ class FullInstrumentViewModel:
                 self._bin_max = bin_edge
 
     def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
-        workspace_indices = self._workspace_indices[~self._is_monitor]
+        workspace_indices = self._workspace_indices[self._is_valid]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
@@ -67,7 +70,7 @@ class FullInstrumentViewModel:
         )
         self._data_max = max(new_detector_counts)
         self._data_min = min(new_detector_counts)
-        self._counts[~self._is_monitor] = new_detector_counts
+        self._counts[self._is_valid] = new_detector_counts
 
     def workspace(self):
         return self._workspace
@@ -76,10 +79,10 @@ class FullInstrumentViewModel:
         return self._sample_position
 
     def detector_positions(self):
-        return self._detector_positions[~self._is_monitor]
+        return self._detector_positions[self._is_valid]
 
     def detector_projection_positions(self):
-        return self._detector_projection_positions[~self._is_monitor]
+        return self._detector_projection_positions[self._is_valid]
 
     def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
         for i in indices:
@@ -89,16 +92,16 @@ class FullInstrumentViewModel:
         return self._detector_is_picked.astype(int)
 
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[~self._is_monitor][self._detector_is_picked]
+        return self._detector_ids[self._is_valid][self._detector_is_picked]
 
     def picked_workspace_indices(self):
-        return self._workspace_indices[~self._is_monitor][self._detector_is_picked]
+        return self._workspace_indices[self._is_valid][self._detector_is_picked]
 
     def detector_counts(self) -> np.ndarray:
-        return self._counts[~self._is_monitor]
+        return self._counts[self._is_valid]
 
     def detector_ids(self):
-        return self._detector_ids[~self._is_monitor]
+        return self._detector_ids[self._is_valid]
 
     def data_limits(self) -> list:
         return [self._data_min, self._data_max]
@@ -107,17 +110,17 @@ class FullInstrumentViewModel:
         return [self._bin_min, self._bin_max]
 
     def monitor_positions(self):
-        return self._detector_positions[self._is_monitor]
+        return self._detector_positions[[self._detector_info.isMonitor(i) for i in range(len(self._detector_ids))]]
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
         # TODO: Sort out this ugliness
-        picked_ws_indices = self._workspace_indices[~self._is_monitor][self._detector_is_picked]
-        picked_ids = self._detector_ids[~self._is_monitor][self._detector_is_picked]
-        picked_xyz_positions = self._detector_positions[~self._is_monitor][self._detector_is_picked]
-        picked_spherical_positions = self._spherical_positions[~self._is_monitor][self._detector_is_picked]
-        picked_counts = self._counts[~self._is_monitor][self._detector_is_picked]
+        picked_ws_indices = self._workspace_indices[self._is_valid][self._detector_is_picked]
+        picked_ids = self._detector_ids[self._is_valid][self._detector_is_picked]
+        picked_xyz_positions = self._detector_positions[self._is_valid][self._detector_is_picked]
+        picked_spherical_positions = self._spherical_positions[self._is_valid][self._detector_is_picked]
+        picked_counts = self._counts[self._is_valid][self._detector_is_picked]
 
         picked_info = []
         for i, ws_index in enumerate(picked_ws_indices):

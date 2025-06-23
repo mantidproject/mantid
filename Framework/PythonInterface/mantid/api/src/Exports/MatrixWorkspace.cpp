@@ -25,6 +25,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
@@ -324,6 +325,17 @@ std::vector<size_t> getIndicesFromDetectorIDs(MatrixWorkspace &self, const boost
   return self.getIndicesFromDetectorIDs(Converters::PySequenceToVector<int>(detIDs)());
 }
 
+boost::python::dict getDetectorIDToWorkspaceIndexMap(MatrixWorkspace &self, bool throwIfMultipleDets,
+                                                     bool ignoreIfNoValidDets) {
+  const auto unorderedMap = self.getDetectorIDToWorkspaceIndexMap(throwIfMultipleDets, ignoreIfNoValidDets);
+  boost::python::dict pythonDict;
+  for (const auto &[key, value] : unorderedMap) {
+    pythonDict[key] = value;
+  }
+
+  return pythonDict;
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -373,6 +385,10 @@ void export_MatrixWorkspace() {
       .def("getIndicesFromDetectorIDs", &getIndicesFromDetectorIDs, (arg("self"), arg("detID_list")),
            "Returns a list of workspace indices from the corrresponding "
            "detector IDs.")
+      .def("getDetectorIDToWorkspaceIndexMap", &getDetectorIDToWorkspaceIndexMap,
+           (arg("self"), arg("throwIfMultipleDets"), arg("ignoreIfNoValidDets")),
+           " Return a map where the key is detector ID (pixel ID), and the value at that index = the corresponding "
+           "workspace index")
       .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
            "Return the :class:`~mantid.geometry.Detector` or "
