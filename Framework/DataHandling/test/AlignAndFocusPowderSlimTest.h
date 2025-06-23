@@ -30,7 +30,9 @@ public:
   }
 
   // run the algorithm do some common checks and return output workspace name
-  MatrixWorkspace_sptr run_algorithm(const std::string &filename, const double xmin = -1., const double xmax = -1.) {
+  MatrixWorkspace_sptr run_algorithm(const std::string &filename, const std::vector<double> &xmin = {},
+                                     const std::vector<double> &xmax = {}, const std::vector<double> &xdelta = {},
+                                     const std::string binning = "Logarithmic") {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -42,10 +44,13 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
-    if (xmin >= 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", std::vector<double>{xmin}));
-    if (xmax >= 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", std::vector<double>{xmax}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningMode", binning));
+    if (!xmin.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmin));
+    if (!xmax.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmax));
+    if (!xdelta.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", xdelta));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
@@ -79,8 +84,8 @@ public:
   }
 
   void test_common_x() {
-    constexpr double xmin{13000};
-    constexpr double xmax{36000};
+    const std::vector<double> xmin{13000.};
+    const std::vector<double> xmax{36000.};
     const std::string filename("VULCAN_218062.nxs.h5");
     MatrixWorkspace_sptr outputWS = run_algorithm(filename, xmin, xmax);
 
@@ -91,14 +96,55 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), NUM_Y);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     // default values in algorithm
-    TS_ASSERT_EQUALS(outputWS->readX(0).front(), xmin);
-    TS_ASSERT_EQUALS(outputWS->readX(0).back(), xmax);
+    TS_ASSERT_EQUALS(outputWS->readX(0).front(), xmin[0]);
+    TS_ASSERT_EQUALS(outputWS->readX(0).back(), xmax[0]);
     // observed values from running
     const auto y_values = outputWS->readY(0);
     TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 55374.); // observed
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 0.);
+
+    // do not need to cleanup because workspace did not go into the ADS
+  }
+
+  void test_ragged_bins_x_min_max() {
+    const std::vector<double> xmin{13000., 14000., 15000., 16000., 17000., 18000.};
+    const std::vector<double> xmax{36000., 37000., 38000., 39000., 40000., 41000.};
+    const std::string filename("VULCAN_218062.nxs.h5");
+    MatrixWorkspace_sptr outputWS = run_algorithm(filename, xmin, xmax);
+
+    // verify the output
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
+
+    // check the x-values
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      const auto &x_values = outputWS->readX(i);
+      TS_ASSERT_EQUALS(x_values.front(), xmin[i]);
+      TS_ASSERT_EQUALS(x_values.back(), xmax[i]);
+    }
+
+    // do not need to cleanup because workspace did not go into the ADS
+  }
+
+  void test_ragged_bins_x_delta() {
+    const std::vector<double> xmin{13000.};
+    const std::vector<double> xmax{36000.};
+    const std::vector<double> xdelta{1000., 2000., 3000., 4000., 5000., 6000.};
+    // this will create
+    const std::string filename("VULCAN_218062.nxs.h5");
+    MatrixWorkspace_sptr outputWS = run_algorithm(filename, xmin, xmax, xdelta, "Linear");
+
+    // verify the output
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
+
+    // check the x-values
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      const auto &x_values = outputWS->readX(i);
+      TS_ASSERT_EQUALS(x_values.front(), xmin[0]);
+      TS_ASSERT_EQUALS(x_values.back(), xmax[0]);
+      TS_ASSERT_EQUALS(x_values.size(), std::round((xmax[0] - xmin[0]) / xdelta[i] + 1));
+    }
 
     // do not need to cleanup because workspace did not go into the ADS
   }

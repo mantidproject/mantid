@@ -473,7 +473,7 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
-                  "Specify binning behavior ('Logorithmic')");
+                  "Specify binning behavior ('Logarithmic')");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
