@@ -6,6 +6,7 @@ from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
+import numpy as np
 
 
 class TestFullInstrumentViewModel(unittest.TestCase):
@@ -38,6 +39,21 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     # TODO: Add test for picked_detectors_info_text
     # TODO: Add tests for other picking methods
+
+    def test_detectors_with_no_spectra(self):
+        mock_worskpace = mock.MagicMock()
+        mock_detector_info = mock.MagicMock()
+        mock_worskpace.detectorInfo.return_value = mock_detector_info
+        mock_detector_info.detectorIDs.return_value = [1, 20, 300]
+        mock_detector_info.isMonitor.return_value = False
+        mock_worskpace.getDetectorIDToWorkspaceIndexMap.return_value = {1: 0, 20: 1, 300: -1}
+        mock_worskpace.getNumberHistograms.return_value = 3
+        mock_worskpace.dataX.return_value = [0, 1, 2]
+        mock_worskpace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
+        model = FullInstrumentViewModel(mock_worskpace)
+        np.testing.assert_array_equal(model._detector_ids, [1, 20, 300])
+        np.testing.assert_array_equal(model._is_valid, [True, True, False])
+        np.testing.assert_array_equal(model._counts, [100, 200, 0])
 
     @mock.patch("instrumentview.Projections.spherical_projection.spherical_projection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
