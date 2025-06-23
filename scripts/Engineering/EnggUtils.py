@@ -48,6 +48,9 @@ class GROUP(Enum):
     TEXTURE30 = "Texture30", [1, 2]
 
 
+TEXTURE_GROUPS = (GROUP.TEXTURE20, GROUP.TEXTURE30)  # lookup table for some texture specific behaviour
+
+
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     """
     Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from mantid.PDCalibration
@@ -211,7 +214,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+        if calibration.group in TEXTURE_GROUPS:
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -465,7 +468,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
 
     # directories for saved focused data
-    calib_is_texture = calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30
+    calib_is_texture = calibration.group in TEXTURE_GROUPS
     if calib_is_texture:
         focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix())
     else:
