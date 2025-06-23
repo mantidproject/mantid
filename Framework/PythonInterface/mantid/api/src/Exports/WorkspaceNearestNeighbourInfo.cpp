@@ -63,6 +63,6 @@ void export_WorkspaceNearestNeighbourInfo() {
       .def("__init__", make_constructor(&createWorkspaceNearestNeighbourInfo, default_call_policies(),
                                         (arg("workspace"), arg("ignoreMaskedDetectors"), arg("nNeighbours") = 8)))
       .def("getNeighbours", &getNeighboursByDetector, (arg("self"), arg("comp"), arg("radius") = 0.0))
-      .def("getNeighbours", &getNeighboursBySpec, (arg("self"), arg("spec"), arg("radius") = 0.0))
-      .def("getNeighboursExact", &getNeighboursExact, (arg("self"), arg("spec")));
+      .def("getNeighbours", &getNeighboursBySpec, (arg("self"), arg("spec_num"), arg("radius")))
+      .def("getNeighboursExact", &getNeighboursExact, (arg("self"), arg("spec_num")));
 }
