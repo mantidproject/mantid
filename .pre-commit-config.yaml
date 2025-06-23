@@ -30,7 +30,7 @@ repos:
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 15c7c52cf8eeb0d74c736a1f100743a244c2f0a8
+    rev: 312eb3e59ed829275f3b87ece24a04f5345a7c6b
     hooks:
       - id: cmake-missing-pytest-files
         # Exclude sphinx / template file
