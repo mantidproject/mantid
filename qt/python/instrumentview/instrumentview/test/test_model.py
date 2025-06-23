@@ -17,6 +17,18 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def setUp(self):
         self._model = FullInstrumentViewModel(self._ws)
 
+    def _create_mock_workspace(self, detector_ids: list[int]):
+        mock_workspace = mock.MagicMock()
+        mock_workspace.detectorInfo.return_value = mock.MagicMock()
+        mock_workspace.componentInfo.return_value = mock.MagicMock()
+        mock_workspace.getNumberHistograms.return_value = len(detector_ids)
+        mock_workspace.detectorInfo().detectorIDs.return_value = detector_ids
+        mock_workspace.detectorInfo().isMonitor.return_value = False
+        mock_workspace.dataX.return_value = list(range(len(detector_ids)))
+        mock_workspace.getDetectorIDToWorkspaceIndexMap.return_value = {id: i for i, id in enumerate(detector_ids)}
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
+        return mock_workspace
+
     def test_union_with_current_bin_min_max(self):
         current_min = self._model._bin_min
         current_max = self._model._bin_max
@@ -41,16 +53,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     # TODO: Add tests for other picking methods
 
     def test_detectors_with_no_spectra(self):
-        mock_worskpace = mock.MagicMock()
-        mock_detector_info = mock.MagicMock()
-        mock_worskpace.detectorInfo.return_value = mock_detector_info
-        mock_detector_info.detectorIDs.return_value = [1, 20, 300]
-        mock_detector_info.isMonitor.return_value = False
-        mock_worskpace.getDetectorIDToWorkspaceIndexMap.return_value = {1: 0, 20: 1, 300: -1}
-        mock_worskpace.getNumberHistograms.return_value = 3
-        mock_worskpace.dataX.return_value = [0, 1, 2]
-        mock_worskpace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
-        model = FullInstrumentViewModel(mock_worskpace)
+        mock_workspace = self._create_mock_workspace([1, 20, 300])
+        mock_workspace.getDetectorIDToWorkspaceIndexMap.return_value = {1: 0, 20: 1, 300: -1}
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
+        model = FullInstrumentViewModel(mock_workspace)
         np.testing.assert_array_equal(model._detector_ids, [1, 20, 300])
         np.testing.assert_array_equal(model._is_valid, [True, True, False])
         np.testing.assert_array_equal(model._counts, [100, 200, 0])
@@ -70,3 +76,57 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         points = self._model.calculate_projection(is_spherical, axis=[0, 1, 0])
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
+
+    def test_sample_position(self):
+        expected_position = np.array([1.0, 2.0, 1.0])
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.componentInfo().samplePosition.return_value = expected_position
+        model = FullInstrumentViewModel(mock_workspace)
+        np.testing.assert_array_equal(model.sample_position(), expected_position)
+
+    def test_source_position(self):
+        expected_position = np.array([0.5, 1.0, 0.2])
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.componentInfo().sourcePosition.return_value = expected_position
+        model = FullInstrumentViewModel(mock_workspace)
+        np.testing.assert_array_equal(model._source_position, expected_position)
+
+    def test_detector_counts(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        expected_counts = np.array([100, 200, 300])
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = expected_counts
+        model = FullInstrumentViewModel(mock_workspace)
+        expected_counts = np.array([100, 200, 300])
+        np.testing.assert_array_equal(model.detector_counts(), expected_counts)
+
+    def test_detector_ids(self):
+        expected_ids = np.array([1, 2, 3])
+        mock_workspace = self._create_mock_workspace(expected_ids)
+        model = FullInstrumentViewModel(mock_workspace)
+        np.testing.assert_array_equal(model.detector_ids(), expected_ids)
+
+    def test_data_limits(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200, 300]
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(model.data_limits()[0], 100)
+        self.assertEqual(model.data_limits()[1], 300)
+
+    def test_bin_limits(self):
+        bins = [0, 1, 2]
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.dataX.return_value = bins
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(model.bin_limits()[0], bins[0])
+        self.assertEqual(model.bin_limits()[1], bins[-1])
+
+    def test_monitor_positions(self):
+        def mock_is_monitor(index):
+            return index % 2 == 0
+
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.detectorInfo().isMonitor = mock_is_monitor
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100]
+        model = FullInstrumentViewModel(mock_workspace)
+        monitor_positions = model.monitor_positions()
+        self.assertEqual(len(monitor_positions), 2)
