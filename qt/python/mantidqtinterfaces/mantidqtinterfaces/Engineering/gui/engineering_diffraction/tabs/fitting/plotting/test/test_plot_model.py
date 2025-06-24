@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch, call
 from numpy import isnan, nan
+import os
 
 from mantid import FunctionFactory
 from mantid.kernel import UnitParams, UnitParametersMap
@@ -622,42 +623,45 @@ class FittingPlotModelTest(unittest.TestCase):
 
     def run_the_save_tests(self, expected_dirs, mock_makedirs, mock_save):
         mock_makedirs.assert_has_calls([call(d) for d in expected_dirs])
-        mock_save.assert_has_calls([call(InputWorkspace="param_ws", Filename=f"{d}\\param_ws.nxs") for d in expected_dirs])
+        mock_save.assert_has_calls([call(InputWorkspace="param_ws", Filename=os.path.join(d, "param_ws.nxs")) for d in expected_dirs])
 
     @patch(f"{plot_model_path}.SaveNexus")
     @patch(f"{plot_model_path}.makedirs")
     @patch(f"{plot_model_path}.path.exists", return_value=False)
-    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value="\\mock\\output")
+    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = "RB123"
         self.model._save_files("param_ws", "FitParameters", grouping="Texture20")
 
-        expected_dirs = ["\\mock\\output\\FitParameters", "\\mock\\output\\User\\RB123\\FitParameters\\Texture20"]
+        expected_dirs = [
+            os.path.join("mock", "output", "FitParameters"),
+            os.path.join("mock", "output", "User", "RB123", "FitParameters", "Texture20"),
+        ]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
 
     @patch(f"{plot_model_path}.SaveNexus")
     @patch(f"{plot_model_path}.makedirs")
     @patch(f"{plot_model_path}.path.exists", return_value=False)
-    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value="\\mock\\output")
+    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = "RB123"
         self.model._save_files("param_ws", "FitParameters", grouping="")
 
-        expected_dirs = ["\\mock\\output\\FitParameters", "\\mock\\output\\User\\RB123\\FitParameters"]
+        expected_dirs = [os.path.join("mock", "output", "FitParameters"), os.path.join("mock", "output", "User", "RB123", "FitParameters")]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
 
     @patch(f"{plot_model_path}.SaveNexus")
     @patch(f"{plot_model_path}.makedirs")
     @patch(f"{plot_model_path}.path.exists", return_value=False)
-    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value="\\mock\\output")
+    @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_RB_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = None
         self.model._save_files("param_ws", "FitParameters", grouping="")
 
         expected_dirs = [
-            "\\mock\\output\\FitParameters",
+            os.path.join("mock", "output", "FitParameters"),
         ]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)

@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from Engineering.texture.TextureUtils import (
     run_focus_script,
     run_abs_corr,
+    validate_abs_corr_inputs,
     get_numerical_integ,
     fit_all_peaks,
     make_iterable,
@@ -135,6 +136,36 @@ class TextureUtilsTest(unittest.TestCase):
             )
         self.assertEqual(mock_load.call_count, 4)  # 2 ws + 2 param
         mock_create.assert_called_once()
+
+    def test_validate_abs_corr_inputs_when_orientation_file_given_requires_is_euler_flag(self):
+        valid, error_msg = validate_abs_corr_inputs(orientation_file="some_file.txt")
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If orientation file is specified, must flag orient_file_is_euler.\n")
+
+    def test_validate_abs_corr_inputs_when_is_euler_require_scheme_and_sense(self):
+        valid, error_msg = validate_abs_corr_inputs(orientation_file="some_file.txt", orient_file_is_euler=True)
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If orientation file is euler, must provide scheme and sense.\n")
+
+    def test_validate_abs_corr_inputs_when_copy_ref_requires_ref_ws(self):
+        valid, error_msg = validate_abs_corr_inputs(copy_ref=True)
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If copy_ref is True, must provide ref_ws.\n")
+
+    def test_validate_abs_corr_inputs_when_include_custom_gv_req_xml_file(self):
+        valid, error_msg = validate_abs_corr_inputs(include_abs_corr=True, gauge_vol_preset="Custom")
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If custom gauge volume required, must provide shape xml as file.\n")
+
+    def test_validate_abs_corr_inputs_when_attenuation_table_req_point_and_unit(self):
+        valid, error_msg = validate_abs_corr_inputs(include_atten_table=True)
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If attenuation table required, must provide valid point and units.\n")
+
+    def test_validate_abs_corr_inputs_when_include_div_corr_require_divergence_vals(self):
+        valid, error_msg = validate_abs_corr_inputs(include_div_corr=True)
+        self.assertFalse(valid)
+        self.assertEqual(error_msg, r"If divergence correction required, must provide valid values.\n")
 
 
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ class TextureProjection:
     def make_pole_figure_tables(
         self,
         wss: Sequence[str],
-        peak_wss: Sequence[str],
+        peak_wss: Optional[Sequence[str]],
         out_ws: str,
         hkl: Optional[Sequence[int]],
         inc_scatt_corr: bool,
@@ -64,7 +64,7 @@ class TextureProjection:
     ) -> None:
         flat_ax_transform = np.reshape(ax_transform, (9,))
         table_workspaces = []
-        if len(peak_wss) == len(wss):
+        if peak_wss and (len(peak_wss) == len(wss)):
             for iws, ws in enumerate(wss):
                 ws_str = f"_{iws}_abi_table"
                 CreatePoleFigureTableWorkspace(

@@ -102,26 +102,26 @@ def run_focus_script(
 
 def run_abs_corr(
     wss: Sequence[str],
-    ref_ws: str,
-    orientation_file: str,
-    orient_file_is_euler: bool,
-    euler_scheme: str,
-    euler_axes_sense: str,
-    copy_ref: bool,
-    include_abs_corr: bool,
-    monte_carlo_args: str,
-    gauge_vol_preset: str,
-    gauge_vol_shape_file: str,
-    include_atten_table: bool,
-    eval_point: str,
-    eval_units: str,
-    exp_name: str,
-    root_dir: str,
-    include_div_corr: bool,
-    div_hoz: float,
-    div_vert: float,
-    det_hoz: float,
-    clear_ads_after: bool,
+    ref_ws: Optional[str] = None,
+    orientation_file: Optional[str] = None,
+    orient_file_is_euler: Optional[bool] = None,
+    euler_scheme: Optional[str] = None,
+    euler_axes_sense: Optional[str] = None,
+    copy_ref: bool = False,
+    include_abs_corr: bool = False,
+    monte_carlo_args: Optional[str] = None,
+    gauge_vol_preset: Optional[str] = None,
+    gauge_vol_shape_file: Optional[str] = None,
+    include_atten_table: bool = False,
+    eval_point: Optional[Union[str, float]] = None,
+    eval_units: Optional[str] = None,
+    exp_name: Optional[str] = None,
+    root_dir: str = ".",
+    include_div_corr: bool = False,
+    div_hoz: Optional[float] = None,
+    div_vert: Optional[float] = None,
+    det_hoz: Optional[float] = None,
+    clear_ads_after: bool = True,
 ):
     """
     Apply absorption correction to data for use in texture analysis pipeline
@@ -149,38 +149,118 @@ def run_abs_corr(
     """
     model = TextureCorrectionModel()
     model.set_reference_ws = ref_ws
-    model.load_all_orientations(wss, orientation_file, orient_file_is_euler, euler_scheme, euler_axes_sense)
 
-    out_wss = [f"Corrected_{ws}" for ws in wss]
+    valid_inputs, error_msg = validate_abs_corr_inputs(
+        ref_ws,
+        orientation_file,
+        orient_file_is_euler,
+        euler_scheme,
+        euler_axes_sense,
+        copy_ref,
+        include_abs_corr,
+        gauge_vol_preset,
+        gauge_vol_shape_file,
+        include_atten_table,
+        eval_point,
+        eval_units,
+        include_div_corr,
+        div_hoz,
+        div_vert,
+        det_hoz,
+    )
+    if not valid_inputs:
+        logger.error(error_msg)
+    # otherwise run script
+    else:
+        if orientation_file:
+            model.load_all_orientations(wss, orientation_file, orient_file_is_euler, euler_scheme, euler_axes_sense)
+
+        out_wss = [f"Corrected_{ws}" for ws in wss]
+
+        if copy_ref:
+            model.copy_sample_info(ref_ws, wss)
+
+        for i, ws in enumerate(wss):
+            abs_corr = 1.0
+            div_corr = 1.0
+
+            if include_abs_corr:
+                model.define_gauge_volume(ws, gauge_vol_preset, gauge_vol_shape_file)
+                model.calc_absorption(ws, monte_carlo_args)
+                abs_corr = "_abs_corr"
+                if include_atten_table:
+                    atten_vals = model.read_attenuation_coefficient_at_value(abs_corr, eval_point, eval_units)
+                    model.write_atten_val_table(
+                        ws,
+                        atten_vals,
+                        eval_point,
+                        eval_units,
+                        exp_name,
+                        None,
+                        root_dir,
+                    )
+
+            if include_div_corr:
+                model.calc_divergence(ws, div_hoz, div_vert, det_hoz)
+                div_corr = "_div_corr"
+
+            model.apply_corrections(ws, out_wss[i], None, root_dir, abs_corr, div_corr, None, clear_ads_after)
+
+
+def validate_abs_corr_inputs(
+    ref_ws: Optional[str] = None,
+    orientation_file: Optional[str] = None,
+    orient_file_is_euler: Optional[bool] = None,
+    euler_scheme: Optional[str] = None,
+    euler_axes_sense: Optional[str] = None,
+    copy_ref: bool = False,
+    include_abs_corr: bool = False,
+    gauge_vol_preset: Optional[str] = None,
+    gauge_vol_shape_file: Optional[str] = None,
+    include_atten_table: bool = False,
+    eval_point: Optional[Union[str, float]] = None,
+    eval_units: Optional[str] = None,
+    include_div_corr: bool = False,
+    div_hoz: Optional[float] = None,
+    div_vert: Optional[float] = None,
+    det_hoz: Optional[float] = None,
+):
+    valid_inputs = True
+    error_msg = ""
+    # validate inputs
+    if orientation_file:
+        valid_orientation_inputs = isinstance(orient_file_is_euler, bool)
+        if not valid_orientation_inputs:
+            valid_inputs = False
+            error_msg += r"If orientation file is specified, must flag orient_file_is_euler.\n"
+        if valid_orientation_inputs and orient_file_is_euler:
+            # if is euler flag, require euler_scheme and euler_axes_sense
+            valid_orientation_inputs = isinstance(euler_scheme, str) and isinstance(euler_axes_sense, str)
+            if not valid_orientation_inputs:
+                valid_inputs = False
+                error_msg += r"If orientation file is euler, must provide scheme and sense.\n"
 
     if copy_ref:
-        model.copy_sample_info(ref_ws, wss)
+        if not isinstance(ref_ws, str):
+            valid_inputs = False
+            error_msg += r"If copy_ref is True, must provide ref_ws.\n"
 
-    for i, ws in enumerate(wss):
-        abs_corr = 1.0
-        div_corr = 1.0
+    if include_abs_corr:
+        if gauge_vol_preset == "Custom":
+            if not isinstance(gauge_vol_shape_file, str):
+                valid_inputs = False
+                error_msg += r"If custom gauge volume required, must provide shape xml as file.\n"
 
-        if include_abs_corr:
-            model.define_gauge_volume(ws, gauge_vol_preset, gauge_vol_shape_file)
-            model.calc_absorption(ws, monte_carlo_args)
-            abs_corr = "_abs_corr"
-            if include_atten_table:
-                atten_vals = model.read_attenuation_coefficient_at_value(abs_corr, eval_point, eval_units)
-                model.write_atten_val_table(
-                    ws,
-                    atten_vals,
-                    eval_point,
-                    eval_units,
-                    exp_name,
-                    None,
-                    root_dir,
-                )
+    if include_atten_table:
+        if not (isinstance(eval_point, Union[str, float]) and isinstance(eval_units, str)):
+            valid_inputs = False
+            error_msg += r"If attenuation table required, must provide valid point and units.\n"
 
-        if include_div_corr:
-            model.calc_divergence(ws, div_hoz, div_vert, det_hoz)
-            div_corr = "_div_corr"
-
-        model.apply_corrections(ws, out_wss[i], None, root_dir, abs_corr, div_corr, None, clear_ads_after)
+    if include_div_corr:
+        if not (isinstance(div_hoz, float) and isinstance(div_vert, float) and isinstance(det_hoz, float)):
+            valid_inputs = False
+            error_msg += r"If divergence correction required, must provide valid values.\n"
+    return valid_inputs, error_msg
 
 
 # -------- Fitting Script Logic--------------------------------
@@ -270,13 +350,16 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
                         param_name = param.split(".")[-1]
                         col_name = "chi2" if param_name == "Cost function value" else param_name
                         out_tab.addColumn("double", col_name)
-                    out_tab.addColumn("double", "I_est")
+                    if do_numeric_integ:
+                        out_tab.addColumn("double", "I_est")
 
                 if do_numeric_integ:
                     intensity_est = get_numerical_integ(crop_ws, ispec)
                     out_tab.addRow([ispec] + spec_fit.column("Value") + [intensity_est])
+                else:
+                    out_tab.addRow([ispec] + spec_fit.column("Value"))
 
-            SaveNexus(InputWorkspace=out_ws, Filename=out_path)
+                SaveNexus(InputWorkspace=out_ws, Filename=out_path)
 
 
 # -------- Pole Figure Script Logic--------------------------------
@@ -284,26 +367,26 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
 
 def create_pf(
     wss: Sequence[str],
-    params: Optional[Sequence[str]],
-    include_scatt_power: bool,
-    cif: Optional[str],
-    lattice: Optional[str],
-    space_group: Optional[str],
-    basis: Optional[str],
-    hkl: Optional[Sequence[int]],
-    readout_column: Optional[str],
-    dir1: Sequence[float],
-    dir2: Sequence[float],
-    dir3: Sequence[float],
-    dir_names: Sequence[str],
-    scatter: bool,
-    kernel: Optional[float],
-    scat_vol_pos: Sequence[float],
-    chi2_thresh: Optional[float],
-    peak_thresh: Optional[float],
     root_dir: str,
     exp_name: str,
-    projection_method: str,
+    dir1: Sequence[float] = (1.0, 0.0, 0.0),
+    dir2: Sequence[float] = (0.0, 1.0, 0.0),
+    dir3: Sequence[float] = (0.0, 0.0, 1.0),
+    dir_names: Sequence[str] = ("D1", "D2", "D3"),
+    include_scatt_power: bool = False,
+    scatter: bool = True,
+    scat_vol_pos: Sequence[float] = (0.0, 0.0, 0.0),
+    projection_method: str = "Azimuthal",
+    params: Optional[Sequence[str]] = None,
+    cif: Optional[str] = None,
+    lattice: Optional[str] = None,
+    space_group: Optional[str] = None,
+    basis: Optional[str] = None,
+    hkl: Optional[Sequence[int]] = None,
+    readout_column: Optional[str] = None,
+    kernel: Optional[float] = None,
+    chi2_thresh: Optional[float] = None,
+    peak_thresh: Optional[float] = None,
 ):
     """
     Create a single pole figure, for use in texture analysis workflow
@@ -342,10 +425,13 @@ def create_pf(
                 ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
 
     out_ws, grouping = model.get_pf_table_name(wss, params, hkl, readout_column)
+    dir1, dir2, dir3 = np.asarray(dir1), np.asarray(dir2), np.asarray(dir3)
     ax_transform = np.concatenate((dir1[:, None], dir2[:, None], dir3[:, None]), axis=1)
     ax_labels = dir_names
 
     save_dirs = model.get_save_dirs(root_dir, "PoleFigureTables", exp_name, grouping)
+    chi2_thresh = chi2_thresh if chi2_thresh else 0.0
+    peak_thresh = peak_thresh if peak_thresh else 0.0
     model.make_pole_figure_tables(
         wss, params, out_ws, hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
     )
@@ -385,28 +471,28 @@ def make_iterable(param):
 def create_pf_loop(
     root_dir: str,
     ws_folder: str,
-    fit_folder: Optional[str],
-    peaks: Optional[Union[float, Sequence[float]]],
     grouping: str,
     include_scatt_power: bool,
-    cif: Optional[str],
-    lattice: Optional[str],
-    space_group: Optional[str],
-    basis: Optional[str],
-    hkls: Optional[Union[Sequence[Sequence[int]], Sequence[int]]],
-    readout_columns: Optional[Union[str, Sequence[str]]],
     dir1: Sequence[float],
     dir2: Sequence[float],
     dir3: Sequence[float],
     dir_names: Sequence[str],
     scatter: Union[str, bool],
-    kernel: Optional[float],
     scat_vol_pos: Sequence[float],
-    chi2_thresh: Optional[float],
-    peak_thresh: Optional[float],
     save_root: str,
     exp_name: str,
     projection_method: str,
+    fit_folder: Optional[str] = None,
+    peaks: Optional[Union[float, Sequence[float]]] = None,
+    cif: Optional[str] = None,
+    lattice: Optional[str] = None,
+    space_group: Optional[str] = None,
+    basis: Optional[str] = None,
+    hkls: Optional[Union[Sequence[Sequence[int]], Sequence[int]]] = None,
+    readout_columns: Optional[Union[str, Sequence[str]]] = None,
+    kernel: Optional[float] = None,
+    chi2_thresh: Optional[float] = None,
+    peak_thresh: Optional[float] = None,
 ):
     """
     Create a series of pole figures, for use in texture analysis workflow

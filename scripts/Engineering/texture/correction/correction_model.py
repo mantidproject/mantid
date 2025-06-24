@@ -6,13 +6,13 @@ from mantid.simpleapi import (
     DefineGaugeVolume,
     ConvertUnits,
     MonteCarloAbsorption,
-    EstimateDivergence,
     CloneWorkspace,
     SaveNexus,
     SetGoniometer,
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
+    CreateDetectorTable,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -58,17 +58,17 @@ class TextureCorrectionModel:
             SetSample(ws, Geometry={"Shape": "CSG", "Value": shape})
         SetSampleMaterial(ws, material)
 
-    def copy_sample_info(self, ref_ws, wss, is_ref=False):
+    def copy_sample_info(self, ref_ws_name, wss, is_ref=False):
         # currently copy shape bakes the orientation matrix into the sample shape
         if not is_ref:
             # need to create a ws with an unorientated sample to copy over
-            ws = ADS.retrieve(ref_ws)
-            trans_mat = ws.getRun().getGoniometer().getR()
+            ref_ws = ADS.retrieve(ref_ws_name)
+            trans_mat = ref_ws.getRun().getGoniometer().getR()
 
-            _tmp_ws = CloneWorkspace(ws, OutputWorkspace="_tmp_ws")
+            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws")
             _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
 
-            CopySample(InputWorkspace=ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(InputWorkspace=ref_ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
             for ws in wss:
                 CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
@@ -78,7 +78,7 @@ class TextureCorrectionModel:
         else:
             # if is_ref flag then we want to take this baked orientation forward
             for ws in wss:
-                CopySample(InputWorkspace=ref_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+                CopySample(InputWorkspace=ref_ws_name, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     def get_ws_info(self, ws_name, select=True):
         return {
@@ -140,7 +140,7 @@ class TextureCorrectionModel:
         return valid
 
     def calc_absorption(self, ws, mc_param_str):
-        method_dict = self._param_str_to_dict(mc_param_str)
+        method_dict = self._param_str_to_dict(mc_param_str) if mc_param_str else {}  # allow no kwargs to be given
         temp_ws = ConvertUnits(ws, Target="Wavelength")
         # Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
         method_dict["OutputWorkspace"] = "_abs_corr"
@@ -164,8 +164,26 @@ class TextureCorrectionModel:
         else:
             return string
 
-    def calc_divergence(self, ws, horz, vert, det_horz):
-        EstimateDivergence(ws, vert, horz, det_horz, OutputWorkspace="_div_corr")
+    def calc_divergence(self, ws_name, horz, vert, det_horz):
+        # estimate of divergence taken from divergence component of equation 3 in
+        # J. Appl. Cryst. (2014). 47, 1337–1354 doi:10.1107/S1600576714012710
+
+        ws = ADS.retrieve(ws_name)
+        # extract thetas from detector table
+        det_tab = CreateDetectorTable(InputWorkspace=ws, DetectorTableWorkspace="det_tab")
+        thetas = np.deg2rad(det_tab.column("Theta"))
+
+        # estimate per spectra divergence
+        div = vert * np.sqrt((horz**2) * (det_horz**2)) * np.sin(thetas) ** 2
+
+        # compile data in workspace
+        _div_corr = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="_div_corr")
+        num_spec = ws.getNumberHistograms()
+        y_shape = ws.readY(0).shape
+        [_div_corr.setY(i, np.ones(y_shape) * div[i]) for i in range(num_spec)]
+
+        # clear ads
+        ADS.remove("det_tab")
 
     def apply_corrections(
         self, ws, out_ws, calibration_group, root_dir, abs_corr=1.0, div_corr=1.0, rb_num=None, remove_ws_after_processing=False
@@ -235,7 +253,8 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, calibration.group)
+        group = calibration.group if calibration else None
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, group)
 
     def create_reference_ws(self, rb_num, instr="ENGINX"):
         self.set_reference_ws(f"{rb_num}_reference_workspace")
