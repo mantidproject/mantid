@@ -113,7 +113,7 @@ pyyaml:
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
-  - 5.15.8
+  - 5.15
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
