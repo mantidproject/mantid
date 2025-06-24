@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
     QSplitter,
     QCheckBox,
     QTextEdit,
+    QPushButton,
 )
 from qtpy.QtGui import QPalette, QIntValidator
 from qtpy.QtCore import Qt
@@ -80,6 +81,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._multi_Select_Check.setText("Select multiple detectors")
         self._multi_Select_Check.stateChanged.connect(self._on_multi_select_check_box_clicked)
         multi_select_h_layout.addWidget(self._multi_Select_Check)
+        clear_selection_button = QPushButton("Clear Selection")
+        clear_selection_button.setToolTip("Clear the current selection of detectors")
+        clear_selection_button.clicked.connect(self._on_clear_selection_button_clicked)
+        multi_select_h_layout.addWidget(clear_selection_button)
         multi_select_group_box.setLayout(multi_select_h_layout)
 
         options_vertical_layout.addWidget(detector_group_box)
@@ -159,6 +164,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def _on_multi_select_check_box_clicked(self, state):
         """Tell the presenter if either single or multi select is enabled"""
         self._presenter.set_multi_select_enabled(state == 2)
+
+    def _on_clear_selection_button_clicked(self):
+        self._presenter.clear_all_picked_detectors()
 
     def set_contour_range_limits(self, contour_limits: list) -> None:
         """Update the contour range edit boxes with formatted text"""
@@ -297,7 +305,9 @@ class FullInstrumentViewWindow(QMainWindow):
         for d in workspace_indices:
             self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=int(d))
 
-        self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+        if len(workspace_indices) > 0:
+            self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+
         self._detector_figure_canvas.draw()
 
     def update_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
