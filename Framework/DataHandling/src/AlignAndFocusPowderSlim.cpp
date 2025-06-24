@@ -242,9 +242,9 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-template <typename TofType> class ProcessEventsTask {
+template <typename DetidType, typename TofType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<TofType> *tofs,
+  ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
       : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
         m_binedges(binedges), no_mask(calibration->useAll()) {}
@@ -257,7 +257,7 @@ public:
     const auto &binedges = *m_binedges;
     const auto &range_end = range.end();
     for (size_t i = range.begin(); i < range_end; ++i) {
-      const detid_t &detid = (*m_detids)[i];
+      const auto &detid = (*m_detids)[i];
       if (no_mask || m_calibration->use(detid)) {
         // Apply calibration
         const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
@@ -283,7 +283,7 @@ public:
   std::vector<uint32_t> y_temp;
 
 private:
-  const std::vector<detid_t> *m_detids;
+  const std::vector<DetidType> *m_detids;
   const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
@@ -362,7 +362,7 @@ public:
                                       : m_events_per_chunk;
 
           // load detid
-          std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
+          auto event_detid = std::make_unique<std::vector<uint32_t>>(); // uint32 for ORNL nexus file
           m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
           // immediately find min/max to allow for other things to read disk
           const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
@@ -374,7 +374,7 @@ public:
           }
 
           // load time-of-flight
-          auto event_time_of_flight = std::make_unique<std::vector<float>>();
+          auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
           m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
 
           // Non-blocking processing of the events
