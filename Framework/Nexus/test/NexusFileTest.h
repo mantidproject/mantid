@@ -31,13 +31,13 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-class NeXusFileTest : public CxxTest::TestSuite {
+class NexusFileTest : public CxxTest::TestSuite {
 
 public:
   // // This pair of boilerplate methods prevent the suite being created statically
   // // This means the constructor isn't called when running other tests
-  static NeXusFileTest *createSuite() { return new NeXusFileTest(); }
-  static void destroySuite(NeXusFileTest *suite) { delete suite; }
+  static NexusFileTest *createSuite() { return new NexusFileTest(); }
+  static void destroySuite(NexusFileTest *suite) { delete suite; }
 
   // #################################################################################################################
   // TEST CONSTRUCTORS
@@ -271,7 +271,7 @@ public:
   void test_make_data_lateral() {
     // this ensures behavior making a dataset while a dataset is opened will instead
     // anchor that dataset into the containing GROUP and not the DATASET
-    // this is not good hygienic behavior, but is requried by NexusClasses and can
+    // this is not good hygienic behavior, but is required by NexusClasses and can
     // lead to test regressions that are otherwise very hard to track down
     cout << "\ntest make data lateral\n";
     FileResource resource("test_napi_file_rdwr.h5");
@@ -682,6 +682,33 @@ public:
     file.closeData();
     file.closeGroup();
     file.close();
+  }
+
+  void test_data_existing_str_len() {
+    // this test protects against a regression that can occur inside LoadNexusLogs
+    // the correct length to use for rank-2 char blocks is H5Tget_size() x dims[0],
+    // and not a single char more.  Null-termination will be correctly handled this way.
+    // Trying to be even-more-null-terminated will lead to buffer overflow errors.
+    cout << "\ntest dataset read existing -- string block logs\n";
+
+    // open a file
+    std::string filename = getFullPath("SANS2D00022048.nxs");
+    Mantid::Nexus::File file(filename, NXACC_READ);
+
+    // this is the dataset that can cause the buffer errors
+    std::string addressOfBad("/raw_data_1/selog/S6/value_log/value");
+
+    // this is meant to mimic the behavior inside LoadNexusLogs::createTimeSeries
+    // at around L202 - L243, the section handling NXnumtype::CHAR
+    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
+    file.openAddress(addressOfBad);
+    Mantid::Nexus::Info info = file.getInfo();
+    std::size_t total_length = info.dims[0] * info.dims[1];
+    char *val_array = new char[total_length];
+    TS_ASSERT_THROWS_NOTHING(file.getData(val_array));
+    std::string values(val_array, total_length);
+    TS_ASSERT_EQUALS(values, "MediumMediumMediumMedium");
+    delete[] val_array;
   }
 
   // #################################################################################################################

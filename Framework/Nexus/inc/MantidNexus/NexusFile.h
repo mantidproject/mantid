@@ -646,7 +646,7 @@ public:
    *
    * \param link The object (group or data) in the file to link to.
    */
-  void makeLink(NXlink &link);
+  void makeLink(NXlink const &link);
 };
 
 /**

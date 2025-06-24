@@ -30,13 +30,13 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-class NeXusFileLeakTest : public CxxTest::TestSuite {
+class NexusFileLeakTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NeXusFileLeakTest *createSuite() { return new NeXusFileLeakTest(); }
-  static void destroySuite(NeXusFileLeakTest *suite) { delete suite; }
+  static NexusFileLeakTest *createSuite() { return new NexusFileLeakTest(); }
+  static void destroySuite(NexusFileLeakTest *suite) { delete suite; }
 
   /**
    * These correspond to former napi tests
