@@ -18,7 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
@@ -42,7 +42,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
-using Mantid::Kernel::ArrayLengthValidator;
+using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
@@ -465,13 +465,15 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
-
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{10}),
+  auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
+  mustBePosArr->setLower(0.0);
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{10}, mustBePosArr),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_DELTA, std::vector<double>{0.0016}),
                   "Bin size for output data");
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}),
-                  "Minimum x-value for the output binning");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}, mustBePosArr),
+      "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
   declareProperty(
@@ -518,14 +520,10 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   else if (!(numDelta == 1 || numDelta == NUM_HIST))
     errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
 
-  if (std::any_of(xmins.cbegin(), xmins.cend(), [](double x) { return !std::isfinite(x) || x < 0; }))
-    errors[PropertyNames::X_MIN] = "All must be non-negative";
-  else if (!(numMin == 1 || numMin == NUM_HIST))
+  if (!(numMin == 1 || numMin == NUM_HIST))
     errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
 
-  if (std::any_of(xmaxs.cbegin(), xmaxs.cend(), [](double x) { return !std::isfinite(x) || x <= 0; }))
-    errors[PropertyNames::X_MAX] = "All must be positive";
-  else if (!(numMax == 1 || numMax == NUM_HIST))
+  if (!(numMax == 1 || numMax == NUM_HIST))
     errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
 
   return errors;
