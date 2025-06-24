@@ -88,6 +88,9 @@ class FullInstrumentViewModel:
     def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
         self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
 
+    def clear_all_picked_detectors(self) -> None:
+        self._detector_is_picked.fill(False)
+
     def picked_visibility(self) -> np.ndarray:
         return self._detector_is_picked.astype(int)
 

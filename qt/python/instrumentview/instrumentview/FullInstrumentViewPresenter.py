@@ -125,7 +125,10 @@ class FullInstrumentViewPresenter:
         self.update_picked_detectors(selected_point_indices)
 
     def update_picked_detectors(self, point_indices: list[int] | np.ndarray) -> None:
-        self._model.negate_picked_visibility(point_indices)
+        if len(point_indices) == 0:
+            self._model.clear_all_picked_detectors()
+        else:
+            self._model.negate_picked_visibility(point_indices)
 
         # Update to visibility shows up in real time
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
@@ -133,6 +136,9 @@ class FullInstrumentViewPresenter:
 
         self._view.show_plot_for_detectors(self._model.workspace(), self._model.picked_workspace_indices())
         self._view.update_selected_detector_info(self._model.picked_detectors_info_text())
+
+    def clear_all_picked_detectors(self) -> None:
+        self.update_picked_detectors([])
 
     def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
