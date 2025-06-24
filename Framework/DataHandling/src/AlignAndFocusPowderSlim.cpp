@@ -802,6 +802,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
  * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
  * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
  * @param calibration_map Calibration for the entire instrument.
+ * @param mask detector ids that exist in the map should not be included.
  */
 AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
                                                           const double time_conversion,
