@@ -64,7 +64,6 @@ set(SRC_FILES
     src/MantidDesktopServices.cpp
     src/MantidDialog.cpp
     src/MantidHelpInterface.cpp
-    src/MantidHelpWindow.cpp
     src/MantidTreeModel.cpp
     src/MantidTreeWidget.cpp
     src/MantidTreeWidgetItem.cpp
@@ -80,7 +79,6 @@ set(SRC_FILES
     src/ParseKeyValueString.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
-    src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
     src/ProgressableView.cpp
     src/PropertyHandler.cpp
@@ -157,12 +155,9 @@ set(SRC_FILES
     src/Python/CodeExecution.cpp
     src/Python/Sip.cpp
     src/Python/QHashToDict.cpp
+    src/PythonHelpBridge.cpp
+    src/PythonHelpWindow.cpp
 )
-
-if(NOT ENABLE_QTASSISTANT)
-  list(APPEND SRC_FILES src/PythonHelpBridge.cpp)
-  list(APPEND SRC_FILES src/PythonHelpWindow.cpp)
-endif()
 
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
@@ -205,7 +200,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.h
     inc/MantidQtWidgets/Common/MantidDialog.h
     inc/MantidQtWidgets/Common/MantidHelpInterface.h
-    inc/MantidQtWidgets/Common/MantidHelpWindow.h
     inc/MantidQtWidgets/Common/MantidTreeModel.h
     inc/MantidQtWidgets/Common/MantidTreeWidget.h
     inc/MantidQtWidgets/Common/MantidWidget.h
@@ -216,7 +210,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/FileFinderWidget.h
     inc/MantidQtWidgets/Common/NotificationService.h
     inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
-    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
@@ -265,12 +258,9 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
+    inc/MantidQtWidgets/Common/PythonHelpBridge.h
+    inc/MantidQtWidgets/Common/PythonHelpWindow.h
 )
-
-if(NOT ENABLE_QTASSISTANT)
-  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpBridge.h)
-  list(APPEND QT5_MOC_FILES inc/MantidQtWidgets/Common/PythonHelpWindow.h)
-endif()
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
@@ -370,12 +360,12 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
-    inc/MantidQtWidgets/Common/SequentialFitDialog.ui
     inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
+    inc/MantidQtWidgets/Common/SequentialFitDialog.ui
+    inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
@@ -637,18 +627,12 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
-endif()
-
-# Add option to the compiler to register MantidHelpWindow
-if(ENABLE_QTASSISTANT)
-  add_definitions(-DDOCS_QTHELP)
 endif()
 
 # Target Additional components for this module
@@ -713,6 +697,12 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
+# Help collection file
+set(QCH_FILES)
+
+# For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
+# # This line is now removed/commented
+
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
     test/BatchAlgorithmRunnerTest.h
@@ -749,10 +739,6 @@ set(TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
-
-if(NOT ENABLE_QTASSISTANT)
-  list(APPEND TEST_FILES test/PythonHelpWindowTest.h)
-endif()
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
