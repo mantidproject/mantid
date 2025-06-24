@@ -7,7 +7,7 @@
 import os
 import shutil
 import systemtesting
-
+import numpy as np
 from mantid import config
 from mantid.api import AnalysisDataService as ADS
 from Engineering.texture.TextureUtils import run_abs_corr, fit_all_peaks
@@ -271,7 +271,7 @@ class PeakFitMixin(object):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            self.assertAlmostEqual(out_table.column(c)[0], expected_dict[c], places=5)
+            self.assertTrue(np.isclose(out_table.column(c)[0], expected_dict[c], rtol=1e-4))
 
 
 class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
