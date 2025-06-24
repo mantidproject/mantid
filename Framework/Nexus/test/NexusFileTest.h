@@ -129,6 +129,22 @@ public:
   //   TS_ASSERT_EQUALS(actual, expected);
   //   TS_ASSERT_DIFFERS(actual, notexpected);
   //   file.close();
+
+  // void test_can_open_existing() {
+  //   cout << "\ntest open exisitng\n";
+
+  //   FileResource resource("test_nexus_file_init.h5");
+  //   std::string filename = resource.fullPath();
+
+  //   // create the file and ensure it exists
+  //   Mantid::Nexus::File file(filename, NXACC_CREATE5);
+  //   file.putAttr("test_attr", 100);
+  //   file.close();
+  //   TS_ASSERT(std::filesystem::exists(filename));
+
+  //   // now open it in read mode
+  //   Mantid::Nexus::File file2(filename, NXACC_READ);
+  //   file2.close();
   // }
 
   void test_fail_open() {
@@ -197,14 +213,11 @@ public:
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXACC_CREATE5);
 
-    // get location of root file
-    // auto loc = file.getCurrentLocationAs<H5::Group>();
-    // cout << strmakef("Located at %p\n", loc.get());
-
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
     file.makeGroup(grp, cls, false);
-    // TS_ASSERT_EQUALS(file.getNumObjs(), 1);
+    auto currentAddress = file.getAddress();
+    TS_ASSERT_EQUALS(currentAddress, "/");
 
     // check error conditions
     TS_ASSERT_THROWS(file.openGroup(string(), cls), Mantid::Nexus::Exception const &);
@@ -213,9 +226,8 @@ public:
 
     // now open it, check we are at a different location
     TS_ASSERT_THROWS_NOTHING(file.openGroup(grp, cls));
-    // auto new_loc = file.getCurrentLocationAs<H5::Group>();
-    // cout << strmakef("Located at %p\n", new_loc.get());
-    // TS_ASSERT_DIFFERS(loc, new_loc);
+    currentAddress = file.getAddress();
+    TS_ASSERT_EQUALS(currentAddress, "/test_group");
   }
 
   void test_open_group_bad() {
@@ -425,6 +437,51 @@ public:
 
     TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
   }
+
+  // void test_close_data_lateral() {
+  //   cout << "\ntest close data lateral\n";
+  //   FileResource resource("test_napi_file_dataclose.h5");
+  //   std::string filename = resource.fullPath();
+
+  //   // setup file for data
+  //   NexusFile5 *fid;
+  //   NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+  //   NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
+  //   NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
+
+  //   char entry[128];
+  //   H5Iget_name(fid->iCurrentG, entry, 128);
+
+  //   // make and open data
+  //   NXnumtype type(NXnumtype::CHAR);
+  //   DimVector dims{3};
+  //   char data1[] = "data1";
+  //   NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims.data()), "failed to make data1");
+  //   NX_ASSERT_OKAY(NXopendata(fid, data1), "failed to open data");
+  //   char path1[128];
+  //   H5Iget_name(fid->iCurrentD, path1, 128);
+
+  //   // make and open lateral data
+  //   char data2[] = "data2";
+  //   NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims.data()), "made a nested data2");
+  //   NX_ASSERT_OKAY(NXopendata(fid, data2), "failed to open data");
+  //   char path2[128];
+  //   H5Iget_name(fid->iCurrentD, path2, 128);
+
+  //   // now close lateral data... where are we??
+  //   NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
+  //   TS_ASSERT_EQUALS(fid->iCurrentD, 0);
+  //   TS_ASSERT_DIFFERS(fid->iCurrentG, 0);
+  //   std::string lastaddress;
+  //   char lastname[128];
+  //   NXgetaddress(fid, lastaddress);
+  //   H5Iget_name(fid->iCurrentG, lastname, 128);
+  //   TS_ASSERT_EQUALS(lastaddress, std::string(lastname));
+  //   TS_ASSERT_EQUALS(lastaddress, "/entry");
+
+  //   // cleanup
+  //   NX_ASSERT_OKAY(NXclose(fid), "failed to close");
+  // }
 
   template <typename T> void do_test_data_putget(Mantid::Nexus::File &file, string name, T in) {
     T out;
