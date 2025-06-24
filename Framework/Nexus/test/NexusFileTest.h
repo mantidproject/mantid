@@ -377,50 +377,28 @@ public:
     TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
   }
 
-  // void test_close_data_lateral() {
-  //   cout << "\ntest close data lateral\n";
-  //   FileResource resource("test_napi_file_dataclose.h5");
-  //   std::string filename = resource.fullPath();
+  void test_close_data_lateral() {
+    cout << "\ntest close data lateral\n";
+    FileResource resource("test_nexus_file_dataclose.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    file.makeGroup("entry", "NXentry", true);
 
-  //   // setup file for data
-  //   NexusFile5 *fid;
-  //   NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
-  //   NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
-  //   NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
+    // make and open data
+    NXnumtype type(NXnumtype::CHAR);
+    file.makeData("data1", NXnumtype::CHAR, 3, true);
+    std::string address1 = file.getAddress();
 
-  //   char entry[128];
-  //   H5Iget_name(fid->iCurrentG, entry, 128);
+    // make and open lateral data
+    TS_ASSERT_THROWS_NOTHING(file.makeData("data2", NXnumtype::CHAR, 2, false));
+    TS_ASSERT_THROWS_NOTHING(file.openData("data2"));
+    std::string address2 = file.getAddress();
 
-  //   // make and open data
-  //   NXnumtype type(NXnumtype::CHAR);
-  //   DimVector dims{3};
-  //   char data1[] = "data1";
-  //   NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims.data()), "failed to make data1");
-  //   NX_ASSERT_OKAY(NXopendata(fid, data1), "failed to open data");
-  //   char path1[128];
-  //   H5Iget_name(fid->iCurrentD, path1, 128);
+    TS_ASSERT_DIFFERS(address1, address2);
 
-  //   // make and open lateral data
-  //   char data2[] = "data2";
-  //   NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims.data()), "made a nested data2");
-  //   NX_ASSERT_OKAY(NXopendata(fid, data2), "failed to open data");
-  //   char path2[128];
-  //   H5Iget_name(fid->iCurrentD, path2, 128);
-
-  //   // now close lateral data... where are we??
-  //   NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-  //   TS_ASSERT_EQUALS(fid->iCurrentD, 0);
-  //   TS_ASSERT_DIFFERS(fid->iCurrentG, 0);
-  //   std::string lastaddress;
-  //   char lastname[128];
-  //   NXgetaddress(fid, lastaddress);
-  //   H5Iget_name(fid->iCurrentG, lastname, 128);
-  //   TS_ASSERT_EQUALS(lastaddress, std::string(lastname));
-  //   TS_ASSERT_EQUALS(lastaddress, "/entry");
-
-  //   // cleanup
-  //   NX_ASSERT_OKAY(NXclose(fid), "failed to close");
-  // }
+    TS_ASSERT_THROWS_NOTHING(file.closeData());
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry");
+  }
 
   template <typename T> void do_test_data_putget(Mantid::Nexus::File &file, string name, T in) {
     T out;
