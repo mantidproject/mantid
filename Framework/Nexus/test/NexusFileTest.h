@@ -370,9 +370,10 @@ public:
 
     // now make data, close it, and check we are back at beginning
     file.makeData("test_data:", NXnumtype::CHAR, 1, true);
-    // auto indata = file.getCurrentLocationAs<H5::DataSet>();
-    // TS_ASSERT_DIFFERS(indata->getId(), -1);
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry/test_data:");
+
     TS_ASSERT_THROWS_NOTHING(file.closeData());
+    TS_ASSERT_EQUALS(file.getAddress(), "/entry")
 
     TS_ASSERT_THROWS(file.closeData(), Mantid::Nexus::Exception const &);
   }
