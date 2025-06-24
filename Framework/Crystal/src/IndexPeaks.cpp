@@ -49,6 +49,7 @@ const std::string MAIN_NUM_INDEXED{"MainNumIndexed"};
 const std::string SATE_NUM_INDEXED{"SateNumIndexed"};
 const std::string MAIN_ERR{"MainError"};
 const std::string SATE_ERR{"SatelliteError"};
+const std::string UPDATE_UB{"UpdateUB"};
 
 struct SatelliteIndexingArgs {
   const double tolerance;
@@ -108,7 +109,8 @@ struct IndexPeaksArgs {
             alg.getProperty(ROUNDHKLS),
             alg.getProperty(COMMONUB),
             alg.getProperty(SAVEMODINFO),
-            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE), maxOrderToUse, modVectorsToUse, crossTermToUse}};
+            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE), maxOrderToUse, modVectorsToUse, crossTermToUse},
+            alg.getProperty(UPDATE_UB)};
   }
 
   IPeaksWorkspace_sptr workspace;
@@ -117,6 +119,7 @@ struct IndexPeaksArgs {
   const bool commonUB;
   const bool storeModulationInfo;
   const SatelliteIndexingArgs satellites;
+  const bool updateUB;
 };
 } // namespace Prop
 
@@ -382,6 +385,8 @@ void IndexPeaks::init() {
   this->declareProperty(Prop::SAVEMODINFO, false,
                         "If true, update the OrientedLattice with the maxOrder, "
                         "modulation vectors & cross terms values input to the algorithm");
+  this->declareProperty(Prop::UPDATE_UB, false,
+                        "Stores optimized UB to the workspace in the case where the peak workspace has one run.");
 
   // -- outputs --
   this->declareProperty(Prop::NUM_INDEXED, 0, "Gets set with the number of indexed peaks.", Direction::Output);
@@ -500,9 +505,22 @@ void IndexPeaks::exec() {
     std::unordered_map<int, std::vector<IPeak *>> peaksPerRun;
     for (int i = 0; i < args.workspace->getNumberPeaks(); i++)
       peaksPerRun[args.workspace->getPeak(i).getRunNumber()].emplace_back(args.workspace->getPeakPtr(i));
-    if (peaksPerRun.size() < 2) {
-      g_log.warning("Peaks from only one run exist but CommonUBForAll=True so peaks will be indexed with an optimised "
-                    "UB which will not be saved in the workspace.");
+    if (peaksPerRun.size() == 1) {
+      if (args.updateUB) {
+        // Save the optimized UB to the workspace
+        auto peaks = peaksPerRun.begin()->second;
+        std::vector<V3D> qSample(peaks.size());
+        std::generate(std::begin(qSample), std::end(qSample),
+                      [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
+
+        DblMatrix optimizedUB = optimizeUBMatrix(sampleUB, qSample, args.mainTolerance);
+        args.workspace->mutableSample().getOrientedLattice().setUB(optimizedUB);
+        g_log.warning() << "Updated workspace UB matrix with optimized values for single run data.\n";
+      } else {
+        g_log.warning(
+            "Peaks from only one run exist but CommonUBForAll=False so peaks will be indexed with an optimised "
+            "UB which will not be saved in the workspace.");
+      }
     }
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
