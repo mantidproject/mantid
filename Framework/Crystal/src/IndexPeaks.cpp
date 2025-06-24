@@ -386,7 +386,8 @@ void IndexPeaks::init() {
                         "If true, update the OrientedLattice with the maxOrder, "
                         "modulation vectors & cross terms values input to the algorithm");
   this->declareProperty(Prop::UPDATE_UB, false,
-                        "Stores optimized UB to the workspace in the case where the peak workspace has one run.");
+                        "Saves the optimized UB matrix to the workspace if CommonUBForAll=False. This option works "
+                        "only when the peak workspace contains a single run.");
 
   // -- outputs --
   this->declareProperty(Prop::NUM_INDEXED, 0, "Gets set with the number of indexed peaks.", Direction::Output);
@@ -514,12 +515,16 @@ void IndexPeaks::exec() {
                       [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
 
         DblMatrix optimizedUB = optimizeUBMatrix(sampleUB, qSample, args.mainTolerance);
-        args.workspace->mutableSample().getOrientedLattice().setUB(optimizedUB);
-        g_log.warning() << "Updated workspace UB matrix with optimized values for single run data.\n";
+        if (optimizedUB != sampleUB) {
+          args.workspace->mutableSample().getOrientedLattice().setUB(optimizedUB);
+          g_log.notice() << "Updating the UB matrix with an improved optimized version.\n";
+        } else {
+          g_log.notice() << "No improved UB matrix was found, so retaining the original UB.\n";
+        }
       } else {
         g_log.warning(
             "Peaks from only one run exist but CommonUBForAll=False so peaks will be indexed with an optimised "
-            "UB which will not be saved in the workspace.");
+            "UB which will not be saved in the workspace. Use UpdateUB=True to save the optimized UB matrix.\n");
       }
     }
     const bool optimizeUB{true};
