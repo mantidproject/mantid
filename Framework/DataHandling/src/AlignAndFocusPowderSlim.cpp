@@ -65,8 +65,8 @@ const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
-const std::string TIME_OF_FLIGHT("event_time_offset");
-const std::string DETID("event_id");
+const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
+const std::string DETID("event_id");                   // uint32 in ORNL nexus files
 const std::string INDEX_ID("event_index");
 } // namespace NxsFieldNames
 
@@ -158,13 +158,14 @@ public:
     // groups close themselves
   }
 
-  template <typename NumT>
-  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<NumT>> &data, const size_t offset,
+  template <typename TofType>
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
                const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
   }
 
-  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<detid_t>> &data, const size_t offset,
+  template <typename DetidType>
+  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
                  const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
   }
