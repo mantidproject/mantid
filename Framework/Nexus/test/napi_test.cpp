@@ -203,8 +203,6 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXmakegroup(fileid, "link", "NXentry"), "");
   ASSERT_NO_ERROR(NXopengroup(fileid, "link", "NXentry"), "");
   ASSERT_NO_ERROR(NXmakelink(fileid, &glink), "");
-  ASSERT_NO_ERROR(NXmakenamedlink(fileid, "renLinkGroup", &glink), "");
-  ASSERT_NO_ERROR(NXmakenamedlink(fileid, "renLinkData", &dlink), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // close group link
   ASSERT_NO_ERROR(NXclose(fileid), "");
@@ -399,32 +397,6 @@ int main(int argc, char *argv[]) {
   }
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
 
-  std::cout << "renLinkGroup NXsample test\n";
-  ASSERT_NO_ERROR(NXopengroup(fileid, "renLinkGroup", "NXsample"), "");
-  if (NXgetgroupID(fileid, &blink) != NXstatus::NX_OK)
-    return TEST_FAILED;
-  if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (renLinkGroup)\n"
-              << "original group\n";
-    NXIprintlink(fileid, &glink);
-    std::cout << "linked group\n";
-    NXIprintlink(fileid, &blink);
-    return TEST_FAILED;
-  }
-  ASSERT_NO_ERROR(NXclosegroup(fileid), "");
-
-  std::cout << "renLinkData test\n";
-  ASSERT_NO_ERROR(NXopendata(fileid, "renLinkData"), "");
-  ASSERT_NO_ERROR(NXgetdataID(fileid, &blink), "");
-  if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (renLinkData)\n"
-              << "original group\n";
-    NXIprintlink(fileid, &glink);
-    std::cout << "linked group\n";
-    NXIprintlink(fileid, &blink);
-    return TEST_FAILED;
-  }
-  ASSERT_NO_ERROR(NXclosedata(fileid), "");
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   std::cout << "Link check OK\n";
 
