@@ -70,17 +70,17 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
 
    --------------------------------------------------------------------- */
 
-static bool canBeOpened(CONSTCHAR *filename) {
+static bool canBeOpened(std::string const &filename) {
   // this is for reading, check for existence first
   FILE *fd = NULL;
-  fd = fopen(filename, "r");
+  fd = fopen(filename.c_str(), "r");
   if (fd == NULL) {
     return false;
   }
   fclose(fd);
 
   // check that this is indeed hdf5
-  if (H5Fis_hdf5(static_cast<const char *>(filename)) > 0) {
+  if (H5Fis_hdf5(filename.c_str()) > 0) {
     return true;
   } else {
     // file type not recognized
@@ -89,24 +89,22 @@ static bool canBeOpened(CONSTCHAR *filename) {
 }
 
 /*----------------------------------------------------------------------*/
-NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
+NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
   // allocate the object on the heap
-  gHandle = nullptr;
-  // determine the filename for opening
-  std::string filename(userfilename);
+  fid = nullptr;
   // determine if the file can be opened
-  bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename.c_str()));
+  bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename));
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
     // call NX5open to set variables on it
-    status = NX5open(filename.c_str(), am, gHandle);
+    status = NX5open(filename, am, fid);
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     status = NXstatus::NX_ERROR;
   }
-  if (status != NXstatus::NX_OK && gHandle != NULL) {
-    delete gHandle;
-    gHandle = NULL;
+  if (status != NXstatus::NX_OK && fid != nullptr) {
+    delete fid;
+    fid = nullptr;
   }
 
   return status;
@@ -120,7 +118,7 @@ NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
   if (newHandle->iFID <= 0) {
     NXReportError("cannot clone file");
     delete newHandle;
-    newHandle = NULL;
+    newHandle = nullptr;
     return NXstatus::NX_ERROR;
   }
   newHandle->iStack5[0].iVref = 0; /* root! */
@@ -148,7 +146,7 @@ NXstatus NXclose(NXhandle &fid) {
 
 /*-----------------------------------------------------------------------*/
 
-NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
+NXstatus NXmakegroup(NXhandle fid, std::string const &name, std::string const &nxclass) {
   pNexusFile5 pFile;
   hid_t iVID;
   hid_t attr1, aid1, aid2;
@@ -168,13 +166,13 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   }
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, strlen(nxclass));
+  H5Tset_size(aid1, nxclass.size());
   attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attr1 < 0) {
     NXReportError("ERROR: failed to store class name");
     return NXstatus::NX_ERROR;
   }
-  if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(nxclass))) < 0) {
+  if (H5Awrite(attr1, aid1, nxclass.c_str()) < 0) {
     NXReportError("ERROR: failed to store class name");
     return NXstatus::NX_ERROR;
   }
@@ -190,7 +188,7 @@ NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
 /*------------------------------------------------------------------------*/
 
-NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
+NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &nxclass) {
   std::string pBuffer;
 
   pNexusFile5 pFile = NXI5assert(fid);
@@ -209,7 +207,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pFile->name_tmp = pBuffer;
   pFile->name_ref = pBuffer;
 
-  if ((nxclass != NULL) && (strcmp(nxclass, NX_UNKNOWN_GROUP) != 0)) {
+  if ((!nxclass.empty()) && (nxclass != NX_UNKNOWN_GROUP)) {
     /* check group attribute */
     herr_t iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
     if (iRet < 0) {
@@ -232,7 +230,7 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     char data[128];
     H5Tset_size(atype, sizeof(data));
     iRet = readStringAttributeN(attr1, data, sizeof(data));
-    if (strcmp(data, nxclass) == 0) {
+    if (data == nxclass) {
       /* test OK */
     } else {
       std::string warning("ERROR: group class is not identical: \"");
@@ -301,6 +299,7 @@ NXstatus NXclosegroup(NXhandle fid) {
       pFile->name_tmp = "";
     }
     NXI5KillDir(pFile);
+    pFile->iCurrentD = 0;
     pFile->iStackPtr--;
     if (pFile->iStackPtr > 0) {
       pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
@@ -314,26 +313,24 @@ NXstatus NXclosegroup(NXhandle fid) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t const dimensions[]) {
-  int64_t chunk_size[H5S_MAX_RANK];
-  int i;
-
+NXstatus NXmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype, std::size_t const rank,
+                      Mantid::Nexus::DimVector const &dims) {
   NXI5assert(fid);
 
-  memset(chunk_size, 0, H5S_MAX_RANK * sizeof(int64_t));
-  memcpy(chunk_size, dimensions, static_cast<size_t>(rank) * sizeof(int64_t));
-  for (i = 0; i < rank; i++) {
-    if (dimensions[i] == NX_UNLIMITED || dimensions[i] <= 0) {
+  Mantid::Nexus::DimSizeVector chunk_size(dims);
+  for (std::size_t i = 0; i < rank; i++) {
+    if (dims[i] == NX_UNLIMITED || dims[i] <= 0) {
       chunk_size[i] = 1;
     }
   }
-  return NXcompmakedata64(fid, name, datatype, rank, dimensions, NXcompression::NONE, chunk_size);
+  return NXcompmakedata64(fid, name, datatype, rank, dims, NXcompression::NONE, chunk_size);
 }
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t const dimensions[],
-                          NXcompression const compress_type, int64_t const chunk_size[]) {
+NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype, std::size_t const rank,
+                          Mantid::Nexus::DimVector const &dims, NXcompression const compress_type,
+                          Mantid::Nexus::DimSizeVector const &chunk_size) {
   hid_t datatype1, dataspace, iNew;
   hid_t type, cparms = -1;
   pNexusFile5 pFile;
@@ -348,13 +345,13 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG <= 0) {
-    sprintf(pBuffer, "ERROR: no group open for makedata on %s", name);
+    sprintf(pBuffer, "ERROR: no group open for makedata on %s", name.c_str());
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
 
   if (rank <= 0) {
-    sprintf(pBuffer, "ERROR: invalid rank specified %s", name);
+    sprintf(pBuffer, "ERROR: invalid rank specified %s", name.c_str());
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
@@ -365,20 +362,20 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
      Check dimensions for consistency. Dimension may be -1
      thus denoting an unlimited dimension.
    */
-  for (int i = 0; i < rank; i++) {
-    chunkdims[i] = static_cast<hsize_t>(chunk_size[i]);
-    mydim[i] = static_cast<hsize_t>(dimensions[i]);
-    maxdims[i] = static_cast<hsize_t>(dimensions[i]);
-    size[i] = static_cast<hsize_t>(dimensions[i]);
-    if (dimensions[i] <= 0) {
+  for (std::size_t i = 0; i < rank; i++) {
+    chunkdims[i] = chunk_size[i];
+    mydim[i] = dims[i];
+    maxdims[i] = dims[i];
+    size[i] = dims[i];
+    if (dims[i] <= 0) {
       mydim[i] = 1;
       maxdims[i] = H5S_UNLIMITED;
       size[i] = 1;
       unlimiteddim = 1;
     } else {
-      mydim[i] = static_cast<hsize_t>(dimensions[i]);
-      maxdims[i] = static_cast<hsize_t>(dimensions[i]);
-      size[i] = static_cast<hsize_t>(dimensions[i]);
+      mydim[i] = dims[i];
+      maxdims[i] = dims[i];
+      size[i] = dims[i];
     }
   }
 
@@ -391,9 +388,9 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
      */
     byte_zahl = (size_t)mydim[rank - 1];
     hsize_t mydim1[H5S_MAX_RANK];
-    for (int i = 0; i < rank; i++) {
+    for (std::size_t i = 0; i < rank; i++) {
       mydim1[i] = mydim[i];
-      if (dimensions[i] <= 0) {
+      if (dims[i] <= 0) {
         mydim1[0] = 1;
         maxdims[0] = H5S_UNLIMITED;
       }
@@ -430,8 +427,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
     H5Pset_deflate(cparms, compress_level);
-    dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
-                    H5P_DEFAULT);
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   } else if (compress_type == NXcompression::NONE) {
     if (unlimiteddim) {
       cparms = H5Pcreate(H5P_DATASET_CREATE);
@@ -440,11 +436,9 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
         NXReportError("ERROR: size of chunks could not be set");
         return NXstatus::NX_ERROR;
       }
-      dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
-                      H5P_DEFAULT);
+      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
     } else {
-      dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT,
-                      H5P_DEFAULT);
+      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
   } else if (compress_type == NXcompression::CHUNK) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
@@ -453,13 +447,11 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
       NXReportError("ERROR: size of chunks could not be set");
       return NXstatus::NX_ERROR;
     }
-    dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
-                    H5P_DEFAULT);
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
 
   } else {
     NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
-    dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT,
-                    H5P_DEFAULT);
+    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
   if (dID < 0) {
     NXReportError("ERROR: creating chunked dataset failed");
@@ -470,7 +462,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
   if (unlimiteddim) {
     iNew = H5Dset_extent(pFile->iCurrentD, size);
     if (iNew < 0) {
-      sprintf(pBuffer, "ERROR: cannot create dataset %s", name);
+      sprintf(pBuffer, "ERROR: cannot create dataset %s", name.c_str());
       NXReportError(pBuffer);
       return NXstatus::NX_ERROR;
     }
@@ -492,18 +484,16 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  pNexusFile5 pFile;
-
-  pFile = NXI5assert(fid);
+NXstatus NXopendata(NXhandle fid, std::string const &name) {
+  pNexusFile5 pFile = NXI5assert(fid);
   /* clear pending attribute directories first */
   NXI5KillAttDir(pFile);
 
   /* find the ID number and open the dataset */
-  pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name, H5P_DEFAULT);
+  pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
   if (pFile->iCurrentD < 0) {
     char pBuffer[256];
-    sprintf(pBuffer, "ERROR: dataset \"%s\" not found at this level", name);
+    sprintf(pBuffer, "ERROR: dataset \"%s\" not found at this level", name.c_str());
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
@@ -549,10 +539,9 @@ NXstatus NXputdata(NXhandle fid, const void *data) {
   pNexusFile5 pFile;
   herr_t iRet;
   std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
-  int rank;
 
   pFile = NXI5assert(fid);
-  rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+  int rank = H5Sget_simple_extent_ndims(pFile->iCurrentS);
   if (rank < 0) {
     NXReportError("ERROR: Cannot determine dataset rank");
     return NXstatus::NX_ERROR;
@@ -565,17 +554,17 @@ NXstatus NXputdata(NXhandle fid, const void *data) {
   bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
   /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
   if (unlimiteddim) {
-    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
-    for (std::size_t i = 0; i < myStart.size(); i++) {
+    Mantid::Nexus::DimSizeVector myStart, mySize;
+    for (int i = 0; i < rank; i++) {
       if (maxdims[i] == H5S_UNLIMITED) {
-        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
+        myStart[i] = thedims[i] + 1;
         mySize[i] = 1;
       } else {
         myStart[i] = 0;
-        mySize[i] = static_cast<int64_t>(thedims[i]);
+        mySize[i] = thedims[i];
       }
     }
-    return NXputslab64(fid, data, myStart.data(), mySize.data());
+    return NXputslab64(fid, data, myStart, mySize);
   } else {
     iRet = H5Dwrite(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (iRet < 0) {
@@ -588,7 +577,8 @@ NXstatus NXputdata(NXhandle fid, const void *data) {
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
+NXstatus NXputattr(NXhandle fid, std::string const &name, const void *data, std::size_t const datalen,
+                   NXnumtype const iType) {
   if (datalen > 1 && iType != NXnumtype::CHAR) {
     NXReportError(
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
@@ -597,7 +587,8 @@ NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen,
   return NX5putattr(fid, name, data, datalen, iType);
 }
 
-NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
+NXstatus NXputslab64(NXhandle fid, const void *data, Mantid::Nexus::DimSizeVector const &iStart,
+                     Mantid::Nexus::DimSizeVector const &iSize) {
   pNexusFile5 pFile;
   int iRet, rank;
   hsize_t myStart[H5S_MAX_RANK];
@@ -695,11 +686,9 @@ NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], con
 /* ---- --------------------------------------------------------------- */
 
 NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
-  pNexusFile5 pFile;
-  int datalen;
   NXnumtype type = NXnumtype::CHAR;
 
-  pFile = NXI5assert(fid);
+  pNexusFile5 pFile = NXI5assert(fid);
 
   /* we cannot return ID's when no datset is open */
   if (pFile->iCurrentD <= 0) {
@@ -710,9 +699,9 @@ NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
      this means: if the item is already linked: use the target attribute else,
      the address to the current node
    */
-  datalen = 1024;
+  std::size_t datalen = 1024;
   char caddr[1024] = {0};
-  if (NX5getattr(fid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
+  if (NX5getattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
     sRes.targetAddress = buildCurrentAddress(pFile);
   } else {
     sRes.targetAddress = std::string(caddr);
@@ -779,32 +768,37 @@ NXstatus NXflush(NXhandle &fid) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype) {
-  int i;
+NXstatus NXmalloc64(void *&data, std::size_t rank, Mantid::Nexus::DimVector const dims, NXnumtype datatype) {
   size_t size = 1;
-  *data = nullptr;
-  for (i = 0; i < rank; i++) {
-    size *= (size_t)dimensions[i];
+  data = nullptr;
+  for (size_t i = 0; i < rank; i++) {
+    size *= dims[i];
   }
-  if ((datatype == NXnumtype::CHAR) || (datatype == NXnumtype::INT8) || (datatype == NXnumtype::UINT8)) {
-    /* allow for terminating \0 */
+  switch (datatype) {
+  case NXnumtype::CHAR:
+  case NXnumtype::INT8:
+  case NXnumtype::UINT8:
     size += 2;
-  } else if ((datatype == NXnumtype::INT16) || (datatype == NXnumtype::UINT16)) {
+    break;
+  case NXnumtype::INT16:
+  case NXnumtype::UINT16:
     size *= 2;
-  } else if ((datatype == NXnumtype::INT32) || (datatype == NXnumtype::UINT32) || (datatype == NXnumtype::FLOAT32)) {
+    break;
+  case NXnumtype::INT32:
+  case NXnumtype::UINT32:
+  case NXnumtype::FLOAT32:
     size *= 4;
-  } else if ((datatype == NXnumtype::INT64) || (datatype == NXnumtype::UINT64)) {
+    break;
+  case NXnumtype::INT64:
+  case NXnumtype::UINT64:
+  case NXnumtype::FLOAT64:
     size *= 8;
-  } else if (datatype == NXnumtype::FLOAT64) {
-    size *= 8;
-  } else {
+    break;
+  default:
     NXReportError("ERROR: NXmalloc - unknown data type in array");
     return NXstatus::NX_ERROR;
   }
-  *data = malloc(size);
-  if (*data != nullptr) {
-    memset(*data, 0, size);
-  }
+  data = calloc(size, 1);
   return NXstatus::NX_OK;
 }
 
@@ -826,7 +820,7 @@ NXstatus NXfree(void **data) {
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
+NXstatus NXgetnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
   return NX5getnextentry(fid, name, nxclass, datatype);
 }
 
@@ -863,18 +857,15 @@ char *nxitrim(char *str) {
 NXstatus NXgetdata(NXhandle fid, void *data) {
   NXstatus status;
   NXnumtype type;
-  int rank;
-  int64_t iDim[NX_MAXRANK];
+  std::size_t rank;
+  Mantid::Nexus::DimVector iDim;
 
-  NX5getinfo64(fid, &rank, iDim, &type); /* unstripped size if string */
+  NX5getinfo64(fid, rank, iDim, type); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NXnumtype::CHAR) && (rank == 1)) {
-    char *pPtr;
-    pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
-    memset(pPtr, 0, (size_t)iDim[0] + 5);
-    status = NX5getdata(fid, pPtr);
-    char const *pPtr2;
-    pPtr2 = nxitrim(pPtr);
+    std::string pPtr(iDim[0] + 5, '\0');
+    status = NX5getdata(fid, pPtr.data());
+    char const *pPtr2 = nxitrim(pPtr.data());
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
@@ -883,7 +874,6 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
-    free(pPtr);
   } else {
     status = NX5getdata(fid, data);
   }
@@ -892,21 +882,21 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
+NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &dims, NXnumtype &iType) {
   NXstatus status;
-  char *pPtr = nullptr;
-  *rank = 0;
-  status = NX5getinfo64(fid, rank, dimension, iType);
+  char *pPtr = NULL;
+  rank = 0;
+  status = NX5getinfo64(fid, rank, dims, iType);
   /*
      the length of a string may be trimmed....
    */
   /* only strip one dimensional strings */
-  if ((*iType == NXnumtype::CHAR) && (*rank == 1)) {
-    pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
-    if (pPtr != nullptr) {
-      memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
+  if ((iType == NXnumtype::CHAR) && (rank == 1)) {
+    pPtr = static_cast<char *>(malloc(static_cast<size_t>(dims[0] + 1) * sizeof(char)));
+    if (pPtr != NULL) {
+      memset(pPtr, 0, static_cast<size_t>(dims[0] + 1) * sizeof(char));
       NX5getdata(fid, pPtr);
-      dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
+      dims[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
       free(pPtr);
     }
   }
@@ -915,7 +905,8 @@ NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iT
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
+NXstatus NXgetslab64(NXhandle fid, void *data, Mantid::Nexus::DimSizeVector const &iStart,
+                     Mantid::Nexus::DimSizeVector const &iSize) {
   pNexusFile5 pFile;
   hsize_t mySize[H5S_MAX_RANK];
   hid_t memspace, iRet;
@@ -1008,16 +999,17 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
+NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
   return NX5getattr(fid, name, data, datalen, iType);
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetattrinfo(NXhandle fid, int *iN) { return NX5getattrinfo(fid, iN); }
+NXstatus NXgetattrinfo(NXhandle fid, std::size_t &iN) { return NX5getattrinfo(fid, iN); }
 
-NXstatus NXgetattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[], NXnumtype *iType) {
-  return NX5getattrainfo(handle, name, rank, dim, iType);
+NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
+                        NXnumtype &iType) {
+  return NX5getattrainfo(handle, name, rank, dims, iType);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1034,9 +1026,9 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
        this means: if the item is already linked: use the target attribute, else
        the address to the current node
      */
-    int datalen = 1024;
+    std::size_t datalen = 1024;
     char caddr[1024] = {0};
-    if (NX5getattr(fileid, "target", caddr, &datalen, &type) != NXstatus::NX_OK) {
+    if (NX5getattr(fileid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
       sRes.targetAddress = buildCurrentAddress(pFile);
     } else {
       sRes.targetAddress = std::string(caddr);
@@ -1050,7 +1042,7 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
+NXstatus NXgetgroupinfo(NXhandle fid, std::size_t &iN, std::string &pName, std::string &pClass) {
   return NX5getgroupinfo(fid, iN, pName, pClass);
 }
 
@@ -1096,18 +1088,16 @@ NXstatus NXinitgroupdir(NXhandle fid) {
 /*-------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
+NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
   NXstatus status;
   int run = 1;
-  NXname addressElement;
-  char *pPtr;
-
-  if (hfil == nullptr || address == NULL) {
+  std::string addressElement;
+  if (fid == NULL || address.empty()) {
     NXReportError("ERROR: NXopendata needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
+  std::string pPtr(moveDown(fid, address, status));
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: NXopendata failed to move down in hierarchy");
     return status;
@@ -1115,11 +1105,13 @@ NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
 
   while (run == 1) {
     pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneUp(hfil, addressElement);
+    status = stepOneUp(fid, addressElement);
+    printf("pPtr = %s\n", pPtr.c_str());
+    printf("addressElement  %s\b", addressElement.c_str());
     if (status != NXstatus::NX_OK) {
       return status;
     }
-    if (pPtr == NULL) {
+    if (pPtr.empty()) {
       run = 0;
     }
   }
@@ -1127,18 +1119,17 @@ NXstatus NXopenaddress(NXhandle hfil, CONSTCHAR *address) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
+NXstatus NXopengroupaddress(NXhandle fid, std::string const &address) {
   NXstatus status;
-  NXname addressElement;
-  char *pPtr;
+  std::string addressElement;
   char buffer[256];
 
-  if (hfil == nullptr || address == NULL) {
+  if (fid == nullptr || address.empty()) {
     NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(address)), &status);
+  std::string pPtr(moveDown(fid, address, status));
   if (status != NXstatus::NX_OK) {
     NXReportError("ERROR: NXopengroupaddress failed to move down in hierarchy");
     return status;
@@ -1146,13 +1137,14 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 
   do {
     pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneGroupUp(hfil, addressElement);
+    status = stepOneGroupUp(fid, addressElement);
     if (status == NXstatus::NX_ERROR) {
-      sprintf(buffer, "ERROR: NXopengroupaddress cannot reach address %s", address);
-      NXReportError(buffer);
+      std::string msg("ERROR: NXopengroupaddress cannot reach address ");
+      msg += address;
+      NXReportError(msg.c_str());
       return NXstatus::NX_ERROR;
     }
-  } while (pPtr != NULL && status != NXstatus::NX_EOD);
+  } while (!pPtr.empty() && status != NXstatus::NX_EOD);
   return NXstatus::NX_OK;
 }
 
@@ -1173,8 +1165,9 @@ NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   return NXstatus::NX_OK;
 }
 
-NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  return NX5getnextattra(handle, pName, rank, dim, iType);
+NXstatus NXgetnextattra(NXhandle fid, std::string &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
+                        NXnumtype &iType) {
+  return NX5getnextattra(fid, name, rank, dims, iType);
 }
 
 /*--------------------------------------------------------------------

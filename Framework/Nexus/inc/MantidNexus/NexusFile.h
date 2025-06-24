@@ -570,10 +570,9 @@ public:
    *
    * \param info Designation of which attribute to read.
    * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
+   * \param length The length of the attribute.
    */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
+  void getAttr(const AttrInfo &info, void *data, std::size_t length = 0);
 
   /**
    * Get the value of an attribute that is a scalar number.

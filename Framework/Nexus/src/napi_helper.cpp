@@ -393,31 +393,26 @@ int isRoot(NXhandle hfil) {
   copies the next address element into element.
   returns a pointer into address beyond the extracted address
   ---------------------------------------------------------------------*/
-char *extractNextAddress(char *address, NXname element) {
-  char *pStart = address;
+std::string extractNextAddress(std::string const &address, std::string &element) {
+  std::size_t start = 0;
   /*
      skip over leading /
    */
-  if (*pStart == '/') {
-    pStart++;
+  if (address.starts_with('/')) {
+    start++;
   }
 
   /*
      find next /
    */
-  char *pNext = strchr(pStart, '/');
-  if (pNext == NULL) {
-    /*
-       this is the last address element
-     */
-    strcpy(element, pStart);
-    return NULL;
+  std::size_t next = address.find_first_of('/', start);
+  std::size_t width = next - start;
+  element = address.substr(start, width);
+  if (next == std::string::npos) {
+    return "";
   } else {
-    size_t length = (size_t)(pNext - pStart);
-    strncpy(element, pStart, length);
-    element[length] = '\0';
+    return address.substr(next + 1, std::string::npos);
   }
-  return pNext++;
 }
 
 /*-------------------------------------------------------------------*/
@@ -435,8 +430,8 @@ NXstatus gotoRoot(NXhandle hfil) {
 }
 
 /*--------------------------------------------------------------------*/
-int isRelative(char const *address) {
-  if (address[0] == '.' && address[1] == '.')
+int isRelative(std::string const &address) {
+  if (address.starts_with(".."))
     return 1;
   else
     return 0;
@@ -454,84 +449,81 @@ NXstatus moveOneDown(NXhandle hfil) {
 /*-------------------------------------------------------------------
   returns a pointer to the remaining address string to move up
   --------------------------------------------------------------------*/
-char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
-  *code = NXstatus::NX_OK;
+std::string moveDown(NXhandle fid, std::string const &address, NXstatus &code) {
+  code = NXstatus::NX_OK;
+  std::string ret(address);
 
-  if (address[0] == '/') {
-    *code = gotoRoot(hfil);
-    return address;
+  if (address.starts_with('/')) {
+    code = gotoRoot(fid);
   } else {
-    char *pPtr;
-    pPtr = address;
-    while (isRelative(pPtr)) {
-      NXstatus status = moveOneDown(hfil);
+    while (isRelative(ret)) {
+      NXstatus status = moveOneDown(fid);
       if (status == NXstatus::NX_ERROR) {
-        *code = status;
-        return pPtr;
+        code = status;
+        break;
+      } else {
+        ret = ret.substr(3, std::string::npos);
       }
-      pPtr += 3;
     }
-    return pPtr;
   }
+  return ret;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus stepOneUp(NXhandle hfil, char const *name) {
+NXstatus stepOneUp(NXhandle fid, std::string const &name) {
   NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
+  std::string name2, xclass;
 
   /*
      catch the case when we are there: i.e. no further stepping
      necessary. This can happen with address like ../
    */
-  if (strlen(name) < 1) {
+  if (name.size() < 1) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
+  NXinitgroupdir(fid);
 
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
-        return NXopendata(hfil, name);
+  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
+    if (name2 == name) {
+      if (xclass == "SDS") {
+        return NXopendata(fid, name);
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopenaddress cannot step into %s", name);
-  NXReportError(pBueffel);
+  std::string warning("ERROR: NXopenaddress cannot step into " + name);
+  NXReportError(warning.c_str());
   return NXstatus::NX_ERROR;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
+NXstatus stepOneGroupUp(NXhandle fid, std::string const &name) {
   NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
+  std::string name2, xclass;
 
   /*
      catch the case when we are there: i.e. no further stepping
      necessary. This can happen with address like ../
    */
-  if (strlen(name) < 1) {
+  if (name.size() < 1) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+  NXinitgroupdir(fid);
+  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
 
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
+    if (name2 == name) {
+      if (xclass == "SDS") {
         return NXstatus::NX_EOD;
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopengroupaddress cannot step into %s", name);
-  NXReportError(pBueffel);
+  std::string warning("ERROR: NXopengroupaddress cannot step into " + name);
+  NXReportError(warning.c_str());
   return NXstatus::NX_ERROR;
 }
 
@@ -539,7 +531,7 @@ NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
  * private functions used in NX5open
  */
 
-hid_t create_file_access_plist(CONSTCHAR *filename) {
+hid_t create_file_access_plist(std::string const &filename) {
   char pBuffer[512];
   hid_t fapl = -1;
 
@@ -548,7 +540,7 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
     sprintf(pBuffer,
             "Error: failed to create file access property "
             "list for file %s",
-            filename);
+            filename.c_str());
     NXReportError(pBuffer);
     return fapl;
   }
@@ -558,7 +550,7 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
     sprintf(pBuffer,
             "Error: cannot set close policy for file "
             "%s",
-            filename);
+            filename.c_str());
     NXReportError(pBuffer);
     return fapl;
   }
@@ -566,23 +558,23 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
   return fapl;
 }
 
-herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
+herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string const &buffer) {
   char pBuffer[512];
   hid_t attr_id;
   hid_t space_id = H5Screate(H5S_SCALAR);
   hid_t type_id = H5Tcopy(H5T_C_S1);
 
-  H5Tset_size(type_id, strlen(buffer));
+  H5Tset_size(type_id, buffer.size());
 
-  attr_id = H5Acreate(parent_id, name, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+  attr_id = H5Acreate(parent_id, name.c_str(), type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
   if (attr_id < 0) {
-    sprintf(pBuffer, "ERROR: failed to create %s attribute", name);
+    sprintf(pBuffer, "ERROR: failed to create %s attribute", name.c_str());
     NXReportError(pBuffer);
     return -1;
   }
 
-  if (H5Awrite(attr_id, type_id, buffer) < 0) {
-    sprintf(pBuffer, "ERROR: failed writting %s attribute", name);
+  if (H5Awrite(attr_id, type_id, buffer.data()) < 0) {
+    sprintf(pBuffer, "ERROR: failed writting %s attribute", name.c_str());
     NXReportError(pBuffer);
     return -1;
   }

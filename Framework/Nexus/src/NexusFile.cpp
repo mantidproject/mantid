@@ -671,8 +671,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   unsigned int compress_level;
   bool unlimiteddim = false;
   int rank = static_cast<int>(dims.size());
-  const int64_t *chunk_size = const_cast<int64_t *>(chunk.data());
-  const int64_t *dimensions = const_cast<int64_t *>(dims.data());
   stringstream msg;
   msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
@@ -695,19 +693,19 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
      thus denoting an unlimited dimension.
    */
   for (int i = 0; i < rank; i++) {
-    chunkdims[i] = static_cast<hsize_t>(chunk_size[i]);
-    mydim[i] = static_cast<hsize_t>(dimensions[i]);
-    maxdims[i] = static_cast<hsize_t>(dimensions[i]);
-    dsize[i] = static_cast<hsize_t>(dimensions[i]);
-    if (dimensions[i] <= 0) {
+    chunkdims[i] = chunk[i];
+    mydim[i] = dims[i];
+    maxdims[i] = dims[i];
+    dsize[i] = dims[i];
+    if (dims[i] <= 0) {
       mydim[i] = 1;
       maxdims[i] = H5S_UNLIMITED;
       dsize[i] = 1;
       unlimiteddim = true;
     } else {
-      mydim[i] = static_cast<hsize_t>(dimensions[i]);
-      maxdims[i] = static_cast<hsize_t>(dimensions[i]);
-      dsize[i] = static_cast<hsize_t>(dimensions[i]);
+      mydim[i] = dims[i];
+      maxdims[i] = dims[i];
+      dsize[i] = dims[i];
     }
   }
 
@@ -721,7 +719,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     byte_zahl = (size_t)mydim[rank - 1];
     for (int i = 0; i < rank; i++) {
       mydim1[i] = mydim[i];
-      if (dimensions[i] <= 0) {
+      if (dims[i] <= 0) {
         mydim1[0] = 1;
         maxdims[0] = H5S_UNLIMITED;
       }
@@ -1232,15 +1230,9 @@ void File::readData(std::string const &dataName, std::string &data) {
 //------------------------------------------------------------------------------------------------------------------
 
 Info File::getInfo() {
-  int64_t dims[NX_MAXRANK];
-  NXnumtype type;
-  int rank;
-  NAPI_CALL(NXgetinfo64(*(this->m_pfile_id), &rank, dims, &type), "NXgetinfo failed");
   Info info;
-  info.type = static_cast<NXnumtype>(type);
-  for (int i = 0; i < rank; i++) {
-    info.dims.push_back(dims[i]);
-  }
+  std::size_t rank;
+  NAPI_CALL(NXgetinfo64(*(this->m_pfile_id), rank, info.dims, info.type), "NXgetinfo failed");
   return info;
 }
 
@@ -1248,10 +1240,10 @@ void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(*(this->m_pfile_id)), "NXin
 
 Entry File::getNextEntry() {
   // set up temporary variables to get the information
-  NXname name, class_name;
+  std::string name, class_name;
   NXnumtype datatype;
 
-  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, &datatype);
+  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, datatype);
   if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
@@ -1347,20 +1339,19 @@ void File::putAttr(const std::string &name, const string &value, const bool empt
   this->putAttr(info, my_value.data());
 }
 
-void File::getAttr(const AttrInfo &info, void *data, int length) {
+void File::getAttr(const AttrInfo &info, void *data, std::size_t length) {
   NXnumtype type = info.type;
-  if (length < 0) {
-    length = static_cast<int>(info.length);
+  if (length == 0) {
+    length = info.length;
   }
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), info.name.c_str(), data, &length, &type),
-            "NXgetattr(" + info.name + ") failed");
+  NAPI_CALL(NXgetattr(*(this->m_pfile_id), info.name, data, length, type), "NXgetattr(" + info.name + ") failed");
   if (type != info.type) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
     throw NXEXCEPTION(msg.str());
   }
   // char attributes are always NULL terminated and so may change length
-  if (static_cast<unsigned>(length) != info.length && type != NXnumtype::CHAR) {
+  if (length != info.length && type != NXnumtype::CHAR) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
     throw NXEXCEPTION(msg.str());
@@ -1379,16 +1370,16 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   NXnumtype type = getType<NumT>();
-  int length = 1;
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name.c_str(), &value, &length, &type), "NXgetattr(" + name + ") failed");
+  std::size_t length = 0;
+  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name, &value, length, type), "NXgetattr(" + name + ") failed");
 }
 
 string File::getStrAttr(std::string const &name) {
   // get info for this string attribute
-  int rank;
-  int dims[NX_MAXRANK];
+  std::size_t rank;
+  DimVector dims(NX_MAXRANK);
   NXnumtype datatype = NXnumtype::CHAR;
-  NAPI_CALL(NXgetattrainfo(*(this->m_pfile_id), name.c_str(), &rank, dims, &datatype), "NXgetinfo failed");
+  NAPI_CALL(NXgetattrainfo(*(this->m_pfile_id), name, rank, dims, datatype), "NXgetinfo failed");
   AttrInfo info{datatype, static_cast<size_t>(dims[0]), name};
 
   // do checks
@@ -1417,12 +1408,12 @@ void File::initAttrDir() { NAPI_CALL(NXinitattrdir(*(this->m_pfile_id)), "NXinit
 
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
-  NXname name;
+  std::string name;
   NXnumtype type;
 
-  int rank;
-  int dim[NX_MAXRANK];
-  NXstatus status = NXgetnextattra(*(this->m_pfile_id), name, &rank, dim, &type);
+  std::size_t rank;
+  DimVector dim(NX_MAXRANK);
+  NXstatus status = NXgetnextattra(*(this->m_pfile_id), name, rank, dim, type);
   if (status == NXstatus::NX_OK) {
     AttrInfo info;
     info.type = type;
@@ -1443,7 +1434,7 @@ AttrInfo File::getNextAttr() {
     // string array (2 dim char array)
     if (rank == 2 && type == NXnumtype::CHAR) {
       info.length = 1;
-      for (int d = 0; d < rank; ++d) {
+      for (std::size_t d = 0; d < rank; ++d) {
         info.length *= static_cast<std::size_t>(dim[d]);
       }
       return info;

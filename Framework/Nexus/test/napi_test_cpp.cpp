@@ -121,8 +121,8 @@ static void writeTest(const string &filename, NXaccess create_code) {
   array_dims[0] = 100;
   array_dims[1] = 20;
   vector<int> comp_array;
-  for (int i = 0; i < array_dims[0]; i++) {
-    for (int j = 0; j < array_dims[1]; j++) {
+  for (std::size_t i = 0; i < array_dims[0]; i++) {
+    for (std::size_t j = 0; j < array_dims[1]; j++) {
       comp_array.push_back(i);
     }
   }

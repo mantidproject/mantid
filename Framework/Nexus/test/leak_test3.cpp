@@ -14,9 +14,9 @@ using namespace std;
 const int nFiles = 10;
 const int nEntry = 2;
 const int nData = 2;
-int64_t array_dims[2] = {512, 512};
-const char szFile[] = "leak_test.nxs";
-const int iBinarySize = 512 * 512;
+Mantid::Nexus::DimVector array_dims{512, 512};
+std::string szFile("leak_test.nxs");
+std::size_t const iBinarySize(512 * 512);
 int aiBinaryData[iBinarySize];
 
 #define ON_ERROR(msgstr)                                                                                               \
@@ -26,9 +26,9 @@ int aiBinaryData[iBinarySize];
   }
 
 int main() {
-  int i, iFile, iEntry, iData, iNXdata;
+  int iFile, iEntry, iData, iNXdata;
 
-  for (i = 0; i < iBinarySize; i++) {
+  for (std::size_t i = 0; i < iBinarySize; i++) {
     aiBinaryData[i] = rand();
   }
 
@@ -91,7 +91,7 @@ int main() {
       ON_ERROR("NXclose failed!")
 
     // Delete file
-    remove(szFile);
+    remove(szFile.c_str());
   }
 
   return 0;

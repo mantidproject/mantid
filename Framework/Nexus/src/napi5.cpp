@@ -65,7 +65,7 @@ extern void *NXpData;
 
 ---------------------------------------------------------------------*/
 
-NXstatus NX5open(CONSTCHAR *filename, NXaccess const am, NXhandle &fid) {
+NXstatus NX5open(std::string const &filename, NXaccess const am, NXhandle &fid) {
   hid_t root_id;
   char pBuffer[512];
   char *time_buffer = NULL;
@@ -99,21 +99,21 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess const am, NXhandle &fid) {
   fid = new NexusFile5;
   if (am == NXaccess::CREATE5) {
     am1 = H5F_ACC_TRUNC;
-    fid->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
+    fid->iFID = H5Fcreate(filename.c_str(), am1, H5P_DEFAULT, fapl);
   } else {
     if (am == NXaccess::READ)
       am1 = H5F_ACC_RDONLY;
     else
       am1 = H5F_ACC_RDWR;
 
-    fid->iFID = H5Fopen(filename, am1, fapl);
+    fid->iFID = H5Fopen(filename.c_str(), am1, fapl);
   }
 
   if (fapl != -1)
     H5Pclose(fapl); /*close file access property list*/
 
   if (fid->iFID <= 0) {
-    snprintf(pBuffer, sizeof(pBuffer) - 1, "ERROR: cannot open file: %s", filename);
+    snprintf(pBuffer, sizeof(pBuffer) - 1, "ERROR: cannot open file: %s", filename.c_str());
     NXReportError(pBuffer);
     delete fid;
     fid = nullptr;
@@ -200,7 +200,8 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess const am, NXhandle &fid) {
 /*---------------------------------------------------------------*/
 /* ------------------------------------------------------------------- */
 
-NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
+NXstatus NX5putattr(NXhandle fid, std::string const &name, const void *data, std::size_t const datalen,
+                    NXnumtype const iType) {
   pNexusFile5 pFile;
   hid_t attr1;
   hid_t type;
@@ -215,10 +216,10 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
   vid = getAttVID(pFile);
 
   // check if the attribute exists -- if so, delete it
-  attRet = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+  attRet = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
   if (attRet > 0) {
     H5Aclose(attRet);
-    iRet = H5Adelete(vid, name);
+    iRet = H5Adelete(vid, name.c_str());
     if (iRet < 0) {
       NXReportError("ERROR: old attribute cannot be removed! ");
       killAttVID(pFile, vid);
@@ -230,11 +231,11 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
   hid_t dataspace = H5Screate(H5S_SCALAR);
   hid_t datatype = H5Tcopy(type);
   if (iType == NXnumtype::CHAR) {
-    H5Tset_size(datatype, static_cast<size_t>(datalen));
+    H5Tset_size(datatype, datalen);
   }
 
   // create the attribute
-  attr1 = H5Acreate(vid, name, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+  attr1 = H5Acreate(vid, name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
   if (attr1 < 0) {
     NXReportError("ERROR: attribute cannot created! ");
     killAttVID(pFile, vid);
@@ -317,36 +318,36 @@ herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, voi
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX5getgroupinfo_recurse(NXhandle fid, int *iN, NXname pName, NXname pClass) {
+NXstatus NX5getgroupinfo_recurse(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
   pNexusFile5 pFile;
   hid_t atype, attr_id, grp;
 
   pFile = NXI5assert(fid);
   /* check if there is a group open */
   if (pFile->iCurrentG == 0) {
-    strcpy(pName, "root");
-    strcpy(pClass, "NXroot");
+    name = "root";
+    nxclass = "NXroot";
     pFile->iNX = 0;
     grp = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
     H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
     H5Gclose(grp);
-    *iN = pFile->iNX;
+    iN = pFile->iNX;
   } else {
-    strcpy(pName, pFile->name_ref.c_str());
+    name = pFile->name_ref;
     attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0) {
-      strcpy(pClass, NX_UNKNOWN_GROUP);
+      nxclass = NX_UNKNOWN_GROUP;
     } else {
       atype = H5Tcopy(H5T_C_S1);
       char data[64];
       H5Tset_size(atype, sizeof(data));
       readStringAttributeN(attr_id, data, sizeof(data));
-      strcpy(pClass, data);
+      nxclass = data;
       pFile->iNX = 0;
       grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
       H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
       H5Gclose(grp);
-      *iN = pFile->iNX;
+      iN = pFile->iNX;
       H5Aclose(attr_id);
     }
   }
@@ -354,40 +355,40 @@ NXstatus NX5getgroupinfo_recurse(NXhandle fid, int *iN, NXname pName, NXname pCl
 }
 
 /*----------------------------------------------------------------------------*/
-NXstatus NX5getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
+NXstatus NX5getgroupinfo(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
   pNexusFile5 pFile;
   hid_t atype, attr_id, gid;
 
   pFile = NXI5assert(fid);
   /* check if there is a group open */
   if (pFile->iCurrentG == 0) {
-    strcpy(pName, "root");
-    strcpy(pClass, "NXroot");
+    name = "root";
+    nxclass = "NXroot";
     gid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    *iN = countObjectsInGroup(gid);
+    iN = countObjectsInGroup(gid);
     H5Gclose(gid);
   } else {
-    strcpy(pName, pFile->name_ref.c_str());
+    name = pFile->name_ref;
     attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0) {
-      strcpy(pClass, NX_UNKNOWN_GROUP);
+      nxclass = NX_UNKNOWN_GROUP;
     } else {
       atype = H5Tcopy(H5T_C_S1);
       char data[64];
       H5Tset_size(atype, sizeof(data));
       readStringAttributeN(attr_id, data, sizeof(data));
-      strcpy(pClass, data);
+      nxclass = data;
       H5Aclose(attr_id);
     }
     pFile->iNX = 0;
-    *iN = countObjectsInGroup(pFile->iCurrentG);
+    iN = countObjectsInGroup(pFile->iCurrentG);
   }
   return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
+NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
   pNexusFile5 pFile;
   hid_t grp, attr1, type, atype;
   herr_t iRet;
@@ -403,7 +404,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
      iterate to next entry in group list
    */
   idx = pFile->iStack5[pFile->iStackPtr].iCurrentIDX;
-  if (pFile->name_ref.size() == 0) {
+  if (pFile->name_ref.empty()) {
     /* root group */
     pFile->name_ref = "/";
   }
@@ -411,7 +412,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
   // index can be wrong here
   iRet = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, &idx, nxgroup_info, &op_data);
   H5Gclose(grp);
-  strcpy(nxclass, NX_UNKNOWN_GROUP);
+  nxclass = NX_UNKNOWN_GROUP;
 
   /*
      figure out the number of items in the current group. We need this in order to
@@ -438,7 +439,7 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
   if (iRet > 0) {
     pFile->iStack5[pFile->iStackPtr].iCurrentIDX++;
     if (op_data.iname != NULL) {
-      strcpy(name, op_data.iname);
+      name = op_data.iname;
       free(op_data.iname);
     } else {
       pFile->iStack5[pFile->iStackPtr].iCurrentIDX = 0;
@@ -448,36 +449,32 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
       /*
          open group and find class name attribute
        */
-      size_t const Nbuff(2048), Nname(1024);
-      char ph_name[Nname];
-      strcpy(ph_name, "");
+      std::string ph_name("");
       for (std::size_t i = 1; i < (pFile->iStackPtr + 1); i++) {
-        strcat(ph_name, pFile->iStack5[i].irefn.c_str());
-        strcat(ph_name, "/");
+        ph_name += pFile->iStack5[i].irefn + "/";
       }
-      strcat(ph_name, name);
-      grp = H5Gopen(pFile->iFID, ph_name, H5P_DEFAULT);
+      ph_name += name;
+      grp = H5Gopen(pFile->iFID, ph_name.c_str(), H5P_DEFAULT);
       if (grp < 0) {
+        size_t const Nbuff(2048);
         char pBuffer[Nbuff];
-        snprintf(pBuffer, Nbuff, "ERROR: group %s does not exist", ph_name);
+        snprintf(pBuffer, Nbuff, "ERROR: group %s does not exist", ph_name.c_str());
         NXReportError(pBuffer);
         return NXstatus::NX_ERROR;
       }
       attr1 = H5Aopen_by_name(grp, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
       if (attr1 < 0) {
-        strcpy(nxclass, NX_UNKNOWN_GROUP);
+        nxclass = NX_UNKNOWN_GROUP;
       } else {
         type = H5T_C_S1;
         atype = H5Tcopy(type);
         char data[128];
         H5Tset_size(atype, sizeof(data));
         if (readStringAttributeN(attr1, data, sizeof(data)) < 0) {
-          char pBuffer[Nbuff];
-          snprintf(pBuffer, Nbuff, "ERROR: reading attribute");
-          NXReportError(pBuffer);
+          NXReportError("ERROR: reading attribute");
           return NXstatus::NX_ERROR;
         }
-        strcpy(nxclass, data);
+        nxclass = data;
         H5Tclose(atype);
         H5Aclose(attr1);
       }
@@ -487,16 +484,16 @@ NXstatus NX5getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *d
          open dataset and find type
        */
       if (pFile->iCurrentG == 0) {
-        grp = H5Dopen(pFile->iFID, name, H5P_DEFAULT);
+        grp = H5Dopen(pFile->iFID, name.c_str(), H5P_DEFAULT);
       } else {
-        grp = H5Dopen(pFile->iCurrentG, name, H5P_DEFAULT);
+        grp = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
       }
       type = H5Dget_type(grp);
       atype = H5Tcopy(type);
       tclass = H5Tget_class(atype);
       NXnumtype iPtype = hdf5ToNXType(tclass, atype);
-      *datatype = iPtype;
-      strcpy(nxclass, "SDS");
+      datatype = iPtype;
+      nxclass = "SDS";
       H5Tclose(atype);
       H5Tclose(type);
       H5Dclose(grp);
@@ -608,9 +605,9 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
+NXstatus NX5getinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &dims, NXnumtype &iType) {
   pNexusFile5 pFile;
-  int i, iRank;
+  std::size_t iRank;
   NXnumtype mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
@@ -635,7 +632,7 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
   }
   /* conversion to proper ints for the platform */
-  *iType = mType;
+  iType = mType;
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
     if (H5Tis_variable_str(pFile->iCurrentT)) {
       /* this will not work for arrays of strings */
@@ -651,9 +648,10 @@ NXstatus NX5getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
       myDim[iRank - 1] = H5Tget_size(pFile->iCurrentT);
     }
   }
-  *rank = (int)iRank;
-  for (i = 0; i < iRank; i++) {
-    dimension[i] = (int64_t)myDim[i];
+  rank = iRank;
+  dims.resize(rank);
+  for (std::size_t i = 0; i < rank; i++) {
+    dims[i] = myDim[i];
   }
   return NXstatus::NX_OK;
 }
@@ -672,23 +670,23 @@ herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void 
   return 1;
 }
 
-NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *iType) {
-  int rank;
+NXstatus NX5getnextattr(NXhandle fileid, std::string &name, std::size_t &iLength, NXnumtype &iType) {
+  std::size_t rank;
   NXstatus status;
-  int mydim[H5S_MAX_RANK];
+  Mantid::Nexus::DimVector mydim;
 
-  status = NX5getnextattra(fileid, pName, &rank, mydim, iType);
+  status = NX5getnextattra(fileid, name, rank, mydim, iType);
 
   if (status != NXstatus::NX_OK)
     return status;
 
   if (rank == 0 || (rank == 1 && mydim[0] == 1)) {
-    *iLength = 1;
+    iLength = 1;
     return NXstatus::NX_OK;
   }
 
-  if (rank == 1 && *iType == NXnumtype::CHAR) {
-    *iLength = mydim[0];
+  if (rank == 1 && iType == NXnumtype::CHAR) {
+    iLength = mydim[0];
     return NXstatus::NX_OK;
   }
 
@@ -699,7 +697,7 @@ NXstatus NX5getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *
 /*-------------------------------------------------------------------------*/
 
 // cppcheck-suppress constParameterCallback
-NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
+NXstatus NX5getattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
   pNexusFile5 pFile;
   hid_t vid, iNew;
   hsize_t dims[H5S_MAX_RANK], totalsize;
@@ -709,12 +707,12 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
   pFile = NXI5assert(fid);
 
-  type = nxToHDF5Type(*iType);
+  type = nxToHDF5Type(iType);
 
   vid = getAttVID(pFile);
-  iNew = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+  iNew = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
   if (iNew < 0) {
-    sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name);
+    sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name.c_str());
     killAttVID(pFile, vid);
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
@@ -735,15 +733,15 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
   /* finally read the data */
   if (type == H5T_C_S1) {
-    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), *datalen);
-    *datalen = static_cast<int>(strlen(static_cast<char *>(data)));
+    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), datalen);
+    datalen = strlen(static_cast<char *>(data));
   } else {
     iRet = H5Aread(pFile->iCurrentA, type, data);
-    *datalen = 1;
+    datalen = 1;
   }
 
   if (iRet < 0) {
-    sprintf(pBuffer, "ERROR: could not read attribute data for \"%s\"", name);
+    sprintf(pBuffer, "ERROR: could not read attribute data for \"%s\"", name.c_str());
     NXReportError(pBuffer);
     killAttVID(pFile, vid);
     return NXstatus::NX_ERROR;
@@ -757,7 +755,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, NX
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
+NXstatus NX5getattrinfo(NXhandle fid, std::size_t &iN) {
   pNexusFile5 pFile;
   int idx;
   hid_t vid;
@@ -765,7 +763,7 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
 
   pFile = NXI5assert(fid);
   idx = 0;
-  *iN = idx;
+  iN = idx;
 
   vid = getAttVID(pFile);
 
@@ -774,12 +772,12 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
   idx = static_cast<int>(oinfo.num_attrs);
   if (idx > 0) {
     if (pFile->iCurrentG > 0 && pFile->iCurrentD == 0) {
-      *iN = idx - 1;
+      iN = idx - 1;
     } else {
-      *iN = idx;
+      iN = idx;
     }
   } else {
-    *iN = 0;
+    iN = 0;
   }
   killAttVID(pFile, vid);
   return NXstatus::NX_OK;
@@ -792,18 +790,19 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
 /*-------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------*/
-NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getnextattra(NXhandle fid, std::string &name, std::size_t &rank, Mantid::Nexus::DimVector &dim,
+                         NXnumtype &iType) {
   pNexusFile5 pFile;
   herr_t iRet;
   char *iname = NULL;
   hid_t vid;
   H5O_info1_t oinfo;
 
-  pFile = NXI5assert(handle);
+  pFile = NXI5assert(fid);
 
   vid = getAttVID(pFile);
 
-  pName[0] = '\0';
+  name = "\0";
   hsize_t idx = pFile->iCurrentIDX;
   iRet = 0;
 
@@ -834,9 +833,9 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
       free(iname);
       iname = NULL;
       killAttVID(pFile, vid);
-      return NX5getnextattra(handle, pName, rank, dim, iType);
+      return NX5getnextattra(fid, name, rank, dim, iType);
     }
-    strcpy(pName, iname);
+    name = iname;
     free(iname);
     iname = NULL;
   } else {
@@ -846,10 +845,11 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NX
   }
 
   killAttVID(pFile, vid);
-  return NX5getattrainfo(handle, pName, rank, dim, iType);
+  return NX5getattrainfo(fid, name, rank, dim, iType);
 }
 /*------------------------------------------------------------------------*/
-NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[], NXnumtype *iType) {
+NXstatus NX5getattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dim,
+                         NXnumtype &iType) {
   pNexusFile5 pFile;
   int iRet;
   NXnumtype mType;
@@ -862,7 +862,7 @@ NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[],
   pFile = NXI5assert(handle);
 
   vid = getAttVID(pFile);
-  pFile->iCurrentA = H5Aopen_by_name(vid, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+  pFile->iCurrentA = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
   if (pFile->iCurrentA < 0) {
     pFile->iCurrentA = 0;
     NXReportError("ERROR: unable to open attribute");
@@ -883,7 +883,7 @@ NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[],
   mType = hdf5ToNXType(tclass, attrt);
 
   /* conversion to proper ints for the platform */
-  *iType = mType;
+  iType = mType;
 
   if (tclass == H5T_STRING) {
     myrank++;
@@ -904,10 +904,11 @@ NXstatus NX5getattrainfo(NXhandle handle, CONSTCHAR *name, int *rank, int dim[],
     myDim[0] = 1;
   }
 
-  for (int i = 0; i < myrank; i++) {
-    dim[i] = static_cast<int>(myDim[i]);
+  rank = static_cast<std::size_t>(myrank);
+  dim.resize(rank);
+  for (std::size_t i = 0; i < rank; i++) {
+    dim[i] = myDim[i];
   }
-  *rank = static_cast<int>(myrank);
 
   return NXstatus::NX_OK;
 }

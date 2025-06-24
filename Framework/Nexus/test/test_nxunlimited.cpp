@@ -35,8 +35,7 @@
 int test_unlimited(NXaccess file_type, const char *filename) {
   // cppcheck-suppress constVariable
   static double d[DATA_SIZE];
-  Mantid::Nexus::dimsize_t dims[2] = {NX_UNLIMITED, DATA_SIZE};
-  Mantid::Nexus::dimsize_t slab_start[2], slab_size[2];
+  Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
   NXhandle file_id = NULL;
   remove(filename);
   NXopen(filename, file_type, file_id);
@@ -44,10 +43,8 @@ int test_unlimited(NXaccess file_type, const char *filename) {
   NXopengroup(file_id, "entry1", "NXentry");
   NXcompmakedata64(file_id, "data", NXnumtype::FLOAT64, 2, dims, NXcompression::NONE, dims);
   NXopendata(file_id, "data");
-  slab_start[1] = 0;
-  slab_size[0] = 1;
-  slab_size[1] = DATA_SIZE;
 
+  Mantid::Nexus::DimSizeVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
   for (Mantid::Nexus::dimsize_t i = 0; i < 2; i++) {
     slab_start[0] = i;
     NXputslab64(file_id, d, slab_start, slab_size);
