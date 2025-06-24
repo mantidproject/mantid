@@ -175,7 +175,7 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost:
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
-std::vector<size_t> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
+std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
                                                            const boost::python::object &workspaceIndices,
                                                            const size_t numberOfWorkspaces, const double minX,
                                                            const double maxX, const bool entireRange) {

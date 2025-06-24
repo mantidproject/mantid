@@ -844,12 +844,12 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   }
 }
 
-std::vector<size_t> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+std::vector<double> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
                                                                             const double minX, const double maxX,
                                                                             const bool entireRange) const {
   std::vector<double> integratedSpectra;
   getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
-  std::vector<size_t> detectorCounts(workspaceIndices.size(), 0);
+  std::vector<double> detectorCounts(workspaceIndices.size(), 0.0);
   for (size_t i = 0; i < workspaceIndices.size(); ++i) {
     detectorCounts[i] = integratedSpectra[workspaceIndices[i]];
   }

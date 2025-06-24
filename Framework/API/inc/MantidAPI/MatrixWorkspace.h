@@ -363,7 +363,7 @@ public:
   virtual void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
                                     const bool entireRange) const;
 
-  std::vector<size_t> getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+  std::vector<double> getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
                                                              const double minX, const double maxX,
                                                              const bool entireRange) const;
 
