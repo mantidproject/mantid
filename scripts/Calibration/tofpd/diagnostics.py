@@ -483,7 +483,6 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     return mtd[outputname]
 
 
-# flake8: noqa: C901
 def plot_peakd(
     wksp: Union[str, Workspace2D], peak_positions: Union[float, list], plot_regions=True, show_bad_cnt=True, drange=(0, 0), threshold=0.01
 ):
