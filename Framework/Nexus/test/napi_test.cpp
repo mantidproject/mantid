@@ -87,11 +87,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
   ASSERT_NO_ERROR(NXopen(nxFile, nx_creation_code, fileid), "Failure in NXopen for " + nxFile);
-  if (nx_creation_code == NXaccess::CREATE5) {
-    std::cout << "Trying to reopen the file handle" << std::endl;
-    NXhandle clone_fileid;
-    ASSERT_NO_ERROR(NXreopen(fileid, clone_fileid), "Failed to NXreopen " + nxFile);
-  }
   // open group entry
   ASSERT_NO_ERROR(NXmakegroup(fileid, "entry", "NXentry"), "NXmakegroup(fileid, \"entry\", \"NXentry\")");
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "NXopengroup(fileid, \"entry\", \"NXentry\")");
@@ -99,7 +94,7 @@ int main(int argc, char *argv[]) {
                   "NXputattr(fileid, \"hugo\", \"namenlos\", strlen, NXnumtype::CHAR)");
   ASSERT_NO_ERROR(NXputattr(fileid, "cucumber", "passion", static_cast<int>(strlen("passion")), NXnumtype::CHAR),
                   "NXputattr(fileid, \"cucumber\", \"passion\", strlen, NXnumtype::CHAR)");
-  Mantid::Nexus::DimVector NXlen64{strlen(ch_test_data)};
+  Mantid::Nexus::DimVector NXlen64{static_cast<int64_t>(strlen(ch_test_data))};
   ASSERT_NO_ERROR(NXcompmakedata64(fileid, "ch_data", NXnumtype::CHAR, 1, NXlen64, NXcompression::NONE, NXlen64), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "ch_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, ch_test_data), "");

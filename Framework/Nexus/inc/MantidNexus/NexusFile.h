@@ -37,10 +37,10 @@ class MANTID_NEXUS_DLL File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  /** The handle for the C-API. */
-  std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** The handle for the C-API. */
+  std::shared_ptr<NexusFile5> m_pfile_id;
   /** nexus descriptor to track the file tree
    * NOTE: in file write, the following cannot be relied upon:
    * - hasRootAttr

@@ -11,24 +11,30 @@
 #include <string>
 #include <vector>
 
-typedef const char CONSTCHAR;
-
-#define NX5SIGNATURE 959695
-
-/*
- * Any new NXaccess options should be numbered in 2^n format
- * (8, 16, 32, etc) so that they can be bit masked and tested easily.
- */
-
-constexpr int NX_MAXNAMELEN = 64;
 constexpr int NX_MAXADDRESSLEN = 1024;
-
-constexpr int NXMAXSTACK = 50;
 
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
-#define NX5SIGNATURE 959695
+/** \enum NXaccess
+ * NeXus file access codes.
+ * these codes are taken directly from values used in hdf5 package
+ * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
+ * \li NXACC_READ read-only. Same as H5F_ACC_RDONLY
+ * \li NXACC_RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
+ * \li NXACC_CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
+ */
+typedef enum : unsigned int { 
+  NXACC_READ = 0x0000u,
+  NXACC_RDWR = 0x0001u,
+  NXACC_CREATE5 = 0x0002u
+} NXaccess_mode;
+
+/**
+ * A combination of options from #NXaccess_mode
+ */
+typedef unsigned int NXaccess;
+
 
 struct stackEntry {
   std::string irefn;
@@ -36,7 +42,11 @@ struct stackEntry {
   hsize_t iCurrentIDX;
 };
 
-struct NexusFile5 {
+/** NexusFile5
+ * NOTE this needs to either be moved to a separate file,
+ * or entirely absorbed inside Nexus::File
+ */
+struct MANTID_NEXUS_DLL NexusFile5 {
   std::vector<stackEntry> iStack5;
   stackEntry iAtt5;
   hid_t iFID;
@@ -47,13 +57,16 @@ struct NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  std::size_t iStackPtr;
+  std::size_t iStackPtr; // NOTE probably sufficient to use .back() instead
   std::string name_ref;
   std::string name_tmp;
 
-  NexusFile5()
-      : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
-        iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {};
+  // constructors
+  NexusFile5() = delete;
+  NexusFile5(std::string const &, NXaccess const);
+  NexusFile5(NexusFile5 const &);
+  // destructor
+  ~NexusFile5();
 };
 
 typedef NexusFile5 *pNexusFile5;
@@ -107,18 +120,21 @@ typedef struct {
  */
 enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
 
+/*--------------------------------------------------------------------------*/
+
 /** \class NXnumtype
  * The primitive types published by this API.
- * \li FLOAT32 float.
- * \li FLOAT64 double
- * \li INT8 int8_t
- * \li UINT8 uint8_t
- * \li INT16 int16_t
- * \li UINT16 uint16_t
- * \li INT32 int32_t
- * \li UINT32 uint32_t
- * \li INT64 int8_t if available on the machine
- * \li UINT64 uint8_t if available on the machine
+ * \li FLOAT32 32-bit float.
+ * \li FLOAT64 64-bit double
+ * \li INT8 byte-width integer -- int8_t
+ * \li UINT8 byte-width unsigned integer -- uint8_t
+ * \li INT16 double-byte-width integer -- int16_t
+ * \li UINT16 double-byte-width unsigned integer -- uint16_t
+ * \li INT32 quad-byte-width integer -- int32_t
+ * \li UINT32 quad-byte-width unsigned integer -- uint32_t
+ * \li INT64 eight-byte-width integer -- int8_t if available on the machine
+ * \li UINT64 eight-byte-width integer -- uint8_t if available on the machine
+ * \li BINARY lump of binary data, same as UINT8
  * \ingroup cpp_types
  */
 class MANTID_NEXUS_DLL NXnumtype {
@@ -153,7 +169,8 @@ public:
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &value);
 
 /**
- * The available compression types. These are all ignored in xml files.
+ * The available compression types:
+ * \li CHUNK chunk encoding
  * \li NONE no compression
  * \li LZW Lossless Lempel Ziv Welch compression (recommended)
  * \li RLE Run length encoding (only HDF-4)

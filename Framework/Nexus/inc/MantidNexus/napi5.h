@@ -8,8 +8,6 @@
 
 /* HDF5 interface */
 
-NXstatus NX5open(std::string const &filename, NXaccess access_method, NXhandle &handle);
-
 NXstatus NX5putattr(NXhandle handle, std::string const &name, const void *data, std::size_t const iDataLen,
                     NXnumtype const iType);
 

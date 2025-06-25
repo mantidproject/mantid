@@ -111,20 +111,6 @@ NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
 }
 
 /*-----------------------------------------------------------------------*/
-
-NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
-  newHandle = new NexusFile5;
-  newHandle->iFID = H5Freopen(origHandle->iFID);
-  if (newHandle->iFID <= 0) {
-    NXReportError("cannot clone file");
-    delete newHandle;
-    newHandle = nullptr;
-    return NXstatus::NX_ERROR;
-  }
-  newHandle->iStack5[0].iVref = 0; /* root! */
-  return NXstatus::NX_OK;
-}
-
 /* ------------------------------------------------------------------------- */
 
 NXstatus NXclose(NXhandle &fid) {

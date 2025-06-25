@@ -386,25 +386,17 @@ int testLoadPath(const string &filename) {
 }
 
 int main(int argc, char **argv) {
-  NXaccess nx_creation_code;
-  string fileext;
-  if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
-    nx_creation_code = NXaccess::CREATE5;
-    fileext = ".h5";
-  } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
-    cout << "napi_test_cpp-xml-table is not supported" << endl;
-    return TEST_FAILED;
-  } else if (strstr(argv[0], "napi_test_cpp-xml") != NULL) {
-    cout << "napi_test_cpp-xml is not supported" << endl;
-    return TEST_FAILED;
-  } else {
-    return TEST_FAILED;
-  }
-  const string filename("napi_test_cpp" + fileext);
+  NXaccess nx_creation_code = NXaccess::CREATE5;
+  std::string filename("napi_test_cpp.h5");
+  std::string fullname = (std::filesystem::temp_directory_path() / filename).generic_string();
+  removeFile(fullname); // in case last round failed
 
-  removeFile(filename); // in case last round failed
   try {
-    writeTest(filename, nx_creation_code);
+    writeTest(fullname, nx_creation_code);
+    if (!std::filesystem::exists(fullname)) {
+      std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
+      return TEST_FAILED;
+    }
   } catch (const std::runtime_error &e) {
     cout << "writeTest failed:\n" << e.what() << endl;
     return TEST_FAILED;
@@ -414,8 +406,8 @@ int main(int argc, char **argv) {
     return TEST_SUCCEED;
   }
 
-  if (!std::filesystem::exists(filename)) {
-    std::cerr << "NeXus file \"" << filename << "\" does not exist after write test\n";
+  if (!std::filesystem::exists(fullname)) {
+    std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
     return TEST_FAILED;
   }
 
@@ -433,6 +425,7 @@ int main(int argc, char **argv) {
   removeFile(filename); // cleanup
 
   // try using the load path
+  std::string fileext(".h5");
   if (testLoadPath(DMC01 + fileext) != TEST_SUCCEED) {
     cout << "testLoadPath failed" << endl;
     return TEST_FAILED;

@@ -85,13 +85,6 @@
 MANTID_NEXUS_DLL NXstatus NXopen(std::string const &filename, NXaccess const access_method, NXhandle &handle);
 
 /**
- * Opens an existing NeXus file a second time for e.g. access from another thread.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_init
- */
-MANTID_NEXUS_DLL NXstatus NXreopen(NXhandle pOrigHandle, NXhandle &pNewHandle);
-
-/**
  * close a NeXus file
  * \param pHandle A NeXus file handle as returned from NXopen. pHandle is invalid after this
  * call.

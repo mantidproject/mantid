@@ -202,19 +202,19 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopenaddress(*(this->m_pfile_id), address), "NXopenaddress(" + address + ") failed");
+  NAPI_CALL(NXopenaddress(m_pfile_id.get(), address), "NXopenaddress(" + address + ") failed");
 }
 
 void File::openGroupAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopengroupaddress(*(this->m_pfile_id), address), "NXopengroupaddress(" + address + ") failed");
+  NAPI_CALL(NXopengroupaddress(m_pfile_id.get(), address), "NXopengroupaddress(" + address + ") failed");
 }
 
 std::string File::getAddress() {
   std::string address;
-  NAPI_CALL(NXgetaddress(*(this->m_pfile_id), address), "NXgetaddress() failed");
+  NAPI_CALL(NXgetaddress(m_pfile_id.get(), address), "NXgetaddress() failed");
   // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
   if (address == "") {
@@ -243,7 +243,7 @@ bool File::hasData(std::string const &name) {
 
 bool File::isDataSetOpen() {
   NXlink id;
-  if (NXgetdataID(*(this->m_pfile_id), id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(m_pfile_id.get(), id) == NXstatus::NX_ERROR) {
     return false;
   } else {
     return true;
@@ -572,7 +572,7 @@ template <typename NumT> void File::getData(NumT *data) {
   if (data == NULL) {
     throw NXEXCEPTION("Supplied null pointer to write data to");
   }
-  NAPI_CALL(NXgetdata(*(this->m_pfile_id), data), "NXgetdata failed");
+  NAPI_CALL(NXgetdata(m_pfile_id.get(), data), "NXgetdata failed");
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -1232,18 +1232,18 @@ void File::readData(std::string const &dataName, std::string &data) {
 Info File::getInfo() {
   Info info;
   std::size_t rank;
-  NAPI_CALL(NXgetinfo64(*(this->m_pfile_id), rank, info.dims, info.type), "NXgetinfo failed");
+  NAPI_CALL(NXgetinfo64(m_pfile_id.get(), rank, info.dims, info.type), "NXgetinfo failed");
   return info;
 }
 
-void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(*(this->m_pfile_id)), "NXinitgroupdir failed"); }
+void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(m_pfile_id.get()), "NXinitgroupdir failed"); }
 
 Entry File::getNextEntry() {
   // set up temporary variables to get the information
   std::string name, class_name;
   NXnumtype datatype;
 
-  NXstatus status = NXgetnextentry(*(this->m_pfile_id), name, class_name, datatype);
+  NXstatus status = NXgetnextentry(m_pfile_id.get(), name, class_name, datatype);
   if (status == NXstatus::NX_OK) {
     string str_name(name);
     string str_class(class_name);
@@ -1303,7 +1303,7 @@ template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *da
   if (info.name.empty()) {
     throw NXEXCEPTION("Supplied empty name to putAttr");
   }
-  NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name, data, info.length, info.type),
+  NAPI_CALL(NXputattr(m_pfile_id.get(), info.name, data, info.length, info.type),
             "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
                 ") failed");
 }
@@ -1344,7 +1344,7 @@ void File::getAttr(const AttrInfo &info, void *data, std::size_t length) {
   if (length == 0) {
     length = info.length;
   }
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), info.name, data, length, type), "NXgetattr(" + info.name + ") failed");
+  NAPI_CALL(NXgetattr(m_pfile_id.get(), info.name, data, length, type), "NXgetattr(" + info.name + ") failed");
   if (type != info.type) {
     stringstream msg;
     msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
@@ -1371,7 +1371,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   NXnumtype type = getType<NumT>();
   std::size_t length = 0;
-  NAPI_CALL(NXgetattr(*(this->m_pfile_id), name, &value, length, type), "NXgetattr(" + name + ") failed");
+  NAPI_CALL(NXgetattr(m_pfile_id.get(), name, &value, length, type), "NXgetattr(" + name + ") failed");
 }
 
 string File::getStrAttr(std::string const &name) {
@@ -1379,7 +1379,7 @@ string File::getStrAttr(std::string const &name) {
   std::size_t rank;
   DimVector dims(NX_MAXRANK);
   NXnumtype datatype = NXnumtype::CHAR;
-  NAPI_CALL(NXgetattrainfo(*(this->m_pfile_id), name, rank, dims, datatype), "NXgetinfo failed");
+  NAPI_CALL(NXgetattrainfo(m_pfile_id.get(), name, rank, dims, datatype), "NXgetinfo failed");
   AttrInfo info{datatype, static_cast<size_t>(dims[0]), name};
 
   // do checks
@@ -1404,7 +1404,7 @@ string File::getStrAttr(std::string const &name) {
 
 // NAVIGATE ATTRIBUTES
 
-void File::initAttrDir() { NAPI_CALL(NXinitattrdir(*(this->m_pfile_id)), "NXinitattrdir failed"); }
+void File::initAttrDir() { NAPI_CALL(NXinitattrdir(m_pfile_id.get()), "NXinitattrdir failed"); }
 
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
@@ -1413,7 +1413,7 @@ AttrInfo File::getNextAttr() {
 
   std::size_t rank;
   DimVector dim(NX_MAXRANK);
-  NXstatus status = NXgetnextattra(*(this->m_pfile_id), name, rank, dim, type);
+  NXstatus status = NXgetnextattra(m_pfile_id.get(), name, rank, dim, type);
   if (status == NXstatus::NX_OK) {
     AttrInfo info;
     info.type = type;

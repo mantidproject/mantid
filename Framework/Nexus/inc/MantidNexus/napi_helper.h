@@ -11,7 +11,7 @@ namespace std {
 template <typename T> class shared_ptr;
 }
 
-MANTID_NEXUS_DLL pNexusFile5 assertNXID(std::shared_ptr<NXhandle> fid);
+MANTID_NEXUS_DLL pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> fid);
 
 MANTID_NEXUS_DLL pNexusFile5 NXI5assert(NXhandle fid);
 
