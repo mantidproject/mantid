@@ -65,6 +65,9 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   result << "]";
   return result.str();
 }
+
+pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> pfid) { return NXI5assert(pfid.get()); }
+
 } // end of anonymous namespace
 
 NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)

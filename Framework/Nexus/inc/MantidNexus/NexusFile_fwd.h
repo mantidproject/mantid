@@ -16,7 +16,7 @@ constexpr int NX_MAXADDRESSLEN = 1024;
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
-/** \enum NXaccess
+/** \enum NXaccess_mode
  * NeXus file access codes.
  * these codes are taken directly from values used in hdf5 package
  * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
