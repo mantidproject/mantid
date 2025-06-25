@@ -4,9 +4,9 @@
 Mantid 6.13.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_13_release/mantid-6_13-summary.png
    :class: screenshot
-   :width: 385px
+   :width: 600px
    :align: right
 
 .. contents:: Table of Contents

@@ -2,6 +2,11 @@
 Reflectometry Changes
 =====================
 
+.. image:: ../../images/6_13_release/refl-gui-fredrikze.png
+   :class: screenshot
+   :width: 600px
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 

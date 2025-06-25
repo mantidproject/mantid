@@ -2,6 +2,11 @@
 Framework Changes
 =================
 
+.. image:: ../../images/6_13_release/python-3_11.png
+   :class: screenshot
+   :height: 600px
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 

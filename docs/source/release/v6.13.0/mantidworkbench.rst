@@ -2,6 +2,11 @@
 Mantid Workbench Changes
 ========================
 
+.. image:: ../../images/6_13_release/crosshair-example.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 

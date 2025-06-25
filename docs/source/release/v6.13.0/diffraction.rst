@@ -2,6 +2,11 @@
 Diffraction Changes
 ===================
 
+.. image:: ../../images/6_13_release/PEARLTransfit-example.png
+   :class: screenshot
+   :width: 385px
+   :align: right
+
 .. contents:: Table of Contents
    :local:
 
