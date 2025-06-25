@@ -149,7 +149,7 @@ NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
   this->iStackPtr = 0;
   this->iFID = H5Freopen(origHandle.iFID);
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
-  this->iCurrentIDX(0);
+  this->iCurrentIDX = 0;
   this->iNX = 0;
   this->name_ref = "";
   this->name_tmp = "";
