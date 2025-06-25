@@ -542,7 +542,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   // Open NeXus file
   try {
-    LegacyNexus::File nxfileID(filename, LegacyNexus::NXaccess::READ);
+    LegacyNexus::File nxfileID(filename, LegacyNexus::NXACC_READ);
     LegacyLoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (const LegacyNexus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;

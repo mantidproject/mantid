@@ -80,7 +80,7 @@ void MuonNexusReader::openFirstNXentry(Mantid::LegacyNexus::File &handle) {
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readFromFile(const string &filename) {
-  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXaccess::READ);
+  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXACC_READ);
   openFirstNXentry(handle);
 
   // find all of the NXdata in the entry
@@ -238,7 +238,7 @@ void MuonNexusReader::readLogData(const string &filename) {
   // reset the count of logs
   m_nexusLogCount = 0;
 
-  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXaccess::READ);
+  Mantid::LegacyNexus::File handle(filename, Mantid::LegacyNexus::NXACC_READ);
   openFirstNXentry(handle);
 
   // read nexus fields at this level looking for NXlog and loading these into

@@ -813,7 +813,7 @@ void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWork
 void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
 
   // Get handle to nexus file
-  LegacyNexus::File handle(m_filename, LegacyNexus::NXaccess::READ);
+  LegacyNexus::File handle(m_filename, LegacyNexus::NXACC_READ);
 
   // For single-period datasets, read /run/instrument/beam/frames_good
   if (nperiods == 1) {
