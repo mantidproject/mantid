@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 const QString DEFAULT_LOG("run_number");
+constexpr int LINE_EDIT_MAX_LENGTH(1000);
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "MUSR"};
 
 namespace MantidQt::CustomInterfaces {
@@ -67,6 +68,11 @@ void ALCDataLoadingView::initialize() {
   QRegExp re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
   QValidator *validator = new QRegExpValidator(re, this);
   m_ui.runs->setTextValidator(validator);
+
+  m_ui.forwardEdit->setValidator(validator);
+  m_ui.forwardEdit->setMaxLength(LINE_EDIT_MAX_LENGTH);
+  m_ui.backwardEdit->setValidator(validator);
+  m_ui.backwardEdit->setMaxLength(LINE_EDIT_MAX_LENGTH);
 
   // Alpha to only accept positive doubles
   m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
@@ -201,8 +207,7 @@ bool ALCDataLoadingView::displayWarning(const std::string &warning) {
                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
   if (reply == QMessageBox::Yes)
     return true;
-  else
-    return false;
+  return false;
 }
 
 /**
