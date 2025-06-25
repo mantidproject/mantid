@@ -68,8 +68,8 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
 } // end of anonymous namespace
 
 NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
-    : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
-      iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+    : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0), iNX(0),
+      iStackPtr(0), name_ref(""), name_tmp("") {
   // check HDF5 version installed
   unsigned int vers_major, vers_minor, vers_release;
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
@@ -119,6 +119,7 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
                                                            {"file_time", NXIformatNeXusTime()},
                                                            {"NX_class", "NXroot"}};
     for (auto attr : attrs) {
+      // cppcheck-suppress useStlAlgorithm
       if (set_str_attribute(root_id, attr.first, attr.second) < 0) {
         H5Gclose(root_id);
         H5Fclose(iFID);
@@ -134,8 +135,8 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 };
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
-    : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
-      iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+    : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0), iNX(0),
+      iStackPtr(0), name_ref(""), name_tmp("") {
   iFID = H5Freopen(origHandle.iFID);
   if (iFID <= 0) {
     throw Mantid::Nexus::Exception("Error reopening file");
@@ -144,7 +145,13 @@ NexusFile5::NexusFile5(NexusFile5 const &origHandle)
 };
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
+  this->iStack5 = {"", 0, 0};
+  this->iStackPtr = 0;
   this->iFID = H5Freopen(origHandle.iFID);
+  this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
+  this->iNX = 0;
+  this->name_ref = "";
+  this->name_tmp = "";
   return *this;
 }
 
@@ -1717,6 +1724,7 @@ NXnumtype::operator int() const { return m_val; };
 
 #define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
 
+// cppcheck-suppress-begin knownConditionTrueFalse
 NXnumtype::operator std::string() const {
   // NOTE for user-readability it is better to check all of these cases
   // cppcheck doesn't like this, as some of these have the same value, making checks redundant
@@ -1752,6 +1760,7 @@ NXnumtype::operator std::string() const {
   // cppcheck-suppress-end knownConditionTrueFalse
   return ret;
 }
+// cppcheck-suppress-end knownConditionTrueFalse
 
 std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
   os << std::string(value);

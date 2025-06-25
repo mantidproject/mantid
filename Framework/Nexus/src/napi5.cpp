@@ -794,4 +794,4 @@ NXstatus NX5getattrainfo(NXhandle handle, std::string const &name, std::size_t &
 }
 
 // cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
-// cppcheck-suppress-end [unmatchedSuppression, variableScope, invalidPrintfArgType_uint]
+// cppcheck-suppress-end [unmatchedSuppression, variableScope, invalidPrintfArgType_uint, constParameterReference]

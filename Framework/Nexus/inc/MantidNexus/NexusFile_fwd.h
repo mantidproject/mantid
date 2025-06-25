@@ -43,7 +43,6 @@ struct stackEntry {
  */
 struct MANTID_NEXUS_DLL NexusFile5 {
   std::vector<stackEntry> iStack5;
-  stackEntry iAtt5;
   hid_t iFID;
   hid_t iCurrentG;
   hid_t iCurrentD;
