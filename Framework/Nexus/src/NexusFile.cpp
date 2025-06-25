@@ -145,7 +145,7 @@ NexusFile5::NexusFile5(NexusFile5 const &origHandle)
 };
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
-  this->iStack5 = {"", 0, 0};
+  this->iStack5 = {{"", 0, 0}};
   this->iStackPtr = 0;
   this->iFID = H5Freopen(origHandle.iFID);
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
