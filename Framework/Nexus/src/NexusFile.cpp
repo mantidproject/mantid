@@ -851,7 +851,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     }
     mydim1[rank - 1] = 1;
     if (mydim[rank - 1] > 1) {
-      mydim[rank - 1] = maxdims[rank - 1] = dsize[rank - 1] = 1;
+      maxdims[rank - 1] = dsize[rank - 1] = 1;
     }
     if (chunkdims[rank - 1] > 1) {
       chunkdims[rank - 1] = 1;
@@ -1737,11 +1737,15 @@ void File::makeLink(NXlink const &link) {
 using namespace Mantid::Nexus;
 int NXnumtype::validate_val(int const x) {
   int val = BAD;
+  // NOTE for user-readability it is better to check all of these cases
+  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
+  // cppcheck-suppress-begin knownConditionTrueFalse
   if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
       (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
       (x == BAD)) {
     val = x;
   }
+  // cppcheck-suppress-end knownConditionTrueFalse
   return val;
 }
 
@@ -1758,6 +1762,9 @@ NXnumtype::operator int() const { return m_val; };
 #define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
 
 NXnumtype::operator std::string() const {
+  // NOTE for user-readability it is better to check all of these cases
+  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
+  // cppcheck-suppress-begin knownConditionTrueFalse
   std::string ret = NXTYPE_PRINT(BAD);
   if (m_val == FLOAT32) {
     ret = NXTYPE_PRINT(FLOAT32);
@@ -1786,6 +1793,7 @@ NXnumtype::operator std::string() const {
   } else if (m_val == BINARY) {
     ret = NXTYPE_PRINT(BINARY);
   }
+  // cppcheck-suppress-end knownConditionTrueFalse
   return ret;
 }
 
