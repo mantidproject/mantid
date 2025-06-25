@@ -117,26 +117,6 @@ Removed
 - The ``LoadSNSspec`` algorithm was deprecated on 2017-01-30 and has now been removed.
 - Removed the obsolete algorithm ``NexusTester``
 
-Fit Functions
--------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
-Deprecated
-############
-
-
-Removed
-############
-
-
-
 Data Handling
 -------------
 
@@ -152,19 +132,6 @@ Deprecated
 Removed
 ############
 - ``SaveToSNSHistogramNexus`` has been removed, because it is unused.
-
-
-Data Objects
-------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
 
 Python
 ------
@@ -215,12 +182,6 @@ New features
 
   Those interested in the details of the changes can see them in the (developer centric)
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_.
-
-
-Bugfixes
-############
-
-
 
 Build Tools
 -----------
