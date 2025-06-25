@@ -807,7 +807,7 @@ public:
     // get the info and check
     std::size_t rank;
     DimVector dimsout{0};
-    NXnumtype datatype = getType<int>();
+    NXnumtype datatype = NXnumtype::CHAR; // set to something that is NOT int
     NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     cout << "\tinfo got\n";
     TS_ASSERT_EQUALS(datatype, getType<int>());
@@ -824,7 +824,7 @@ public:
     cout << "\tmade and put double data\n";
 
     // get the info and check
-    datatype = NXnumtype::FLOAT64;
+    datatype = NXnumtype::CHAR;
     NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     cout << "\tinfo got\n";
     TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);

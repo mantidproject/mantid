@@ -121,9 +121,9 @@ static void writeTest(const string &filename, NXaccess create_code) {
   array_dims[0] = 100;
   array_dims[1] = 20;
   vector<int> comp_array;
-  for (std::size_t i = 0; i < array_dims[0]; i++) {
-    for (std::size_t j = 0; j < array_dims[1]; j++) {
-      comp_array.push_back(i);
+  for (int64_t i = 0; i < array_dims[0]; i++) {
+    for (int64_t j = 0; j < array_dims[1]; j++) {
+      comp_array.push_back(static_cast<int>(i));
     }
   }
   const Mantid::Nexus::DimVector cdims{20, 20};
@@ -410,10 +410,9 @@ int main(int argc, char **argv) {
     std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
     return TEST_FAILED;
   }
-
   // try reading a file
   try {
-    if (readTest(filename) != TEST_SUCCEED) {
+    if (readTest(fullname) != TEST_SUCCEED) {
       cout << "readTest failed" << endl;
       return TEST_FAILED;
     }

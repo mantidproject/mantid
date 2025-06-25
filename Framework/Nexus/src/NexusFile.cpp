@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <assert.h>
+#include <filesystem>
 #include <hdf5.h>
 #include <iostream>
 #include <numeric>
@@ -36,6 +37,12 @@ using std::vector;
   printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
   fflush(stdout);
 
+#define FILE_EXISTS(filename)                                                                                          \
+  if (!std::filesystem::exists(filename)) {                                                                            \
+    throw std::runtime_error(std::string(__FILE__) + ":" + std::to_string(__LINE__));                                  \
+  } else {                                                                                                             \
+    DEBUG_LOG();                                                                                                       \
+  }
 /**
  * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
@@ -59,6 +66,98 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 } // end of anonymous namespace
+
+NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
+    : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
+      iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+  // check HDF5 version installed
+  unsigned int vers_major, vers_minor, vers_release;
+  if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
+    throw Mantid::Nexus::Exception("Cannot determine HDF5 library version", "NexusFile5 constructor", filename);
+  }
+  if (vers_major == 1 && vers_minor < 8) {
+    throw Mantid::Nexus::Exception("HDF5 library 1.8.0 or higher required", "NexusFile5 constructor", filename);
+  }
+  std::string version_str =
+      std::to_string(vers_major) + "." + std::to_string(vers_minor) + "." + std::to_string(vers_release);
+  // turn off the automatic HDF error handling
+  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+
+  // create file acccess property list
+  hid_t fapl = -1;
+  fapl = create_file_access_plist(filename);
+
+  if (am != NXACC_CREATE5) {
+    if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
+      throw Mantid::Nexus::Exception("File is not HDF5", "NexusFile5 constructor", filename);
+    }
+    iFID = H5Fopen(filename.c_str(), am, fapl);
+  } else {
+    iFID = H5Fcreate(filename.c_str(), am, H5P_DEFAULT, fapl);
+  }
+
+  if (fapl != -1) {
+    H5Pclose(fapl);
+  }
+
+  if (iFID <= 0) {
+    throw Mantid::Nexus::Exception("Cannot open file", "NexusFile5 constructor", filename);
+  }
+
+  // if in creation mode, must add the following attributes
+  // - file_namen
+  // - file_time
+  // - Nexus version
+  // - HDF5 version
+  if (am == NXACC_CREATE5) {
+    // open the root as a group and add these attributes
+    hid_t root_id = H5Gopen(iFID, "/", H5P_DEFAULT);
+
+    std::vector<std::pair<std::string, std::string>> attrs{{"NeXus_version", NEXUS_VERSION},
+                                                           {"file_name", filename},
+                                                           {"HDF5_Version", version_str},
+                                                           {"file_time", NXIformatNeXusTime()},
+                                                           {"NX_class", "NXroot"}};
+    for (auto attr : attrs) {
+      if (set_str_attribute(root_id, attr.first, attr.second) < 0) {
+        H5Gclose(root_id);
+        H5Fclose(iFID);
+        throw Mantid::Nexus::Exception("Error formatting file for NeXus", "NexusFile5 constructor", filename);
+      }
+    }
+    H5Gflush(root_id);
+    H5Gclose(root_id);
+  }
+  H5Fflush(iFID, H5F_SCOPE_GLOBAL);
+
+  iStack5[0].iVref = 0; // root!
+};
+
+NexusFile5::NexusFile5(NexusFile5 const &origHandle)
+    : iStack5{{"", 0, 0}}, iAtt5{"", 0, 0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0),
+      iCurrentA(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+  iFID = H5Freopen(origHandle.iFID);
+  if (iFID <= 0) {
+    throw Mantid::Nexus::Exception("Error reopening file");
+  }
+  iStack5[0].iVref = 0; // root!
+};
+
+NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
+  this->iFID = H5Freopen(origHandle.iFID);
+  return *this;
+}
+
+NexusFile5::~NexusFile5() {
+  if (iCurrentD != 0) {
+    H5Dclose(iCurrentD);
+  }
+  for (auto entry : iStack5) {
+    H5Gclose(entry.iVref);
+  }
+  H5Fclose(iFID);
+  H5garbage_collect();
+}
 
 namespace Mantid::Nexus {
 
@@ -118,30 +217,28 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   if (filename.empty()) {
     throw NXEXCEPTION("Filename specified is empty constructor");
   }
-
-  NXhandle temp;
-  NXstatus status = NXopen(filename, access, temp);
-  if (status != NXstatus::NX_OK) {
+  NexusFile5 tmp(filename, access);
+  if (tmp.iFID <= 0) {
     stringstream msg;
     msg << "NXopen(" << filename << ", " << access << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    this->m_pfile_id = std::make_shared<NXhandle>(temp);
+    m_pfile_id = std::make_shared<NexusFile5>(tmp);
   }
 }
 
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_pfile_id(f.m_pfile_id), m_close_handle(false),
+    : m_filename(f.m_filename), m_access(f.m_access), m_close_handle(false), m_pfile_id(f.m_pfile_id),
       m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false),
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_close_handle(false), m_pfile_id(pf->m_pfile_id),
       m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_pfile_id(pf->m_pfile_id), m_close_handle(false),
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_close_handle(false), m_pfile_id(pf->m_pfile_id),
       m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
@@ -159,35 +256,34 @@ File &File::operator=(File const &f) {
 // deconstructor
 
 File::~File() {
-  if (m_close_handle && m_pfile_id != NULL) {
-    NXstatus status = NXclose(*m_pfile_id);
-    this->m_pfile_id = NULL;
-    if (status != NXstatus::NX_OK) {
-      stringstream msg;
-      msg << "NXclose failed for file " << m_filename << "\n";
-      NXReportError(const_cast<char *>(msg.str().c_str()));
-    }
+  if (m_close_handle) {
+    close();
   }
+  m_pfile_id.reset();
 }
 
 void File::close() {
-  if (this->m_pfile_id != NULL) {
-    NAPI_CALL(NXclose(*m_pfile_id), "NXclose failed");
-    this->m_pfile_id = NULL;
+  if (m_pfile_id != nullptr) {
+    /* release memory */
+    for (auto entry : m_pfile_id->iStack5) {
+      H5Gclose(entry.iVref);
+    }
+    H5Fclose(m_pfile_id->iFID);
+    NXI5KillDir(m_pfile_id.get());
+    H5garbage_collect();
+    m_pfile_id = nullptr;
   }
+  m_pfile_id.reset();
 }
 
 void File::flush() {
-  pNexusFile5 pFile = NULL;
   herr_t iRet;
-
-  pFile = assertNXID(m_pfile_id);
-  if (pFile->iCurrentD != 0) {
-    iRet = H5Fflush(pFile->iCurrentD, H5F_SCOPE_LOCAL);
-  } else if (pFile->iCurrentG != 0) {
-    iRet = H5Fflush(pFile->iCurrentG, H5F_SCOPE_LOCAL);
+  if (m_pfile_id->iCurrentD != 0) {
+    iRet = H5Fflush(m_pfile_id->iCurrentD, H5F_SCOPE_LOCAL);
+  } else if (m_pfile_id->iCurrentG != 0) {
+    iRet = H5Fflush(m_pfile_id->iCurrentG, H5F_SCOPE_LOCAL);
   } else {
-    iRet = H5Fflush(pFile->iFID, H5F_SCOPE_LOCAL);
+    iRet = H5Fflush(m_pfile_id->iFID, H5F_SCOPE_LOCAL);
   }
   if (iRet < 0) {
     throw NXEXCEPTION("The object cannot be flushed");
@@ -428,7 +524,7 @@ void File::closeGroup() {
       ii = ii - i;
     }
     if (ii > 0) {
-      char *uname = strdup(pFile->name_ref.c_str());
+      char const *uname = strdup(pFile->name_ref.c_str());
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);

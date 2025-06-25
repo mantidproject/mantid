@@ -159,8 +159,8 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXmakelink(fileid, dlink), "");
   Mantid::Nexus::DimVector dims{100, 20};
   int comp_array[100][20];
-  for (std::size_t i = 0; i < dims[0]; i++) {
-    for (std::size_t j = 0; j < dims[1]; j++) {
+  for (int64_t i = 0; i < dims[0]; i++) {
+    for (int64_t j = 0; j < dims[1]; j++) {
       comp_array[i][j] = static_cast<int>(i);
     }
   }
@@ -314,7 +314,6 @@ int main(int argc, char *argv[]) {
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           ASSERT_NO_ERROR(NXgetattrinfo(fileid, numattr), "");
           do {
-            // cppcheck-suppress argumentSize
             attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
             if (attr_status == NXstatus::NX_ERROR)
               return TEST_FAILED;

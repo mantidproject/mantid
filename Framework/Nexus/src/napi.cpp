@@ -97,7 +97,8 @@ NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
     // call NX5open to set variables on it
-    status = NX5open(filename, am, fid);
+    fid = new NexusFile5(filename, am);
+    status = NXstatus::NX_OK;
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     status = NXstatus::NX_ERROR;
@@ -698,10 +699,10 @@ NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXmakelink(NXhandle fid, NXlink &sLink) {
+NXstatus NXmakelink(NXhandle fid, NXlink const &sLink) {
   pNexusFile5 pFile;
   std::string linkTarget;
-  char *itemName = NULL;
+  // char *itemName = NULL;
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) { /* root level, can not link here */
@@ -711,12 +712,7 @@ NXstatus NXmakelink(NXhandle fid, NXlink &sLink) {
   /*
      locate name of the element to link
    */
-  itemName = strrchr(sLink.targetAddress.data(), '/');
-  if (itemName == NULL) {
-    NXReportError("ERROR: bad link structure");
-    return NXstatus::NX_ERROR;
-  }
-  itemName++;
+  std::string itemName = sLink.targetAddress.substr(sLink.targetAddress.find_last_of('/') + 1);
 
   /*
      build addressname to link from our current group and the name
@@ -1092,8 +1088,6 @@ NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
   while (run == 1) {
     pPtr = extractNextAddress(pPtr, addressElement);
     status = stepOneUp(fid, addressElement);
-    printf("pPtr = %s\n", pPtr.c_str());
-    printf("addressElement  %s\b", addressElement.c_str());
     if (status != NXstatus::NX_OK) {
       return status;
     }

@@ -24,17 +24,12 @@ typedef uint64_t hsize_t;
  * \li NXACC_RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
  * \li NXACC_CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
  */
-typedef enum : unsigned int { 
-  NXACC_READ = 0x0000u,
-  NXACC_RDWR = 0x0001u,
-  NXACC_CREATE5 = 0x0002u
-} NXaccess_mode;
+typedef enum : unsigned int { NXACC_READ = 0x0000u, NXACC_RDWR = 0x0001u, NXACC_CREATE5 = 0x0002u } NXaccess_mode;
 
 /**
  * A combination of options from #NXaccess_mode
  */
 typedef unsigned int NXaccess;
-
 
 struct stackEntry {
   std::string irefn;
@@ -65,6 +60,8 @@ struct MANTID_NEXUS_DLL NexusFile5 {
   NexusFile5() = delete;
   NexusFile5(std::string const &, NXaccess const);
   NexusFile5(NexusFile5 const &);
+  // assignment
+  NexusFile5 &operator=(NexusFile5 const &);
   // destructor
   ~NexusFile5();
 };

@@ -279,7 +279,7 @@ MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink &pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_linking
  */
-MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink &pLink);
+MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink const &pLink);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
