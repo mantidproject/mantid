@@ -400,7 +400,7 @@ void LoadCSNSNexus::exec() {
   const std::string m_filename = getPropertyValue("Filename");
   m_entry = getPropertyValue("NXentryName");
   const std::vector<std::string> bankNames = getProperty("Bankname");
-  m_file = std::make_unique<Nexus::File>(m_filename, NXACC_READ);
+  m_file = std::make_unique<Nexus::File>(m_filename, NXaccess::READ);
   const bool m_loadBank = getProperty("LoadBank");
   const bool m_loadEvent = getProperty("LoadEvent");
   const auto start_time = getExperimentTime("start_time_utc");

@@ -165,7 +165,7 @@ void SaveNXTomo::setupFile() {
   // if we can overwrite, try to open the file
   if (!m_overwriteFile) {
     try {
-      m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_RDWR);
+      m_nxFile = std::make_unique<Nexus::File>(m_filename, NXaccess::RDWR);
       return;
     } catch (Nexus::Exception const &) {
     }
@@ -173,7 +173,7 @@ void SaveNXTomo::setupFile() {
 
   // If not overwriting, or no existing file found above, create new file
   if (!m_nxFile) {
-    m_nxFile = std::make_unique<Nexus::File>(m_filename, NXACC_CREATE5);
+    m_nxFile = std::make_unique<Nexus::File>(m_filename, NXaccess::CREATE5);
   }
   // Make the top level entry (and open it)
   m_nxFile->makeGroup("entry1", "NXentry", true);

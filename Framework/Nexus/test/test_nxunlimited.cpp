@@ -32,7 +32,7 @@
 
 #define DATA_SIZE 200000
 
-int test_unlimited(int file_type, const char *filename) {
+int test_unlimited(NXaccess file_type, const char *filename) {
   // cppcheck-suppress constVariable
   static double d[DATA_SIZE];
   int64_t dims[2] = {NX_UNLIMITED, DATA_SIZE};
@@ -64,7 +64,7 @@ int main() {
 
   printf("Testing HDF5\n");
   time(&tim);
-  test_unlimited(NXACC_CREATE5, "test_unlimited.nx5");
+  test_unlimited(NXaccess::CREATE5, "test_unlimited.nx5");
   printf("Took %u seconds\n", (unsigned)(time(NULL) - tim));
 
   return 0;

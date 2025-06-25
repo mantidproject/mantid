@@ -226,7 +226,7 @@ void LoadILLDiffraction::loadMetaData() {
 
   // get some information from the NeXus file
   try {
-    Nexus::File filehandle(m_filename, NXACC_READ);
+    Nexus::File filehandle(m_filename, NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(filehandle, mutableRun);
   } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";

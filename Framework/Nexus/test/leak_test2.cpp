@@ -18,7 +18,7 @@ int iFile, iReOpen, iEntry, iData, iNXdata, iSimpleArraySize = 4;
 
 int main() {
   printf("Running for %d iterations\n", nFiles);
-  NXaccess access_mode = NXACC_CREATE5;
+  NXaccess access_mode = NXaccess::CREATE5;
   char strFile[512];
 
   for (iFile = 0; iFile < nFiles; iFile++) {

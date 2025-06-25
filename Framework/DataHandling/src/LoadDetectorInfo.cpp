@@ -221,7 +221,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
  */
 void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
   Nexus::File nxsFile(filename,
-                      NXACC_READ); // will throw if file can't be opened
+                      NXaccess::READ); // will throw if file can't be opened
 
   // two types of file:
   //   - new type entry per detector

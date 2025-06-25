@@ -212,7 +212,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
   try {
-    Nexus::File nxHandle(m_fileName, NXACC_READ);
+    Nexus::File nxHandle(m_fileName, NXaccess::READ);
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);

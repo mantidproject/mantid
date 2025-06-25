@@ -90,7 +90,7 @@ public:
   //    if (true)
   //    {
   //      Nexus::File * file = new ::Nexus::File("components.nxs",
-  //      NXACC_CREATE5);
+  //      NXaccess::CREATE5);
   //      file->makeGroup("test_comps", "NXdata",1);
   //      std::vector<double> posArray(num*3);
   //      std::vector<double> rotArray(num*4);
