@@ -18,8 +18,7 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_X = "Cylindrical X"
     _CYLINDRICAL_Y = "Cylindrical Y"
     _CYLINDRICAL_Z = "Cylindrical Z"
-    _SIDE_BY_SIDE = "Side-By-Side"
-    _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
+    _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
     def __init__(self, view, workspace):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
@@ -72,8 +71,6 @@ class FullInstrumentViewPresenter:
             is_spherical = True
         elif projection_type.startswith("Cylindrical"):
             is_spherical = False
-        elif projection_type == self._SIDE_BY_SIDE:
-            pass
         else:
             raise ValueError(f"Unknown projection type: {projection_type}")
 
