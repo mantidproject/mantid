@@ -120,7 +120,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   }
 
   NXhandle temp;
-  NXstatus status = NXopen(filename.c_str(), access, temp);
+  NXstatus status = NXopen(filename, access, temp);
   if (status != NXstatus::NX_OK) {
     stringstream msg;
     msg << "NXopen(" << filename << ", " << access << ") failed";
@@ -202,14 +202,14 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopenaddress(*(this->m_pfile_id), address.c_str()), "NXopenaddress(" + address + ") failed");
+  NAPI_CALL(NXopenaddress(*(this->m_pfile_id), address), "NXopenaddress(" + address + ") failed");
 }
 
 void File::openGroupAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopengroupaddress(*(this->m_pfile_id), address.c_str()), "NXopengroupaddress(" + address + ") failed");
+  NAPI_CALL(NXopengroupaddress(*(this->m_pfile_id), address), "NXopengroupaddress(" + address + ") failed");
 }
 
 std::string File::getAddress() {
@@ -1303,7 +1303,7 @@ template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *da
   if (info.name.empty()) {
     throw NXEXCEPTION("Supplied empty name to putAttr");
   }
-  NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name.c_str(), data, static_cast<int>(info.length), info.type),
+  NAPI_CALL(NXputattr(*(this->m_pfile_id), info.name, data, info.length, info.type),
             "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
                 ") failed");
 }

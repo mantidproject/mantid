@@ -131,7 +131,7 @@ void killAttVID(const pNexusFile5 pFile, hid_t vid) {
   }
 }
 
-NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink &sLink) {
+NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink) {
   hid_t dataID, aid2, aid1, attID;
   char name[] = "target";
 

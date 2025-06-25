@@ -350,7 +350,7 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
     return NXstatus::NX_ERROR;
   }
 
-  if (rank <= 0) {
+  if (rank == 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified %s", name.c_str());
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
@@ -402,13 +402,13 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
     if (chunkdims[rank - 1] > 1) {
       chunkdims[rank - 1] = 1;
     }
-    dataspace = H5Screate_simple(rank, mydim1, maxdims);
+    dataspace = H5Screate_simple(static_cast<int>(rank), mydim1, maxdims);
   } else {
     if (unlimiteddim) {
-      dataspace = H5Screate_simple(rank, mydim, maxdims);
+      dataspace = H5Screate_simple(static_cast<int>(rank), mydim, maxdims);
     } else {
       /* dataset creation */
-      dataspace = H5Screate_simple(rank, mydim, NULL);
+      dataspace = H5Screate_simple(static_cast<int>(rank), mydim, NULL);
     }
   }
   datatype1 = H5Tcopy(type);
@@ -420,7 +420,7 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
   hid_t dID;
   if (compress_type == NXcompression::LZW) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
-    iNew = H5Pset_chunk(cparms, rank, chunkdims);
+    iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
     if (iNew < 0) {
       NXReportError("ERROR: size of chunks could not be set");
       return NXstatus::NX_ERROR;
@@ -431,7 +431,7 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
   } else if (compress_type == NXcompression::NONE) {
     if (unlimiteddim) {
       cparms = H5Pcreate(H5P_DATASET_CREATE);
-      iNew = H5Pset_chunk(cparms, rank, chunkdims);
+      iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
       if (iNew < 0) {
         NXReportError("ERROR: size of chunks could not be set");
         return NXstatus::NX_ERROR;
@@ -442,7 +442,7 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
     }
   } else if (compress_type == NXcompression::CHUNK) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
-    iNew = H5Pset_chunk(cparms, rank, chunkdims);
+    iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
     if (iNew < 0) {
       NXReportError("ERROR: size of chunks could not be set");
       return NXstatus::NX_ERROR;
@@ -554,7 +554,7 @@ NXstatus NXputdata(NXhandle fid, const void *data) {
   bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
   /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
   if (unlimiteddim) {
-    Mantid::Nexus::DimSizeVector myStart, mySize;
+    Mantid::Nexus::DimSizeVector myStart(rank, 0), mySize(rank);
     for (int i = 0; i < rank; i++) {
       if (maxdims[i] == H5S_UNLIMITED) {
         myStart[i] = thedims[i] + 1;
@@ -768,7 +768,7 @@ NXstatus NXflush(NXhandle &fid) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXmalloc64(void *&data, std::size_t rank, Mantid::Nexus::DimVector const dims, NXnumtype datatype) {
+NXstatus NXmalloc64(void *&data, std::size_t rank, Mantid::Nexus::DimVector const &dims, NXnumtype datatype) {
   size_t size = 1;
   data = nullptr;
   for (size_t i = 0; i < rank; i++) {
@@ -1122,7 +1122,6 @@ NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
 NXstatus NXopengroupaddress(NXhandle fid, std::string const &address) {
   NXstatus status;
   std::string addressElement;
-  char buffer[256];
 
   if (fid == nullptr || address.empty()) {
     NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");

@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
-  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), nx_creation_code, fileid), "Failure in NXopen for " + nxFile);
+  ASSERT_NO_ERROR(NXopen(nxFile, nx_creation_code, fileid), "Failure in NXopen for " + nxFile);
   if (nx_creation_code == NXaccess::CREATE5) {
     std::cout << "Trying to reopen the file handle" << std::endl;
     NXhandle clone_fileid;
@@ -148,8 +148,8 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXputslab64(fileid, r8_array, slab_start, slab_size), "");
   ASSERT_NO_ERROR(
       NXputattr(fileid, "ch_attribute", ch_test_data, static_cast<int>(strlen(ch_test_data)), NXnumtype::CHAR), "");
-  int i = 42;
-  ASSERT_NO_ERROR(NXputattr(fileid, "i4_attribute", &i, 1, NXnumtype::INT32), "");
+  int intdata = 42;
+  ASSERT_NO_ERROR(NXputattr(fileid, "i4_attribute", &intdata, 1, NXnumtype::INT32), "");
   r = static_cast<float>(3.14159265);
   ASSERT_NO_ERROR(NXputattr(fileid, "r4_attribute", &r, 1, NXnumtype::FLOAT32), "");
   ASSERT_NO_ERROR(NXgetdataID(fileid, dlink), "");
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
   // NXcompmakedata64 has a hard time with unlimited dimensions
   ASSERT_NO_ERROR(NXmakedata64(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims), "NXmakedata64 flush_data");
   slab_size[0] = 1;
-  for (i = 0; i < 7; i++) {
+  for (int i = 0; i < 7; i++) {
     slab_start[0] = i;
     ASSERT_NO_ERROR(NXopendata(fileid, "flush_data"), "");
     ASSERT_NO_ERROR(NXputslab64(fileid, &i, slab_start, slab_size), "");
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
+  ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   std::size_t num_objs;
   NXgetattrinfo(fileid, num_objs);
   if (num_objs > 0) {
@@ -231,7 +231,6 @@ int main(int argc, char *argv[]) {
   std::size_t NXrank;
   Mantid::Nexus::DimVector NXdims(32);
   do {
-    // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
     if (attr_status == NXstatus::NX_ERROR)
       return TEST_FAILED;
@@ -256,7 +255,6 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "NXentry address " << address << std::endl;
   do {
-    // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
     if (attr_status == NXstatus::NX_ERROR)
       return TEST_FAILED;
@@ -269,12 +267,10 @@ int main(int argc, char *argv[]) {
     }
   } while (attr_status == NXstatus::NX_OK);
 
-  // cppcheck-suppress argumentSize
   std::size_t num;
   ASSERT_NO_ERROR(NXgetgroupinfo(fileid, num, group_name, class_name), "");
   std::cout << "Group: " << group_name.c_str() << "(" << class_name.c_str() << ") contains " << num << " items\n";
   do {
-    // cppcheck-suppress argumentSize
     entry_status = NXgetnextentry(fileid, name, nxclass, NXtype);
     if (entry_status == NXstatus::NX_ERROR)
       return TEST_FAILED;
@@ -322,9 +318,6 @@ int main(int argc, char *argv[]) {
           ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           ASSERT_NO_ERROR(NXgetattrinfo(fileid, numattr), "");
-          if (i > 0) {
-            printf("      Number of attributes : %lu\n", numattr);
-          }
           do {
             // cppcheck-suppress argumentSize
             attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
@@ -334,8 +327,8 @@ int main(int argc, char *argv[]) {
               switch (NXtype) {
               case NXnumtype::INT32:
                 NXlen = TEST_FAILED;
-                ASSERT_NO_ERROR(NXgetattr(fileid, name, &i, NXlen, NXtype), "");
-                printf("         %s : %d\n", name.c_str(), i);
+                ASSERT_NO_ERROR(NXgetattr(fileid, name, &intdata, NXlen, NXtype), "");
+                printf("         %s : %d\n", name.c_str(), intdata);
                 break;
               case NXnumtype::FLOAT32:
                 NXlen = TEST_FAILED;

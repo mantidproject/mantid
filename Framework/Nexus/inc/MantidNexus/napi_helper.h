@@ -29,7 +29,7 @@ MANTID_NEXUS_DLL hid_t getAttVID(pNexusFile5 pFile);
 
 MANTID_NEXUS_DLL void killAttVID(const pNexusFile5 pFile, hid_t vid);
 
-MANTID_NEXUS_DLL NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink &sLink);
+MANTID_NEXUS_DLL NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink);
 
 MANTID_NEXUS_DLL int countObjectsInGroup(hid_t loc_id);
 
