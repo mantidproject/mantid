@@ -401,7 +401,7 @@ void Goniometer::loadNexus(Nexus::File *file, const std::string &group) {
     std::vector<double> matrixData;
     file->readData("rotation_matrix", matrixData);
     DblMatrix rotMat(matrixData);
-    setR(rotMat);
+    setR(std::move(rotMat));
     m_initFromR = true; // set as initFromR to prevent overwrite on R recalc
   } else {
     for (int i = 0; i < num_axes; i++) {
