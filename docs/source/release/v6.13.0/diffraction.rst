@@ -13,6 +13,8 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+.. _6_13_powder_diffraction:
+
 New features
 ############
 - A new algorithm, :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` has been added - for VULCAN only. This

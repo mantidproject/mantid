@@ -187,6 +187,8 @@ Bugfixes
 Dependencies
 ------------
 
+.. _6_13_dependencies:
+
 New features
 ############
 - Upgraded to Python 3.11.
