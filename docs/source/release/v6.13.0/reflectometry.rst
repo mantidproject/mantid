@@ -4,7 +4,7 @@ Reflectometry Changes
 
 .. image:: ../../images/6_13_release/refl-gui-fredrikze.png
    :class: screenshot
-   :width: 600px
+   :width: 45%
    :align: right
 
 .. contents:: Table of Contents
@@ -28,9 +28,5 @@ New Features
 - A new :ref:`algm-ReflectometryISISCalculatePolEff` algorithm has been added. This algorithm provides a convenient
   wrapper for the :ref:`algm-ReflectometryISISCreateTransmission`, :ref:`algm-PolarizationEfficienciesWildes` and
   :ref:`algm-JoinISISPolarizationEfficiencies` algorithms.
-
-Bugfixes
---------
-
 
 :ref:`Release 6.13.0 <v6.13.0>`
