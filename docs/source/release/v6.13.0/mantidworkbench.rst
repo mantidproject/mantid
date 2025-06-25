@@ -34,19 +34,6 @@ Bugfixes
   in the :ref:`Fit Property Browser <WorkbenchPlotWindow_Fitting>` on macOS.
 - Minimizing the sample log plot on the ``SampleLogs`` widget so that it is not visible no longer throws an error.
 
-
-InstrumentViewer
-----------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
-
 SliceViewer
 -----------
 
