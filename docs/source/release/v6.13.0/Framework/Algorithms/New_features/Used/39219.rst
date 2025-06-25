@@ -1,1 +1,0 @@
-- In :ref:`algm-SetGoniometer`, you can now directly pass a comma separated string of 9 values corresponding to the (row major) flattened rotation matrix.

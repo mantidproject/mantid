@@ -1,1 +1,0 @@
-- :ref:`algm-PaalmanPingsAbsorptionCorrection` has been updated to use beam properties from :ref:`algm-SetBeam` to determine ``GaugeVolume`` if no volume is defined.

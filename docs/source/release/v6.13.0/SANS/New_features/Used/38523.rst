@@ -1,1 +1,0 @@
-- :ref:`algm-SANSSave` now supports the new :ref:`algm-SavePolarizedNXcanSAS` algorithm.

@@ -1,5 +1,0 @@
-- Overplotting a Cut plot with changed intensity and a Bragg peak no longer causes a crash.
-- Changing intensity to GDOS on an interactive Cut plot no longer causes a crash.
-- Attempting to save a file to a read-only folder will now display an error instead of causing a crash.
-- Width calculation for Cut plots no longer causes rounding error.
-- Invalid characters in user input boxes such as Intensity, Bose and Scale no longer produce a crash.

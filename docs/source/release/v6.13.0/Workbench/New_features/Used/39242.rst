@@ -1,1 +1,0 @@
-- A crosshair toggle option has been added in mantidplots on the top right of the toolbar area. The crosshair button is disabled (invisible) in titled plots.
