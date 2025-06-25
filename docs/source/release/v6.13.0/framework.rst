@@ -195,6 +195,26 @@ New features
   - See Python's `migration guide <https://docs.python.org/3/whatsnew/3.11.html#porting-to-python-3-11>`_ for changes
     that could break scripts.
 
+- This release has replaced use of the `NeXus API <https://github.com/nexusformat/code>`_ with its own implementation
+  that is heavily influenced by that code. There are two main purposes for no longer depending on the NeXus-API:
+
+  1. The API was `announced as only undergoing bugfixes as of 2014 <https://www.nexusformat.org/content/NIACAPI.html>`_.
+     The last release was `v4.4.3 <https://github.com/nexusformat/code/releases/tag/v4.4.3>`_ on 2016-09-12.
+  2. In order to make changes to improve performance, Mantid needs to change the underlying implementation calling
+     HDF5.
+
+  The net effect is that we have a ``Nexus`` abstraction that only supports HDF5-based files, which are the vast
+  majority of the files that Mantid needs to write, and a ``LegacyNexus`` abstraction which has reduced its support to
+  HDF4 and HDF5 based files (dropping ``xml``).
+
+  Much of this release cycle was spent creating the new abstraction and moving all existing code to use it. Ideally,
+  users should see very little difference. There may be improved performance for files that have many groups/datasets at
+  a level within the file. This is due to an in-memory cache of the data layout.
+
+  Those interested in the details of the changes can see them in the (developer centric)
+  `github issue <https://github.com/mantidproject/mantid/issues/38332>`_.
+
+
 Bugfixes
 ############
 
