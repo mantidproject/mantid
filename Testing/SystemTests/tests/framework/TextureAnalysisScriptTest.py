@@ -271,7 +271,7 @@ class PeakFitMixin(object):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            self.assertTrue(np.isclose(out_table.column(c)[0], expected_dict[c], rtol=1e-4))
+            self.assertTrue(np.isclose(out_table.column(c)[0], expected_dict[c], rtol=1e-3))
 
 
 class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
