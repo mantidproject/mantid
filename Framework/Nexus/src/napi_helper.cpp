@@ -6,14 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-pNexusFile5 NXI5assert(NXhandle fid) {
-  pNexusFile5 pRes;
-
-  assert(fid != NULL);
-  pRes = static_cast<pNexusFile5>(fid);
-  assert(pRes->iNXID == NX5SIGNATURE);
-  return pRes;
-}
+pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
 void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 

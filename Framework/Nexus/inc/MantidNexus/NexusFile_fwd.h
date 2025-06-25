@@ -55,7 +55,6 @@ struct NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  int iNXID;
   int iStackPtr;
   char name_ref[1024];
   char name_tmp[1024];
