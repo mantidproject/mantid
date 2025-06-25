@@ -12,12 +12,6 @@ New Features
 - :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>` now supports an output label that is appended to the output name
   and doesn't override previous outputs.
 
-
-Bugfixes
---------
-
-
-
 Algorithms
 ----------
 
@@ -30,9 +24,5 @@ New features
 - A ``CacheDirectory`` parameter has been added to the :ref:`algm-Abins` and :ref:`algm-Abins2D` algorithms. This allows
   an explicit cache directory to be set independently for each calculation; the previous behaviour (to use the User Save
   Directory) remains available as the default value.
-
-Bugfixes
-############
-
 
 :ref:`Release 6.13.0 <v6.13.0>`
