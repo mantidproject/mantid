@@ -19,7 +19,6 @@ using std::stringstream;
 using std::vector;
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
-#define NX5SIGNATURE 959695
 #define NX_UNKNOWN_GROUP ""
 
 #define NAPI_CALL(status, msg)                                                                                         \
