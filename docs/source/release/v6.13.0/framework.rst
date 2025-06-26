@@ -84,6 +84,8 @@ Bugfixes
 - Add ``MandatoryValidator<OptionalBool>`` to property declaration in the :ref:`algm-Divide` algorithm
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will no longer crash due to a slab size to data size mismatch when
   writing ragged workspaces.
+- When working with large datasets, :ref:`SumSpectra <algm-SumSpectra>` will no longer freeze when adding an
+  ``EventList`` of weighted events to the ``OutputWorkspace``.
 
 Deprecated
 ############
