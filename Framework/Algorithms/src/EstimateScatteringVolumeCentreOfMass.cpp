@@ -14,13 +14,22 @@
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/V3D.h"
+#include <unordered_map>
 
 namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Geometry;
 using namespace Kernel;
+
+namespace {
+const std::string UNIT_M = "m";
+const std::string UNIT_CM = "cm";
+const std::string UNIT_MM = "mm";
+static const std::unordered_map<std::string, double> unitToMeters{{UNIT_M, 1.0}, {UNIT_CM, 0.01}, {UNIT_MM, 0.001}};
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EstimateScatteringVolumeCentreOfMass)
@@ -40,8 +49,13 @@ void EstimateScatteringVolumeCentreOfMass::init() {
                   "Estimated centre of mass of illuminated sample volume");
 
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
-  moreThanZero->setLower(0.001);
-  declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
+  moreThanZero->setLower(1e-6);
+  declareProperty("ElementSize", 1.0, moreThanZero,
+                  "The size of one side of an integration element cube in {ElementUnits}");
+
+  std::vector<std::string> unitOptions{UNIT_M, UNIT_CM, UNIT_MM};
+  declareProperty("ElementUnits", UNIT_MM, std::make_shared<StringListValidator>(std::move(unitOptions)),
+                  "The units which ElementSize has been provided in");
 }
 
 void EstimateScatteringVolumeCentreOfMass::exec() {
@@ -50,8 +64,14 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   // Cache the beam direction
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
   // Calculate the element size
-  m_cubeSide = getProperty("ElementSize"); // in mm
-  m_cubeSide *= 0.001;                     // now in m
+  m_cubeSide = getProperty("ElementSize"); // in units
+  std::string elementUnits = getProperty("ElementUnits");
+
+  auto it = unitToMeters.find(elementUnits);
+  if (it == unitToMeters.end()) {
+    throw std::invalid_argument("Supported units for ElementUnits are (m, cm, mm), not: " + elementUnits);
+  }
+  m_cubeSide *= it->second; // now in m
 
   // Retrieve the Sample Shape Geometry
   const std::shared_ptr<const Geometry::IObject> sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
@@ -75,8 +95,12 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculate
     const std::shared_ptr<const Geometry::IObject> integrationVolume,
     const std::shared_ptr<const Geometry::IObject> sampleObject) {
   const auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
-  if (raster.l1.size() == 0)
-    throw std::runtime_error("Failed to rasterize shape");
+  if (raster.l1.size() == 0) {
+    const std::string mess("Failed to find any points in the rasterized illumination volume within the sample shape - "
+                           "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
+  }
   // calculate mean element position
   const V3D meanPos = calcAveragePosition(raster.position);
   return meanPos;
@@ -114,6 +138,7 @@ const V3D EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::v
     return sum;
   } else {
   }
+  // shouldn't be able to reach this point anyway
   const std::string mess("No intersection points found between illumination volume and sample shape - "
                          "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
   g_log.error(mess);
