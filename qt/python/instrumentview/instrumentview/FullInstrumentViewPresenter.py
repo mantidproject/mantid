@@ -28,6 +28,11 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_FULL_3D, _SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
+    _TIME_OF_FLIGHT = "TOF"
+    _D_SPACING = "dSpacing"
+    _WAVELENGTH = "Wavelength"
+    _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH]
+
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
@@ -72,6 +77,9 @@ class FullInstrumentViewPresenter:
         except ValueError:
             default_index = 0
         return default_index, self._PROJECTION_OPTIONS
+
+    def _on_unit_option_selected(self, value):
+        self.unit_option_selected(self._UNIT_OPTIONS[value])
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -165,7 +173,11 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
 
-        self._view.set_plot_for_detectors(self._model.workspace, self._model.picked_workspace_indices)
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+
+    def _update_line_plot_ws_and_draw(self, unit: str) -> None:
+        self._model.extract_spectra_for_line_plot(unit)
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
 
     def on_clear_selected_detectors_clicked(self) -> None:
@@ -207,3 +219,6 @@ class FullInstrumentViewPresenter:
         # we don't want stale workspace references hanging around.
         if hasattr(self, "_ads_observer"):
             del self._ads_observer
+
+    def on_unit_option_selected(self, value) -> None:
+        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
