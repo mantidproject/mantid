@@ -197,7 +197,6 @@ class FullInstrumentViewModel:
             return
 
         ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
-
         ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
 
         self.line_plot_workspace = ws

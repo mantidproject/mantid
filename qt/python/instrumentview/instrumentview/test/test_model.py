@@ -249,3 +249,31 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.setup()
         monitor_positions = model.monitor_positions
         self.assertEqual(len(monitor_positions), 2)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    def test_extract_spectra_for_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = [1, 2]
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("TOF")
+        mock_extract_spectra.assert_called_once_with(
+            InputWorkspace=mock_workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
+        )
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_extract_spectra.return_value, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
+        )
+        self.assertEqual(mock_convert_units.return_value, model.line_plot_workspace)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    def test_extract_spectra_no_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = []
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("Wavelength")
+        self.assertIsNone(model.line_plot_workspace)
+        mock_extract_spectra.assert_not_called()
+        mock_convert_units.assert_not_called()
