@@ -24,7 +24,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  double averageTransmition(Mantid::API::WorkspaceGroup_const_sptr wsGroup) const;
+  double averageTransmition(Mantid::API::WorkspaceGroup_const_sptr const &wsGroup) const;
 
 private:
   void init() override;

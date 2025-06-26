@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DetermineSpinStateOrder.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
@@ -34,6 +35,7 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroupWithYValues(const std::vect
   auto wsGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
   for (const double yValue : yValues) {
     const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 100, true, 100, yValue, 0, 0);
+    ws->getAxis(0)->setUnit("WaveLength");
     wsGroup->addWorkspace(ws);
   }
   return wsGroup;
@@ -51,6 +53,7 @@ Mantid::API::WorkspaceGroup_sptr createWorkpsaceGroupWithYValuesAndFlipperLogs(c
   }
   for (double i = 0.0; i < yValues.size(); i++) {
     const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 100, true, 100, yValues[i], 0, 0);
+    ws->getAxis(0)->setUnit("WaveLength");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws, false, false, instrumentName);
     auto spinFlipperLog = new Mantid::Kernel::TimeSeriesProperty<double>(
         logName, logTimes, createFakeLogValues(logTimes.size(), logMeans[i]));
@@ -77,6 +80,7 @@ public:
     auto wsGroupWithThreeItems = std::make_shared<Mantid::API::WorkspaceGroup>();
     for (int i = 0; i < 3; ++i) {
       const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "ZOOM");
+      ws->getAxis(0)->setUnit("WaveLength");
       wsGroupWithThreeItems->addWorkspace(ws);
     }
 
@@ -94,6 +98,7 @@ public:
     auto wsGroupOsiris = std::make_shared<Mantid::API::WorkspaceGroup>();
     for (int i = 0; i < 4; ++i) {
       const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "OSIRIS");
+      ws->getAxis(0)->setUnit("WaveLength");
       wsGroupOsiris->addWorkspace(ws);
     }
 
@@ -104,6 +109,57 @@ public:
     auto errors = alg.validateInputs();
     TS_ASSERT(!errors.empty())
     TS_ASSERT_EQUALS(errors["InputWorkspace"], "Sub workspaces must be data from either LARMOR or ZOOM")
+  }
+
+  void test_validateInputs_wavelengthAxis() {
+    auto wsGroupTOF = std::make_shared<Mantid::API::WorkspaceGroup>();
+    for (int i = 0; i < 4; ++i) {
+      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "ZOOM");
+      ws->getAxis(0)->setUnit("TOF");
+      wsGroupTOF->addWorkspace(ws);
+    }
+
+    DetermineSpinStateOrder alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", wsGroupTOF);
+
+    auto errors = alg.validateInputs();
+    TS_ASSERT(!errors.empty())
+    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must be in units of Wavelength.")
+  }
+
+  void test_validateInputs_multipleHistograms() {
+    auto wsGroupThreeHistograms = std::make_shared<Mantid::API::WorkspaceGroup>();
+    for (int i = 0; i < 4; ++i) {
+      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, false, false, true, "ZOOM");
+      ws->getAxis(0)->setUnit("Wavelength");
+      wsGroupThreeHistograms->addWorkspace(ws);
+    }
+
+    DetermineSpinStateOrder alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", wsGroupThreeHistograms);
+
+    auto errors = alg.validateInputs();
+    TS_ASSERT(!errors.empty())
+    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must contain a single histogram.")
+  }
+
+  void test_validateInputs_notHistogramData() {
+    auto wsGroupNonHistogram = std::make_shared<Mantid::API::WorkspaceGroup>();
+    for (int i = 0; i < 4; ++i) {
+      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, false, "ZOOM");
+      ws->getAxis(0)->setUnit("Wavelength");
+      wsGroupNonHistogram->addWorkspace(ws);
+    }
+
+    DetermineSpinStateOrder alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", wsGroupNonHistogram);
+
+    auto errors = alg.validateInputs();
+    TS_ASSERT(!errors.empty())
+    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must be histogram data.")
   }
 
   void test_averageTransmission() {

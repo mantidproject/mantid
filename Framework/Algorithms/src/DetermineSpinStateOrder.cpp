@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/DetermineSpinStateOrder.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -47,12 +48,43 @@ void DetermineSpinStateOrder::init() {
                   Direction::Output);
 }
 
+void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
+  if (workspace == nullptr) {
+    errorList["InputWorkspace"] = "All input workspaces must be of type MatrixWorkspace.";
+    return;
+  }
+
+  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
+  if (unit->unitID() != "Wavelength") {
+    errorList["InputWorkspace"] = "All input workspaces must be in units of Wavelength.";
+    return;
+  }
+
+  if (workspace->getNumberHistograms() != 1) {
+    errorList["InputWorkspace"] = "All input workspaces must contain a single histogram.";
+    return;
+  }
+
+  if (!workspace->isHistogramData()) {
+    errorList["InputWorkspace"] = "All input workspaces must be histogram data.";
+  }
+}
+
 std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
   std::map<std::string, std::string> helpMessages;
 
   API::WorkspaceGroup_const_sptr wsGroup = getProperty("InputWorkspace");
   if (wsGroup->getNumberOfEntries() != 4) {
     helpMessages["InputWorkspace"] = "Input workspace group must have 4 entries (PA data)";
+    return helpMessages;
+  }
+
+  for (const API::Workspace_sptr &ws : wsGroup->getAllItems()) {
+    const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+    validateGroupItem(groupItem, helpMessages);
+    if (!helpMessages.empty()) {
+      return helpMessages;
+    }
   }
 
   const auto firstItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(wsGroup->getItem(0));
@@ -108,7 +140,7 @@ void DetermineSpinStateOrder::exec() {
   setProperty("SpinStates", spinStates);
 }
 
-double DetermineSpinStateOrder::averageTransmition(API::WorkspaceGroup_const_sptr wsGroup) const {
+double DetermineSpinStateOrder::averageTransmition(API::WorkspaceGroup_const_sptr const &wsGroup) const {
   const auto workspaces = wsGroup->getAllItems();
 
   double total =
