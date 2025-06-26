@@ -52,7 +52,10 @@ class TimeDifference(PythonAlgorithm):
         return "TimeDifference"
 
     def summary(self):
-        return "Calculates the time differences of a series of workspaces with respect to a reference"
+        return (
+            "Calculates the time differences of a series of workspaces with respect to a reference. "
+            "If a reference workspace isn't provided, the first workspace from InputWorkspaces is used."
+        )
 
     def PyInit(self):
         self.declareProperty(
@@ -82,8 +85,7 @@ class TimeDifference(PythonAlgorithm):
         for name in workspace_names:
             ws = AnalysisDataService.retrieve(name)
             if not group_or_matrix(ws):
-                issues["InputWorkspaces"] = f"Workspace {name} is not a Group or Matrix Workspace."
-                return issues
+                issues["InputWorkspaces"] += f"Workspace {name} is not a Group or Matrix Workspace."
 
         reference_workspace = self.getProperty("ReferenceWorkspace").value
         if reference_workspace:
@@ -137,8 +139,6 @@ class TimeDifference(PythonAlgorithm):
     def _get_time_ws_group(self, workspaces: WorkspaceGroup) -> tuple[np.datetime64, np.timedelta64]:
         starts = ends = []
         for ws in workspaces:
-            if isinstance(ws, WorkspaceGroup):
-                continue
             time_start, time_end = self._get_time_ws(ws)
             if not np.isnat(time_start):
                 starts.append(time_start)
