@@ -116,16 +116,15 @@ private:
     MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     return testWS;
   }
-  MatrixWorkspace_sptr createWorkspaceWithCylinderSample() {
-    // Create a workspace with a cylinder sample
+  MatrixWorkspace_sptr createWorkspaceWithAnyOffsetCylinderSample(std::vector<double> offset) {
+    // Create a workspace with an offset cylinder sample
     MatrixWorkspace_sptr testWS = createTestWorkspace();
-    // Create the geometry (cylinder along y-axis)
+    // Create the geometry (cylinder with offset center)
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty("Shape", "Cylinder");
     geometry->declareProperty("Height", 4);
     geometry->declareProperty("Radius", 1);
-    std::vector<double> center{0, 0, 0};
-    geometry->declareProperty("Center", center);
+    geometry->declareProperty("Center", offset);
     std::vector<double> axis{0, 1, 0}; // y-axis
     geometry->declareProperty("Axis", axis);
     // Set the sample information
@@ -136,25 +135,11 @@ private:
     setsample.execute();
     return testWS;
   }
+  MatrixWorkspace_sptr createWorkspaceWithCylinderSample() {
+    return createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{0.0, 0.0, 0.0});
+  }
   MatrixWorkspace_sptr createWorkspaceWithOffsetCylinderSample() {
-    // Create a workspace with an offset cylinder sample
-    MatrixWorkspace_sptr testWS = createTestWorkspace();
-    // Create the geometry (cylinder with offset center)
-    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty("Shape", "Cylinder");
-    geometry->declareProperty("Height", 4);
-    geometry->declareProperty("Radius", 1);
-    std::vector<double> center{0, -1, 0}; // Offset center
-    geometry->declareProperty("Center", center);
-    std::vector<double> axis{0, 1, 0}; // y-axis
-    geometry->declareProperty("Axis", axis);
-    // Set the sample information
-    Mantid::DataHandling::SetSample setsample;
-    setsample.initialize();
-    setsample.setProperty("InputWorkspace", testWS);
-    setsample.setProperty("Geometry", geometry);
-    setsample.execute();
-    return testWS;
+    return createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{0.0, -1.0, 0.0});
   }
   MatrixWorkspace_sptr createWorkspaceWithOffsetCubeSample() {
     // Create a workspace with an offset cylinder sample
