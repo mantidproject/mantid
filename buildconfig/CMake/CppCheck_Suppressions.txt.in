@@ -593,4 +593,4 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowse
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:352
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:394
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFile.cpp:863
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFile.cpp:855

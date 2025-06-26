@@ -178,8 +178,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
 
     H5Gclose(root_id);
   }
-
-  pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
   handle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
