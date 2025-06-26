@@ -45,8 +45,8 @@ public:
   const std::shared_ptr<const Geometry::IObject> getGaugeVolumeObject();
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
   const Kernel::V3D
-  rasterizeGaugeVolumeAndCalculateMeanElementPosition(const std::shared_ptr<const IObject> integrationVolume,
-                                                      const std::shared_ptr<const IObject> sampleObject);
+  rasterizeGaugeVolumeAndCalculateMeanElementPosition(const std::shared_ptr<const Geometry::IObject> integrationVolume,
+                                                      const std::shared_ptr<const Geometry::IObject> sampleObject);
   const std::shared_ptr<const Geometry::IObject> extractValidSampleObject(const API::Sample &sample);
 
 private:
