@@ -13,6 +13,8 @@
 
 typedef const char CONSTCHAR;
 
+#define NX5SIGNATURE 959695
+
 /*
  * Any new NXaccess_mode options should be numbered in 2^n format
  * (8, 16, 32, etc) so that they can be bit masked and tested easily.
@@ -53,7 +55,6 @@ struct NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  int iNXID;
   int iStackPtr;
   char name_ref[1024];
   char name_tmp[1024];

@@ -126,7 +126,6 @@ NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
     free(pNew);
     return NXstatus::NX_ERROR;
   }
-  pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
   newHandle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;

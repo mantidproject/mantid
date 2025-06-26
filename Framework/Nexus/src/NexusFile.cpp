@@ -19,7 +19,6 @@ using std::stringstream;
 using std::vector;
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
-#define NX5SIGNATURE 959695
 #define NX_UNKNOWN_GROUP ""
 
 #define NAPI_CALL(status, msg)                                                                                         \
@@ -51,14 +50,7 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
-pNexusFile5 assertNXID(std::shared_ptr<NXhandle> fid) {
-  pNexusFile5 pRes;
-
-  assert(fid != NULL);
-  pRes = static_cast<pNexusFile5>(*fid);
-  assert(pRes->iNXID == NX5SIGNATURE);
-  return pRes;
-}
+pNexusFile5 assertNXID(std::shared_ptr<NXhandle> fid) { return *fid; }
 
 herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata) {
   UNUSED_ARG(loc_id);
