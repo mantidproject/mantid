@@ -358,6 +358,7 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     auto const summationType = summationTypeFromString(m_view->getSummationType());
     auto const includePartialBins = m_view->getIncludePartialBins();
     auto const debugOption = m_view->getDebugOption();
+    auto const diagnosticsOption = m_view->getDiagnosticsOption();
     auto transmissionStitchOptions = transmissionStitchOptionsFromView();
     auto backgroundSubtraction = backgroundSubtractionFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
@@ -366,7 +367,7 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     return ExperimentValidationResult(Experiment(analysisMode, reductionType, summationType, includePartialBins,
                                                  debugOption, backgroundSubtraction, polarizationCorrections,
                                                  floodCorrections, transmissionStitchOptions, stitchParameters,
-                                                 lookupTableValidationResult.assertValid()));
+                                                 lookupTableValidationResult.assertValid(), diagnosticsOption));
   } else {
     return ExperimentValidationResult(ExperimentValidationErrors(lookupTableValidationResult.assertError()));
   }
@@ -421,6 +422,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setSummationType(summationTypeToString(m_model.summationType()));
   m_view->setIncludePartialBins(m_model.includePartialBins());
   m_view->setDebugOption(m_model.debug());
+  m_view->setDiagnosticsOption(m_model.diagnostics());
   m_view->setLookupTable(m_model.lookupTableToArray());
   // Transmission
   if (m_model.transmissionStitchOptions().overlapRange()) {
