@@ -18,7 +18,7 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
-class IObject;
+class IObject_sptr;
 } // namespace Geometry
 
 namespace Algorithms {
@@ -42,12 +42,11 @@ public:
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   Kernel::V3D m_beamDirection;         ///< The direction of the beam.
   double m_cubeSide;                   ///< Element size of raster
-  const std::shared_ptr<const Geometry::IObject> getGaugeVolumeObject();
+  const Geometry::IObject_sptr getGaugeVolumeObject();
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
-  const Kernel::V3D
-  rasterizeGaugeVolumeAndCalculateMeanElementPosition(const std::shared_ptr<const Geometry::IObject> integrationVolume,
-                                                      const std::shared_ptr<const Geometry::IObject> sampleObject);
-  const std::shared_ptr<const Geometry::IObject> extractValidSampleObject(const API::Sample &sample);
+  const Kernel::V3D rasterizeGaugeVolumeAndCalculateMeanElementPosition(const Geometry::IObject_sptr integrationVolume,
+                                                                        const Geometry::IObject_sptr sampleObject);
+  const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
 
 private:
   /// Initialisation code
