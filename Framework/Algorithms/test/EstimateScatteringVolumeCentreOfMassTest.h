@@ -163,7 +163,7 @@ private:
     geometry->declareProperty("Shape", "Cylinder");
     geometry->declareProperty("Height", 4);
     geometry->declareProperty("Radius", 1);
-    geometry->declareProperty("Center", offset);
+    geometry->declareProperty("Center", std::move(offset));
     std::vector<double> axis{0, 1, 0}; // y-axis
     geometry->declareProperty("Axis", axis);
     // Set the sample information
@@ -190,7 +190,7 @@ private:
     geometry->declareProperty("Width", 2);
     geometry->declareProperty("Thick", 2);
     std::vector<double> center{1, 1, 1}; // Offset center
-    geometry->declareProperty("Center", center);
+    geometry->declareProperty("Center", std::move(center));
     geometry->declareProperty("Angle", 0);
     // Set the sample information
     Mantid::DataHandling::SetSample setsample;
@@ -219,7 +219,7 @@ private:
   }
   MatrixWorkspace_sptr createWorkspaceWithUnilluminatedSample() {
     // Create workspace with cylinder sample and add gauge volume
-    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{3.0, 3.0, 3.0});
+    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{10.0, 10.0, 10.0});
     // Define a cubic gauge volume
     const std::string gaugeXML = " \
         <cuboid id='some-cuboid'> \
