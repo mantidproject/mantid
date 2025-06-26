@@ -29,6 +29,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
+#include "tbb/parallel_invoke.h"
 #include "tbb/parallel_reduce.h"
 
 #include <H5Cpp.h>
@@ -340,7 +341,8 @@ public:
       // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
       // task group allows for separate of disk read from processing
-      tbb::task_group tg;
+      tbb::task_group_context tgroupcontext; // needed by parallel_reduce
+      tbb::task_group tgroup(tgroupcontext);
 
       // create object so bank calibration can be re-used
       std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
@@ -353,6 +355,10 @@ public:
       NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
       const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
+      // declare arrays once so memory can be reused
+      auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
+      auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
+
       // read parts of the bank at a time
       size_t event_index_start = eventRangeFull.first;
       while (event_index_start < eventRangeFull.second) {
@@ -363,41 +369,42 @@ public:
                                     ? std::numeric_limits<size_t>::max()
                                     : m_events_per_chunk;
 
-        // load detid
-        auto event_detid = std::make_unique<std::vector<uint32_t>>(); // uint32 for ORNL nexus file
-        m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
-        // immediately find min/max to allow for other things to read disk
-        const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-        // only recreate calibration if it doesn't already have the useful information
-        if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-            (calibration->idmax() < static_cast<detid_t>(maxval))) {
-          calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-              static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration, m_masked);
-        }
+        // load detid and tof at the same time
+        tbb::parallel_invoke(
+            [&] { // load detid
+              // event_detid->clear();
+              m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+              // immediately find min/max to allow for other things to read disk
+              const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
+              // only recreate calibration if it doesn't already have the useful information
+              if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
+                  (calibration->idmax() < static_cast<detid_t>(maxval))) {
+                calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
+                    static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration,
+                    m_masked);
+              }
+            },
+            [&] { // load time-of-flight
+              // event_time_of_flight->clear();
+              m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+            });
 
-        // load time-of-flight
-        auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
-        m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+        // Create a local task for this thread
+        ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX());
 
         // Non-blocking processing of the events
-        // Each thread needs its own ProcessEventsTask
-        const auto numEvent = event_time_of_flight->size();
-        tg.run([numEvent, event_detid = std::move(event_detid), event_time_of_flight = std::move(event_time_of_flight),
-                calibration = std::move(calibration), x_ptr = &spectrum.readX(), &y_temp,
-                grainsize = m_grainsize_event]() {
-          // Create a local task for this thread
-          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr);
-          tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
-          // Atomically accumulate results into shared y_temp
-          for (size_t i = 0; i < y_temp.size(); ++i) {
-            y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-          }
-        });
+        const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
+        tbb::parallel_reduce(range_info, task, tgroupcontext);
+
+        // Atomically accumulate results into shared y_temp to combine local histograms
+        for (size_t i = 0; i < y_temp.size(); ++i) {
+          y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
+        }
 
         event_index_start += m_events_per_chunk;
       }
 
-      tg.wait();
+      tgroup.wait();
 
       // copy the data out into the correct spectrum
       auto &y_values = spectrum.dataY();
