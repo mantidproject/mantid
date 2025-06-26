@@ -9,15 +9,17 @@
 Description
 -----------
 
-This algorithm takes a list of :ref:`Matrix <MatrixWorkspace>` and :ref:`Group <WorkspaceGroup>` workspaces and compares the
-middle time at which each run occurs to a reference value, defining these differences in seconds or hours in respective
-columns of an output table workspace.
+This algorithm takes a list of workspace names (workspaces can be :ref:`Matrix <MatrixWorkspace>` or :ref:`Group <WorkspaceGroup>`)
+and compares the middle time (defined below) at which each run occurs to a reference value.
+The differences are entered into the output table workspace with columns for the time in seconds and hours (plus errors).
 To establish the time at which each run occurs, the start times are taken from either ``run_start`` or ``start_time`` logs and the end times
 from ``run_end`` or ``end_time`` logs.
 For each workspace, the run duration is computed as : :math:`duration = end_{time} - start_{time}` and the time as the middle
 time of the duration interval: :math:`midtime = start_{time} + duration/2`.
+Then, each difference time is computed by subtracting the calculated ``midtime`` stamp from the reference.:math:`difference = midtime - midtime_{ref}` .
+Taking the duration as the absolute error of each ``midtime`` stamp, the error of the difference is computed as the sum of each ``midtime`` error.
 
-*  If a reference workspace is not provided, the first workspace on the Workspaces property list will be set as the reference.
+*  If a reference workspace is not provided, the first workspace in the Workspaces property list will be set as the reference.
 *  For group workspaces, start and end time stamps for all the workspaces contained in the group will be extracted, and the duration interval
    computed from the runs with the earliest and latest start and end times, respectively.
 
