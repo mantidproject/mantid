@@ -4,8 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidQtWidgets/Common/PythonHelpBridge.h"
+
+#pragma push_macro("slots")
+#undef slots
 #include <Python.h>
+#pragma pop_macro("slots")
+
 #include <boost/python.hpp>
 #include <boost/python/str.hpp>
 #include <stdexcept>

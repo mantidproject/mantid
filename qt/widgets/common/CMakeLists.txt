@@ -428,14 +428,12 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
     inc/MantidQtWidgets/Common/MantidTreeModel.h
     inc/MantidQtWidgets/Common/MantidTreeWidget.h
-    inc/MantidQtWidgets/Common/MantidHelpWindow.h
     inc/MantidQtWidgets/Common/MessageDisplay.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonFitDataSelector.h
     inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
     inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
-    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
