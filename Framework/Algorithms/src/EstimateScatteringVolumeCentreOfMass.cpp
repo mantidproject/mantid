@@ -61,7 +61,7 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   //
   // NB: here we expect the gauge volume object to be the illumination volume in the lab frame, as such,
   // it is not required to be wholly within the sample shape (this will likely be the main use case for this alg)
-  std::shared_ptr<const IObject> integrationVolume = sampleObject;
+  std::shared_ptr<const Geometry::IObject> integrationVolume = sampleObject;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = getGaugeVolumeObject();
   }
@@ -72,7 +72,8 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
 /// Calculate the mean position of all valid volume elements to get the Centre of Mass of the Scattering Volume
 const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculateMeanElementPosition(
-    const std::shared_ptr<const IObject> integrationVolume, const std::shared_ptr<const IObject> sampleObject) {
+    const std::shared_ptr<const Geometry::IObject> integrationVolume,
+    const std::shared_ptr<const Geometry::IObject> sampleObject) {
   const auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
