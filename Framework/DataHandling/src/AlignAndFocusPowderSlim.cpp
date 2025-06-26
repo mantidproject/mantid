@@ -102,6 +102,9 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
   }
 }
 
+/// detids with this calibration factor are something to not bother with
+constexpr double IGNORE_PIXEL{1.e6};
+
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -246,29 +249,40 @@ public:
   ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
                     const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
       : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
-        m_binedges(binedges), no_mask(calibration->useAll()) {}
+        m_binedges(binedges) {}
 
   ProcessEventsTask(ProcessEventsTask &other, tbb::split)
       : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
-        m_calibration(other.m_calibration), m_binedges(other.m_binedges), no_mask(other.no_mask) {}
+        m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) {
-    const auto &binedges = *m_binedges;
+    // Cache values to reduce number of function calls
     const auto &range_end = range.end();
-    for (size_t i = range.begin(); i < range_end; ++i) {
-      const auto &detid = (*m_detids)[i];
-      if (no_mask || m_calibration->use(detid)) {
-        // Apply calibration
-        const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
-        // Find the bin index using binary search
-        const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
+    const auto &binedges_cbegin = m_binedges->cbegin();
+    const auto &binedges_cend = m_binedges->cend();
+    const auto &tof_min = m_binedges->front();
+    const auto &tof_max = m_binedges->back();
 
-        // Increment the count if a bin was found
-        if (!(it == binedges.cbegin() || it == binedges.cend())) {
-          const size_t bin = static_cast<size_t>(it - binedges.cbegin() - 1);
+    // Calibrate and histogram the data
+    auto detid_iter = m_detids->cbegin() + range.begin();
+    auto tof_iter = m_tofs->cbegin() + range.begin();
+    for (size_t i = range.begin(); i < range_end; ++i) {
+      const auto &detid = *detid_iter;
+      const auto &calib_factor = m_calibration->value(detid);
+      if (calib_factor < IGNORE_PIXEL) {
+        // Apply calibration
+        const double &tof = static_cast<double>(*tof_iter) * calib_factor;
+        if ((tof < tof_max) && (!(tof < tof_min))) { // check against max first to allow skipping second
+          // Find the bin index using binary search
+          const auto &it = std::upper_bound(binedges_cbegin, binedges_cend, tof);
+
+          // Increment the count if a bin was found
+          const auto &bin = static_cast<size_t>(std::distance(binedges_cbegin, it) - 1);
           y_temp[bin]++;
         }
       }
+      ++detid_iter;
+      ++tof_iter;
     }
   }
 
@@ -286,7 +300,6 @@ private:
   const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
-  const bool no_mask; ///< whether there are any masked pixels
 };
 
 class ProcessBankTask {
@@ -848,8 +861,9 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
   // setup the detector mask - this assumes there are not many pixels in the overall mask
   // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
   for (const auto &detid : mask) {
-    if (detid >= idmin && detid <= idmax)
-      m_mask.insert(detid);
+    if (detid >= idmin && detid <= idmax) {
+      m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
+    }
   }
 }
 
@@ -859,13 +873,6 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
 const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
   return m_calibration[detid - m_detid_offset];
 }
-
-bool AlignAndFocusPowderSlim::BankCalibration::use(const detid_t detid) const { return !(m_mask.contains(detid)); }
-
-/**
- * Returns true if all pixels should be used
- */
-bool AlignAndFocusPowderSlim::BankCalibration::useAll() const { return m_mask.empty(); }
 
 const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
 detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {

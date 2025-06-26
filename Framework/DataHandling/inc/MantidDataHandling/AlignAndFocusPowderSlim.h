@@ -29,14 +29,11 @@ public:
     BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
                     const std::map<detid_t, double> &calibration_map, const std::set<detid_t> &mask);
     const double &value(const detid_t detid) const;
-    bool use(const detid_t detid) const;
-    bool useAll() const;
     const detid_t &idmin() const;
     detid_t idmax() const;
 
   private:
     std::vector<double> m_calibration;
-    std::set<detid_t> m_mask;
     const detid_t m_detid_offset;
   };
 
