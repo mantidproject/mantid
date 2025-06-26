@@ -215,12 +215,7 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
-  std::size_t num_objs;
-  NXgetattrinfo(fileid, num_objs);
-  if (num_objs > 0) {
-    std::cout << "Number of global attributes: " << num_objs << std::endl;
-  }
+  ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::_RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXnumtype NXtype;
   NXstatus entry_status, attr_status;
   std::size_t NXrank;
@@ -244,9 +239,6 @@ int main(int argc, char *argv[]) {
     }
   } while (attr_status == NXstatus::NX_OK);
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
-  std::size_t numattr;
-  NXgetattrinfo(fileid, numattr);
-  std::cout << "Number of group attributes: " << numattr << std::endl;
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "NXentry address " << address << std::endl;
   do {
@@ -312,7 +304,6 @@ int main(int argc, char *argv[]) {
           slab_start[0] = 4;
           ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
-          ASSERT_NO_ERROR(NXgetattrinfo(fileid, numattr), "");
           do {
             attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
             if (attr_status == NXstatus::NX_ERROR)

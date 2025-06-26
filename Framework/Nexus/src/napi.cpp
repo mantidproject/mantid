@@ -987,7 +987,21 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetattrinfo(NXhandle fid, std::size_t &iN) { return NX5getattrinfo(fid, iN); }
+// NXstatus NXgetattrinfo(NXhandle fid, std::size_t &iN) {
+//   hid_t vid = getAttVID(fid );
+//   H5O_info2_t oinfo;
+//   if(H5Oget_info3(vid, &oinfo, H5O_INFO_NUM_ATTRS) > 0) {
+//     std::size_t num = oinfo.num_attrs;
+//     if (fid->iCurrentG > 0 && fid->iCurrentD == 0) {
+//       num--;
+//     }
+//     iN = num;
+//   } else {
+//     iN = 0;
+//   }
+//   killAttVID(fid, vid);
+//   return NXstatus::NX_OK;
+// }
 
 NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
                         NXnumtype &iType) {

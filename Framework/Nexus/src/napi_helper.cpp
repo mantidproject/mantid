@@ -110,17 +110,17 @@ std::string buildCurrentAddress(pNexusFile5 fid) {
   return std::string(caddr);
 }
 
-hid_t getAttVID(pNexusFile5 pFile) {
+hid_t getAttVID(pNexusFile5 fid) {
   hid_t vid;
-  if (pFile->iCurrentG == 0 && pFile->iCurrentD == 0) {
-    /* global attribute */
-    vid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-  } else if (pFile->iCurrentD != 0) {
+  if (fid->iCurrentD != 0) {
     /* dataset attribute */
-    vid = pFile->iCurrentD;
+    vid = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    /* group attribute */
+    vid = fid->iCurrentG;
   } else {
-    /* group attribute */;
-    vid = pFile->iCurrentG;
+    /* global attribute */
+    vid = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
   }
   return vid;
 }

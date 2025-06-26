@@ -347,15 +347,6 @@ MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, Mantid::Nexus
 MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, std::string const &name, void *data, std::size_t &iDataLen,
                                     NXnumtype &iType);
 
-/**
- * Get the count of attributes in the currently open dataset, group or global attributes when at root level.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param no_items A pointer to an integer which be set to the number of attributes available.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetattrinfo(NXhandle handle, std::size_t &no_items);
-
 MANTID_NEXUS_DLL NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank,
                                          Mantid::Nexus::DimVector &dim, NXnumtype &iType);
 

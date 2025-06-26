@@ -537,7 +537,6 @@ NXstatus NX5getinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector 
 }
 
 /*-------------------------------------------------------------------------*/
-
 /*-------------------------------------------------------------------------*/
 
 /* Operator function. */
@@ -634,41 +633,9 @@ NXstatus NX5getattr(NXhandle fid, std::string const &name, void *data, std::size
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NX5getattrinfo(NXhandle fid, std::size_t &iN) {
-  pNexusFile5 pFile;
-  int idx;
-  hid_t vid;
-  H5O_info1_t oinfo;
-
-  pFile = NXI5assert(fid);
-  idx = 0;
-  iN = idx;
-
-  vid = getAttVID(pFile);
-
-  // TODO use new version of method rather than v1
-  H5Oget_info1(vid, &oinfo);
-  idx = static_cast<int>(oinfo.num_attrs);
-  if (idx > 0) {
-    if (pFile->iCurrentG > 0 && pFile->iCurrentD == 0) {
-      iN = idx - 1;
-    } else {
-      iN = idx;
-    }
-  } else {
-    iN = 0;
-  }
-  killAttVID(pFile, vid);
-  return NXstatus::NX_OK;
-}
-
 /*-------------------------------------------------------------------------*/
-
 /* ------------------------------------------------------------------- */
-
 /*-------------------------------------------------------------------------*/
-
 /*------------------------------------------------------------------------*/
 NXstatus NX5getnextattra(NXhandle fid, std::string &name, std::size_t &rank, Mantid::Nexus::DimVector &dim,
                          NXnumtype &iType) {
