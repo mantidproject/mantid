@@ -9,12 +9,16 @@
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidDataHandling/SetSample.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Kernel::V3D;
+using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
+using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
 class EstimateScatteringVolumeCentreOfMassTest : public CxxTest::TestSuite {
 public:
   void testInit() {
@@ -160,12 +164,12 @@ private:
     MatrixWorkspace_sptr testWS = createTestWorkspace();
     // Create the geometry (cylinder with offset center)
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty("Shape", "Cylinder");
-    geometry->declareProperty("Height", 4);
-    geometry->declareProperty("Radius", 1);
-    geometry->declareProperty("Center", std::move(offset));
+    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4.0), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 1.0), "");
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(offset)), "");
     std::vector<double> axis{0, 1, 0}; // y-axis
-    geometry->declareProperty("Axis", axis);
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Axis", std::move(axis)), "");
     // Set the sample information
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
@@ -185,13 +189,13 @@ private:
     MatrixWorkspace_sptr testWS = createTestWorkspace();
     // Create the geometry (cylinder with offset center)
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty("Shape", "FlatPlate");
-    geometry->declareProperty("Height", 2);
-    geometry->declareProperty("Width", 2);
-    geometry->declareProperty("Thick", 2);
+    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Height", 2.0), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Width", 2.0), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Thick", 2.0), "");
     std::vector<double> center{1, 1, 1}; // Offset center
-    geometry->declareProperty("Center", std::move(center));
-    geometry->declareProperty("Angle", 0);
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Angle", 2.0), "");
     // Set the sample information
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
