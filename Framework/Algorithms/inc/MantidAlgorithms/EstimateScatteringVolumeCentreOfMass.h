@@ -17,9 +17,6 @@ namespace Mantid {
 namespace API {
 class Sample;
 }
-namespace Geometry {
-class IObject_sptr;
-} // namespace Geometry
 
 namespace Algorithms {
 

@@ -134,12 +134,12 @@ const V3D EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::v
     sum /= static_cast<double>(pos.size());
     return sum;
   } else {
+    // shouldn't be able to reach this point anyway
+    const std::string mess("No intersection points found between illumination volume and sample shape - "
+                           "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
   }
-  // shouldn't be able to reach this point anyway
-  const std::string mess("No intersection points found between illumination volume and sample shape - "
-                         "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
-  g_log.error(mess);
-  throw std::runtime_error(mess);
 }
 
 } // namespace Mantid::Algorithms
