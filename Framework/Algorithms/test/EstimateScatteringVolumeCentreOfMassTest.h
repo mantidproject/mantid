@@ -109,6 +109,45 @@ public:
     TS_ASSERT_THROWS(centerOfMass.execute(), const std::invalid_argument &);
     TS_ASSERT(!centerOfMass.isExecuted());
   }
+  void testExecWithDifferentElementSizeUnits() {
+    // Create a test workspace with cylinder sample
+    MatrixWorkspace_sptr testWS = createWorkspaceWithCylinderSample();
+    // Run the algorithm
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementUnits", "m");
+    centerOfMass.setProperty("ElementSize", 0.001); // 1mm cubes
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    TS_ASSERT(centerOfMass.isExecuted());
+    // Check output
+    std::vector<double> resultVec = centerOfMass.getProperty("CentreOfMass");
+    V3D result(resultVec[0], resultVec[1], resultVec[2]);
+    // For a symmetric cylinder along y-axis centered at origin,
+    TS_ASSERT_DELTA(result.X(), 0.0, 0.00001);
+    TS_ASSERT_DELTA(result.Y(), 0.0, 0.00001);
+    TS_ASSERT_DELTA(result.Z(), 0.0, 0.00001);
+  }
+  void testBadElementUnitsThrowsError() {
+    // Create a test workspace with cylinder sample
+    MatrixWorkspace_sptr testWS = createWorkspaceWithCylinderSample();
+    // Run the algorithm
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    TS_ASSERT_THROWS(centerOfMass.setProperty("ElementUnits", "um"), const std::invalid_argument &);
+  }
+  void testErrorIfNoSampleIlluminated() {
+    // Create a test workspace with cylinder sample and sphere gauge volume
+    MatrixWorkspace_sptr testWS = createWorkspaceWithUnilluminatedSample();
+    // Run the algorithm
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 1.0); // 1mm cubes
+    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
+    TS_ASSERT(!centerOfMass.isExecuted());
+  }
 
 private:
   MatrixWorkspace_sptr createTestWorkspace() {
@@ -164,7 +203,24 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithOffsetCylinderSampleAndGaugeVolume() {
     // Create workspace with cylinder sample and add gauge volume
     MatrixWorkspace_sptr testWS = createWorkspaceWithOffsetCylinderSample();
-    // Define a spherical gauge volume
+    // Define a cubic gauge volume
+    const std::string gaugeXML = " \
+        <cuboid id='some-cuboid'> \
+        <height val='0.01'  /> \
+        <width val='0.01' />  \
+        <depth  val='0.01' />  \
+        <centre x='0.0' y='0.0' z='0.0'  />  \
+        </cuboid>  \
+        <algebra val='some-cuboid' /> \
+        ";
+    // Add the gauge volume to the run properties
+    testWS->mutableRun().addProperty("GaugeVolume", gaugeXML);
+    return testWS;
+  }
+  MatrixWorkspace_sptr createWorkspaceWithUnilluminatedSample() {
+    // Create workspace with cylinder sample and add gauge volume
+    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{3.0, 3.0, 3.0});
+    // Define a cubic gauge volume
     const std::string gaugeXML = " \
         <cuboid id='some-cuboid'> \
         <height val='0.01'  /> \
@@ -181,7 +237,7 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithPartiallyIlluminatedSample() {
     // Create workspace with cylinder sample and add gauge volume
     MatrixWorkspace_sptr testWS = createWorkspaceWithOffsetCubeSample();
-    // Define a spherical gauge volume
+    // Define a cubic gauge volume
     const std::string gaugeXML = " \
         <cuboid id='some-cuboid'> \
         <height val='0.02'  /> \
