@@ -103,6 +103,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "FloodCorrection",
             "FloodWorkspace",
             "Debug",
+            "Diagnostics",
             "TimeInterval",
             "LogValueInterval",
             "LogName",
