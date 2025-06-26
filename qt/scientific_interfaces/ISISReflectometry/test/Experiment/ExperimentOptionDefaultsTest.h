@@ -75,10 +75,10 @@ public:
     TS_ASSERT_EQUALS(result.debug(), true);
   }
 
-  // void testValidDiagnosticsOptionsFromParamsFile() {
-  //   auto result = getDefaultsFromParamsFile("Experiment");
-  //   TS_ASSERT_EQUALS(result.diagnostics(), true);
-  // }
+  void testValidDiagnosticsOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
+    TS_ASSERT_EQUALS(result.diagnostics(), true);
+  }
 
   void testDefaultLookupRowOptions() {
     auto result = getDefaults();
