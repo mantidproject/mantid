@@ -329,8 +329,7 @@ public:
       // TODO REMOVE debug print
       std::cout << bankName << " has " << eventRangeFull.second << " events\n"
                 << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
-                << "\n";
+                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)\n";
 
       // create a histogrammer to process the events
       auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -644,6 +643,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
+    std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
