@@ -162,6 +162,10 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithAnyOffsetCylinderSample(std::vector<double> offset) {
     // Create a workspace with an offset cylinder sample
     MatrixWorkspace_sptr testWS = createTestWorkspace();
+    // create the material
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
     // Create the geometry (cylinder with offset center)
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
@@ -174,6 +178,7 @@ private:
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
     setsample.setProperty("InputWorkspace", testWS);
+    setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
     return testWS;
@@ -187,6 +192,10 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithOffsetCubeSample() {
     // Create a workspace with an offset cylinder sample
     MatrixWorkspace_sptr testWS = createTestWorkspace();
+    // create the material
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
     // Create the geometry (cylinder with offset center)
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
@@ -200,6 +209,7 @@ private:
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
     setsample.setProperty("InputWorkspace", testWS);
+    setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
     return testWS;
