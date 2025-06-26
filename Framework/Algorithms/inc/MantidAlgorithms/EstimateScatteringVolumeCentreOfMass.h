@@ -39,23 +39,21 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
 
-protected:
-  API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
-  const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
-  std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
-  std::vector<double> m_averagePos;            ///< Average position of raster elements
-  double m_cubeSide;                           ///< Element size of raster
-  std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
-  std::vector<double> calcAveragePosition(const std::vector<Kernel::V3D> &pos);
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
+  double m_cubeSide;                   ///< Element size of raster
+  const std::shared_ptr<const Geometry::IObject> getGaugeVolumeObject();
+  const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
+  const Kernel::V3D
+  rasterizeGaugeVolumeAndCalculateMeanElementPosition(const std::shared_ptr<const IObject> integrationVolume,
+                                                      const std::shared_ptr<const IObject> sampleObject);
+  const std::shared_ptr<const Geometry::IObject> extractValidSampleObject(const API::Sample &sample);
 
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
-
-  void constructSample(API::Sample &sample);
 };
 
 } // namespace Algorithms

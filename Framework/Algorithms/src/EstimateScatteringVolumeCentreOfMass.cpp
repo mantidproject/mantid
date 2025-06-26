@@ -26,7 +26,7 @@ using namespace Kernel;
 DECLARE_ALGORITHM(EstimateScatteringVolumeCentreOfMass)
 
 EstimateScatteringVolumeCentreOfMass::EstimateScatteringVolumeCentreOfMass()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_elementPositions(), m_averagePos(), m_cubeSide(0.0) {}
+    : API::Algorithm(), m_inputWS(), m_cubeSide(0.0) {}
 
 void EstimateScatteringVolumeCentreOfMass::init() {
 
@@ -49,62 +49,74 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   m_inputWS = getProperty("InputWorkspace");
   // Cache the beam direction
   m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
+  // Calculate the element size
   m_cubeSide = getProperty("ElementSize"); // in mm
   m_cubeSide *= 0.001;                     // now in m
 
-  // Construct Sample
-  constructSample(m_inputWS->mutableSample());
+  // Retrieve the Sample Shape Geometry
+  const std::shared_ptr<const Geometry::IObject> sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
 
-  // Calculate the cached values of L1, element volumes, and geometry size
-  auto integrationVolume = std::shared_ptr<const IObject>(m_sampleObject->clone());
+  // Retrieve the illumination volume (we assume the sample is fully illuminated hence the volume is the same as the
+  // sample, unless a Gauge Volume has been defined)
+  //
+  // NB: here we expect the gauge volume object to be the illumination volume in the lab frame, as such,
+  // it is not required to be wholly within the sample shape (this will likely be the main use case for this alg)
+  std::shared_ptr<const IObject> integrationVolume = sampleObject;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
-    integrationVolume = constructGaugeVolume();
+    integrationVolume = getGaugeVolumeObject();
   }
+  const V3D averagePos = rasterizeGaugeVolumeAndCalculateMeanElementPosition(integrationVolume, sampleObject);
+  setProperty("CentreOfMass", averagePos);
+}
 
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *m_sampleObject, m_cubeSide);
+/// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
+/// Calculate the mean position of all valid volume elements to get the Centre of Mass of the Scattering Volume
+const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculateMeanElementPosition(
+    const std::shared_ptr<const IObject> integrationVolume, const std::shared_ptr<const IObject> sampleObject) {
+  const auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
-  // move over the information
-  m_elementPositions = std::move(raster.position);
-  if (m_elementPositions.empty()) {
-    throw std::runtime_error("Failed to define any initial scattering gauge volume for geometry");
-  }
-  m_averagePos = calcAveragePosition(m_elementPositions);
-  setProperty("CentreOfMass", m_averagePos);
+  // calculate mean element position
+  const V3D meanPos = calcAveragePosition(raster.position);
+  return meanPos;
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
-void EstimateScatteringVolumeCentreOfMass::constructSample(API::Sample &sample) {
-  m_sampleObject = &sample.getShape();
+const std::shared_ptr<const Geometry::IObject>
+EstimateScatteringVolumeCentreOfMass::extractValidSampleObject(const API::Sample &sample) {
   // Check there is one, and fail if not
-  if (!m_sampleObject->hasValidShape()) {
+  if (!sample.getShape().hasValidShape()) {
     const std::string mess("No shape has been defined for the sample in the input workspace");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   } else {
     g_log.information("Successfully constructed the sample object");
+    return std::make_shared<const Geometry::IObject>(sample.getShape());
   }
 }
 
-std::shared_ptr<const Geometry::IObject> EstimateScatteringVolumeCentreOfMass::constructGaugeVolume() {
+const std::shared_ptr<const Geometry::IObject> EstimateScatteringVolumeCentreOfMass::getGaugeVolumeObject() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 
   // Retrieve and create the gauge volume shape
-  std::shared_ptr<const Geometry::IObject> volume =
+  const std::shared_ptr<const Geometry::IObject> volume =
       ShapeFactory().createShape(m_inputWS->run().getProperty("GaugeVolume")->value());
 
   return volume;
 }
 
-std::vector<double> EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::vector<V3D> &pos) {
-  V3D sum = std::accumulate(pos.begin(), pos.end(), V3D(0.0, 0.0, 0.0));
-
+const V3D EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::vector<V3D> &pos) {
   if (!pos.empty()) {
+    V3D sum = std::accumulate(pos.begin(), pos.end(), V3D(0.0, 0.0, 0.0));
     sum /= static_cast<double>(pos.size());
+    return sum;
+  } else {
   }
-  std::vector<double> out = {sum[0], sum[1], sum[2]};
-  return out;
+  const std::string mess("No intersection points found between illumination volume and sample shape - "
+                         "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
+  g_log.error(mess);
+  throw std::runtime_error(mess);
 }
 
 } // namespace Mantid::Algorithms
