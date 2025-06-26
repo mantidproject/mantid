@@ -178,22 +178,20 @@ private:
   }
 
 public:
-  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group) {
-    constexpr uint64_t START_DEFAULT = 0;
-    constexpr uint64_t STOP_DEFAULT = std::numeric_limits<uint64_t>::max();
-
+  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group, const uint64_t number_events) {
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
       uint64_t start_event = event_index->at(m_pulse_start_index);
-      uint64_t stop_event = STOP_DEFAULT;
+      uint64_t stop_event = number_events;
       if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
         stop_event = event_index->at(m_pulse_stop_index);
       return {start_event, stop_event};
     } else {
-      return {START_DEFAULT, STOP_DEFAULT};
+      constexpr uint64_t START_DEFAULT = 0;
+      return {START_DEFAULT, number_events};
     }
   }
 
@@ -311,98 +309,102 @@ public:
       // open the bank
       auto event_group = entry.openGroup(bankName); // type=NXevent_data
 
-      // get filtering range
-      auto eventRangeFull = m_loader.getEventIndexRange(event_group);
-      // update range for data that is present
-      if (eventRangeFull.second == std::numeric_limits<size_t>::max()) {
-        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-        const auto length_actual = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
-        eventRangeFull.second = length_actual;
+      // skip empty dataset
+      auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      const int64_t total_events = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
+      if (total_events == 0) {
+        m_progress->report();
+        continue;
       }
 
+      // get filtering range and update it for data that is present
+      auto eventRangeFull = m_loader.getEventIndexRange(event_group, total_events);
+      // skip empty filter range
       if (eventRangeFull.first == eventRangeFull.second) {
         // g_log.warning() << "No data for bank " << entry_name << '\n';
-      } else {
-        // TODO REMOVE debug print
-        std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                  << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
-                  << "\n";
+        m_progress->report();
+        continue;
+      }
 
-        // create a histogrammer to process the events
-        auto &spectrum = m_wksp->getSpectrum(wksp_index);
+      // TODO REMOVE debug print
+      std::cout << bankName << " has " << eventRangeFull.second << " events\n"
+                << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
+                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
+                << "\n";
 
-        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-        // counting things
-        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+      // create a histogrammer to process the events
+      auto &spectrum = m_wksp->getSpectrum(wksp_index);
 
-        // task group allows for separate of disk read from processing
-        tbb::task_group tg;
+      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+      // counting things
+      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+      // std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
-        // create object so bank calibration can be re-used
-        std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
+      // task group allows for separate of disk read from processing
+      tbb::task_group tg;
 
-        // get handle to the data
-        auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-        // and the units
-        std::string tof_unit;
-        NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-        const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
+      // create object so bank calibration can be re-used
+      std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
 
-        // read parts of the bank at a time
-        size_t event_index_start = eventRangeFull.first;
-        while (event_index_start < eventRangeFull.second) {
-          // H5Cpp will truncate correctly
-          // H5Util resizes the vector
-          const size_t offset = event_index_start;
-          const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
-                                      ? std::numeric_limits<size_t>::max()
-                                      : m_events_per_chunk;
+      // get handle to the data
+      auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
+      // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      // and the units
+      std::string tof_unit;
+      NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+      const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
-          // load detid
-          auto event_detid = std::make_unique<std::vector<uint32_t>>(); // uint32 for ORNL nexus file
-          m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
-          // immediately find min/max to allow for other things to read disk
-          const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-          // only recreate calibration if it doesn't already have the useful information
-          if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-              (calibration->idmax() < static_cast<detid_t>(maxval))) {
-            calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration, m_masked);
-          }
+      // read parts of the bank at a time
+      size_t event_index_start = eventRangeFull.first;
+      while (event_index_start < eventRangeFull.second) {
+        // H5Cpp will truncate correctly
+        // H5Util resizes the vector
+        const size_t offset = event_index_start;
+        const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
+                                    ? std::numeric_limits<size_t>::max()
+                                    : m_events_per_chunk;
 
-          // load time-of-flight
-          auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
-          m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
-
-          // Non-blocking processing of the events
-          // Each thread needs its own ProcessEventsTask
-          const auto numEvent = event_time_of_flight->size();
-          tg.run([numEvent, event_detid = std::move(event_detid),
-                  event_time_of_flight = std::move(event_time_of_flight), calibration = std::move(calibration),
-                  x_ptr = &spectrum.readX(), &y_temp, grainsize = m_grainsize_event]() {
-            // Create a local task for this thread
-            ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr);
-            tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
-            // Atomically accumulate results into shared y_temp
-            for (size_t i = 0; i < y_temp.size(); ++i) {
-              y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-            }
-          });
-
-          event_index_start += m_events_per_chunk;
+        // load detid
+        auto event_detid = std::make_unique<std::vector<uint32_t>>(); // uint32 for ORNL nexus file
+        m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+        // immediately find min/max to allow for other things to read disk
+        const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
+        // only recreate calibration if it doesn't already have the useful information
+        if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
+            (calibration->idmax() < static_cast<detid_t>(maxval))) {
+          calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
+              static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration, m_masked);
         }
 
-        tg.wait();
+        // load time-of-flight
+        auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
+        m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
 
-        // copy the data out into the correct spectrum
-        auto &y_values = spectrum.dataY();
-        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+        // Non-blocking processing of the events
+        // Each thread needs its own ProcessEventsTask
+        const auto numEvent = event_time_of_flight->size();
+        tg.run([numEvent, event_detid = std::move(event_detid), event_time_of_flight = std::move(event_time_of_flight),
+                calibration = std::move(calibration), x_ptr = &spectrum.readX(), &y_temp,
+                grainsize = m_grainsize_event]() {
+          // Create a local task for this thread
+          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr);
+          tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
+          // Atomically accumulate results into shared y_temp
+          for (size_t i = 0; i < y_temp.size(); ++i) {
+            y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
+          }
+        });
 
-        std::cout << bankName << " stop " << timer << std::endl;
+        event_index_start += m_events_per_chunk;
       }
+
+      tg.wait();
+
+      // copy the data out into the correct spectrum
+      auto &y_values = spectrum.dataY();
+      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+
+      std::cout << bankName << " stop " << timer << std::endl;
       m_progress->report();
     }
   }
