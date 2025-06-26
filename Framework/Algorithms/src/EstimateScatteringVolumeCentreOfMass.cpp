@@ -85,7 +85,7 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
       m_inputWS->run().hasProperty("GaugeVolume") ? getGaugeVolumeObject() : sampleObject;
 
   const V3D averagePos = rasterizeGaugeVolumeAndCalculateMeanElementPosition(integrationVolume, sampleObject);
-  setProperty("CentreOfMass", averagePos);
+  setProperty("CentreOfMass", std::vector<double>(averagePos));
 }
 
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
@@ -94,6 +94,7 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculate
     const Geometry::IObject_sptr integrationVolume, const Geometry::IObject_sptr sampleObject) {
   const auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
   if (raster.l1.size() == 0) {
+    // most errors should be caught by the rasterise function, but just in case
     const std::string mess("Failed to find any points in the rasterized illumination volume within the sample shape - "
                            "Check sample shape and gauge volume are defined correctly or try reducing the ElementSize");
     g_log.error(mess);

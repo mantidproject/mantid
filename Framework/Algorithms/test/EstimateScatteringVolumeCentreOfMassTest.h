@@ -6,11 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
-#include "MantidDataHandling/SetSample.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -19,12 +21,27 @@ using Mantid::Kernel::V3D;
 using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
 using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
+using Mantid::API::Sample;
+using Mantid::Geometry::IObject_sptr;
+
 class EstimateScatteringVolumeCentreOfMassTest : public CxxTest::TestSuite {
 public:
   void testInit() {
     Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
     TS_ASSERT_THROWS_NOTHING(centerOfMass.initialize());
     TS_ASSERT(centerOfMass.isInitialized());
+  }
+  void testErrorIfNoSampleIlluminated() {
+    // Create a test workspace with cylinder sample and sphere gauge volume
+    MatrixWorkspace_sptr testWS = createWorkspaceWithUnilluminatedSample();
+    // Run the algorithm
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.setRethrows(true);
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 1.0); // 1mm cubes
+    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
+    TS_ASSERT(!centerOfMass.isExecuted());
   }
   void testExecWithCylinderSample() {
     // Create a test workspace with cylinder sample
@@ -141,17 +158,6 @@ public:
     centerOfMass.setProperty("InputWorkspace", testWS);
     TS_ASSERT_THROWS(centerOfMass.setProperty("ElementUnits", "um"), const std::invalid_argument &);
   }
-  void testErrorIfNoSampleIlluminated() {
-    // Create a test workspace with cylinder sample and sphere gauge volume
-    MatrixWorkspace_sptr testWS = createWorkspaceWithUnilluminatedSample();
-    // Run the algorithm
-    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
-    centerOfMass.initialize();
-    centerOfMass.setProperty("InputWorkspace", testWS);
-    centerOfMass.setProperty("ElementSize", 1.0); // 1mm cubes
-    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
-    TS_ASSERT(!centerOfMass.isExecuted());
-  }
 
 private:
   MatrixWorkspace_sptr createTestWorkspace() {
@@ -159,59 +165,32 @@ private:
     MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     return testWS;
   }
-  MatrixWorkspace_sptr createWorkspaceWithAnyOffsetCylinderSample(std::vector<double> offset) {
-    // Create a workspace with an offset cylinder sample
+
+  MatrixWorkspace_sptr createWorkspaceWithAnyOffsetCylinderSample(V3D offset) {
+
+    // Create the workspace
     MatrixWorkspace_sptr testWS = createTestWorkspace();
-    // create the material
-    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
-    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
-    // Create the geometry (cylinder with offset center)
-    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4.0), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 1.0), "");
-    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(offset)), "");
-    std::vector<double> axis{0, 1, 0}; // y-axis
-    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Axis", std::move(axis)), "");
-    // Set the sample information
-    Mantid::DataHandling::SetSample setsample;
-    setsample.initialize();
-    setsample.setProperty("InputWorkspace", testWS);
-    setsample.setProperty("Material", material);
-    setsample.setProperty("Geometry", geometry);
-    setsample.execute();
+
+    IObject_sptr shape_sptr =
+        ComponentCreationHelper::createCappedCylinder(0.01, 0.04, offset, V3D(0.0, 1.0, 0.0), "cyl");
+    testWS->mutableSample().setShape(shape_sptr);
     return testWS;
   }
+
   MatrixWorkspace_sptr createWorkspaceWithCylinderSample() {
-    return createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{0.0, 0.0, 0.0});
+    V3D center(0.0, -0.02, 0.0); // cylinder of height 4cm is centred with base at (0,-2,0)
+    return createWorkspaceWithAnyOffsetCylinderSample(center);
   }
   MatrixWorkspace_sptr createWorkspaceWithOffsetCylinderSample() {
-    return createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{0.0, -1.0, 0.0});
+    V3D center(0.0, -0.03, 0.0); // this is offset 1cm lower
+    return createWorkspaceWithAnyOffsetCylinderSample(center);
   }
   MatrixWorkspace_sptr createWorkspaceWithOffsetCubeSample() {
     // Create a workspace with an offset cylinder sample
     MatrixWorkspace_sptr testWS = createTestWorkspace();
-    // create the material
-    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
-    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
-    // Create the geometry (cylinder with offset center)
-    auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Height", 2.0), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Width", 2.0), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Thick", 2.0), "");
-    std::vector<double> center{1, 1, 1}; // Offset center
-    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Angle", 2.0), "");
-    // Set the sample information
-    Mantid::DataHandling::SetSample setsample;
-    setsample.initialize();
-    setsample.setProperty("InputWorkspace", testWS);
-    setsample.setProperty("Material", material);
-    setsample.setProperty("Geometry", geometry);
-    setsample.execute();
+    IObject_sptr shape_sptr =
+        ComponentCreationHelper::createCuboid(0.01, 0.01, 0.01, V3D(0.01, 0.01, 0.01), "testCube");
+    testWS->mutableSample().setShape(shape_sptr);
     return testWS;
   }
   MatrixWorkspace_sptr createWorkspaceWithOffsetCylinderSampleAndGaugeVolume() {
@@ -233,7 +212,7 @@ private:
   }
   MatrixWorkspace_sptr createWorkspaceWithUnilluminatedSample() {
     // Create workspace with cylinder sample and add gauge volume
-    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(std::vector<double>{10.0, 10.0, 10.0});
+    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(V3D(10.0, 10.0, 10.0));
     // Define a cubic gauge volume
     const std::string gaugeXML = " \
         <cuboid id='some-cuboid'> \
