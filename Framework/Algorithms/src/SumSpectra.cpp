@@ -583,7 +583,7 @@ void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace, Progress
     }
     numOutputEvents += inputWorkspace->getSpectrum(i).getNumberEvents();
   }
-
+  outputEL.switchTo(inputWorkspace->getSpectrum(0).getEventType());
   outputEL.reserve(numOutputEvents);
 
   // Loop over spectra
