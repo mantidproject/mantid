@@ -194,6 +194,7 @@ set(PYTHON_PLUGINS
     algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
     algorithms/SymmetriseMDHisto.py
+    algorithms/TimeDifference.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
     algorithms/TestWorkspaceGroupProperty.py
