@@ -204,6 +204,26 @@ void IFunction::unfix(size_t i) {
 }
 
 /**
+ * Creates and processes a single tie, handling constant expressions and validation
+ * @param parName :: The name of the parameter to tie
+ * @param expr :: A math expression
+ * @param isDefault :: Flag to mark as default
+ * @return unique_ptr<ParameterTie> - the tie (nullptr if constant)
+ */
+std::unique_ptr<ParameterTie> IFunction::createAndProcessTie(const std::string &parName, const std::string &expr,
+                                                             bool isDefault) {
+  auto newTie = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
+
+  if (!isDefault && newTie->isConstant()) {
+    setParameter(parName, newTie->eval());
+    fix(getParameterIndex(*newTie));
+    return nullptr;
+  }
+
+  return newTie;
+}
+
+/**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
  * @param expr :: A math expression
@@ -211,12 +231,10 @@ void IFunction::unfix(size_t i) {
  * with this reference: a tie or a constraint.
  */
 void IFunction::tie(const std::string &parName, const std::string &expr, bool isDefault) {
-  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
-  if (!isDefault && ti->isConstant()) {
-    setParameter(parName, ti->eval());
-    fix(getParameterIndex(*ti));
-  } else {
-    addTie(std::move(ti));
+  auto tiePtr = createAndProcessTie(parName, expr, isDefault);
+
+  if (tiePtr) {
+    addTie(std::move(tiePtr));
   }
 }
 
@@ -230,18 +248,41 @@ void IFunction::tie(const std::string &parName, const std::string &expr, bool is
  *
  */
 void IFunction::addTies(const std::string &ties, bool isDefault) {
+  std::map<size_t, std::pair<size_t, std::string>> oldTies;
+
   Expression list;
   list.parse(ties);
   list.toList();
   for (const auto &t : list) {
     if (t.name() == "=" && t.size() >= 2) {
       size_t n = t.size() - 1;
-      const std::string value = t[n].str();
+      const std::string expr = t[n].str();
       for (size_t i = n; i != 0;) {
         --i;
-        this->tie(t[i].name(), value, isDefault);
+        auto parName = t[i].name();
+        auto parTie = createAndProcessTie(parName, expr, isDefault);
+
+        if (parTie) {
+          auto iPar = getParameterIndex(*parTie);
+          oldTies[iPar] = insertTie(std::move(parTie));
+        }
       }
     }
+  }
+
+  try {
+    sortTies(true);
+  } catch (std::runtime_error &) {
+    for (const auto &[iPar, oldTie] : oldTies) {
+      auto [oldIdx, oldExp] = oldTie;
+
+      if (!oldExp.empty()) {
+        m_ties[oldIdx] = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
+      } else {
+        removeTie(iPar);
+      }
+    }
+    throw;
   }
   applyTies();
 }
@@ -260,17 +301,48 @@ void IFunction::removeTie(const std::string &parName) {
 std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
   bool first = true;
-  for (auto &tie : m_ties) {
-    if (tie->isDefault())
+  for (auto &parTie : m_ties) {
+    if (parTie->isDefault())
       continue;
     if (!first) {
       tieStream << ',';
     } else {
       first = false;
     }
-    tieStream << tie->asString(this);
+    tieStream << parTie->asString(this);
   }
   return tieStream.str();
+}
+
+/**
+ * Insert a new tie to the correct position
+ * @param tie :: the tie
+ * @return a pair of the old tie position and expression
+ */
+std::pair<std::size_t, std::string> IFunction::insertTie(std::unique_ptr<ParameterTie> tie) {
+  auto iPar = getParameterIndex(*tie);
+  std::size_t existingTieIndex =
+      std::distance(m_ties.begin(), std::find_if(m_ties.begin(), m_ties.end(),
+                                                 [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; }));
+  std::string oldExp = "";
+  const auto oldTie = getTie(iPar);
+  if (oldTie) {
+    const auto oldTieStr = oldTie->asString();
+    oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
+  }
+
+  if (existingTieIndex < m_ties.size()) {
+    m_ties[existingTieIndex] = std::move(tie);
+  } else {
+    m_ties.emplace_back(std::move(tie));
+    setParameterStatus(iPar, Tied);
+  }
+
+  if (oldTie) {
+    return {existingTieIndex, oldExp};
+  } else {
+    return {existingTieIndex, ""};
+  }
 }
 
 /**
@@ -280,26 +352,15 @@ std::string IFunction::writeTies() const {
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   auto iPar = getParameterIndex(*tie);
-  auto it =
-      std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
-  const auto oldTie = getTie(iPar);
-
-  if (it != m_ties.end()) {
-    *it = std::move(tie);
-  } else {
-    m_ties.emplace_back(std::move(tie));
-    setParameterStatus(iPar, Tied);
-  }
+  const auto [oldIdx, oldExp] = insertTie(std::move(tie));
 
   try {
     // sortTies checks for circular and self ties
     sortTies(true);
   } catch (std::runtime_error &) {
     // revert / remove tie if invalid
-    if (oldTie) {
-      const auto oldTieStr = oldTie->asString();
-      const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
-      *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
+    if (!oldExp.empty()) {
+      m_ties[oldIdx] = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
     } else {
       removeTie(iPar);
     }
@@ -310,8 +371,8 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
 bool IFunction::hasOrderedTies() const { return !m_orderedTies.empty(); }
 
 void IFunction::applyOrderedTies() {
-  for (auto &&tie : m_orderedTies) {
-    tie->eval();
+  for (auto &&parTie : m_orderedTies) {
+    parTie->eval();
   }
 }
 
@@ -322,8 +383,8 @@ void IFunction::applyTies() {
   if (hasOrderedTies()) {
     applyOrderedTies();
   } else {
-    for (auto &tie : m_ties) {
-      tie->eval();
+    for (auto &parTie : m_ties) {
+      parTie->eval();
     }
   }
 }
@@ -1156,7 +1217,7 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
           // function
           if (name() == fitParam.getFunction()) {
             // update value
-            auto *testWithLocation = dynamic_cast<IFunctionWithLocation *>(this);
+            const auto *testWithLocation = dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() && fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
@@ -1604,20 +1665,20 @@ void IFunction::sortTies(const bool checkOnly) {
 
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
-    auto const tie = getTie(i);
-    if (!tie || ignoreTie(*tie)) {
+    auto const parTie = getTie(i);
+    if (!parTie || ignoreTie(*parTie)) {
       continue;
     }
 
     TieNode newNode;
-    newNode.left = getParameterIndex(*tie);
-    auto const rhsParameters = tie->getRHSParameters();
+    newNode.left = getParameterIndex(*parTie);
+    auto const rhsParameters = parTie->getRHSParameters();
     newNode.right.reserve(rhsParameters.size());
     for (auto &&p : rhsParameters) {
       newNode.right.emplace_back(this->getParameterIndex(p));
     }
     if (newNode < newNode) {
-      throw std::runtime_error("Parameter is tied to itself: " + tie->asString(this));
+      throw std::runtime_error("Parameter is tied to itself: " + parTie->asString(this));
     }
     bool before(false), after(false);
     size_t indexBefore(0), indexAfter(0);
@@ -1633,7 +1694,7 @@ void IFunction::sortTies(const bool checkOnly) {
     }
     if (before) {
       if (after) {
-        std::string message = "Circular dependency in ties:\n" + tie->asString(this) + '\n';
+        std::string message = "Circular dependency in ties:\n" + parTie->asString(this) + '\n';
         message += getTie(indexBefore)->asString(this);
         if (indexAfter != indexBefore) {
           message += '\n' + getTie(indexAfter)->asString(this);
@@ -1647,8 +1708,8 @@ void IFunction::sortTies(const bool checkOnly) {
   }
   if (!checkOnly) {
     for (auto &&node : orderedTieNodes) {
-      auto const tie = getTie(node.left);
-      m_orderedTies.emplace_back(tie);
+      auto const parTie = getTie(node.left);
+      m_orderedTies.emplace_back(parTie);
     }
   }
 }
