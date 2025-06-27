@@ -1,1 +1,0 @@
-- The LoadSNSspec algorithm was deprecated on 2017-01-30 and has now been removed.

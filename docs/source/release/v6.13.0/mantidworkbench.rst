@@ -9,8 +9,14 @@ New Features
 ------------
 - The :ref:`Python script editor <WorkbenchScriptWindow>` now supports ``bool`` and f-string syntax highlighting.
 - Users can now save multiple selected workspaces in the ASCII format.
-- A crosshair toggle option has been added in mantid plots on the top right of the toolbar area. The crosshair button is
-  disabled (invisible) in tiled and 3D plots.
+
+.. image:: ../../images/6_13_release/crosshair-example.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
+- A crosshair toggle option has been added in mantid plots on the top right of the toolbar area (see image). The
+  crosshair button is disabled (invisible) in tiled and 3D plots.
 - The :ref:`WorkbenchSettings` widget's ``Apply`` button is now disabled when there are no pending changes.
 - Deprecated parameter ``Unwrap Ref`` has been removed from the Powder Diffraction Reduction Interface.
 - Added property ``errorreports.core_dumps``.
@@ -28,19 +34,6 @@ Bugfixes
 - The ``...`` button for a :ref:`user defined function <user_defined_function>` is no longer obscured by the scroll bar
   in the :ref:`Fit Property Browser <WorkbenchPlotWindow_Fitting>` on macOS.
 - Minimizing the sample log plot on the ``SampleLogs`` widget so that it is not visible no longer throws an error.
-
-
-InstrumentViewer
-----------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
 
 SliceViewer
 -----------

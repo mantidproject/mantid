@@ -1,1 +1,0 @@
-- Correct binning of output workspace of :ref:`algm-PDFFourierTransform-v2` and correct use of bin edge and bin center in evaluated integral.

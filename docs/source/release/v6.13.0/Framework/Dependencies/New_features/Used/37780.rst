@@ -1,1 +1,0 @@
-- Upgraded to Python 3.11, see release notes from Python `here <https://docs.python.org/3/whatsnew/3.11.html>`_. Also see Python's `migration guide <https://docs.python.org/3/whatsnew/3.11.html#porting-to-python-3-11>`_ for changes that could break scripts.

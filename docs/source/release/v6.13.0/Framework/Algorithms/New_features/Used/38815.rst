@@ -1,1 +1,0 @@
-- ``Divide`` now has an optional argument, ``IsDistribution``, to force the output distribution type.

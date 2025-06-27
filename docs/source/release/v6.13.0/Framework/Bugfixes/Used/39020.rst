@@ -1,1 +1,0 @@
-- ``getProtonCharge`` method of ``Run`` object now correctly returns a period filtered log value when called on multi-period NeXus files. Some inconsistencies remain when adding runs that consist of different periods, please see `this issue <https://github.com/mantidproject/mantid/issues/39336>`_ for more information.
