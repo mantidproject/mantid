@@ -85,7 +85,8 @@ class TimeDifference(PythonAlgorithm):
         for name in workspace_names:
             ws = AnalysisDataService.retrieve(name)
             if not group_or_matrix(ws):
-                issues["InputWorkspaces"] += f"Workspace {name} is not a Group or Matrix Workspace."
+                error_txt = f"Workspace {name} is not a Group or Matrix Workspace."
+                issues["InputWorkspaces"] = error_txt if "InputWorkspaces" not in issues else issues["InputWorkspaces"] + error_txt
 
         reference_workspace = self.getProperty("ReferenceWorkspace").value
         if reference_workspace:
