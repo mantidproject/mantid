@@ -1,1 +1,0 @@
-- Fix an issue where :ref:`SumSpectra <algm-SumSpectra>` would freeze when on large datasets when adding EventList to the Output Workspace if the Event Type was weighted.

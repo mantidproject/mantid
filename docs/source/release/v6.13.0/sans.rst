@@ -5,6 +5,8 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+.. _6_13_sans:
+
 New Features
 ------------
 - A new :ref:`algm-SavePolarizedNXcanSAS` algorithm has been added to save reduced polarized SANS data in the NXcanSAS
