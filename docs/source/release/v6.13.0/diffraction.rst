@@ -2,11 +2,6 @@
 Diffraction Changes
 ===================
 
-.. image:: ../../images/6_13_release/PEARLTransfit-example.png
-   :class: screenshot
-   :width: 385px
-   :align: right
-
 .. contents:: Table of Contents
    :local:
 
@@ -20,6 +15,12 @@ New features
 - A new algorithm, :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` has been added - for VULCAN only. This
   replicates the functionality of :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, but performs
   all the work on the events directly from the file to reduce memory usage.
+
+.. image:: ../../images/6_13_release/PEARLTransfit-example.png
+   :class: screenshot
+   :width: 385px
+   :align: right
+
 - Several improvements have been made to :ref:`algm-PEARLTransfit`:
 
   - Perform an initial fit with a fixed ``GaussianFWHM`` for calibration runs to improve the robustness of the
@@ -27,6 +28,7 @@ New features
   - Accounted for covariance in error calculation for effective temperature.
   - Added a new input parameter ``RebinInEnergy``. If False then the energy bins will be determined from the TOF bins in
     the input workspace rather than the ``Ediv`` parameter.
+  - See the image for an example of the improved fit.
 
 - Both user-defined sample and container geometry have been enabled together with the definition of gauge volume to
   account for the beam size. This has been implemented in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and
