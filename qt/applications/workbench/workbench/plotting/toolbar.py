@@ -85,7 +85,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool("Fill Area", "Fill area under curves", "mdi.format-color-fill", "waterfall_fill_area", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool("Help", "Open plotting help documentation", "mdi.help", "launch_plot_help", None),
-        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.plus", "toggle_crosshair", False),
+        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.target", "toggle_crosshair", False),
         MantidNavigationTool("Hide", "Hide the plot", "mdi.eye", "hide_plot", None),
     )
 
