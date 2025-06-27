@@ -13,7 +13,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** DetermineSpinStateOrder : TODO: DESCRIPTION
+/** DetermineSpinStateOrder : Takes a workspace group of Polarised SANS run periods and returns
+a string (e.g '--, -+, +-, ++') of thier corresponding spin states.
  */
 class MANTID_ALGORITHMS_DLL DetermineSpinStateOrder : public API::Algorithm {
 public:

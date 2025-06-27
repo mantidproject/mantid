@@ -32,19 +32,22 @@ const std::string DetermineSpinStateOrder::name() const { return "DetermineSpinS
 int DetermineSpinStateOrder::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DetermineSpinStateOrder::category() const { return "Reflectometry"; }
+const std::string DetermineSpinStateOrder::category() const { return "SANS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string DetermineSpinStateOrder::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string DetermineSpinStateOrder::summary() const {
+  return "Takes a workspace group of Polarised SANS run periods and returns a string (e.g '--, -+, +-, ++') of thier "
+         "corresponding spin states.";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DetermineSpinStateOrder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("InputWorkspace", "", Direction::Input),
-                  "An input workspace.");
+                  "A Polarised SANS run from either LARMOR or ZOOM (group workspace with 4 periods).");
   declareProperty("SpinStates", std::string(""),
-                  "A comma-seperated string of the spin states of each of the child workspacese.g '++,--,+-,-+'",
+                  "A comma-seperated string of the spin states of each of the run periods e.g '++,--,+-,-+'",
                   Direction::Output);
 }
 

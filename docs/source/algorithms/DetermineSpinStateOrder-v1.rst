@@ -10,35 +10,43 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Takes a Polarised SANS transmission run and attempts to determine the spin state for each run period.
 
+To determine if the RF flipper is on or not the algorithm uses the spin flipper current log, to determine the beam polarisation the
+algorithm compares the period transmission to the average transmission (greater than the average suggests the same state as the flipper).
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - DetermineSpinStateOrder**
 
 .. testcode:: DetermineSpinStateOrderExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   from mantid.simpleapi import *
+   from mantid.api import WorkspaceGroup
 
-   wsOut = DetermineSpinStateOrder()
+   wsGroup = WorkspaceGroup()
+   mtd.add("group", wsGroup)
+   y_values = [10, 80, 20, 90]
+   flipper_current_values = [3, 3.5, 5.5, 5.8]
 
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+   for i in range(4):
+       ws_name = f"ws_{i}"
+       CreateSampleWorkspace("Histogram", "Flat background", XUnit="Wavelength", XMin=0, XMax=10, BinWidth=1, NumEvents=10, InstrumentName="LARMOR", OutputWorkspace=ws_name)
+       CropWorkspace(ws_name, StartWorkspaceIndex=1, EndWorkspaceIndex=1, OutputWorkspace=ws_name)
+       mtd[ws_name] *= y_values[i]
+       AddTimeSeriesLog(ws_name, "FlipperCurrent", "2010-01-01T00:00:00", flipper_current_values[i])
+       wsGroup.addWorkspace(mtd[ws_name])
+
+   ConvertToHistogram(wsGroup, OutputWorkspace=wsGroup)
+   result = DetermineSpinStateOrder(wsGroup)
+   print(f"Spin state order from wsGroup is {result}")
 
 Output:
 
 .. testoutput:: DetermineSpinStateOrderExample
 
-  The output workspace has ?? spectra
+   Spin state order from wsGroup is +-,++,-+,--
 
 .. categories::
 
