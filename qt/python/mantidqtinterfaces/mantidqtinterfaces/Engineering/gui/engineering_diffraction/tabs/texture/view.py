@@ -1,0 +1,195 @@
+from qtpy import QtWidgets, QtCore
+from mantidqt.utils.qt import load_ui
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
+from qtpy.QtWidgets import QVBoxLayout
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
+
+Ui_texture, _ = load_ui(__file__, "texture_tab.ui")
+
+
+class TextureView(QtWidgets.QWidget, Ui_texture):
+    sig_enable_controls = QtCore.Signal(bool)
+    sig_view_requested = QtCore.Signal(str)
+    sig_view_shape_requested = QtCore.Signal(str)
+
+    def __init__(self, parent=None):
+        super(TextureView, self).__init__(parent)
+        self.setupUi(self)
+
+        self.show_sample_view = ShowSampleView()
+
+        self.finder_texture_ws.setLabelText("Sample Run(s)")
+        self.finder_texture_ws.allowMultipleFiles(True)
+
+        self.finder_texture_tables.setLabelText("Fit Parameters")
+        self.finder_texture_tables.allowMultipleFiles(True)
+
+        self._setup_plot()
+
+    # ========== Signal Connectors ==========
+    def set_on_load_ws_clicked(self, slot):
+        self.btn_loadWSFiles.clicked.connect(slot)
+
+    def set_on_load_param_clicked(self, slot):
+        self.btn_loadParamFiles.clicked.connect(slot)
+
+    def set_enable_controls_connection(self, slot):
+        self.sig_enable_controls.connect(slot)
+
+    def set_on_delete_clicked(self, slot):
+        self.btn_deleteSelected.clicked.connect(slot)
+
+    def set_on_delete_param_clicked(self, slot):
+        self.btn_deleteSelectedParams.clicked.connect(slot)
+
+    def set_on_select_all_clicked(self, slot):
+        self.btn_selectAll.clicked.connect(slot)
+
+    def set_on_deselect_all_clicked(self, slot):
+        self.btn_deselectAll.clicked.connect(slot)
+
+    def set_on_calc_pf_clicked(self, slot):
+        self.btn_calc_pf.clicked.connect(slot)
+
+    def set_include_scatter_corr(self, val):
+        return self.check_scatt.setChecked(val)
+
+    def set_on_check_inc_scatt_corr_state_changed(self, slot):
+        self.check_scatt.stateChanged.connect(slot)
+
+    def set_on_load_cif_clicked(self, slot):
+        self.btn_loadCif.clicked.connect(slot)
+
+    def set_on_copy_all_xtal_clicked(self, slot):
+        self.btn_copyXtalToAll.clicked.connect(slot)
+
+    def set_on_set_crystal_clicked(self, slot):
+        self.btn_setCrystal.clicked.connect(slot)
+
+    def set_on_set_all_crystal_clicked(self, slot):
+        self.btn_setAllCrystal.clicked.connect(slot)
+
+    # ========== Table Handling ==========
+    def populate_workspace_table(self, workspace_info_list):
+        self.table_loaded_data.setColumnCount(5)
+        self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Fit Parameters", "Crystal Structure", "Sample", "Select"])
+        self.table_loaded_data.setRowCount(len(workspace_info_list))
+
+        header = self.table_loaded_data.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+
+        for row, (ws, metadata) in enumerate(workspace_info_list.items()):
+            self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
+            self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(metadata.get("fit_parameters", "Not set")))
+            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("crystal", "Not set")))
+
+            # selection box
+            checkbox = QtWidgets.QCheckBox()
+            checkbox.setChecked(metadata["select"])
+            cell_widget = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout(cell_widget)
+            layout.addWidget(checkbox)
+            layout.setAlignment(QtCore.Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            self.table_loaded_data.setCellWidget(row, 4, cell_widget)
+
+            # shape_view
+            self.show_sample_view.add_show_button_to_table_if_shape(
+                self.sig_view_shape_requested, self.table_loaded_data, ws, row, 3, metadata.get("shape", "Not set") != "Not set"
+            )
+
+    def get_projection_method(self):
+        return self.combo_projMethod.currentText()
+
+    def get_hkl(self):
+        return self.h_lineedit.text(), self.k_lineedit.text(), self.l_lineedit.text()
+
+    def get_inc_scatt_power(self):
+        return self.check_scatt.isChecked()
+
+    def get_lattice(self):
+        return self.lattice_lineedit.text()
+
+    def get_spacegroup(self):
+        return self.spacegroup_lineedit.text()
+
+    def get_basis(self):
+        return self.basis_lineedit.text()
+
+    def get_crystal_ws_prop(self):
+        return self.combo_workspaceListProp.currentText()
+
+    def get_crystal_ws_cif(self):
+        return self.combo_workspaceListCIF.currentText()
+
+    def get_readout_column(self):
+        return self.combo_param.currentText()
+
+    def populate_workspace_list(self, workspace_names):
+        self.combo_workspaceListProp.clear()
+        self.combo_workspaceListProp.addItems(sorted(workspace_names))
+        self.combo_workspaceListCIF.clear()
+        self.combo_workspaceListCIF.addItems(sorted(workspace_names))
+
+    def populate_readout_column_list(self, cols, starting_index):
+        self.combo_param.clear()
+        self.combo_param.addItems(cols)
+        if starting_index:
+            self.combo_param.setCurrentIndex(starting_index)
+
+    def get_selected_workspaces(self):
+        selected_wss = []
+        selected_params = []
+        for row in range(self.table_loaded_data.rowCount()):
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
+            if cell_widget:
+                checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
+                if checkbox and checkbox.isChecked():
+                    selected_wss.append(self.table_loaded_data.item(row, 0).text())
+                    selected_params.append(self.table_loaded_data.item(row, 1).text())
+        return selected_wss, selected_params
+
+    def set_all_workspaces_selected(self, selected):
+        for row in range(self.table_loaded_data.rowCount()):
+            cell_widget = self.table_loaded_data.cellWidget(row, 4)
+            if cell_widget:
+                checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
+                if checkbox:
+                    checkbox.setChecked(selected)
+
+    def get_file_paths(self):
+        return self.finder_corr.getFilenames()
+
+    def is_searching(self):
+        return self.finder_corr.isSearching()
+
+    def _setup_plot(self):
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setMinimumHeight(400)
+
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        layout = QVBoxLayout()
+        self.plot_canvas.setLayout(layout)
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+
+    def get_plot_axis(self):
+        return self.figure, self.canvas
+
+    def update_crystal_section_visibility(self):
+        self.set_crystal_section_visibility(self.check_scatt.isChecked())
+
+    def set_crystal_section_visibility(self, vis):
+        self.widget_scattPowerContainer.setVisible(vis)
+
+    def update_col_select_visibility(self, vis):
+        self.label_param.setVisible(vis)
+        self.combo_param.setVisible(vis)
