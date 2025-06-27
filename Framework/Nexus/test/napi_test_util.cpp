@@ -63,7 +63,7 @@ void putAttr(Mantid::Nexus::File &file, const std::string &dataName, const std::
 void write_dmc(const std::string &filename, const std::string &start_time, const std::vector<int32_t> &counts,
                const std::vector<double> &two_theta) {
   std::cout << "Creating external file \"" << filename << "\"\n";
-  Mantid::Nexus::File file(filename, NXACC_CREATE5);
+  Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
   const std::string title("Ga0.94Mn0.04Sb_8mm 2.567A T=4");
 

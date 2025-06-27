@@ -37,7 +37,7 @@ int main() {
 
     NXhandle fileid;
     NXlink aLink;
-    if (NXopen(szFile, NXACC_CREATE5, fileid) != NXstatus::NX_OK)
+    if (NXopen(szFile, NXaccess::CREATE5, fileid) != NXstatus::NX_OK)
       ON_ERROR("NXopen_failed")
 
     for (iEntry = 0; iEntry < nEntry; iEntry++) {
@@ -65,8 +65,8 @@ int main() {
           ostringstream oss3;
           oss3 << "i2_data_" << iData;
 
-          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NX_COMP_LZW, array_dims) !=
-              NXstatus::NX_OK)
+          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NXcompression::LZW,
+                               array_dims) != NXstatus::NX_OK)
             ON_ERROR("NXcompmakedata failed!")
 
           if (NXopendata(fileid, PSZ(oss3.str())) != NXstatus::NX_OK)

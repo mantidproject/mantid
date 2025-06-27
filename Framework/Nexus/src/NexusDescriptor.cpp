@@ -79,7 +79,7 @@ NexusDescriptor::NexusDescriptor(std::string filename, NXaccess access)
     : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType() {
   // if we are creating a file and it already exists, then delete it first
-  if (access == NXaccess_mode::NXACC_CREATE5) {
+  if (access == NXaccess::CREATE5) {
     if (std::filesystem::exists(m_filename)) {
       std::filesystem::remove(m_filename);
     }

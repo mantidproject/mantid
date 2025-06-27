@@ -782,7 +782,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // do the work
   int i_type = static_cast<int>(type);
-  int compress_type = static_cast<int>(comp);
 
   hid_t datatype1, dataspace, iNew;
   hid_t dtype, cparms = -1;
@@ -852,7 +851,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     }
     mydim1[rank - 1] = 1;
     if (mydim[rank - 1] > 1) {
-      mydim[rank - 1] = maxdims[rank - 1] = dsize[rank - 1] = 1;
+      maxdims[rank - 1] = dsize[rank - 1] = 1;
     }
     if (chunkdims[rank - 1] > 1) {
       chunkdims[rank - 1] = 1;
@@ -872,12 +871,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
   }
   compress_level = 6;
-  if ((compress_type / 100) == NX_COMP_LZW) {
-    compress_level = static_cast<unsigned int>(compress_type % 100);
-    compress_type = NX_COMP_LZW;
-  }
   hid_t dID;
-  if (compress_type == NX_COMP_LZW) {
+  if (comp == NXcompression::LZW) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     iNew = H5Pset_chunk(cparms, rank, chunkdims);
     if (iNew < 0) {
@@ -887,7 +882,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     H5Pset_shuffle(cparms); // mrt: improves compression
     H5Pset_deflate(cparms, compress_level);
     dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-  } else if (compress_type == NX_COMP_NONE) {
+  } else if (comp == NXcompression::NONE) {
     if (unlimiteddim) {
       cparms = H5Pcreate(H5P_DATASET_CREATE);
       iNew = H5Pset_chunk(cparms, rank, chunkdims);
@@ -899,7 +894,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     } else {
       dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-  } else if (compress_type == NX_CHUNK) {
+  } else if (comp == NXcompression::CHUNK) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     iNew = H5Pset_chunk(cparms, rank, chunkdims);
     if (iNew < 0) {
@@ -1136,7 +1131,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
      */
     int mtype = 0;
     if (tclass == H5T_STRING) {
-      mtype = NX_CHAR;
+      mtype = NXnumtype::CHAR;
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
@@ -1158,7 +1153,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       throw NXEXCEPTION("Selecting memspace failed");
     }
     /* read slab */
-    if (mtype == NX_CHAR) {
+    if (mtype == NXnumtype::CHAR) {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
       char const *data1;
       data1 = tmp_data + myStart[0];
@@ -1702,7 +1697,7 @@ void File::makeLink(NXlink const &link) {
   /*
      set the target attribute
    */
-  if (link.linkType > 0) {
+  if (link.linkType == NXentrytype::sds) {
     dataID = H5Dopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
   } else {
     dataID = H5Gopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
@@ -1729,7 +1724,7 @@ void File::makeLink(NXlink const &link) {
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
-  if (link.linkType > 0) {
+  if (link.linkType == NXentrytype::sds) {
     H5Dclose(dataID);
   } else {
     H5Gclose(dataID);
@@ -1742,11 +1737,15 @@ void File::makeLink(NXlink const &link) {
 using namespace Mantid::Nexus;
 int NXnumtype::validate_val(int const x) {
   int val = BAD;
+  // NOTE for user-readability it is better to check all of these cases
+  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
+  // cppcheck-suppress-begin knownConditionTrueFalse
   if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
       (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
       (x == BAD)) {
     val = x;
   }
+  // cppcheck-suppress-end knownConditionTrueFalse
   return val;
 }
 
@@ -1763,6 +1762,9 @@ NXnumtype::operator int() const { return m_val; };
 #define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
 
 NXnumtype::operator std::string() const {
+  // NOTE for user-readability it is better to check all of these cases
+  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
+  // cppcheck-suppress-begin knownConditionTrueFalse
   std::string ret = NXTYPE_PRINT(BAD);
   if (m_val == FLOAT32) {
     ret = NXTYPE_PRINT(FLOAT32);
@@ -1791,11 +1793,42 @@ NXnumtype::operator std::string() const {
   } else if (m_val == BINARY) {
     ret = NXTYPE_PRINT(BINARY);
   }
+  // cppcheck-suppress-end knownConditionTrueFalse
   return ret;
 }
 
 std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
   os << std::string(value);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const NXaccess &value) {
+  std::string ret("Unknown access type");
+  if (value == NXaccess::CREATE5) {
+    ret = NXTYPE_PRINT(NXaccess::CREATE5);
+  } else if (value == NXaccess::READ) {
+    ret = NXTYPE_PRINT(NXaccess::READ);
+  } else if (value == NXaccess::RDWR) {
+    ret = NXTYPE_PRINT(NXaccess::RDWR);
+  }
+  os << ret;
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const NXcompression &value) {
+  std::string ret("Unknown compression type");
+  if (value == NXcompression::NONE) {
+    ret = NXTYPE_PRINT(NXcompression::NONE);
+  } else if (value == NXcompression::CHUNK) {
+    ret = NXTYPE_PRINT(NXcompression::CHUNK);
+  } else if (value == NXcompression::LZW) {
+    ret = NXTYPE_PRINT(NXcompression::LZW);
+  } else if (value == NXcompression::RLE) {
+    ret = NXTYPE_PRINT(NXcompression::RLE);
+  } else if (value == NXcompression::HUF) {
+    ret = NXTYPE_PRINT(NXcompression::HUF);
+  }
+  os << ret;
   return os;
 }
 

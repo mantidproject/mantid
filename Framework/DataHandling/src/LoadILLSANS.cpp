@@ -1002,7 +1002,7 @@ void LoadILLSANS::loadMetaData(const Nexus::NXEntry &entry, const std::string &i
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   try {
-    Nexus::File nxHandle(filename, NXACC_READ);
+    Nexus::File nxHandle(filename, NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
   } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << filename << "\" in read mode: " << e.what() << "\n";
