@@ -761,7 +761,6 @@ set(QT5_TEST_FILES
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
     test/ManageUserDirectoriesTest.h
-    # test/MantidHelpWindowTest.h - disabled while the failure is investigated
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
