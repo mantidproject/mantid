@@ -29,10 +29,12 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
+#include "tbb/parallel_invoke.h"
 #include "tbb/parallel_reduce.h"
 
 #include <H5Cpp.h>
 #include <atomic>
+#include <numbers>
 #include <regex>
 
 namespace Mantid::DataHandling {
@@ -64,8 +66,8 @@ const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
-const std::string TIME_OF_FLIGHT("event_time_offset");
-const std::string DETID("event_id");
+const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
+const std::string DETID("event_id");                   // uint32 in ORNL nexus files
 const std::string INDEX_ID("event_index");
 } // namespace NxsFieldNames
 
@@ -100,6 +102,9 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
   }
 }
 
+/// detids with this calibration factor are something to not bother with
+constexpr double IGNORE_PIXEL{1.e6};
+
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -128,7 +133,7 @@ const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return
 namespace { // anonymous
 std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
                                            const std::vector<double> &polars) {
-  constexpr double deg2rad = M_PI / 180.;
+  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
 
   std::vector<double> difc;
 
@@ -157,37 +162,15 @@ public:
     // groups close themselves
   }
 
-  void loadTOF(H5::Group &event_group, std::unique_ptr<std::vector<float>> &data,
-               const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::TIME_OF_FLIGHT);
-    auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  template <typename TofType>
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
+               const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-
-    // get the units
-    std::string tof_unit;
-    NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-
-    // Convert Tof to microseconds
-    if (tof_unit != MICROSEC)
-      Kernel::Units::timeConversionVector(*data, tof_unit, MICROSEC);
   }
 
-  void loadDetid(H5::Group &event_group, std::unique_ptr<std::vector<detid_t>> &data,
-                 const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::DETID);
-    auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  template <typename DetidType>
+  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
+                 const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
   }
 
@@ -199,22 +182,20 @@ private:
   }
 
 public:
-  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group) {
-    constexpr uint64_t START_DEFAULT = 0;
-    constexpr uint64_t STOP_DEFAULT = std::numeric_limits<uint64_t>::max();
-
+  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group, const uint64_t number_events) {
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
       uint64_t start_event = event_index->at(m_pulse_start_index);
-      uint64_t stop_event = STOP_DEFAULT;
+      uint64_t stop_event = number_events;
       if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
         stop_event = event_index->at(m_pulse_stop_index);
       return {start_event, stop_event};
     } else {
-      return {START_DEFAULT, STOP_DEFAULT};
+      constexpr uint64_t START_DEFAULT = 0;
+      return {START_DEFAULT, number_events};
     }
   }
 
@@ -263,39 +244,45 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-class ProcessEventsTask {
+template <typename DetidType, typename TofType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const std::vector<detid_t> *detids, const std::vector<float> *tofs,
-                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges,
-                    const std::set<detid_t> *masked)
+  ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
       : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
-        m_binedges(binedges), masked(masked), no_mask(masked->empty()) {}
+        m_binedges(binedges) {}
 
   ProcessEventsTask(ProcessEventsTask &other, tbb::split)
       : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
-        m_calibration(other.m_calibration), m_binedges(other.m_binedges), masked(other.masked), no_mask(other.no_mask) {
-  }
+        m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) {
-    const auto &binedges = *m_binedges;
-    const size_t nbins = binedges.size() - 1;
+    // Cache values to reduce number of function calls
+    const auto &range_end = range.end();
+    const auto &binedges_cbegin = m_binedges->cbegin();
+    const auto &binedges_cend = m_binedges->cend();
+    const auto &tof_min = m_binedges->front();
+    const auto &tof_max = m_binedges->back();
 
-    for (size_t i = range.begin(); i < range.end(); ++i) {
-      const detid_t &detid = (*m_detids)[i];
-      if (no_mask || (masked->find(detid) == masked->end())) {
+    // Calibrate and histogram the data
+    auto detid_iter = m_detids->cbegin() + range.begin();
+    auto tof_iter = m_tofs->cbegin() + range.begin();
+    for (size_t i = range.begin(); i < range_end; ++i) {
+      const auto &detid = *detid_iter;
+      const auto &calib_factor = m_calibration->value(detid);
+      if (calib_factor < IGNORE_PIXEL) {
         // Apply calibration
-        const double tof = static_cast<double>((*m_tofs)[i]) * m_calibration->value(detid);
+        const double &tof = static_cast<double>(*tof_iter) * calib_factor;
+        if ((tof < tof_max) && (!(tof < tof_min))) { // check against max first to allow skipping second
+          // Find the bin index using binary search
+          const auto &it = std::upper_bound(binedges_cbegin, binedges_cend, tof);
 
-        // Find the bin index using binary search
-        const auto &it = std::upper_bound(binedges.cbegin(), binedges.cend(), tof);
-        const size_t bin = (it == binedges.cbegin() || it == binedges.cend())
-                               ? nbins
-                               : static_cast<size_t>(it - binedges.cbegin() - 1);
-
-        if (bin < nbins) {
+          // Increment the count if a bin was found
+          const auto &bin = static_cast<size_t>(std::distance(binedges_cbegin, it) - 1);
           y_temp[bin]++;
         }
       }
+      ++detid_iter;
+      ++tof_iter;
     }
   }
 
@@ -309,12 +296,10 @@ public:
   std::vector<uint32_t> y_temp;
 
 private:
-  const std::vector<detid_t> *m_detids;
-  const std::vector<float> *m_tofs;
+  const std::vector<DetidType> *m_detids;
+  const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
-  const std::set<detid_t> *masked;
-  const bool no_mask; ///< whether there are any masked pixels
 };
 
 class ProcessBankTask {
@@ -329,7 +314,6 @@ public:
         m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
       const auto &bankName = m_bankEntries[wksp_index];
@@ -339,86 +323,107 @@ public:
       // open the bank
       auto event_group = entry.openGroup(bankName); // type=NXevent_data
 
-      // get filtering range
-      auto eventRangeFull = m_loader.getEventIndexRange(event_group);
-      // update range for data that is present
-      if (eventRangeFull.second == std::numeric_limits<size_t>::max()) {
-        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-        const auto length_actual = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
-        eventRangeFull.second = length_actual;
+      // skip empty dataset
+      auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      const int64_t total_events = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
+      if (total_events == 0) {
+        m_progress->report();
+        continue;
       }
+
+      // get filtering range and update it for data that is present
+      auto eventRangeFull = m_loader.getEventIndexRange(event_group, total_events);
+      // skip empty filter range
+      if (eventRangeFull.first == eventRangeFull.second) {
+        // g_log.warning() << "No data for bank " << entry_name << '\n';
+        m_progress->report();
+        continue;
+      }
+
+      // TODO REMOVE debug print
+      std::cout << bankName << " has " << eventRangeFull.second << " events\n"
+                << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
+                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)\n";
+
+      // create a histogrammer to process the events
+      auto &spectrum = m_wksp->getSpectrum(wksp_index);
+
+      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+      // counting things
+      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+      // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+
+      // task group allows for separate of disk read from processing
+      tbb::task_group_context tgroupcontext; // needed by parallel_reduce
+      tbb::task_group tgroup(tgroupcontext);
 
       // create object so bank calibration can be re-used
       std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
 
-      if (eventRangeFull.first == eventRangeFull.second) {
-        // g_log.warning() << "No data for bank " << entry_name << '\n';
-      } else {
-        // TODO REMOVE debug print
-        std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                  << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
-                  << "\n";
+      // get handle to the data
+      auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
+      // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      // and the units
+      std::string tof_unit;
+      NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+      const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
-        // create a histogrammer to process the events
-        auto &spectrum = m_wksp->getSpectrum(wksp_index);
+      // declare arrays once so memory can be reused
+      auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
+      auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
-        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-        // counting things
-        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+      // read parts of the bank at a time
+      size_t event_index_start = eventRangeFull.first;
+      while (event_index_start < eventRangeFull.second) {
+        // H5Cpp will truncate correctly
+        // H5Util resizes the vector
+        const size_t offset = event_index_start;
+        const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
+                                    ? std::numeric_limits<size_t>::max()
+                                    : m_events_per_chunk;
 
-        tbb::task_group tg;
-        // read parts of the bank at a time
-        size_t event_index_start = eventRangeFull.first;
-        while (event_index_start < eventRangeFull.second) {
-          // H5Cpp will truncate correctly
-          const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
-                                                                event_index_start + m_events_per_chunk};
+        // load detid and tof at the same time
+        tbb::parallel_invoke(
+            [&] { // load detid
+              // event_detid->clear();
+              m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+              // immediately find min/max to allow for other things to read disk
+              const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
+              // only recreate calibration if it doesn't already have the useful information
+              if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
+                  (calibration->idmax() < static_cast<detid_t>(maxval))) {
+                calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
+                    static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration,
+                    m_masked);
+              }
+            },
+            [&] { // load time-of-flight
+              // event_time_of_flight->clear();
+              m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+            });
 
-          // load detid
-          std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
-          m_loader.loadDetid(event_group, event_detid, eventRangePartial);
-          // immediately find min/max to allow for other things to read disk
-          const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-          // only recreate calibraion if it doesn't already have the useful information
-          if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-              (calibration->idmax() < static_cast<detid_t>(maxval))) {
-            calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
-          }
+        // Create a local task for this thread
+        ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX());
 
-          // load time-of-flight
-          std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
+        // Non-blocking processing of the events
+        const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
+        tbb::parallel_reduce(range_info, task, tgroupcontext);
 
-          // Non-blocking processing of the events
-          // Each thread needs its own ProcessEventsTask
-          tg.run([event_detid = std::move(event_detid), event_time_of_flight = std::move(event_time_of_flight),
-                  calibration = std::move(calibration), x_ptr = &spectrum.readX(), masked_ptr = &m_masked, &y_temp,
-                  grainsize = m_grainsize_event]() {
-            const auto numEvent = event_time_of_flight->size();
-
-            // Create a local task for this thread
-            ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), x_ptr, masked_ptr);
-            tbb::parallel_reduce(tbb::blocked_range<size_t>(0, numEvent, grainsize), task);
-            // Atomically accumulate results into shared y_temp
-            for (size_t i = 0; i < y_temp.size(); ++i) {
-              y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-            }
-          });
-
-          event_index_start += m_events_per_chunk;
+        // Atomically accumulate results into shared y_temp to combine local histograms
+        for (size_t i = 0; i < y_temp.size(); ++i) {
+          y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
         }
 
-        tg.wait();
-
-        // copy the data out into the correct spectrum
-        auto &y_values = spectrum.dataY();
-        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-
-        std::cout << bankName << " stop " << timer << std::endl;
+        event_index_start += m_events_per_chunk;
       }
+
+      tgroup.wait();
+
+      // copy the data out into the correct spectrum
+      auto &y_values = spectrum.dataY();
+      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+
+      std::cout << bankName << " stop " << timer << std::endl;
       m_progress->report();
     }
   }
@@ -658,6 +663,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
+    std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
@@ -809,8 +815,21 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
 }
 
 // ------------------------ BankCalibration object
+/**
+ * Calibration of a subset of pixels as requested in the constructor. This is used because a vector is faster lookup
+ * than a map for dense array of values.
+ *
+ * @param idmin Minimum detector id to include in the calibration
+ * @param idmax Maximum detector id to include in the calibration
+ * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
+ * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
+ * @param calibration_map Calibration for the entire instrument.
+ * @param mask detector ids that exist in the map should not be included.
+ */
 AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
-                                                          const std::map<detid_t, double> &calibration_map)
+                                                          const double time_conversion,
+                                                          const std::map<detid_t, double> &calibration_map,
+                                                          const std::set<detid_t> &mask)
     : m_detid_offset(idmin) {
   // error check the id-range
   if (idmax < idmin)
@@ -819,20 +838,36 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
   // allocate memory and set the default value to 1
   m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
 
-  // copy over values that matter
+  // set up iterators for copying data
   auto iter = calibration_map.find(idmin);
   if (iter == calibration_map.end())
     throw std::runtime_error("ALSO BAD!");
   auto iter_end = calibration_map.find(idmax);
   if (iter_end != calibration_map.end())
     ++iter_end;
+
+  // copy over values that matter
   for (; iter != iter_end; ++iter) {
     const auto index = static_cast<size_t>(iter->first - m_detid_offset);
     m_calibration[index] = iter->second;
   }
+
+  // apply time conversion here so it is effectively applied for each detector once rather than on each event
+  if (time_conversion != 1.) {
+    std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
+                   [time_conversion](const auto &value) { return std::move(time_conversion * value); });
+  }
+
+  // setup the detector mask - this assumes there are not many pixels in the overall mask
+  // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
+  for (const auto &detid : mask) {
+    if (detid >= idmin && detid <= idmax) {
+      m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
+    }
+  }
 }
 
-/*
+/**
  * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
  */
 const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
