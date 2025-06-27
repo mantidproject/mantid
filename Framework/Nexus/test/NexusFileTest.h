@@ -75,7 +75,7 @@ public:
     std::string filename = resource.fullPath();
 
     // create the file and ensure it exists
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.close();
     TS_ASSERT(std::filesystem::exists(filename));
   }
@@ -83,14 +83,14 @@ public:
   void test_fail_open() {
     // test opening a file that exists, but is unreadable
     std::string filename = getFullPath("Test_characterizations_char.txt");
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(filename, NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(filename, NXaccess::READ));
 
     // test opening an empty file
     FileResource resource("fake_empty_file.nxs.h5");
     std::ofstream file(resource.fullPath());
     file << "mock";
     file.close();
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXaccess::READ));
   }
 
   void test_clear_on_create() {
@@ -101,10 +101,10 @@ public:
     file.close();
 
     // this file cannot be opened for read
-    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_READ));
+    TS_ASSERT_THROWS_ANYTHING(Mantid::Nexus::File file(resource.fullPath(), NXaccess::READ));
 
     // but no issue if opened for create
-    TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(resource.fullPath(), NXACC_CREATE5));
+    TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5));
   }
 
   void test_flush() {
@@ -113,7 +113,7 @@ public:
     // TODO actually test the buffers
     FileResource resource("test_nexus_file_flush.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.flush();
   }
 
@@ -125,7 +125,7 @@ public:
     cout << "\ntest makeGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     string grp("test_group"), cls("NXsample");
 
@@ -140,7 +140,7 @@ public:
     cout << "\ntest openGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
@@ -159,7 +159,7 @@ public:
     cout << "\ntest openGroup bad\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // create a group, to be opened
     string grp("test_group"), cls("NXpants");
@@ -177,7 +177,7 @@ public:
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
 
     // create a file with group -- open it
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup(grp1, cls1, false);
     file.openGroup(grp1, cls1);
 
@@ -190,7 +190,7 @@ public:
     cout << "\ntest closeGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // check error at root
     TS_ASSERT_THROWS_NOTHING(file.closeGroup());
@@ -216,7 +216,7 @@ public:
     Mantid::Nexus::DimVector dims({1});
     NXnumtype type(NXnumtype::CHAR);
 
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // if there is not a top-level NXentry, should throw error
     TS_ASSERT_THROWS(file.makeData(name, type, dims), Mantid::Nexus::Exception const &);
@@ -237,7 +237,7 @@ public:
     FileResource resource("test_nexus_file_data.h5");
     std::string filename = resource.fullPath();
 
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     NXnumtype type(NXnumtype::CHAR);
@@ -252,7 +252,7 @@ public:
     cout << "\ntest openData\n";
     FileResource resource("test_nexus_file_data.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // create a dataset, to be opened
@@ -276,7 +276,7 @@ public:
     cout << "\ntest make data lateral\n";
     FileResource resource("test_napi_file_rdwr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // make and open data
@@ -299,7 +299,7 @@ public:
     cout << "\ntest makeData layers -- bad\n";
     FileResource resource("test_nexus_file_rdwr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     NXnumtype type(NXnumtype::CHAR);
     string data1("layer1"), data2("layer2");
@@ -314,7 +314,7 @@ public:
     cout << "\ntest closeData\n";
     FileResource resource("test_nexus_file_dataclose.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // check error at root
@@ -342,7 +342,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
@@ -381,7 +381,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // try to put data when not in a dataset -- should fail
@@ -396,7 +396,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_stringrw.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get a string
@@ -411,7 +411,7 @@ public:
   void test_check_str_length() {
     FileResource resource("test_nexus_str_len.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     std::string testStr("some_str_data");
@@ -439,7 +439,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
@@ -511,7 +511,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW_vec.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int vector
@@ -545,7 +545,7 @@ public:
 
     // open a file
     std::string filename = getFullPath("md_missing_paramater_map.nxs");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Mantid::Nexus::File file(filename, NXaccess::READ);
 
     std::string addressOfBad("/MDHistoWorkspace/experiment0/sample");
     TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
@@ -579,7 +579,7 @@ public:
 
     // create a file and write string data through a char
     // this mimics behavior from TimeSeriesProperty::saveProperty()
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
     // setup the string data
     std::vector<std::string> values{"help me i", "am stuck in a NXS file", "forever"};
@@ -664,7 +664,7 @@ public:
     H5Fclose(fid);
 
     // now open the file and read
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Mantid::Nexus::File file(filename, NXaccess::READ);
     if (file.hasAddress("entry/data")) {
       file.openAddress("entry/data");
     } else {
@@ -693,7 +693,7 @@ public:
 
     // open a file
     std::string filename = getFullPath("SANS2D00022048.nxs");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Mantid::Nexus::File file(filename, NXaccess::READ);
 
     // this is the dataset that can cause the buffer errors
     std::string addressOfBad("/raw_data_1/selog/S6/value_log/value");
@@ -721,7 +721,7 @@ public:
     cout << "\ntest get_address -- groups only\n";
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // at root, address should be "/"
     TS_ASSERT_EQUALS("/", file.getAddress());
@@ -747,7 +747,7 @@ public:
     cout << "\ntest get_address -- groups and data!\n";
     FileResource resource("test_nexus_file_grpdata.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // at root, address should be "/"
     TS_ASSERT_EQUALS("/", file.getAddress());
@@ -770,7 +770,7 @@ public:
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // setup a recursive group tree
     std::vector<Entry> tree{Entry{"/entry1", "NXentry"},
@@ -839,7 +839,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put an integer
@@ -872,7 +872,7 @@ public:
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     file.makeGroup("entry", "NXentry", true);
 
     // put an integer
@@ -904,7 +904,7 @@ public:
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
 
@@ -931,7 +931,7 @@ public:
     // open a file
     FileResource resource("test_nexus_attr.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     file.makeGroup("entry", "NXentry", true);
 
@@ -966,7 +966,7 @@ public:
 
     // open the file in read-only mode
     std::string filename = getFullPath("md_missing_paramater_map.nxs");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Mantid::Nexus::File file(filename, NXaccess::READ);
 
     // go to main entry (for this file, MDHistoWorkspace)
     file.openGroup("MDHistoWorkspace", "NXentry");
@@ -991,7 +991,7 @@ public:
 
     // open the file in read-only mode
     std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");
-    Mantid::Nexus::File file(filename, NXACC_READ);
+    Mantid::Nexus::File file(filename, NXaccess::READ);
 
     // go to the trouble spot -- /entry/bank39_events/event_time_offset
     std::string entryName("/entry/bank39_events/event_time_offset");
@@ -1016,7 +1016,7 @@ public:
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     // setup a recursive group tree
     std::vector<Entry> tree{Entry{"/entry1", "NXentry"},

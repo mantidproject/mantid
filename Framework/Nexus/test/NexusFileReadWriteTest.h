@@ -50,7 +50,7 @@ private:
 
     cout << "Creating \"" << nxFile << "\"" << endl;
     // create file
-    File fileid(nxFile, NXACC_CREATE5);
+    File fileid(nxFile, NXaccess::CREATE5);
 
     fileid.makeGroup("entry", "NXentry");
     fileid.openGroup("entry", "NXentry");

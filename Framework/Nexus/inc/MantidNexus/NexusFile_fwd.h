@@ -16,19 +16,9 @@ typedef const char CONSTCHAR;
 #define NX5SIGNATURE 959695
 
 /*
- * Any new NXaccess_mode options should be numbered in 2^n format
+ * Any new NXaccess options should be numbered in 2^n format
  * (8, 16, 32, etc) so that they can be bit masked and tested easily.
- *
- * To test older non bit masked options (values below 8) use e.g.
- *
- *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
- *
- * To test new (>=8) options just use normal bit masking e.g.
- *
- *       if ( mode & NXACC_NOSTRIP )
- *
  */
-constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
 
 constexpr int NX_UNLIMITED = -1;
 
@@ -65,22 +55,19 @@ typedef NexusFile5 *NXhandle;
 
 typedef char NXname[128];
 
-/** \enum NXaccess_mode
+/** \enum NXaccess
  * NeXus file access codes.
- * \li NXACC_READ read-only
- * \li NXACC_RDWR open an existing file for reading and writing.
- * \li NXACC_CREATE5 create a NeXus HDF-5 file.
+ * \li READ read-only
+ * \li RDWR open an existing file for reading and writing.
+ * \li CREATE5 create a NeXus HDF-5 file.
  */
-typedef enum {
-  NXACC_READ = 1,
-  NXACC_RDWR = 2,
-  NXACC_CREATE5 = 5,
-} NXaccess_mode;
+enum class NXaccess : unsigned int {
+  READ = 1,   //< 0x0001u = 0001
+  RDWR = 2,   //< 0x0002u = 0010
+  CREATE5 = 5 //< 0x0005u = 0101
+};
 
-/**
- * A combination of options from #NXaccess_mode
- */
-typedef int NXaccess;
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
 typedef struct {
   char *iname;
@@ -92,7 +79,7 @@ typedef struct {
  * \li group the entry is a group
  * \li sds the entry is a dataset (class SDS)
  */
-enum NXentrytype : int { group = 0, sds = 1 };
+enum class NXentrytype : int { group = 0, sds = 1 };
 
 /**
  * \struct NXlink
@@ -105,13 +92,6 @@ typedef struct {
   NXentrytype linkType;      /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
-/* Map NeXus compression methods to HDF compression methods */
-constexpr int NX_CHUNK = 0;
-constexpr int NX_COMP_NONE = 100;
-constexpr int NX_COMP_LZW = 200;
-constexpr int NX_COMP_RLE = 300;
-constexpr int NX_COMP_HUF = 400;
-
 /**
  * Special codes for NeXus file status.
  * \li OKAY success +1.
@@ -120,46 +100,6 @@ constexpr int NX_COMP_HUF = 400;
  * \ingroup cpp_types
  */
 enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
-
-/**
- * \ingroup c_types
- * \def NX_FLOAT32
- * 32 bit float
- * \def NX_FLOAT64
- * 64 bit float == double
- * \def NX_INT8
- * 8 bit integer == byte
- * \def NX_UINT8
- * 8 bit unsigned integer
- * \def NX_INT16
- * 16 bit integer
- * \def NX_UINT16
- * 16 bit unsigned integer
- * \def NX_INT32
- * 32 bit integer
- * \def NX_UINT32
- * 32 bit unsigned integer
- * \def NX_CHAR
- * 8 bit character
- * \def NX_BINARY
- * lump of binary data == NX_UINT8
- */
-/*--------------------------------------------------------------------------*/
-
-/* Map NeXus to HDF types */
-constexpr int NX_FLOAT32{5};
-constexpr int NX_FLOAT64{6};
-constexpr int NX_INT8{20};
-constexpr int NX_UINT8{21};
-constexpr int NX_BOOLEAN{NX_UINT8};
-constexpr int NX_INT16{22};
-constexpr int NX_UINT16{23};
-constexpr int NX_INT32{24};
-constexpr int NX_UINT32{25};
-constexpr int NX_INT64{26};
-constexpr int NX_UINT64{27};
-constexpr int NX_CHAR{4};
-constexpr int NX_BINARY{21};
 
 /** \class NXnumtype
  * The primitive types published by this API.
@@ -177,19 +117,19 @@ constexpr int NX_BINARY{21};
  */
 class MANTID_NEXUS_DLL NXnumtype {
 public:
-  static int const FLOAT32 = NX_FLOAT32;
-  static int const FLOAT64 = NX_FLOAT64;
-  static int const INT8 = NX_INT8;
-  static int const UINT8 = NX_UINT8;
-  static int const BOOLEAN = NX_BOOLEAN;
-  static int const INT16 = NX_INT16;
-  static int const UINT16 = NX_UINT16;
-  static int const INT32 = NX_INT32;
-  static int const UINT32 = NX_UINT32;
-  static int const INT64 = NX_INT64;
-  static int const UINT64 = NX_UINT64;
-  static int const CHAR = NX_CHAR;
-  static int const BINARY = NX_BINARY;
+  static int const FLOAT32 = 5;
+  static int const FLOAT64 = 6;
+  static int const INT8 = 20;
+  static int const UINT8 = 21;
+  static int const BOOLEAN = 21;
+  static int const INT16 = 22;
+  static int const UINT16 = 23;
+  static int const INT32 = 24;
+  static int const UINT32 = 25;
+  static int const INT64 = 26;
+  static int const UINT64 = 27;
+  static int const CHAR = 4;
+  static int const BINARY = 21;
   static int const BAD = -1;
 
 private:
@@ -214,13 +154,9 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &val
  * \li HUF Huffmann encoding (only HDF-4)
  * \ingroup cpp_types
  */
-enum NXcompression : int {
-  CHUNK = NX_CHUNK,
-  NONE = NX_COMP_NONE,
-  LZW = NX_COMP_LZW,
-  RLE = NX_COMP_RLE,
-  HUF = NX_COMP_HUF
-};
+enum class NXcompression { CHUNK, NONE, LZW, RLE, HUF };
+
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression &value);
 
 // forward declare
 namespace Mantid::Nexus {

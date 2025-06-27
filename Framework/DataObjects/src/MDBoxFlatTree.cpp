@@ -676,16 +676,16 @@ Mantid::Nexus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fil
   if (!fileExists && readOnly)
     throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode", fileName);
 
-  NXaccess access(NXACC_RDWR);
+  NXaccess access(NXaccess::RDWR);
   if (readOnly)
-    access = NXACC_READ;
+    access = NXaccess::READ;
 
   file_holder_type hFile;
   try {
     if (fileExists)
       hFile = file_holder_type(new Mantid::Nexus::File(fileName, access));
     else
-      hFile = file_holder_type(new Mantid::Nexus::File(fileName, NXACC_CREATE5));
+      hFile = file_holder_type(new Mantid::Nexus::File(fileName, NXaccess::CREATE5));
   } catch (...) {
     throw Kernel::Exception::FileError("Can not open NeXus file", fileName);
   }

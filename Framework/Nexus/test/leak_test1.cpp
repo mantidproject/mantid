@@ -7,7 +7,7 @@
 using NexusNapiTest::removeFile;
 
 int main() {
-  NXaccess access_mode = NXACC_CREATE5;
+  NXaccess access_mode = NXaccess::CREATE5;
   const int nReOpen = 1000;
   printf("Running for %d iterations\n", nReOpen);
   int iReOpen;
@@ -26,7 +26,7 @@ int main() {
     if (0 == iReOpen % 100)
       printf("loop count %d\n", iReOpen);
 
-    if (NXopen(szFile.c_str(), NXACC_RDWR, fileid) != NXstatus::NX_OK)
+    if (NXopen(szFile.c_str(), NXaccess::RDWR, fileid) != NXstatus::NX_OK)
       ON_ERROR("NXopen failed!\n");
 
     if (NXclose(fileid) != NXstatus::NX_OK)

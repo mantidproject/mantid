@@ -244,7 +244,7 @@ public:
   }
 
   void createFakeFile(const std::string &filename) {
-    Mantid::Nexus::File file(filename, NXACC_CREATE5);
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
 
     const bool openGroup = true;
     file.makeGroup("raw_data_1", "NXentry", openGroup);

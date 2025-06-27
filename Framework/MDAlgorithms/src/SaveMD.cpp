@@ -227,7 +227,7 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  auto file = std::make_unique<Nexus::File>(filename, NXACC_CREATE5);
+  auto file = std::make_unique<Nexus::File>(filename, NXaccess::CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);

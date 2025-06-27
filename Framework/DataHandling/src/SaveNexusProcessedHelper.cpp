@@ -85,7 +85,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   // open named file and entry - file may exist
   // @throw Exception::FileError if cannot open Nexus file for writing
   //
-  NXaccess mode(NXACC_CREATE5);
+  NXaccess mode(NXaccess::CREATE5);
   std::string mantidEntryName;
   m_filename = fileName;
   //
@@ -94,7 +94,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   // format otherwise as compressed hdf5
   //
   if ((Poco::File(m_filename).exists() && append_to_file) || m_filehandle)
-    mode = NXACC_RDWR;
+    mode = NXaccess::RDWR;
 
   else {
     if (fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size()) {
@@ -125,7 +125,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   // new name to be n+1 so that we do not over-write by default. This may need
   // changing.
   //
-  if (mode == NXACC_RDWR) {
+  if (mode == NXaccess::RDWR) {
     size_t count = 0;
     if (entryNumber.has_value()) {
       // Use the entry number provided.

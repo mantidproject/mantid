@@ -58,7 +58,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(std::string const &filename, NXaccess const access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXaccess::READ);
 
   /**
    * Create a new File.
@@ -66,7 +66,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(char const *filename, NXaccess const access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXaccess::READ);
 
   /**
    * Copy constructor
@@ -111,7 +111,7 @@ private:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
+  void initOpenFile(const std::string &filename, const NXaccess access = NXaccess::READ);
 
   //------------------------------------------------------------------------------------------------------------------
   // FILE NAVIGATION METHODS

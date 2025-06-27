@@ -54,18 +54,6 @@
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
 
-/* levels for deflate - to test for these we use ((value / 100) == NX_COMP_LZW) */
-#define NX_COMP_LZW_LVL0 (100 * NX_COMP_LZW + 0)
-#define NX_COMP_LZW_LVL1 (100 * NX_COMP_LZW + 1)
-#define NX_COMP_LZW_LVL2 (100 * NX_COMP_LZW + 2)
-#define NX_COMP_LZW_LVL3 (100 * NX_COMP_LZW + 3)
-#define NX_COMP_LZW_LVL4 (100 * NX_COMP_LZW + 4)
-#define NX_COMP_LZW_LVL5 (100 * NX_COMP_LZW + 5)
-#define NX_COMP_LZW_LVL6 (100 * NX_COMP_LZW + 6)
-#define NX_COMP_LZW_LVL7 (100 * NX_COMP_LZW + 7)
-#define NX_COMP_LZW_LVL8 (100 * NX_COMP_LZW + 8)
-#define NX_COMP_LZW_LVL9 (100 * NX_COMP_LZW + 9)
-
 /*
  * Standard interface
  *
@@ -85,14 +73,12 @@
  * or a NXflush will the data file be valid.
  * \param filename The name of the file to open
  * \param access_method The file access method. This can be:
- * \li NXACC__READ read access
- * \li NXACC_RDWR read write access
- * \li NXACC_CREATE, NXACC_CREATE4 create a new HDF-4 NeXus file
- * \li NXACC_CREATE5 create a new HDF-5 NeXus file
- * \li NXACC_CREATEXML create an XML NeXus file.
- * see #NXaccess_mode
+ * \li READ read access
+ * \li RDWR read write access
+ * \li CREATE5 create a new HDF-5 NeXus file
+ * see #NXaccess
  * Support for HDF-4 is deprecated.
- * \param pHandle A file handle which will be initialized upon successfull completeion of NXopen.
+ * \param handle A file handle which will be initialized upon successfull completeion of NXopen.
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_init
  */
@@ -204,10 +190,10 @@ MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumt
  * \param datatype The data type of this data set.
  * \param rank The number of dimensions this dataset is going to have
  * \param comp_typ The compression scheme to use. Possible values:
- * \li NX_COMP_NONE no compression
- * \li NX_COMP_LZW (recommended) despite the name this enabled zlib compression (of various levels, see above)
- * \li NX_COMP_RLE run length encoding (only HDF-4)
- * \li NX_COMP_HUF Huffmann encoding (only HDF-4)
+ * \li NONE no compression
+ * \li LZW (recommended) despite the name this enabled zlib compression (of various levels, see above)
+ * \li RLE run length encoding (only HDF-4)
+ * \li HUF Huffmann encoding (only HDF-4)
  * \param dim An array of size rank holding the size of the dataset in each dimension. The first dimension
  * can be NX_UNLIMITED. Data can be appended to such a dimension using NXputslab.
  * \param bufsize The dimensions of the subset of the data which usually be writen in one go.
@@ -217,7 +203,7 @@ MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, CONSTCHAR *label, NXnumt
  * \ingroup c_readwrite
  */
 MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, NXnumtype datatype, int rank,
-                                           int64_t const dim[], int comp_typ, int64_t const chunk_size[]);
+                                           int64_t const dim[], NXcompression const comp, int64_t const chunk_size[]);
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or
@@ -466,8 +452,6 @@ MANTID_NEXUS_DLL const char *NXgetversion();
  * \ingroup c_memory
  */
 MANTID_NEXUS_DLL NXstatus NXfree(void **data);
-
-MANTID_NEXUS_DLL NXstatus NXIprintlink(NXhandle fid, NXlink const *link);
 
 /**
  * Dispatches the error message
