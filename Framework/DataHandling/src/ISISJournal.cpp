@@ -30,7 +30,7 @@ using Poco::XML::NodeFilter;
 using Poco::XML::TreeWalker;
 
 namespace {
-static constexpr const char *URL_PREFIX = "http://journals.isis.cclrc.ac.uk/jv/";
+static constexpr const char *URL_PREFIX = "http://journals.isis.cclrc.ac.uk/jv/ndx";
 static constexpr const char *INDEX_FILE_NAME = "main";
 static constexpr const char *JOURNAL_PREFIX = "/journal_";
 static constexpr const char *JOURNAL_EXT = ".xml";

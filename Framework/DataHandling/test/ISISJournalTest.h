@@ -22,7 +22,7 @@ using testing::NiceMock;
 using testing::Return;
 
 namespace {
-const std::string URL_PREFIX = "http://journals.isis.cclrc.ac.uk/jv";
+const std::string URL_PREFIX = "http://journals.isis.cclrc.ac.uk/jv/ndx";
 
 static constexpr const char *emptyFile = "";
 
@@ -95,14 +95,14 @@ public:
 
   void test_getRuns_requests_correct_url() {
     auto journal = makeJournal();
-    auto url = URL_PREFIX + "/ndxinter/journal_19_4.xml";
+    auto url = URL_PREFIX + "inter/journal_19_4.xml";
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getRuns();
   }
 
   void test_getCycleNames_requests_correct_url() {
     auto journal = makeJournal(indexFile);
-    auto url = URL_PREFIX + "/ndxinter/journal_main.xml";
+    auto url = URL_PREFIX + "inter/journal_main.xml";
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(url, _)).Times(1);
     journal.getCycleNames();
   }
