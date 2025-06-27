@@ -41,7 +41,7 @@ static constexpr const char *FILE_TAG = "file";
 
 /** Construct the URL for a journal file containing run data for a particular
  * instrument and cycle, e.g.
- *   http://data.isis.rl.ac.uk/journals/ndxinter/journal_19_4.xml
+ *   http://journals.isis.cclrc.ac.uk/jv/ndxinter/journal_19_4.xml
  * @param instrument : the ISIS instrument name (case insensitive)
  * @param name : the file name excluding the "journal_" prefix and extension,
  * e.g. "19_4" for "journal_19_4.xml"
