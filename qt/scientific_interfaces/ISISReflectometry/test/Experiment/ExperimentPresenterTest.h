@@ -147,6 +147,16 @@ public:
     TS_ASSERT(presenter.experiment().debug());
   }
 
+  void testChangingDiagnosticsOptionUpdatesModel() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsSumInQDefaults();
+    EXPECT_CALL(m_view, getDiagnosticsOption()).WillOnce(Return(true));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT(presenter.experiment().diagnostics());
+  }
+
   void testSetBackgroundSubtractionUpdatesModel() {
     auto presenter = makePresenter();
     expectSubtractBackground();
@@ -657,6 +667,22 @@ public:
     TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
   }
 
+  void testInstrumentChangedUpdatesDiagnosticsOptionsInView() {
+    auto model = makeModelWithDiagnostics(true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_view, setDiagnosticsOption(true)).Times(1);
+    presenter.notifyInstrumentChanged("POLREF");
+  }
+
+  void testInstrumentChangedUpdatesDiagnosticsOptionsInModel() {
+    auto model = makeModelWithDiagnostics(true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    presenter.notifyInstrumentChanged("POLREF");
+    TS_ASSERT_EQUALS(presenter.experiment().diagnostics(), true);
+  }
+
   void testInstrumentChangedUpdatesLookupRowInView() {
     auto lookupRow =
         LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2), 0.7,
@@ -916,40 +942,46 @@ private:
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
     return Experiment(analysisMode, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
   }
 
   Experiment makeModelWithReduction(SummationType summationType, ReductionType reductionType, bool includePartialBins) {
     return Experiment(AnalysisMode::PointDetector, reductionType, summationType, includePartialBins, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
   }
 
   Experiment makeModelWithDebug(bool debug) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, debug,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
+  }
+
+  Experiment makeModelWithDiagnostics(bool diagnostics) {
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
+                      BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), diagnostics);
   }
 
   Experiment makeModelWithLookupRow(LookupRow lookupRow) {
     auto lookupTable = LookupTable({std::move(lookupRow)});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable));
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable), false);
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       TransmissionStitchOptions(std::move(range), std::string(), false), makeEmptyStitchOptions(),
-                      makeLookupTable());
+                      makeLookupTable(), false);
   }
 
   Experiment makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
                                       FloodCorrections floodCorrections, BackgroundSubtraction backgroundSubtraction) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
-                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
+                      makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
   }
 
   std::unique_ptr<IExperimentOptionDefaults> makeDefaults() { return std::make_unique<MockExperimentOptionDefaults>(); }

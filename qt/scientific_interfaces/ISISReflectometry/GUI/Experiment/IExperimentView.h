@@ -63,6 +63,9 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
+  virtual bool getDiagnosticsOption() const = 0;
+  virtual void setDiagnosticsOption(bool enable) = 0;
+
   virtual std::vector<LookupRow::ValueArray> getLookupTable() const = 0;
   virtual void setLookupTable(std::vector<LookupRow::ValueArray> rows) = 0;
   virtual void showLookupRowAsInvalid(int row, int column) = 0;

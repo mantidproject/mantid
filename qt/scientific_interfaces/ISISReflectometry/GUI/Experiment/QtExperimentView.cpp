@@ -306,6 +306,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_floodCorrWsSelector->setEnabled(enabled);
   m_floodCorrLineEdit->setEnabled(enabled);
   m_ui.debugCheckBox->setEnabled(enabled);
+  m_ui.diagnosticsCheckBox->setEnabled(enabled);
   m_ui.subtractBackgroundCheckBox->setEnabled(enabled);
   m_ui.backgroundMethodComboBox->setEnabled(enabled);
   m_ui.polynomialDegreeSpinBox->setEnabled(enabled);
@@ -339,6 +340,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_floodCorrWsSelector, "FloodWorkspace", alg);
   registerSettingWidget(*m_floodCorrLineEdit, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
+  registerSettingWidget(*m_ui.diagnosticsCheckBox, "Diagnostics", alg);
   registerSettingWidget(*m_ui.subtractBackgroundCheckBox, "SubtractBackground", alg);
   registerSettingWidget(*m_ui.backgroundMethodComboBox, "BackgroundCalculationMethod", alg);
   registerSettingWidget(*m_ui.polynomialDegreeSpinBox, "DegreeOfPolynomial", alg);
@@ -369,6 +371,7 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_floodCorrWsSelector);
   connectSettingsChange(*m_floodCorrLineEdit);
   connectSettingsChange(*m_ui.debugCheckBox);
+  connectSettingsChange(*m_ui.diagnosticsCheckBox);
   connectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   connectSettingsChange(*m_ui.backgroundMethodComboBox);
   connectSettingsChange(*m_ui.polynomialDegreeSpinBox);
@@ -394,6 +397,7 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_floodCorrWsSelector);
   disconnectSettingsChange(*m_floodCorrLineEdit);
   disconnectSettingsChange(*m_ui.debugCheckBox);
+  disconnectSettingsChange(*m_ui.diagnosticsCheckBox);
   disconnectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   disconnectSettingsChange(*m_ui.backgroundMethodComboBox);
   disconnectSettingsChange(*m_ui.polynomialDegreeSpinBox);
@@ -714,6 +718,10 @@ void QtExperimentView::setIncludePartialBins(bool enable) { setChecked(*m_ui.inc
 bool QtExperimentView::getDebugOption() const { return m_ui.debugCheckBox->isChecked(); }
 
 void QtExperimentView::setDebugOption(bool enable) { setChecked(*m_ui.debugCheckBox, enable); }
+
+bool QtExperimentView::getDiagnosticsOption() const { return m_ui.diagnosticsCheckBox->isChecked(); }
+
+void QtExperimentView::setDiagnosticsOption(bool enable) { setChecked(*m_ui.diagnosticsCheckBox, enable); }
 
 void QtExperimentView::setReductionType(std::string const &reductionType) {
   return setSelected(*m_ui.reductionTypeComboBox, reductionType);
