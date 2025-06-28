@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::_RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
+  ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXnumtype NXtype;
   NXstatus entry_status, attr_status;
   std::size_t NXrank;

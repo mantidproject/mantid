@@ -16,20 +16,17 @@ constexpr int NX_MAXADDRESSLEN = 1024;
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
-/** \enum NXaccess_mode
+/** \enum NXaccess
  * NeXus file access codes.
  * these codes are taken directly from values used in hdf5 package
  * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
- * \li NXACC_READ read-only. Same as H5F_ACC_RDONLY
- * \li NXACC_RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
- * \li NXACC_CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
+ * \li READ read-only. Same as H5F_ACC_RDONLY
+ * \li RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
+ * \li CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
  */
-typedef enum : unsigned int { NXACC_READ = 0x0000u, NXACC_RDWR = 0x0001u, NXACC_CREATE5 = 0x0002u } NXaccess_mode;
+enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0x0002u };
 
-/**
- * A combination of options from #NXaccess_mode
- */
-typedef unsigned int NXaccess;
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
 struct stackEntry {
   std::string irefn;
@@ -69,20 +66,6 @@ typedef NexusFile5 *pNexusFile5;
 typedef NexusFile5 *NXhandle;
 
 typedef char NXname[128];
-
-/** \enum NXaccess
- * NeXus file access codes.
- * \li READ read-only
- * \li RDWR open an existing file for reading and writing.
- * \li CREATE5 create a NeXus HDF-5 file.
- */
-enum class NXaccess : unsigned int {
-  READ = 1,   //< 0x0001u = 0001
-  RDWR = 2,   //< 0x0002u = 0010
-  CREATE5 = 5 //< 0x0005u = 0101
-};
-
-MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
 typedef struct {
   char *iname;

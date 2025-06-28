@@ -902,7 +902,7 @@ public:
     do_test_putget_attr(fid, expected_names[1], 120.2e6);
 
     // check attr infos
-    std::size_t numattr;
+    // std::size_t numattr;
     // NX_ASSERT_OKAY(NXgetattrinfo(fid, numattr), "failed to get attr info");
     // TS_ASSERT_EQUALS(numattr, 2);
     NX_ASSERT_OKAY(NXinitattrdir(fid), "failed to restart attributes");
@@ -910,7 +910,7 @@ public:
     std::size_t len;
     DimVector dims(4, 0);
     NXnumtype datatype;
-    for (std::size_t i = 0; i < numattr; i++) {
+    for (std::size_t i = 0; i < 2; i++) {
       NX_ASSERT_OKAY(NXgetnextattra(fid, name, len, dims, datatype), "could not get next attribute");
       TS_ASSERT_EQUALS(name, expected_names[i]);
       TS_ASSERT_EQUALS(len, 1);

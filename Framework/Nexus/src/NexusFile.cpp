@@ -90,13 +90,13 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
   hid_t fapl = -1;
   fapl = create_file_access_plist(filename);
 
-  if (am != NXACC_CREATE5) {
+  if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
       throw Mantid::Nexus::Exception("File is not HDF5", "NexusFile5 constructor", filename);
     }
-    iFID = H5Fopen(filename.c_str(), am, fapl);
+    iFID = H5Fopen(filename.c_str(), (unsigned)am, fapl);
   } else {
-    iFID = H5Fcreate(filename.c_str(), am, H5P_DEFAULT, fapl);
+    iFID = H5Fcreate(filename.c_str(), (unsigned)am, H5P_DEFAULT, fapl);
   }
 
   if (fapl != -1) {
@@ -112,7 +112,7 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
   // - file_time
   // - Nexus version
   // - HDF5 version
-  if (am == NXACC_CREATE5) {
+  if (am == NXaccess::CREATE5) {
     // open the root as a group and add these attributes
     hid_t root_id = H5Gopen(iFID, "/", H5P_DEFAULT);
 
