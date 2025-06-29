@@ -221,26 +221,33 @@ int main(int argc, char *argv[]) {
   std::size_t NXrank;
   Mantid::Nexus::DimVector NXdims(32);
   do {
+    DEBUG_LOG()
     attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
+    DEBUG_LOG()
     if (attr_status == NXstatus::NX_ERROR)
       return TEST_FAILED;
     if (attr_status == NXstatus::NX_OK) {
       switch (NXtype) {
       case NXnumtype::CHAR:
+        DEBUG_LOG()
         ASSERT_NO_ERROR(NXgetattr(fileid, name, char_buffer, NXlen, NXtype), "");
+        DEBUG_LOG()
         if (strcmp(name.c_str(), "file_time") && strcmp(name.c_str(), "HDF_version") &&
             strcmp(name.c_str(), "HDF5_Version") && strcmp(name.c_str(), "XML_version")) {
           printf("   %s = %s\n", name.c_str(), char_buffer);
+          DEBUG_LOG()
         }
         break;
       default:
         break;
       }
     }
+    DEBUG_LOG()
   } while (attr_status == NXstatus::NX_OK);
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "NXentry address " << address << std::endl;
+  DEBUG_LOG()
   do {
     attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
     if (attr_status == NXstatus::NX_ERROR)
