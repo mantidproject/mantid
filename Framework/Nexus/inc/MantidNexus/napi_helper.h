@@ -12,7 +12,7 @@ MANTID_NEXUS_DLL void NXI5KillDir(pNexusFile5 self);
 
 MANTID_NEXUS_DLL herr_t readStringAttribute(hid_t attr, char **data);
 
-MANTID_NEXUS_DLL herr_t readStringAttributeN(hid_t attr, char *data, int maxlen);
+MANTID_NEXUS_DLL herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen);
 
 MANTID_NEXUS_DLL void NXI5KillAttDir(pNexusFile5 self);
 
@@ -22,7 +22,7 @@ MANTID_NEXUS_DLL hid_t getAttVID(pNexusFile5 pFile);
 
 MANTID_NEXUS_DLL void killAttVID(const pNexusFile5 pFile, hid_t vid);
 
-MANTID_NEXUS_DLL NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink);
+MANTID_NEXUS_DLL NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink);
 
 MANTID_NEXUS_DLL int countObjectsInGroup(hid_t loc_id);
 
@@ -39,18 +39,17 @@ MANTID_NEXUS_DLL herr_t attr_check(hid_t loc_id, const char *member_name, const 
   --------------------------------------------------------------------------*/
 MANTID_NEXUS_DLL int isDataSetOpen(NXhandle hfil);
 MANTID_NEXUS_DLL int isRoot(NXhandle hfil);
-MANTID_NEXUS_DLL char *extractNextAddress(char *address, NXname element);
+MANTID_NEXUS_DLL std::string extractNextAddress(std::string const &address, std::string &element);
 MANTID_NEXUS_DLL NXstatus gotoRoot(NXhandle hfil);
-MANTID_NEXUS_DLL int isRelative(char const *address);
+MANTID_NEXUS_DLL int isRelative(std::string const &address);
 MANTID_NEXUS_DLL NXstatus moveOneDown(NXhandle hfil);
-MANTID_NEXUS_DLL char *moveDown(NXhandle hfil, char *address, NXstatus *code);
-MANTID_NEXUS_DLL NXstatus stepOneUp(NXhandle hfil, char const *name);
-MANTID_NEXUS_DLL NXstatus stepOneGroupUp(NXhandle hfil, char const *name);
+MANTID_NEXUS_DLL std::string moveDown(NXhandle hfil, std::string const &address, NXstatus &code);
+MANTID_NEXUS_DLL NXstatus stepOneUp(NXhandle hfil, std::string const &name);
+MANTID_NEXUS_DLL NXstatus stepOneGroupUp(NXhandle hfil, std::string const &name);
 
 /*---------------------------------------------------------------------
  * private functions used in NX5open
  */
 
-pNexusFile5 create_file_struct();
-hid_t create_file_access_plist(CONSTCHAR *filename);
-herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer);
+hid_t create_file_access_plist(std::string const &filename);
+herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string const &buffer);

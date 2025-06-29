@@ -831,6 +831,13 @@ public:
     file.openAddress(expected);
     actual = file.getAddress();
     TS_ASSERT_EQUALS(actual, expected);
+
+    // open an address without an initial "/"
+    file.openAddress("/");
+    expected = "entry1/layer2b";
+    TS_ASSERT_THROWS_NOTHING(file.openAddress(expected));
+    actual = file.getAddress();
+    TS_ASSERT_EQUALS(actual, "/" + expected);
   }
 
   void test_getInfo() {

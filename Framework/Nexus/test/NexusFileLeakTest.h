@@ -47,7 +47,7 @@ public:
 
   void test_leak1() {
     int const nReOpen = 1000;
-    cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
+    cout << "\nRunning Leak Test 1: " << nReOpen << " iterations\n";
     FileResource fr("nexus_leak_test1.nxs");
     std::string const szFile(fr.fullPath());
 
