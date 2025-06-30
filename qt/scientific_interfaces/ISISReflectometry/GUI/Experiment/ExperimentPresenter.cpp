@@ -119,6 +119,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   }
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     if (!hasUpdatedSettings(foundRow, previewRow)) {
+      g_log.information("No updated experiment settings to apply from preview.");
       return;
     }
 
@@ -133,6 +134,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
     m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
     updateViewFromModel();
     m_mainPresenter->notifySettingsChanged();
+    g_log.information("Updated experiment settings applied from preview.");
   } else {
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
                                "' in the Lookup Table.");

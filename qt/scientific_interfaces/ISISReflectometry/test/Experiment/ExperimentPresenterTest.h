@@ -652,7 +652,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesDebugOptionsInView() {
-    auto model = makeModelWithDebug(true);
+    auto model = makeModelWithSetDebugFlag(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setDebugOption(true)).Times(1);
@@ -660,7 +660,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesDebugOptionsInModel() {
-    auto model = makeModelWithDebug(true);
+    auto model = makeModelWithSetDebugFlag(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
@@ -668,7 +668,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesDiagnosticsOptionsInView() {
-    auto model = makeModelWithDiagnostics(true);
+    auto model = makeModelWithSetDiagnosticsFlag(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setDiagnosticsOption(true)).Times(1);
@@ -676,7 +676,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesDiagnosticsOptionsInModel() {
-    auto model = makeModelWithDiagnostics(true);
+    auto model = makeModelWithSetDiagnosticsFlag(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
@@ -951,13 +951,13 @@ private:
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
   }
 
-  Experiment makeModelWithDebug(bool debug) {
+  Experiment makeModelWithSetDebugFlag(bool debug) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, debug,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), false);
   }
 
-  Experiment makeModelWithDiagnostics(bool diagnostics) {
+  Experiment makeModelWithSetDiagnosticsFlag(bool diagnostics) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable(), diagnostics);
