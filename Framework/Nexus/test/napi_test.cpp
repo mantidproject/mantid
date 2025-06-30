@@ -227,6 +227,7 @@ int main(int argc, char *argv[]) {
     if (attr_status == NXstatus::NX_OK) {
       switch (NXtype) {
       case NXnumtype::CHAR:
+        NXlen = sizeof(char_buffer);
         ASSERT_NO_ERROR(NXgetattr(fileid, name, char_buffer, NXlen, NXtype), "");
         if (strcmp(name.c_str(), "file_time") && strcmp(name.c_str(), "HDF_version") &&
             strcmp(name.c_str(), "HDF5_Version") && strcmp(name.c_str(), "XML_version")) {
