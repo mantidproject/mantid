@@ -74,11 +74,11 @@ class DNSReductionGUIPresenter:
                 self._parameter_abo.notify_focused_tab(observer)
         if self.modus.name == "single_crystal_elastic":
             if tab_index == 4:
-                self.modus.widgets["plot_elastic_single_crystal"].view.views_menu.menuAction().setVisible(True)
-                self.modus.widgets["plot_elastic_single_crystal"].view.options_menu.menuAction().setVisible(True)
+                self.modus.widgets["plot_elastic_single_crystal"].view.set_plot_view_menu_visibility(True)
+                self.modus.widgets["plot_elastic_single_crystal"].view.set_plot_options_menu_visibility(True)
             else:
-                self.modus.widgets["plot_elastic_single_crystal"].view.views_menu.menuAction().setVisible(False)
-                self.modus.widgets["plot_elastic_single_crystal"].view.options_menu.menuAction().setVisible(False)
+                self.modus.widgets["plot_elastic_single_crystal"].view.set_plot_view_menu_visibility(False)
+                self.modus.widgets["plot_elastic_single_crystal"].view.set_plot_options_menu_visibility(False)
 
     def _attach_signal_slots(self):
         self.view.sig_tab_changed.connect(self._tab_changed)

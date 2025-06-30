@@ -68,8 +68,8 @@ class DNSElasticSCPlotView(DNSView):
         # setting up custom menu for single crystal plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
         self.options_menu = DNSElasticSCPlotOptionsMenu(self)
-        self.views_menu.menuAction().setVisible(False)
-        self.options_menu.menuAction().setVisible(False)
+        self.set_plot_view_menu_visibility(False)
+        self.set_plot_options_menu_visibility(False)
         self.menus = []
         self.menus.append(self.views_menu)
         self.menus.append(self.options_menu)
@@ -96,6 +96,12 @@ class DNSElasticSCPlotView(DNSView):
 
     def _plot(self):
         self.sig_plot.emit()
+
+    def set_plot_view_menu_visibility(self, visible):
+        self.views_menu.menuAction().setVisible(visible)
+
+    def set_plot_options_menu_visibility(self, visible):
+        self.options_menu.menuAction().setVisible(visible)
 
     # dialogs
     def change_dxdy(self):
