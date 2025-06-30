@@ -118,7 +118,7 @@ void DetermineSpinStateOrder::exec() {
   for (const API::Workspace_sptr &ws : wsGroup->getAllItems()) {
     const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
     const auto sfLog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(groupItem->run().getLogData(m_spinFlipperLogName));
+        dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(groupItem->run().getLogData(m_spinFlipperLogName));
     const auto sfLogValues = sfLog->filteredValuesAsVector();
     const double rfState =
         std::accumulate(sfLogValues.cbegin(), sfLogValues.cend(), 0.0) / static_cast<double>(sfLogValues.size());
