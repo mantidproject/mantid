@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
   NXaccess nx_creation_code;
   string fileext;
   if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
-    nx_creation_code = NXACC_CREATE5;
+    nx_creation_code = NXaccess::CREATE5;
     fileext = ".h5";
   } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
     cout << "napi_test_cpp-xml-table is not supported" << endl;

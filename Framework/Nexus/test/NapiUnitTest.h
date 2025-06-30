@@ -85,7 +85,7 @@ public:
 
     // create the file and ensure it exists
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "NXopen file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "NXopen file");
 
     // make sure the fid is set
     TS_ASSERT_DIFFERS(fid->iFID, NULL);
@@ -103,14 +103,14 @@ public:
 
     // create the file and ensure it exists
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "NXopen file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "NXopen file");
     TS_ASSERT_DIFFERS(fid->iFID, NULL);
     NX_ASSERT_OKAY(NXclose(fid), "Nxclose file");
     TS_ASSERT(std::filesystem::exists(filename));
 
     // now open it in read mode
     fid = NULL;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_READ, fid), "NXopen existing file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::READ, fid), "NXopen existing file");
     char path[10];
     H5Iget_name(fid->iFID, path, 10);
     TS_ASSERT_EQUALS(std::string(path), "/");
@@ -131,7 +131,7 @@ public:
     NexusFile5 *fid;
 
     // open the existing file
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "NXopen bad existing file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "NXopen bad existing file");
     char path[10];
     H5Iget_name(fid->iFID, path, 10);
     TS_ASSERT_EQUALS(std::string(path), "/");
@@ -146,7 +146,7 @@ public:
     FileResource resource("test_napi_file_flush.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "Can't open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "Can't open");
     NX_ASSERT_OKAY(NXflush(fid), "Can't flush");
     NX_ASSERT_OKAY(NXclose(fid), "Can't close");
   }
@@ -160,7 +160,7 @@ public:
     FileResource resource("test_napi_file_grp.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "opening file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "opening file");
     NX_ASSERT_OKAY(NXmakegroup(fid, "test_group", "NXsample"), "making group");
     NX_ASSERT_OKAY(NXclose(fid), "closing file");
   }
@@ -172,7 +172,7 @@ public:
     NexusFile5 *fid;
 
     // open the fie
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open file");
 
     // create a group, to be opened
     string grp("test_group"), cls("NXsample");
@@ -193,7 +193,7 @@ public:
     FileResource resource("test_napi_file_grp.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open file");
 
     // create a group, to be opened
     string grp("test_group"), cls("NXpants");
@@ -212,7 +212,7 @@ public:
 
     // create a file with group -- open it
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open file");
     NX_ASSERT_OKAY(NXmakegroup(fid, grp1.c_str(), cls1.c_str()), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, grp1.c_str(), cls1.c_str()), "failed to open group");
 
@@ -238,7 +238,7 @@ public:
     FileResource resource("test_napi_file_grp.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open file");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open file");
 
     char root[128];
     H5Iget_name(fid->iFID, root, 128);
@@ -282,7 +282,7 @@ public:
     DimVector dims{1};
     NXnumtype type(NXnumtype::CHAR);
 
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
 
     // if there is not a top-level NXentry, should throw error
     NX_ASSERT_ERROR(NXmakedata64(fid, name, type, 1, dims.data()), "data made without error");
@@ -301,7 +301,7 @@ public:
     FileResource resource("test_napi_file_data.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -331,7 +331,7 @@ public:
 
     // setup file for data
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -367,7 +367,7 @@ public:
     FileResource resource("test_napi_file_dataclose.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -394,7 +394,7 @@ public:
 
     // setup file for data
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -450,7 +450,7 @@ public:
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -494,7 +494,7 @@ public:
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -515,7 +515,7 @@ public:
     FileResource resource("test_napi_file_stringrw.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -548,7 +548,7 @@ public:
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -640,7 +640,7 @@ public:
     std::string address;
 
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
 
     // at root, path should be "/"
     NX_ASSERT_OKAY(NXgetaddress(fid, address), "could not get root address");
@@ -687,7 +687,7 @@ public:
     FileResource resource("test_napi_file_grpdata.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
 
     // make and open a group -- now at "/abc"
     std::string address;
@@ -716,7 +716,7 @@ public:
     FileResource resource("test_napi_openpathtest.nxs");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -788,7 +788,7 @@ public:
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -842,7 +842,7 @@ public:
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -889,7 +889,7 @@ public:
     FileResource resource("test_napi_attr.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     // move to an entry to avoid conflict with some root-level attributes
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
@@ -928,7 +928,7 @@ public:
     FileResource resource("test_napi_attr.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     // move to an entry to avoid conflict with some root-level attributes
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
@@ -980,7 +980,7 @@ public:
     FileResource resource("test_napi_link.nxs");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXACC_CREATE5, fid), "failed to open");
+    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 

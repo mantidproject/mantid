@@ -268,7 +268,7 @@ private:
 
   void do_test_loadPath(const string &filename) {
     if (getenv("NX_LOAD_PATH") != NULL) {
-      TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXACC_RDWR));
+      TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXaccess::RDWR));
       cout << "Success loading NeXus file from path" << endl;
     } else {
       cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
@@ -278,7 +278,7 @@ private:
 public:
   void test_readwrite_hdf5() {
     cout << " Nexus File Tests\n";
-    NXaccess const nx_creation_code = NXACC_CREATE5;
+    NXaccess const nx_creation_code = NXaccess::CREATE5;
     string const fileext = ".h5";
     string const filename("nexus_file_napi_test_cpp" + fileext);
 

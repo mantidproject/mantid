@@ -21,7 +21,7 @@ enum class NexusType { Muon, Processed, ISIS, TofRaw };
 enum class TimeType { StartTime, EndTime };
 
 Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &absAddress) {
-  Nexus::File nxfile(filename, NXACC_READ);
+  Nexus::File nxfile(filename, NXaccess::READ);
   nxfile.openAddress(absAddress);
   const auto valueStr = nxfile.getStrData();
   g_log.debug(valueStr + " from " + absAddress + " in " + filename);
@@ -54,7 +54,7 @@ NexusType whichNexusType(const std::string &filename) {
   } else if (entryName[0] == "raw_data_1") {
     nexusType = NexusType::ISIS;
   } else {
-    Nexus::File nxfile(filename, NXACC_READ);
+    Nexus::File nxfile(filename, NXaccess::READ);
     const auto entries = nxfile.getEntries();
     const auto firstEntryName = entries.begin()->first;
     try {

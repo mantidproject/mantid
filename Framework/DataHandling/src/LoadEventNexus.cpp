@@ -942,7 +942,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       prog->doReport("Loading all logs");
       try {
         // Open NeXus file
-        Nexus::File nxHandle(m_filename, NXACC_READ);
+        Nexus::File nxHandle(m_filename, NXaccess::READ);
         LoadHelper::addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
       } catch (Nexus::Exception const &e) {
         g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
@@ -1683,7 +1683,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(Nexus::File &file, EventWor
  */
 void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
-    m_file = std::make_unique<Nexus::File>(m_filename, NXACC_READ);
+    m_file = std::make_unique<Nexus::File>(m_filename, NXaccess::READ);
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Severe failure when trying to open NeXus file: " + std::string(e.what()));
   }

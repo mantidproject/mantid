@@ -203,7 +203,8 @@ public:
       testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
     }
 
-    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle =
+        std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXaccess::CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
@@ -233,7 +234,8 @@ public:
     algHist.addChildHistory(std::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
 
-    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle =
+        std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXaccess::CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
@@ -256,7 +258,8 @@ public:
   void test_SaveNexus_Empty() {
     WorkspaceHistory testHistory;
 
-    auto savehandle = std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXACC_CREATE5);
+    auto savehandle =
+        std::make_shared<Mantid::Nexus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs", NXaccess::CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 

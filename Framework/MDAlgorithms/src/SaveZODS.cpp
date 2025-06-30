@@ -58,7 +58,7 @@ void SaveZODS::exec() {
                        "Saving anyway...\n";
 
   // Create a HDF5 file
-  auto file = std::make_unique<Nexus::File>(Filename, NXACC_CREATE5);
+  auto file = std::make_unique<Nexus::File>(Filename, NXaccess::CREATE5);
 
   // ----------- Coordinate system -----------
   uint32_t isLocal = 1;

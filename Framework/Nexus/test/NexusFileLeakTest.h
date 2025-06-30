@@ -51,7 +51,7 @@ public:
     FileResource fr("nexus_leak_test1.nxs");
     std::string const szFile(fr.fullPath());
 
-    File file_obj(szFile, NXACC_CREATE5);
+    File file_obj(szFile, NXaccess::CREATE5);
     file_obj.close();
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
@@ -59,7 +59,7 @@ public:
         cout << "loop count " << iReOpen << "\n";
       }
 
-      file_obj = File(szFile, NXACC_RDWR);
+      file_obj = File(szFile, NXaccess::RDWR);
       file_obj.close();
     }
 
@@ -74,7 +74,7 @@ public:
 
     cout << "Running Leak Test 2: " << nFiles << " iterations\n";
 
-    NXaccess access_mode = NXACC_CREATE5;
+    NXaccess access_mode = NXaccess::CREATE5;
     std::string strFile;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
@@ -141,7 +141,7 @@ public:
     for (int iFile = 0; iFile < nFiles; iFile++) {
       cout << "file " << iFile << "\n";
 
-      File fileid(szFile, NXACC_CREATE5);
+      File fileid(szFile, NXaccess::CREATE5);
 
       for (int iEntry = 0; iEntry < nEntry; iEntry++) {
         std::string oss(strmakef("entry_%d", iEntry));

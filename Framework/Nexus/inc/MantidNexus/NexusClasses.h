@@ -290,10 +290,19 @@ public:
         }
       }
     }
+    if constexpr (std::is_same_v<T, char>) {
+      // For char type we need to add one for the null terminator
+      num_ele += 1;
+    }
     this->alloc(static_cast<std::size_t>(num_ele));
 
     // do the actual load
     getData(m_data.data());
+
+    if constexpr (std::is_same_v<T, char>) {
+      // For char type we need to add a null terminator
+      m_data.push_back('\0');
+    }
   }
 
   /**

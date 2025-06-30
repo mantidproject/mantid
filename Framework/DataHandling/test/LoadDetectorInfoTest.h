@@ -82,7 +82,7 @@ void writeSmallDatFile(const std::string &filename) {
 }
 
 void writeDetNXSfile(const std::string &filename, const int nDets) {
-  Mantid::Nexus::File nxsfile(filename, NXACC_CREATE5);
+  Mantid::Nexus::File nxsfile(filename, NXaccess::CREATE5);
   nxsfile.makeGroup("detectors.dat", "NXEntry", true);
   nxsfile.putAttr("version", "1.0");
 

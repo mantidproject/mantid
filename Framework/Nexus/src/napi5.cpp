@@ -85,9 +85,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
     return NXstatus::NX_ERROR;
   }
 
-  /* mask of any options for now */
-  am = (NXaccess)(am & NXACCMASK_REMOVEFLAGS);
-
   /* turn off the automatic HDF error handling */
   H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 #ifdef USE_FTIME
@@ -105,11 +102,11 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
   }
 
   /* start HDF5 interface */
-  if (am == NXACC_CREATE5) {
+  if (am == NXaccess::CREATE5) {
     am1 = H5F_ACC_TRUNC;
     pNew->iFID = H5Fcreate(filename, am1, H5P_DEFAULT, fapl);
   } else {
-    if (am == NXACC_READ)
+    if (am == NXaccess::READ)
       am1 = H5F_ACC_RDONLY;
     else
       am1 = H5F_ACC_RDWR;
@@ -132,7 +129,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
    * at some point for new files
    */
 
-  if (am == NXACC_CREATE5) {
+  if (am == NXaccess::CREATE5) {
     root_id = H5Gopen(pNew->iFID, "/", H5P_DEFAULT);
     if (set_str_attribute(root_id, "NeXus_version", NEXUS_VERSION) < 0) {
       H5Gclose(root_id);
@@ -178,8 +175,6 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle &handle) {
 
     H5Gclose(root_id);
   }
-
-  pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
   handle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;

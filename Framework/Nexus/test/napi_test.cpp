@@ -48,9 +48,9 @@ using NexusNapiTest::write_dmc02;
 int main(int argc, char *argv[]) {
   std::cout << "determining file type" << std::endl;
   std::string nxFile;
-  NXaccess_mode nx_creation_code;
+  NXaccess nx_creation_code;
   if (strstr(argv[0], "napi_test_hdf5") != NULL) {
-    nx_creation_code = NXACC_CREATE5;
+    nx_creation_code = NXaccess::CREATE5;
     nxFile = "NXtest.h5";
   } else {
     ON_ERROR(std::string(argv[0]) + " is not supported");
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
   ASSERT_NO_ERROR(NXopen(nxFile.c_str(), nx_creation_code, fileid), "Failure in NXopen for " + nxFile);
-  if (nx_creation_code == NXACC_CREATE5) {
+  if (nx_creation_code == NXaccess::CREATE5) {
     std::cout << "Trying to reopen the file handle" << std::endl;
     NXhandle clone_fileid;
     ASSERT_NO_ERROR(NXreopen(fileid, clone_fileid), "Failed to NXreopen " + nxFile);
@@ -124,7 +124,8 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopendata(fileid, "i4_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, i4_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "r4_data", NXnumtype::FLOAT32, 2, array_dims, NX_COMP_LZW, chunk_size), "");
+  ASSERT_NO_ERROR(
+      NXcompmakedata64(fileid, "r4_data", NXnumtype::FLOAT32, 2, array_dims, NXcompression::LZW, chunk_size), "");
   ASSERT_NO_ERROR(NXopendata(fileid, "r4_data"), "");
   ASSERT_NO_ERROR(NXputdata(fileid, r4_array), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
@@ -168,7 +169,7 @@ int main(int argc, char *argv[]) {
     }
   }
   int64_t cdims[2] = {20, 20};
-  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, cdims),
+  ASSERT_NO_ERROR(NXcompmakedata64(fileid, "comp_data", NXnumtype::INT32, 2, dims, NXcompression::LZW, cdims),
                   "NXcompmakedata64 comp_data");
   ASSERT_NO_ERROR(NXopendata(fileid, "comp_data"), "NXopendata comp_data");
   ASSERT_NO_ERROR(NXputdata(fileid, comp_array), "NXputdata comp_data");
@@ -219,7 +220,7 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXACC_RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
+  ASSERT_NO_ERROR(NXopen(nxFile.c_str(), NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXgetattrinfo(fileid, &i);
   if (i > 0) {
     std::cout << "Number of global attributes: " << i << std::endl;
@@ -373,11 +374,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXgetdataID(fileid, &blink), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
   if (NXsameID(fileid, &dlink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (r8_data)\n"
-              << "original data\n";
-    NXIprintlink(fileid, &dlink);
-    std::cout << "linked data\n";
-    NXIprintlink(fileid, &blink);
+    std::cout << "Link check FAILED (r8_data)\n";
     return TEST_FAILED;
   }
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
@@ -388,11 +385,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Group address " << address << "\n";
   ASSERT_NO_ERROR(NXgetgroupID(fileid, &blink), "");
   if (NXsameID(fileid, &glink, &blink) != NXstatus::NX_OK) {
-    std::cout << "Link check FAILED (sample)\n"
-              << "original group\n";
-    NXIprintlink(fileid, &glink);
-    std::cout << "linked group\n";
-    NXIprintlink(fileid, &blink);
+    std::cout << "Link check FAILED (sample)\n";
     return TEST_FAILED;
   }
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
@@ -428,7 +421,7 @@ int testLoadPath() {
     // TODO create file and cleanup
     // std::string filename("data/dmc01.h5");
     NXhandle h;
-    if (NXopen("dmc01.hdf", NXACC_RDWR, h) != NXstatus::NX_OK) {
+    if (NXopen("dmc01.hdf", NXaccess::RDWR, h) != NXstatus::NX_OK) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
     } else {

@@ -6,14 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-pNexusFile5 NXI5assert(NXhandle fid) {
-  pNexusFile5 pRes;
-
-  assert(fid != NULL);
-  pRes = static_cast<pNexusFile5>(fid);
-  assert(pRes->iNXID == NX5SIGNATURE);
-  return pRes;
-}
+pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
 void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
 
@@ -144,7 +137,7 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   /*
      set the target attribute
    */
-  if (sLink->linkType > 0) {
+  if (sLink->linkType == NXentrytype::sds) {
     dataID = H5Dopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
   } else {
     dataID = H5Gopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
@@ -172,7 +165,7 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
-  if (sLink->linkType > 0) {
+  if (sLink->linkType == NXentrytype::sds) {
     H5Dclose(dataID);
   } else {
     H5Gclose(dataID);

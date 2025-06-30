@@ -91,7 +91,7 @@ NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle &gHandle) {
   // determine the filename for opening
   std::string filename(userfilename);
   // determine if the file can be opened
-  bool isHDF5 = (am == NXACC_CREATE5 ? true : canBeOpened(filename.c_str()));
+  bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename.c_str()));
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
     // call NX5open to set variables on it
@@ -126,7 +126,6 @@ NXstatus NXreopen(NXhandle origHandle, NXhandle &newHandle) {
     free(pNew);
     return NXstatus::NX_ERROR;
   }
-  pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
   newHandle = static_cast<NXhandle>(pNew);
   return NXstatus::NX_OK;
@@ -328,13 +327,13 @@ NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int ran
       chunk_size[i] = 1;
     }
   }
-  return NXcompmakedata64(fid, name, datatype, rank, dimensions, NX_COMP_NONE, chunk_size);
+  return NXcompmakedata64(fid, name, datatype, rank, dimensions, NXcompression::NONE, chunk_size);
 }
 
 /* --------------------------------------------------------------------- */
 
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t const dimensions[],
-                          int compress_type, int64_t const chunk_size[]) {
+                          NXcompression const compress_type, int64_t const chunk_size[]) {
   hid_t datatype1, dataspace, iNew;
   hid_t type, cparms = -1;
   pNexusFile5 pFile;
@@ -421,12 +420,8 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
     /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
   }
   compress_level = 6;
-  if ((compress_type / 100) == NX_COMP_LZW) {
-    compress_level = static_cast<unsigned int>(compress_type % 100);
-    compress_type = NX_COMP_LZW;
-  }
   hid_t dID;
-  if (compress_type == NX_COMP_LZW) {
+  if (compress_type == NXcompression::LZW) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     iNew = H5Pset_chunk(cparms, rank, chunkdims);
     if (iNew < 0) {
@@ -437,7 +432,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
     H5Pset_deflate(cparms, compress_level);
     dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
                     H5P_DEFAULT);
-  } else if (compress_type == NX_COMP_NONE) {
+  } else if (compress_type == NXcompression::NONE) {
     if (unlimiteddim) {
       cparms = H5Pcreate(H5P_DATASET_CREATE);
       iNew = H5Pset_chunk(cparms, rank, chunkdims);
@@ -451,7 +446,7 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int
       dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT,
                       H5P_DEFAULT);
     }
-  } else if (compress_type == NX_CHUNK) {
+  } else if (compress_type == NXcompression::CHUNK) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     iNew = H5Pset_chunk(cparms, rank, chunkdims);
     if (iNew < 0) {
@@ -974,7 +969,7 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
      */
     int mtype = 0;
     if (tclass == H5T_STRING) {
-      mtype = NX_CHAR;
+      mtype = NXnumtype::CHAR;
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
@@ -998,7 +993,7 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
       return NXstatus::NX_ERROR;
     }
     /* read slab */
-    if (mtype == NX_CHAR) {
+    if (mtype == NXnumtype::CHAR) {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
       char const *data1;
       data1 = tmp_data + myStart[0];
@@ -1170,12 +1165,6 @@ NXstatus NXopengroupaddress(NXhandle hfil, CONSTCHAR *address) {
 }
 
 /*---------------------------------------------------------------------*/
-NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
-  NXI5assert(fid);
-  printf("HDF5 link: targetAddress = \"%s\", linkType = \"%d\"\n", link->targetAddress.c_str(), link->linkType);
-  return NXstatus::NX_OK;
-}
-
 /*----------------------------------------------------------------------*/
 NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   hid_t current;
