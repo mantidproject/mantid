@@ -16,7 +16,7 @@ To establish the time at which each run occurs, the start times are taken from e
 from ``run_end`` or ``end_time`` logs.
 For each workspace, the run duration is computed as : :math:`duration = end_{time} - start_{time}` and the time as the middle
 time of the duration interval: :math:`midtime = start_{time} + duration/2`.
-Then, each difference time is computed by subtracting the calculated ``midtime`` stamp from the reference.:math:`difference = midtime - midtime_{ref}` .
+Then, each difference time is computed by subtracting the calculated ``midtime`` stamp from the reference. :math:`difference = midtime - midtime_{ref}` .
 Taking the duration as the absolute error of each ``midtime`` stamp, the error of the difference is computed as the sum of each ``midtime`` error.
 
 *  If a reference workspace is not provided, the first workspace in the Workspaces property list will be set as the reference.
