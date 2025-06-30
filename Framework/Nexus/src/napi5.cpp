@@ -283,7 +283,7 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
   /*
      iterate to next entry in group list
    */
-  idx = pFile->iStack5[pFile->iStackPtr].iCurrentIDX;
+  idx = pFile->iStack5.back().iCurrentIDX;
   if (pFile->name_ref.empty()) {
     /* root group */
     pFile->name_ref = "/";
@@ -317,12 +317,12 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
   }
 
   if (iRet > 0) {
-    pFile->iStack5[pFile->iStackPtr].iCurrentIDX++;
+    pFile->iStack5.back().iCurrentIDX++;
     if (op_data.iname != NULL) {
       name = op_data.iname;
       free(op_data.iname);
     } else {
-      pFile->iStack5[pFile->iStackPtr].iCurrentIDX = 0;
+      pFile->iStack5.back().iCurrentIDX = 0;
       return NXstatus::NX_EOD;
     }
     if (op_data.type == H5O_TYPE_GROUP) {
@@ -330,8 +330,8 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
          open group and find class name attribute
        */
       std::string ph_name("");
-      for (std::size_t i = 1; i < (pFile->iStackPtr + 1); i++) {
-        ph_name += pFile->iStack5[i].irefn + "/";
+      for (stackEntry entry : pFile->iStack5) {
+        ph_name += entry.irefn + "/";
       }
       ph_name += name;
       grp = H5Gopen(pFile->iFID, ph_name.c_str(), H5P_DEFAULT);
@@ -388,7 +388,7 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
       if (op_data.iname != NULL) {
         free(op_data.iname);
       }
-      pFile->iStack5[pFile->iStackPtr].iCurrentIDX = 0;
+      pFile->iStack5.back().iCurrentIDX = 0;
       return NXstatus::NX_EOD;
     }
     if (op_data.iname != NULL) {

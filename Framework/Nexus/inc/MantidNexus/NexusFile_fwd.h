@@ -48,7 +48,6 @@ struct MANTID_NEXUS_DLL NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  std::size_t iStackPtr; // NOTE probably sufficient to use .back() instead
   std::string name_ref;
   std::string name_tmp;
 

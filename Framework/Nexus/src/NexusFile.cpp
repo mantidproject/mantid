@@ -43,6 +43,7 @@ using std::vector;
   } else {                                                                                                             \
     DEBUG_LOG();                                                                                                       \
   }
+
 /**
  * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
@@ -72,7 +73,7 @@ pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> pfid) { return NXI5assert(pfi
 
 NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
     : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
   // check HDF5 version installed
   unsigned int vers_major, vers_minor, vers_release;
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
@@ -139,7 +140,7 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
     : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
   iFID = H5Freopen(origHandle.iFID);
   if (iFID <= 0) {
     throw Mantid::Nexus::Exception("Error reopening file");
@@ -149,7 +150,6 @@ NexusFile5::NexusFile5(NexusFile5 const &origHandle)
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
   this->iStack5 = {{"", 0, 0}};
-  this->iStackPtr = 0;
   this->iFID = H5Freopen(origHandle.iFID);
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
   this->iCurrentIDX = 0;
@@ -509,7 +509,6 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 
   /* maintain stack */
   pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iStackPtr++;
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
   NXI5KillDir(pFile);
@@ -527,9 +526,9 @@ void File::closeGroup() {
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t i = pFile->iStack5.back().irefn.size();
     size_t ii = pFile->name_ref.size();
-    if (pFile->iStackPtr > 1) {
+    if (pFile->iStack5.size() > 2) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
@@ -554,13 +553,12 @@ void File::closeGroup() {
     }
     NXI5KillDir(pFile);
     pFile->iCurrentD = 0;
-    pFile->iStackPtr--;
-    if (pFile->iStackPtr > 0) {
-      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    pFile->iStack5.pop_back();
+    if (!pFile->iStack5.empty()) {
+      pFile->iCurrentG = pFile->iStack5.back().iVref;
     } else {
       pFile->iCurrentG = 0;
     }
-    pFile->iStack5.pop_back();
   }
 }
 

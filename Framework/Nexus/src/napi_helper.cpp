@@ -9,7 +9,7 @@
 
 pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
-void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
+void NXI5KillDir(pNexusFile5 self) { self->iStack5.back().iCurrentIDX = 0; }
 
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;

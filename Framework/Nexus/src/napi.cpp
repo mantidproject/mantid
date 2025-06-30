@@ -236,7 +236,6 @@ NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &n
 
   /* maintain stack */
   pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iStackPtr++;
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
   NXI5KillDir(pFile);
@@ -258,9 +257,9 @@ NXstatus NXclosegroup(NXhandle fid) {
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t i = pFile->iStack5.back().irefn.size();
     size_t ii = pFile->name_ref.size();
-    if (pFile->iStackPtr > 1) {
+    if (pFile->iStack5.size() > 2) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
@@ -287,13 +286,12 @@ NXstatus NXclosegroup(NXhandle fid) {
     }
     NXI5KillDir(pFile);
     pFile->iCurrentD = 0;
-    pFile->iStackPtr--;
-    if (pFile->iStackPtr > 0) {
-      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    pFile->iStack5.pop_back();
+    if (!pFile->iStack5.empty()) {
+      pFile->iCurrentG = pFile->iStack5.back().iVref;
     } else {
       pFile->iCurrentG = 0;
     }
-    pFile->iStack5.pop_back();
   }
   return NXstatus::NX_OK;
 }
@@ -987,22 +985,6 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_
 
 /*-------------------------------------------------------------------------*/
 
-// NXstatus NXgetattrinfo(NXhandle fid, std::size_t &iN) {
-//   hid_t vid = getAttVID(fid );
-//   H5O_info2_t oinfo;
-//   if(H5Oget_info3(vid, &oinfo, H5O_INFO_NUM_ATTRS) > 0) {
-//     std::size_t num = oinfo.num_attrs;
-//     if (fid->iCurrentG > 0 && fid->iCurrentD == 0) {
-//       num--;
-//     }
-//     iN = num;
-//   } else {
-//     iN = 0;
-//   }
-//   killAttVID(fid, vid);
-//   return NXstatus::NX_OK;
-// }
-
 NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
                         NXnumtype &iType) {
   return NX5getattrainfo(handle, name, rank, dims, iType);
@@ -1074,15 +1056,8 @@ NXstatus NXinitgroupdir(NXhandle fid) {
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
-
 /*----------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------
-  copies the next address element into element.
-  returns a pointer into address beyond the extracted address
-  ---------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
-
 /*---------------------------------------------------------------------*/
 NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
   NXstatus status;
