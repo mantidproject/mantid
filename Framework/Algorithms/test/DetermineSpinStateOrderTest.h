@@ -48,10 +48,10 @@ Mantid::API::WorkspaceGroup_sptr createWorkpsaceGroupWithYValuesAndFlipperLogs(c
   auto wsGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
   Mantid::Types::Core::DateAndTime start("2025-06-25T10:08:00");
   std::vector<Mantid::Types::Core::DateAndTime> logTimes;
-  for (double i = 0.0; i < logMeans.size(); i++) {
+  for (double i = 0.0; i < static_cast<double>(logMeans.size()); i++) {
     logTimes.push_back(start + i);
   }
-  for (double i = 0.0; i < yValues.size(); i++) {
+  for (int i = 0; i < static_cast<int>(yValues.size()); i++) {
     const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 100, true, 100, yValues[i], 0, 0);
     ws->getAxis(0)->setUnit("WaveLength");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws, false, false, instrumentName);
