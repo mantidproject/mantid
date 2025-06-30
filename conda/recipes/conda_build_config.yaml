@@ -105,6 +105,9 @@ pip:
 pyqt:
   - '>=5.15,<6'
 
+pyqt5_sip:
+  - '<12.13'
+
 python_dateutil:
   - '>=2.8.1'
 

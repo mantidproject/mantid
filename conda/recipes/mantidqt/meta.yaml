@@ -26,6 +26,7 @@ requirements:
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - pyqt {{ pyqt }}                        # [build_platform != target_platform]
+    - pyqt5-sip {{ pyqt5_sip }}              # [build_platform != target_platform]
     - pyqtwebengine                          # [build_platform != target_platform]
     - qt-main {{ qt_main }}                  # [build_platform != target_platform]
     - sip                                    # [build_platform != target_platform]
@@ -38,6 +39,7 @@ requirements:
     - mantid {{ version }}
     - python {{ python }}
     - pyqt {{ pyqt }}
+    - pyqt5-sip {{ pyqt5_sip }}
     - pyqtwebengine
     - qscintilla2 {{ qscintilla2 }}
     - qt-main {{ qt_main }}
@@ -46,7 +48,6 @@ requirements:
     - tbb-devel {{ tbb }}
     - versioningit {{ versioningit }}
     - numpy {{ numpy }}                      # [build_platform != target_platform]
-    - sip {{ sip }}                          # [build_platform != target_platform]
     - libgl-devel  # [linux]
     - xorg-libxxf86vm  # [linux]
     - xorg-libx11  # [linux]
