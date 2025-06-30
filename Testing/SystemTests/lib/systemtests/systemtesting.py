@@ -1161,7 +1161,7 @@ class TestManager(object):
             spec.loader.exec_module(mod)
 
             module_classes = dict(inspect.getmembers(mod, inspect.isclass))
-            module_classes = [x for x in module_classes if self.isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
+            module_classes = [x for x in module_classes if isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
             for test_name in module_classes:
                 tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
@@ -1175,21 +1175,6 @@ class TestManager(object):
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
 
         return module_loaded, tests
-
-    def isValidTestClass(self, class_obj):
-        """Returns true if the test is a valid test class. It is valid
-        if: the class subclassses MantidSystemTest and has no abstract methods
-        """
-        if not issubclass(class_obj, MantidSystemTest):
-            return False
-        # Check if the get_reference_file is abstract or not
-        if hasattr(class_obj, "__abstractmethods__"):
-            if len(class_obj.__abstractmethods__) == 0:
-                return True
-            else:
-                return False
-        else:
-            return True
 
 
 #########################################################################
@@ -1321,6 +1306,24 @@ class MantidFrameworkConfig:
         self.__moveFile(self.__userPropsFile, self.__userPropsFileSystest)
         self.__moveFile(self.__userPropsFileBackup, self.__userPropsFile)
 
+#########################################################################
+# Function to check if a given class object is a Mantid System Test
+# that can be run by the TestRunner class.
+#########################################################################
+def isValidTestClass(class_obj):
+    """Returns true if the test is a valid test class. It is valid
+    if: the class subclassses MantidSystemTest and has no abstract methods
+    """
+    if not issubclass(class_obj, MantidSystemTest):
+        return False
+    # Check if the get_reference_file is abstract or not
+    if hasattr(class_obj, "__abstractmethods__"):
+        if len(class_obj.__abstractmethods__) == 0:
+            return True
+        else:
+            return False
+    else:
+        return True
 
 #########################################################################
 # Function to return a string describing the environment
