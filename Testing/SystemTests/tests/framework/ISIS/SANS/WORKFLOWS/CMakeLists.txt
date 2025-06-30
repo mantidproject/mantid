@@ -1,23 +1,23 @@
 # System tests related to the SANS Workflows.
 
 set(SYSTEST_NAMES
-    SANSBatchReductionTest
-    SANSBeamCentreFinderCoreTest
-    SANSCentreSample
-    SANSDarkRunSubtractionTest
-    SANSDiagnosticPageTest
-    SANSFileChecking
-    SANSLoadersTest
-    SANSLoadTest
-    SANSLOWCentreNoGrav_V2
-    SANSMergedDetectorsTest
-    SANSMergedDetectorsTest_V2
-    SANSQResolutionTest
-    SANSReductionCoreTest
-    SANSSaveTest
-    SANSSingleReductionTest
-    SANSUtilityTest
-    SANSWorkspaceTypeTest
+    SANSBatchReductionTest.py
+    SANSBeamCentreFinderCoreTest.py
+    SANSCentreSample.py
+    SANSDarkRunSubtractionTest.py
+    SANSDiagnosticPageTest.py
+    SANSFileChecking.py
+    SANSLoadersTest.py
+    SANSLoadTest.py
+    SANSLOWCentreNoGrav_V2.py
+    SANSMergedDetectorsTest.py
+    SANSMergedDetectorsTest_V2.py
+    SANSQResolutionTest.py
+    SANSReductionCoreTest.py
+    SANSSaveTest.py
+    SANSSingleReductionTest.py
+    SANSUtilityTest.py
+    SANSWorkspaceTypeTest.py
 )
 
 pysystemtest_add_test(${SYSTEST_NAMES})

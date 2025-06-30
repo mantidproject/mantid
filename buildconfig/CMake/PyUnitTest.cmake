@@ -74,34 +74,17 @@ endfunction()
 # PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
 # This adds the named system test do they can be run individually
 
-function(PYSYSTEMTEST_ADD_TEST)
-
-  # Add all of the individual tests so that they can be run in parallel
-  foreach(part ${ARGN})
-    set(_test_name ${part})
-    if(NOT PR_JOB)
-      set(_system_test_options "")
-    else()
-      set(_system_test_options "--exclude-in-pull-requests")
-    endif()
-
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name}
-                                          --output-on-failure -l information ${_system_test_options}
-      )
-    else()
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name} --output-on-failure
-                                          -l information ${_system_test_options}
-      )
-    endif()
-
-    set_tests_properties(${_test_name} PROPERTIES LABELS "SystemTest")
-
-    if(PYUNITTEST_RUN_SERIAL)
-      set_tests_properties(${_test_name} PROPERTIES RUN_SERIAL 1)
-    endif()
-
-  endforeach(part ${ARGN})
+function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
+  if(NOT PYUNITTEST_RUNNER)
+    set(PYUNITTEST_RUNNER ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
+    pyunittest_add_test(${ARGV})
+    unset(PYUNITTEST_RUNNER)
+  else()
+    set(_temp_unit_runner ${PYUNITTEST_RUNNER})
+    set(PYUNITTEST_RUNNER ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
+    pyunittest_add_test(${ARGV})
+    set(PYUNITTEST_RUNNER ${_temp_unit_runner})
+  endif()
 endfunction()
 
 # Defines a macro to check that each file contains a call to unittest.main() The arguments should be the source
