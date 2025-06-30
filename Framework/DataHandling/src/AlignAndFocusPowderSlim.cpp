@@ -59,6 +59,7 @@ const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
+const std::string BIN_UNITS("BinningUnits");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
@@ -77,6 +78,10 @@ const std::string MICROSEC("microseconds");
 const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
+const std::vector<std::string> unitNames{"dSpacing", "TOF", "MomentumTransfer"};
+enum class BinUnit { DSPACE, TOF, Q, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 
 const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
@@ -475,6 +480,8 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}, mustBePosArr),
       "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<EnumeratedStringProperty<BinUnit, &unitNames>>(PropertyNames::BIN_UNITS),
+                  "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
   declareProperty(
@@ -573,6 +580,14 @@ void AlignAndFocusPowderSlim::exec() {
   } else {
     this->initCalibrationConstants(wksp, difc_focused);
   }
+
+  // set the instrument
+  this->progress(.07, "Set instrument geometry");
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
+  // convert to TOF if not already
+  this->progress(.1, "Convert bins to TOF");
+  wksp = this->convertToTOF(wksp);
 
   /* TODO create grouping information
   // create IndexInfo
@@ -678,10 +693,6 @@ void AlignAndFocusPowderSlim::exec() {
   // close the file so child algorithms can do their thing
   h5file.close();
 
-  // set the instrument
-  this->progress(.9, "Set instrument geometry");
-  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
-
   // load run metadata
   this->progress(.91, "Loading metadata");
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
@@ -697,9 +708,6 @@ void AlignAndFocusPowderSlim::exec() {
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
 
-  // set output units to be the same as coming from AlignAndFocusPowderFromFiles
-  wksp->setYUnit("Counts");
-  wksp->getAxis(0)->setUnit("TOF");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
@@ -707,6 +715,7 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
+  const std::string binUnits = getPropertyValue(PropertyNames::BIN_UNITS);
   std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA);
   std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
   std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
@@ -753,6 +762,10 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
       wksp->setHistogram(i, hist);
     }
   }
+
+  wksp->getAxis(0)->setUnit(binUnits);
+  wksp->setYUnit("Counts");
+
   return wksp;
 }
 
@@ -810,6 +823,21 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
   editAlg->executeAsChildAlg();
 
   wksp = editAlg->getProperty("Workspace");
+
+  return wksp;
+}
+
+API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorkspace_sptr &wksp) {
+  if (wksp->getAxis(0)->unit()->unitID() == "TOF") {
+    // already in TOF, no need to convert
+    return wksp;
+  }
+
+  API::IAlgorithm_sptr convertUnits = createChildAlgorithm("ConvertUnits");
+  convertUnits->setProperty("InputWorkspace", wksp);
+  convertUnits->setPropertyValue("Target", "TOF");
+  convertUnits->executeAsChildAlg();
+  wksp = convertUnits->getProperty("OutputWorkspace");
 
   return wksp;
 }

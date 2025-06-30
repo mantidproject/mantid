@@ -32,7 +32,8 @@ public:
   // run the algorithm do some common checks and return output workspace name
   MatrixWorkspace_sptr run_algorithm(const std::string &filename, const std::vector<double> &xmin = {},
                                      const std::vector<double> &xmax = {}, const std::vector<double> &xdelta = {},
-                                     const std::string binning = "Logarithmic") {
+                                     const std::string binning = "Logarithmic",
+                                     const std::string binningUnits = "TOF") {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -45,6 +46,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningMode", binning));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningUnits", binningUnits));
     if (!xmin.empty())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmin));
     if (!xmax.empty())
