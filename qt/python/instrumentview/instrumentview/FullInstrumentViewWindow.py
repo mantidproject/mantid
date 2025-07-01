@@ -107,9 +107,10 @@ class FullInstrumentViewWindow(QMainWindow):
 
         options_vertical_layout.addStretch()
         central_widget.setLayout(parent_horizontal_layout)
-        self.resize(1300, 1000)
-        self.main_plotter.reset_camera()
-        self.projection_plotter.reset_camera()
+        if not off_screen:
+            self.resize(1300, 1000)
+            self.main_plotter.reset_camera()
+            self.projection_plotter.reset_camera()
 
     def _add_min_max_group_box(self, parent_box: QGroupBox, min_callback, max_callback) -> tuple[QLineEdit, QLineEdit]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
