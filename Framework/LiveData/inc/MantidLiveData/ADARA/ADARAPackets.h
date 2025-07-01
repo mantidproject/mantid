@@ -10,6 +10,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "ADARA.h"
 #include "MantidLiveData/DllConfig.h"
@@ -45,7 +46,7 @@ public:
   PacketType::Version version() const { return m_version; }
   uint32_t payload_length() const { return m_payload_len; }
 #if 0
-	const struct timespec &timestamp(void) const { return m_timestamp; }
+	const struct timespec &timestamp() const { return m_timestamp; }
 #endif
   uint64_t pulseId() const { return m_pulseId; }
   uint32_t packet_length() const { return m_payload_len + 16; }
@@ -94,8 +95,10 @@ public:
 
   uint32_t sourceID() const { return m_fields[0]; }
   bool endOfPulse() const { return !!(m_fields[1] & 0x80000000); }
-  uint16_t pktSeq() const { return (m_fields[1] >> 16) & 0x7fff; }
-  uint16_t dspSeq() const { return m_fields[1] & 0x7fff; }
+  uint32_t pulseSeq() const { return (m_fields[1] >> 16) & 0x7fff; }
+  uint32_t maxPulseSeq() const { return (0x7fff + 1); }
+  uint32_t sourceSeq() const { return m_fields[1] & 0xffff; }
+  uint32_t maxSourceSeq() const { return (0xffff + 1); }
   PulseFlavor::Enum flavor() const { return static_cast<PulseFlavor::Enum>((m_fields[2] >> 24) & 0x7); }
   uint32_t pulseCharge() const { return m_fields[2] & 0x00ffffff; }
   bool badVeto() const { return !!(m_fields[3] & 0x80000000); }
@@ -122,6 +125,8 @@ private:
 
 class MANTID_LIVEDATA_DLL MappedDataPkt : public RawDataPkt {
 public:
+  MappedDataPkt(const MappedDataPkt &pkt);
+
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
 
@@ -131,6 +136,14 @@ private:
 class MANTID_LIVEDATA_DLL RTDLPkt : public Packet {
 public:
   RTDLPkt(const RTDLPkt &pkt);
+
+  bool gotDataFlags() const { return m_version >= 0x01; }
+  uint32_t dataFlags() const {
+    if (gotDataFlags())
+      return (m_fields[0] >> 27) & 0x1f;
+    else
+      return 0;
+  }
 
   PulseFlavor::Enum flavor() const { return static_cast<PulseFlavor::Enum>((m_fields[0] >> 24) & 0x7); }
 
@@ -186,6 +199,8 @@ private:
 
 class MANTID_LIVEDATA_DLL SourceListPkt : public Packet {
 public:
+  SourceListPkt(const SourceListPkt &pkt);
+
   const uint32_t *ids() const { return reinterpret_cast<const uint32_t *>(payload()); }
   uint32_t num_ids() const { return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t); }
 
@@ -195,20 +210,23 @@ private:
   friend class Parser;
 };
 
+enum PulseFlags {
+  ERROR_PIXELS = 0x00001,
+  PARTIAL_DATA = 0x00002,
+  PULSE_VETO = 0x00004,
+  MISSING_RTDL = 0x00008,
+  MAPPING_ERROR = 0x00010,
+  DUPLICATE_PULSE = 0x00020,
+  PCHARGE_UNCORRECTED = 0x00040,
+  VETO_UNCORRECTED = 0x00080,
+  GOT_METADATA = 0x00100,
+  GOT_NEUTRONS = 0x00200,
+  HAS_STATES = 0x00400,
+};
+
 class MANTID_LIVEDATA_DLL BankedEventPkt : public Packet {
 public:
   BankedEventPkt(const BankedEventPkt &pkt);
-
-  enum Flags {
-    ERROR_PIXELS = 0x00001,
-    PARTIAL_DATA = 0x00002,
-    PULSE_VETO = 0x00004,
-    MISSING_RTDL = 0x00008,
-    MAPPING_ERROR = 0x00010,
-    DUPLICATE_PULSE = 0x00020,
-    PCHARGE_UNCORRECTED = 0x00040,
-    VETO_UNCORRECTED = 0x00080,
-  };
 
   uint32_t pulseCharge() const { return m_fields[0]; }
   uint32_t pulseEnergy() const { return m_fields[1]; }
@@ -216,47 +234,54 @@ public:
   uint32_t vetoFlags() const { return (m_fields[3] >> 20) & 0xfff; }
   uint32_t flags() const { return m_fields[3] & 0xfffff; }
 
-  // The source, bank and event accessors all return NULL if we've
-  // incremented past the end
+  // The source, bank and event accessors all return NULL if we've incremented past the end
   const Event *firstEvent() const;
   const Event *nextEvent() const;
-
   bool getSourceCORFlag() const { return m_isCorrected; }
   uint32_t getSourceTOFOffset() const { return m_TOFOffset; }
   uint32_t curBankId() const { return m_bankId; }
-
-  //        uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1];
-  //        }
+  // uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
 
 private:
-  // Two helper functions for firstEvent() & nextEvent()
-  void firstEventInSource() const;
-  void firstEventInBank() const;
-
   const uint32_t *m_fields;
-
   mutable const Event *m_curEvent;
-
-  mutable unsigned m_lastFieldIndex; // index into m_fields for the last valid
-                                     // field in the packet
+  mutable unsigned m_lastFieldIndex; // index into m_fields for the last valid field in the packet
   mutable unsigned m_curFieldIndex;  // where we currently are in the packet
-
   // Data about the current source section
-  mutable unsigned m_sourceStartIndex; // index into m_fields for the start of
-                                       // this source
+  mutable unsigned m_sourceStartIndex; // index into m_fields for the start of this source
   mutable uint32_t m_bankCount;
   mutable uint32_t m_TOFOffset;
   mutable bool m_isCorrected;
-  mutable unsigned m_bankNum; // which bank are we currently in (relative to the
-                              // start of the section)
-
+  mutable unsigned m_bankNum; // which bank are we currently in (relative to the start of the section)
   // Data about the current bank
-  mutable unsigned m_bankStartIndex; // index into m_fields for the start of
-                                     // this source
+  mutable unsigned m_bankStartIndex; // index into m_fields for the start of this source
   mutable uint32_t m_bankId;
   mutable uint32_t m_eventCount;
 
   BankedEventPkt(const uint8_t *data, uint32_t len);
+  // Two helper functions for firstEvent() & nextEvent()
+  void firstEventInSource() const;
+  void firstEventInBank() const;
+
+  friend class Parser;
+};
+
+class BankedEventStatePkt : public Packet {
+public:
+  BankedEventStatePkt(const BankedEventStatePkt &pkt);
+
+  uint32_t pulseCharge() const { return m_fields[0]; }
+  uint32_t pulseEnergy() const { return m_fields[1]; }
+  uint32_t cycle() const { return m_fields[2]; }
+  uint32_t vetoFlags() const { return (m_fields[3] >> 20) & 0xfff; }
+  uint32_t flags() const { return m_fields[3] & 0xfffff; }
+
+  // TODO implment bank/event accessors
+
+private:
+  const uint32_t *m_fields;
+
+  BankedEventStatePkt(const uint8_t *data, uint32_t len);
 
   friend class Parser;
 };
@@ -275,8 +300,7 @@ public:
   bool nextSection() const; // iterate over the sections in the packet
 
   // Section-specific functions (these require either firstSection() or
-  // nextSection() to have run successfully before they will return
-  // valid data.
+  // nextSection() to have run successfully before they will return valid data.
   uint32_t getSectionMonitorID() const;
   uint32_t getSectionEventCount() const;
   uint32_t getSectionSourceID() const;
@@ -286,11 +310,8 @@ public:
 
 private:
   const uint32_t *m_fields;
-
   // Data about the current monitor section
-  mutable uint32_t m_sectionStartIndex; // index into m_fields for the start of
-                                        // this section
-
+  mutable uint32_t m_sectionStartIndex; // index into m_fields for the start of this section
   // used to keep nextEvent from running past the end of the section
   mutable uint32_t m_eventNum;
 
@@ -301,9 +322,28 @@ private:
 
 class MANTID_LIVEDATA_DLL PixelMappingPkt : public Packet {
 public:
-  // TODO implement accessors for fields
+  PixelMappingPkt(const PixelMappingPkt &pkt);
+  const uint8_t *mappingData() const { return ((const uint8_t *)&(m_fields[0])); }
+
 private:
+  const uint32_t *m_fields;
+
   PixelMappingPkt(const uint8_t *data, uint32_t len);
+
+  friend class Parser;
+};
+
+class MANTID_LIVEDATA_DLL PixelMappingAltPkt : public Packet {
+public:
+  PixelMappingAltPkt(const PixelMappingAltPkt &pkt);
+
+  uint32_t numBanks() const { return m_fields[0]; }
+  const uint8_t *mappingData() const { return ((const uint8_t *)&(m_fields[1])); }
+
+private:
+  const uint32_t *m_fields;
+
+  PixelMappingAltPkt(const uint8_t *data, uint32_t len);
 
   friend class Parser;
 };
@@ -327,6 +367,8 @@ private:
 
 class MANTID_LIVEDATA_DLL RunInfoPkt : public Packet {
 public:
+  RunInfoPkt(const RunInfoPkt &pkt);
+
   const std::string &info() const { return m_xml; }
 
 private:
@@ -355,6 +397,8 @@ private:
 
 class MANTID_LIVEDATA_DLL ClientHelloPkt : public Packet {
 public:
+  ClientHelloPkt(const ClientHelloPkt &pkt);
+
   enum Flags {
     PAUSE_AGNOSTIC = 0x0000,
     NO_PAUSE_DATA = 0x0001,
@@ -402,8 +446,18 @@ private:
 
 class MANTID_LIVEDATA_DLL SyncPkt : public Packet {
 public:
-  // TODO implement accessors for fields
+  SyncPkt(const SyncPkt &pkt);
+
+  const std::string signature() const { return m_signature; }
+  uint64_t fileOffset() const { return m_offset; }
+  const std::string comment() const { return m_comment; }
+
 private:
+  const uint32_t *m_fields;
+  std::string m_signature;
+  uint64_t m_offset;
+  std::string m_comment;
+
   SyncPkt(const uint8_t *data, uint32_t len);
 
   friend class Parser;
@@ -411,6 +465,8 @@ private:
 
 class MANTID_LIVEDATA_DLL HeartbeatPkt : public Packet {
 public:
+  HeartbeatPkt(const HeartbeatPkt &pkt);
+
 private:
   HeartbeatPkt(const uint8_t *data, uint32_t len);
 
@@ -419,6 +475,8 @@ private:
 
 class MANTID_LIVEDATA_DLL GeometryPkt : public Packet {
 public:
+  GeometryPkt(const GeometryPkt &pkt);
+
   const std::string &info() const { return m_xml; }
 
 private:
@@ -431,6 +489,8 @@ private:
 
 class MANTID_LIVEDATA_DLL BeamlineInfoPkt : public Packet {
 public:
+  BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
+
   const uint32_t &targetStationNumber() const { return m_targetStationNumber; }
 
   const std::string &id() const { return m_id; }
@@ -449,6 +509,11 @@ private:
   friend class Parser;
 };
 
+enum DataFormat {
+  EVENT_FORMAT = 0x0001,
+  HISTO_FORMAT = 0x0002,
+};
+
 class MANTID_LIVEDATA_DLL BeamMonitorConfigPkt : public Packet {
 public:
   BeamMonitorConfigPkt(const BeamMonitorConfigPkt &pkt);
@@ -456,42 +521,84 @@ public:
   uint32_t beamMonCount() const { return m_fields[0]; }
 
   uint32_t bmonId(uint32_t index) const {
-    if (index < beamMonCount())
-      return m_fields[(index * 6) + 1];
-    else
+    if (index < beamMonCount()) {
+      const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
+                                                                   sizeof(uint32_t) + (index * m_sectionSize));
+      return (section[0]);
+    } else
       return (0);
   }
 
   uint32_t tofOffset(uint32_t index) const {
-    if (index < beamMonCount())
-      return m_fields[(index * 6) + 2];
-    else
+    if (index < beamMonCount()) {
+      const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
+                                                                   sizeof(uint32_t) + (index * m_sectionSize));
+      return (section[1]);
+    } else
       return (0);
   }
 
   uint32_t tofMax(uint32_t index) const {
-    if (index < beamMonCount())
-      return m_fields[(index * 6) + 3];
-    else
+    if (index < beamMonCount()) {
+      const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
+                                                                   sizeof(uint32_t) + (index * m_sectionSize));
+      return (section[2]);
+    } else
       return (0);
   }
 
   uint32_t tofBin(uint32_t index) const {
-    if (index < beamMonCount())
-      return m_fields[(index * 6) + 4];
-    else
+    if (index < beamMonCount()) {
+      const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
+                                                                   sizeof(uint32_t) + (index * m_sectionSize));
+      return (section[3]);
+    } else
       return (0);
   }
 
   double distance(uint32_t index) const {
-    if (index < beamMonCount())
-      return *reinterpret_cast<const double *>(&m_fields[(index * 6) + 5]);
-    else
+    if (index < beamMonCount()) {
+      const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
+                                                                   sizeof(uint32_t) + (index * m_sectionSize));
+      return *reinterpret_cast<const double *>(&(section[4]));
+    } else
       return (0.0);
+  }
+
+  // Duh... All the Format Specifications Squirreled Away at the End...
+  // - For Backwards-Compatible Wire Protocol... <sigh/> ;-)
+  // ...It's Ok, Mantid Requires Them to All Be the Same Anyway...! ;-D
+  uint32_t format(uint32_t index) const {
+    if (m_version >= 0x01) {
+      if (index < beamMonCount()) {
+        // Trailing "Format Appendix" Section... ;-b
+        const uint32_t *format_section = reinterpret_cast<const uint32_t *>(
+            reinterpret_cast<const char *>(m_fields) + sizeof(uint32_t) + (beamMonCount() * m_sectionSize));
+        return (format_section[index]);
+      } else
+        return (HISTO_FORMAT);
+    }
+    // With Older Packet Protocol Versions (0x00), We _Only_ Sent the
+    // BeamMonitorConfigPkt When We Were Histogramming the Beam Monitor.
+    // The Default Case was Event Formatting, Where No Packet was Sent.
+    else
+      return (HISTO_FORMAT);
+  }
+
+  void countFormats(uint32_t &numEvent, uint32_t &numHisto) const {
+    numEvent = 0;
+    numHisto = 0;
+    for (uint32_t i = 0; i < beamMonCount(); i++) {
+      if (format(i) == EVENT_FORMAT)
+        numEvent++;
+      else if (format(i) == HISTO_FORMAT)
+        numHisto++;
+    }
   }
 
 private:
   const uint32_t *m_fields;
+  size_t m_sectionSize;
 
   BeamMonitorConfigPkt(const uint8_t *data, uint32_t len);
 
@@ -500,10 +607,9 @@ private:
 
 class MANTID_LIVEDATA_DLL DetectorBankSetsPkt : public Packet {
 public:
-  DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt) = delete;
-  DetectorBankSetsPkt &operator=(DetectorBankSetsPkt) = delete;
+  DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
 
-  ~DetectorBankSetsPkt() override;
+  virtual ~DetectorBankSetsPkt();
 
   // Detector Bank Set Name, alphanumeric characters...
   static const size_t SET_NAME_SIZE = 16;
@@ -619,6 +725,8 @@ private:
 
 class MANTID_LIVEDATA_DLL DataDonePkt : public Packet {
 public:
+  DataDonePkt(const DataDonePkt &pkt);
+
 private:
   DataDonePkt(const uint8_t *data, uint32_t len);
 
@@ -627,6 +735,8 @@ private:
 
 class MANTID_LIVEDATA_DLL DeviceDescriptorPkt : public Packet {
 public:
+  DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt);
+
   uint32_t devId() const { return m_devId; }
   const std::string &description() const { return m_desc; }
 
@@ -683,10 +793,15 @@ public:
     fields[0] = dev;
   };
 
-private:
-  const uint32_t *m_fields;
+  void updateValue(double value) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    *reinterpret_cast<double *>(&fields[3]) = value;
+  };
 
   VariableDoublePkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
 
   friend class Parser;
 };
@@ -706,13 +821,209 @@ public:
     fields[0] = dev;
   };
 
+  VariableStringPkt(const uint8_t *data, uint32_t len);
+
 private:
   const uint32_t *m_fields;
   std::string m_val;
 
-  VariableStringPkt(const uint8_t *data, uint32_t len);
+  friend class Parser;
+};
+
+class MANTID_LIVEDATA_DLL VariableU32ArrayPkt : public Packet {
+public:
+  VariableU32ArrayPkt(const VariableU32ArrayPkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t elemCount() const { return m_fields[3]; }
+  const std::vector<uint32_t> &value() const { return m_val; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  VariableU32ArrayPkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<uint32_t> m_val;
 
   friend class Parser;
 };
 
-} // namespace ADARA
+class VariableDoubleArrayPkt : public Packet {
+public:
+  VariableDoubleArrayPkt(const VariableDoubleArrayPkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t elemCount() const { return m_fields[3]; }
+  const std::vector<double> &value() const { return m_val; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  VariableDoubleArrayPkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<double> m_val;
+
+  friend class Parser;
+};
+
+class MultVariableU32Pkt : public Packet {
+public:
+  MultVariableU32Pkt(const MultVariableU32Pkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t numValues() const { return m_fields[3]; }
+  const std::vector<uint32_t> &values() const { return m_vals; }
+  const std::vector<uint32_t> &tofs() const { return m_tofs; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  MultVariableU32Pkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<uint32_t> m_vals;
+  std::vector<uint32_t> m_tofs;
+
+  friend class Parser;
+};
+
+class MultVariableDoublePkt : public Packet {
+public:
+  MultVariableDoublePkt(const MultVariableDoublePkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t numValues() const { return m_fields[3]; }
+  const std::vector<double> &values() const { return m_vals; }
+  const std::vector<uint32_t> &tofs() const { return m_tofs; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  void updateValue(double value) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    *((double *)&fields[3]) = value;
+  };
+
+  MultVariableDoublePkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<double> m_vals;
+  std::vector<uint32_t> m_tofs;
+
+  friend class Parser;
+};
+
+class MultVariableStringPkt : public Packet {
+public:
+  MultVariableStringPkt(const MultVariableStringPkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t numValues() const { return m_fields[3]; }
+  const std::vector<std::string> &values() const { return m_vals; }
+  const std::vector<uint32_t> &tofs() const { return m_tofs; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  MultVariableStringPkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<std::string> m_vals;
+  std::vector<uint32_t> m_tofs;
+
+  friend class Parser;
+};
+
+class MultVariableU32ArrayPkt : public Packet {
+public:
+  MultVariableU32ArrayPkt(const MultVariableU32ArrayPkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t numValues() const { return m_fields[3]; }
+  uint32_t elemCount(uint32_t index) const {
+    return ((index < numValues()) ? static_cast<uint32_t>(m_vals[index].size()) : 0);
+  }
+  const std::vector<std::vector<uint32_t>> values() const { return m_vals; }
+  const std::vector<uint32_t> &tofs() const { return m_tofs; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  MultVariableU32ArrayPkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<std::vector<uint32_t>> m_vals;
+  std::vector<uint32_t> m_tofs;
+
+  friend class Parser;
+};
+
+class MultVariableDoubleArrayPkt : public Packet {
+public:
+  MultVariableDoubleArrayPkt(const MultVariableDoubleArrayPkt &pkt);
+
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
+  VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
+  uint32_t numValues() const { return m_fields[3]; }
+  uint32_t elemCount(uint32_t index) const {
+    return ((index < numValues()) ? static_cast<uint32_t>(m_vals[index].size()) : 0);
+  }
+  const std::vector<std::vector<double>> values() const { return m_vals; }
+  const std::vector<uint32_t> &tofs() const { return m_tofs; }
+
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
+    fields[0] = dev;
+  };
+
+  MultVariableDoubleArrayPkt(const uint8_t *data, uint32_t len);
+
+private:
+  const uint32_t *m_fields;
+  std::vector<std::vector<double>> m_vals;
+  std::vector<uint32_t> m_tofs;
+
+  friend class Parser;
+};
+
+} /* namespace ADARA */
