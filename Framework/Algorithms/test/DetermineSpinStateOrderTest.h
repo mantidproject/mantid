@@ -194,13 +194,13 @@ public:
 
   void test_heStateWhenRfIsNegative() {
     const std::vector<double> transmissionValues = {10.0, 20.0, 80.0, 90.0};
-    const std::vector<char> expectedSpinStates = {'+', '+', '-', '-'};
+    const std::vector<char> expectedSpinStates = {'0', '0', '1', '1'};
     heStateTest(transmissionValues, expectedSpinStates, 10.0, "LARMOR", "FlipperCurrent");
   }
 
   void test_heStateWhenRfIsPositive() {
     const std::vector<double> transmissionValues = {10.0, 20.0, 80.0, 90.0};
-    const std::vector<char> expectedSpinStates = {'-', '-', '+', '+'};
+    const std::vector<char> expectedSpinStates = {'1', '1', '0', '0'};
     heStateTest(transmissionValues, expectedSpinStates, -10.0, "LARMOR", "FlipperCurrent");
   }
 
@@ -225,13 +225,13 @@ public:
 
   void test_rfState_larmor() {
     const std::vector<double> logMeans = {6.0, 5.5, 0.0, 2.0};
-    const std::vector<char> expectedSpinStates = {'-', '-', '+', '+'};
+    const std::vector<char> expectedSpinStates = {'1', '1', '0', '0'};
     rfStateTest(logMeans, expectedSpinStates, "LARMOR", "FlipperCurrent");
   }
 
   void test_rfState_zoom() {
     const std::vector<double> logMeans = {2.0, 3.5, -1.5, -4.0};
-    const std::vector<char> expectedSpinStates = {'-', '-', '+', '+'};
+    const std::vector<char> expectedSpinStates = {'1', '1', '0', '0'};
     rfStateTest(logMeans, expectedSpinStates, "ZOOM", "Spin_flipper");
   }
 };

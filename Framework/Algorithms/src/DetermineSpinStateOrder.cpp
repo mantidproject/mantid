@@ -36,8 +36,8 @@ const std::string DetermineSpinStateOrder::category() const { return "SANS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string DetermineSpinStateOrder::summary() const {
-  return "Takes a workspace group of Polarised SANS run periods and returns a string (e.g '--, -+, +-, ++') of thier "
-         "corresponding spin states.";
+  return "Takes a workspace group of Polarised SANS run periods and returns a string (e.g '11, 10, 01, 00') of thier "
+         "corresponding spin states in Wildes notation.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void DetermineSpinStateOrder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("InputWorkspace", "", Direction::Input),
                   "A Polarised SANS run from either LARMOR or ZOOM (group workspace with 4 periods).");
   declareProperty("SpinStates", std::string(""),
-                  "A comma-seperated string of the spin states of each of the run periods e.g '++,--,+-,-+'",
+                  "A comma-seperated string of the spin states of each of the run periods e.g '11, 10, 01, 00'",
                   Direction::Output);
 }
 
@@ -126,15 +126,15 @@ void DetermineSpinStateOrder::exec() {
 
     if (rfState > m_rfStateCondition) {
       if (heState < 0) {
-        spinStatesOrder.push_back("-+");
+        spinStatesOrder.push_back("10");
       } else {
-        spinStatesOrder.push_back("--");
+        spinStatesOrder.push_back("11");
       }
     } else {
       if (heState < 0) {
-        spinStatesOrder.push_back("+-");
+        spinStatesOrder.push_back("01");
       } else {
-        spinStatesOrder.push_back("++");
+        spinStatesOrder.push_back("00");
       }
     }
   }
