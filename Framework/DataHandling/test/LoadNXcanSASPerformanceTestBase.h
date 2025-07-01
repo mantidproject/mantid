@@ -8,25 +8,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <utility>
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNXcanSAS.h"
-#include "MantidDataHandling/NXcanSASDefinitions.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/VectorHelper.h"
 #include "NXcanSASTestHelper.h"
 
-using Mantid::DataHandling::NXcanSAS::LoadNXcanSAS;
 using namespace NXcanSASTestHelper;
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling::NXcanSAS;
 
 class ILoadNXcanSASPerformanceTest {
@@ -71,42 +60,4 @@ protected:
   }
 
   virtual void setupUniqueParams() = 0;
-};
-
-class LoadNXcanSASPerformanceTest1D : public ILoadNXcanSASPerformanceTest, public CxxTest::TestSuite {
-public:
-  void setUp() override { ILoadNXcanSASPerformanceTest::setUp(); }
-  void tearDown() override { ILoadNXcanSASPerformanceTest::tearDown(); }
-  void test_execute() override { alg.execute(); }
-
-  static LoadNXcanSASPerformanceTest1D *createSuite() { return new LoadNXcanSASPerformanceTest1D(); }
-  static void destroySuite(LoadNXcanSASPerformanceTest1D *suite) { delete suite; }
-  void setupUniqueParams() override {
-    m_parameters.hasDx = true;
-
-    const auto ws = provide1DWorkspace(m_parameters);
-    setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
-    m_parameters.idf = getIDFfromWorkspace(ws);
-
-    save_no_assert(ws, m_parameters);
-  }
-};
-
-class LoadNXcanSASPerformanceTest2D : public ILoadNXcanSASPerformanceTest, public CxxTest::TestSuite {
-public:
-  void setUp() override { ILoadNXcanSASPerformanceTest::setUp(); }
-  void tearDown() override { ILoadNXcanSASPerformanceTest::tearDown(); }
-  void test_execute() override { alg.execute(); }
-
-  static LoadNXcanSASPerformanceTest2D *createSuite() { return new LoadNXcanSASPerformanceTest2D(); }
-  static void destroySuite(LoadNXcanSASPerformanceTest2D *suite) { delete suite; }
-  void setupUniqueParams() override {
-    m_parameters.is2dData = true;
-
-    const auto ws = provide2DWorkspace(m_parameters);
-    set2DValues(ws);
-    m_parameters.idf = getIDFfromWorkspace(ws);
-
-    save_no_assert(ws, m_parameters);
-  }
 };
