@@ -90,7 +90,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_can_run_numbers_included_if_can_transmission_property_is_set() {
@@ -119,7 +119,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_can_and_sample_runs_included_if_both_transmission_properties_are_set() {
@@ -151,7 +151,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_1D_workspace_without_transmissions_is_saved_correctly() {
@@ -174,7 +174,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_sample_bgsub_values_included_if_properties_are_set() {
@@ -203,7 +203,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_unknown_detector_names_are_not_saved() {
@@ -227,7 +227,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_1D_workspace_without_transmissions_and_without_xerror_is_saved_correctly() {
@@ -252,7 +252,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_1D_workspace_with_point_transmissions_is_saved_correctly() {
@@ -293,7 +293,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_2D_workspace_is_saved_correctly() {
@@ -318,7 +318,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
   void test_that_group_workspaces_are_saved_correctly_in_individual_files() {
@@ -333,14 +333,14 @@ public:
 
     for (auto const &suffix : parameters.expectedGroupSuffices) {
       // Assert
-      auto tmpFilePath = parameters.filePath;
-      parameters.filePath.insert(tmpFilePath.size() - 3, suffix);
-      TS_ASSERT(!std::filesystem::is_empty(parameters.filePath));
+      const auto &origFilePath = parameters.filePath();
+      auto newFilePath = origFilePath;
+      parameters.overwriteFilePath(newFilePath.insert(newFilePath.size() - 3, suffix));
       do_assert(parameters);
 
       // clean files
-      removeFile(parameters.filePath);
-      parameters.filePath = tmpFilePath;
+      removeFile(parameters.filePath());
+      parameters.overwriteFilePath(origFilePath);
     }
     // Clean ads
     ads.clear();
@@ -369,7 +369,7 @@ public:
     do_assert(parameters);
 
     // Clean up
-    removeFile(parameters.filePath);
+    removeFile(parameters.filePath());
   }
 
 private:
@@ -378,9 +378,8 @@ private:
                            const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();
-    parameters.filePath = generateRandomFilename();
 
-    saveAlg->setProperty("Filename", parameters.filePath);
+    saveAlg->setProperty("Filename", parameters.filePath());
     saveAlg->setProperty("InputWorkspace", workspace);
     saveAlg->setProperty("RadiationSource", parameters.radiationSource);
     saveAlg->setProperty("Geometry", parameters.geometry);

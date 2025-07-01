@@ -39,7 +39,13 @@ struct TransmissionTestParameters {
   bool usesTransmission{false};
 };
 
-struct NXcanSASTestParameters {
+std::string generateRandomFilename(std::size_t length = 12, const std::string &suffix = ".h5");
+
+class NXcanSASTestParameters {
+private:
+  std::string m_filePath;
+
+public:
   NXcanSASTestParameters() = default;
 
   int polWorkspaceNumber{4};
@@ -58,7 +64,6 @@ struct NXcanSASTestParameters {
   double magneticFieldStrength{1};
   double scaledBgSubScaleFactor{};
 
-  std::string filePath;
   std::string runNumber{"1234"};
   std::string userFile{"my_user_file"};
   std::string workspaceTitle{"sample_workspace"};
@@ -99,6 +104,15 @@ struct NXcanSASTestParameters {
   bool hasBgSub{false};
   bool isHistogram{false};
   bool loadTransmission{false};
+
+  void overwriteFilePath(const std::string &inputFilePath) { m_filePath = inputFilePath; }
+
+  const std::string &filePath() {
+    if (m_filePath.empty()) {
+      m_filePath = generateRandomFilename();
+    }
+    return m_filePath;
+  }
 };
 
 std::string concatenateStringVector(const std::vector<std::string> &stringVector);
@@ -133,6 +147,4 @@ Mantid::API::MatrixWorkspace_sptr provide2DWorkspace(const NXcanSASTestParameter
 void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws, double value = 0);
 
 void removeFile(const std::string &filename);
-
-std::string generateRandomFilename(std::size_t length = 12, const std::string &suffix = ".h5");
 } // namespace NXcanSASTestHelper

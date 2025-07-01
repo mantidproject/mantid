@@ -64,7 +64,7 @@ public:
   void setUp() override { m_parameters = NXcanSASTestParameters(); }
   void tearDown() override {
     m_ads.clear();
-    removeFile(m_parameters.filePath);
+    removeFile(m_parameters.filePath());
   }
 
   void test_that_1D_workspace_with_Q_resolution_can_be_loaded() {
@@ -111,7 +111,6 @@ public:
     m_parameters.invalidDetectors = false;
     m_parameters.hasDx = false;
     m_parameters.loadTransmission = true;
-    m_parameters.filePath = generateRandomFilename();
 
     const auto ws = provide1DWorkspace(m_parameters);
     setXValuesOn1DWorkspace(ws, m_parameters.xmin, m_parameters.xmax);
@@ -133,8 +132,7 @@ public:
   }
 
   void test_that_legacy_transmissions_saved_as_histograms_are_loaded() {
-    m_parameters.filePath = "NXcanSAS-histo-lambda.h5";
-
+    m_parameters.overwriteFilePath("NXcanSAS-histo-lambda.h5");
     const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(load_file_no_issues());
     TS_ASSERT(!wsOut->isHistogramData());
   }
@@ -145,7 +143,6 @@ public:
     m_parameters.invalidDetectors = false;
     m_parameters.is2dData = true;
     m_parameters.hasDx = false;
-    m_parameters.filePath = generateRandomFilename();
 
     const auto ws = provide2DWorkspace(m_parameters);
     set2DValues(ws);
@@ -270,15 +267,12 @@ private:
   AnalysisDataServiceImpl &m_ads;
   NXcanSASTestParameters m_parameters;
 
-  Workspace_sptr load_file_no_issues() const {
-    if (m_parameters.filePath.empty()) {
-      throw std::runtime_error("Error in test - no file path set in parameters");
-    }
+  Workspace_sptr load_file_no_issues() {
     LoadNXcanSAS alg;
 
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filePath));
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_parameters.filePath()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadTransmission", m_parameters.loadTransmission));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_parameters.loadedWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -299,9 +293,8 @@ private:
 
     const std::string saveAlgName = m_parameters.isPolarized ? "SavePolarizedNXcanSAS" : "SaveNXcanSAS";
     const auto saveAlg = AlgorithmManager::Instance().createUnmanaged(saveAlgName);
-    m_parameters.filePath = generateRandomFilename();
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", m_parameters.filePath);
+    saveAlg->setProperty("Filename", m_parameters.filePath());
 
     if (m_parameters.isPolarized) {
       saveAlg->setProperty("InputWorkspace", std::dynamic_pointer_cast<WorkspaceGroup>(workspace));
@@ -515,95 +508,5 @@ private:
       compareLogTo(wsOut, sasSampleEMFieldDirectionRotation, "3");
       do_assert_load(wsPoint, wsOut);
     }
-  }
-};
-
-class LoadNXcanSASTestPerformance : public CxxTest::TestSuite {
-public:
-  static LoadNXcanSASTestPerformance *createSuite() { return new LoadNXcanSASTestPerformance(); }
-
-  static void destroySuite(LoadNXcanSASTestPerformance *suite) { delete suite; }
-
-  LoadNXcanSASTestPerformance() {
-    setup_1D();
-    setup_2D();
-  }
-
-  ~LoadNXcanSASTestPerformance() {
-    AnalysisDataService::Instance().clear();
-    removeFile(parameters1D.filePath);
-    removeFile(parameters2D.filePath);
-  }
-
-  void test_execute_1D() { alg1D.execute(); }
-
-  void test_execute_2D() { alg2D.execute(); }
-
-private:
-  LoadNXcanSAS alg1D;
-  LoadNXcanSAS alg2D;
-  NXcanSASTestParameters parameters1D;
-  NXcanSASTestParameters parameters2D;
-
-  void save_no_assert(const MatrixWorkspace_sptr &ws, NXcanSASTestParameters &parameters) {
-    auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
-    saveAlg->initialize();
-    saveAlg->setProperty("Filename", parameters.filePath);
-    saveAlg->setProperty("InputWorkspace", ws);
-    saveAlg->setProperty("RadiationSource", parameters.radiationSource);
-    if (!parameters.detectors.empty()) {
-      std::string detectorsAsString = concatenateStringVector(parameters.detectors);
-      saveAlg->setProperty("DetectorNames", detectorsAsString);
-    }
-
-    saveAlg->execute();
-  }
-
-  void setup_1D() {
-    removeFile(parameters1D.filePath);
-    parameters1D.detectors.emplace_back("front-detector");
-    parameters1D.detectors.emplace_back("rear-detector");
-    parameters1D.invalidDetectors = false;
-    parameters1D.hasDx = true;
-    parameters1D.filePath = generateRandomFilename();
-
-    const auto ws = provide1DWorkspace(parameters1D);
-    setXValuesOn1DWorkspace(ws, parameters1D.xmin, parameters1D.xmax);
-    parameters1D.idf = getIDFfromWorkspace(ws);
-
-    save_no_assert(ws, parameters1D);
-
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
-
-    alg1D.initialize();
-    alg1D.setPropertyValue("Filename", parameters1D.filePath);
-
-    alg1D.setProperty("LoadTransmission", true);
-
-    alg1D.setPropertyValue("OutputWorkspace", outWsName);
-  }
-
-  void setup_2D() {
-    removeFile(parameters2D.filePath);
-
-    parameters2D.detectors.emplace_back("front-detector");
-    parameters2D.detectors.emplace_back("rear-detector");
-    parameters2D.invalidDetectors = false;
-    parameters2D.is2dData = true;
-    parameters2D.filePath = generateRandomFilename();
-
-    const auto ws = provide2DWorkspace(parameters2D);
-    set2DValues(ws);
-    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
-    parameters2D.idf = getIDFfromWorkspace(ws);
-
-    save_no_assert(ws, parameters2D);
-
-    alg2D.initialize();
-    alg2D.setPropertyValue("Filename", parameters2D.filePath);
-
-    alg2D.setProperty("LoadTransmission", true);
-
-    alg2D.setPropertyValue("OutputWorkspace", outWsName);
   }
 };
