@@ -36,7 +36,7 @@ const std::string DetermineSpinStateOrder::category() const { return "SANS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string DetermineSpinStateOrder::summary() const {
-  return "Takes a workspace group of Polarised SANS run periods and returns a string (e.g '11, 10, 01, 00') of thier "
+  return "Takes a workspace group of Polarised SANS run periods and returns a string (e.g '11, 10, 01, 00') of their "
          "corresponding spin states in Wildes notation.";
 }
 
@@ -81,7 +81,7 @@ std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
 
   API::WorkspaceGroup_const_sptr wsGroup = getProperty("InputWorkspace");
   if (wsGroup->getNumberOfEntries() != 4) {
-    helpMessages["InputWorkspace"] = "Input workspace group must have 4 entries (PA data)";
+    helpMessages["InputWorkspace"] = "Input workspace group must have 4 entries.";
     return helpMessages;
   }
 

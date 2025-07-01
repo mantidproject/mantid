@@ -90,7 +90,7 @@ public:
 
     auto errors = alg.validateInputs();
     TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "Input workspace group must have 4 entries (PA data)")
+    TS_ASSERT_EQUALS(errors["InputWorkspace"], "Input workspace group must have 4 entries.")
     WorkspaceCreationHelper::removeWS("three_items");
   }
 

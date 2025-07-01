@@ -12,8 +12,8 @@ Description
 
 Takes a Polarised SANS transmission run and attempts to determine the spin state for each run period.
 
-To determine if the RF flipper is on or not the algorithm uses the spin flipper current log, to determine the beam polarisation the
-algorithm compares the period transmission to the average transmission (greater than the average suggests the same state as the flipper).
+The average current through the RF flipper for every run is extracted from the appropriate spin flipper log in the instrument. The beam polarisation is determined by 
+comparing each period transmission to the average transmission (greater than the average suggests the same state as the flipper).
 
 Usage
 -----
