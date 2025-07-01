@@ -731,6 +731,12 @@ private:
   bool m_isRegistered{false};
   /// The function used to calculate the step size
   std::function<double(const double)> m_stepSizeFunction;
+
+  // Creates and processes a single tie, handling constant expressions and validation
+  std::unique_ptr<ParameterTie> createAndProcessTie(const std::string &parName, const std::string &expr,
+                                                    bool isDefault);
+  // Insert a new tie to the correct position
+  std::pair<std::size_t, std::string> insertTie(std::unique_ptr<ParameterTie> tie);
 };
 
 /// shared pointer to the function base class

@@ -87,6 +87,121 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("D"), 0.0);
   }
 
+  void testAddTies() {
+    MockFunction fun;
+
+    // Set initial parameter values
+    fun.setParameter("A", 1.0);
+    fun.setParameter("B", 2.0);
+    fun.setParameter("C", 3.0);
+    fun.setParameter("D", 4.0);
+
+    // Add multiple ties at once
+    fun.addTies("A=2*B,C=3*D");
+
+    // Check that the ties were added correctly
+    auto aTie = fun.getTie(0);
+    TS_ASSERT(aTie);
+    TS_ASSERT(!fun.isActive(0));
+    TS_ASSERT(!fun.isFixed(0));
+    TS_ASSERT_EQUALS(aTie->asString(nullptr), "A=2*B");
+
+    auto cTie = fun.getTie(2);
+    TS_ASSERT(cTie);
+    TS_ASSERT(!fun.isActive(2));
+    TS_ASSERT(!fun.isFixed(2));
+    TS_ASSERT_EQUALS(cTie->asString(nullptr), "C=3*D");
+
+    // Apply the ties and check values
+    fun.applyTies();
+    TS_ASSERT_EQUALS(fun.getParameter("A"), 4.0);
+    TS_ASSERT_EQUALS(fun.getParameter("B"), 2.0);
+    TS_ASSERT_EQUALS(fun.getParameter("C"), 12.0);
+    TS_ASSERT_EQUALS(fun.getParameter("D"), 4.0);
+
+    // Test adding a constant tie
+    fun.addTies("D=5");
+    TS_ASSERT(!fun.getTie(3)); // Should be fixed, not tied
+    TS_ASSERT(fun.isFixed(3));
+    TS_ASSERT_EQUALS(fun.getParameter("D"), 5.0);
+
+    // Applying ties again should update values
+    fun.applyTies();
+    TS_ASSERT_EQUALS(fun.getParameter("A"), 4.0);
+    TS_ASSERT_EQUALS(fun.getParameter("B"), 2.0);
+    TS_ASSERT_EQUALS(fun.getParameter("C"), 15.0);
+    TS_ASSERT_EQUALS(fun.getParameter("D"), 5.0);
+
+    // Test clearing ties
+    fun.clearTies();
+    TS_ASSERT(!fun.getTie(0));
+    TS_ASSERT(!fun.getTie(1));
+    TS_ASSERT(!fun.getTie(2));
+    TS_ASSERT(!fun.getTie(3));
+    TS_ASSERT(fun.isActive(0));
+    TS_ASSERT(fun.isActive(1));
+    TS_ASSERT(fun.isActive(2));
+    TS_ASSERT(fun.isActive(3));
+  }
+
+  void testAddTiesCircularDependencies() {
+    MockFunction fun;
+
+    // Set initial parameter values
+    fun.setParameter("A", 1.0);
+    fun.setParameter("B", 2.0);
+    fun.setParameter("C", 3.0);
+    fun.setParameter("D", 4.0);
+
+    // Test direct circular dependency
+    TS_ASSERT_THROWS(fun.addTies("A=B,B=A"), const std::runtime_error &);
+
+    // Check that no ties were added due to the circular dependency
+    TS_ASSERT(!fun.getTie(0));
+    TS_ASSERT(!fun.getTie(1));
+    TS_ASSERT(fun.isActive(0));
+    TS_ASSERT(fun.isActive(1));
+
+    // Test longer circular dependency chain
+    TS_ASSERT_THROWS(fun.addTies("A=B,B=C,C=A"), const std::runtime_error &);
+
+    // Check that no ties were added
+    TS_ASSERT(!fun.getTie(0));
+    TS_ASSERT(!fun.getTie(1));
+    TS_ASSERT(!fun.getTie(2));
+
+    // Test multiple circular dependencies
+    TS_ASSERT_THROWS(fun.addTies("A=B,B=C,C=D,D=A"), const std::runtime_error &);
+
+    // Check that no ties were added
+    TS_ASSERT(!fun.getTie(0));
+    TS_ASSERT(!fun.getTie(1));
+    TS_ASSERT(!fun.getTie(2));
+
+    // Test self-tie
+    TS_ASSERT_THROWS(fun.addTies("A=A"), const std::runtime_error &);
+    TS_ASSERT(!fun.getTie(0));
+
+    // Test mixed valid and circular ties
+    TS_ASSERT_THROWS(fun.addTies("A=2*B,B=3*C,C=A"), const std::runtime_error &);
+
+    // Check that existing valid ties are preserved
+    fun.addTies("A=2*B");
+    TS_ASSERT(fun.getTie(0));
+    // Adding a circular tie should not affect existing ties
+    TS_ASSERT_THROWS(fun.addTies("C=D,D=C"), const std::runtime_error &);
+    TS_ASSERT(fun.getTie(0));  // A's tie should still exist
+    TS_ASSERT(!fun.getTie(2)); // No tie should be added for C
+    TS_ASSERT(!fun.getTie(3)); // No tie should be added for D
+
+    // Verify that only valid ties are applied
+    fun.applyTies();
+    TS_ASSERT_EQUALS(fun.getParameter("A"), 4.0); // 2*B
+    TS_ASSERT_EQUALS(fun.getParameter("B"), 2.0);
+    TS_ASSERT_EQUALS(fun.getParameter("C"), 3.0);
+    TS_ASSERT_EQUALS(fun.getParameter("D"), 4.0);
+  }
+
   void testFixAll() {
     MockFunction fun;
     fun.tie("A", "2*B");
