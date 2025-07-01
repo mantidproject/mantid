@@ -1,1 +1,0 @@
-- `#39148 <https://github.com/mantidproject/mantid/issues/39148>`_ : Resolve formatting issue within ``CEO2.cif`` causing a loop error when trying to load into Mantid Workbech using ``LoadCIF``.

@@ -1,1 +1,0 @@
-- Added the option when plotting peaks in HKL to use the peak positions calculated from Q\ :sub:`sample` using the UB instead of peak index.
