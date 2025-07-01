@@ -331,16 +331,16 @@ public:
     // Act
     save_file_no_issues(std::dynamic_pointer_cast<Mantid::API::Workspace>(ws_group), parameters);
 
+    const auto origFilePath = parameters.filePath();
     for (auto const &suffix : parameters.expectedGroupSuffices) {
       // Assert
-      const auto &origFilePath = parameters.filePath();
       auto newFilePath = origFilePath;
-      parameters.overwriteFilePath(newFilePath.insert(newFilePath.size() - 3, suffix));
+      newFilePath.insert(newFilePath.size() - 3, suffix);
+      parameters.overwriteFilePath(newFilePath);
       do_assert(parameters);
 
       // clean files
       removeFile(parameters.filePath());
-      parameters.overwriteFilePath(origFilePath);
     }
     // Clean ads
     ads.clear();
