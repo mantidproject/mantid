@@ -97,6 +97,26 @@ void WorkspaceGroup::sortMembersByName() {
 }
 
 /**
+ *  Reorder the group members using a list of indicies (e.g the list 3,2,1,0 would reverse the order)
+ */
+void WorkspaceGroup::reorderMembersWithIndicies(const std::vector<int> &indicies) {
+  if (indicies.size() != this->size()) {
+    g_log.warning("Number of indicies must match the number of workspace members\n");
+    return;
+  }
+
+  if (!std::all_of(indicies.cbegin(), indicies.cend(), [&](int i) { return i >= 0 && i < m_workspaces.size(); })) {
+    g_log.warning("All indicies must be >= 0 and < the number of workspaces in the group\n");
+    return;
+  }
+
+  std::vector<Mantid::API::Workspace_sptr> reordered;
+  std::transform(indicies.cbegin(), indicies.cend(), std::back_inserter(reordered),
+                 [&](const auto &i) { return m_workspaces[i]; });
+  m_workspaces = reordered;
+}
+
+/**
  * Adds a workspace to the group. The workspace does not have to be in the
  * ADS
  * @param workspace :: A shared pointer to a workspace to add. If the

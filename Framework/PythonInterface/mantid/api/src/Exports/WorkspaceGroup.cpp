@@ -8,6 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/DataServiceExporter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
@@ -21,6 +23,7 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+using namespace Mantid::PythonInterface::Converters;
 
 namespace {
 
@@ -86,6 +89,20 @@ PyObject *getItem(WorkspaceGroup &self, const int &index) {
   return convertWsToObj(self.getItem(index));
 }
 
+void reorder(WorkspaceGroup &self, const boost::python::object &pythonIndicies) {
+  std::vector<int> indicies(static_cast<size_t>(PySequence_Size(pythonIndicies.ptr())));
+
+  if (NDArray::check(pythonIndicies)) {
+    NDArrayToVector<int> converter(pythonIndicies);
+    converter.copyTo(indicies);
+  } else {
+    PySequenceToVector<int> converter(pythonIndicies);
+    converter.copyTo(indicies);
+  }
+
+  self.reorderMembersWithIndicies(indicies);
+}
+
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup", no_init)
       .def("__init__", make_constructor(&makeWorkspaceGroup))
@@ -95,6 +112,7 @@ void export_WorkspaceGroup() {
       .def("contains", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
            (arg("self"), arg("workspace")), "Returns true if the given name is in the group")
       .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")), "Sort members by name")
+      .def("reorder", reorder, (arg("self"), arg("indicies")), "Reorder the group members using a list of indicies")
       .def("add", addItem, (arg("self"), arg("workspace_name")), "Add a name to the group")
       .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"), "Returns the number of workspaces contained in the group")
