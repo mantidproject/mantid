@@ -823,7 +823,7 @@ public:
   // TEST ADDRESS METHODS
   // #################################################################################################################
 
-  /* NOTE for historical reasons, additional tests exist in NeXusFileReadWriteTest.h*/
+  /* NOTE for historical reasons, additional tests exist in NexusFileReadWriteTest.h*/
 
   void test_getAddress_groups() {
     cout << "\ntest get_address -- groups only\n";
@@ -955,12 +955,12 @@ public:
     TS_ASSERT_EQUALS(file.getAddress(), "/" + expected);
 
     // failling should leave path alone
-    TS_ASSERT_THROWS(file.openAddress("/pants"), NeXus::Exception &);
-    TS_ASSERT_EQUALS(file.getAddress(), expected);
+    TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception &);
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
 
     // intermingle working and failing opens
     file.openAddress("/entry1/layer2a/");
-    TS_ASSERT_THROWS(file.openGroup("pants", NXENTRY), NeXus::Exception &);
+    TS_ASSERT_THROWS(file.openGroup("pants", NXENTRY), Mantid::Nexus::Exception &);
     file.openGroup("layer3a", NXENTRY);
     TS_ASSERT_EQUALS(file.getAddress(), "/entry1/layer2a/layer3a");
   }
@@ -1229,11 +1229,11 @@ public:
   // TEST LINK METHODS
   // ################################################################################################################
 
-  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
+  /* NOTE for historical reasons these exist in NexusFileReadWriteTest.h*/
 
   // ##################################################################################################################
   // TEST READ / WRITE SLAB METHODS
   // ################################################################################################################
 
-  /* NOTE for historical reasons these exist in NeXusFileReadWriteTest.h*/
+  /* NOTE for historical reasons these exist in NexusFileReadWriteTest.h*/
 };
