@@ -166,7 +166,7 @@ public:
     const std::vector<double> yValues = {10.0, 25.0, 80.0, 4.5};
     auto wsGroup = createWorkspaceGroupWithYValues(yValues);
 
-    const double result = averageTransmition(wsGroup);
+    const double result = averageTransmission(wsGroup);
 
     const double averageYValue =
         std::accumulate(yValues.cbegin(), yValues.cend(), 0.0) / static_cast<double>(yValues.size());

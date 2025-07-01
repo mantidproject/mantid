@@ -115,7 +115,7 @@ std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
 void DetermineSpinStateOrder::exec() {
   API::WorkspaceGroup_const_sptr wsGroup = getProperty("InputWorkspace");
 
-  const double averageTrans = averageTransmition(wsGroup);
+  const double averageTrans = averageTransmission(wsGroup);
   std::vector<std::string> spinStatesOrder;
 
   for (const API::Workspace_sptr &ws : wsGroup->getAllItems()) {
@@ -146,7 +146,7 @@ void DetermineSpinStateOrder::exec() {
   setProperty("SpinStates", spinStates);
 }
 
-double DetermineSpinStateOrder::averageTransmition(API::WorkspaceGroup_const_sptr const &wsGroup) const {
+double DetermineSpinStateOrder::averageTransmission(API::WorkspaceGroup_const_sptr const &wsGroup) const {
   const auto workspaces = wsGroup->getAllItems();
 
   double total =
