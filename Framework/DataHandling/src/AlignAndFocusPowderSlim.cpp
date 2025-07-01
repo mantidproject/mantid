@@ -473,13 +473,12 @@ void AlignAndFocusPowderSlim::init() {
                   "be specified.");
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{10}, mustBePosArr),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_DELTA, std::vector<double>{0.0016}),
                   "Bin size for output data");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}, mustBePosArr),
-      "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{2.0}, mustBePosArr),
+                  "Minimum x-value for the output binning");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinUnit, &unitNames>>(PropertyNames::BIN_UNITS),
                   "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
