@@ -1,0 +1,1 @@
+- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` output workspace names now include the spectrum number when it is enabled.

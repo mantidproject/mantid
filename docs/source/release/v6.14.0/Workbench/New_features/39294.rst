@@ -1,0 +1,1 @@
+- Sequential fit output workspace names now include the spectrum number to distinguish between different spectra results.
