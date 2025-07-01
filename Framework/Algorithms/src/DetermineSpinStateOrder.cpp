@@ -52,24 +52,27 @@ void DetermineSpinStateOrder::init() {
 }
 
 void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
-  if (workspace == nullptr) {
+  std::vector<std::string> workspaceIssues;
+  if (!workspace) {
     errorList["InputWorkspace"] = "All input workspaces must be of type MatrixWorkspace.";
     return;
   }
 
   Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
   if (unit->unitID() != "Wavelength") {
-    errorList["InputWorkspace"] = "All input workspaces must be in units of Wavelength.";
-    return;
+    workspaceIssues.push_back("All input workspaces must be in units of Wavelength.");
   }
 
   if (workspace->getNumberHistograms() != 1) {
-    errorList["InputWorkspace"] = "All input workspaces must contain a single histogram.";
-    return;
+    workspaceIssues.push_back("All input workspaces must contain a single histogram.");
   }
 
   if (!workspace->isHistogramData()) {
-    errorList["InputWorkspace"] = "All input workspaces must be histogram data.";
+    workspaceIssues.push_back("All input workspaces must be histogram data.");
+  }
+
+  if (!workspaceIssues.empty()) {
+    errorList["InputWorkspace"] = Kernel::Strings::join(workspaceIssues.cbegin(), workspaceIssues.cend(), " ");
   }
 }
 
