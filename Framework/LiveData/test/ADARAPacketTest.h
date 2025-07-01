@@ -14,11 +14,8 @@
 #include <Poco/DOM/Document.h>
 #include <memory>
 
-// All of the sample packets that we need to run the tests are defined in the
-// following
-// header.  The packets can get pretty long, which is why I didn't want them
-// cluttering
-// up this file.
+// All of the sample packets that we need to run the tests are defined in the following header.
+// The packets can get pretty long, which is why I didn't want them cluttering up this file.
 #include "ADARAPackets.h"
 
 class ADARAPacketTest : public CxxTest::TestSuite, ADARA::Parser {
