@@ -107,6 +107,9 @@ class DNSElasticSCPlotView(DNSView):
     def _plot(self):
         self.sig_plot.emit()
 
+    def _change_grid(self):
+        self.sig_change_grid.emit()
+
     def set_plot_view_menu_visibility(self, visible):
         self.views_menu.menuAction().setVisible(visible)
 
