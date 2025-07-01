@@ -107,12 +107,7 @@ public:
 
   void overwriteFilePath(const std::string &inputFilePath) { m_filePath = inputFilePath; }
 
-  const std::string &filePath() {
-    if (m_filePath.empty()) {
-      m_filePath = generateRandomFilename();
-    }
-    return m_filePath;
-  }
+  const std::string &filePath();
 };
 
 std::string concatenateStringVector(const std::vector<std::string> &stringVector);

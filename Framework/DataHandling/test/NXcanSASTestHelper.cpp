@@ -296,4 +296,11 @@ std::string generateRandomFilename(std::size_t length, const std::string &suffix
   return filepath.string();
 }
 
+const std::string &NXcanSASTestParameters::filePath() {
+  if (m_filePath.empty()) {
+    m_filePath = generateRandomFilename();
+  }
+  return m_filePath;
+}
+
 } // namespace NXcanSASTestHelper
