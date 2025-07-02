@@ -11,14 +11,18 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
+
+Kernel::Logger g_log("DetermineSpinStateOrder");
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetermineSpinStateOrder)
@@ -143,6 +147,9 @@ void DetermineSpinStateOrder::exec() {
   }
 
   const std::string spinStates = Kernel::Strings::join(spinStatesOrder.cbegin(), spinStatesOrder.cend(), ",");
+  std::stringstream msg;
+  msg << "Determined the following spin state order for " << wsGroup->getName() << ": " << spinStates;
+  g_log.notice(msg.str());
   setProperty("SpinStates", spinStates);
 }
 
