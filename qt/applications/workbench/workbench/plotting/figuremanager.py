@@ -611,8 +611,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             for ax in self._axes_that_are_not_colour_bars():
                 ax.set_autoscalex_on(False)
                 ax.set_autoscaley_on(False)
-                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False)
-                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False)
+                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
+                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
                 self._crosshair_lines[ax] = (hline, vline)
 
             self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
