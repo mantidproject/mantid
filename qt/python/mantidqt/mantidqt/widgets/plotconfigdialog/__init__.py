@@ -87,7 +87,7 @@ def curve_in_ax(ax):
 
 def line_in_ax(ax):
     """Return True if there are any lines in the Axes object"""
-    return len(ax.get_lines()) > 0
+    return len([line for line in ax.get_lines() if not line.get_label() == "_nolegend_"]) > 0
 
 
 def errorbars_in_ax(ax):
