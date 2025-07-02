@@ -8,10 +8,10 @@
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 import numpy as np
-from pydantic import ConfigDict, validate_call
+from pydantic import ConfigDict, validate_call, with_config
 from typing_extensions import TypedDict
 
 from mantid.kernel import logger
@@ -22,10 +22,9 @@ from abins.atomsdata import AtomData
 from abins.constants import MASS_EPS
 
 
+@with_config(ConfigDict(arbitrary_types_allowed=True))
 class AbinsDataDict(TypedDict):
     """Dict form of AbinsData used for caching"""
-
-    __pydantic_config__ = ConfigDict(arbitrary_types_allowed=True)
 
     frequencies: np.ndarray
     weights: np.ndarray
@@ -50,7 +49,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     read_formatted_data() if necessary and caching the results.
     """
 
-    def __init__(self, input_ab_initio_filename: str = None, cache_directory: Path | None = None):
+    def __init__(self, input_ab_initio_filename: str | None = None, cache_directory: Path | None = None):
         """An object for loading phonon data from ab initio output files"""
 
         if not isinstance(input_ab_initio_filename, str):
@@ -95,14 +94,14 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
 
-        loaded_data = {
-            "frequencies": datasets["frequencies"],
-            "weights": datasets["weights"],
-            "k_vectors": datasets["k_vectors"],
-            "atomic_displacements": datasets["atomic_displacements"],
-            "unit_cell": datasets["unit_cell"],
-            "atoms": datasets["atoms"],
-        }
+        loaded_data = AbinsDataDict(
+            frequencies=datasets["frequencies"],
+            weights=datasets["weights"],
+            k_vectors=datasets["k_vectors"],
+            atomic_displacements=datasets["atomic_displacements"],
+            unit_cell=datasets["unit_cell"],
+            atoms=datasets["atoms"],
+        )
 
         return self._rearrange_data(data=loaded_data)
 
@@ -134,7 +133,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
     @staticmethod
-    def abinsdata_saver(read_function):
+    def abinsdata_saver(read_function: Callable[..., AbinsData]) -> Callable[..., AbinsData]:
         """Decorated function also passes return value to self.save_ab_initio_data
 
         read_function should return an object of type abins_data
@@ -168,8 +167,8 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             atoms=atoms_data.extract(),
         )
 
-        for name in data:
-            self._clerk.add_data(name=name, value=data[name])
+        for key, value in data.items():
+            self._clerk.add_data(name=key, value=value)
         self._clerk.add_file_attributes()
         self._clerk.add_attribute("ab_initio_program", self._ab_initio_program)
         self._clerk.save()
