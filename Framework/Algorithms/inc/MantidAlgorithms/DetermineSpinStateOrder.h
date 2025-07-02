@@ -32,7 +32,7 @@ private:
   void exec() override;
 
   std::string m_spinFlipperLogName;
-  int m_rfStateCondition;
+  double m_rfStateCondition;
 };
 
 } // namespace Algorithms

@@ -15,6 +15,8 @@ Takes a Polarised SANS transmission run and attempts to determine the spin state
 The average current through the RF flipper for every run is extracted from the appropriate spin flipper log in the instrument. The beam polarisation is determined by
 comparing each period transmission to the average transmission (greater than the average suggests the same state as the flipper).
 
+If the data is from LARMOR or ZOOM, properties **SpinFlipperLogName** and **SpinFlipperAverageCurrent** can be inferred by the algorithm (don't need to be set).
+
 Usage
 -----
 

@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
@@ -50,12 +51,21 @@ const std::string DetermineSpinStateOrder::summary() const {
 void DetermineSpinStateOrder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("InputWorkspace", "", Direction::Input),
                   "A Polarised SANS run from either LARMOR or ZOOM (group workspace with 4 periods).");
+  declareProperty("SpinFlipperLogName", std::string(""),
+                  "Name of the log contained in the InputWorkspace which holds the flipper current (can be inferred if "
+                  "data is from LARMOR or ZOOM).",
+                  Direction::Input);
+  declareProperty("SpinFlipperAverageCurrent", EMPTY_DBL(),
+                  "Expected average current for the spin slipper over all periods. Used to determine if a particular "
+                  "period has the flipper active or not (can be inferred if data is from LARMOR or ZOOM).",
+                  Direction::Input);
   declareProperty("SpinStates", std::string(""),
                   "A comma-seperated string of the spin states of each of the run periods e.g '11, 10, 01, 00'",
                   Direction::Output);
 }
 
-void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
+void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList,
+                       const std::string &spinFlipperLogName = "") {
   std::vector<std::string> workspaceIssues;
   if (!workspace) {
     errorList["InputWorkspace"] = "All input workspaces must be of type MatrixWorkspace.";
@@ -75,6 +85,11 @@ void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std:
     workspaceIssues.push_back("All input workspaces must be histogram data.");
   }
 
+  if (spinFlipperLogName != "" && !workspace->run().hasProperty(spinFlipperLogName)) {
+    workspaceIssues.push_back("All input workspaces must contain the provided spin flipper log: " + spinFlipperLogName +
+                              ".");
+  }
+
   if (!workspaceIssues.empty()) {
     errorList["InputWorkspace"] = Kernel::Strings::join(workspaceIssues.cbegin(), workspaceIssues.cend(), " ");
   }
@@ -91,23 +106,29 @@ std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
 
   for (const API::Workspace_sptr &ws : wsGroup->getAllItems()) {
     const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
-    validateGroupItem(groupItem, helpMessages);
+    validateGroupItem(groupItem, helpMessages, getPropertyValue("SpinFlipperLogName"));
     if (!helpMessages.empty()) {
       return helpMessages;
     }
   }
 
-  const auto firstItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(wsGroup->getItem(0));
-  const auto instrument = firstItem->getInstrument()->getName();
+  if (isDefault("SpinFlipperLogName") || isDefault("SpinFlipperAverageCurrent")) {
+    const auto firstItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(wsGroup->getItem(0));
+    const auto instrument = firstItem->getInstrument()->getName();
 
-  if (instrument == "LARMOR") {
-    m_spinFlipperLogName = "FlipperCurrent";
-    m_rfStateCondition = 4;
-  } else if (instrument == "ZOOM") {
-    m_spinFlipperLogName = "Spin_flipper";
-    m_rfStateCondition = 0;
-  } else {
-    helpMessages["InputWorkspace"] = "Sub workspaces must be data from either LARMOR or ZOOM";
+    if (instrument == "LARMOR") {
+      m_spinFlipperLogName =
+          isDefault("SpinFlipperLogName") ? "FlipperCurrent" : getPropertyValue("SpinFlipperLogName");
+      m_rfStateCondition =
+          isDefault("SpinFlipperAverageCurrent") ? 4.0 : std::stod(getPropertyValue("SpinFlipperAverageCurrent"));
+    } else if (instrument == "ZOOM") {
+      m_spinFlipperLogName = isDefault("SpinFlipperLogName") ? "Spin_flipper" : getPropertyValue("SpinFlipperLogName");
+      m_rfStateCondition =
+          isDefault("SpinFlipperAverageCurrent") ? 0.0 : std::stod(getPropertyValue("SpinFlipperAverageCurrent"));
+    } else {
+      helpMessages["InputWorkspace"] = "Sub workspaces must be data from either LARMOR or ZOOM when SpinFlipperLogName "
+                                       "or SpinFlipperAverageCurrent are not provided";
+    }
   }
 
   return helpMessages;
@@ -118,6 +139,10 @@ std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
  */
 void DetermineSpinStateOrder::exec() {
   API::WorkspaceGroup_const_sptr wsGroup = getProperty("InputWorkspace");
+  if (!isDefault("SpinFlipperLogName") && !isDefault("SpinFlipperAverageCurrent")) {
+    m_spinFlipperLogName = getPropertyValue("SpinFlipperLogName");
+    m_rfStateCondition = std::stod(getPropertyValue("SpinFlipperAverageCurrent"));
+  }
 
   const double averageTrans = averageTransmission(wsGroup);
   std::vector<std::string> spinStatesOrder;

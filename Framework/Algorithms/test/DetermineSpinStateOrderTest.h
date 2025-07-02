@@ -94,7 +94,7 @@ public:
     WorkspaceCreationHelper::removeWS("three_items");
   }
 
-  void test_validateInputs_unsupportedInstrument() {
+  void test_validateInputs_unsupportedInstrumentForNoLogInfo() {
     auto wsGroupOsiris = std::make_shared<Mantid::API::WorkspaceGroup>();
     for (int i = 0; i < 4; ++i) {
       const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "OSIRIS");
@@ -108,7 +108,8 @@ public:
 
     auto errors = alg.validateInputs();
     TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "Sub workspaces must be data from either LARMOR or ZOOM")
+    TS_ASSERT_EQUALS(errors["InputWorkspace"], "Sub workspaces must be data from either LARMOR or ZOOM when "
+                                               "SpinFlipperLogName or SpinFlipperAverageCurrent are not provided")
   }
 
   void test_validateInputs_wavelengthAxis() {
