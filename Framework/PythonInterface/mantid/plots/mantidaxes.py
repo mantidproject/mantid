@@ -1717,6 +1717,8 @@ class _WorkspaceArtists(object):
         :param plot_kwargs: Key word args to pass to plotting function
         """
         if plot_kwargs:
+            if "specNum" in plot_kwargs:
+                del plot_kwargs["specNum"]
             new_artists = self._data_replace_cb(self._artists, workspace, plot_kwargs)
         else:
             new_artists = self._data_replace_cb(self._artists, workspace)
