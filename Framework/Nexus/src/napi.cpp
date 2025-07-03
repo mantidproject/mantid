@@ -37,17 +37,14 @@
 
 #include "MantidNexus/napi.h"
 
-// cppcheck-suppress-begin [constVariablePointer, unmatchedSuppression]
+// cppcheck-suppress-begin [unmatchedSuppression]
+// cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 #include "MantidNexus/napi_helper.h"
 
 #define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
-
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
 
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
@@ -96,7 +93,7 @@ NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
   bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename));
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
-    // call NX5open to set variables on it
+    // construct on heap
     fid = new NexusFile5(filename, am);
     status = NXstatus::NX_OK;
   } else {
@@ -686,7 +683,7 @@ NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
    */
   std::size_t datalen = 1024;
   char caddr[1024] = {0};
-  if (NX5getattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+  if (NXgetattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
     sRes.targetAddress = buildCurrentAddress(pFile);
   } else {
     sRes.targetAddress = std::string(caddr);
@@ -1006,7 +1003,7 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
      */
     std::size_t datalen = 1024;
     char caddr[1024] = {0};
-    if (NX5getattr(fileid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+    if (NXgetattr(fileid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
       sRes.targetAddress = buildCurrentAddress(pFile);
     } else {
       sRes.targetAddress = std::string(caddr);
@@ -1191,4 +1188,5 @@ char *NXIformatNeXusTime() {
   return time_buffer;
 }
 
-// cppcheck-suppress-end [constVariablePointer, unmatchedSuppression]
+// cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-end [unmatchedSuppression]

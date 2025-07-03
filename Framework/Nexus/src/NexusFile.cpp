@@ -33,17 +33,6 @@ using std::vector;
     throw NXEXCEPTION(msg);                                                                                            \
   }
 
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
-
-#define FILE_EXISTS(filename)                                                                                          \
-  if (!std::filesystem::exists(filename)) {                                                                            \
-    throw std::runtime_error(std::string(__FILE__) + ":" + std::to_string(__LINE__));                                  \
-  } else {                                                                                                             \
-    DEBUG_LOG();                                                                                                       \
-  }
-
 /**
  * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
@@ -175,7 +164,7 @@ namespace Mantid::Nexus {
 // catch for undefined types
 template <typename NumT> NXnumtype getType(NumT const number) {
   stringstream msg;
-  msg << "NeXus::getType() does not know type of " << typeid(number).name();
+  msg << "Nexus::getType() does not know type of " << typeid(number).name();
   throw Exception(msg.str(), "NXnumtype getType<NumT>");
 }
 
@@ -231,7 +220,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   NexusFile5 tmp(filename, access);
   if (tmp.iFID <= 0) {
     stringstream msg;
-    msg << "NXopen(" << filename << ", " << access << ") failed";
+    msg << "File::initOpenFile(" << filename << ", " << access << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
     m_pfile_id = std::make_shared<NexusFile5>(tmp);
@@ -763,7 +752,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   }
 
   // do the work
-  int i_type = static_cast<int>(type);
 
   hid_t datatype1, dataspace, iNew;
   hid_t dtype, cparms = -1;
@@ -777,7 +765,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   bool unlimiteddim = false;
   int rank = static_cast<int>(dims.size());
   stringstream msg;
-  msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
+  msg << "NXcompmakedata64(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
 
   pFile = assertNXID(m_pfile_id);

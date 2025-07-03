@@ -25,10 +25,6 @@
 
 ----------------------------------------------------------------------------*/
 
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
-
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include "napi_test_util.h"

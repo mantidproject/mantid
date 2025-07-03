@@ -23,8 +23,10 @@
 
 ----------------------------------------------------------------------------*/
 
-// cppcheck-suppress-begin [unmatchedSuppression, variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-begin unmatchedSuppression
+// cppcheck-suppress-begin [variableScope, invalidPrintfArgType_uint, constParameterReference]
 // cppcheck-suppress-begin [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
+// cppcheck-suppress-begin [shadowArgument]
 
 #include <string>
 #define H5Aiterate_vers 2
@@ -330,7 +332,7 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
          open group and find class name attribute
        */
       std::string ph_name("");
-      for (stackEntry entry : pFile->iStack5) {
+      for (stackEntry const &entry : pFile->iStack5) {
         ph_name += entry.irefn + "/";
       }
       ph_name += name;
@@ -760,5 +762,6 @@ NXstatus NX5getattrainfo(NXhandle handle, std::string const &name, std::size_t &
   return NXstatus::NX_OK;
 }
 
-// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
-// cppcheck-suppress-end [unmatchedSuppression, variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer, shadowArgument]
+// cppcheck-suppress-end [variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-end unmatchedSuppression
