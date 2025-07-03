@@ -20,9 +20,11 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
+
 TREAT_LOG_NEGATIVE_VALUES = "clip"
 DECIMAL_FORMAT = "Decimal Format"
 SCIENTIFIC_FORMAT = "Scientific Format"
+SCALE_MODES = ["linear", "log", "symlog"]
 
 
 class PropertiesEditorBase(QDialog):
@@ -133,7 +135,7 @@ class LegendEditor(PropertiesEditorBase):
 class AxisEditorModel(object):
     min = None
     max = None
-    log = None
+    scale_mode = None
     grid = None
     formatter = None
 
@@ -153,13 +155,16 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
-            self.ui.logBox.hide()
+            self.ui.scaleBox.hide()
+            self.ui.scaleLabel.hide()
             self.ui.gridBox.hide()
+        else:
+            for mode in SCALE_MODES:
+                self.ui.scaleBox.addItem(mode)
         self.ui.editor_format.addItem(DECIMAL_FORMAT)
         self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
         self.axis_id = axis_id
-        self.lim_getter = getattr(axes, "get_{}lim".format(axis_id))
 
         if isinstance(axes, Axes3D):
             self.lim_setter = getattr(axes, "set_{}lim3d".format(axis_id))
@@ -177,7 +182,7 @@ class AxisEditor(PropertiesEditorBase):
         memento = AxisEditorModel()
         self._memento = memento
         memento.min, memento.max = getattr(self.axes, "get_{}lim".format(self.axis_id))()
-        memento.log = getattr(self.axes, "get_{}scale".format(self.axis_id))() != "linear"
+        memento.scale_mode = getattr(self.axes, "get_{}scale".format(self.axis_id))()
         memento.grid = self.axis.grid_on() if hasattr(self.axis, "grid_on") else self.axis._major_tick_kw.get("gridOn", False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
             memento.formatter = DECIMAL_FORMAT
@@ -189,13 +194,8 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.errors.hide()
         # apply properties
         axes = self.axes
-
+        self.scale_setter(self.ui.scaleBox.currentText())
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-        if self.ui.logBox.isChecked():
-            self.scale_setter("log", **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
-            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
-        else:
-            self.scale_setter("linear")
         self.lim_setter(self.limit_min, self.limit_max)
         self._set_tick_format()
         which = "both" if hasattr(axes, "show_minor_gridlines") and axes.show_minor_gridlines else "major"
@@ -211,19 +211,9 @@ class AxisEditor(PropertiesEditorBase):
     def _fill(self, model):
         self.ui.editor_min.setText(str(model.min))
         self.ui.editor_max.setText(str(model.max))
-        self.ui.logBox.setChecked(model.log)
+        self.ui.scaleBox.setCurrentText(model.scale_mode)  # change this,
         self.ui.gridBox.setChecked(model.grid)
         self.ui.editor_format.setCurrentText(model.formatter)
-
-    def _check_log_limits(self, editor_min, editor_max):
-        # Check that the limits from the editor are sensible for a log graph
-        # These limits are not necessarily in numeric order we have to check both
-        lim_min, lim_max = self.lim_getter()
-        if editor_min <= 0:
-            editor_min = lim_min
-        if editor_max <= 0:
-            editor_max = lim_max
-        return editor_min, editor_max
 
     def _set_tick_format(self):
         formatter = self.ui.editor_format.currentText()
