@@ -39,7 +39,7 @@ public:
   }
   void tearDown() override {
     m_ads.clear();
-    removeFile(m_parameters.filename);
+    removeFile(m_parameters.filePath());
   }
 
   void test_algorithm_saves_with_no_issue_for_1D_test_data_full_polarization() {
@@ -53,7 +53,7 @@ public:
 
     const auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SavePolarizedNXcanSAS");
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", m_parameters.filename);
+    saveAlg->setProperty("Filename", m_parameters.filePath());
     saveAlg->setProperty("InputWorkspace", ws);
 
     TSM_ASSERT_THROWS("Incompatible workspace", saveAlg->execute(), const std::runtime_error &);
@@ -151,7 +151,7 @@ public:
         assertSavedFileFormat(savePolAlg);
 
         // clean
-        removeFile(m_parameters.filename);
+        removeFile(m_parameters.filePath());
         m_ads.clear();
       }
     }
@@ -185,7 +185,7 @@ public:
 
       // clean
       m_ads.clear();
-      removeFile(m_parameters.filename);
+      removeFile(m_parameters.filePath());
     }
   }
 
@@ -196,7 +196,7 @@ private:
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SavePolarizedNXcanSAS");
     saveAlg->initialize();
 
-    saveAlg->setProperty("Filename", m_parameters.filename);
+    saveAlg->setProperty("Filename", m_parameters.filePath());
     saveAlg->setProperty("InputWorkspace", workspace);
 
     // Standard Metadata

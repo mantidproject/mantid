@@ -411,9 +411,8 @@ protected:
     assertDataSpacesMatch(std::make_pair(tDataSet, lambdaDataSet), std::make_pair("Transmission signal", "Wavelength"));
   }
 
-  void do_assert(const NXcanSASTestParameters &parameters) {
-    const auto filename = parameters.filename;
-    H5::H5File file(filename, H5F_ACC_RDONLY, H5Util::defaultFileAcc());
+  void do_assert(NXcanSASTestParameters &parameters) {
+    H5::H5File file(parameters.filePath(), H5F_ACC_RDONLY, H5Util::defaultFileAcc());
 
     // Check sasentry
     const auto entry = file.openGroup(sasEntryGroupName + sasEntryDefaultSuffix);

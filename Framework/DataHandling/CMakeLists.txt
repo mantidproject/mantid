@@ -516,6 +516,8 @@ set(TEST_FILES
     LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h
+    LoadNXcanSASPerformanceTest1D.h
+    LoadNXcanSASPerformanceTest2D.h
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h
     LoadNexusMonitorsTest.h
