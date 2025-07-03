@@ -277,14 +277,8 @@ void File::close() {
 }
 
 void File::flush() {
-  herr_t iRet;
-  if (m_pfile_id->iCurrentD != 0) {
-    iRet = H5Fflush(m_pfile_id->iCurrentD, H5F_SCOPE_LOCAL);
-  } else if (m_pfile_id->iCurrentG != 0) {
-    iRet = H5Fflush(m_pfile_id->iCurrentG, H5F_SCOPE_LOCAL);
-  } else {
-    iRet = H5Fflush(m_pfile_id->iFID, H5F_SCOPE_LOCAL);
-  }
+  hid_t vid = getCurrentId();
+  herr_t iRet = H5Fflush(vid, H5F_SCOPE_LOCAL);
   if (iRet < 0) {
     throw NXEXCEPTION("The object cannot be flushed");
   }
@@ -309,8 +303,13 @@ void File::openGroupAddress(std::string const &address) {
 }
 
 std::string File::getAddress() {
-  std::string address;
-  NAPI_CALL(NXgetaddress(m_pfile_id.get(), address), "NXgetaddress() failed");
+  hid_t current = getCurrentId();
+  // call once to get the address length, again to get whole address
+  std::size_t addrlen = H5Iget_name(current, NULL, 0);
+  char *caddr = new char[addrlen + 1];
+  H5Iget_name(current, caddr, addrlen + 1);
+  std::string address(caddr);
+  delete[] caddr;
   // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
   if (address == "") {
@@ -338,27 +337,21 @@ bool File::hasData(std::string const &name) {
 }
 
 bool File::isDataSetOpen() {
-  NXlink id;
-  if (NXgetdataID(m_pfile_id.get(), id) == NXstatus::NX_ERROR) {
+  if (m_pfile_id->iCurrentD == 0) {
     return false;
   } else {
-    return true;
+    return H5Iget_type(m_pfile_id->iCurrentD) == H5I_DATASET;
   }
 }
 
 bool File::isDataInt() {
-  Info info = this->getInfo();
-  switch (info.type) {
-  case NXnumtype::INT8:
-  case NXnumtype::UINT8:
-  case NXnumtype::INT16:
-  case NXnumtype::UINT16:
-  case NXnumtype::INT32:
-  case NXnumtype::UINT32:
-    return true;
-  default:
-    return false;
+  if (m_pfile_id->iCurrentD == 0) {
+    throw NXEXCEPTION("No dataset is open");
   }
+  hid_t datatype = H5Dget_type(m_pfile_id->iCurrentD);
+  H5T_class_t dataclass = H5Tget_class(datatype);
+  H5Tclose(datatype);
+  return dataclass == H5T_INTEGER;
 }
 
 std::string File::formAbsoluteAddress(std::string const &name) {
@@ -374,6 +367,26 @@ std::string File::formAbsoluteAddress(std::string const &name) {
   }
   // the caller is responsible for checking that it exists
   return new_name;
+}
+
+hid_t File::getCurrentId() const {
+  if (m_pfile_id->iCurrentD != 0) {
+    return m_pfile_id->iCurrentD;
+  } else if (m_pfile_id->iCurrentG != 0) {
+    return m_pfile_id->iCurrentG;
+  } else {
+    return m_pfile_id->iFID;
+  }
+}
+
+std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
+  if (m_pfile_id->iCurrentD != 0) {
+    return std::make_shared<H5::DataSet>(m_pfile_id->iCurrentD);
+  } else if (m_pfile_id->iCurrentG != 0) {
+    return std::make_shared<H5::Group>(m_pfile_id->iCurrentG);
+  } else {
+    return std::make_shared<H5::H5File>(m_pfile_id->iFID);
+  }
 }
 
 void File::registerEntry(std::string const &address, std::string const &name) {
@@ -1329,7 +1342,7 @@ Info File::getInfo() {
   return info;
 }
 
-void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(m_pfile_id.get()), "NXinitgroupdir failed"); }
+void File::initGroupDir() { m_pfile_id->iStack5.back().iCurrentIDX = 0; }
 
 Entry File::getNextEntry() {
   // set up temporary variables to get the information
@@ -1497,7 +1510,7 @@ string File::getStrAttr(std::string const &name) {
 
 // NAVIGATE ATTRIBUTES
 
-void File::initAttrDir() { NAPI_CALL(NXinitattrdir(m_pfile_id.get()), "NXinitattrdir failed"); }
+void File::initAttrDir() { m_pfile_id->iCurrentIDX = 0; }
 
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
@@ -1563,17 +1576,8 @@ vector<AttrInfo> File::getAttrInfos() {
 }
 
 bool File::hasAttr(const std::string &name) {
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
-    }
-    if (temp.name == name)
-      return true;
-  }
-  return false;
+  hid_t current = getCurrentId();
+  return H5Aexists(current, name.c_str()) > 0;
 }
 
 //------------------------------------------------------------------------------------------------------------------

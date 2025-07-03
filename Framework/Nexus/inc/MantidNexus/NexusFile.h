@@ -13,6 +13,11 @@ namespace {
 static const std::string NULL_STR("NULL");
 }
 
+namespace H5 {
+// forward declare
+class H5Object;
+} // namespace H5
+
 /**
  * \file NexusFile.h Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
@@ -165,6 +170,15 @@ public:
 
 private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
+
+  hid_t getCurrentId() const;
+
+  /** It is sometimes necessary to interface with code using the H5Cpp library
+   * This method will return the current location as an object, which can be
+   * used with, for instance, H5Util or other parts of Mantid
+   * \returns a shared pointer to an H5Object corresponding to current location
+   */
+  std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
   // these are used for updating the NexusDescriptor
   std::string formAbsoluteAddress(std::string const &);
