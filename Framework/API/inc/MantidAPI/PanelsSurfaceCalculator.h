@@ -1,0 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+
+using Mantid::Geometry::ComponentInfo;
+using Mantid::Kernel::V3D;
+
+namespace Mantid {
+namespace API {
+class MANTID_API_DLL PanelsSurfaceCalculator {
+public:
+  void setupBasisAxes(const V3D &zaxis, V3D &xaxis, V3D &yaxis) const;
+  std::vector<V3D> retrievePanelCorners(const ComponentInfo &componentInfo, const size_t rootIndex) const;
+  V3D calculatePanelNormal(const std::vector<V3D> &panelCorners) const;
+  bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex, const std::vector<size_t> &tubes,
+                  const V3D &normal);
+  V3D calculateBankNormal(const ComponentInfo &componentInfo, const std::vector<size_t> &tubes);
+  void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex, std::vector<bool> &visitedComponents) const;
+  size_t findNumDetectors(const ComponentInfo &componentInfo, const std::vector<size_t> &components) const;
+  Mantid::Kernel::Quat calcBankRotation(const V3D &detPos, V3D normal, const V3D &zAxis, const V3D &yAxis,
+                                        const V3D &samplePosition) const;
+
+private:
+  Mantid::Kernel::Logger g_log = Mantid::Kernel::Logger("PanelsSurfaceCalculator");
+};
+} // namespace API
+} // namespace Mantid
