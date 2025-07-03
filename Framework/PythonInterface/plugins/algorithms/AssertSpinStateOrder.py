@@ -11,6 +11,22 @@ from mantid.simpleapi import DetermineSpinStateOrder
 from mantid.kernel import logger, Direction
 
 
+def validate_group_item(ws):
+    issues = []
+    if ws.getAxis(0).getUnit().unitID() != "Wavelength":
+        issues.append("All input workspaces must be in units of Wavelength.")
+
+    if ws.getNumberHistograms() != 1:
+        issues.append("All input workspaces must contain a single histogram.")
+
+    if not ws.isHistogramData():
+        issues.append("All input workspaces must be histogram data.")
+
+    if len(issues) != 0:
+        return {"InputWorkspace": ", ".join(issues)}
+    return {}
+
+
 class AssertSpinStateOrder(PythonAlgorithm):
     def category(self):
         return "SANS"
@@ -50,7 +66,25 @@ class AssertSpinStateOrder(PythonAlgorithm):
         )
 
     def validateInputs(self):
-        return {}
+        issues = {}
+        group_ws = self.getProperty("InputWorkspace").value
+        if group_ws.getNumberOfEntries() != 4:
+            issues["InputWorkspace"] = "Input workspace group must have 4 entries."
+            return issues
+
+        for ws in group_ws:
+            issues = validate_group_item(ws)
+            if issues != {}:
+                return issues
+
+        expected_spin_states = self.getProperty("ExpectedSpinStates").value
+        if len(expected_spin_states.split(",")) != 4:
+            issues["ExpectedSpinStates"] = "ExpectedSpinStates should have 4 values."
+
+        if expected_spin_states.replace("0", "").replace("1", "").replace(",", "") != "":
+            issues["ExpectedSpinStates"] = "ExpectedSpinStates should be in Wildes notation (e.g '00,01,10,11')."
+
+        return issues
 
     def PyExec(self):
         group_ws = self.getProperty("InputWorkspace").value
@@ -62,7 +96,7 @@ class AssertSpinStateOrder(PythonAlgorithm):
         if not matching:
             logger.warning(
                 f"Expected {group_ws.getName()} to have the spin state order '{expected_spin_states}'"
-                f" but actually found 'f{found_spin_states}'"
+                f" but actually found '{found_spin_states}'"
             )
 
             if self.getProperty("Reorder").value:
