@@ -24,8 +24,6 @@ MANTID_NEXUS_DLL void killAttVID(const pNexusFile5 pFile, hid_t vid);
 
 MANTID_NEXUS_DLL NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink);
 
-MANTID_NEXUS_DLL int countObjectsInGroup(hid_t loc_id);
-
 MANTID_NEXUS_DLL NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype);
 
 MANTID_NEXUS_DLL hid_t nxToHDF5Type(NXnumtype datatype);

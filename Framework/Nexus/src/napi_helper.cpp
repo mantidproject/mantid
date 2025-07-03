@@ -174,21 +174,23 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink) {
   return NXstatus::NX_OK;
 }
 
-int countObjectsInGroup(hid_t loc_id) {
-  int count = 0;
-  H5G_info_t numobj;
-
-  herr_t status;
-
-  status = H5Gget_info(loc_id, &numobj);
-  if (status < 0) {
-    NXReportError("Internal error, failed to retrieve no of objects");
-    return 0;
-  }
-
-  count = (int)numobj.nlinks;
-  return count;
-}
+// NOTE save in case needed later as model
+// std::size_t countObjectsInGroup(pNexusFile5 const fid) {
+//   std::size_t count = 0;
+//   herr_t iRet;
+//   if (fid->iCurrentG == 0) {
+//     hid_t gid = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
+//     iRet = H5Gget_num_objs(gid, &count);
+//     H5Gclose(gid);
+//   } else {
+//     iRet = H5Gget_num_objs(fid->iCurrentG, &count);
+//   }
+//   if (iRet < 0) {
+//     NXReportError("Internal error, failed to retrieve no of objects");
+//     return 0;
+//   }
+//   return count;
+// }
 
 NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
   // NOTE this is exploiting the bit-level representation of NXnumtype

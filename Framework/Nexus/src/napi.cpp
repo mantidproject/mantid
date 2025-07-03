@@ -1016,11 +1016,6 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetgroupinfo(NXhandle fid, std::size_t &iN, std::string &pName, std::string &pClass) {
-  return NX5getgroupinfo(fid, iN, pName, pClass);
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXsameID(NXhandle fileid, NXlink const &pFirstID, NXlink const &pSecondID) {

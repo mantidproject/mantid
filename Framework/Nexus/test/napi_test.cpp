@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
     return TEST_SUCCEED; /* create only */
   }
 
-  std::string name, nxclass, group_name, class_name, address;
+  std::string name, nxclass, address;
   char char_buffer[128];
 
   // read test
@@ -251,9 +251,6 @@ int main(int argc, char *argv[]) {
     }
   } while (attr_status == NXstatus::NX_OK);
 
-  std::size_t num;
-  ASSERT_NO_ERROR(NXgetgroupinfo(fileid, num, group_name, class_name), "");
-  std::cout << "Group: " << group_name.c_str() << "(" << class_name.c_str() << ") contains " << num << " items\n";
   do {
     entry_status = NXgetnextentry(fileid, name, nxclass, NXtype);
     if (entry_status == NXstatus::NX_ERROR)

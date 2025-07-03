@@ -199,75 +199,7 @@ herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, voi
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NX5getgroupinfo_recurse(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
-  pNexusFile5 pFile;
-  hid_t atype, attr_id, grp;
-
-  pFile = NXI5assert(fid);
-  /* check if there is a group open */
-  if (pFile->iCurrentG == 0) {
-    name = "root";
-    nxclass = "NXroot";
-    pFile->iNX = 0;
-    grp = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-    H5Gclose(grp);
-    iN = pFile->iNX;
-  } else {
-    name = pFile->name_ref;
-    attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-    if (attr_id < 0) {
-      nxclass = NX_UNKNOWN_GROUP;
-    } else {
-      atype = H5Tcopy(H5T_C_S1);
-      char data[64];
-      H5Tset_size(atype, sizeof(data));
-      readStringAttributeN(attr_id, data, sizeof(data));
-      nxclass = data;
-      pFile->iNX = 0;
-      grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
-      H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-      H5Gclose(grp);
-      iN = pFile->iNX;
-      H5Aclose(attr_id);
-    }
-  }
-  return NXstatus::NX_OK;
-}
-
 /*----------------------------------------------------------------------------*/
-NXstatus NX5getgroupinfo(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
-  pNexusFile5 pFile;
-  hid_t atype, attr_id, gid;
-
-  pFile = NXI5assert(fid);
-  /* check if there is a group open */
-  if (pFile->iCurrentG == 0) {
-    name = "root";
-    nxclass = "NXroot";
-    gid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    iN = countObjectsInGroup(gid);
-    H5Gclose(gid);
-  } else {
-    name = pFile->name_ref;
-    attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-    if (attr_id < 0) {
-      nxclass = NX_UNKNOWN_GROUP;
-    } else {
-      atype = H5Tcopy(H5T_C_S1);
-      char data[64];
-      H5Tset_size(atype, sizeof(data));
-      readStringAttributeN(attr_id, data, sizeof(data));
-      nxclass = data;
-      H5Aclose(attr_id);
-    }
-    pFile->iNX = 0;
-    iN = countObjectsInGroup(pFile->iCurrentG);
-  }
-  return NXstatus::NX_OK;
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
