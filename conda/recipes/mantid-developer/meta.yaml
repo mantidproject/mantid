@@ -65,7 +65,7 @@ requirements:
     - orsopy {{ orsopy }}
 
     # Not Windows, OpenGL implementation:
-    - {{ cdt('mesa-libgl-devel') }} # [linux]
+    - libgl-devel      # [linux]
 
     # Linux only
     - gxx_linux-64 {{ cxx_compiler_version }} # [linux]
