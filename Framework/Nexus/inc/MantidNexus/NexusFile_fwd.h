@@ -117,20 +117,21 @@ enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
  */
 class MANTID_NEXUS_DLL NXnumtype {
 public:
-  static int const FLOAT32 = 5;
-  static int const FLOAT64 = 6;
-  static int const INT8 = 20;
-  static int const UINT8 = 21;
-  static int const BOOLEAN = 21;
-  static int const INT16 = 22;
-  static int const UINT16 = 23;
-  static int const INT32 = 24;
-  static int const UINT32 = 25;
-  static int const INT64 = 26;
-  static int const UINT64 = 27;
-  static int const CHAR = 4;
-  static int const BINARY = 21;
-  static int const BAD = -1;
+  // first hexadigit: 2 = float, 1 = signed int, 0 = unsigned int, F = special
+  // second hexadigit: width in bytes
+  static unsigned short constexpr FLOAT32 = 0x24u; // 10 0100 = 0x24
+  static unsigned short constexpr FLOAT64 = 0x28u; // 10 1000 = 0x28
+  static unsigned short constexpr INT8 = 0x11u;    // 01 0001 = 0x11
+  static unsigned short constexpr INT16 = 0x12u;   // 01 0010 = 0x12
+  static unsigned short constexpr INT32 = 0x14u;   // 01 0100 = 0x14
+  static unsigned short constexpr INT64 = 0x18u;   // 01 1000 = 0x18
+  static unsigned short constexpr UINT8 = 0x01u;   // 00 0001 = 0x01
+  static unsigned short constexpr UINT16 = 0x02u;  // 00 0010 = 0x02
+  static unsigned short constexpr UINT32 = 0x04u;  // 00 0100 = 0x04
+  static unsigned short constexpr UINT64 = 0x08u;  // 00 1000 = 0x08
+  static unsigned short constexpr CHAR = 0xF0u;    // 11 0000 = 0xF0
+  static unsigned short constexpr BINARY = 0xF1u;  // 11 0001 = 0xF1
+  static unsigned short constexpr BAD = 0xFFu;     // 11 1111 = 0xFF
 
 private:
   int m_val;

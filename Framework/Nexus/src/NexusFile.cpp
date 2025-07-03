@@ -1690,18 +1690,12 @@ void File::makeLink(NXlink const &link) {
 using namespace Mantid::Nexus;
 int NXnumtype::validate_val(int const x) {
   int val = BAD;
-  // NOTE for user-readability it is better to check all of these cases
-  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
-  // cppcheck-suppress-begin knownConditionTrueFalse
-  if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
-      (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
-      (x == BAD)) {
+  if ((x == INT8) || (x == UINT8) || (x == INT16) || (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) ||
+      (x == UINT64) || (x == FLOAT32) || (x == FLOAT64) || (x == CHAR) || (x == BINARY) || (x == BAD)) {
     val = x;
   }
-  // cppcheck-suppress-end knownConditionTrueFalse
   return val;
 }
-
 NXnumtype::NXnumtype() : m_val(BAD) {};
 NXnumtype::NXnumtype(int const val) : m_val(validate_val(val)) {};
 
@@ -1714,43 +1708,28 @@ NXnumtype::operator int() const { return m_val; };
 
 #define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
 
-// cppcheck-suppress-begin knownConditionTrueFalse
 NXnumtype::operator std::string() const {
-  // NOTE for user-readability it is better to check all of these cases
-  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
-  // cppcheck-suppress-begin knownConditionTrueFalse
+  // isolate each hexadigit
+  unsigned short type = static_cast<unsigned short>(m_val & 0xF0);
+  unsigned short size = static_cast<unsigned short>(m_val & 0x0F);
+  std::string sizestr = std::to_string(size * 8u); // width in bits
   std::string ret = NXTYPE_PRINT(BAD);
-  if (m_val == FLOAT32) {
-    ret = NXTYPE_PRINT(FLOAT32);
-  } else if (m_val == FLOAT64) {
-    ret = NXTYPE_PRINT(FLOAT64);
-  } else if (m_val == INT8) {
-    ret = NXTYPE_PRINT(INT8);
-  } else if (m_val == UINT8) {
-    ret = NXTYPE_PRINT(UINT8);
-  } else if (m_val == BOOLEAN) {
-    ret = NXTYPE_PRINT(BOOLEAN);
-  } else if (m_val == INT16) {
-    ret = NXTYPE_PRINT(INT16);
-  } else if (m_val == UINT16) {
-    ret = NXTYPE_PRINT(UINT16);
-  } else if (m_val == INT32) {
-    ret = NXTYPE_PRINT(INT32);
-  } else if (m_val == UINT32) {
-    ret = NXTYPE_PRINT(UINT32);
-  } else if (m_val == INT64) {
-    ret = NXTYPE_PRINT(INT64);
-  } else if (m_val == UINT64) {
-    ret = NXTYPE_PRINT(UINT64);
-  } else if (m_val == CHAR) {
-    ret = NXTYPE_PRINT(CHAR);
-  } else if (m_val == BINARY) {
-    ret = NXTYPE_PRINT(BINARY);
+  if (type == 0x00u) {
+    ret = "UINT" + sizestr;
+  } else if (type == 0x10u) {
+    ret = "INT" + sizestr;
+  } else if (type == 0x20u) {
+    ret = "FLOAT" + sizestr;
+  } else if (type == 0xF0u) {
+    // special types
+    if (m_val == CHAR) {
+      ret = NXTYPE_PRINT(CHAR);
+    } else if (m_val == BINARY) {
+      ret = NXTYPE_PRINT(BINARY);
+    }
   }
-  // cppcheck-suppress-end knownConditionTrueFalse
   return ret;
 }
-// cppcheck-suppress-end knownConditionTrueFalse
 
 std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
   os << std::string(value);
