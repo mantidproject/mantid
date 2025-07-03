@@ -566,7 +566,49 @@ NXstatus NXputattr(NXhandle fid, std::string const &name, const void *data, std:
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
     return NXstatus::NX_ERROR;
   }
-  return NX5putattr(fid, name, data, datalen, iType);
+
+  // determine ID of containing HDF object
+  hid_t vid = getAttVID(fid);
+
+  // check if the attribute exists -- if so, delete it
+  hid_t attRet = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  if (attRet > 0) {
+    H5Aclose(attRet);
+    herr_t iRet = H5Adelete(vid, name.c_str());
+    if (iRet < 0) {
+      NXReportError("ERROR: old attribute cannot be removed! ");
+      killAttVID(fid, vid);
+      return NXstatus::NX_ERROR;
+    }
+  }
+
+  // prepare new dataspace, datatype
+  hid_t dataspace = H5Screate(H5S_SCALAR);
+  hid_t datatype = H5Tcopy(nxToHDF5Type(iType));
+  if (iType == NXnumtype::CHAR) {
+    H5Tset_size(datatype, datalen);
+  }
+
+  // create the attribute
+  hid_t attr1 = H5Acreate(vid, name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr1 < 0) {
+    NXReportError("ERROR: attribute cannot created! ");
+    killAttVID(fid, vid);
+    return NXstatus::NX_ERROR;
+  }
+  if (H5Awrite(attr1, datatype, data) < 0) {
+    NXReportError("ERROR: failed to store attribute ");
+    killAttVID(fid, vid);
+    return NXstatus::NX_ERROR;
+  }
+  /* Close attribute dataspace */
+  H5Tclose(datatype);
+  H5Sclose(dataspace);
+  /* Close attribute  */
+  H5Aclose(attr1);
+  killAttVID(fid, vid);
+  // return that it is okay
+  return NXstatus::NX_OK;
 }
 
 NXstatus NXputslab64(NXhandle fid, const void *data, Mantid::Nexus::DimSizeVector const &iStart,
@@ -976,8 +1018,118 @@ NXstatus NXgetslab64(NXhandle fid, void *data, Mantid::Nexus::DimSizeVector cons
 
 /*-------------------------------------------------------------------------*/
 
+NXstatus NXgetcharattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
+  pNexusFile5 pFile = NXI5assert(fid);
+  hid_t vid = getAttVID(pFile);
+
+  hid_t attr = H5Aopen(vid, name.c_str(), H5P_DEFAULT);
+  if (attr < 0) {
+    killAttVID(pFile, vid);
+    NXReportError(("ERROR: attribute \"" + name + "\" not found").c_str());
+    return NXstatus::NX_ERROR;
+  }
+
+  // determine the datatype and size
+  // hid_t datatype = H5Aget_type(attr);
+  // H5T_class_t dataclass = H5Tget_class(datatype);
+  // iType = hdf5ToNXType(dataclass, datatype);
+
+  hid_t datatype = nxToHDF5Type(iType);
+  H5T_class_t dataclass = H5Tget_class(datatype);
+
+  NXstatus status;
+  if (dataclass != H5T_STRING) {
+    NXReportError("ERROR: attribute is not a string");
+    status = NXstatus::NX_ERROR;
+  } else if (H5Tis_variable_str(datatype)) {
+    char *rdata = nullptr;
+    herr_t iRet = H5Aread(attr, datatype, &rdata);
+    if (iRet < 0 || rdata == nullptr) {
+      NXReportError("Failed to read variable-length string");
+      status = NXstatus::NX_ERROR;
+    } else {
+      // datalen = strlen(rdata);
+      memcpy(data, rdata, datalen * sizeof(char));
+      H5free_memory(rdata); // NOTE must free rdata within hdf5
+      status = NXstatus::NX_OK;
+    }
+  } else {
+    // datalen = H5Tget_size(datatype);
+    char *rdata = static_cast<char *>(calloc(datalen + 1, sizeof(char)));
+    herr_t iRet = H5Aread(attr, datatype, rdata);
+    if (iRet < 0) {
+      NXReportError("Failed to read fixed-length string");
+      status = NXstatus::NX_ERROR;
+    } else {
+      rdata[datalen] = '\0'; // ensure null termination
+      memcpy(data, rdata, (datalen) * sizeof(char));
+      status = NXstatus::NX_OK;
+    }
+    free(rdata);
+  }
+
+  // cleanup
+  H5Tclose(datatype);
+  H5Aclose(attr);
+  killAttVID(pFile, vid);
+  return status;
+}
+
+// cppcheck-suppress constParameterCallback
 NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
-  return NX5getattr(fid, name, data, datalen, iType);
+  pNexusFile5 pFile;
+  hid_t vid, iNew;
+  hsize_t dims[H5S_MAX_RANK], totalsize;
+  herr_t iRet;
+  hid_t type, filespace;
+  char pBuffer[256];
+
+  pFile = NXI5assert(fid);
+
+  type = nxToHDF5Type(iType);
+
+  vid = getAttVID(pFile);
+  iNew = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  if (iNew < 0) {
+    sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name.c_str());
+    killAttVID(pFile, vid);
+    NXReportError(pBuffer);
+    return NXstatus::NX_ERROR;
+  }
+  pFile->iCurrentA = iNew;
+
+  // get the dataspace and proper dimensions
+  filespace = H5Aget_space(pFile->iCurrentA);
+  totalsize = 1;
+  const auto ndims = H5Sget_simple_extent_dims(filespace, dims, NULL);
+  for (int i = 0; i < ndims; i++) {
+    totalsize *= dims[i];
+  }
+  if (ndims != 0 && totalsize > 1) {
+    NXReportError("ERROR: attribute arrays not supported by this api");
+    return NXstatus::NX_ERROR;
+  }
+
+  /* finally read the data */
+  if (type == H5T_C_S1) {
+    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), datalen);
+    datalen = strlen(static_cast<char *>(data));
+  } else {
+    iRet = H5Aread(pFile->iCurrentA, type, data);
+    datalen = 1;
+  }
+
+  if (iRet < 0) {
+    sprintf(pBuffer, "ERROR: could not read attribute data for \"%s\"", name.c_str());
+    NXReportError(pBuffer);
+    killAttVID(pFile, vid);
+    return NXstatus::NX_ERROR;
+  }
+
+  H5Aclose(pFile->iCurrentA);
+
+  killAttVID(pFile, vid);
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
