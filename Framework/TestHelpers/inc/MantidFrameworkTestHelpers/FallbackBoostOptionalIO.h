@@ -21,11 +21,4 @@ inline std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<Ch
   return (os << "std::optional @ " << reinterpret_cast<const void *>(&value));
 }
 
-/// Simple prints the address of the optional object - this can be removed once boost::optional is converted to
-/// std::optional
-template <class CharType, class CharTrait, class OptionalValueType>
-inline std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &os,
-                                                           boost::optional<OptionalValueType> const &value) {
-  return (os << "boost::optional @ " << reinterpret_cast<const void *>(&value));
-}
 } // namespace boost
