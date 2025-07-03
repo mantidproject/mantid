@@ -179,22 +179,20 @@ class FullInstrumentViewWindow(QMainWindow):
         self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
         self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
 
-    def _on_tof_limits_updated(self, text):
+    def _on_tof_limits_updated(self):
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        is_valid, min, max = self._parse_min_max_text(text, self._tof_min_edit, self._tof_max_edit)
+        is_valid, min, max = self._parse_min_max_text(self._tof_min_edit, self._tof_max_edit)
         if is_valid:
             self._presenter.set_tof_limits(min, max)
 
-    def _on_contour_limits_updated(self, text):
+    def _on_contour_limits_updated(self):
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        is_valid, min, max = self._parse_min_max_text(text, self._contour_range_min_edit, self._contour_range_max_edit)
+        is_valid, min, max = self._parse_min_max_text(self._contour_range_min_edit, self._contour_range_max_edit)
         if is_valid:
             self._presenter.set_contour_limits(min, max)
 
-    def _parse_min_max_text(self, text, min_edit, max_edit) -> tuple[bool, int, int]:
+    def _parse_min_max_text(self, min_edit, max_edit) -> tuple[bool, int, int]:
         """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
-        if text is None:
-            return (False, 0, 0)
         try:
             min = int(min_edit.text())
             max = int(max_edit.text())
@@ -204,7 +202,7 @@ class FullInstrumentViewWindow(QMainWindow):
             return (False, min, max)
         return (True, min, max)
 
-    def update_scalar_range(self, clim, label: str) -> None:
+    def update_scalar_range(self, clim: list[float], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
         self.projection_plotter.update_scalar_bar_range(clim, label)
