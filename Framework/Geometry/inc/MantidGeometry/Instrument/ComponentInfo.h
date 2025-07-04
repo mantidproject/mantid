@@ -83,6 +83,7 @@ public:
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
+  std::vector<size_t> quadrilateralComponentCornerIndices(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
@@ -128,6 +129,7 @@ public:
   BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
                           const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
+  std::string componentTypeName(const size_t componentIndex) const;
   void setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   size_t scanCount() const;
   void merge(const ComponentInfo &other);
