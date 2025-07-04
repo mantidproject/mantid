@@ -41,6 +41,7 @@ class AxesTabWidgetPresenter:
         self.view.axis_tab_bar.currentChanged.connect(self.axis_changed)
         self.view.show_minor_ticks_check_box.toggled.connect(self.show_minor_ticks_checked)
         self.view.autoscale.toggled.connect(self.autoscale_changed)
+        self.view.scale_combo_box.currentIndexChanged.connect(self.scale_changed)
         if self.success_callback and self.error_callback:
             self.view.apply_all_button.clicked.connect(self._apply_all_properties_with_errors)
         else:
@@ -87,7 +88,9 @@ class AxesTabWidgetPresenter:
 
         if "xlabel" in self.current_view_props:
             ax.set_xlabel(self.current_view_props["xlabel"])
-            ax.set_xscale(self.current_view_props["xscale"].lower())  # As of mpl 3.5 scale settings must be lowercase
+            ax.set_xscale(
+                self.current_view_props["xscale"].lower(), **self._get_scale_kwargs("x")
+            )  # As of mpl 3.5 scale settings must be lowercase
 
             if self.current_view_props["xautoscale"]:
                 if ax.images:
@@ -102,7 +105,7 @@ class AxesTabWidgetPresenter:
 
         if "ylabel" in self.current_view_props:
             ax.set_ylabel(self.current_view_props["ylabel"])
-            ax.set_yscale(self.current_view_props["yscale"].lower())
+            ax.set_yscale(self.current_view_props["yscale"].lower(), **self._get_scale_kwargs("y"))
 
             if self.current_view_props["yautoscale"]:
                 if ax.images:
@@ -122,6 +125,12 @@ class AxesTabWidgetPresenter:
                 ax.autoscale(True, axis="z")
             else:
                 ax.set_zlim3d(self.current_view_props["zlim"])
+
+    def _get_scale_kwargs(self, ax: str) -> dict:
+        scale_kwargs = {}
+        if self.current_view_props[f"{ax}scale"] == "Symlog":
+            scale_kwargs["linthresh"] = float(self.current_view_props[f"linthresh{ax}"])
+        return scale_kwargs
 
     def get_selected_ax(self):
         """Get Axes object of selected axes"""
@@ -193,19 +202,26 @@ class AxesTabWidgetPresenter:
             self.view.set_show_minor_gridlines(ax_props.minor_gridlines)
 
         self.view.set_autoscale_enabled(ax_props[f"{ax}autoscale"])
-        self.view.set_limit_input_enabled(not ax_props[f"{ax}autoscale"])
 
+        self.view.set_limit_input_enabled(not ax_props[f"{ax}autoscale"])
         lim = ax_props[f"{ax}lim"]
         self.view.set_lower_limit(lim[0])
         self.view.set_upper_limit(lim[1])
         self.view.set_label(ax_props[f"{ax}label"])
         self.view.set_scale(ax_props[f"{ax}scale"])
 
+        self.view.set_symlog_linear_threshold_input_visible(ax_props[f"{ax}scale"] == "Symlog")
+        self.view.set_symlog_linear_threshold(ax_props[f"linthresh{ax}"])
+
         self.current_view_props.update(self.view.get_properties())
 
     def autoscale_changed(self):
         autoscale_enabled = self.view.get_autoscale_enabled()
         self.view.set_limit_input_enabled(not autoscale_enabled)
+
+    def scale_changed(self):
+        symlog_linear_limits_visible = self.view.get_scale() == "Symlog"
+        self.view.set_symlog_linear_threshold_input_visible(symlog_linear_limits_visible)
 
     def axis_changed(self):
         ax = self.current_axis
@@ -217,6 +233,7 @@ class AxesTabWidgetPresenter:
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
         self.current_view_props[f"{ax}autoscale"] = self.view.get_autoscale_enabled()
         self.current_view_props["canvas_color"] = self.view.get_canvas_color()
+        self.current_view_props[f"linthresh{ax}"] = self.view.get_symlog_linear_threshold()
 
         new_ax = self.view.get_axis()
         self.current_axis = new_ax
@@ -229,6 +246,7 @@ class AxesTabWidgetPresenter:
             self.view.set_upper_limit(lim[1])
             self.view.set_label(self.current_view_props[f"{new_ax}label"])
             self.view.set_scale(self.current_view_props[f"{new_ax}scale"])
+            self._configure_symlog(self.current_view_props[f"{new_ax}scale"] == "Symlog", self.current_view_props, new_ax)
         else:
             ax_props = self.get_selected_ax_properties()
             ax = self.view.get_axis()
@@ -239,6 +257,12 @@ class AxesTabWidgetPresenter:
             self.view.set_upper_limit(lim[1])
             self.view.set_label(ax_props[f"{ax}label"])
             self.view.set_scale(ax_props[f"{ax}scale"])
+            self._configure_symlog(self.view.get_scale() == "Symlog", ax_props, ax)
+
+    def _configure_symlog(self, is_symlog, props, ax):
+        self.view.set_symlog_linear_threshold_input_visible(is_symlog)
+        if is_symlog:
+            self.view.set_symlog_linear_threshold(props[f"linthresh{ax}"])
 
     def show_minor_ticks_checked(self, checked):
         # Can't have minor gridlines without minor ticks
