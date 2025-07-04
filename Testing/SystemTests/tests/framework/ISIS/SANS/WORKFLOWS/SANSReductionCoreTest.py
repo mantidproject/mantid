@@ -11,7 +11,7 @@ import os
 import systemtesting
 
 import mantid
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AlgorithmManager
 from sans.state.Serializer import Serializer
 

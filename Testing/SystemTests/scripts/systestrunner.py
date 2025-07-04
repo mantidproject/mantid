@@ -24,6 +24,7 @@ start_time = time.time()
 DEFAULT_QT_API = "pyqt5"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
+SANS_TEST_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "tests", "framework", "ISIS", "SANS"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 DEFAULT_LOG_LEVEL = "information"
@@ -50,6 +51,7 @@ def main(argv):
     # allow PythonInterface/test to be discoverable
     sys.path.append(systemtesting.FRAMEWORK_PYTHONINTERFACE_TEST_DIR)
 
+    sys.path.append(SANS_TEST_LOC)
     #########################################################################
     # Configure mantid
     #########################################################################
