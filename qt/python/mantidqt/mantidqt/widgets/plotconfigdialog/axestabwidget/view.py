@@ -109,6 +109,10 @@ class AxesTabWidgetView(QWidget):
         self.upper_limit_validator.last_valid_value = str(limit)
         self.upper_limit_line_edit.setText(str(limit))
 
+    def set_symlog_linear_threshold(self, limit):
+        # ADD VALIDATOR - self.lower_limit_validator.last_valid_value = str(limit)
+        self.linear_threshold_line_edit.setText(str(limit))
+
     def set_label(self, label):
         self.label_line_edit.setText(label)
 
@@ -122,8 +126,11 @@ class AxesTabWidgetView(QWidget):
         self.autoscale.setChecked(enabled)
 
     def set_limit_input_enabled(self, enabled):
-        self.lower_limit_line_edit.setEnabled(enabled)
-        self.upper_limit_line_edit.setEnabled(enabled)
+        self.linear_threshold_line_edit.setEnabled(enabled)
+
+    def set_symlog_linear_threshold_input_visible(self, enabled):
+        self.linear_threshold_label.setVisible(enabled)
+        self.linear_threshold_line_edit.setVisible(enabled)
 
     def set_z_axis_selector_enabled(self, enabled):
         self.axis_tab_bar.setTabEnabled(2, enabled)
@@ -136,3 +143,6 @@ class AxesTabWidgetView(QWidget):
 
     def get_axis(self):
         return "xyz"[self.axis_tab_bar.currentIndex()]
+
+    def get_symlog_linear_threshold(self):
+        return self.linear_threshold_line_edit.text()
