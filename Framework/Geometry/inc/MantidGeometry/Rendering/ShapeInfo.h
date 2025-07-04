@@ -115,7 +115,7 @@ public:
   /// sets the geometry handler for a hollow cylinder
   void setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis, double innerRadius,
                          double outerRadius, double height);
-  bool operator==(const ShapeInfo &other);
+  bool operator==(const ShapeInfo &other) const;
 };
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
