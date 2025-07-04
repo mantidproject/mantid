@@ -48,6 +48,7 @@ private:
                                                    const std::vector<specnum_t> &specids,
                                                    const std::vector<double> &l2s,
                                                    const std::vector<double> &azimuthals);
+  API::MatrixWorkspace_sptr convertToTOF(API::MatrixWorkspace_sptr &wksp);
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
