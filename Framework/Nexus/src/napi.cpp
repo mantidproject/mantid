@@ -37,17 +37,14 @@
 
 #include "MantidNexus/napi.h"
 
-// cppcheck-suppress-begin [constVariablePointer, unmatchedSuppression]
+// cppcheck-suppress-begin [unmatchedSuppression]
+// cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
 #include "MantidNexus/napi_helper.h"
 
 #define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
-
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
 
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
@@ -96,7 +93,7 @@ NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
   bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename));
   NXstatus status = NXstatus::NX_ERROR;
   if (isHDF5) {
-    // call NX5open to set variables on it
+    // construct on heap
     fid = new NexusFile5(filename, am);
     status = NXstatus::NX_OK;
   } else {
@@ -236,7 +233,6 @@ NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &n
 
   /* maintain stack */
   pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iStackPtr++;
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
   NXI5KillDir(pFile);
@@ -258,9 +254,9 @@ NXstatus NXclosegroup(NXhandle fid) {
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t i = pFile->iStack5.back().irefn.size();
     size_t ii = pFile->name_ref.size();
-    if (pFile->iStackPtr > 1) {
+    if (pFile->iStack5.size() > 2) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
@@ -287,13 +283,12 @@ NXstatus NXclosegroup(NXhandle fid) {
     }
     NXI5KillDir(pFile);
     pFile->iCurrentD = 0;
-    pFile->iStackPtr--;
-    if (pFile->iStackPtr > 0) {
-      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    pFile->iStack5.pop_back();
+    if (!pFile->iStack5.empty()) {
+      pFile->iCurrentG = pFile->iStack5.back().iVref;
     } else {
       pFile->iCurrentG = 0;
     }
-    pFile->iStack5.pop_back();
   }
   return NXstatus::NX_OK;
 }
@@ -688,7 +683,7 @@ NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
    */
   std::size_t datalen = 1024;
   char caddr[1024] = {0};
-  if (NX5getattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+  if (NXgetattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
     sRes.targetAddress = buildCurrentAddress(pFile);
   } else {
     sRes.targetAddress = std::string(caddr);
@@ -987,22 +982,6 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_
 
 /*-------------------------------------------------------------------------*/
 
-// NXstatus NXgetattrinfo(NXhandle fid, std::size_t &iN) {
-//   hid_t vid = getAttVID(fid );
-//   H5O_info2_t oinfo;
-//   if(H5Oget_info3(vid, &oinfo, H5O_INFO_NUM_ATTRS) > 0) {
-//     std::size_t num = oinfo.num_attrs;
-//     if (fid->iCurrentG > 0 && fid->iCurrentD == 0) {
-//       num--;
-//     }
-//     iN = num;
-//   } else {
-//     iN = 0;
-//   }
-//   killAttVID(fid, vid);
-//   return NXstatus::NX_OK;
-// }
-
 NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
                         NXnumtype &iType) {
   return NX5getattrainfo(handle, name, rank, dims, iType);
@@ -1024,7 +1003,7 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
      */
     std::size_t datalen = 1024;
     char caddr[1024] = {0};
-    if (NX5getattr(fileid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+    if (NXgetattr(fileid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
       sRes.targetAddress = buildCurrentAddress(pFile);
     } else {
       sRes.targetAddress = std::string(caddr);
@@ -1037,11 +1016,6 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetgroupinfo(NXhandle fid, std::size_t &iN, std::string &pName, std::string &pClass) {
-  return NX5getgroupinfo(fid, iN, pName, pClass);
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXsameID(NXhandle fileid, NXlink const &pFirstID, NXlink const &pSecondID) {
@@ -1074,15 +1048,8 @@ NXstatus NXinitgroupdir(NXhandle fid) {
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
-
 /*----------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------
-  copies the next address element into element.
-  returns a pointer into address beyond the extracted address
-  ---------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
-
 /*---------------------------------------------------------------------*/
 NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
   NXstatus status;
@@ -1216,4 +1183,5 @@ char *NXIformatNeXusTime() {
   return time_buffer;
 }
 
-// cppcheck-suppress-end [constVariablePointer, unmatchedSuppression]
+// cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-end [unmatchedSuppression]

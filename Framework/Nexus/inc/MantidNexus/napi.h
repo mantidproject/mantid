@@ -379,20 +379,6 @@ MANTID_NEXUS_DLL NXstatus NXgetnextattra(NXhandle handle, std::string &name, std
 MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink &pLink);
 
 /**
- * Retrieve information about the currently open group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param no_items A pointer to an integer which will be set to the count
- *   of group elements available. This is the count of other groups and
- * data sets in this group.
- * \param name The name of the group.
- * \param nxclass The NeXus class name of the group.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_metadata
- */
-MANTID_NEXUS_DLL NXstatus NXgetgroupinfo(NXhandle handle, std::size_t &no_items, std::string &name,
-                                         std::string &nxclass);
-
-/**
  * Tests if two link data structures describe the same item.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param pFirstID The first link data for the test.

@@ -20,10 +20,6 @@ using std::multimap;
 using std::string;
 using std::vector;
 
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
-
 namespace { // anonymous namespace
 const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");

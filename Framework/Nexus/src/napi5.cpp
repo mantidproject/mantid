@@ -23,8 +23,10 @@
 
 ----------------------------------------------------------------------------*/
 
-// cppcheck-suppress-begin [unmatchedSuppression, variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-begin unmatchedSuppression
+// cppcheck-suppress-begin [variableScope, invalidPrintfArgType_uint, constParameterReference]
 // cppcheck-suppress-begin [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
+// cppcheck-suppress-begin [shadowArgument]
 
 #include <string>
 #define H5Aiterate_vers 2
@@ -197,75 +199,7 @@ herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, voi
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NX5getgroupinfo_recurse(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
-  pNexusFile5 pFile;
-  hid_t atype, attr_id, grp;
-
-  pFile = NXI5assert(fid);
-  /* check if there is a group open */
-  if (pFile->iCurrentG == 0) {
-    name = "root";
-    nxclass = "NXroot";
-    pFile->iNX = 0;
-    grp = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-    H5Gclose(grp);
-    iN = pFile->iNX;
-  } else {
-    name = pFile->name_ref;
-    attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-    if (attr_id < 0) {
-      nxclass = NX_UNKNOWN_GROUP;
-    } else {
-      atype = H5Tcopy(H5T_C_S1);
-      char data[64];
-      H5Tset_size(atype, sizeof(data));
-      readStringAttributeN(attr_id, data, sizeof(data));
-      nxclass = data;
-      pFile->iNX = 0;
-      grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
-      H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-      H5Gclose(grp);
-      iN = pFile->iNX;
-      H5Aclose(attr_id);
-    }
-  }
-  return NXstatus::NX_OK;
-}
-
 /*----------------------------------------------------------------------------*/
-NXstatus NX5getgroupinfo(NXhandle fid, std::size_t &iN, std::string &name, std::string &nxclass) {
-  pNexusFile5 pFile;
-  hid_t atype, attr_id, gid;
-
-  pFile = NXI5assert(fid);
-  /* check if there is a group open */
-  if (pFile->iCurrentG == 0) {
-    name = "root";
-    nxclass = "NXroot";
-    gid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    iN = countObjectsInGroup(gid);
-    H5Gclose(gid);
-  } else {
-    name = pFile->name_ref;
-    attr_id = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-    if (attr_id < 0) {
-      nxclass = NX_UNKNOWN_GROUP;
-    } else {
-      atype = H5Tcopy(H5T_C_S1);
-      char data[64];
-      H5Tset_size(atype, sizeof(data));
-      readStringAttributeN(attr_id, data, sizeof(data));
-      nxclass = data;
-      H5Aclose(attr_id);
-    }
-    pFile->iNX = 0;
-    iN = countObjectsInGroup(pFile->iCurrentG);
-  }
-  return NXstatus::NX_OK;
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
@@ -283,7 +217,7 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
   /*
      iterate to next entry in group list
    */
-  idx = pFile->iStack5[pFile->iStackPtr].iCurrentIDX;
+  idx = pFile->iStack5.back().iCurrentIDX;
   if (pFile->name_ref.empty()) {
     /* root group */
     pFile->name_ref = "/";
@@ -317,12 +251,12 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
   }
 
   if (iRet > 0) {
-    pFile->iStack5[pFile->iStackPtr].iCurrentIDX++;
+    pFile->iStack5.back().iCurrentIDX++;
     if (op_data.iname != NULL) {
       name = op_data.iname;
       free(op_data.iname);
     } else {
-      pFile->iStack5[pFile->iStackPtr].iCurrentIDX = 0;
+      pFile->iStack5.back().iCurrentIDX = 0;
       return NXstatus::NX_EOD;
     }
     if (op_data.type == H5O_TYPE_GROUP) {
@@ -330,8 +264,8 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
          open group and find class name attribute
        */
       std::string ph_name("");
-      for (std::size_t i = 1; i < (pFile->iStackPtr + 1); i++) {
-        ph_name += pFile->iStack5[i].irefn + "/";
+      for (stackEntry const &entry : pFile->iStack5) {
+        ph_name += entry.irefn + "/";
       }
       ph_name += name;
       grp = H5Gopen(pFile->iFID, ph_name.c_str(), H5P_DEFAULT);
@@ -388,7 +322,7 @@ NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, 
       if (op_data.iname != NULL) {
         free(op_data.iname);
       }
-      pFile->iStack5[pFile->iStackPtr].iCurrentIDX = 0;
+      pFile->iStack5.back().iCurrentIDX = 0;
       return NXstatus::NX_EOD;
     }
     if (op_data.iname != NULL) {
@@ -760,5 +694,6 @@ NXstatus NX5getattrainfo(NXhandle handle, std::string const &name, std::size_t &
   return NXstatus::NX_OK;
 }
 
-// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer]
-// cppcheck-suppress-end [unmatchedSuppression, variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer, shadowArgument]
+// cppcheck-suppress-end [variableScope, invalidPrintfArgType_uint, constParameterReference]
+// cppcheck-suppress-end unmatchedSuppression

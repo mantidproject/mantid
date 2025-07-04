@@ -9,7 +9,7 @@
 
 pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
-void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
+void NXI5KillDir(pNexusFile5 self) { self->iStack5.back().iCurrentIDX = 0; }
 
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
@@ -174,71 +174,51 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink) {
   return NXstatus::NX_OK;
 }
 
-int countObjectsInGroup(hid_t loc_id) {
-  int count = 0;
-  H5G_info_t numobj;
-
-  herr_t status;
-
-  status = H5Gget_info(loc_id, &numobj);
-  if (status < 0) {
-    NXReportError("Internal error, failed to retrieve no of objects");
-    return 0;
-  }
-
-  count = (int)numobj.nlinks;
-  return count;
-}
+// NOTE save in case needed later as model
+// std::size_t countObjectsInGroup(pNexusFile5 const fid) {
+//   std::size_t count = 0;
+//   herr_t iRet;
+//   if (fid->iCurrentG == 0) {
+//     hid_t gid = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
+//     iRet = H5Gget_num_objs(gid, &count);
+//     H5Gclose(gid);
+//   } else {
+//     iRet = H5Gget_num_objs(fid->iCurrentG, &count);
+//   }
+//   if (iRet < 0) {
+//     NXReportError("Internal error, failed to retrieve no of objects");
+//     return 0;
+//   }
+//   return count;
+// }
 
 NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
+  // NOTE this is exploiting the bit-level representation of NXnumtype
+  // where the first hex stands for: 2 = float, 1 = signed int, 0 = unsigned int
+  // and where the second hex is the width in bytes (which is given by H5Tget_size)
+  // and where CHAR (0XF0) and BINARY (0xF1) are special values
+  unsigned short size = static_cast<unsigned short>(H5Tget_size(atype));
   NXnumtype iPtype = NXnumtype::BAD;
-  size_t size;
-  H5T_sign_t sign;
-
   if (tclass == H5T_STRING) {
     iPtype = NXnumtype::CHAR;
+  } else if (tclass == H5T_BITFIELD) {
+    // underused datatype, would be great for masks
+    iPtype = NXnumtype::BINARY;
   } else if (tclass == H5T_INTEGER) {
-    size = H5Tget_size(atype);
-    sign = H5Tget_sign(atype);
-    if (size == 1) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT8;
-      } else {
-        iPtype = NXnumtype::UINT8;
-      }
-    } else if (size == 2) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT16;
-      } else {
-        iPtype = NXnumtype::UINT16;
-      }
-    } else if (size == 4) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT32;
-      } else {
-        iPtype = NXnumtype::UINT32;
-      }
-    } else if (size == 8) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT64;
-      } else {
-        iPtype = NXnumtype::UINT64;
-      }
+    unsigned short type = size;
+    H5T_sign_t sign = H5Tget_sign(atype);
+    if (sign == H5T_SGN_2) {
+      type += 0x10; // signed data type
     }
+    iPtype = NXnumtype(type);
   } else if (tclass == H5T_FLOAT) {
-    size = H5Tget_size(atype);
-    if (size == 4) {
-      iPtype = NXnumtype::FLOAT32;
-    } else if (size == 8) {
-      iPtype = NXnumtype::FLOAT64;
-    }
+    iPtype = NXnumtype(0x20u + size);
   }
   if (iPtype == NXnumtype::BAD) {
     char message[80];
     snprintf(message, 79, "ERROR: hdf5ToNXtype: invalid type (%d)", tclass);
     NXReportError(message);
   }
-
   return iPtype;
 }
 
@@ -298,6 +278,7 @@ hid_t nxToHDF5Type(NXnumtype datatype) {
 }
 
 hid_t h5MemType(hid_t atype) {
+  // NOTE is this function actually necessary?
   hid_t memtype_id = -1;
   size_t size;
   H5T_sign_t sign;

@@ -33,16 +33,6 @@ using std::vector;
     throw NXEXCEPTION(msg);                                                                                            \
   }
 
-#define DEBUG_LOG()                                                                                                    \
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);                                                                  \
-  fflush(stdout);
-
-#define FILE_EXISTS(filename)                                                                                          \
-  if (!std::filesystem::exists(filename)) {                                                                            \
-    throw std::runtime_error(std::string(__FILE__) + ":" + std::to_string(__LINE__));                                  \
-  } else {                                                                                                             \
-    DEBUG_LOG();                                                                                                       \
-  }
 /**
  * \file NexusFile.cpp
  * The implementation of the NeXus C++ API
@@ -72,7 +62,7 @@ pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> pfid) { return NXI5assert(pfi
 
 NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
     : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
   // check HDF5 version installed
   unsigned int vers_major, vers_minor, vers_release;
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
@@ -139,7 +129,7 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
     : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), iStackPtr(0), name_ref(""), name_tmp("") {
+      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
   iFID = H5Freopen(origHandle.iFID);
   if (iFID <= 0) {
     throw Mantid::Nexus::Exception("Error reopening file");
@@ -149,7 +139,6 @@ NexusFile5::NexusFile5(NexusFile5 const &origHandle)
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
   this->iStack5 = {{"", 0, 0}};
-  this->iStackPtr = 0;
   this->iFID = H5Freopen(origHandle.iFID);
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
   this->iCurrentIDX = 0;
@@ -175,7 +164,7 @@ namespace Mantid::Nexus {
 // catch for undefined types
 template <typename NumT> NXnumtype getType(NumT const number) {
   stringstream msg;
-  msg << "NeXus::getType() does not know type of " << typeid(number).name();
+  msg << "Nexus::getType() does not know type of " << typeid(number).name();
   throw Exception(msg.str(), "NXnumtype getType<NumT>");
 }
 
@@ -231,7 +220,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
   NexusFile5 tmp(filename, access);
   if (tmp.iFID <= 0) {
     stringstream msg;
-    msg << "NXopen(" << filename << ", " << access << ") failed";
+    msg << "File::initOpenFile(" << filename << ", " << access << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
     m_pfile_id = std::make_shared<NexusFile5>(tmp);
@@ -288,14 +277,8 @@ void File::close() {
 }
 
 void File::flush() {
-  herr_t iRet;
-  if (m_pfile_id->iCurrentD != 0) {
-    iRet = H5Fflush(m_pfile_id->iCurrentD, H5F_SCOPE_LOCAL);
-  } else if (m_pfile_id->iCurrentG != 0) {
-    iRet = H5Fflush(m_pfile_id->iCurrentG, H5F_SCOPE_LOCAL);
-  } else {
-    iRet = H5Fflush(m_pfile_id->iFID, H5F_SCOPE_LOCAL);
-  }
+  hid_t vid = getCurrentId();
+  herr_t iRet = H5Fflush(vid, H5F_SCOPE_LOCAL);
   if (iRet < 0) {
     throw NXEXCEPTION("The object cannot be flushed");
   }
@@ -320,8 +303,13 @@ void File::openGroupAddress(std::string const &address) {
 }
 
 std::string File::getAddress() {
-  std::string address;
-  NAPI_CALL(NXgetaddress(m_pfile_id.get(), address), "NXgetaddress() failed");
+  hid_t current = getCurrentId();
+  // call once to get the address length, again to get whole address
+  std::size_t addrlen = H5Iget_name(current, NULL, 0);
+  char *caddr = new char[addrlen + 1];
+  H5Iget_name(current, caddr, addrlen + 1);
+  std::string address(caddr);
+  delete[] caddr;
   // openAddress expects "/" to open root
   // for consitency, this should return "/" at the root
   if (address == "") {
@@ -349,27 +337,21 @@ bool File::hasData(std::string const &name) {
 }
 
 bool File::isDataSetOpen() {
-  NXlink id;
-  if (NXgetdataID(m_pfile_id.get(), id) == NXstatus::NX_ERROR) {
+  if (m_pfile_id->iCurrentD == 0) {
     return false;
   } else {
-    return true;
+    return H5Iget_type(m_pfile_id->iCurrentD) == H5I_DATASET;
   }
 }
 
 bool File::isDataInt() {
-  Info info = this->getInfo();
-  switch (info.type) {
-  case NXnumtype::INT8:
-  case NXnumtype::UINT8:
-  case NXnumtype::INT16:
-  case NXnumtype::UINT16:
-  case NXnumtype::INT32:
-  case NXnumtype::UINT32:
-    return true;
-  default:
-    return false;
+  if (m_pfile_id->iCurrentD == 0) {
+    throw NXEXCEPTION("No dataset is open");
   }
+  hid_t datatype = H5Dget_type(m_pfile_id->iCurrentD);
+  H5T_class_t dataclass = H5Tget_class(datatype);
+  H5Tclose(datatype);
+  return dataclass == H5T_INTEGER;
 }
 
 std::string File::formAbsoluteAddress(std::string const &name) {
@@ -385,6 +367,26 @@ std::string File::formAbsoluteAddress(std::string const &name) {
   }
   // the caller is responsible for checking that it exists
   return new_name;
+}
+
+hid_t File::getCurrentId() const {
+  if (m_pfile_id->iCurrentD != 0) {
+    return m_pfile_id->iCurrentD;
+  } else if (m_pfile_id->iCurrentG != 0) {
+    return m_pfile_id->iCurrentG;
+  } else {
+    return m_pfile_id->iFID;
+  }
+}
+
+std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
+  if (m_pfile_id->iCurrentD != 0) {
+    return std::make_shared<H5::DataSet>(m_pfile_id->iCurrentD);
+  } else if (m_pfile_id->iCurrentG != 0) {
+    return std::make_shared<H5::Group>(m_pfile_id->iCurrentG);
+  } else {
+    return std::make_shared<H5::H5File>(m_pfile_id->iFID);
+  }
 }
 
 void File::registerEntry(std::string const &address, std::string const &name) {
@@ -509,7 +511,6 @@ void File::openGroup(std::string const &name, std::string const &class_name) {
 
   /* maintain stack */
   pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iStackPtr++;
   pFile->iCurrentIDX = 0;
   pFile->iCurrentD = 0;
   NXI5KillDir(pFile);
@@ -527,9 +528,9 @@ void File::closeGroup() {
   } else {
     /* close the current group and decrement name_ref */
     H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5[pFile->iStackPtr].irefn.size();
+    size_t i = pFile->iStack5.back().irefn.size();
     size_t ii = pFile->name_ref.size();
-    if (pFile->iStackPtr > 1) {
+    if (pFile->iStack5.size() > 2) {
       ii = ii - i - 1;
     } else {
       ii = ii - i;
@@ -554,13 +555,12 @@ void File::closeGroup() {
     }
     NXI5KillDir(pFile);
     pFile->iCurrentD = 0;
-    pFile->iStackPtr--;
-    if (pFile->iStackPtr > 0) {
-      pFile->iCurrentG = pFile->iStack5[pFile->iStackPtr].iVref;
+    pFile->iStack5.pop_back();
+    if (!pFile->iStack5.empty()) {
+      pFile->iCurrentG = pFile->iStack5.back().iVref;
     } else {
       pFile->iCurrentG = 0;
     }
-    pFile->iStack5.pop_back();
   }
 }
 
@@ -765,7 +765,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   }
 
   // do the work
-  int i_type = static_cast<int>(type);
 
   hid_t datatype1, dataspace, iNew;
   hid_t dtype, cparms = -1;
@@ -779,7 +778,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   bool unlimiteddim = false;
   int rank = static_cast<int>(dims.size());
   stringstream msg;
-  msg << "NXcompmakedata64(" << name << ", " << i_type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
+  msg << "NXcompmakedata64(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
 
   pFile = assertNXID(m_pfile_id);
@@ -1343,7 +1342,7 @@ Info File::getInfo() {
   return info;
 }
 
-void File::initGroupDir() { NAPI_CALL(NXinitgroupdir(m_pfile_id.get()), "NXinitgroupdir failed"); }
+void File::initGroupDir() { m_pfile_id->iStack5.back().iCurrentIDX = 0; }
 
 Entry File::getNextEntry() {
   // set up temporary variables to get the information
@@ -1511,7 +1510,7 @@ string File::getStrAttr(std::string const &name) {
 
 // NAVIGATE ATTRIBUTES
 
-void File::initAttrDir() { NAPI_CALL(NXinitattrdir(m_pfile_id.get()), "NXinitattrdir failed"); }
+void File::initAttrDir() { m_pfile_id->iCurrentIDX = 0; }
 
 AttrInfo File::getNextAttr() {
   // string & name, int & length, NXnumtype type) {
@@ -1577,17 +1576,8 @@ vector<AttrInfo> File::getAttrInfos() {
 }
 
 bool File::hasAttr(const std::string &name) {
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
-    }
-    if (temp.name == name)
-      return true;
-  }
-  return false;
+  hid_t current = getCurrentId();
+  return H5Aexists(current, name.c_str()) > 0;
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1704,18 +1694,12 @@ void File::makeLink(NXlink const &link) {
 using namespace Mantid::Nexus;
 int NXnumtype::validate_val(int const x) {
   int val = BAD;
-  // NOTE for user-readability it is better to check all of these cases
-  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
-  // cppcheck-suppress-begin knownConditionTrueFalse
-  if ((x == FLOAT32) || (x == FLOAT64) || (x == INT8) || (x == UINT8) || (x == BOOLEAN) || (x == INT16) ||
-      (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) || (x == UINT64) || (x == CHAR) || (x == BINARY) ||
-      (x == BAD)) {
+  if ((x == INT8) || (x == UINT8) || (x == INT16) || (x == UINT16) || (x == INT32) || (x == UINT32) || (x == INT64) ||
+      (x == UINT64) || (x == FLOAT32) || (x == FLOAT64) || (x == CHAR) || (x == BINARY) || (x == BAD)) {
     val = x;
   }
-  // cppcheck-suppress-end knownConditionTrueFalse
   return val;
 }
-
 NXnumtype::NXnumtype() : m_val(BAD) {};
 NXnumtype::NXnumtype(int const val) : m_val(validate_val(val)) {};
 
@@ -1728,43 +1712,28 @@ NXnumtype::operator int() const { return m_val; };
 
 #define NXTYPE_PRINT(var) #var // stringify the variable name, for cleaner code
 
-// cppcheck-suppress-begin knownConditionTrueFalse
 NXnumtype::operator std::string() const {
-  // NOTE for user-readability it is better to check all of these cases
-  // cppcheck doesn't like this, as some of these have the same value, making checks redundant
-  // cppcheck-suppress-begin knownConditionTrueFalse
+  // isolate each hexadigit
+  unsigned short type = static_cast<unsigned short>(m_val & 0xF0);
+  unsigned short size = static_cast<unsigned short>(m_val & 0x0F);
+  std::string sizestr = std::to_string(size * 8u); // width in bits
   std::string ret = NXTYPE_PRINT(BAD);
-  if (m_val == FLOAT32) {
-    ret = NXTYPE_PRINT(FLOAT32);
-  } else if (m_val == FLOAT64) {
-    ret = NXTYPE_PRINT(FLOAT64);
-  } else if (m_val == INT8) {
-    ret = NXTYPE_PRINT(INT8);
-  } else if (m_val == UINT8) {
-    ret = NXTYPE_PRINT(UINT8);
-  } else if (m_val == BOOLEAN) {
-    ret = NXTYPE_PRINT(BOOLEAN);
-  } else if (m_val == INT16) {
-    ret = NXTYPE_PRINT(INT16);
-  } else if (m_val == UINT16) {
-    ret = NXTYPE_PRINT(UINT16);
-  } else if (m_val == INT32) {
-    ret = NXTYPE_PRINT(INT32);
-  } else if (m_val == UINT32) {
-    ret = NXTYPE_PRINT(UINT32);
-  } else if (m_val == INT64) {
-    ret = NXTYPE_PRINT(INT64);
-  } else if (m_val == UINT64) {
-    ret = NXTYPE_PRINT(UINT64);
-  } else if (m_val == CHAR) {
-    ret = NXTYPE_PRINT(CHAR);
-  } else if (m_val == BINARY) {
-    ret = NXTYPE_PRINT(BINARY);
+  if (type == 0x00u) {
+    ret = "UINT" + sizestr;
+  } else if (type == 0x10u) {
+    ret = "INT" + sizestr;
+  } else if (type == 0x20u) {
+    ret = "FLOAT" + sizestr;
+  } else if (type == 0xF0u) {
+    // special types
+    if (m_val == CHAR) {
+      ret = NXTYPE_PRINT(CHAR);
+    } else if (m_val == BINARY) {
+      ret = NXTYPE_PRINT(BINARY);
+    }
   }
-  // cppcheck-suppress-end knownConditionTrueFalse
   return ret;
 }
-// cppcheck-suppress-end knownConditionTrueFalse
 
 std::ostream &operator<<(std::ostream &os, const NXnumtype &value) {
   os << std::string(value);

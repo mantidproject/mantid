@@ -17,7 +17,6 @@ NXstatus NX5getnextentry(NXhandle handle, std::string &name, std::string &nxclas
 
 NXstatus NX5getnextattr(NXhandle handle, std::string &pName, std::size_t &iLength, NXnumtype &iType);
 NXstatus NX5getattr(NXhandle handle, std::string const &name, void *data, std::size_t &iDataLen, NXnumtype &iType);
-NXstatus NX5getgroupinfo(NXhandle handle, std::size_t &no_items, std::string &name, std::string &nxclass);
 
 NXstatus NX5getnextattra(NXhandle handle, std::string &pName, std::size_t &rank, Mantid::Nexus::DimVector &dim,
                          NXnumtype &iType);
