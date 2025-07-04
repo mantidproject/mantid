@@ -14,7 +14,7 @@ import mantid  # noqa
 import systemtesting
 import os
 
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace

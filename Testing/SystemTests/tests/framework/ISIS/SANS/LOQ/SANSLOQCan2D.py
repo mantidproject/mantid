@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from ISISCommandInterface import AssignCan, AssignSample, Detector, Gravity, LOQ, MaskFile, Set2D, SetDetectorOffsets, WavRangeReduction
 
 # Test is giving odd results on Linux, but only this 2D one.

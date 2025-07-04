@@ -13,7 +13,7 @@ import isis_instrument
 import isis_reduction_steps
 import SANS2DReductionGUI as sansgui
 
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from sans.common.enums import SANSInstrument
 
 

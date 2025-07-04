@@ -7,7 +7,7 @@
 # pylint: disable=no-init,too-few-public-methods
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import AnalysisDataService
 from sans.command_interface.ISISCommandInterface import Set1D, Detector, MaskFile, AssignSample, WavRangeReduction, LARMOR

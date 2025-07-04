@@ -11,4 +11,4 @@ set(SYSTEST_NAMES
     ZOOMWavLoopsTest.py
 )
 
-pysystemtest_add_test(${SYSTEST_NAMES})
+pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} framework.ISIS.SANS.ZOOM ${SYSTEST_NAMES})

@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from ISISCommandInterface import AssignSample, Gravity, MaskFile, SANS2D, Set1D, SetDetectorOffsets, WavRangeReduction
 from sans.common.enums import SANSInstrument
 

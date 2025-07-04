@@ -4,4 +4,4 @@ set(SYSTEST_NAMES DepolarizedAnalyserTransmissionTest.py FlipperEfficiencyTest.p
                   PolarizerEfficiencyTest.py
 )
 
-pysystemtest_add_test(${SYSTEST_NAMES})
+pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} framework.PolarizationCorrections ${SYSTEST_NAMES})

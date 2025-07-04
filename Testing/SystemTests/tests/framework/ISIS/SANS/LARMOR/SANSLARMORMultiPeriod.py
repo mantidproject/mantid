@@ -8,7 +8,7 @@
 
 # test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
 from ISISCommandInterface import AssignSample, Detector, LARMOR, MaskFile, Set1D
 from sans.common.enums import SANSInstrument
