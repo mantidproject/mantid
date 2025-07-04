@@ -79,9 +79,9 @@ private:
   void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result, const API::IFunction_sptr &ifun,
                       const InputSpectraToFit &data, double logValue, double chi2) const;
 
-  void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
-                                const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
-                                const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
+  void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<std::string> &fitWorkspaces,
+                                const std::vector<std::string> &parameterWorkspaces,
+                                const std::vector<std::string> &covarianceWorkspaces);
 
   API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
                                     const API::IFunction_sptr &inputFunction, const std::vector<double> &initialParams,

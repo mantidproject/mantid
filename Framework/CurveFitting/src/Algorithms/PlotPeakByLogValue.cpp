@@ -213,9 +213,9 @@ void PlotPeakByLogValue::exec() {
   }
   ITableWorkspace_sptr result = createResultsTable(logName, ifunSingle, isDataName);
 
-  std::vector<MatrixWorkspace_sptr> fitWorkspaces;
-  std::vector<ITableWorkspace_sptr> parameterWorkspaces;
-  std::vector<ITableWorkspace_sptr> covarianceWorkspaces;
+  std::vector<std::string> fitWorkspaces;
+  std::vector<std::string> parameterWorkspaces;
+  std::vector<std::string> covarianceWorkspaces;
   if (createFitOutput) {
     covarianceWorkspaces.reserve(wsNames.size());
     fitWorkspaces.reserve(wsNames.size());
@@ -264,9 +264,9 @@ void PlotPeakByLogValue::exec() {
     double chi2 = fit->getProperty("OutputChi2overDoF");
 
     if (createFitOutput) {
-      MatrixWorkspace_sptr outputFitWorkspace = fit->getProperty("OutputWorkspace");
-      ITableWorkspace_sptr outputParamWorkspace = fit->getProperty("OutputParameters");
-      ITableWorkspace_sptr outputCovarianceWorkspace = fit->getProperty("OutputNormalisedCovarianceMatrix");
+      std::string outputFitWorkspace = fit->getPropertyValue("OutputWorkspace");
+      std::string outputParamWorkspace = fit->getPropertyValue("OutputParameters");
+      std::string outputCovarianceWorkspace = fit->getPropertyValue("OutputNormalisedCovarianceMatrix");
       fitWorkspaces.emplace_back(outputFitWorkspace);
       parameterWorkspaces.emplace_back(outputParamWorkspace);
       covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
@@ -326,26 +326,24 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
   return ifun;
 }
 
-void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput,
-                                                  const std::vector<MatrixWorkspace_sptr> &fitWorkspaces,
-                                                  const std::vector<ITableWorkspace_sptr> &parameterWorkspaces,
-                                                  const std::vector<ITableWorkspace_sptr> &covarianceWorkspaces) {
+void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput, const std::vector<std::string> &fitWorkspaces,
+                                                  const std::vector<std::string> &parameterWorkspaces,
+                                                  const std::vector<std::string> &covarianceWorkspaces) {
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
-    WorkspaceGroup_sptr covarianceGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : covarianceWorkspaces)
-      covarianceGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
+    auto const groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+    std::vector<std::pair<std::vector<std::string>, std::string>> groupingOperations = {
+        {covarianceWorkspaces, this->m_baseName + "_NormalisedCovarianceMatrices"},
+        {parameterWorkspaces, this->m_baseName + "_Parameters"},
+        {fitWorkspaces, this->m_baseName + "_Workspaces"}};
 
-    WorkspaceGroup_sptr parameterGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : parameterWorkspaces)
-      parameterGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Parameters", parameterGroup);
-
-    WorkspaceGroup_sptr fitGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : fitWorkspaces)
-      fitGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Workspaces", fitGroup);
+    for (const auto &[inputWorkspaces, outputName] : groupingOperations) {
+      groupAlg->initialize();
+      groupAlg->setProperty("InputWorkspaces", inputWorkspaces);
+      groupAlg->setProperty("OutputWorkspace", outputName);
+      groupAlg->setAlwaysStoreInADS(true);
+      groupAlg->execute();
+    }
   }
 
   for (auto &minimizerWorkspace : this->m_minimizerWorkspaces) {
@@ -354,6 +352,7 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput,
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", this->m_baseName + "_" + paramName);
+    groupAlg->setAlwaysStoreInADS(true);
     groupAlg->execute();
   }
 }
@@ -480,6 +479,7 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   fit->setPropertyValue("PeakRadius", this->getPropertyValue("PeakRadius"));
   fit->setProperty("CalcErrors", true);
   fit->setProperty("CreateOutput", createFitOutput);
+  fit->setAlwaysStoreInADS(true);
   if (!histogramFit) {
     fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
     fit->setProperty("ConvolveMembers", outputConvolvedMembers);
