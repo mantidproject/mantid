@@ -30,4 +30,4 @@ set(SYSTEST_NAMES
     SANS2DWaveloopsTest_V2.py
 )
 
-pysystemtest_add_test(${SYSTEST_NAMES})
+pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} framework.ISIS.SANS.SANS2D ${SYSTEST_NAMES})

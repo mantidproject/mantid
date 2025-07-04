@@ -15,4 +15,4 @@ set(SYSTEST_NAMES
     SANSLOQTransFitWorkspace2D.py
 )
 
-pysystemtest_add_test(${SYSTEST_NAMES})
+pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} framework.ISIS.SANS.LOQ ${SYSTEST_NAMES})
