@@ -338,6 +338,7 @@ public:
     declareProperty("FloodCorrection", "");
     declareProperty("FloodWorkspace", "");
     declareProperty("Debug", "");
+    declareProperty("Diagnostics", "");
     declareProperty("SubtractBackground", "");
     declareProperty("BackgroundCalculationMethod", "");
     declareProperty("DegreeOfPolynomial", "");

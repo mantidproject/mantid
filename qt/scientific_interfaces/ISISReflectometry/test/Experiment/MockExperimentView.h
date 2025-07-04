@@ -25,6 +25,7 @@ public:
     ON_CALL(*this, getPolarizationCorrectionOption()).WillByDefault(testing::Return("None"));
     ON_CALL(*this, getFloodCorrectionType()).WillByDefault(testing::Return("Workspace"));
     ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
+    ON_CALL(*this, getDiagnosticsOption()).WillByDefault(testing::Return(false));
     ON_CALL(*this, getIncludePartialBins()).WillByDefault(testing::Return(false));
   }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
@@ -45,6 +46,8 @@ public:
   MOCK_METHOD0(disableIncludePartialBins, void());
   MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_METHOD1(setDebugOption, void(bool));
+  MOCK_CONST_METHOD0(getDiagnosticsOption, bool());
+  MOCK_METHOD1(setDiagnosticsOption, void(bool));
   MOCK_CONST_METHOD0(getLookupTable, std::vector<LookupRow::ValueArray>());
   MOCK_METHOD1(setLookupTable, void(std::vector<LookupRow::ValueArray>));
   MOCK_METHOD2(showLookupRowAsInvalid, void(int row, int column));

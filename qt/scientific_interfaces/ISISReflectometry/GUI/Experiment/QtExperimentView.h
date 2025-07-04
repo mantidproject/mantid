@@ -51,6 +51,9 @@ public:
   bool getDebugOption() const override;
   void setDebugOption(bool enable) override;
 
+  bool getDiagnosticsOption() const override;
+  void setDiagnosticsOption(bool enable) override;
+
   std::vector<LookupRow::ValueArray> getLookupTable() const override;
   void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
   void showLookupRowAsInvalid(int row, int column) override;

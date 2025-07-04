@@ -267,6 +267,19 @@
        </property>
       </widget>
      </item>
+	<item row="2" column="3">
+		<widget class="QCheckBox" name="diagnosticsCheckBox">
+			<property name="minimumSize">
+				<size>
+					<width>50</width>
+					<height>0</height>
+				</size>
+			</property>
+			<property name="text">
+				<string/>
+			</property>
+		</widget>
+	</item>
      <item row="17" column="3">
       <widget class="QPushButton" name="getExpDefaultsButton">
        <property name="sizePolicy">
@@ -309,6 +322,19 @@
        </property>
       </widget>
      </item>
+	<item row="2" column="2">
+		<widget class="QLabel" name="diagnosticsLabel">
+			<property name="minimumSize">
+				<size>
+					<width>117</width>
+					<height>0</height>
+				</size>
+			</property>
+			<property name="text">
+				<string>Diagnostics</string>
+			</property>
+		</widget>
+	</item>
      <item row="14" column="2">
       <widget class="QLabel" name="floodWorkspaceWsSelectorLabel">
        <property name="sizePolicy">

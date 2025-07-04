@@ -119,6 +119,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   }
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     if (!hasUpdatedSettings(foundRow, previewRow)) {
+      g_log.information("No updated experiment settings to apply from preview.");
       return;
     }
 
@@ -133,6 +134,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
     m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
     updateViewFromModel();
     m_mainPresenter->notifySettingsChanged();
+    g_log.information("Updated experiment settings applied from preview.");
   } else {
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
                                "' in the Lookup Table.");
@@ -358,6 +360,7 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     auto const summationType = summationTypeFromString(m_view->getSummationType());
     auto const includePartialBins = m_view->getIncludePartialBins();
     auto const debugOption = m_view->getDebugOption();
+    auto const diagnosticsOption = m_view->getDiagnosticsOption();
     auto transmissionStitchOptions = transmissionStitchOptionsFromView();
     auto backgroundSubtraction = backgroundSubtractionFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
@@ -366,7 +369,7 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
     return ExperimentValidationResult(Experiment(analysisMode, reductionType, summationType, includePartialBins,
                                                  debugOption, backgroundSubtraction, polarizationCorrections,
                                                  floodCorrections, transmissionStitchOptions, stitchParameters,
-                                                 lookupTableValidationResult.assertValid()));
+                                                 lookupTableValidationResult.assertValid(), diagnosticsOption));
   } else {
     return ExperimentValidationResult(ExperimentValidationErrors(lookupTableValidationResult.assertError()));
   }
@@ -421,6 +424,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setSummationType(summationTypeToString(m_model.summationType()));
   m_view->setIncludePartialBins(m_model.includePartialBins());
   m_view->setDebugOption(m_model.debug());
+  m_view->setDiagnosticsOption(m_model.diagnostics());
   m_view->setLookupTable(m_model.lookupTableToArray());
   // Transmission
   if (m_model.transmissionStitchOptions().overlapRange()) {
