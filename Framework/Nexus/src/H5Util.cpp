@@ -579,10 +579,15 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
 
 template MANTID_NEXUS_DLL float readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL double readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int8_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint8_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int16_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint16_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL char readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce

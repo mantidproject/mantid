@@ -345,8 +345,6 @@ public:
     H5Iget_name(fid->iCurrentD, path1, 128);
 
     // make and open lateral data
-    // NOTE this behavior is not what is actually desired and causes confusion
-    // Making a dataset while a dataset is already open should be disallowed
     char data2[] = "data2";
     NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims), "made a nested data2");
     NX_ASSERT_OKAY(NXopendata(fid, data2), "failed to open data");
@@ -870,6 +868,7 @@ public:
   // ################################################################################################################
 
   template <typename T> void do_test_putget_attr(NexusFile5 *fid, string name, T const &data) {
+    cout << "\tput/get attribute " << name << "\n";
     // test put/get by pointer to data
     T out;
     std::size_t len;
@@ -902,9 +901,6 @@ public:
     do_test_putget_attr(fid, expected_names[1], 120.2e6);
 
     // check attr infos
-    // std::size_t numattr;
-    // NX_ASSERT_OKAY(NXgetattrinfo(fid, numattr), "failed to get attr info");
-    // TS_ASSERT_EQUALS(numattr, 2);
     NX_ASSERT_OKAY(NXinitattrdir(fid), "failed to restart attributes");
     std::string name(20, 0);
     std::size_t len;
