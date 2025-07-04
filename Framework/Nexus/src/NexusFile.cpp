@@ -597,9 +597,15 @@ void File::openData(std::string const &name) {
   /* clear pending attribute directories first */
   NXI5KillAttDir(pFile);
 
+  // close any open dataset
+  if (pFile->iCurrentD != 0) {
+    H5Dclose(pFile->iCurrentD);
+  }
+
   /* find the ID number and open the dataset */
   pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
   if (pFile->iCurrentD < 0) {
+    pFile->iCurrentD = 0;
     throw NXEXCEPTION("dataset (" + name + ") not found at this level");
   }
   /* find the ID number of datatype */
@@ -1402,24 +1408,25 @@ std::string File::getTopLevelEntryName() {
 
 // PUT / GET ATTRIBUTES
 
-template <typename NumT> void File::putAttr(const AttrInfo &info, NumT const *data) {
-  if (info.name == NULL_STR) {
+template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
+  if (name == NULL_STR) {
     throw NXEXCEPTION("Supplied bad attribute name \"" + NULL_STR + "\"");
   }
-  if (info.name.empty()) {
+  if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to putAttr");
   }
-  NAPI_CALL(NXputattr(m_pfile_id.get(), info.name, data, info.length, info.type),
-            "NXputattr(" + info.name + ", data, " + std::to_string(info.length) + ", " + (string)info.type +
-                ") failed");
-}
 
-template <typename NumT> void File::putAttr(std::string const &name, NumT const &value) {
-  AttrInfo info;
-  info.name = name;
-  info.length = 1;
-  info.type = getType<NumT>();
-  this->putAttr(info, &value);
+  std::shared_ptr<H5::H5Object> current = getCurrentObject();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
+  }
+  try {
+    Mantid::NeXus::H5Util::writeNumAttribute<NumT>(*current, name, value);
+  } catch (H5::Exception const &e) {
+    throw NXEXCEPTION(e.getDetailMsg());
+  }
 }
 
 void File::putAttr(const char *name, const char *value) {
@@ -1429,38 +1436,31 @@ void File::putAttr(const char *name, const char *value) {
   if (value == NULL) {
     throw NXEXCEPTION("Specified value as null to putAttr");
   }
-  string s_name(name);
-  string s_value(value);
-  this->putAttr(s_name, s_value);
+  this->putAttr(string(name), string(value));
 }
 
 void File::putAttr(const std::string &name, const string &value, const bool empty_add_space) {
+  if (name == NULL_STR) {
+    throw NXEXCEPTION("Supplied bad attribute name \"" + NULL_STR + "\"");
+  }
+  if (name.empty()) {
+    throw NXEXCEPTION("Supplied empty name to putAttr");
+  }
   string my_value(value);
-  if (my_value.empty() && empty_add_space)
+  if (my_value.empty() && empty_add_space) {
     my_value = " "; // Make a default "space" to avoid errors.
-  AttrInfo info;
-  info.name = name;
-  info.length = static_cast<unsigned int>(my_value.size());
-  info.type = NXnumtype::CHAR;
-  this->putAttr(info, my_value.data());
-}
+  }
 
-void File::getAttr(const AttrInfo &info, void *data, std::size_t length) {
-  NXnumtype type = info.type;
-  if (length == 0) {
-    length = info.length;
+  std::shared_ptr<H5::H5Object> current = getCurrentObject();
+  // behavior pre-existent in napi --
+  // if user tries to write an attribute that already exists, delete and overwrite
+  if (current->attrExists(name)) {
+    current->removeAttr(name);
   }
-  NAPI_CALL(NXgetattr(m_pfile_id.get(), info.name, data, length, type), "NXgetattr(" + info.name + ") failed");
-  if (type != info.type) {
-    stringstream msg;
-    msg << "NXgetattr(" << info.name << ") changed type [" << info.type << "->" << type << "]";
-    throw NXEXCEPTION(msg.str());
-  }
-  // char attributes are always NULL terminated and so may change length
-  if (length != info.length && type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "NXgetattr(" << info.name << ") change length [" << info.length << "->" << length << "]";
-    throw NXEXCEPTION(msg.str());
+  try {
+    Mantid::NeXus::H5Util::writeStrAttribute(*current, name, my_value);
+  } catch (H5::Exception const &e) {
+    throw NXEXCEPTION(e.getDetailMsg());
   }
 }
 
@@ -1475,36 +1475,47 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 }
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-  NXnumtype type = getType<NumT>();
-  std::size_t length = 0;
-  NAPI_CALL(NXgetattr(m_pfile_id.get(), name, &value, length, type), "NXgetattr(" + name + ") failed");
+  // hid_t vid = getCurrentId();
+
+  // // open the attribute
+  // hid_t attr = H5Aopen(vid, name.c_str(), H5P_DEFAULT);
+  // if (attr < 0) {
+  //   throw NXEXCEPTION("ERROR: attribute \"" + name + "\" not found");
+  // }
+
+  // // ensure the attribute is a scalar
+  // hid_t filespace = H5Aget_space(attr);
+  // if (H5Sget_simple_extent_type(filespace) != H5S_SCALAR) {
+  //   H5Sclose(filespace);
+  //   H5Aclose(attr);
+  //   throw NXEXCEPTION("ERROR: attribute arrays not supported by this api");
+  // }
+  // H5Sclose(filespace);
+
+  // hid_t datatype = nxToHDF5Type(getType<NumT>());
+  // herr_t iret = H5Aread(attr, datatype, &value);
+  // H5Tclose(datatype);
+  // H5Aclose(attr);
+  // if (iret < 0) {
+  //   throw NXEXCEPTION("ERROR: could not read attribute data for \"" + name + "\"");
+  // }
+  auto current = getCurrentObject();
+  try {
+    value = Mantid::NeXus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
+  } catch (H5::Exception const &e) {
+    throw NXEXCEPTION(e.getDetailMsg());
+  }
 }
 
 string File::getStrAttr(std::string const &name) {
-  // get info for this string attribute
-  std::size_t rank;
-  DimVector dims(NX_MAXRANK);
-  NXnumtype datatype = NXnumtype::CHAR;
-  NAPI_CALL(NXgetattrainfo(m_pfile_id.get(), name, rank, dims, datatype), "NXgetinfo failed");
-  AttrInfo info{datatype, static_cast<size_t>(dims[0]), name};
-
-  // do checks
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "getStrAttr only works with strings (type=" << NXnumtype::CHAR << ") found type=" << info.type;
-    throw NXEXCEPTION(msg.str());
-  }
-  char *value = new char[info.length + 1];
+  // NOTE ensure the H5Cpp objects created here are properly destroyed when exiting scope
+  std::string res("");
+  auto current = getCurrentObject();
   try {
-    this->getAttr(info, value, static_cast<int>(info.length) + 1);
-  } catch (const Exception &) {
-    // Avoid memory leak
-    delete[] value;
-    throw; // rethrow original exception
+    Mantid::NeXus::H5Util::readStringAttribute(*current, name, res);
+  } catch (H5::Exception const &e) {
+    throw NXEXCEPTION(e.getDetailMsg());
   }
-  std::string res(value);
-  delete[] value;
-
   return res;
 }
 

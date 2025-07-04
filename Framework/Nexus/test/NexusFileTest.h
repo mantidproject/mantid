@@ -1279,17 +1279,13 @@ public:
     // go to main entry (for this file, MDHistoWorkspace)
     file.openGroup("MDHistoWorkspace", "NXentry");
 
-    // get the attribute without specifying type -- should be no errors
+    // get the attribute with different types -- should be no errors
     int32_t version32 = 0;
     TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version32));
     int64_t version64 = 0;
     TS_ASSERT_THROWS_NOTHING(file.getAttr("SaveMDVersion", version64));
-
-    // get attribute asserting the type -- make sure there is a failure
-    Mantid::Nexus::AttrInfo info32{NXnumtype::INT32, 1, "SaveMDVersion"}; // int32_t will fail because it is int64_t
-    Mantid::Nexus::AttrInfo info64{NXnumtype::INT64, 1, "SaveMDVersion"}; // int64_t will pass
-    TS_ASSERT_THROWS_NOTHING(file.getAttr(info32, &version32))
-    TS_ASSERT_THROWS_NOTHING(file.getAttr(info64, &version64));
+    TS_ASSERT_EQUALS(version32, 2);
+    TS_ASSERT_EQUALS(version64, 2);
   }
 
   void test_existing_attr_bad_length() {
