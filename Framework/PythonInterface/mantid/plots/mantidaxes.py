@@ -1331,16 +1331,6 @@ class MantidAxes(Axes):
                     return
         raise ValueError("Curve does not have existing creation args")
 
-    def get_linthreshx(self) -> float:
-        if self.get_xscale() == "symlog":
-            return self.xaxis.get_transform().linthresh
-        return 2.0  # 2 is mpl default for linthresh
-
-    def get_linthreshy(self) -> float:
-        if self.get_yscale() == "symlog":
-            return self.yaxis.get_transform().linthresh
-        return 2.0
-
 
 # -----------------------------------------------------------------------------
 # MantidAxes3D

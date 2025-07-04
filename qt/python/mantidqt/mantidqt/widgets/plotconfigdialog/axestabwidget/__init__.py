@@ -36,15 +36,15 @@ class AxProperties(dict):
         props["yautoscale"] = ax.get_autoscaley_on()
         props["canvas_color"] = ax.get_facecolor()
 
-        props["linthreshx"] = ax.get_linthreshx()
-        props["linthreshy"] = ax.get_linthreshy()
+        props["linthreshx"] = ax.xaxis.get_transform().linthresh if props["xscale"] == "Symlog" else 2
+        props["linthreshy"] = ax.yaxis.get_transform().linthresh if props["yscale"] == "Symlog" else 2
 
         if isinstance(ax, Axes3D):
             props["zlim"] = ax.get_zlim()
             props["zlabel"] = ax.get_zlabel()
             props["zscale"] = ax.get_zscale().title()
             props["zautoscale"] = ax.get_autoscalez_on()
-            # props["linthreshz"] = ax.get_linthreshz_bounds()
+            # props["linthreshz"] = ax.get_ztransform().linthresh if props["zscale"] == 'Symlog' else 2
         else:
             props["minor_ticks"] = not isinstance(ax.xaxis.minor.locator, NullLocator)
             props["minor_gridlines"] = ax.show_minor_gridlines if hasattr(ax, "show_minor_gridlines") else False

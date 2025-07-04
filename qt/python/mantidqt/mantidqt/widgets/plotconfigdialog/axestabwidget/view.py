@@ -126,7 +126,8 @@ class AxesTabWidgetView(QWidget):
         self.autoscale.setChecked(enabled)
 
     def set_limit_input_enabled(self, enabled):
-        self.linear_threshold_line_edit.setEnabled(enabled)
+        self.lower_limit_line_edit.setEnabled(enabled)
+        self.upper_limit_line_edit.setEnabled(enabled)
 
     def set_symlog_linear_threshold_input_visible(self, enabled):
         self.linear_threshold_label.setVisible(enabled)
