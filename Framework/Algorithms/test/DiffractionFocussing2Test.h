@@ -276,8 +276,8 @@ public:
     createGroupWS->execute();
   }
 
-  void run_rebin_parameters_test(std::string inputWS, std::string groupWS, std::string outputType,
-                                 double xMin, double xMax, bool preserveEvents) {
+  void run_rebin_parameters_test(std::string inputWS, std::string groupWS, std::string outputType, double xMin,
+                                 double xMax, bool preserveEvents) {
 
     {
       const double test_xMin = xMin;
@@ -384,6 +384,45 @@ public:
       TS_ASSERT_EQUALS(X0.back(), test_xMax - 100.0);
       auto X1 = output->x(1);
       TS_ASSERT_EQUALS(X1.size(), 3.);
+      TS_ASSERT_EQUALS(X1.front(), test_xMin);
+      TS_ASSERT_EQUALS(X1.back(), test_xMax);
+    }
+
+    {
+      // Verify case where input data domain is contained by output domain:
+      //   ensure that there are no NaN in the output workspace.  This tests a bug fix to
+      //   an issue caused by the fact that in this case, the rebinning weights near the boundaries
+      //   were previously set to zero.
+      //  (See: EWM defect #12058 [ORNL])
+
+      const double test_xMin = xMin;
+      const double test_xMax = xMax;
+      const double test_delta = 50.0;
+
+      std::vector<double> dmins = {test_xMin - 100.0, test_xMin};
+      std::vector<double> dmaxs = {test_xMax + 100.0, test_xMax};
+      std::vector<double> delta = {test_delta, test_delta};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+      const auto &X0 = output->x(0);
+      const auto &Y0 = output->y(0);
+      TS_ASSERT_EQUALS(X0.size(), 13);
+      TS_ASSERT_EQUALS(X0.front(), test_xMin - 100.0);
+      TS_ASSERT_EQUALS(X0.back(), test_xMax + 100.0);
+
+      size_t nan_count = 0;
+      for (const auto &y : Y0)
+        if (std::isnan(y))
+          ++nan_count;
+      TS_ASSERT_EQUALS(nan_count, 0);
+
+      const auto &X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 9);
       TS_ASSERT_EQUALS(X1.front(), test_xMin);
       TS_ASSERT_EQUALS(X1.back(), test_xMax);
     }
