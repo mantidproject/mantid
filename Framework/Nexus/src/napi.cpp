@@ -37,7 +37,7 @@
 
 #include "MantidNexus/napi.h"
 
-// cppcheck-suppress-begin [unmatchedSuppression]
+// cppcheck-suppress-begin [unmatchedSuppression, variableScope]
 // cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
 
 // this has to be after the other napi includes
@@ -1375,4 +1375,4 @@ std::string NXIformatNeXusTime() {
 }
 
 // cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
-// cppcheck-suppress-end [unmatchedSuppression]
+// cppcheck-suppress-end [unmatchedSuppression, variableScope]
