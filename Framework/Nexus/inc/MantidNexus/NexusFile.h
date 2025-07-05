@@ -603,16 +603,6 @@ public:
   // NAVIGATE ATTRIBUTES
 
   /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
-
-  /**
    * \return Information about all attributes on the data that is currently open.
    */
   std::vector<AttrInfo> getAttrInfos();

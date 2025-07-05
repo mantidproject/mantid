@@ -1305,7 +1305,7 @@ public:
     // make sure the attrinfo corresponding to units has a length of 11
     auto infos = file.getAttrInfos();
     TS_ASSERT_EQUALS(infos[1].name, "units");
-    TS_ASSERT_EQUALS(infos[1].length - 1, expected.size());
+    TS_ASSERT_EQUALS(infos[1].length, expected.size());
     // make sure the entire string attribute is read
     std::string units = file.getAttr<std::string>("units");
     TS_ASSERT_EQUALS(units, expected);

@@ -902,10 +902,57 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &dims, NXnumtype &iType) {
-  NXstatus status;
   char *pPtr = NULL;
   rank = 0;
-  status = NX5getinfo64(fid, rank, dims, iType);
+
+  pNexusFile5 pFile;
+  std::size_t iRank;
+  NXnumtype mType;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  hid_t memType;
+  char *vlData = NULL;
+
+  pFile = NXI5assert(fid);
+  /* check if there is an Dataset open */
+  if (pFile->iCurrentD == 0) {
+    NXReportError("ERROR: no dataset open");
+    return NXstatus::NX_ERROR;
+  }
+
+  /* read information */
+  tclass = H5Tget_class(pFile->iCurrentT);
+  mType = hdf5ToNXType(tclass, pFile->iCurrentT);
+  iRank = H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+  if (iRank == 0) {
+    iRank = 1; /* we pretend */
+    myDim[0] = 1;
+  } else {
+    H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+  }
+  /* conversion to proper ints for the platform */
+  iType = mType;
+  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+    if (H5Tis_variable_str(pFile->iCurrentT)) {
+      /* this will not work for arrays of strings */
+      memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        myDim[iRank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, pFile->iCurrentS, H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
+    } else {
+      myDim[iRank - 1] = H5Tget_size(pFile->iCurrentT);
+    }
+  }
+  rank = iRank;
+  dims.resize(rank);
+  for (std::size_t i = 0; i < rank; i++) {
+    dims[i] = myDim[i];
+  }
+
   /*
      the length of a string may be trimmed....
    */
@@ -919,7 +966,8 @@ NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &
       free(pPtr);
     }
   }
-  return status;
+  return NXstatus::NX_OK;
+  ;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1133,12 +1181,6 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
-                        NXnumtype &iType) {
-  return NX5getattrainfo(handle, name, rank, dims, iType);
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
@@ -1277,15 +1319,10 @@ NXstatus NXgetaddress(NXhandle fid, std::string &address) {
   return NXstatus::NX_OK;
 }
 
-NXstatus NXgetnextattra(NXhandle fid, std::string &name, std::size_t &rank, Mantid::Nexus::DimVector &dims,
-                        NXnumtype &iType) {
-  return NX5getnextattra(fid, name, rank, dims, iType);
-}
-
 /*--------------------------------------------------------------------
   format NeXus time. Code needed in every NeXus file driver
   ---------------------------------------------------------------------*/
-char *NXIformatNeXusTime() {
+std::string NXIformatNeXusTime() {
   time_t timer;
   char *time_buffer = NULL;
   struct tm *time_info;
@@ -1332,7 +1369,9 @@ char *NXIformatNeXusTime() {
   } else {
     strcpy(time_buffer, "1970-01-01T00:00:00+00:00");
   }
-  return time_buffer;
+  std::string res(time_buffer);
+  free(time_buffer);
+  return res;
 }
 
 // cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]

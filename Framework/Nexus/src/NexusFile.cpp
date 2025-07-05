@@ -40,7 +40,10 @@ using std::vector;
 
 namespace { // anonymous namespace to keep it in the file
 
+std::string const group_class_spec("NX_class");
+std::string const target_attr_name("target");
 std::string const scientific_data_set("SDS");
+constexpr int default_deflate_level(6);
 
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
@@ -110,8 +113,8 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
                                                            {"file_name", filename},
                                                            {"HDF5_Version", version_str},
                                                            {"file_time", NXIformatNeXusTime()},
-                                                           {"NX_class", "NXroot"}};
-    for (auto attr : attrs) {
+                                                           {group_class_spec, "NXroot"}};
+    for (auto const &attr : attrs) {
       // cppcheck-suppress useStlAlgorithm
       if (set_str_attribute(root_id, attr.first, attr.second) < 0) {
         H5Gclose(root_id);
@@ -536,7 +539,7 @@ void File::closeGroup() {
       ii = ii - i;
     }
     if (ii > 0) {
-      char const *uname = strdup(pFile->name_ref.c_str());
+      char *uname = strdup(pFile->name_ref.c_str());
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
@@ -549,6 +552,8 @@ void File::closeGroup() {
        */
       pFile->name_ref = u1name;
       pFile->name_tmp = u1name;
+      free(uname);
+      free(u1name);
     } else {
       pFile->name_ref = "";
       pFile->name_tmp = "";
@@ -780,11 +785,10 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   hsize_t mydim[H5S_MAX_RANK], mydim1[H5S_MAX_RANK];
   hsize_t dsize[H5S_MAX_RANK];
   hsize_t maxdims[H5S_MAX_RANK];
-  unsigned int compress_level;
   bool unlimiteddim = false;
   int rank = static_cast<int>(dims.size());
   stringstream msg;
-  msg << "NXcompmakedata64(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
+  msg << "compMakeData(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
 
   pFile = assertNXID(m_pfile_id);
@@ -857,7 +861,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     H5Tset_size(datatype1, byte_zahl);
     /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
   }
-  compress_level = 6;
   hid_t dID;
   if (comp == NXcompression::LZW) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
@@ -867,7 +870,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
-    H5Pset_deflate(cparms, compress_level);
+    H5Pset_deflate(cparms, default_deflate_level);
     dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   } else if (comp == NXcompression::NONE) {
     if (unlimiteddim) {
@@ -1521,67 +1524,53 @@ string File::getStrAttr(std::string const &name) {
 
 // NAVIGATE ATTRIBUTES
 
-void File::initAttrDir() { m_pfile_id->iCurrentIDX = 0; }
-
-AttrInfo File::getNextAttr() {
-  // string & name, int & length, NXnumtype type) {
-  std::string name;
-  NXnumtype type;
-
-  std::size_t rank;
-  DimVector dim(NX_MAXRANK);
-  NXstatus status = NXgetnextattra(m_pfile_id.get(), name, rank, dim, type);
-  if (status == NXstatus::NX_OK) {
-    AttrInfo info;
-    info.type = type;
-    info.name = string(name);
-
-    // scalar value
-    if (rank == 0 || (rank == 1 && dim[0] == 1)) {
-      info.length = 1;
-      return info;
+std::vector<AttrInfo> File::getAttrInfos() {
+  hid_t current = getCurrentId();
+  // get the number of attributes
+  H5O_info2_t oinfo; /* Object info */
+  H5Oget_info3(current, &oinfo, H5O_INFO_NUM_ATTRS);
+  std::size_t num_attr = oinfo.num_attrs;
+  std::vector<AttrInfo> infos;
+  infos.reserve(num_attr);
+  for (std::size_t idx = 0; idx < num_attr; idx++) {
+    // open the attribute -- see link below for example, implemented in H5::H5Object:getNumAttrs()
+    // https://github.com/HDFGroup/hdf5/blob/51dd7758fe5d79ec61e457ff30c697ceccb32e90/c%2B%2B/src/H5Object.cpp#L192
+    hid_t attr = H5Aopen_by_idx(current, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, idx, H5P_DEFAULT, H5P_DEFAULT);
+    // 1. get the attribute name
+    std::size_t namelen = H5Aget_name(attr, 0, NULL);
+    char *cname = new char[namelen + 1];
+    H5Aget_name(attr, namelen + 1, cname);
+    cname[namelen] = '\0'; // ensure null termination
+    // do not include the group class spec
+    if (group_class_spec == cname) {
+      continue;
     }
-
-    // char (=string) or number array (1 dim)
-    if (rank == 1) {
-      info.length = static_cast<unsigned int>(dim[0]);
-      return info;
+    // 2. get the attribute type
+    hid_t attrtype = H5Aget_type(attr);
+    H5T_class_t attrclass = H5Tget_class(attrtype);
+    NXnumtype type = hdf5ToNXType(attrclass, attrtype);
+    // 3. get the attribute length
+    hid_t attrspace = H5Aget_space(attr);
+    int rank = H5Sget_simple_extent_ndims(attrspace);
+    if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
-
-    // string array (2 dim char array)
-    if (rank == 2 && type == NXnumtype::CHAR) {
-      info.length = 1;
-      for (std::size_t d = 0; d < rank; ++d) {
-        info.length *= static_cast<std::size_t>(dim[d]);
-      }
-      return info;
+    hsize_t *dims = new hsize_t[rank];
+    H5Sget_simple_extent_dims(attrspace, dims, NULL);
+    std::size_t length = 1;
+    if (type == NXnumtype::CHAR) {
+      length = getStrAttr(cname).size();
     }
-
-    // TODO - AttrInfo cannot handle more complex ranks/dimensions, we need to throw an error
-    std::cerr << "ERROR iterating through attributes found array attribute not understood by this api" << std::endl;
-    throw NXEXCEPTION("getNextAttr failed");
-
-  } else if (status == NXstatus::NX_EOD) {
-    AttrInfo info;
-    info.name = NULL_STR;
-    info.length = 0;
-    info.type = NXnumtype::BINARY; // junk value that shouldn't be checked for
-    return info;
-  } else {
-    throw NXEXCEPTION("NXgetnextattra failed");
-  }
-}
-
-vector<AttrInfo> File::getAttrInfos() {
-  vector<AttrInfo> infos;
-  this->initAttrDir();
-  AttrInfo temp;
-  while (true) {
-    temp = this->getNextAttr();
-    if (temp.name == NULL_STR) {
-      break;
+    for (int d = 0; d < rank; d++) {
+      length *= dims[d];
     }
-    infos.push_back(temp);
+    delete[] dims;
+    // now add info to the vector
+    infos.emplace_back(type, length, cname);
+    delete[] cname;
+    H5Sclose(attrspace);
+    H5Tclose(attrtype);
+    H5Aclose(attr);
   }
   return infos;
 }
@@ -1605,7 +1594,7 @@ NXlink File::getGroupID() {
   }
 
   try {
-    getAttr("target", link.targetAddress);
+    getAttr(target_attr_name, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = buildCurrentAddress(pFile);
   }
@@ -1625,7 +1614,7 @@ NXlink File::getDataID() {
   }
 
   try {
-    getAttr("target", link.targetAddress);
+    getAttr(target_attr_name, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = buildCurrentAddress(pFile);
   }
@@ -1660,7 +1649,6 @@ void File::makeLink(NXlink const &link) {
   H5Lcreate_hard(pFile->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   hid_t dataID, aid2, aid1, attID;
-  char name[] = "target";
 
   /*
      set the target attribute
@@ -1673,10 +1661,10 @@ void File::makeLink(NXlink const &link) {
   if (dataID < 0) {
     throw NXEXCEPTION("Internal error, address to link does not exist");
   }
-  hid_t status = H5Aopen_by_name(dataID, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t status = H5Aopen_by_name(dataID, ".", target_attr_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
   if (status > 0) {
     H5Aclose(status);
-    status = H5Adelete(dataID, name);
+    status = H5Adelete(dataID, target_attr_name.c_str());
     if (status < 0) {
       return;
     }
@@ -1684,7 +1672,7 @@ void File::makeLink(NXlink const &link) {
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
   H5Tset_size(aid1, link.targetAddress.size());
-  attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+  attID = H5Acreate(dataID, target_attr_name.c_str(), aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attID < 0) {
     return;
   }
