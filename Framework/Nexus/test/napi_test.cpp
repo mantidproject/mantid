@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
   UNUSED_ARG(argc);
 #else  // WIN32
   // ------------------------------------------> TODO fine up to here "nexuscpptest-c-hdf5-test"
-  std::size_t NXlen;
   float r;
   const unsigned char i1_array[4] = {1, 2, 3, 4};
   const short int i2_array[4] = {1000, 2000, 3000, 4000};
@@ -207,49 +206,19 @@ int main(int argc, char *argv[]) {
   }
 
   std::string name, nxclass, address;
-  char char_buffer[128];
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
   ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXnumtype NXtype;
-  NXstatus entry_status, attr_status;
+  NXstatus entry_status;
   std::size_t NXrank;
   Mantid::Nexus::DimVector NXdims(32);
-  do {
-    attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
-    if (attr_status == NXstatus::NX_ERROR)
-      return TEST_FAILED;
-    if (attr_status == NXstatus::NX_OK) {
-      switch (NXtype) {
-      case NXnumtype::CHAR:
-        NXlen = sizeof(char_buffer);
-        ASSERT_NO_ERROR(NXgetattr(fileid, name, char_buffer, NXlen, NXtype), "");
-        if (strcmp(name.c_str(), "file_time") && strcmp(name.c_str(), "HDF_version") &&
-            strcmp(name.c_str(), "HDF5_Version") && strcmp(name.c_str(), "XML_version")) {
-          printf("   %s = %s\n", name.c_str(), char_buffer);
-        }
-        break;
-      default:
-        break;
-      }
-    }
-  } while (attr_status == NXstatus::NX_OK);
+  // used to be test of NXgetnextattra here
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "NXentry address " << address << std::endl;
-  do {
-    attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
-    if (attr_status == NXstatus::NX_ERROR)
-      return TEST_FAILED;
-    if (attr_status == NXstatus::NX_OK) {
-      if (NXtype == NXnumtype::CHAR) {
-        NXlen = sizeof(char_buffer);
-        ASSERT_NO_ERROR(NXgetattr(fileid, name, char_buffer, NXlen, NXtype), "");
-        printf("   %s = %s\n", name.c_str(), char_buffer);
-      }
-    }
-  } while (attr_status == NXstatus::NX_OK);
+  // used to be test of NXgetnextattra here
 
   do {
     entry_status = NXgetnextentry(fileid, name, nxclass, NXtype);
@@ -298,32 +267,7 @@ int main(int argc, char *argv[]) {
           slab_start[0] = 4;
           ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
           print_data("      ", std::cout, data_buffer, NXtype, 4);
-          do {
-            attr_status = NXgetnextattra(fileid, name, NXrank, NXdims, NXtype);
-            if (attr_status == NXstatus::NX_ERROR)
-              return TEST_FAILED;
-            if (attr_status == NXstatus::NX_OK) {
-              switch (NXtype) {
-              case NXnumtype::INT32:
-                NXlen = TEST_FAILED;
-                ASSERT_NO_ERROR(NXgetattr(fileid, name, &intdata, NXlen, NXtype), "");
-                printf("         %s : %d\n", name.c_str(), intdata);
-                break;
-              case NXnumtype::FLOAT32:
-                NXlen = TEST_FAILED;
-                ASSERT_NO_ERROR(NXgetattr(fileid, name, &r, NXlen, NXtype), "");
-                printf("         %s : %f\n", name.c_str(), r);
-                break;
-              case NXnumtype::CHAR:
-                NXlen = sizeof(char_buffer);
-                ASSERT_NO_ERROR(NXgetattr(fileid, name, char_buffer, NXlen, NXtype), "");
-                printf("         %s : %s\n", name.c_str(), char_buffer);
-                break;
-              default:
-                continue;
-              }
-            }
-          } while (attr_status == NXstatus::NX_OK);
+          // used to be test of NXgetnextattra here
         }
         ASSERT_NO_ERROR(NXclosedata(fileid), "");
         // cppcheck-suppress cstyleCast

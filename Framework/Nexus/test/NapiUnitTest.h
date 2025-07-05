@@ -900,18 +900,6 @@ public:
     // put/get a double attribute
     do_test_putget_attr(fid, expected_names[1], 120.2e6);
 
-    // check attr infos
-    NX_ASSERT_OKAY(NXinitattrdir(fid), "failed to restart attributes");
-    std::string name(20, 0);
-    std::size_t len;
-    DimVector dims(4, 0);
-    NXnumtype datatype;
-    for (std::size_t i = 0; i < 2; i++) {
-      NX_ASSERT_OKAY(NXgetnextattra(fid, name, len, dims, datatype), "could not get next attribute");
-      TS_ASSERT_EQUALS(name, expected_names[i]);
-      TS_ASSERT_EQUALS(len, 1);
-    }
-
     // cleanup
     NX_ASSERT_OKAY(NXclose(fid), "failed to close");
   }

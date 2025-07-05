@@ -347,26 +347,6 @@ MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, Mantid::Nexus
 MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, std::string const &name, void *data, std::size_t &iDataLen,
                                     NXnumtype &iType);
 
-MANTID_NEXUS_DLL NXstatus NXgetattrainfo(NXhandle handle, std::string const &name, std::size_t &rank,
-                                         Mantid::Nexus::DimVector &dim, NXnumtype &iType);
-
-/**
- * Iterate over global, group or dataset attributes depending on the currently open group or
- * dataset. In order to search attributes multiple calls to #NXgetnextattr are performed in a loop
- * until #NXgetnextattr returns NX_EOD which indicates that there are no further attributes.
- * reset search using #NXinitattrdir
- * This allows for attributes with any dimensionality.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the attribute
- * \param rank Rank of the attribute data.
- * \param dim Dimension array for the attribute content.
- * \param iType A pointer to an integer which will be set to the NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXgetnextattra(NXhandle handle, std::string &name, std::size_t &rank,
-                                         Mantid::Nexus::DimVector &dims, NXnumtype &iType);
-
 /**
  * Retrieve link data for the currently open group. This link data can later on be used to link this
  * group into a different group.
@@ -398,7 +378,7 @@ MANTID_NEXUS_DLL NXstatus NXsameID(NXhandle handle, NXlink const &pFirstID, NXli
 MANTID_NEXUS_DLL NXstatus NXinitgroupdir(NXhandle handle);
 
 /**
- * Resets a pending attribute search to the start again. To be called in a #NXgetnextattr loop when
+ * Resets a pending attribute search to the start again. To be called in a NXgetnextattr loop when
  * an attribute search has to be restarted.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \return NX_OK on success, NX_ERROR in the case of an error.
@@ -432,4 +412,4 @@ MANTID_NEXUS_DLL NXstatus NXfree(void **data);
 MANTID_NEXUS_DLL void NXReportError(const char *text);
 
 /* extern void *NXpData; */
-MANTID_NEXUS_DLL char *NXIformatNeXusTime();
+MANTID_NEXUS_DLL std::string NXIformatNeXusTime();

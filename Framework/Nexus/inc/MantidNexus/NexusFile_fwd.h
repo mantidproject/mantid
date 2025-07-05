@@ -175,6 +175,8 @@ typedef std::map<std::string, std::string> Entries;
 
 /**
  * This structure holds the type and dimensions of a primative field/array.
+ * \li type: NXnumtype for data type
+ * \li dims: DimVector, size is rank
  */
 struct Info {
   /** The primative type for the field. */
@@ -183,7 +185,11 @@ struct Info {
   DimVector dims;
 };
 
-/** Information about an attribute. */
+/** Information about an attribute.
+ * \li type: NXnumtype for data type
+ * \li length: length of attribute, if string (otherwise 1)
+ * \li name: the name of thr attribute
+ */
 struct AttrInfo {
   /** The primitive type for the attribute. */
   NXnumtype type;

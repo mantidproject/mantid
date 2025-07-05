@@ -549,13 +549,6 @@ public:
   /**
    * Put the supplied data as an attribute into the currently open data.
    *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
@@ -577,16 +570,6 @@ public:
    * \param value The attribute value.
    */
   void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
-
-  /**
-   * Get the value of the attribute specified by the AttrInfo supplied.
-   * Only use this method if you know what the type on disk should be.
-   *
-   * \param info Designation of which attribute to read.
-   * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute.
-   */
-  void getAttr(const AttrInfo &info, void *data, std::size_t length = 0);
 
   /**
    * Get the value of an attribute that is a scalar number.
@@ -618,16 +601,6 @@ public:
   std::string getStrAttr(std::string const &name);
 
   // NAVIGATE ATTRIBUTES
-
-  /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
 
   /**
    * \return Information about all attributes on the data that is currently open.
