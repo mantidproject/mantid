@@ -211,7 +211,7 @@ class AxisEditor(PropertiesEditorBase):
     def _fill(self, model):
         self.ui.editor_min.setText(str(model.min))
         self.ui.editor_max.setText(str(model.max))
-        self.ui.scaleBox.setCurrentText(model.scale_mode)  # change this,
+        self.ui.scaleBox.setCurrentText(model.scale_mode)
         self.ui.gridBox.setChecked(model.grid)
         self.ui.editor_format.setCurrentText(model.formatter)
 
