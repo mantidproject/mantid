@@ -15,8 +15,8 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
 
 endfunction()
 
-# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
-# This adds the named system test do they can be run individually
+# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the MantidSystemTest
+# class. This adds the system test modules (files), rather than the classes, but will run every class in the module.
 function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
   if(NOT PYSYSTEMTEST_RUNNER)
     set(_systest_runner ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
