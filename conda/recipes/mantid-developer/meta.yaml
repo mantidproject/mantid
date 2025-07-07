@@ -50,7 +50,7 @@ requirements:
     - qt-gtk-platformtheme # [linux]
     - quasielasticbayes {{ quasielasticbayes }}
     - quickbayes {{ quickbayes }}
-    - requests>=2.25.1
+    - requests>=2.32.4
     - scipy {{ scipy }}
     - setuptools
     - sphinx {{ sphinx }}
