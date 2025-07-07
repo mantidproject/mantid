@@ -259,7 +259,7 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
       const std::string expr = t[n].str();
       for (size_t i = n; i != 0;) {
         --i;
-        auto parName = t[i].name();
+        const auto &parName = t[i].name();
         auto parTie = createAndProcessTie(parName, expr, isDefault);
 
         if (parTie) {
