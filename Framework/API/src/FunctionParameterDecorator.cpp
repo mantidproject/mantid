@@ -270,6 +270,12 @@ void FunctionParameterDecorator::setUpForFit() {
   m_wrappedFunction->setUpForFit();
 }
 
+void FunctionParameterDecorator::addTies(const std::string &ties, bool isDefault) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->addTies(ties, isDefault);
+}
+
 /// Throws std::runtime_error when m_wrappedFunction is not set.
 void FunctionParameterDecorator::throwIfNoFunctionSet() const {
   if (!m_wrappedFunction) {

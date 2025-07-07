@@ -68,7 +68,7 @@ matplotlib:
   - 3.9.*
 
 mslice:
-  - '2.11.0'
+  - '2.12'
 
 
 ninja:
@@ -159,10 +159,6 @@ euphonic:
 
 librdkafka:
   - '>=1.6.0'
-
-# 6.8.0 causes issues in mantidqt CMake when cross compiling.
-sip:
-  - <=6.7.11
 
 versioningit:
   - '>=2.1'

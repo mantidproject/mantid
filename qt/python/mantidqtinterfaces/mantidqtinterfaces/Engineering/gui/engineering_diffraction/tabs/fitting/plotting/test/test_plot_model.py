@@ -120,35 +120,69 @@ class FittingPlotModelTest(unittest.TestCase):
         }
         return fitprop
 
-    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
-    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
-    @patch(plot_model_path + ".ADS")
-    def test_update_fit(self, mock_ads, mock_create_fit_tables, mock_get_diffs):
+    def _run_update_fit(
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof, is_tof, mock_table_return_values, func_str, target_results
+    ):
         mock_loaded_ws_list = mock.MagicMock()
         mock_active_ws_list = mock.MagicMock()
         mock_log_ws_name = mock.MagicMock()
+        mock_ws_is_tof.return_value = is_tof
+
+        fitprop = self._setup_update_fit_test(mock_table_return_values, mock_ads, mock_get_diffs, func_str, ["Gaussian_PeakCentre"])
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
+        self.assertEqual(self.model._fit_results["name1"]["results"], target_results)
+        mock_create_fit_tables.assert_called_once_with(mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+        if is_tof:
+            self.assertEqual(mock_get_diffs.call_count, 4)  # twice for each peak
+        else:
+            self.assertEqual(mock_get_diffs.call_count, 0)
+
+    @patch(plot_model_path + ".FittingPlotModel._ws_is_tof")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_in_tof(self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof):
+        is_tof = True
         mock_table_return_values = {
             "Name": ["f0.Height", "f0.PeakCentre", "f0.Sigma", "f1.Height", "f1.PeakCentre", "f1.Sigma", "Cost function value"],
             "Value": [11.0, 40000.0, 54.0, 10.0, 30000.0, 51.0, 1.0],
             "Error": [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0],
         }
         func_str = "name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51"
-        fitprop = self._setup_update_fit_test(mock_table_return_values, mock_ads, mock_get_diffs, func_str, ["Gaussian_PeakCentre"])
-        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
-
-        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
-        self.assertEqual(
-            self.model._fit_results["name1"]["results"],
-            {
-                "Gaussian_Height": [[11.0, 1.0], [10.0, 1.0]],
-                "Gaussian_PeakCentre": [[40000.0, 10.0], [30000.0, 10.0]],
-                "Gaussian_PeakCentre_dSpacing": [[4.0, 1.0e-3], [3.0, 1.0e-3]],
-                "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
-                "Gaussian_fwhm": [self._get_fwhm_values(func_str, 0), self._get_fwhm_values(func_str, 1)],
-            },
+        target_results = {
+            "Gaussian_Height": [[11.0, 1.0], [10.0, 1.0]],
+            "Gaussian_PeakCentre": [[40000.0, 10.0], [30000.0, 10.0]],
+            "Gaussian_PeakCentre_dSpacing": [[4.0, 1.0e-3], [3.0, 1.0e-3]],
+            "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
+            "Gaussian_fwhm": [self._get_fwhm_values(func_str, 0), self._get_fwhm_values(func_str, 1)],
+        }
+        self._run_update_fit(
+            mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof, is_tof, mock_table_return_values, func_str, target_results
         )
-        mock_create_fit_tables.assert_called_once_with(mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
-        self.assertEqual(mock_get_diffs.call_count, 4)  # twice for each peak
+
+    @patch(plot_model_path + ".FittingPlotModel._ws_is_tof")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_in_d_spacing(self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof):
+        is_tof = False
+        mock_table_return_values = {
+            "Name": ["f0.Height", "f0.PeakCentre", "f0.Sigma", "f1.Height", "f1.PeakCentre", "f1.Sigma", "Cost function value"],
+            "Value": [11.0, 4.0, 54.0, 10.0, 3.0, 51.0, 1.0],
+            "Error": [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0],
+        }
+        func_str = "name=Gaussian,Height=11,PeakCentre=4,Sigma=54;name=Gaussian,Height=10,PeakCentre=3,Sigma=51"
+        target_results = {
+            "Gaussian_Height": [[11.0, 1.0], [10.0, 1.0]],
+            "Gaussian_PeakCentre": [[4.0, 10.0], [3.0, 10.0]],
+            "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
+            "Gaussian_fwhm": [self._get_fwhm_values(func_str, 0), self._get_fwhm_values(func_str, 1)],
+        }
+        self._run_update_fit(
+            mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof, is_tof, mock_table_return_values, func_str, target_results
+        )
 
     @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
@@ -211,15 +245,17 @@ class FittingPlotModelTest(unittest.TestCase):
 
     @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._ws_is_tof")
     @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
     @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
     @patch(plot_model_path + ".ADS")
     def test_update_fit_with_composite_peak_and_user_function(
-        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_ws_is_tof, mock_conv_tof_to_d, mock_conv_tof_e
     ):
         mock_loaded_ws_list = mock.MagicMock()
         mock_active_ws_list = mock.MagicMock()
         mock_log_ws_name = mock.MagicMock()
+        mock_ws_is_tof.return_value = True
         mock_table_return_values = {
             "Name": [
                 "f0.Height",
@@ -278,18 +314,20 @@ class FittingPlotModelTest(unittest.TestCase):
 
     @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
     @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._ws_is_tof")
     @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
     @patch(plot_model_path + ".GroupWorkspaces")
     @patch(plot_model_path + ".CreateWorkspace")
     @patch(plot_model_path + ".ADS")
     def test_update_fit_with_func_having_fwhm_params(
-        self, mock_ads, mock_create_ws, mock_group_ws, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+        self, mock_ads, mock_create_ws, mock_group_ws, mock_get_diffs, mock_ws_is_tof, mock_conv_tof_to_d, mock_conv_tof_e
     ):
         mock_loaded_ws_list = mock.MagicMock()
         mock_loaded_ws_list.__len__.return_value = 1
         mock_active_ws_list = mock.MagicMock()
         mock_log_ws_name = mock.MagicMock()
         mock_log_ws_name.split.return_value = "log_workspace"
+        mock_ws_is_tof.return_value = True
         mock_table_return_values = {
             "Name": [
                 "f0.Mixing",

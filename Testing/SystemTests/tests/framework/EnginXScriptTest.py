@@ -71,7 +71,7 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
         )  # North
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
-        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped_1-1200")
 
     def validate(self):
         # only assert diff constants (both banks tests normalisation etc.)
@@ -79,6 +79,104 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=5)
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["North"][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["North"][UnitParams.tzero], delta=2)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
+class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest):
+    def runTest(self):
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CROPPED,
+            spectrum_num="1-1200",
+        )
+        enginx.main()
+        self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-1200").extractY().max()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx.calibration.set_spectra_list("1-100")
+        enginx.calibration.update_group_ws_from_group()
+        enginx.main()
+        self._dataY2 = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-100").extractY().max()
+
+    def validate(self):
+        self.assertNotAlmostEqual(self._dataY, self._dataY2, delta=0.005)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
+class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidSystemTest):
+    def runTest(self):
+        grouping_path_1 = str(os.path.join(CWDIR, "TestingCalFiles/example1/my_grouping.cal"))
+        grouping_path_2 = str(os.path.join(CWDIR, "TestingCalFiles/example2/my_grouping.cal"))
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_1,
+        )
+        enginx.main()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_2,
+        )
+        self.assertRaises(AssertionError, enginx.main)
+
+    def validate(self):
+        pass
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
+class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtesting.MantidSystemTest):
+    def runTest(self):
+        grouping_path_1 = os.path.join(CWDIR, "TestingCalFiles/example2/my_grouping.cal")
+        grouping_path_2 = os.path.join(CWDIR, "TestingCalFiles/example3/my_grouping.cal")
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_1,
+        )
+        enginx.main()
+
+        # run again with different cropping window and store the resulting diff consts
+        enginx = EnginX(
+            vanadium_run="ENGINX307521",
+            focus_runs=["ENGINX305761"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX305738",
+            group=GROUP.CUSTOM,
+            groupingfile_path=grouping_path_2,
+        )
+        self.assertRaises(AssertionError, enginx.main)
+
+    def validate(self):
+        pass
 
     def cleanup(self):
         ADS.clear()

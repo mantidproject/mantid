@@ -1015,6 +1015,7 @@ size_t GroupDetectors2::formGroupsEvent(const DataObjects::EventWorkspace_const_
     for (auto i : it->second) {
       totalEvents += inputWS->getSpectrum(i).getNumberEvents();
     }
+    outEL.switchTo(inputWS->getSpectrum(0).getEventType());
     outEL.reserve(totalEvents);
 
     // the Y values and errors from spectra being grouped are combined in the

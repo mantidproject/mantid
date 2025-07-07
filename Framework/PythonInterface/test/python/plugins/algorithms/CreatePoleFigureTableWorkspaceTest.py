@@ -65,13 +65,16 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             val = 1.0 + (i / 10)
             peak_param_table.addRow([val, 3.14 + (i / 100), i])  # 3.14 hkl (1,1,1) dSpacing
 
+        self.default_alphas = np.deg2rad(np.array((-42.5, -45, -47.5, -54.74)))
+        self.default_betas = np.deg2rad(np.array((90, 90, 90, 60)))
+
     def tearDown(self):
         AnalysisDataService.clear()
 
     def eval_arrays(self, arr1, arr2, thresh=0.005):
         self.assertTrue(np.all(np.abs(arr1 - arr2) < thresh))
 
-    def setup_missing_column(self, column_name):
+    def setup_missing_column(self, column_name, readout="I"):
         # override PeakParameter Table
         peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
         peak_param_table.removeColumn(column_name)
@@ -81,6 +84,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         alg.setProperty("InputWorkspace", AnalysisDataService.retrieve("ws"))
         alg.setProperty("PeakParameterWorkspace", peak_param_table)
         alg.setProperty("OutputWorkspace", "outws")
+        alg.setProperty("ReadoutColumn", readout)
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues["PeakParameterWorkspace"], f"PeakParameterWorkspace must have column: '{column_name}'")
@@ -93,15 +97,127 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 1 along X axis, det 0 is 5 degrees towards +Z
         # det 1 Q is at -45 degrees from X axis (it points towards -Z)
         # det 0 Q is at -42.5 degrees
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2])
 
         # beta
         # both det 0 and det 1 are in plane, beta = 90 degrees from Y
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
 
         # intensity
         # det 0 has 1.0, det 1 has 1.1
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_flipping_td_negates_alphas(self):
+        # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha
+        ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, -1))).reshape(-1)
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        self.eval_arrays(outws.column("Alpha"), -self.default_alphas[:2])
+
+        # beta
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # intensity
+        # det 0 has 1.0, det 1 has 1.1
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_flipping_rd_adds_pi_to_alphas(self):
+        # alpha is taken from rd, if rd is inverted the q vectors are now at alpha +/- pi rather than alpha
+        ax_transform = np.array(((-1, 0, 0), (0, 1, 0), (0, 0, 1))).reshape(-1)
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        self.eval_arrays(outws.column("Alpha"), -(self.default_alphas[:2] + np.pi))
+
+        # beta
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # intensity
+        # det 0 has 1.0, det 1 has 1.1
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_flipping_nd_does_nothing(self):
+        # negative normal directions are always inverted so expect the same result
+        ax_transform = np.array(((1, 0, 0), (0, -1, 0), (0, 0, 1))).reshape(-1)
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2])
+
+        # beta
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # intensity
+        # det 0 has 1.0, det 1 has 1.1
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_providing_identity_does_nothing(self):
+        # negative normal directions are always inverted so expect the same result
+        ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, 1))).reshape(-1)
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2])
+
+        # beta
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # intensity
+        # det 0 has 1.0, det 1 has 1.1
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_rotating_rd_and_td_pi_by_4_about_nd_adds_pi_by_4_to_alphas(self):
+        # alpha is taken from rd, if rd and td are rotated pi/4 about nd, the Q vectors are rotated pi/4 relative to rd
+        ir2 = 1 / np.sqrt(2)
+        ax_transform = np.array(((ir2, 0, ir2), (0, 1, 0), (-ir2, 0, ir2))).reshape(-1)
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", AxesTransform=ax_transform
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        print(outws.column("Alpha"))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] + (np.pi / 4))
+
+        # beta
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # intensity
+        # det 0 has 1.0, det 1 has 1.1
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
+
+    def test_alg_with_different_readout_column(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws", PeakParameterWorkspace="PeakParameterWS", OutputWorkspace="outws", ReadoutColumn="chi2"
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        # alpha
+        # det 1 along X axis, det 0 is 5 degrees towards +Z
+        # det 1 Q is at -45 degrees from X axis (it points towards -Z)
+        # det 0 Q is at -42.5 degrees
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2])
+
+        # beta
+        # both det 0 and det 1 are in plane, beta = 90 degrees from Y
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:2])
+
+        # final column should be chi2
+        # det 0 has 0, det 1 has 1
+        self.eval_arrays(outws.column("chi2"), np.array((0.0, 1.0)))
 
     def test_alg_with_goniometer_applied(self):
         # ws 2 is rotated 45 degrees away from +Z
@@ -114,11 +230,11 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 1 along X axis, det 0 is 5 degrees towards +Z
         # det 1 Q is at -45 degrees from X axis (it points towards -Z)
         # det 0 Q is at -42.5 degrees
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((2.5, 0, -2.5, -9.74))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas + (np.pi / 4))
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1, 1.2, 1.3)))
 
     def test_alg_with_chi_thresh(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -129,11 +245,11 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # alpha
         # det 0 Q is (1/sqrt2,0,1/sqrt2) but det 3 Q is (0.5,0.5,1/sqrt2)
         # det 3 alpha is -54.74 degs
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas)
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1, 1.2, 1.3)))
 
     def test_alg_with_hkl(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -149,12 +265,12 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # alpha
         # det 0 Q is (1/sqrt2,0,1/sqrt2) but det 3 Q is (0.5,0.5,1/sqrt2)
         # det 3 alpha is -54.74 degs
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas)
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity
         scat_power = 13.58
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)) / scat_power)
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1, 1.2, 1.3)) / scat_power)
 
     def test_alg_with_hkl_and_pos_thresh(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -168,12 +284,12 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 1)  # only det 0 should be within range
 
         # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5,))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:1])
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90,))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:1])
         # intensity
         scat_power = 13.58
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0,)) / scat_power)
+        self.eval_arrays(outws.column("I"), np.array((1.0,)) / scat_power)
 
     def test_alg_with_hkl_and_pos_thresh_not_adjust_for_scatt_power_if_flag_false(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -188,11 +304,11 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 1)  # only det 0 should be within range
 
         # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5,))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:1])
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90,))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:1])
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0,)))
+        self.eval_arrays(outws.column("I"), np.array((1.0,)))
 
     def test_alg_with_hkl_and_pos_thresh_and_chi_thresh(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -206,12 +322,12 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 1)  # det 0 and 1 should be in pos thresh but only det 0 in chi2 thresh
 
         # alpha
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5,))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[:1])
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90,))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas[:1])
         # intensity
         scat_power = 13.58
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0,)) / scat_power)
+        self.eval_arrays(outws.column("I"), np.array((1.0,)) / scat_power)
 
     def test_alg_with_no_hkl_that_pos_thresh_applied_from_mean_x0(self):
         outws = CreatePoleFigureTableWorkspace(
@@ -224,32 +340,22 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 2)  # x0s are [3.14, 3.15, 3.16, 3.17] mean is 3.155
 
         # alpha
-        self.eval_arrays(
-            outws.column("Alpha"),
-            np.deg2rad(
-                np.array(
-                    (
-                        -45,
-                        -47.5,
-                    )
-                )
-            ),
-        )
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas[1:3])
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas[1:3])
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.1, 1.2)))
+        self.eval_arrays(outws.column("I"), np.array((1.1, 1.2)))
 
     def test_if_no_peak_param_table_default_intensity_used(self):
         outws = CreatePoleFigureTableWorkspace(
             InputWorkspace="ws", OutputWorkspace="outws", Reflection=(1, 1, 1), ApplyScatteringPowerCorrection=True
         )
         self.assertEqual(outws.rowCount(), 4)
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas)
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity should not be corrected for scattering power even though flag is true (as it is by default)
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.0, 1.0, 1.0)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.0, 1.0, 1.0)))
 
     def test_chi2_not_required_if_threshold_is_set_to_zero(self):
         peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
@@ -326,11 +432,11 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # alpha
         # det 0 Q is (1/sqrt2,0,1/sqrt2) but det 3 Q is (0.5,0.5,1/sqrt2)
         # det 3 alpha is -54.74 degs
-        self.eval_arrays(outws.column("Alpha"), np.deg2rad(np.array((-42.5, -45, -47.5, -54.74))))
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas)
         # beta
-        self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 60))))
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1, 1.2, 1.3)))
 
     def test_offset_shape_fully_illuminated(self):
         sample_offset = [0.075, 0.0, 0.0]
@@ -354,7 +460,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # beta
         self.eval_arrays(outws.column("Beta"), np.deg2rad(np.array((90, 90, 90, 59.13))))
         # intensity
-        self.eval_arrays(outws.column("Intensity"), np.array((1.0, 1.1, 1.2, 1.3)))
+        self.eval_arrays(outws.column("I"), np.array((1.0, 1.1, 1.2, 1.3)))
 
     # failure cases
     def test_error_if_num_spectra_does_not_match_param_ws_rows(self):
@@ -374,8 +480,8 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             issues["PeakParameterWorkspace"], "PeakParameterWorkspace must have same number of rows as Input Workspace has spectra"
         )
 
-    def test_error_if_no_intensity_on_peak_parameter_workspace(self):
-        self.setup_missing_column("I")
+    def test_error_if_no_intensity_on_peak_parameter_workspace_and_that_is_readout(self):
+        self.setup_missing_column("I", "I")
 
     def test_error_if_no_x0_on_peak_parameter_workspace(self):
         self.setup_missing_column("X0")
@@ -417,6 +523,20 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues["InputWorkspace"], "If reflection is specified: InputWorkspace sample must have a CrystalStructure")
+
+    def test_error_if_bad_transform_matrix_given(self):
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=AnalysisDataService.retrieve("PeakParameterWS"),
+            OutputWorkspace="outws",
+            AxesTransform=np.ones(9),
+        )
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(
+            issues["AxesTransform"],
+            "Algorithm currently expects axes transforms to volume-preserving, as such the determinant must equal 1 (or -1)",
+        )
 
     def test_error_if_hkl_cannot_be_parsed(self):
         alg = _init_alg(

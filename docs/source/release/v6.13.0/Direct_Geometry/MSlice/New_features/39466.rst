@@ -1,3 +1,0 @@
-- Update to Python 3.11.
-- Changed layout of Compose button. Furthermore, the button is now always called `Compose` and does not change its name anymore when selecting an item from the dropdown menu.
-- Invisible workspaces from MSlice are now deleted when the workspace they orignated from is deleted in the ADS (workspace tab in Mantid).

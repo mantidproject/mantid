@@ -8,13 +8,29 @@
 
 """SANSSave algorithm performs saving of SANS reduction data."""
 
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
-from mantid.kernel import Direction, logger
+from typing import Any
+
+from mantid.api import (
+    DataProcessorAlgorithm,
+    WorkspaceProperty,
+    MatrixWorkspaceProperty,
+    AlgorithmFactory,
+    PropertyMode,
+    FileProperty,
+    FileAction,
+    Progress,
+    WorkspaceGroup,
+)
+from mantid.kernel import Direction, logger, PropertyManagerProperty
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
 from sans.common.file_information import convert_to_shape
 from sans.common.general_functions import get_detector_names_from_instrument
 from sans.common.constant_containers import SANSInstrument_string_as_key_NoInstrument
 from sans.common.enums import SaveType
+
+FILE_FORMAT_DOC_SUFFIX = (
+    "Note that if file formats of the same type, e.g. .xml are chosen, then the file format is appended to the file name."
+)
 
 
 class SANSSave(DataProcessorAlgorithm):
@@ -24,9 +40,12 @@ class SANSSave(DataProcessorAlgorithm):
     def summary(self):
         return "Performs saving of reduced SANS data."
 
+    def checkGroups(self):
+        return False
+
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            WorkspaceProperty("InputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
             doc="The workspace which is to be saved."
             " This workspace needs to be the result of a SANS reduction,"
             " i.e. it can only be 1D or 2D if the second axis is numeric.",
@@ -50,54 +69,49 @@ class SANSSave(DataProcessorAlgorithm):
             "Nexus",
             False,
             direction=Direction.Input,
-            doc="Save as nexus format. "
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as nexus format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "CanSAS",
             False,
             direction=Direction.Input,
-            doc="Save as CanSAS xml format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as CanSAS xml format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "NXcanSAS",
             False,
             direction=Direction.Input,
-            doc="Save as NXcanSAS format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as NXcanSAS format. " + FILE_FORMAT_DOC_SUFFIX,
+        )
+        self.declareProperty(
+            "PolarizedNXcanSAS",
+            False,
+            direction=Direction.Input,
+            doc="Save in PolarizedNXcanSAS format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "NistQxy",
             False,
             direction=Direction.Input,
-            doc="Save as Nist Qxy format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as Nist Qxy format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "RKH",
             False,
             direction=Direction.Input,
-            doc="Save as RKH format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as RKH format. " + FILE_FORMAT_DOC_SUFFIX,
         )
         self.declareProperty(
             "CSV",
             False,
             direction=Direction.Input,
-            doc="Save as CSV format."
-            "Note that if file formats of the same type, e.g. .xml are chosen, then the "
-            "file format is appended to the file name.",
+            doc="Save as CSV format. " + FILE_FORMAT_DOC_SUFFIX,
         )
 
         self.setPropertyGroup("Nexus", "FileFormats")
         self.setPropertyGroup("CanSAS", "FileFormats")
-        self.setPropertyGroup("NXCanSAS", "FileFormats")
+        self.setPropertyGroup("NXcanSAS", "FileFormats")
+        self.setPropertyGroup("PolarizedNXcanSAS", "FileFormats")
         self.setPropertyGroup("NistQxy", "FileFormats")
         self.setPropertyGroup("RKH", "FileFormats")
         self.setPropertyGroup("CSV", "FileFormats")
@@ -142,44 +156,40 @@ class SANSSave(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The scale factor the BackgroundSubtractionWorkspace is multiplied by before subtraction. Can be blank.",
         )
+        self.declareProperty(
+            PropertyManagerProperty("PolarizationProps", dict()),
+            doc="A dictionary of properties to values for all of the metadata used in a polarized reduction. Supported "
+            "properties are:\n"
+            "InputSpinStates (str),\n"
+            "PolarizerComponentName (str),\n"
+            "AnalyzerComponentName (str),\n"
+            "FlipperComponentNames (str, comma separated list),\n"
+            "MagneticFieldStrengthLogName (str),\n"
+            "MagneticFieldDirection (str, comma separated list of axes),\n"
+            "PolarizationTransmissionWorkspaces (dict, component name -> workspace name),\n"
+            "PolarizationEfficiencyWorkspaces (dict, component name -> workspace name),\n"
+            "PolarizationEmptyCellWorkspaces (dict, component name -> workspace name),\n"
+            "ElectricFieldStrengthLogName (str),\n"
+            "ElectricFieldDirection (str, comma separated list of axes),\n"
+            "InitialCellPolarizations (dict, component name -> value (str)),\n"
+            "InitialCellPolarizationErrorWorkspaces (dict, component name -> value (str)),\n"
+            "GasPressure (dict, component name -> value (float))\n",
+        )
 
     def PyExec(self):
-        use_zero_error_free = self.getProperty("UseZeroErrorFree").value
         file_formats = self._get_file_formats()
         file_name = self.getProperty("Filename").value
         workspace = self.getProperty("InputWorkspace").value
 
-        sample = workspace.sample()
-        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
-        height = sample.getHeight()
-        width = sample.getWidth()
-        thickness = sample.getThickness()
-
-        instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrument().getName()]
-
-        detectors = ",".join(get_detector_names_from_instrument(instrument))
-
-        transmission = self.getProperty("Transmission").value
-        transmission_can = self.getProperty("TransmissionCan").value
-
+        use_zero_error_free = self.getProperty("UseZeroErrorFree").value
         if use_zero_error_free:
-            workspace = get_zero_error_free_workspace(workspace)
-            if transmission:
-                transmission = get_zero_error_free_workspace(transmission)
-            if transmission_can:
-                transmission_can = get_zero_error_free_workspace(transmission_can)
-        additional_properties = {
-            "Transmission": transmission,
-            "TransmissionCan": transmission_can,
-            "DetectorNames": detectors,
-            "SampleHeight": height,
-            "SampleWidth": width,
-            "SampleThickness": thickness,
-            "BackgroundSubtractionWorkspace": self.getProperty("BackgroundSubtractionWorkspace").value,
-            "BackgroundSubtractionScaleFactor": self.getProperty("BackgroundSubtractionScaleFactor").value,
-        }
-        if maybe_geometry is not None:
-            additional_properties["Geometry"] = maybe_geometry.value
+            if isinstance(workspace, WorkspaceGroup):
+                group = WorkspaceGroup()
+                for i in range(0, workspace.getNumberOfEntries()):
+                    group.addWorkspace(get_zero_error_free_workspace(workspace.getItem(i)))
+                workspace = group
+            else:
+                workspace = get_zero_error_free_workspace(workspace)
 
         additional_run_numbers = {
             "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
@@ -188,13 +198,19 @@ class SANSSave(DataProcessorAlgorithm):
             "CanDirectRunNumber": self.getProperty("CanDirectRunNumber").value,
         }
 
+        additional_properties = self._get_additional_properties(workspace, use_zero_error_free)
+
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
             progress_message = "Saving to {0}.".format(file_format.file_format.value)
             progress.report(progress_message)
             progress.report(progress_message)
             try:
-                save_to_file(workspace, file_format, file_name, additional_properties, additional_run_numbers)
+                if file_format.file_format is SaveType.POL_NX_CAN_SAS:
+                    pol_props = self._fix_polarization_props_types(self.getProperty("PolarizationProps").value)
+                    save_to_file(workspace, file_format, file_name, {**additional_properties, **pol_props}, additional_run_numbers)
+                else:
+                    save_to_file(workspace, file_format, file_name, additional_properties, additional_run_numbers)
             except (RuntimeError, ValueError) as e:
                 logger.warning(
                     "Cannot save workspace using SANSSave. "
@@ -204,12 +220,77 @@ class SANSSave(DataProcessorAlgorithm):
                 raise e
         progress.report("Finished saving workspace to files.")
 
+    def _get_additional_properties(self, workspace, use_zero_error_free) -> dict[str:Any]:
+        additional_properties = {}
+
+        # Transmission workspaces from alg props, replace with zero-error free versions if requested.
+        transmission = self.getProperty("Transmission").value
+        transmission_can = self.getProperty("TransmissionCan").value
+        if use_zero_error_free:
+            if transmission:
+                transmission = get_zero_error_free_workspace(transmission)
+            if transmission_can:
+                transmission_can = get_zero_error_free_workspace(transmission_can)
+        additional_properties["Transmission"] = transmission
+        additional_properties["TransmissionCan"] = transmission_can
+
+        # Background Subtraction properties from the alg props.
+        additional_properties["BackgroundSubtractionWorkspace"] = self.getProperty("BackgroundSubtractionWorkspace").value
+        additional_properties["BackgroundSubtractionScaleFactor"] = self.getProperty("BackgroundSubtractionScaleFactor").value
+
+        # Any other metadata is extracted directly from the reduced workspace.
+        if isinstance(workspace, WorkspaceGroup):
+            self._extract_metadata(workspace.getItem(0), additional_properties)
+        else:
+            self._extract_metadata(workspace, additional_properties)
+
+        return additional_properties
+
+    @staticmethod
+    def _extract_metadata(workspace, additional_properties: dict[str:Any]):
+        sample = workspace.sample()
+        additional_properties["SampleHeight"] = sample.getHeight()
+        additional_properties["SampleWidth"] = sample.getWidth()
+        additional_properties["SampleThickness"] = sample.getThickness()
+
+        instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrument().getName()]
+        additional_properties["DetectorNames"] = ",".join(get_detector_names_from_instrument(instrument))
+
+        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
+        if maybe_geometry is not None:
+            additional_properties["Geometry"] = maybe_geometry.value
+
+    def _fix_polarization_props_types(self, polarization_props) -> dict[str:str]:
+        return dict([(key, polarization_props[key].value) for key in polarization_props.keys()])
+
     def validateInputs(self):
         errors = dict()
         # The workspace must be 1D or 2D if the second axis is numeric
         workspace = self.getProperty("InputWorkspace").value
-        number_of_histograms = workspace.getNumberHistograms()
-        axis1 = workspace.getAxis(1)
+        if isinstance(workspace, WorkspaceGroup):
+            return self._validate_group(errors, workspace)
+        if self.getProperty("PolarizedNXcanSAS").value:
+            errors.update({"InputWorkspace": "Must be a workspace group to save using PolarizedNXcanSAS"})
+            return errors
+        return self._validate_workspace(errors, workspace)
+
+    def _validate_group(self, errors, input_workspace):
+        for i in range(0, input_workspace.getNumberOfEntries()):
+            self._validate_workspace(errors, input_workspace.getItem(i))
+        if self.getProperty("PolarizedNXcanSAS").value:
+            self._validate_pol_props(errors)
+        if (
+            self.getProperty("CanSAS").value
+            or self.getProperty("NistQxy").value
+            or self.getProperty("RKH").value
+            or self.getProperty("CSV").value
+        ):
+            errors.update({"InputWorkspace": "Cannot be a workspace group when saving using CanSAS, NistQxy, RKH, or CSV"})
+        return errors
+
+    def _validate_workspace(self, errors, input_workspace):
+        number_of_histograms = input_workspace.getNumberHistograms()
+        axis1 = input_workspace.getAxis(1)
         is_first_axis_numeric = axis1.isNumeric()
         if not is_first_axis_numeric and number_of_histograms > 1:
             errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all axes need to be numeric."})
@@ -220,6 +301,7 @@ class SANSSave(DataProcessorAlgorithm):
             errors.update({"Nexus": "At least one data format needs to be specified."})
             errors.update({"CanSAS": "At least one data format needs to be specified."})
             errors.update({"NXcanSAS": "At least one data format needs to be specified."})
+            errors.update({"PolarizedNXcanSAS": "At least one data format needs to be specified"})
             errors.update({"NistQxy": "At least one data format needs to be specified."})
             errors.update({"RKH": "At least one data format needs to be specified."})
             errors.update({"CSV": "At least one data format needs to be specified."})
@@ -235,11 +317,22 @@ class SANSSave(DataProcessorAlgorithm):
             )
         return errors
 
+    def _validate_pol_props(self, errors):
+        polarization_props = self.getProperty("PolarizationProps").value
+        if not polarization_props:
+            errors.update({"PolarizationProps": "PolarizationProps must be set to use SavePolarizedNXcanSAS."})
+            return
+        if "InputSpinStates" not in polarization_props.keys():
+            errors.update(
+                {"PolarizationProps": "Missing property for SavePolarizedNXcanSAS. These properties are missing: InputSpinStates."}
+            )
+
     def _get_file_formats(self):
         file_types = []
         self._check_file_types(file_types, "Nexus", SaveType.NEXUS)
         self._check_file_types(file_types, "CanSAS", SaveType.CAN_SAS)
         self._check_file_types(file_types, "NXcanSAS", SaveType.NX_CAN_SAS)
+        self._check_file_types(file_types, "PolarizedNXcanSAS", SaveType.POL_NX_CAN_SAS)
         self._check_file_types(file_types, "NistQxy", SaveType.NIST_QXY)
         self._check_file_types(file_types, "RKH", SaveType.RKH)
         self._check_file_types(file_types, "CSV", SaveType.CSV)
@@ -253,6 +346,9 @@ class SANSSave(DataProcessorAlgorithm):
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NX_CAN_SAS, file_types, [])
+
+        # SavePolarizedNXcanSAS clashes with SaveNXcanSAS
+        self.add_file_format_with_appended_name_requirement(file_formats, SaveType.POL_NX_CAN_SAS, file_types, [SaveType.NX_CAN_SAS])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NIST_QXY, file_types, [SaveType.RKH])

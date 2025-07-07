@@ -1,0 +1,1 @@
+- Optimize the addTies function by implementing a single sort operation after all ties are added, rather than sorting the ties after each individual addition

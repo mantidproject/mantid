@@ -44,8 +44,10 @@ public:
   MOCK_METHOD1(validateRunData, std::vector<std::string>(IETRunData const &runData));
   MOCK_METHOD1(validatePlotData, std::vector<std::string>(IETPlotData const &plotData));
 
-  MOCK_METHOD2(energyTransferAlgorithm,
-               MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams));
+  MOCK_METHOD4(energyTransferAlgorithm,
+               MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams,
+                                                        std::string const &outputGroupName,
+                                                        std::string const &outputLabel));
   MOCK_CONST_METHOD2(plotRawAlgorithmQueue,
                      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>(InstrumentData const &instData,
                                                                           IETPlotData const &plotData));
@@ -60,6 +62,7 @@ public:
   MOCK_METHOD4(groupWorkspaces, std::vector<std::string>(std::string const &groupName, std::string const &instrument,
                                                          std::string const &groupOption, bool const shouldGroup));
 
+  MOCK_CONST_METHOD2(getOutputGroupName, std::string(InstrumentData const &instData, std::string const &inputFiles));
   MOCK_CONST_METHOD0(outputGroupName, std::string());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
 };
@@ -75,9 +78,11 @@ public:
   MOCK_CONST_METHOD0(getSaveData, IETSaveData());
   MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
   MOCK_CONST_METHOD0(getRunView, IRunView *());
+  MOCK_CONST_METHOD0(getOutputName, IOutputNameView *());
   MOCK_CONST_METHOD0(getPlotOptionsView, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
+  MOCK_CONST_METHOD0(getInputText, std::string());
   MOCK_CONST_METHOD0(isRunFilesValid, bool());
   MOCK_CONST_METHOD1(validateCalibrationFileType, void(IUserInputValidator *uiv));
   MOCK_CONST_METHOD1(validateRebinString, void(IUserInputValidator *uiv));

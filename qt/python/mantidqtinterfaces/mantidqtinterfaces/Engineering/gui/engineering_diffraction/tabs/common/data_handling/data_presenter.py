@@ -17,7 +17,6 @@ class FittingDataPresenter(object):
         self.view = view
         self.worker = None
         self.iplot = []
-
         self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
         self.plotted = set()  # List of plotted workspace names
 
@@ -61,11 +60,13 @@ class FittingDataPresenter(object):
             self._start_load_worker(filenames)
 
     def remove_workspace(self, ws_name):
+        self.plotted.discard(ws_name)
         if ws_name in self.model.get_all_workspace_names():
+            if ws_name in self.model.get_loaded_workspaces():
+                self.row_numbers.pop(ws_name)
             self.model.remove_workspace(ws_name)
             # plot_presenter will already be notified of ws being removed via its own ADS observer
-            self.plotted.discard(ws_name)
-            self._repopulate_table()
+            self._repopulate_table(False)
         elif ws_name in self.model.get_all_log_workspaces_names():
             self.model.update_sample_log_workspace_group()
 
@@ -132,10 +133,8 @@ class FittingDataPresenter(object):
         Will also handle any workspaces that need to be plotted.
         """
         workspaces_to_be_plotted = self.plotted.copy()
-
         if clear_plotted:
             self.plotted.clear()
-
         self._remove_all_table_rows()
         self.row_numbers.clear()
         self.all_plots_removed_notifier.notify_subscribers()

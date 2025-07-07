@@ -4,19 +4,27 @@
 Mantid 6.13.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_13_release/mantid-6_13-summary.png
    :class: screenshot
-   :width: 385px
+   :width: 600px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.13.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release showcases a wide range of new algorithms and behind-the-scenes improvements, including:
+
+- Availability of a native Apple Silicon package for macOS users. With Rosetta no longer being required, users of this
+  new package should notice a significant performance improvement on Apple Silicon based machines. `Installing via
+  conda <https://www.mantidproject.org/installation/index#conda>`_ will automatically install the best version of the
+  package for your machine.
+- A :ref:`complete overhaul of the NeXus API <6_13_dependencies>` for loading HDF5-based files.
+- A :ref:`set of brand new algorithms <6_13_sans>` for producing and saving multiple polarized SANS files into a single
+  output file.
+- Significant improvements to the :ref:`PEARLTransFit <6_13_powder_diffraction>` algorithm.
+- An :ref:`upgrade to Python 3.11 <6_13_dependencies>`.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

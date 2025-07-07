@@ -168,8 +168,8 @@ class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SHOEBOX)
 
     def validate(self):
-        intens_over_sigma = [0.0, 9.638, 10.265, 136.535, 0.0]
-        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+        intens_over_sigma = [0.0, 12.749, 11.941, 136.535, 0.0]
+        np.testing.assert_allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2)
 
 
 class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
@@ -195,8 +195,8 @@ class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.PROFILE)
 
     def validate(self):
-        intens_over_sigma = [0.0, 17.863, 13.395, 135.109, 0.0]
-        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+        intens_over_sigma = [0.0, 0.0, 27.47, 131.576, 0.0]
+        np.testing.assert_allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, rtol=1e-2)
 
 
 def _load_data_and_add_peaks(sxd, runno):

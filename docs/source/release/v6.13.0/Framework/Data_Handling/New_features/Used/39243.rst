@@ -1,1 +1,0 @@
-- :ref:`LoadSpec <algm-LoadSpec>` has been updated to be declared as a file loader

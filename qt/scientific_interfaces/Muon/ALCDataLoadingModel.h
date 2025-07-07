@@ -54,7 +54,6 @@ public:
   void setFilesToLoad(const std::vector<std::string> &files) override;
 
 private:
-  static std::string isCustomGroupingValid(const std::string &group, bool &isValid);
   static int extractRunNumber(const std::string &file);
 
   /// Last loaded data workspace

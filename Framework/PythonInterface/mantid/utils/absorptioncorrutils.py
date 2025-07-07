@@ -569,7 +569,7 @@ def calc_1st_absorption_corr_using_wksp(
     elif abs_method == "FullPaalmanPings":
         PaalmanPingsAbsorptionCorrection(donor_wksp, OutputWorkspace=absName, ElementSize=element_size)
         Multiply(LHSWorkspace=absName + "_acc", RHSWorkspace=absName + "_assc", OutputWorkspace=absName + "_ac")
-        Divide(LHSWorkspace=absName + "_ac", RHSWorkspace=absName + "_acsc", OutputWorkspace=absName + "_ac")
+        Divide(LHSWorkspace=absName + "_acsc", RHSWorkspace=absName + "_ac", OutputWorkspace=absName + "_ac")
         return absName + "_assc", absName + "_ac"
     else:
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))

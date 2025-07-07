@@ -2,7 +2,14 @@
 import numpy as np
 from mantid.kernel import V3D
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, FloatArrayLengthValidator
+from mantid.kernel import (
+    Direction,
+    FloatBoundedValidator,
+    FloatArrayProperty,
+    FloatArrayLengthValidator,
+    PropertyCriterion,
+    EnabledWhenProperty,
+)
 from mantid.geometry import ReflectionGenerator, CrystalStructure
 from typing import Optional
 
@@ -32,6 +39,12 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         self.declareProperty(
             ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
             doc="Output workspace containing the table of alphas, betas and intensities.",
+        )
+        self.declareProperty(
+            "ReadoutColumn",
+            defaultValue="I",
+            direction=Direction.Input,
+            doc="The column from the Peak Parameter Workspace which should be used for populating the final column in the output table",
         )
         self.declareProperty(
             FloatArrayProperty("Reflection", [0, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
@@ -66,6 +79,21 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             FloatArrayProperty("ScatteringVolumePosition", [0.0, 0.0, 0.0], FloatArrayLengthValidator(3), direction=Direction.Input),
             doc="Position where the diffraction vectors should be calculated from, defaults as the origin",
         )
+        self.declareProperty(
+            FloatArrayProperty(
+                "AxesTransform", [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], FloatArrayLengthValidator(9), direction=Direction.Input
+            ),
+            doc="Algorithm assumes the initial orientation of the sample has the "
+            "two in plane axes of the pole figure aligned with X and Z of the laboratory frame. "
+            "This can be overridden by providing a flattened axes transform matrix, "
+            "which transforms X and Z to the desired initial vectors",
+        )
+        # disable properties which don't apply when there is no peak parameter workspace
+        self.setPropertySettings("ReadoutColumn", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("Chi2Threshold", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
+        self.setPropertySettings("PeakPositionThreshold", EnabledWhenProperty("PeakParameterWorkspace", PropertyCriterion.IsNotDefault))
+        # disable properties which don't apply when there is no reflection
+        self.setPropertySettings("ApplyScatteringPowerCorrection", EnabledWhenProperty("Reflection", PropertyCriterion.IsNotDefault))
 
     def validateInputs(self):
         issues = dict()
@@ -79,10 +107,18 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         peak_ws = self.getProperty("PeakParameterWorkspace").value
         chi2_thresh = self.getProperty("Chi2Threshold").value
         x0_thresh = self.getProperty("PeakPositionThreshold").value
+        readout_column = self.getProperty("ReadoutColumn").value
         # if the chi2_threshold is set to allow all peaks, no chi2 column is needed
-        self.no_chi2_needed = chi2_thresh < 1e-6
+        self.no_chi2_needed = np.allclose(chi2_thresh, 0)
         # if the x0_threshold is set to allow all peaks, no x0 column is needed
-        self.no_x0_needed = x0_thresh < 1e-6
+        self.no_x0_needed = np.allclose(x0_thresh, 0)
+
+        ax_trans = np.asarray(self.getProperty("AxesTransform").value).reshape((3, 3))
+        if not np.allclose(np.abs(np.linalg.det(ax_trans)), 1):
+            issues["AxesTransform"] = (
+                "Algorithm currently expects axes transforms to volume-preserving, as such the determinant must equal 1 (or -1)"
+            )
+
         if peak_ws:
             # check num rows in table matches num spectra in ws
             if peak_ws.rowCount() != ws.getNumberHistograms():
@@ -94,13 +130,17 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 except RuntimeError:
                     issues["PeakParameterWorkspace"] = f"PeakParameterWorkspace must have column: '{col_name}'"
 
-            # if peak parameter ws is given, expect these columns
-            check_col("I")
+            # if peak parameter ws is given, expect these columns:
+
+            # the specified readout column
+            check_col(readout_column)
 
             if not self.no_x0_needed:
+                # x0, if needed
                 check_col("X0")
 
             if not self.no_chi2_needed:
+                # chi2, if needed
                 check_col("chi2")
 
         if not self.getProperty("Reflection").isDefault:
@@ -119,12 +159,14 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         # get inputs
         ws = self.getProperty("InputWorkspace").value
         peak_param_ws = self.getProperty("PeakParameterWorkspace").value
+        readout_column = self.getProperty("ReadoutColumn").value
         hkl = self.getProperty("Reflection").value
         hkl_is_set = not self.getProperty("Reflection").isDefault
         chi_thresh = self.getProperty("Chi2Threshold").value
         x0_thresh = self.getProperty("PeakPositionThreshold").value
         apply_scatt_corr = self.getProperty("ApplyScatteringPowerCorrection").value
         sample_pos = np.asarray(self.getProperty("ScatteringVolumePosition").value)
+        ax_trans = np.asarray(self.getProperty("AxesTransform").value).reshape((3, 3))
 
         # generate a detector table to get detector positions
         det_table = self.exec_child_alg(
@@ -139,7 +181,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         qi = sample_pos - source_pos
 
         # get the rotation matrix of the sample
-        rot_mat = ws.run().getGoniometer().getR()
+        rot_mat = ws.run().getGoniometer().getR() @ ax_trans
 
         # matrix to put detectors in sample frame
         to_pole_view = np.linalg.inv(rot_mat)
@@ -167,7 +209,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
 
         if peak_param_ws:
             # assume that the peak_param_ws has only the peak of interest fitted
-            intensities = np.asarray(peak_param_ws.column("I"))
+            intensities = np.asarray(peak_param_ws.column(readout_column))
             use_default_intensity = False
             if not self.no_x0_needed:
                 x0s = np.asarray(peak_param_ws.column("X0"))
@@ -190,7 +232,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         table_ws = self.exec_child_alg("CreateEmptyTableWorkspace", OutputWorkspace="_tmp")
         table_ws.addColumn(type="double", name="Alpha", plottype=2)
         table_ws.addColumn(type="double", name="Beta", plottype=2)
-        table_ws.addColumn(type="double", name="Intensity", plottype=2)
+        table_ws.addColumn(type="double", name=readout_column, plottype=2)
 
         # check which spectra meet inclusion thresholds
         valid_spec_mask = self._thresh_criteria_mask(ab_arr.shape[0], chi_thresh, x0_thresh, chi2, x0s, peak)
@@ -199,7 +241,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 # amend intensity for any scattering correction
                 intensity = intensities[spec_index] / scat_power if not use_default_intensity else default_intensity
                 # add data to table
-                table_ws.addRow({"Alpha": ab_arr[spec_index, 0], "Beta": ab_arr[spec_index, 1], "Intensity": intensity})
+                table_ws.addRow({"Alpha": ab_arr[spec_index, 0], "Beta": ab_arr[spec_index, 1], readout_column: intensity})
 
         self.setProperty("OutputWorkspace", table_ws)
 

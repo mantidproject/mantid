@@ -370,7 +370,7 @@ std::string FittingModel::createOutputName(const std::string &fitMode, const std
                                            const std::string &spectra) const {
   std::string inputWorkspace = isMultiFit() ? "Multi" : workspaceName;
   std::string inputSpectra = isMultiFit() ? "" : spectra;
-  return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString + "_" + inputSpectra + "_Results";
+  return inputWorkspace + "_" + m_fitType + "_" + fitMode + "_" + m_fitString + "_" + inputSpectra + getResultsSuffix();
 }
 
 std::optional<std::string> FittingModel::sequentialFitOutputName() const {
@@ -608,16 +608,16 @@ IAlgorithm_sptr FittingModel::createSimultaneousFit(const MultiDomainFunction_sp
   fitAlgorithm->setProperty("OutputWorkspace", *outputName);
   return fitAlgorithm;
 }
-
+std::string FittingModel::getResultsSuffix() const { return isMultiFit() ? "_Results" : "_Result"; }
 std::string FittingModel::singleFitOutputName(std::string workspaceName, WorkspaceIndex spectrum) const {
   std::string inputWorkspace = isMultiFit() ? "Multi" : workspaceName;
   std::string spectra = std::to_string(spectrum.value);
-  return inputWorkspace + "_" + m_fitType + "_" + m_fitString + "_" + spectra + "_Results";
+  return inputWorkspace + "_" + m_fitType + "_" + m_fitString + "_" + spectra + getResultsSuffix();
 }
 
 std::optional<std::string> FittingModel::getOutputBasename() const {
   if (auto const outputName = sequentialFitOutputName())
-    return cutLastOf(*outputName, "_Results");
+    return cutLastOf(*outputName, getResultsSuffix());
   return std::nullopt;
 }
 

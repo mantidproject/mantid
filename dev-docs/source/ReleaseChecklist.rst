@@ -36,6 +36,8 @@ are responsible for ensuring that the work gets done.
 Timeline
 --------
 
+This is final part of the :ref:`development and release cycle <DevelopmentAndReleaseCycle>`.
+
 +-----------------------------+-----------------------------------------------+--------------------------------------------------------------------------+--------------------------+
 | | Key Event(s)              | | Task Priorities                             | | Actions Required from                                                  | | Time Until Release     |
 |                             |                                               |                                                                          |                          |
@@ -297,25 +299,26 @@ Beta Testing Begins
 
    * Dear all,
 
-     We are busy making preparations for the release of version *<version>* of Mantid.
+     We are busy preparing for the release of version *<version>* of Mantid.
      We have completed our first round of developer testing and are now ready for beta-testing feedback.
      The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
      We then hope to release the following week.
 
-     Packages
+     To test the Mantid nightly version, it is recommended to install it as a conda package in a new conda environment. To achieve this, use the
+     following command:
 
-     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
-     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
-     Alternatively, the nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+
+     Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
-     Another possibility is to conduct testing on IDAaaS. Please be aware that the version on IDAaaS is typically one day behind the nightly version available on Conda.
+     Another possibility is to conduct testing on IDAaaS.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
 
-     Please report any bugs to ``mantid-help@mantidproject.org`` and
-     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     Please report any problems or bugs to ``mantid-help@mantidproject.org``
+     If the problem is a bug that would prevent your normal workflow then start the email subject with ``URGENT:``.
      It would be most helpful for the team if bugs are communicated back to us as soon as possible.
 
      Thank you all for your help.
@@ -326,22 +329,23 @@ Beta Testing Begins
 
    * Dear all,
 
-     We are busy making preparations for the release of version *<version>* of Mantid.
+     We are busy preparing for the release of version *<version>* of Mantid.
      We have completed our first round of developer testing and are now ready for beta-testing feedback.
      The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
      We then hope to release the following week.
 
-     Packages
+     To test the Mantid nightly version, it is recommended to install it as a conda package in a new conda environment. To achieve this, use the
+     following command:
 
-     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
-     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+
      Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
 
-     Please report any bugs to ``mantid-help@mantidproject.org`` and
-     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     Please report any problems or bugs to ``mantid-help@mantidproject.org``.
+     If the problem is a bug that would prevent your normal workflow then start the email subject with ``URGENT:``.
      It would be most helpful for the team if bugs are communicated back to us as soon as possible.
 
      Thank you all for your help.
@@ -485,9 +489,6 @@ have been fixed. Then:
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
-  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
-  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -567,6 +568,9 @@ Anaconda channel.
    <https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml>`__.
    Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
    The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
+*  Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+   This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+   publishing for the ``main`` nightly pipeline.
 
 **Generate DOI**
 

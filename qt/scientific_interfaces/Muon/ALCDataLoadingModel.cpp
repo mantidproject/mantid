@@ -20,6 +20,24 @@
 
 using namespace Mantid::API;
 
+namespace ALCGroupingHelper {
+/**
+ * Check basic group string is valid
+ * i.e. does not contain letters or start or ends with , or -
+ * @param group :: the string of the grouping
+ * @returns :: True if group format is incorrect, false otherwise
+ */
+bool isCustomGroupingInvalid(const std::string &group) {
+
+  auto isDecimal = [](const char c) { return c == '.'; };
+
+  return !std::isdigit(static_cast<unsigned char>(group.front())) ||
+         !std::isdigit(static_cast<unsigned char>(group.back())) ||
+         std::any_of(std::begin(group), std::end(group), ::isalpha) ||
+         std::any_of(std::begin(group), std::end(group), isDecimal);
+}
+} // namespace ALCGroupingHelper
+
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingModel::ALCDataLoadingModel()
@@ -249,42 +267,22 @@ bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType
   if (detGroupingType != "Custom") {
     return true;
   }
+  try {
+    const std::vector<std::string> groupings = {forwardGrouping, backwardGrouping};
+    std::vector<int> allDetectors;
+    for (const auto &customGroup : groupings) {
+      if (ALCGroupingHelper::isCustomGroupingInvalid(customGroup)) {
+        return false;
+      }
+      const auto groupDetectors = Mantid::Kernel::Strings::parseRange(customGroup);
+      allDetectors.insert(allDetectors.end(), groupDetectors.cbegin(), groupDetectors.cend());
+    }
 
-  bool groupingOK = true;
-
-  auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
-  if (!groupingOK) {
+    auto isOutsideDetRange = [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); };
+    return !std::any_of(allDetectors.cbegin(), allDetectors.cend(), isOutsideDetRange);
+  } catch (std::invalid_argument &) {
     return false;
   }
-  const auto backward = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(backwardGrouping, groupingOK));
-  if (!groupingOK) {
-    return false;
-  }
-
-  detectors.insert(detectors.end(), backward.begin(), backward.end());
-  auto isOutsideDetRange = [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); };
-
-  return !std::any_of(detectors.cbegin(), detectors.cend(), isOutsideDetRange);
-}
-
-/**
- * Check basic group string is valid
- * i.e. does not contain letters or start with , or -
- * @param group :: the string of the grouping
- * @param isValid :: bool to say if the string is valid
- * @returns :: True if grouping OK, false if bad
- */
-std::string ALCDataLoadingModel::isCustomGroupingValid(const std::string &group, bool &isValid) {
-
-  auto isDecimal = [](const char c) { return c == '.'; };
-
-  if (!std::isdigit(static_cast<unsigned char>(group[0])) ||
-      std::any_of(std::begin(group), std::end(group), ::isalpha) ||
-      std::any_of(std::begin(group), std::end(group), isDecimal)) {
-    isValid = false;
-    return "";
-  }
-  return group;
 }
 
 void ALCDataLoadingModel::updateAutoLoadCancelled() {

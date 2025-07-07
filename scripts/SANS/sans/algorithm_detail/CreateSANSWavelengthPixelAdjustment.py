@@ -147,7 +147,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
 
             # Add an instrument to the workspace
             instrument_name = "LoadInstrument"
-            instrument_options = {"Workspace": output_workspace, "Filename": idf_path, "RewriteSpectraMap": False}
+            instrument_options = {"Workspace": output_workspace, "Filename": idf_path, "RewriteSpectraMap": True}
             instrument_alg = create_unmanaged_algorithm(instrument_name, **instrument_options)
             instrument_alg.execute()
 

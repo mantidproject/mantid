@@ -26,6 +26,7 @@ class ReflectometryISISCalculatePolEffTestBase(MantidSystemTest, metaclass=ABCMe
         "MonitorIntegrationWavelengthMin": 2.5,
         "MonitorIntegrationWavelengthMax": 10.0,
         "OutputWorkspace": _OUTPUT_WS_NAME,
+        "Flippers": "00,11,01,10",
     }
     _MAG_ARGS = {
         "MagInputRuns": _MAG_RUNS,

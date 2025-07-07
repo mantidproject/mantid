@@ -28,7 +28,7 @@ requirements:
     - pyqt {{ pyqt }}                        # [build_platform != target_platform]
     - pyqtwebengine                          # [build_platform != target_platform]
     - qt-main {{ qt_main }}                  # [build_platform != target_platform]
-    - sip {{ sip }}                          # [build_platform != target_platform]
+    - sip                                    # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]

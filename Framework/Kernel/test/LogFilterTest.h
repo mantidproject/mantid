@@ -57,6 +57,15 @@ public:
     TS_ASSERT_EQUALS(p->nthInterval(4).end_str(),
                      "2007-Nov-30 16:17:50"); // nth interval changed to use
                                               // previous interval now.
+
+    // test out of bounds check given filter applied
+    auto testFilter = createTestFilter(1);
+    LogFilter flt(p);
+    flt.addFilter(*testFilter);
+    TS_ASSERT_THROWS_EQUALS(flt.data()->nthInterval(5), const std::runtime_error &e, std::string(e.what()),
+                            "nthInterval(): FilteredTimeSeriesProperty 'test' interval 5 does not exist");
+    TS_ASSERT_THROWS_EQUALS(flt.data()->nthInterval(-1), const std::runtime_error &e, std::string(e.what()),
+                            "nthInterval(): FilteredTimeSeriesProperty 'test' interval -1 does not exist");
   }
 
   void testFilterWithTrueAtStart() {

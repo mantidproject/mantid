@@ -10,8 +10,6 @@
 Description
 -----------
 
-**This algorithm can only be run on windows due to f2py support and the underlying fortran code**
-
 The model that is being fitted is that of a \delta-function (elastic component) of amplitude A(0)
 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The whole function is then convolved
 with the resolution function. The -function and Lorentzians are intrinsically normalised to unity

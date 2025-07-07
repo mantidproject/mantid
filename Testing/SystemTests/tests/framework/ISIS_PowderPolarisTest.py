@@ -389,10 +389,10 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked
-        expected_peak_values = [0.8808, 1.1001, 2.9530, 4.6593, 4.3521]
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked
+        expected_peak_values = [0.8245, 1.2468, 3.1390, 4.6012, 4.3110]
         for index, ws in enumerate(self.pdf_output):
-            idx = get_bin_number_at_given_r(ws.dataX(0), 3.9)
+            idx = get_bin_number_at_given_r(ws.dataX(0), 3.85)
             self.assertAlmostEqual(ws.dataY(0)[idx], expected_peak_values[index], places=3)
 
 
@@ -408,9 +408,9 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5799, places=3)
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5325, places=3)
 
 
 class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
@@ -425,9 +425,9 @@ class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5305, places=3)
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.4836, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
@@ -476,9 +476,9 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 2.8955, places=3)
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 2.8950, places=3)
         self.assertEqual(self.pdf_output.name(), "98533_pdf_g(r)")
 
 
@@ -509,14 +509,14 @@ class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
         x_data = self.pdf_output.dataX(0)
         y_data = self.pdf_output.dataY(0)
         idx_to_check_filter = 5
         self.assertTrue(x_data[idx_to_check_filter] < self.r_min)
         self.assertAlmostEqual(y_data[idx_to_check_filter], 0.0, places=1)
-        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(y_data[idx], 2.6732, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(y_data[idx], 2.6666, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
@@ -531,9 +531,9 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.8473, places=3)
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.7571, places=3)
 
 
 def run_total_scattering(

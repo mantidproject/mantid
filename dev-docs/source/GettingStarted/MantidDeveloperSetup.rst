@@ -21,3 +21,5 @@ Create ``mantid-developer`` conda environment by following the steps below:
   .. code-block:: sh
 
     mamba update -c mantid/label/nightly --all
+
+See :ref:`packaging <Packaging>` for more information on this topic.

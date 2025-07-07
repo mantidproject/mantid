@@ -97,7 +97,7 @@ def add_runs(  # noqa: C901
                 userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period
             )
 
-            is_not_allowed_instrument = inst.upper() not in {"SANS2D", "LARMOR", "ZOOM"}
+            is_not_allowed_instrument = inst.upper() not in {"SANS2D", "LARMOR", "ZOOM", "LOQ"}
             if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = "Adding event data not supported for " + inst + " for now"
                 print(error)

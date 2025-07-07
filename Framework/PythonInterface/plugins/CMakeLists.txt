@@ -194,6 +194,7 @@ set(PYTHON_PLUGINS
     algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
     algorithms/SymmetriseMDHisto.py
+    algorithms/TimeDifference.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
     algorithms/TestWorkspaceGroupProperty.py
@@ -280,6 +281,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/NormaliseByThickness.py
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
+    algorithms/peakdata_utils.py
     algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py
     algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
     algorithms/WorkflowAlgorithms/PowderILLDetectorScan.py
@@ -398,6 +400,8 @@ set(PYTHON_PLUGINS
     functions/TFMuonium.py
     functions/TeixeiraWater.py
     functions/TeixeiraWaterIqt.py
+    functions/TeixeiraWaterIqtFT.py
+    functions/TeixeiraWaterIqtHelper.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py
