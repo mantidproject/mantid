@@ -5,17 +5,36 @@
 # test. This directory is added to the PYTHONPATH when tests are executed _testname_prefix :: A prefix for each test
 # that is added to ctest, the name will be ${_testname_prefix}_TestName ${ARGN} :: List of test files
 function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
+  if(NOT PYUNITTEST_RUNNER)
+    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
+  else()
+    set(_test_runner_module ${PYUNITTEST_RUNNER})
+  endif()
+
+  py_add_test("UnitTest" ${_test_runner_module} ${ARGV})
+
+endfunction()
+
+# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
+# This adds the named system test do they can be run individually
+function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
+  if(NOT PYSYSTEMTEST_RUNNER)
+    set(_systest_runner ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
+  else()
+    set(_systest_runner ${PYSYSTEMTEST_RUNNER})
+  endif()
+  py_add_test("SystemTest" ${_systest_runner} ${ARGV})
+
+endfunction()
+
+# PY_ADD_TEST is used by the above test-adding methods. It SHOULD NOT be used directly in CMakeLists.txt files. Use
+# PYSYSTEMTEST_ADD_TEST or PYUNITTEST_ADD_TEST instead.
+function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_prefix)
   # Property for the module directory
   if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
     set(_module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
   else()
     set(_module_dir ${CMAKE_BINARY_DIR}/bin)
-  endif()
-
-  if(NOT PYUNITTEST_RUNNER)
-    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
-  else()
-    set(_test_runner_module ${PYUNITTEST_RUNNER})
   endif()
 
   # Environment
@@ -63,28 +82,12 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
       ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT} LABELS
-                                          "UnitTest"
+                                          ${_test_type}
     )
     if(PYUNITTEST_RUN_SERIAL)
       set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)
     endif()
   endforeach(part ${ARGN})
-endfunction()
-
-# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
-# This adds the named system test do they can be run individually
-
-function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
-  if(NOT PYUNITTEST_RUNNER)
-    set(PYUNITTEST_RUNNER ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
-    pyunittest_add_test(${ARGV})
-    unset(PYUNITTEST_RUNNER)
-  else()
-    set(_temp_unit_runner ${PYUNITTEST_RUNNER})
-    set(PYUNITTEST_RUNNER ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
-    pyunittest_add_test(${ARGV})
-    set(PYUNITTEST_RUNNER ${_temp_unit_runner})
-  endif()
 endfunction()
 
 # Defines a macro to check that each file contains a call to unittest.main() The arguments should be the source
