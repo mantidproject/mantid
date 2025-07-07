@@ -98,9 +98,19 @@ def main(argv):
         escape_quotes=True,
     )
 
+    results = dict()
     for test_class_name in test_class_names:
         script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, False)
-        runner.start_in_current_process(script_obj)
+        results[test_class_name] = runner.start_in_current_process(script_obj)
+
+    #########################################################################
+    # Process Results
+    #########################################################################
+
+    failure = False
+    exit_codes = list(results.values())
+    if any(exit_code[0] is not systemtesting.TestRunner.SUCCESS_CODE for exit_code in exit_codes):
+        failure = True
 
     #########################################################################
     # Cleanup
@@ -108,6 +118,10 @@ def main(argv):
 
     # Put the configuration back to its original state
     mtdconf.restoreconfig()
+
+    if failure:
+        # The lack of details here is due to ctest handling the stdout dump on failures.
+        raise RuntimeError()
 
 
 if __name__ == "__main__":
