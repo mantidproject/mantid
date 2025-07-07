@@ -7,26 +7,23 @@
 #include <unistd.h>
 #endif
 
-#define PSZ(s) (s).c_str()
-
 const int nFiles = 10;
 const int nEntry = 10;
 const int nData = 10;
-int64_t array_dims[2] = {5, 4};
+Mantid::Nexus::DimVector vec_dims{4};
 short int i2_array[4] = {1000, 2000, 3000, 4000};
 int iFile, iReOpen, iEntry, iData, iNXdata, iSimpleArraySize = 4;
 
 int main() {
   printf("Running for %d iterations\n", nFiles);
   NXaccess access_mode = NXaccess::CREATE5;
-  char strFile[512];
+  std::string filename;
 
   for (iFile = 0; iFile < nFiles; iFile++) {
-    sprintf(strFile, "leak_test2_%03d.nxs", iFile);
-    remove(strFile);
-    printf("file %s\n", strFile);
+    filename = "leak_test2_" + std::to_string(iFile) + ".nxs";
+    remove(filename.c_str());
     NXhandle fileid;
-    if (NXopen(strFile, access_mode, fileid) != NXstatus::NX_OK) {
+    if (NXopen(filename, access_mode, fileid) != NXstatus::NX_OK) {
       std::cerr << "NXopen failed!" << std::endl;
       return 1;
     }
@@ -34,12 +31,12 @@ int main() {
     for (iEntry = 0; iEntry < nEntry; iEntry++) {
       std::ostringstream oss;
       oss << "entry_" << iEntry;
-      if (NXmakegroup(fileid, PSZ(oss.str()), "NXentry") != NXstatus::NX_OK) {
+      if (NXmakegroup(fileid, oss.str(), "NXentry") != NXstatus::NX_OK) {
         std::cerr << "NXmakegroup failed!" << std::endl;
         return 1;
       }
 
-      if (NXopengroup(fileid, PSZ(oss.str()), "NXentry") != NXstatus::NX_OK) {
+      if (NXopengroup(fileid, oss.str(), "NXentry") != NXstatus::NX_OK) {
         std::cerr << "NXopengroup failed!" << std::endl;
         return 1;
       }
@@ -47,12 +44,12 @@ int main() {
       for (iNXdata = 0; iNXdata < nData; iNXdata++) {
         std::ostringstream oss2;
         oss2 << "data_" << iNXdata;
-        if (NXmakegroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::NX_OK) {
+        if (NXmakegroup(fileid, oss2.str(), "NXdata") != NXstatus::NX_OK) {
           std::cerr << "NXmakegroup failed!" << std::endl;
           return 1;
         }
 
-        if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::NX_OK) {
+        if (NXopengroup(fileid, oss2.str(), "NXdata") != NXstatus::NX_OK) {
           std::cerr << "NXopengroup failed!" << std::endl;
           return 1;
         }
@@ -60,13 +57,13 @@ int main() {
         for (iData = 0; iData < nData; iData++) {
           std::ostringstream oss3;
           oss3 << "i2_data_" << iData;
-          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 1, &array_dims[1], NXcompression::NONE,
-                               &array_dims[1]) != NXstatus::NX_OK) {
+          if (NXcompmakedata64(fileid, oss3.str(), NXnumtype::INT16, 1, vec_dims, NXcompression::NONE, vec_dims) !=
+              NXstatus::NX_OK) {
             std::cerr << "NXmakedata failed!" << std::endl;
             return 1;
           }
 
-          if (NXopendata(fileid, PSZ(oss3.str())) != NXstatus::NX_OK) {
+          if (NXopendata(fileid, oss3.str()) != NXstatus::NX_OK) {
             std::cerr << "NXopendata failed!" << std::endl;
             return 1;
           }
@@ -101,7 +98,7 @@ int main() {
     fileid = NULL;
 
     // Delete file
-    remove(strFile);
+    remove(filename.c_str());
   }
   return 0;
 }

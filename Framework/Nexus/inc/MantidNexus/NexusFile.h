@@ -13,6 +13,11 @@ namespace {
 static const std::string NULL_STR("NULL");
 }
 
+namespace H5 {
+// forward declare
+class H5Object;
+} // namespace H5
+
 /**
  * \file NexusFile.h Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
@@ -37,10 +42,10 @@ class MANTID_NEXUS_DLL File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  /** The handle for the C-API. */
-  std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** The handle for the C-API. */
+  std::shared_ptr<NexusFile5> m_pfile_id;
   /** nexus descriptor to track the file tree
    * NOTE: in file write, the following cannot be relied upon:
    * - hasRootAttr
@@ -165,6 +170,15 @@ public:
 
 private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
+
+  hid_t getCurrentId() const;
+
+  /** It is sometimes necessary to interface with code using the H5Cpp library
+   * This method will return the current location as an object, which can be
+   * used with, for instance, H5Util or other parts of Mantid
+   * \returns a shared pointer to an H5Object corresponding to current location
+   */
+  std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
   // these are used for updating the NexusDescriptor
   std::string formAbsoluteAddress(std::string const &);
@@ -570,10 +584,9 @@ public:
    *
    * \param info Designation of which attribute to read.
    * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
+   * \param length The length of the attribute.
    */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
+  void getAttr(const AttrInfo &info, void *data, std::size_t length = 0);
 
   /**
    * Get the value of an attribute that is a scalar number.

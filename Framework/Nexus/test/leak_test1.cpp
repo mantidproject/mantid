@@ -16,7 +16,7 @@ int main() {
   NXhandle fileid;
 
   removeFile(szFile); // in case it was left over from previous run
-  if (NXopen(szFile.c_str(), access_mode, fileid) != NXstatus::NX_OK)
+  if (NXopen(szFile, access_mode, fileid) != NXstatus::NX_OK)
     ON_ERROR("NXopen failed!\n")
 
   if (NXclose(fileid) != NXstatus::NX_OK)
@@ -26,7 +26,7 @@ int main() {
     if (0 == iReOpen % 100)
       printf("loop count %d\n", iReOpen);
 
-    if (NXopen(szFile.c_str(), NXaccess::RDWR, fileid) != NXstatus::NX_OK)
+    if (NXopen(szFile, NXaccess::RDWR, fileid) != NXstatus::NX_OK)
       ON_ERROR("NXopen failed!\n");
 
     if (NXclose(fileid) != NXstatus::NX_OK)

@@ -539,35 +539,6 @@ public:
     TS_ASSERT_EQUALS(ind, outd);
   }
 
-  void test_data_existing_missing() {
-    // this test protects against a regression that can occur in OSX inside of LoadMD
-    cout << "\ntest dataset read existing -- sample/material\n";
-
-    // open a file
-    std::string filename = getFullPath("md_missing_paramater_map.nxs");
-    Mantid::Nexus::File file(filename, NXaccess::READ);
-
-    std::string addressOfBad("/MDHistoWorkspace/experiment0/sample");
-    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
-
-    // go to this address and read things in
-    file.openAddress(addressOfBad);
-
-    // confirm version is 2
-    int version;
-    file.getAttr("version", version);
-    TS_ASSERT_EQUALS(version, 1);
-
-    // read the name
-    std::string name;
-    file.getAttr("name", name);
-    TS_ASSERT(!name.empty());
-
-    // read the formula style
-    std::string formulaStyle;
-    TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Mantid::Nexus::Exception const &);
-  }
-
   void test_data_string_array_as_char_array() {
     // this test checks that string arrays saved a block char arrays can be read back
     // this guards against a regression that would otherwise occur within PropertyNexusTest
@@ -831,6 +802,13 @@ public:
     file.openAddress(expected);
     actual = file.getAddress();
     TS_ASSERT_EQUALS(actual, expected);
+
+    // open an address without an initial "/"
+    file.openAddress("/");
+    expected = "entry1/layer2b";
+    TS_ASSERT_THROWS_NOTHING(file.openAddress(expected));
+    actual = file.getAddress();
+    TS_ASSERT_EQUALS(actual, "/" + expected);
   }
 
   void test_getInfo() {
@@ -886,6 +864,54 @@ public:
     TS_ASSERT_THROWS(file.getInfo(), Mantid::Nexus::Exception const &);
   }
 
+  void test_isDataSetOpen() {
+    cout << "\ntest is data set open\n";
+    // open a file
+    FileResource resource("test_nexus_file_isdataopen.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+
+    // the root is not a dataset
+    TS_ASSERT(!file.isDataSetOpen());
+
+    // a group is not a dataset
+    file.makeGroup("entry", "NXentry", true);
+    TS_ASSERT(!file.isDataSetOpen());
+
+    // a dataset IS a dataset
+    file.makeData("data", NXnumtype::CHAR, 1, true);
+    TS_ASSERT(file.isDataSetOpen());
+
+    file.close();
+  }
+
+  void test_isDataInt() {
+    cout << "\ntest is data set open\n";
+    // open a file
+    FileResource resource("test_nexus_file_isdataopen.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    // char data is not int
+    file.makeData("chardata", NXnumtype::CHAR, 1, true);
+    TS_ASSERT(!file.isDataInt());
+
+    // float data is not int
+    file.makeData("floatdata", NXnumtype::FLOAT32, 1, true);
+    TS_ASSERT(!file.isDataInt());
+
+    // all the integer types are ints
+    std::vector<NXnumtype> inttypes{NXnumtype::INT8,  NXnumtype::UINT8,  NXnumtype::INT16, NXnumtype::UINT16,
+                                    NXnumtype::INT32, NXnumtype::UINT32, NXnumtype::INT64, NXnumtype::UINT64};
+    for (NXnumtype const &type : inttypes) {
+      file.makeData("data_" + std::string(type), type, 1, true);
+      TS_ASSERT(file.isDataInt());
+    }
+
+    file.close();
+  }
+
   // ##################################################################################################################
   // TEST ATTRIBUTE METHODS
   // ################################################################################################################
@@ -925,6 +951,33 @@ public:
     }
   }
 
+  void test_putget_attr_different_types() {
+    cout << "\ntest attribute -- different types\n";
+
+    // open a file
+    FileResource resource("test_nexus_attr_different.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    std::vector<std::string> expected_names{"int_attr", "dbl_attr"};
+
+    // put the attributes
+    int64_t in(7);
+    double rin(124.e7);
+    file.putAttr(expected_names[0], in);
+    file.putAttr(expected_names[1], rin);
+    file.flush();
+
+    int8_t out;
+    float rout;
+    file.getAttr(expected_names[0], out);
+    file.getAttr(expected_names[1], rout);
+    TS_ASSERT_EQUALS(in, out);
+    TS_ASSERT_EQUALS(rin, rout);
+    file.close();
+  }
+
   void test_putget_attr_str() {
     cout << "\ntest string attribute read/write\n";
 
@@ -959,6 +1012,133 @@ public:
     TS_ASSERT_EQUALS(attrInfos[1].length, actual.size());
   }
 
+  void test_get_bad_attr_fails() {
+    cout << "\ntest atttribute -- bad\n";
+
+    // open a file
+    FileResource resource("test_nexus_attr_bad.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    // move to an entry to avoid conflict with some root-level attributes
+    file.makeGroup("entry", "NXentry", true);
+
+    std::vector<std::string> attr_names{"attr_1", "attr_2"};
+    int64_t in = 7, out;
+    TS_ASSERT_THROWS_NOTHING(file.putAttr(attr_names[0], in));
+    TS_ASSERT_THROWS_NOTHING(file.getAttr(attr_names[0], out));
+    TS_ASSERT_EQUALS(in, out);
+
+    // try to get an attribute that doesn't exist
+    TS_ASSERT(!file.hasAttr(attr_names[1]));
+    TS_ASSERT_THROWS(file.getAttr(attr_names[1], out), Mantid::Nexus::Exception const &);
+
+    // cleanup
+    file.close();
+  }
+
+  void test_attr_contrary_type() {
+    cout << "\ntest read existing -- sample/material\n";
+
+    // open a file
+    std::string filename = getFullPath("md_missing_paramater_map.nxs");
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+
+    std::string addressOfBad("/MDHistoWorkspace/experiment0/sample/material");
+    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
+
+    // go to this address and read things in
+    file.openAddress(addressOfBad);
+
+    // read the name
+    std::string name;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("name", name));
+    TS_ASSERT(name.empty());
+
+    // confirm version is 2
+    // note that it is stored internally as INT64
+    float version;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("version", version));
+    TS_ASSERT_EQUALS(version, 2);
+
+    // read the formula style
+    std::string formulaStyle;
+    TS_ASSERT_THROWS_NOTHING(file.getAttr("formulaStyle", formulaStyle));
+    TS_ASSERT_EQUALS(formulaStyle, "empty");
+    file.close();
+  }
+
+  void test_putget_attr_group_and_datasrt_and_root() {
+    cout << "\ntest attribute read/write on group, on dataset, and on root\n";
+
+    // open a file
+    FileResource resource("test_nexus_attr_different_obj.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+
+    std::vector<std::string> expected_names{"root_attr_", "group_attr_", "sds_attr_"};
+    std::vector<int> expected_values{13, 12, 17};
+    std::vector<std::string> expected_str_names{"root_str_attr_", "group_str_attr_", "sds_str_attr_"};
+    std::vector<std::string> expected_string{"root_data", "group_data", "data_data"};
+
+    // NOTE H5cpp catches and does not rethrow the error when closing a Group that was
+    // created from a DataSet or H5File ID.  It is only logged to std::cerr.  We therefore need to
+    // redirect std::cerr and make sure it stays blank to detect this sort of error.
+    // If uncaught this can cause memory leaks
+    std::stringstream errors;
+    std::streambuf *old_cerr = std::cerr.rdbuf();
+    std::cerr.rdbuf(errors.rdbuf());
+
+    // put/get an attribute at root
+    do_test_putget_attr(file, expected_names[0], expected_values[0]);
+    do_test_putget_attr(file, expected_str_names[0], expected_string[0]);
+
+    // put/get an attribute in a group
+    file.makeGroup("entry", "NXentry", true);
+    do_test_putget_attr(file, expected_names[1], expected_values[1]);
+    do_test_putget_attr(file, expected_str_names[1], expected_string[1]);
+
+    // put/get an attribute in a dataset
+    file.makeData("data", NXnumtype::INT64, 1, true);
+    do_test_putget_attr(file, expected_names[2], expected_values[2]);
+    do_test_putget_attr(file, expected_str_names[2], expected_string[2]);
+
+    // make sure none of the above logged any errors
+    TSM_ASSERT(errors.str(), errors.str().empty());
+
+    // cleanup
+    file.close();
+    std::cerr.rdbuf(old_cerr);
+  }
+
+  void test_attr_existing_missing() {
+    // this test protects against a regression that can occur in OSX inside of LoadMD
+    // for reference, see Material::loadNexus() in Material.cpp
+    // see also the test LoadMDTest::test_loading_MD_with_missing_parameter_map
+    cout << "\ntest dataset read existing -- sample/material\n";
+
+    // open a file
+    std::string filename = getFullPath("md_missing_paramater_map.nxs");
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+
+    std::string addressOfBad("/MDHistoWorkspace/experiment0/sample");
+    TS_ASSERT_EQUALS(file.hasAddress(addressOfBad), true);
+
+    // go to this address and read things in
+    file.openAddress(addressOfBad);
+
+    // confirm version is 1 -- this has no formulaStyle
+    int32_t version32;
+    int64_t version64;
+    file.getAttr("version", version32);
+    file.getAttr("version", version64);
+    TS_ASSERT_EQUALS(version32, 1);
+    TS_ASSERT_EQUALS(version64, 1);
+
+    // read the formula style -- should throw exception
+    std::string formulaStyle;
+    TS_ASSERT_THROWS(file.getAttr("formulaStyle", formulaStyle), Mantid::Nexus::Exception const &);
+  }
+
   void test_existing_attr_resolved() {
     // test that attributes in existing files are corectly resolved
     // this prevents a regression that will otherwise show up in tests of LoadMD and various python algorithms
@@ -987,7 +1167,7 @@ public:
   void test_existing_attr_bad_length() {
     // some fields have the unit attribute set with value "microsecond" but with a length of 8 instead of 11
     // this prevents a regression that will otherwise show up in tests of LoadEventNexus and various python algorithms
-    cout << "\ntest open existing file with system-dependent type\n";
+    cout << "\ntest open existing file with a badly set attr length\n";
 
     // open the file in read-only mode
     std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");

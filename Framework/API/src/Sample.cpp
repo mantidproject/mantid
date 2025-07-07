@@ -329,17 +329,17 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
 
   // Version 0 = saveNexusProcessed before Sep 8, 2011
   int version = 0;
-  try {
+  if (file->hasAttr("version")) {
     file->getAttr("version", version);
-  } catch (Nexus::Exception const &) {
+  } else {
     version = 0;
   }
 
   if (version == 0) {
     // Sample NAME field may/may not be present
-    try {
+    if (file->hasData("name")) {
       file->readData("name", m_name);
-    } catch (Nexus::Exception const &) {
+    } else {
       m_name = "";
     }
   }

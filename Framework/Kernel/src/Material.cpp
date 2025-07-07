@@ -595,9 +595,9 @@ void Material::loadNexus(Nexus::File *file, const std::string &group) {
   this->calculateTotalScatterXSection();
 
   file->readData("number_density", m_numberDensity);
-  try {
+  if (file->hasData("packing_fraction")) {
     file->readData("packing_fraction", m_packingFraction);
-  } catch (std::runtime_error &) {
+  } else {
     m_packingFraction = 1.;
   }
   file->readData("temperature", m_temperature);

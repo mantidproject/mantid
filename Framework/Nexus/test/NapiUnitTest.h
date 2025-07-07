@@ -9,13 +9,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/napi.h"
-#include "MantidNexus/napi5.h"
 #include "test_helper.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <hdf5.h>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -285,12 +285,12 @@ public:
     NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
 
     // if there is not a top-level NXentry, should throw error
-    NX_ASSERT_ERROR(NXmakedata64(fid, name, type, 1, dims.data()), "data made without error");
+    NX_ASSERT_ERROR(NXmakedata64(fid, name, type, 1, dims), "data made without error");
 
     // now make a NXentry group and try
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakedata64(fid, name, type, 1, dims.data()), "faled to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, name, type, 1, dims), "faled to make data");
 
     // cleanup
     NX_ASSERT_OKAY(NXclose(fid), "failed to close");
@@ -309,7 +309,7 @@ public:
     char data[] = "test_data";
     DimVector dims{3};
     NXnumtype type(NXnumtype::CHAR);
-    NX_ASSERT_OKAY(NXmakedata64(fid, data, type, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, data, type, 1, dims), "failed to make data");
 
     // check error conditions
     NX_ASSERT_ERROR(NXopendata(fid, "tacos1"), "opened bad data");
@@ -339,16 +339,14 @@ public:
     NXnumtype type(NXnumtype::CHAR);
     DimVector dims({3});
     char data1[] = "data1";
-    NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims.data()), "failed to make data1");
+    NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims), "failed to make data1");
     NX_ASSERT_OKAY(NXopendata(fid, data1), "failed to open data");
     char path1[128];
     H5Iget_name(fid->iCurrentD, path1, 128);
 
     // make and open lateral data
-    // NOTE this behavior is not what is actually desired and causes confusion
-    // Making a dataset while a dataset is already open should be disallowed
     char data2[] = "data2";
-    NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims.data()), "made a nested data2");
+    NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims), "made a nested data2");
     NX_ASSERT_OKAY(NXopendata(fid, data2), "failed to open data");
     char path2[128];
     H5Iget_name(fid->iCurrentD, path2, 128);
@@ -377,7 +375,7 @@ public:
     // now make data, close it, and check we are back at root
     NXnumtype type(NXnumtype::CHAR);
     DimVector dims{3};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data1", type, 1, dims.data()), "failed to make data1");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data1", type, 1, dims), "failed to make data1");
     NX_ASSERT_OKAY(NXopendata(fid, "data1"), "failed to open data");
     TS_ASSERT_DIFFERS(fid->iCurrentD, 0);
     NX_ASSERT_OKAY(NXclosedata(fid), "");
@@ -405,14 +403,14 @@ public:
     NXnumtype type(NXnumtype::CHAR);
     DimVector dims{3};
     char data1[] = "data1";
-    NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims.data()), "failed to make data1");
+    NX_ASSERT_OKAY(NXmakedata64(fid, data1, type, 1, dims), "failed to make data1");
     NX_ASSERT_OKAY(NXopendata(fid, data1), "failed to open data");
     char path1[128];
     H5Iget_name(fid->iCurrentD, path1, 128);
 
     // make and open lateral data
     char data2[] = "data2";
-    NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims.data()), "made a nested data2");
+    NX_ASSERT_OKAY(NXmakedata64(fid, data2, type, 1, dims), "made a nested data2");
     NX_ASSERT_OKAY(NXopendata(fid, data2), "failed to open data");
     char path2[128];
     H5Iget_name(fid->iCurrentD, path2, 128);
@@ -435,7 +433,7 @@ public:
   template <typename T> void do_test_data_putget(NexusFile5 *fid, string name, T const &in) {
     T out;
     DimVector dims{1};
-    NX_ASSERT_OKAY(NXmakedata64(fid, name.c_str(), getType<T>(), 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, name.c_str(), getType<T>(), 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, name.c_str()), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
     NX_ASSERT_OKAY(NXgetdata(fid, &out), "failed to get data");
@@ -529,7 +527,7 @@ public:
     // However, that seems to contradict notes inside napi5 about rank for string data
     // Using rank = 1 works, but the DataSpace will register size = 1
     DimVector dims{static_cast<dimsize_t>(in.size())};
-    NX_ASSERT_OKAY(NXmakedata64(fid, name.c_str(), NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, name.c_str(), NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, name.c_str()), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, in.data()), "failed to put data");
     NX_ASSERT_OKAY(NXgetdata(fid, out.data()), "failed to get data");
@@ -555,13 +553,13 @@ public:
     // put/get an int
     int in[4] = {12, 7, 2, 3}, out[4];
     DimVector dims{4};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_int", getType<int>(), 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data_int", getType<int>(), 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data_int"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, in), "failed to put data");
     DimVector dimsout{0, 0, 0, 0};
-    int rank;
+    std::size_t rank;
     NXnumtype datatype;
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     NX_ASSERT_OKAY(NXgetdata(fid, &(out[0])), "failed to get data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
     // confirm
@@ -575,10 +573,10 @@ public:
     // put/get double array
     double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
     dims = {4};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double", NXnumtype::FLOAT64, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double", NXnumtype::FLOAT64, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data_double"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, ind), "failed to put data");
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     NX_ASSERT_OKAY(NXgetdata(fid, outd), "failed to get data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
     // confirm
@@ -592,10 +590,10 @@ public:
     // put/get double 2D array
     double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}}, outdd[3][2];
     dims = {3, 2};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double_2d", NXnumtype::FLOAT64, 2, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double_2d", NXnumtype::FLOAT64, 2, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data_double_2d"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, indd), "failed to put data");
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     NX_ASSERT_OKAY(NXgetdata(fid, outdd), "failed to get data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
     // confirm
@@ -613,10 +611,10 @@ public:
     char word[] = "silicovolcaniosis";
     char read[30] = {'A'}; // pre-fill with junk data
     dims = {static_cast<dimsize_t>(strlen(word))};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_char", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data_char", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data_char"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, word), "failed to put data");
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     NX_ASSERT_OKAY(NXgetdata(fid, &(read[0])), "failed to get data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
     // confirm
@@ -698,7 +696,7 @@ public:
 
     // make another layer -- at "/abc/def"
     DimVector dims{1};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "def", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "def", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "def"), "failed to open data");
     int in = 17;
     NX_ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
@@ -724,14 +722,14 @@ public:
 
     // make path /entry/data1
     char one = '1';
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data1", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data1", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data1"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &one), "failed to put data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
     // make path /entry/data2
     char two = '2';
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data2", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data2", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data2"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &two), "failed to put data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
@@ -740,7 +738,7 @@ public:
     char three = '3';
     NX_ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakedata64(fid, "more_data", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "more_data", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "more_data"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &three), "failed to put data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
@@ -751,7 +749,7 @@ public:
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close data"); // close /entry
     NX_ASSERT_OKAY(NXmakegroup(fid, "link", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "link", "NXentry"), "failed to open group"); // open /entry/link
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data4", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "data4", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data4"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &four), "failed to put data");
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
@@ -798,17 +796,17 @@ public:
     int in = 17;
     DimVector dims{1};
     // NOTE the type of `int` is platform-dependent and may be int32_t or int64_t
-    NX_ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
     cout << "\tmade and put data\n";
 
     // get the info and check
-    int rank;
+    std::size_t rank;
     DimVector dimsout{0};
-    NXnumtype datatype = getType<int>();
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    NXnumtype datatype = NXnumtype::CHAR; // set to something that is NOT int
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     cout << "\tinfo got\n";
     TS_ASSERT_EQUALS(datatype, getType<int>());
     TS_ASSERT_EQUALS(rank, 1);
@@ -817,15 +815,15 @@ public:
 
     // put a double
     double ind = 107.2345;
-    NX_ASSERT_OKAY(NXmakedata64(fid, "double_data", NXnumtype::FLOAT64, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "double_data", NXnumtype::FLOAT64, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "double_data"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &ind), "failed to put data");
 
     cout << "\tmade and put double data\n";
 
     // get the info and check
-    datatype = NXnumtype::FLOAT64;
-    NX_ASSERT_OKAY(NXgetinfo64(fid, &rank, dimsout.data(), &datatype), "failed to get info");
+    datatype = NXnumtype::CHAR;
+    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
     cout << "\tinfo got\n";
     TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
     TS_ASSERT_EQUALS(rank, 1);
@@ -849,18 +847,17 @@ public:
     // put an integer
     int in = 17;
     DimVector dims{1};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "int_data", getType<int>(), 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "int_data"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, &in), "failed to put data");
 
     // open a group and try to get info
-    int rank;
+    std::size_t rank;
     DimVector dimsout;
     NXnumtype datatype;
     NX_ASSERT_OKAY(NXmakegroup(fid, "a_group", "NXshorts"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "a_group", "NXshorts"), "failed to open group");
-    NX_ASSERT_ERROR(NXgetinfo64(fid, &rank, dimsout.data(), &datatype),
-                    "trying to get info in group should give error");
+    NX_ASSERT_ERROR(NXgetinfo64(fid, rank, dimsout, datatype), "trying to get info in group should give error");
 
     // cleanup
     NX_ASSERT_OKAY(NXclose(fid), "failed to close");
@@ -871,12 +868,13 @@ public:
   // ################################################################################################################
 
   template <typename T> void do_test_putget_attr(NexusFile5 *fid, string name, T const &data) {
+    cout << "\tput/get attribute " << name << "\n";
     // test put/get by pointer to data
     T out;
-    int len;
+    std::size_t len;
     NXnumtype datatype = getType<T>();
     NX_ASSERT_OKAY(NXputattr(fid, name.c_str(), &data, 1, getType<T>()), "failed to put attr");
-    NX_ASSERT_OKAY(NXgetattr(fid, name.c_str(), &out, &len, &datatype), "failed to get attribute");
+    NX_ASSERT_OKAY(NXgetattr(fid, name.c_str(), &out, len, datatype), "failed to get attribute");
     TS_ASSERT_EQUALS(data, out);
     TS_ASSERT_EQUALS(len, 1);
     TS_ASSERT_EQUALS(datatype, getType<T>());
@@ -903,16 +901,13 @@ public:
     do_test_putget_attr(fid, expected_names[1], 120.2e6);
 
     // check attr infos
-    int numattr;
-    NX_ASSERT_OKAY(NXgetattrinfo(fid, &numattr), "failed to get attr info");
-    TS_ASSERT_EQUALS(numattr, 2);
     NX_ASSERT_OKAY(NXinitattrdir(fid), "failed to restart attributes");
-    char name[20] = {0};
-    int len;
-    int dims[] = {0, 0, 0, 0};
+    std::string name(20, 0);
+    std::size_t len;
+    DimVector dims(4, 0);
     NXnumtype datatype;
-    for (int i = 0; i < numattr; i++) {
-      NX_ASSERT_OKAY(NXgetnextattra(fid, name, &len, dims, &datatype), "could not get next attribute");
+    for (std::size_t i = 0; i < 2; i++) {
+      NX_ASSERT_OKAY(NXgetnextattra(fid, name, len, dims, datatype), "could not get next attribute");
       TS_ASSERT_EQUALS(name, expected_names[i]);
       TS_ASSERT_EQUALS(len, 1);
     }
@@ -938,14 +933,14 @@ public:
     NX_ASSERT_OKAY(NXputattr(fid, "str_attr_", data.data(), static_cast<int>(data.size()), NXnumtype::CHAR),
                    "failed to put attr");
 
-    // NOTE we MUST pass the size of the string + 1 for thsi to work
-    int len = static_cast<int>(data.size() + 1);
+    // NOTE we MUST pass the size of the string + 1 for this to work
+    std::size_t len = data.size() + 1;
     // NOTE we MUST pass the correct variable type (rather than deducing it) for this to work
     NXnumtype datatype = NXnumtype::CHAR;
 
     // read into a low-level char array
     char cread[30] = {'A'}; // pre-fill with junk
-    NX_ASSERT_OKAY(NXgetattr(fid, "str_attr_", cread, &len, &datatype), "failed to get attribute");
+    NX_ASSERT_OKAY(NXgetattr(fid, "str_attr_", cread, len, datatype), "failed to get attribute");
     TS_ASSERT_EQUALS(data, cread);
     TS_ASSERT_EQUALS(len, data.size());
     TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
@@ -955,7 +950,7 @@ public:
     // If it is too long, the string will contain junk data
     // If too short, the string will not contain all of the data
     string readme(30, 'A'); // pre-fill with junk
-    NX_ASSERT_OKAY(NXgetattr(fid, "str_attr_", readme.data(), &len, &datatype), "failed to get attribute");
+    NX_ASSERT_OKAY(NXgetattr(fid, "str_attr_", readme.data(), len, datatype), "failed to get attribute");
     TS_ASSERT_DIFFERS(data, readme);
     readme.resize(len);
     // NOTE we must go to length - 1, because read attribute is WRONG
@@ -988,13 +983,13 @@ public:
     cout << "create entry at /entry/some_data\n";
     string const somedata("this is some data");
     DimVector dims{static_cast<dimsize_t>(somedata.size())};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "some_data", NXnumtype::CHAR, 1, dims.data()), "failed to make data");
+    NX_ASSERT_OKAY(NXmakedata64(fid, "some_data", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "some_data"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, somedata.data()), "failed to put data");
 
     // create a link target
     NXlink datalink;
-    NX_ASSERT_OKAY(NXgetdataID(fid, &datalink), "failed to make link");
+    NX_ASSERT_OKAY(NXgetdataID(fid, datalink), "failed to make link");
     TS_ASSERT_EQUALS(datalink.targetAddress, "/entry/some_data");
     TS_ASSERT_EQUALS(datalink.linkType, NXentrytype::sds);
 
@@ -1005,13 +1000,13 @@ public:
     cout << "create group at /entry/data to link to the data\n";
     NX_ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakelink(fid, &datalink), "failed to make link");
+    NX_ASSERT_OKAY(NXmakelink(fid, datalink), "failed to make link");
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close");
 
     // check data link
     NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/data/some_data"), "failed to open linked address");
     NXlink res1;
-    NX_ASSERT_OKAY(NXgetdataID(fid, &res1), "failed to get data ID from link");
+    NX_ASSERT_OKAY(NXgetdataID(fid, res1), "failed to get data ID from link");
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
     cout << "data link works\n";
@@ -1027,7 +1022,7 @@ public:
     NX_ASSERT_OKAY(NXmakegroup(fid, "group1", "NXpants"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group1", "NXpants"), "failed to open group");
     NXlink grouplink;
-    NX_ASSERT_OKAY(NXgetgroupID(fid, &grouplink), "failed to get group ID");
+    NX_ASSERT_OKAY(NXgetgroupID(fid, grouplink), "failed to get group ID");
     TS_ASSERT_EQUALS(grouplink.targetAddress, "/entry/group1");
     TS_ASSERT_EQUALS(grouplink.linkType, NXentrytype::group);
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
@@ -1036,13 +1031,13 @@ public:
     cout << "create group /entry/group2/group1\n";
     NX_ASSERT_OKAY(NXmakegroup(fid, "group2", "NXshorts"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group2", "NXshorts"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakelink(fid, &grouplink), "failed to make link");
+    NX_ASSERT_OKAY(NXmakelink(fid, grouplink), "failed to make link");
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close");
 
     // check group link
     NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/group2/group1"), "failed to open linked address");
     NXlink res2;
-    NX_ASSERT_OKAY(NXgetgroupID(fid, &res2), "failed to get linked group ID");
+    NX_ASSERT_OKAY(NXgetgroupID(fid, res2), "failed to get linked group ID");
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
     cout << "group link works\n";

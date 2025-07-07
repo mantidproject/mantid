@@ -2,13 +2,14 @@
 #include <assert.h>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
-void NXI5KillDir(pNexusFile5 self) { self->iStack5[self->iStackPtr].iCurrentIDX = 0; }
+void NXI5KillDir(pNexusFile5 self) { self->iStack5.back().iCurrentIDX = 0; }
 
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
@@ -73,7 +74,7 @@ herr_t readStringAttribute(hid_t attr, char **data) {
   return static_cast<herr_t>(NXstatus::NX_OK);
 }
 
-herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
+herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen) {
   herr_t iRet;
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
@@ -83,7 +84,7 @@ herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
     // there is a danger of overflowing output string
-    std::strncpy(data, vdat, static_cast<size_t>(maxlen));
+    std::strncpy(data, vdat, maxlen);
 #if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
@@ -109,17 +110,17 @@ std::string buildCurrentAddress(pNexusFile5 fid) {
   return std::string(caddr);
 }
 
-hid_t getAttVID(pNexusFile5 pFile) {
+hid_t getAttVID(pNexusFile5 fid) {
   hid_t vid;
-  if (pFile->iCurrentG == 0 && pFile->iCurrentD == 0) {
-    /* global attribute */
-    vid = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-  } else if (pFile->iCurrentD != 0) {
+  if (fid->iCurrentD != 0) {
     /* dataset attribute */
-    vid = pFile->iCurrentD;
+    vid = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    /* group attribute */
+    vid = fid->iCurrentG;
   } else {
-    /* group attribute */;
-    vid = pFile->iCurrentG;
+    /* global attribute */
+    vid = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
   }
   return vid;
 }
@@ -130,17 +131,17 @@ void killAttVID(const pNexusFile5 pFile, hid_t vid) {
   }
 }
 
-NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
+NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink const &sLink) {
   hid_t dataID, aid2, aid1, attID;
   char name[] = "target";
 
   /*
      set the target attribute
    */
-  if (sLink->linkType == NXentrytype::sds) {
-    dataID = H5Dopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
+  if (sLink.linkType == NXentrytype::sds) {
+    dataID = H5Dopen(pFile->iFID, sLink.targetAddress.c_str(), H5P_DEFAULT);
   } else {
-    dataID = H5Gopen(pFile->iFID, sLink->targetAddress.c_str(), H5P_DEFAULT);
+    dataID = H5Gopen(pFile->iFID, sLink.targetAddress.c_str(), H5P_DEFAULT);
   }
   if (dataID < 0) {
     NXReportError("Internal error, address to link does not exist");
@@ -156,16 +157,16 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   }
   aid2 = H5Screate(H5S_SCALAR);
   aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, sLink->targetAddress.size());
+  H5Tset_size(aid1, sLink.targetAddress.size());
   attID = H5Acreate(dataID, name, aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
   if (attID < 0) {
     return NXstatus::NX_OK;
   }
-  UNUSED_ARG(H5Awrite(attID, aid1, sLink->targetAddress.c_str()));
+  UNUSED_ARG(H5Awrite(attID, aid1, sLink.targetAddress.c_str()));
   H5Tclose(aid1);
   H5Sclose(aid2);
   H5Aclose(attID);
-  if (sLink->linkType == NXentrytype::sds) {
+  if (sLink.linkType == NXentrytype::sds) {
     H5Dclose(dataID);
   } else {
     H5Gclose(dataID);
@@ -173,71 +174,51 @@ NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
   return NXstatus::NX_OK;
 }
 
-int countObjectsInGroup(hid_t loc_id) {
-  int count = 0;
-  H5G_info_t numobj;
-
-  herr_t status;
-
-  status = H5Gget_info(loc_id, &numobj);
-  if (status < 0) {
-    NXReportError("Internal error, failed to retrieve no of objects");
-    return 0;
-  }
-
-  count = (int)numobj.nlinks;
-  return count;
-}
+// NOTE save in case needed later as model
+// std::size_t countObjectsInGroup(pNexusFile5 const fid) {
+//   std::size_t count = 0;
+//   herr_t iRet;
+//   if (fid->iCurrentG == 0) {
+//     hid_t gid = H5Gopen(fid->iFID, "/", H5P_DEFAULT);
+//     iRet = H5Gget_num_objs(gid, &count);
+//     H5Gclose(gid);
+//   } else {
+//     iRet = H5Gget_num_objs(fid->iCurrentG, &count);
+//   }
+//   if (iRet < 0) {
+//     NXReportError("Internal error, failed to retrieve no of objects");
+//     return 0;
+//   }
+//   return count;
+// }
 
 NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
+  // NOTE this is exploiting the bit-level representation of NXnumtype
+  // where the first hex stands for: 2 = float, 1 = signed int, 0 = unsigned int
+  // and where the second hex is the width in bytes (which is given by H5Tget_size)
+  // and where CHAR (0XF0) and BINARY (0xF1) are special values
+  unsigned short size = static_cast<unsigned short>(H5Tget_size(atype));
   NXnumtype iPtype = NXnumtype::BAD;
-  size_t size;
-  H5T_sign_t sign;
-
   if (tclass == H5T_STRING) {
     iPtype = NXnumtype::CHAR;
+  } else if (tclass == H5T_BITFIELD) {
+    // underused datatype, would be great for masks
+    iPtype = NXnumtype::BINARY;
   } else if (tclass == H5T_INTEGER) {
-    size = H5Tget_size(atype);
-    sign = H5Tget_sign(atype);
-    if (size == 1) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT8;
-      } else {
-        iPtype = NXnumtype::UINT8;
-      }
-    } else if (size == 2) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT16;
-      } else {
-        iPtype = NXnumtype::UINT16;
-      }
-    } else if (size == 4) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT32;
-      } else {
-        iPtype = NXnumtype::UINT32;
-      }
-    } else if (size == 8) {
-      if (sign == H5T_SGN_2) {
-        iPtype = NXnumtype::INT64;
-      } else {
-        iPtype = NXnumtype::UINT64;
-      }
+    unsigned short type = size;
+    H5T_sign_t sign = H5Tget_sign(atype);
+    if (sign == H5T_SGN_2) {
+      type += 0x10; // signed data type
     }
+    iPtype = NXnumtype(type);
   } else if (tclass == H5T_FLOAT) {
-    size = H5Tget_size(atype);
-    if (size == 4) {
-      iPtype = NXnumtype::FLOAT32;
-    } else if (size == 8) {
-      iPtype = NXnumtype::FLOAT64;
-    }
+    iPtype = NXnumtype(0x20u + size);
   }
   if (iPtype == NXnumtype::BAD) {
     char message[80];
     snprintf(message, 79, "ERROR: hdf5ToNXtype: invalid type (%d)", tclass);
     NXReportError(message);
   }
-
   return iPtype;
 }
 
@@ -297,6 +278,7 @@ hid_t nxToHDF5Type(NXnumtype datatype) {
 }
 
 hid_t h5MemType(hid_t atype) {
+  // NOTE is this function actually necessary?
   hid_t memtype_id = -1;
   size_t size;
   H5T_sign_t sign;
@@ -350,10 +332,8 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
   UNUSED_ARG(loc_id);
   UNUSED_ARG(unused);
   UNUSED_ARG(opdata);
-  char attr_name[8 + 1]; /* need to leave space for \0 as well */
-
-  strcpy(attr_name, "NX_class");
-  return strstr(member_name, attr_name) ? 1 : 0;
+  std::string attr_name("NX_class");
+  return strstr(member_name, attr_name.c_str()) ? 1 : 0;
 }
 
 /*------------------------------------------------------------------------
@@ -368,7 +348,7 @@ int isDataSetOpen(NXhandle hfil) {
      This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
      when no dataset is open
    */
-  if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetdataID(hfil, id) == NXstatus::NX_ERROR) {
     return 0;
   } else {
     return 1;
@@ -383,7 +363,7 @@ int isRoot(NXhandle hfil) {
      This uses the feauture that NXgetgroupID returns NX_ERROR
      when we are at root level
    */
-  if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {
+  if (NXgetgroupID(hfil, id) == NXstatus::NX_ERROR) {
     return 1;
   } else {
     return 0;
@@ -394,31 +374,26 @@ int isRoot(NXhandle hfil) {
   copies the next address element into element.
   returns a pointer into address beyond the extracted address
   ---------------------------------------------------------------------*/
-char *extractNextAddress(char *address, NXname element) {
-  char *pStart = address;
+std::string extractNextAddress(std::string const &address, std::string &element) {
+  std::size_t start = 0;
   /*
      skip over leading /
    */
-  if (*pStart == '/') {
-    pStart++;
+  if (address.starts_with('/')) {
+    start++;
   }
 
   /*
      find next /
    */
-  char *pNext = strchr(pStart, '/');
-  if (pNext == NULL) {
-    /*
-       this is the last address element
-     */
-    strcpy(element, pStart);
-    return NULL;
+  std::size_t next = address.find_first_of('/', start);
+  std::size_t width = next - start;
+  element = address.substr(start, width);
+  if (next == std::string::npos) {
+    return "";
   } else {
-    size_t length = (size_t)(pNext - pStart);
-    strncpy(element, pStart, length);
-    element[length] = '\0';
+    return address.substr(next + 1, std::string::npos);
   }
-  return pNext++;
 }
 
 /*-------------------------------------------------------------------*/
@@ -436,8 +411,8 @@ NXstatus gotoRoot(NXhandle hfil) {
 }
 
 /*--------------------------------------------------------------------*/
-int isRelative(char const *address) {
-  if (address[0] == '.' && address[1] == '.')
+int isRelative(std::string const &address) {
+  if (address.starts_with(".."))
     return 1;
   else
     return 0;
@@ -455,84 +430,81 @@ NXstatus moveOneDown(NXhandle hfil) {
 /*-------------------------------------------------------------------
   returns a pointer to the remaining address string to move up
   --------------------------------------------------------------------*/
-char *moveDown(NXhandle hfil, char *address, NXstatus *code) {
-  *code = NXstatus::NX_OK;
+std::string moveDown(NXhandle fid, std::string const &address, NXstatus &code) {
+  code = NXstatus::NX_OK;
+  std::string ret(address);
 
-  if (address[0] == '/') {
-    *code = gotoRoot(hfil);
-    return address;
+  if (address.starts_with('/')) {
+    code = gotoRoot(fid);
   } else {
-    char *pPtr;
-    pPtr = address;
-    while (isRelative(pPtr)) {
-      NXstatus status = moveOneDown(hfil);
+    while (isRelative(ret)) {
+      NXstatus status = moveOneDown(fid);
       if (status == NXstatus::NX_ERROR) {
-        *code = status;
-        return pPtr;
+        code = status;
+        break;
+      } else {
+        ret = ret.substr(3, std::string::npos);
       }
-      pPtr += 3;
     }
-    return pPtr;
   }
+  return ret;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus stepOneUp(NXhandle hfil, char const *name) {
+NXstatus stepOneUp(NXhandle fid, std::string const &name) {
   NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
+  std::string name2, xclass;
 
   /*
      catch the case when we are there: i.e. no further stepping
      necessary. This can happen with address like ../
    */
-  if (strlen(name) < 1) {
+  if (name.size() < 1) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
+  NXinitgroupdir(fid);
 
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
-        return NXopendata(hfil, name);
+  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
+    if (name2 == name) {
+      if (xclass == "SDS") {
+        return NXopendata(fid, name);
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopenaddress cannot step into %s", name);
-  NXReportError(pBueffel);
+  std::string warning("ERROR: NXopenaddress cannot step into " + name);
+  NXReportError(warning.c_str());
   return NXstatus::NX_ERROR;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
+NXstatus stepOneGroupUp(NXhandle fid, std::string const &name) {
   NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
+  std::string name2, xclass;
 
   /*
      catch the case when we are there: i.e. no further stepping
      necessary. This can happen with address like ../
    */
-  if (strlen(name) < 1) {
+  if (name.size() < 1) {
     return NXstatus::NX_OK;
   }
 
-  NXinitgroupdir(hfil);
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
+  NXinitgroupdir(fid);
+  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
 
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
+    if (name2 == name) {
+      if (xclass == "SDS") {
         return NXstatus::NX_EOD;
       } else {
-        return NXopengroup(hfil, name, xclass);
+        return NXopengroup(fid, name, xclass);
       }
     }
   }
-  snprintf(pBueffel, 255, "ERROR: NXopengroupaddress cannot step into %s", name);
-  NXReportError(pBueffel);
+  std::string warning("ERROR: NXopengroupaddress cannot step into " + name);
+  NXReportError(warning.c_str());
   return NXstatus::NX_ERROR;
 }
 
@@ -540,18 +512,7 @@ NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
  * private functions used in NX5open
  */
 
-pNexusFile5 create_file_struct() {
-  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
-  if (!pNew) {
-    NXReportError("ERROR: not enough memory to create file structure");
-  } else {
-    memset(pNew, 0, sizeof(NexusFile5));
-  }
-
-  return pNew;
-}
-
-hid_t create_file_access_plist(CONSTCHAR *filename) {
+hid_t create_file_access_plist(std::string const &filename) {
   char pBuffer[512];
   hid_t fapl = -1;
 
@@ -560,7 +521,7 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
     sprintf(pBuffer,
             "Error: failed to create file access property "
             "list for file %s",
-            filename);
+            filename.c_str());
     NXReportError(pBuffer);
     return fapl;
   }
@@ -570,7 +531,7 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
     sprintf(pBuffer,
             "Error: cannot set close policy for file "
             "%s",
-            filename);
+            filename.c_str());
     NXReportError(pBuffer);
     return fapl;
   }
@@ -578,23 +539,23 @@ hid_t create_file_access_plist(CONSTCHAR *filename) {
   return fapl;
 }
 
-herr_t set_str_attribute(hid_t parent_id, CONSTCHAR *name, CONSTCHAR *buffer) {
+herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string const &buffer) {
   char pBuffer[512];
   hid_t attr_id;
   hid_t space_id = H5Screate(H5S_SCALAR);
   hid_t type_id = H5Tcopy(H5T_C_S1);
 
-  H5Tset_size(type_id, strlen(buffer));
+  H5Tset_size(type_id, buffer.size());
 
-  attr_id = H5Acreate(parent_id, name, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+  attr_id = H5Acreate(parent_id, name.c_str(), type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
   if (attr_id < 0) {
-    sprintf(pBuffer, "ERROR: failed to create %s attribute", name);
+    sprintf(pBuffer, "ERROR: failed to create %s attribute", name.c_str());
     NXReportError(pBuffer);
     return -1;
   }
 
-  if (H5Awrite(attr_id, type_id, buffer) < 0) {
-    sprintf(pBuffer, "ERROR: failed writting %s attribute", name);
+  if (H5Awrite(attr_id, type_id, buffer.data()) < 0) {
+    sprintf(pBuffer, "ERROR: failed writting %s attribute", name.c_str());
     NXReportError(pBuffer);
     return -1;
   }
