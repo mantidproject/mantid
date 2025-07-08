@@ -46,6 +46,7 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
       summationTypeFromString(defaults.getStringOrDefault("SummationType", "SummationType", "SumInLambda"));
   auto includePartialBins = defaults.getBoolOrFalse("IncludePartialBins", "IncludePartialBins");
   auto debug = defaults.getBoolOrFalse("Debug", "Debug");
+  auto diagnostics = defaults.getBoolOrFalse("Diagnostics", "Diagnostics");
 
   auto backgroundSubtractionMethod =
       defaults.getStringOrEmpty("BackgroundCalculationMethod", "BackgroundCalculationMethod");
@@ -111,7 +112,7 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
 
   return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug, backgroundSubtraction,
                     polarizationCorrections, std::move(floodCorrections), std::move(transmissionStitchOptions),
-                    stitchParameters, lookupTableValidationResult.assertValid());
+                    stitchParameters, lookupTableValidationResult.assertValid(), diagnostics);
 }
 } // unnamed namespace
 
