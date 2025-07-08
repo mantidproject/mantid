@@ -126,7 +126,7 @@ Introduction to Sample Shape, Material, and Orientation
 #######################################################
 
 A critical aspect to performing texture analysis is having the correct representation of the sample, its shape, and its intrinsic directions for each dataset you process.
-This is because these are the factors which will determine where points end up within the pole figure. Getting these things right within mantid, should hopefully, not be
+This is crucial because these are the factors which will determine where points end up within the pole figure. Getting these things right within mantid, should hopefully, not be
 too onerous, but care should be taken to make good records of the physical layouts during the experiment to check your recreation in mantid.
 
 The way the texture analysis has been designed in Mantid, is that each run's workspace should contain the information about the sample shape and its orientation relative
@@ -247,8 +247,7 @@ the accuracy required, and the amount of time available, you may or may not want
 Mantid offers a suite of approaches to tackle this (:ref:`_Sample Corrections`), so to a certain extent this can be tailored to the use case, but here we
 will discuss the methodology designed to replicate the functionality available within the user interface, making use of :ref:`algm-MonteCarloAbsorption`.
 
-Below is a script that can be used to this end, along with some additional helper scripts for making the reference workspace and dealing with orientation files.
-The main script is split into three sections - imports, experiment information, and execution. For most use cases
+Below is a script that can be used to this end. The script is split into three sections - imports, experiment information, and execution. For most use cases
 the only section needing attention is the experimental information. This section should be sufficiently annotated to explain how to use it, but should mirror
 the user interface while providing more repeatable processing.
 
@@ -358,8 +357,73 @@ the user interface while providing more repeatable processing.
                clear_ads_after = clear_ads_after)
 
 
+Focusing
+########
+
+Regardless of whether absorption correction has been applied (at the very least the absorption correction script should probably be run with `include_abs_corr = False`,
+in order to apply the sample shape and orientations), some focusing of data is likely required for creating pole figures. In principle, unfocussed data could be used,
+but this would be rather slow due to the fitting of peaks on each spectra, and this would not necessarily provide meaningful improvement in spatial resolution. As far as
+ENGIX is concerned, grouping any more finely than the block level is mostly diminishing returns. The below script can be used to generate some custom groupings at
+the module or block level, and could be modified for more exotic groupings beyond this, but there are standard groupings available as well.
+
+.. code::python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+
+   def get_detector_grouping_string(ws, group_by):
+      info = ws.componentInfo()
+      detinfo = ws.detectorInfo()
+      dets = detinfo.detectorIDs()
+      instr_dets = info.detectorsInSubtree(info.root())
+
+      def get_det_id(comp_ind, dets, instr_dets):
+         return dets[np.where(instr_dets == comp_ind)][0]
+
+      nbi = info.indexOfAny("NorthBank")
+      sbi = info.indexOfAny("SouthBank")
 
 
+      nbmi = info.children(nbi)
+      sbmi = info.children(sbi)
+
+      nbmbi = [xx for x in [info.children(int(nbm)) for nbm in nbmi] for xx in x]
+      sbmbi = [xx for x in [info.children(int(sbm)) for sbm in sbmi] for xx in x]
+      if group_by == "module":
+         n_mods = ",".join(
+               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(nbm))]) for nbm in
+               nbmi])
+         s_mods = ",".join(
+               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(sbm))]) for sbm in
+               sbmi])
+         return ",".join([n_mods, s_mods])
+      if group_by == "block":
+         n_blocks = ",".join(
+               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(nbm))]) for nbm in
+               nbmbi])
+         s_blocks = ",".join(
+               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(sbm))]) for sbm in
+               sbmbi])
+         return ",".join([n_blocks, s_blocks])
+
+   ws = LoadEmptyInstrument(InstrumentName = "ENGINX")
+
+   block_string = get_detector_grouping_string(ws, "block")
+
+   det_group = CreateGroupingWorkspace(InputWorkspace = ws, CustomGroupingString = block_string, OutputWorkspace = "det_group")
+
+   CreateGroupingWorkspace(InstrumentName='ENGINX',
+                           ComponentName='ENGIN-X',
+                           CustomGroupingString=block_string,
+                           OutputWorkspace = "det_group")
+
+   SaveCalFile(r"path\to\cal\block.cal", GroupingWorkspace = "det_group")
+
+These cal files can be provided as a `grouping_filepath` if desired, or used to calibrate in the user interface and the resultant `prm` file can be used for focusing.
+
+If using a standard grouping, no grouping_filepath or prm_filepath is required, and simply the string (e.g. `"Texture30"`) is needed.
 
 
 References
