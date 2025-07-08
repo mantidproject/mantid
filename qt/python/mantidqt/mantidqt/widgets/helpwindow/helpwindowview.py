@@ -7,15 +7,62 @@ from html import escape
 from qtpy.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
+    QHBoxLayout,
     QToolBar,
     QPushButton,
     QWidget,
     QLabel,
     QSizePolicy,
+    QLineEdit,
+    QFrame,
+    QShortcut,
+    QApplication,
 )
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
-from qtpy.QtCore import QUrl, Qt
-from qtpy.QtGui import QIcon
+from qtpy.QtCore import QUrl, Qt, QEvent
+from qtpy.QtGui import QIcon, QKeySequence
+
+# Attempt to import QWebEnginePage in a way that works across different Qt bindings/versions
+try:
+    # Preferred: QtWebEngineWidgets provides QWebEnginePage (PyQt5, PyQt6 ≤6.5)
+    from qtpy.QtWebEngineWidgets import QWebEnginePage  # type: ignore
+except ImportError:  # pragma: no cover  – fall back to QtWebEngineCore (Qt ≥6.5)
+    try:
+        from qtpy.QtWebEngineCore import QWebEnginePage  # type: ignore
+    except ImportError:
+        # As a last resort, define a minimal stub exposing only the enum used (FindBackward = 1)
+        class QWebEnginePage:  # type: ignore
+            """Fallback stub when QWebEnginePage is unavailable – limits search functionality."""
+
+            FindBackward = 1
+
+            def __init__(self, *args, **kwargs):
+                raise RuntimeError("QWebEnginePage is not available in this Qt binding; help window search will be limited.")
+
+
+class NavigationWebEngineView(QWebEngineView):
+    """QWebEngineView that intercepts extra mouse buttons for navigation."""
+
+    def __init__(self, *args, **kwargs):
+        self._logger = logging.getLogger(__name__)
+        super().__init__(*args, **kwargs)
+
+    def mousePressEvent(self, event):
+        btn = event.button()
+        if btn in (Qt.BackButton, Qt.XButton1):
+            self._logger.debug("NavigationWebEngineView: Back mouse button pressed")
+            if self.history().canGoBack():
+                self.back()
+                event.accept()
+                return  # Consume event
+        elif btn in (Qt.ForwardButton, Qt.XButton2):
+            self._logger.debug("NavigationWebEngineView: Forward mouse button pressed")
+            if self.history().canGoForward():
+                self.forward()
+                event.accept()
+                return  # Consume event
+        # Fallback to default behaviour
+        super().mousePressEvent(event)
 
 
 class HelpWindowView(QMainWindow):
@@ -34,9 +81,8 @@ class HelpWindowView(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setCentralWidget(container)
 
-        # Create the QWebEngineView
-        self.browser = QWebEngineView()
-        layout.addWidget(self.browser)
+        # Create the custom QWebEngineView (will be added to layout later)
+        self.browser = NavigationWebEngineView()
 
         # Configure Web Engine Settings
         settings = self.browser.settings()
@@ -91,6 +137,13 @@ class HelpWindowView(QMainWindow):
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.toolbar.addWidget(spacer)
 
+        # Find button in toolbar
+        self.findButton = QPushButton()
+        self.findButton.setIcon(QIcon.fromTheme("edit-find", QIcon(":/qt-project.org/styles/commonstyle/images/find-32.png")))
+        self.findButton.setToolTip("Find in Page (Ctrl+F)")
+        self.findButton.clicked.connect(self.show_find_toolbar)
+        self.toolbar.addWidget(self.findButton)
+
         # Status Label (Icon + Text)
         self.statusLabel = QLabel("Status: Initializing...")
         self.statusLabel.setToolTip("Indicates whether documentation is loaded locally (Offline) or from the web (Online)")
@@ -98,11 +151,142 @@ class HelpWindowView(QMainWindow):
         self.statusLabel.setStyleSheet("QLabel { padding-left: 5px; padding-right: 5px; margin-left: 5px; }")
         self.toolbar.addWidget(self.statusLabel)
 
+        # Create Find Toolbar (initially hidden)
+        self.setup_find_toolbar(layout)
+
+        # Add browser after find toolbar
+        layout.addWidget(self.browser)
+
+        # Setup keyboard shortcuts
+        self.setup_shortcuts()
+
         # Connect signals for enabling/disabling buttons
         self.browser.urlChanged.connect(self.update_navigation_buttons)
         # Connect loadFinished to the new handler
         self.browser.loadFinished.connect(self.handle_load_finished)
         self.update_navigation_buttons()
+
+        QApplication.instance().installEventFilter(self)
+
+    def setup_find_toolbar(self, parent_layout):
+        """Create and setup the find toolbar widget."""
+        self.find_frame = QFrame()
+        self.find_frame.setFrameStyle(QFrame.StyledPanel)
+        # Shrink size of the toolbar – subtle background, thinner borders
+        self.find_frame.setStyleSheet(
+            """
+            QFrame {
+                background-color: #fafafa;
+                border: 1px solid #ccc;
+                border-radius: 2px;
+            }
+            QLineEdit {
+                padding: 2px 4px;
+            }
+        """
+        )
+
+        # Limit the visual height of the find toolbar
+        self.find_frame.setMaximumHeight(32)
+        self.find_frame.setVisible(False)
+
+        find_layout = QHBoxLayout(self.find_frame)
+        # Compact margins & spacing
+        find_layout.setContentsMargins(4, 2, 4, 2)
+        find_layout.setSpacing(4)
+
+        # Find label
+        find_label = QLabel("Find:")
+        find_layout.addWidget(find_label)
+
+        # Find input
+        self.find_input = QLineEdit()
+        self.find_input.setPlaceholderText("Search…")
+        self.find_input.setFixedHeight(24)
+        self.find_input.returnPressed.connect(self.find_next)
+        self.find_input.textChanged.connect(self.find_text_changed)
+        find_layout.addWidget(self.find_input)
+
+        # Previous button
+        self.find_prev_button = QPushButton("Prev")
+        self.find_prev_button.setToolTip("Find Previous (Shift+F3)")
+        self.find_prev_button.setFixedHeight(24)
+        self.find_prev_button.clicked.connect(self.find_previous)
+        find_layout.addWidget(self.find_prev_button)
+
+        # Next button
+        self.find_next_button = QPushButton("Next")
+        self.find_next_button.setToolTip("Find Next (F3)")
+        self.find_next_button.setFixedHeight(24)
+        self.find_next_button.clicked.connect(self.find_next)
+        find_layout.addWidget(self.find_next_button)
+
+        # Close button
+        self.find_close_button = QPushButton("×")
+        self.find_close_button.setFixedSize(20, 20)
+        self.find_close_button.setToolTip("Close (Escape)")
+        self.find_close_button.setStyleSheet("QPushButton { font-weight: bold; }")
+        self.find_close_button.clicked.connect(self.hide_find_toolbar)
+        find_layout.addWidget(self.find_close_button)
+
+        parent_layout.addWidget(self.find_frame)
+
+    def setup_shortcuts(self):
+        """Setup keyboard shortcuts for find functionality."""
+        # Ctrl+F to show find
+        self.show_find_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        self.show_find_shortcut.activated.connect(self.show_find_toolbar)
+
+        # Escape to hide find
+        self.hide_find_shortcut = QShortcut(QKeySequence("Escape"), self)
+        self.hide_find_shortcut.activated.connect(self.hide_find_toolbar)
+
+        # F3 for find next
+        self.find_next_shortcut = QShortcut(QKeySequence("F3"), self)
+        self.find_next_shortcut.activated.connect(self.find_next)
+
+        # Shift+F3 for find previous
+        self.find_prev_shortcut = QShortcut(QKeySequence("Shift+F3"), self)
+        self.find_prev_shortcut.activated.connect(self.find_previous)
+
+    def show_find_toolbar(self):
+        """Show the find toolbar and focus the input field."""
+        self.find_frame.setVisible(True)
+        self.find_input.setFocus()
+        self.find_input.selectAll()
+        self._logger.debug("Find toolbar shown")
+
+    def hide_find_toolbar(self):
+        """Hide the find toolbar and clear any search highlights."""
+        self.find_frame.setVisible(False)
+        # Clear search by searching for empty string
+        self.browser.page().findText("")
+        self.browser.setFocus()
+        self._logger.debug("Find toolbar hidden")
+
+    def find_text_changed(self):
+        """Called when find text changes - performs live search."""
+        search_text = self.find_input.text()
+        if search_text:
+            self.browser.page().findText(search_text)
+        else:
+            # Clear highlights when text is empty
+            self.browser.page().findText("")
+
+    def find_next(self):
+        """Find next occurrence of the search text."""
+        search_text = self.find_input.text()
+        if search_text:
+            self.browser.page().findText(search_text)
+            self._logger.debug(f"Finding next: {search_text}")
+
+    def find_previous(self):
+        """Find previous occurrence of the search text."""
+        search_text = self.find_input.text()
+        if search_text:
+            # Use QWebEnginePage.FindBackward flag for previous search
+            self.browser.page().findText(search_text, QWebEnginePage.FindBackward)
+            self._logger.debug(f"Finding previous: {search_text}")
 
     def handle_load_finished(self, ok: bool):
         """Slot handling the loadFinished signal. Shows generic error on failure."""
@@ -278,3 +462,18 @@ class HelpWindowView(QMainWindow):
         self._logger.debug("Close event triggered.")
         self.presenter.on_close()
         super().closeEvent(event)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonPress and obj is not self.browser:
+            btn = event.button()
+            if btn in (Qt.BackButton, Qt.XButton1):
+                self._logger.debug("Global eventFilter: Back mouse button detected (non-browser widget)")
+                if self.browser.history().canGoBack():
+                    self.browser.back()
+                    return True
+            elif btn in (Qt.ForwardButton, Qt.XButton2):
+                self._logger.debug("Global eventFilter: Forward mouse button detected (non-browser widget)")
+                if self.browser.history().canGoForward():
+                    self.browser.forward()
+                    return True
+        return super().eventFilter(obj, event)
