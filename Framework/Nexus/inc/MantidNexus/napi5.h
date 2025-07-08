@@ -8,20 +8,9 @@
 
 /* HDF5 interface */
 
-NXstatus NX5putattr(NXhandle handle, std::string const &name, const void *data, std::size_t const iDataLen,
-                    NXnumtype const iType);
-
 NXstatus NX5getdata(NXhandle handle, void *data);
 NXstatus NX5getinfo64(NXhandle handle, std::size_t &rank, Mantid::Nexus::DimVector &dims, NXnumtype &datatype);
 NXstatus NX5getnextentry(NXhandle handle, std::string &name, std::string &nxclass, NXnumtype &datatype);
-
-NXstatus NX5getnextattr(NXhandle handle, std::string &pName, std::size_t &iLength, NXnumtype &iType);
-NXstatus NX5getattr(NXhandle handle, std::string const &name, void *data, std::size_t &iDataLen, NXnumtype &iType);
-
-NXstatus NX5getnextattra(NXhandle handle, std::string &pName, std::size_t &rank, Mantid::Nexus::DimVector &dim,
-                         NXnumtype &iType);
-NXstatus NX5getattrainfo(NXhandle handle, std::string const &pName, std::size_t &rank, Mantid::Nexus::DimVector &dim,
-                         NXnumtype &iType);
 
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata);
 herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *unused, void *opdata);
