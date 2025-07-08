@@ -35,6 +35,7 @@ class Prop:
     GROUP_TOF = "GroupTOFWorkspaces"
     RELOAD = "ReloadInvalidWorkspaces"
     DEBUG = "Debug"
+    DIAGNOSTICS = "Diagnostics"
     HIDE_INPUT = "HideInputWorkspaces"
     OUTPUT_WS = "OutputWorkspace"
     OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
@@ -247,6 +248,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareOutputProperties(self):
         properties = [
             Prop.DEBUG,
+            Prop.DIAGNOSTICS,
             "MomentumTransferMin",
             "MomentumTransferStep",
             "MomentumTransferMax",
@@ -666,6 +668,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _isDebug(self):
         return not self.getProperty(Prop.DEBUG).isDefault
+
+    def _isDiagnostics(self):
+        return not self.getProperty(Prop.DIAGNOSTICS).isDefault
 
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""

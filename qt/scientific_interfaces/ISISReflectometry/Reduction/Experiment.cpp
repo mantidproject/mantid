@@ -20,27 +20,27 @@ Experiment::Experiment()
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
       m_lookupTable(LookupTable({LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(),
-                                           std::nullopt, ProcessingInstructions(), std::nullopt, std::nullopt)})) {}
+                                           std::nullopt, ProcessingInstructions(), std::nullopt, std::nullopt)})),
+      m_diagnostics(false) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
                        PolarizationCorrections polarizationCorrections, FloodCorrections floodCorrections,
                        TransmissionStitchOptions transmissionStitchOptions,
-
-                       std::map<std::string, std::string> stitchParameters,
-
-                       LookupTable lookupTable)
+                       std::map<std::string, std::string> stitchParameters, LookupTable lookupTable, bool diagnostics)
     : m_analysisMode(analysisMode), m_reductionType(reductionType), m_summationType(summationType),
       m_includePartialBins(includePartialBins), m_debug(debug), m_backgroundSubtraction(backgroundSubtraction),
       m_polarizationCorrections(polarizationCorrections), m_floodCorrections(std::move(floodCorrections)),
       m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
-      m_stitchParameters(std::move(stitchParameters)), m_lookupTable(std::move(lookupTable)) {}
+      m_stitchParameters(std::move(stitchParameters)), m_lookupTable(std::move(lookupTable)),
+      m_diagnostics(diagnostics) {}
 
 AnalysisMode Experiment::analysisMode() const { return m_analysisMode; }
 ReductionType Experiment::reductionType() const { return m_reductionType; }
 SummationType Experiment::summationType() const { return m_summationType; }
 bool Experiment::includePartialBins() const { return m_includePartialBins; }
 bool Experiment::debug() const { return m_debug; }
+bool Experiment::diagnostics() const { return m_diagnostics; }
 
 BackgroundSubtraction const &Experiment::backgroundSubtraction() const { return m_backgroundSubtraction; }
 
@@ -89,6 +89,7 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
          lhs.floodCorrections() == rhs.floodCorrections() &&
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
-         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable;
+         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable &&
+         lhs.diagnostics() == rhs.diagnostics();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

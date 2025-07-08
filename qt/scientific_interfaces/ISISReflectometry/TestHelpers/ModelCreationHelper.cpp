@@ -426,28 +426,29 @@ TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
                     makeBackgroundSubtraction(), makeWorkspacePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
+                    makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard(),
+                    false);
 }
 
 Experiment makeEmptyExperiment() {
   return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                     makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                    std::map<std::string, std::string>(), LookupTable());
+                    std::map<std::string, std::string>(), LookupTable(), false);
 }
 
 Experiment makeExperimentWithValidDuplicateCriteria() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
                     makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
                     makeTransmissionStitchOptions(), makeStitchOptions(),
-                    makeLookupTableWithTwoValidDuplicateCriteria());
+                    makeLookupTableWithTwoValidDuplicateCriteria(), false);
 }
 
 Experiment makeExperimentWithReductionTypeSetForSumInLambda() {
   return Experiment(AnalysisMode::PointDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, false, false,
                     makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                    std::map<std::string, std::string>(), LookupTable());
+                    std::map<std::string, std::string>(), LookupTable(), false);
 }
 
 /* Instrument */
