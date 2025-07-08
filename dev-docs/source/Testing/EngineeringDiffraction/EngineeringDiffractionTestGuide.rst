@@ -8,11 +8,11 @@ Engineering Diffraction Testing
 
 Preamble
 ^^^^^^^^^
-This document is tailored towards developers intending to test the Engineering Diffraction
-interface.
+- This document is tailored towards developers intending to test the Engineering Diffraction interface.
+- Runs can be loaded from the archive, however it is possible that different run numbers will be needed as older runs may be deleted.
+- The nexus files for all the runs used below are available from ``<mantidBuildDir>/ExternalData/Testing/Data/DocTest`` path
+- Data loading time from the archive can be reduced by adding the above path at ``File`` -> ``Manage User Directories`` -> ``Data Search Directories`` before starting the tests.
 
-Runs can be loaded from the archive, however it is possible that different run numbers
-will be needed as older runs may be deleted.
 
 Overview
 ^^^^^^^^
@@ -40,7 +40,7 @@ Calibration
 
 1. Ensure you can access the ISIS data archive.
 
-2. Open the Engineering Diffraction gui: ``Interfaces`` > ``Diffraction`` > ``Engineering Diffraction``
+2. Open the Engineering Diffraction gui: ``Interfaces`` -> ``Diffraction`` -> ``Engineering Diffraction``
 
 3. On opening the gui the `Create New Calibration` option should be selected.
 
@@ -109,7 +109,7 @@ This test covers the RB number.
 1. Enter a string into the ``RB Number`` box.
 
 2. Follow the steps of `Test 1`, any output files (for non-texture ROI) should now be located in both
-   [Save location]/user/[RB number] and [Save location] (for texture ROI the files will be saved in the first location
+   [Save location]/User/[RB number] and [Save location] (for texture ROI the files will be saved in the first location
    if an RB number is specified, otherwise they will be saved in the latter - this is to reduce the number of files being written).
 
 

@@ -32,11 +32,10 @@
 
 #define DATA_SIZE 200000
 
-int test_unlimited(int file_type, const char *filename) {
+int test_unlimited(NXaccess file_type, const char *filename) {
   // cppcheck-suppress constVariable
   static double d[DATA_SIZE];
-  int64_t dims[2] = {NX_UNLIMITED, DATA_SIZE};
-  int64_t slab_start[2], slab_size[2];
+  Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
   NXhandle file_id = NULL;
   remove(filename);
   NXopen(filename, file_type, file_id);
@@ -44,11 +43,9 @@ int test_unlimited(int file_type, const char *filename) {
   NXopengroup(file_id, "entry1", "NXentry");
   NXcompmakedata64(file_id, "data", NXnumtype::FLOAT64, 2, dims, NXcompression::NONE, dims);
   NXopendata(file_id, "data");
-  slab_start[1] = 0;
-  slab_size[0] = 1;
-  slab_size[1] = DATA_SIZE;
 
-  for (int64_t i = 0; i < 2; i++) {
+  Mantid::Nexus::DimSizeVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
+  for (Mantid::Nexus::dimsize_t i = 0; i < 2; i++) {
     slab_start[0] = i;
     NXputslab64(file_id, d, slab_start, slab_size);
   }
@@ -64,7 +61,7 @@ int main() {
 
   printf("Testing HDF5\n");
   time(&tim);
-  test_unlimited(NXACC_CREATE5, "test_unlimited.nx5");
+  test_unlimited(NXaccess::CREATE5, "test_unlimited.nx5");
   printf("Took %u seconds\n", (unsigned)(time(NULL) - tim));
 
   return 0;

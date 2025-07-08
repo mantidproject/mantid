@@ -172,7 +172,7 @@ There are currently no jobs that run the performance tests. See `here
 <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/performancetests>`__
 for the build script that was used to run the tests on Jenkins.
 Anyone attempting to resurrect the job will have to modify it
-to work with the new Conda build system. There is a `set of python scripts
+to work with the new conda build system. There is a `set of python scripts
 <https://github.com/mantidproject/mantid/tree/main/Testing/PerformanceTests>`__
 for controlling and monitoring the performance tests.
 

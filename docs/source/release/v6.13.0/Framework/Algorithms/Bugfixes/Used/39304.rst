@@ -1,1 +1,0 @@
-- Fixed :ref:`ConvertUnits <algm-ConvertUnits>` when input workspace is a :ref:`ragged workspaces <Ragged_Workspace>` with point data.

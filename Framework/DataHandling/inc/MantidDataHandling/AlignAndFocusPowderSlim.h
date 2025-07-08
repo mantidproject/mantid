@@ -26,14 +26,15 @@ public:
 
   class MANTID_DATAHANDLING_DLL BankCalibration {
   public:
-    BankCalibration(const detid_t idmin, const detid_t idmax, const std::map<detid_t, double> &calibration_map);
+    BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
+                    const std::map<detid_t, double> &calibration_map, const std::set<detid_t> &mask);
     const double &value(const detid_t detid) const;
     const detid_t &idmin() const;
     detid_t idmax() const;
 
   private:
     std::vector<double> m_calibration;
-    detid_t m_detid_offset;
+    const detid_t m_detid_offset;
   };
 
 private:
@@ -41,7 +42,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr createOutputWorkspace(const size_t numHist, const bool linearBins, const double x_delta);
+  API::MatrixWorkspace_sptr createOutputWorkspace();
   API::MatrixWorkspace_sptr editInstrumentGeometry(API::MatrixWorkspace_sptr &wksp, const double l1,
                                                    const std::vector<double> &polars,
                                                    const std::vector<specnum_t> &specids,

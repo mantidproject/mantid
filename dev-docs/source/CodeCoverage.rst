@@ -1,5 +1,5 @@
 ========================
-Generating Code Coverage
+Generating code coverage
 ========================
 
 .. contents::
@@ -16,14 +16,14 @@ GCC and LLVM have tooling built in to allow a developer to view the code coverag
 
 This will work for native C++ code and any code executed via Python, as the instrumentation is compiled into the binary output. Gcovr will also filter out any non-project code automatically.
 
-Coverage on Conda
+Coverage on conda
 #################
 
-Since the move to `conda`, `GCC` is installed through the conda package `gxx_linux-64`. This conda package does NOT include `gcov`, required to assess code coverage. `gcov` is not currently available on `conda`, so you will need to ensure that `gcov` can be instead found on your system, and that this version of `gcov` is the same version as the `GCC` compiler we install using `conda`. If this is not the case, errors will be raised during the generation of coverage data.
+Since the move to conda, `GCC` is installed through the conda package `gxx_linux-64`. This conda package does NOT include `gcov`, required to assess code coverage. `gcov` is not currently available on conda, so you will need to ensure that `gcov` can be instead found on your system, and that this version of `gcov` is the same version as the `GCC` compiler we install using conda. If this is not the case, errors will be raised during the generation of coverage data.
 
 As `gcov` is packaged with `GCC`, you will need to install `GCC` on your system. You can typically do this using the `apt` package manager. If an appropriate version of `GCC` is not available for your OS you will unfortunately have to build it from source: https://gcc.gnu.org/wiki/InstallingGCC
 
-C++ Specific Notes
+C++ specific notes
 ##################
 
 The coverage target(s) do not run the tests automatically. Users must either run the test(s) or file(s) they are interested in manually for data to be produced by the tooling.

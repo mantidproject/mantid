@@ -874,8 +874,7 @@ class FigureInteraction(object):
         for arg_set in ax.creation_args:
             if arg_set["function"] == "contour":
                 continue
-
-            if arg_set["workspaces"] in ax.tracked_workspaces:
+            if "workspaces" in arg_set and arg_set["workspaces"] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set["workspaces"])
                 arg_set["distribution"] = is_normalized
                 if "specNum" not in arg_set:

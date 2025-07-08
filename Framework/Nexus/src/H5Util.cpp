@@ -331,12 +331,10 @@ void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vec
   try {
     DataSet dataset = group.openDataSet(name);
     readArray1DCoerce<OutT, narrow>(dataset, output);
-  } catch (const H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log->information("Failed to open dataset \"" + name + "\"\n");
-  } catch (const H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
+  } catch (const H5::GroupIException &) {
+    g_log->information("Failed to open dataset \"" + name + "\"");
+  } catch (const H5::DataTypeIException &) {
+    g_log->information("DataSet \"" + name + "\" should be double");
   }
 }
 
@@ -346,12 +344,10 @@ std::vector<OutT> readArray1DCoerce(const H5::Group &group, const std::string &n
   try {
     DataSet dataset = group.openDataSet(name);
     readArray1DCoerce<OutT, narrow>(dataset, result);
-  } catch (const H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log->information("Failed to open dataset \"" + name + "\"\n");
-  } catch (const H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log->information("DataSet \"" + name + "\" should be double" + "\n");
+  } catch (const H5::GroupIException &) {
+    g_log->information("Failed to open dataset \"" + name + "\"");
+  } catch (const H5::DataTypeIException &) {
+    g_log->information("DataSet \"" + name + "\" should be double");
   }
 
   return result;
@@ -583,10 +579,15 @@ template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, con
 
 template MANTID_NEXUS_DLL float readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL double readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int8_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint8_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int16_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint16_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 template MANTID_NEXUS_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL char readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce

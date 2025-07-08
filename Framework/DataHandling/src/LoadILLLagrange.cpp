@@ -180,7 +180,7 @@ void LoadILLLagrange::loadMetaData() {
 
   // Open NeXus file
   try {
-    Nexus::File nxHandle(getPropertyValue("Filename"), NXACC_READ);
+    Nexus::File nxHandle(getPropertyValue("Filename"), NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
   } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << getPropertyValue("Filename") << "\" in read mode: " << e.what()

@@ -124,6 +124,9 @@ public:
   /// Destructor
   virtual ~InterfaceManager();
 
+  void showHomeHelpPage();
+  void cleanup();
+
 private:
   void notifyExistingInterfaces(UserSubWindow *newWindow);
 

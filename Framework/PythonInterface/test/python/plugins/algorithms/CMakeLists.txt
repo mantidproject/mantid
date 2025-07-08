@@ -140,6 +140,7 @@ set(TEST_PY_FILES
     SymmetriseMDHistoTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
+    TimeDifferenceTest.py
     TOFTOFCropWorkspaceTest.py
     TOFTOFMergeRunsTest.py
     ExportSampleLogsToCSVFileTest.py

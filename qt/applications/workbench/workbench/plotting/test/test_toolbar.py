@@ -132,14 +132,14 @@ class ToolBarTest(unittest.TestCase):
         self.assertTrue(self._is_crosshair_button_visible(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_hiden_for_tiled_plots(self, mock_qappthread):
+    def test_button_for_tiled_plots(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 
         fig, axes = plt.subplots(2)
         axes[0].plot([-10, 10], [1, 2])
         axes[1].plot([3, 2, 1], [1, 2, 3])
         # crosshair button should be hidden because this is a tiled plot
-        self.assertFalse(self._is_crosshair_button_visible(fig))
+        self.assertTrue(self._is_crosshair_button_visible(fig))
         self.assertFalse(self._is_crosshair_button_checked(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")

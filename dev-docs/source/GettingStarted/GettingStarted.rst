@@ -18,8 +18,8 @@ Getting Started
 Environment Setup
 #################
 
-With the addition of Conda to our workflow we at present have two different methods of Getting Started with mantid development.
-Therefore you can choose which method to setup with (We recommend Conda as it will be the only supported
+With the addition of conda to our workflow we at present have two different methods of Getting Started with mantid development.
+Therefore you can choose which method to setup with (We recommend conda as it will be the only supported
 method eventually).
 
 * :ref:`GettingStartedCondaWindows`

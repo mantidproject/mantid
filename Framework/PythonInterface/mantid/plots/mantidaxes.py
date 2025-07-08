@@ -1325,7 +1325,7 @@ class MantidAxes(Axes):
         :returns: None
         """
         for index, creation_arg in enumerate(self.creation_args):  # type: int, dict
-            if workspace_name == creation_arg["workspaces"]:
+            if "workspaces" in creation_arg and workspace_name == creation_arg["workspaces"]:
                 if creation_arg.get("wkspIndex", -1) == workspace_index or creation_arg.get("specNum", -1) == spec_num:
                     del self.creation_args[index]
                     return
@@ -1717,6 +1717,8 @@ class _WorkspaceArtists(object):
         :param plot_kwargs: Key word args to pass to plotting function
         """
         if plot_kwargs:
+            if "specNum" in plot_kwargs and plot_kwargs["specNum"] is None:
+                del plot_kwargs["specNum"]
             new_artists = self._data_replace_cb(self._artists, workspace, plot_kwargs)
         else:
             new_artists = self._data_replace_cb(self._artists, workspace)

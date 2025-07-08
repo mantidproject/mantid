@@ -3,6 +3,7 @@ set(SRC_FILES
     src/NexusClasses.cpp
     src/napi.cpp
     src/napi5.cpp
+    src/napi_helper.cpp
     src/NexusDescriptor.cpp
     src/NexusException.cpp
     src/NexusFile.cpp
@@ -15,6 +16,7 @@ set(INC_FILES
     inc/MantidNexus/NexusFile_fwd.h
     inc/MantidNexus/napi.h
     inc/MantidNexus/napi5.h
+    inc/MantidNexus/napi_helper.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
@@ -25,10 +27,10 @@ set(TEST_FILES
     NexusIOHelperTest.h
     NexusClassesTest.h
     NexusDescriptorTest.h
-    NeXusFileTest.h
-    NeXusFileLeakTest.h
-    NeXusFileNapiTest.h
-    NeXusFileReadWriteTest.h
+    NexusFileTest.h
+    NexusFileLeakTest.h
+    NexusFileNapiTest.h
+    NexusFileReadWriteTest.h
     NapiUnitTest.h
 )
 

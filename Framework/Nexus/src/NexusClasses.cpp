@@ -117,7 +117,7 @@ void NXDataSet::getAttributes() {
 
     switch (ainfo.type) {
     case NXnumtype::CHAR: {
-      attributes.set(ainfo.name, m_fileID->getStrAttr(ainfo));
+      attributes.set(ainfo.name, m_fileID->getStrAttr(ainfo.name));
       break;
     }
     case NXnumtype::INT16: {
@@ -271,7 +271,7 @@ bool NXClass::containsDataSet(const std::string &query) const { return getDataSe
 NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   // Open NeXus file
   try {
-    m_fileID = std::make_shared<File>(m_filename, NXACC_READ);
+    m_fileID = std::make_shared<File>(m_filename, NXaccess::READ);
   } catch (Exception const &e) {
     std::cout << "NXRoot: Error loading " << m_filename << "\" in read mode: " << e.what() << "\n";
     throw;
@@ -287,7 +287,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
   // Open NeXus file
-  m_fileID = std::make_shared<File>(m_filename, NXACC_CREATE5);
+  m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
 }
 
 NXRoot::~NXRoot() { m_fileID->close(); }

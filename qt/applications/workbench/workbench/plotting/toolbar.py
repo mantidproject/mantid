@@ -85,7 +85,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool("Fill Area", "Fill area under curves", "mdi.format-color-fill", "waterfall_fill_area", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool("Help", "Open plotting help documentation", "mdi.help", "launch_plot_help", None),
-        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.plus", "toggle_crosshair", False),
+        MantidNavigationTool("Crosshair", "Toggle crosshair", "mdi.target", "toggle_crosshair", False),
         MantidNavigationTool("Hide", "Hide the plot", "mdi.eye", "hide_plot", None),
     )
 
@@ -234,10 +234,8 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             self.set_fit_enabled(False)
             self.set_superplot_enabled(False)
 
-        # disable crosshair in tiled plots, 3D plots but keep it enabled in color contour plot
-        if (len(fig.get_axes()) > 1 and figure_type(fig) not in [FigureType.Contour]) or (
-            figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]
-        ):
+        # disable crosshair in 3D plots
+        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.set_crosshair_enabled(False)
 
         for ax in fig.get_axes():

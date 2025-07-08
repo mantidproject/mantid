@@ -11,40 +11,35 @@
 #include <string>
 #include <vector>
 
-typedef const char CONSTCHAR;
-
-/*
- * Any new NXaccess_mode options should be numbered in 2^n format
- * (8, 16, 32, etc) so that they can be bit masked and tested easily.
- *
- * To test older non bit masked options (values below 8) use e.g.
- *
- *       if ( (mode & NXACCMASK_REMOVEFLAGS) == NXACC_CREATE )
- *
- * To test new (>=8) options just use normal bit masking e.g.
- *
- *       if ( mode & NXACC_NOSTRIP )
- *
- */
-constexpr int NXACCMASK_REMOVEFLAGS = (0x7); /* bit mask to remove higher flag options */
-
-constexpr int NX_UNLIMITED = -1;
-
-constexpr int NX_MAXRANK = 32;
-constexpr int NX_MAXNAMELEN = 64;
 constexpr int NX_MAXADDRESSLEN = 1024;
-
-constexpr int NXMAXSTACK = 50;
 
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
-struct NexusFile5 {
-  struct iStack5 {
-    char irefn[1024];
-    hid_t iVref;
-    hsize_t iCurrentIDX;
-  } iStack5[NXMAXSTACK];
+/** \enum NXaccess
+ * NeXus file access codes.
+ * these codes are taken directly from values used in hdf5 package
+ * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
+ * \li READ read-only. Same as H5F_ACC_RDONLY
+ * \li RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
+ * \li CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
+ */
+enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0x0002u };
+
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
+
+struct stackEntry {
+  std::string irefn;
+  hid_t iVref;
+  hsize_t iCurrentIDX;
+};
+
+/** NexusFile5
+ * NOTE this needs to either be moved to a separate file,
+ * or entirely absorbed inside Nexus::File
+ */
+struct MANTID_NEXUS_DLL NexusFile5 {
+  std::vector<stackEntry> iStack5;
   hid_t iFID;
   hid_t iCurrentG;
   hid_t iCurrentD;
@@ -53,33 +48,23 @@ struct NexusFile5 {
   hid_t iCurrentA;
   hsize_t iCurrentIDX;
   int iNX;
-  int iNXID;
-  int iStackPtr;
-  char name_ref[1024];
-  char name_tmp[1024];
+  std::string name_ref;
+  std::string name_tmp;
+
+  // constructors
+  NexusFile5() = delete;
+  NexusFile5(std::string const &, NXaccess const);
+  NexusFile5(NexusFile5 const &);
+  // assignment
+  NexusFile5 &operator=(NexusFile5 const &);
+  // destructor
+  ~NexusFile5();
 };
 
 typedef NexusFile5 *pNexusFile5;
 typedef NexusFile5 *NXhandle;
 
 typedef char NXname[128];
-
-/** \enum NXaccess_mode
- * NeXus file access codes.
- * \li NXACC_READ read-only
- * \li NXACC_RDWR open an existing file for reading and writing.
- * \li NXACC_CREATE5 create a NeXus HDF-5 file.
- */
-typedef enum {
-  NXACC_READ = 1,
-  NXACC_RDWR = 2,
-  NXACC_CREATE5 = 5,
-} NXaccess_mode;
-
-/**
- * A combination of options from #NXaccess_mode
- */
-typedef int NXaccess;
 
 typedef struct {
   char *iname;
@@ -91,7 +76,7 @@ typedef struct {
  * \li group the entry is a group
  * \li sds the entry is a dataset (class SDS)
  */
-enum NXentrytype : int { group = 0, sds = 1 };
+enum class NXentrytype : int { group = 0, sds = 1 };
 
 /**
  * \struct NXlink
@@ -104,13 +89,6 @@ typedef struct {
   NXentrytype linkType;      /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
 
-/* Map NeXus compression methods to HDF compression methods */
-constexpr int NX_CHUNK = 0;
-constexpr int NX_COMP_NONE = 100;
-constexpr int NX_COMP_LZW = 200;
-constexpr int NX_COMP_RLE = 300;
-constexpr int NX_COMP_HUF = 400;
-
 /**
  * Special codes for NeXus file status.
  * \li OKAY success +1.
@@ -120,76 +98,40 @@ constexpr int NX_COMP_HUF = 400;
  */
 enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
 
-/**
- * \ingroup c_types
- * \def NX_FLOAT32
- * 32 bit float
- * \def NX_FLOAT64
- * 64 bit float == double
- * \def NX_INT8
- * 8 bit integer == byte
- * \def NX_UINT8
- * 8 bit unsigned integer
- * \def NX_INT16
- * 16 bit integer
- * \def NX_UINT16
- * 16 bit unsigned integer
- * \def NX_INT32
- * 32 bit integer
- * \def NX_UINT32
- * 32 bit unsigned integer
- * \def NX_CHAR
- * 8 bit character
- * \def NX_BINARY
- * lump of binary data == NX_UINT8
- */
 /*--------------------------------------------------------------------------*/
-
-/* Map NeXus to HDF types */
-constexpr int NX_FLOAT32{5};
-constexpr int NX_FLOAT64{6};
-constexpr int NX_INT8{20};
-constexpr int NX_UINT8{21};
-constexpr int NX_BOOLEAN{NX_UINT8};
-constexpr int NX_INT16{22};
-constexpr int NX_UINT16{23};
-constexpr int NX_INT32{24};
-constexpr int NX_UINT32{25};
-constexpr int NX_INT64{26};
-constexpr int NX_UINT64{27};
-constexpr int NX_CHAR{4};
-constexpr int NX_BINARY{21};
 
 /** \class NXnumtype
  * The primitive types published by this API.
- * \li FLOAT32 float.
- * \li FLOAT64 double
- * \li INT8 int8_t
- * \li UINT8 uint8_t
- * \li INT16 int16_t
- * \li UINT16 uint16_t
- * \li INT32 int32_t
- * \li UINT32 uint32_t
- * \li INT64 int8_t if available on the machine
- * \li UINT64 uint8_t if available on the machine
+ * \li FLOAT32 32-bit float.
+ * \li FLOAT64 64-bit double
+ * \li INT8 byte-width integer -- int8_t
+ * \li UINT8 byte-width unsigned integer -- uint8_t
+ * \li INT16 double-byte-width integer -- int16_t
+ * \li UINT16 double-byte-width unsigned integer -- uint16_t
+ * \li INT32 quad-byte-width integer -- int32_t
+ * \li UINT32 quad-byte-width unsigned integer -- uint32_t
+ * \li INT64 eight-byte-width integer -- int8_t if available on the machine
+ * \li UINT64 eight-byte-width integer -- uint8_t if available on the machine
+ * \li BINARY lump of binary data, same as UINT8
  * \ingroup cpp_types
  */
 class MANTID_NEXUS_DLL NXnumtype {
 public:
-  static int const FLOAT32 = NX_FLOAT32;
-  static int const FLOAT64 = NX_FLOAT64;
-  static int const INT8 = NX_INT8;
-  static int const UINT8 = NX_UINT8;
-  static int const BOOLEAN = NX_BOOLEAN;
-  static int const INT16 = NX_INT16;
-  static int const UINT16 = NX_UINT16;
-  static int const INT32 = NX_INT32;
-  static int const UINT32 = NX_UINT32;
-  static int const INT64 = NX_INT64;
-  static int const UINT64 = NX_UINT64;
-  static int const CHAR = NX_CHAR;
-  static int const BINARY = NX_BINARY;
-  static int const BAD = -1;
+  // first hexadigit: 2 = float, 1 = signed int, 0 = unsigned int, F = special
+  // second hexadigit: width in bytes
+  static unsigned short constexpr FLOAT32 = 0x24u; // 10 0100 = 0x24
+  static unsigned short constexpr FLOAT64 = 0x28u; // 10 1000 = 0x28
+  static unsigned short constexpr INT8 = 0x11u;    // 01 0001 = 0x11
+  static unsigned short constexpr INT16 = 0x12u;   // 01 0010 = 0x12
+  static unsigned short constexpr INT32 = 0x14u;   // 01 0100 = 0x14
+  static unsigned short constexpr INT64 = 0x18u;   // 01 1000 = 0x18
+  static unsigned short constexpr UINT8 = 0x01u;   // 00 0001 = 0x01
+  static unsigned short constexpr UINT16 = 0x02u;  // 00 0010 = 0x02
+  static unsigned short constexpr UINT32 = 0x04u;  // 00 0100 = 0x04
+  static unsigned short constexpr UINT64 = 0x08u;  // 00 1000 = 0x08
+  static unsigned short constexpr CHAR = 0xF0u;    // 11 0000 = 0xF0
+  static unsigned short constexpr BINARY = 0xF1u;  // 11 0001 = 0xF1
+  static unsigned short constexpr BAD = 0xFFu;     // 11 1111 = 0xFF
 
 private:
   int m_val;
@@ -206,20 +148,17 @@ public:
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &value);
 
 /**
- * The available compression types. These are all ignored in xml files.
+ * The available compression types:
+ * \li CHUNK chunk encoding
  * \li NONE no compression
  * \li LZW Lossless Lempel Ziv Welch compression (recommended)
  * \li RLE Run length encoding (only HDF-4)
  * \li HUF Huffmann encoding (only HDF-4)
  * \ingroup cpp_types
  */
-enum NXcompression : int {
-  CHUNK = NX_CHUNK,
-  NONE = NX_COMP_NONE,
-  LZW = NX_COMP_LZW,
-  RLE = NX_COMP_RLE,
-  HUF = NX_COMP_HUF
-};
+enum class NXcompression { CHUNK, NONE, LZW, RLE, HUF };
+
+MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression &value);
 
 // forward declare
 namespace Mantid::Nexus {
@@ -236,6 +175,8 @@ typedef std::map<std::string, std::string> Entries;
 
 /**
  * This structure holds the type and dimensions of a primative field/array.
+ * \li type: NXnumtype for data type
+ * \li dims: DimVector, size is rank
  */
 struct Info {
   /** The primative type for the field. */
@@ -244,7 +185,11 @@ struct Info {
   DimVector dims;
 };
 
-/** Information about an attribute. */
+/** Information about an attribute.
+ * \li type: NXnumtype for data type
+ * \li length: length of attribute, if string (otherwise 1)
+ * \li name: the name of thr attribute
+ */
 struct AttrInfo {
   /** The primitive type for the attribute. */
   NXnumtype type;
@@ -257,3 +202,6 @@ struct AttrInfo {
 /** Forward declare of NeXus::File */
 class File;
 } // namespace Mantid::Nexus
+
+constexpr std::size_t NX_MAXRANK(32);
+constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long

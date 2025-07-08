@@ -70,7 +70,7 @@ Deprecated
 - ``Authenticate v1``  is deprecated in favour of v2.
 - ``CentroidPeaksMD v1``  is deprecated in favour of v2.
 - ``ConvertEmptyToTof``
-- :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
+- ``ConvertUnitsUsingDetectorTable``
 - ``DownloadRemoteFile`` is deprecated in favour of v2.
 - :ref:`FFTSmooth	 <algm-FFTSmooth>` is deprecated in favour of v2.
 - OneStepMDEW.

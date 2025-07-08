@@ -1,1 +1,0 @@
-- Fixed a flaky crash in :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` seen when deleting multiple workspaces in the ADS. This also fixed an issue of clearing the whole plot in the same tab when deleting workspaces in the ADS.

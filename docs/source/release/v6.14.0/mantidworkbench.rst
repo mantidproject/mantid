@@ -15,7 +15,7 @@ MantidWorkbench now features a new, integrated HTML-based help viewer, replacing
 
 -   **Modern Help Viewer**: A new help window directly renders HTML documentation within MantidWorkbench, offering improved navigation and display.
 -   **Standardized Documentation Path**: To support the new viewer, HTML documentation now installs to a consistent location: ``<prefix>/share/doc/html/``.
-    *   Build systems (CMake, Conda recipes) have been updated for this standard.
+    *   Build systems (CMake, conda recipes) have been updated for this standard.
 -   **Reliable Document Discovery**:
     *   The new help viewer uses an absolute path (``docs.html.root`` in `Mantid.properties`) to reliably locate local documentation.
     *   Legacy internal components (C++ ``MantidHelpWindow`` and Python ``gui_helper.py`` fallbacks, during their transition phase) have also been updated to recognize the new ``share/doc/html/`` directory.

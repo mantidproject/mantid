@@ -1,1 +1,0 @@
-- Exposed ``Instrument.getFilename()`` and ``Instrument.setFilename()`` to python

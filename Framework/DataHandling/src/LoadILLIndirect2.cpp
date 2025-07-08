@@ -339,7 +339,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   try {
-    Nexus::File nxfileID(nexusfilename, NXACC_READ);
+    Nexus::File nxfileID(nexusfilename, NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (Nexus::Exception const &e) {
     g_log.debug() << "convertNexusToProperties: Error loading  \"" << nexusfilename << "\" in read mode: " << e.what()

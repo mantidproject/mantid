@@ -15,6 +15,7 @@
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <filesystem>
@@ -288,4 +289,18 @@ void removeFile(const std::string &filename) {
     std::filesystem::remove(path);
   }
 }
+
+std::string generateRandomFilename(std::size_t length, const std::string &suffix) {
+  const auto &name = Mantid::Kernel::Strings::randomString(length);
+  std::filesystem::path filepath = std::filesystem::temp_directory_path() / (name + suffix);
+  return filepath.string();
+}
+
+const std::string &NXcanSASTestParameters::filePath() {
+  if (m_filePath.empty()) {
+    m_filePath = generateRandomFilename();
+  }
+  return m_filePath;
+}
+
 } // namespace NXcanSASTestHelper

@@ -8,7 +8,7 @@
   "configurePresets": [
     {
       "name": "conda",
-      "description": "Inherited by all Conda-based, non-hidden presets",
+      "description": "Inherited by all conda-based, non-hidden presets",
       "hidden": true,
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
@@ -28,7 +28,7 @@
     },
     {
       "name": "unix-debug",
-      "description": "Inherited by all Unix-like presets for debugging. Overrides Conda CXX flags for debugging",
+      "description": "Inherited by all Unix-like presets for debugging. Overrides conda CXX flags for debugging",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",

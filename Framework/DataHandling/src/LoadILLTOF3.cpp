@@ -264,7 +264,7 @@ void LoadILLTOF3::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   // Open NeXus file
   try {
-    Nexus::File nxfileID(filename, NXACC_READ);
+    Nexus::File nxfileID(filename, NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   } catch (Nexus::Exception const &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;

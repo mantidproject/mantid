@@ -13,6 +13,11 @@ namespace {
 static const std::string NULL_STR("NULL");
 }
 
+namespace H5 {
+// forward declare
+class H5Object;
+} // namespace H5
+
 /**
  * \file NexusFile.h Definition of the NeXus C++ API.
  * \defgroup cpp_types C++ Types
@@ -37,10 +42,10 @@ class MANTID_NEXUS_DLL File {
 private:
   std::string m_filename;
   NXaccess m_access;
-  /** The handle for the C-API. */
-  std::shared_ptr<NXhandle> m_pfile_id;
   /** should be close handle on exit */
   bool m_close_handle;
+  /** The handle for the C-API. */
+  std::shared_ptr<NexusFile5> m_pfile_id;
   /** nexus descriptor to track the file tree
    * NOTE: in file write, the following cannot be relied upon:
    * - hasRootAttr
@@ -58,7 +63,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(std::string const &filename, NXaccess const access = NXACC_READ);
+  File(std::string const &filename, NXaccess const access = NXaccess::READ);
 
   /**
    * Create a new File.
@@ -66,7 +71,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(char const *filename, NXaccess const access = NXACC_READ);
+  File(char const *filename, NXaccess const access = NXaccess::READ);
 
   /**
    * Copy constructor
@@ -111,7 +116,7 @@ private:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  void initOpenFile(const std::string &filename, const NXaccess access = NXACC_READ);
+  void initOpenFile(const std::string &filename, const NXaccess access = NXaccess::READ);
 
   //------------------------------------------------------------------------------------------------------------------
   // FILE NAVIGATION METHODS
@@ -165,6 +170,15 @@ public:
 
 private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
+
+  hid_t getCurrentId() const;
+
+  /** It is sometimes necessary to interface with code using the H5Cpp library
+   * This method will return the current location as an object, which can be
+   * used with, for instance, H5Util or other parts of Mantid
+   * \returns a shared pointer to an H5Object corresponding to current location
+   */
+  std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
   // these are used for updating the NexusDescriptor
   std::string formAbsoluteAddress(std::string const &);
@@ -535,13 +549,6 @@ public:
   /**
    * Put the supplied data as an attribute into the currently open data.
    *
-   * \param info Description of the attribute to add.
-   * \param data The attribute value.
-   */
-  template <typename NumT> void putAttr(AttrInfo const &info, NumT const *data);
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
@@ -565,29 +572,18 @@ public:
   void putAttr(std::string const &name, std::string const &value, bool const empty_add_space = true);
 
   /**
-   * Get the value of the attribute specified by the AttrInfo supplied.
-   *
-   * \param info Designation of which attribute to read.
-   * \param data The pointer to put the attribute value in.
-   * \param length The length of the attribute. If this is "-1" then the
-   * information in the supplied AttrInfo object will be used.
-   */
-  void getAttr(const AttrInfo &info, void *data, int length = -1);
-
-  /**
    * Get the value of an attribute that is a scalar number.
    *
-   * \param info Designation of which attribute to read.
+   * \param name Name of attribute to read.
    * \tparam NumT numeric data type of result
    *
    * \return The attribute value.
    */
-  template <typename NumT> NumT getAttr(const AttrInfo &info);
-
   template <typename NumT> NumT getAttr(std::string const &name);
 
   /**
    * Get the value of an attribute that is a scalar number.
+   * Only use this method if you do not care about precisely matching the data type on disk
    *
    * \param[in] name Name of attribute to read
    * \param[out] value The read attribute value.
@@ -598,23 +594,13 @@ public:
   /**
    * Get the value of a string attribute.
    *
-   * \param info Which attribute to read.
+   * \param name Name of attribute to read.
    *
    * \return The value of the attribute.
    */
-  std::string getStrAttr(const AttrInfo &info);
+  std::string getStrAttr(std::string const &name);
 
   // NAVIGATE ATTRIBUTES
-
-  /**
-   * Initialize the pending attribute search to start again.
-   */
-  void initAttrDir();
-
-  /**
-   * \return Information about the next attribute.
-   */
-  AttrInfo getNextAttr();
 
   /**
    * \return Information about all attributes on the data that is currently open.
@@ -646,7 +632,7 @@ public:
    *
    * \param link The object (group or data) in the file to link to.
    */
-  void makeLink(NXlink &link);
+  void makeLink(NXlink const &link);
 };
 
 /**

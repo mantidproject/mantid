@@ -1,2 +1,0 @@
-- Update SANS Command Line Interface to pass a save algorithm directly to the ``WavRangeReduction`` command.
-- Update documentation for :ref:`scripting SANS reduction<ScriptingSansReductions>` using command line interface.

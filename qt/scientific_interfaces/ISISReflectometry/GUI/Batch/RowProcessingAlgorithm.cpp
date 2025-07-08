@@ -124,6 +124,7 @@ void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCor
 void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment const &experiment) {
   AlgorithmProperties::update("AnalysisMode", analysisModeToString(experiment.analysisMode()), properties);
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
+  AlgorithmProperties::update("Diagnostics", experiment.diagnostics(), properties);
   SummationType summationType = experiment.summationType();
   AlgorithmProperties::update("SummationType", summationTypeToString(summationType), properties);
   // The ReductionType value is only relevant when the SummationType is SumInQ

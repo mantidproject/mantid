@@ -117,9 +117,9 @@ static void writeTest(const string &filename, NXaccess create_code) {
   array_dims[0] = 100;
   array_dims[1] = 20;
   vector<int> comp_array;
-  for (int i = 0; i < array_dims[0]; i++) {
-    for (int j = 0; j < array_dims[1]; j++) {
-      comp_array.push_back(i);
+  for (int64_t i = 0; i < array_dims[0]; i++) {
+    for (int64_t j = 0; j < array_dims[1]; j++) {
+      comp_array.push_back(static_cast<int>(i));
     }
   }
   const Mantid::Nexus::DimVector cdims{20, 20};
@@ -127,13 +127,11 @@ static void writeTest(const string &filename, NXaccess create_code) {
 
   // ---------- Test write Extendible Data --------------------------
   std::vector<int> data(10, 123);
-  file.makeGroup("extendible_data", "NXdata", 1);
+  file.makeGroup("extendible_data", "NXdata", true);
   file.writeExtendibleData("mydata1", data);
   file.writeExtendibleData("mydata2", data, 1000);
-  std::vector<int64_t> dims(2);
-  dims[0] = 5;
-  dims[1] = 2;
-  std::vector<int64_t> chunk(2, 2);
+  Mantid::Nexus::DimVector dims{5, 2};
+  Mantid::Nexus::DimSizeVector chunk{2, 2};
   file.writeExtendibleData("my2Ddata", data, dims, chunk);
   file.putAttr("string_attrib", "some short string");
 
@@ -210,7 +208,7 @@ int readTest(const string &filename) {
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
       if (it->type == NXnumtype::CHAR) {
-        cout << file.getStrAttr(*it);
+        cout << file.getStrAttr(it->name);
       }
       cout << endl;
     }
@@ -223,7 +221,7 @@ int readTest(const string &filename) {
   for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
     if (it->type == NXnumtype::CHAR) {
-      cout << file.getStrAttr(*it);
+      cout << file.getStrAttr(it->name);
     }
     cout << endl;
   }
@@ -384,25 +382,17 @@ int testLoadPath(const string &filename) {
 }
 
 int main(int argc, char **argv) {
-  NXaccess nx_creation_code;
-  string fileext;
-  if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
-    nx_creation_code = NXACC_CREATE5;
-    fileext = ".h5";
-  } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
-    cout << "napi_test_cpp-xml-table is not supported" << endl;
-    return TEST_FAILED;
-  } else if (strstr(argv[0], "napi_test_cpp-xml") != NULL) {
-    cout << "napi_test_cpp-xml is not supported" << endl;
-    return TEST_FAILED;
-  } else {
-    return TEST_FAILED;
-  }
-  const string filename("napi_test_cpp" + fileext);
+  NXaccess nx_creation_code = NXaccess::CREATE5;
+  std::string filename("napi_test_cpp.h5");
+  std::string fullname = (std::filesystem::temp_directory_path() / filename).generic_string();
+  removeFile(fullname); // in case last round failed
 
-  removeFile(filename); // in case last round failed
   try {
-    writeTest(filename, nx_creation_code);
+    writeTest(fullname, nx_creation_code);
+    if (!std::filesystem::exists(fullname)) {
+      std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
+      return TEST_FAILED;
+    }
   } catch (const std::runtime_error &e) {
     cout << "writeTest failed:\n" << e.what() << endl;
     return TEST_FAILED;
@@ -412,14 +402,13 @@ int main(int argc, char **argv) {
     return TEST_SUCCEED;
   }
 
-  if (!std::filesystem::exists(filename)) {
-    std::cerr << "NeXus file \"" << filename << "\" does not exist after write test\n";
+  if (!std::filesystem::exists(fullname)) {
+    std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
     return TEST_FAILED;
   }
-
   // try reading a file
   try {
-    if (readTest(filename) != TEST_SUCCEED) {
+    if (readTest(fullname) != TEST_SUCCEED) {
       cout << "readTest failed" << endl;
       return TEST_FAILED;
     }
@@ -431,6 +420,7 @@ int main(int argc, char **argv) {
   removeFile(filename); // cleanup
 
   // try using the load path
+  std::string fileext(".h5");
   if (testLoadPath(DMC01 + fileext) != TEST_SUCCEED) {
     cout << "testLoadPath failed" << endl;
     return TEST_FAILED;

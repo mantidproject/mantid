@@ -14,9 +14,9 @@ using namespace std;
 const int nFiles = 10;
 const int nEntry = 2;
 const int nData = 2;
-int64_t array_dims[2] = {512, 512};
-const char szFile[] = "leak_test.nxs";
-const int iBinarySize = 512 * 512;
+Mantid::Nexus::DimVector array_dims{512, 512};
+std::string szFile("leak_test.nxs");
+std::size_t const iBinarySize(512 * 512);
 int aiBinaryData[iBinarySize];
 
 #define ON_ERROR(msgstr)                                                                                               \
@@ -26,9 +26,9 @@ int aiBinaryData[iBinarySize];
   }
 
 int main() {
-  int i, iFile, iEntry, iData, iNXdata;
+  int iFile, iEntry, iData, iNXdata;
 
-  for (i = 0; i < iBinarySize; i++) {
+  for (std::size_t i = 0; i < iBinarySize; i++) {
     aiBinaryData[i] = rand();
   }
 
@@ -37,7 +37,7 @@ int main() {
 
     NXhandle fileid;
     NXlink aLink;
-    if (NXopen(szFile, NXACC_CREATE5, fileid) != NXstatus::NX_OK)
+    if (NXopen(szFile, NXaccess::CREATE5, fileid) != NXstatus::NX_OK)
       ON_ERROR("NXopen_failed")
 
     for (iEntry = 0; iEntry < nEntry; iEntry++) {
@@ -60,13 +60,13 @@ int main() {
         if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::NX_OK)
           ON_ERROR("NXopengroup failed!")
 
-        NXgetgroupID(fileid, &aLink);
+        NXgetgroupID(fileid, aLink);
         for (iData = 0; iData < nData; iData++) {
           ostringstream oss3;
           oss3 << "i2_data_" << iData;
 
-          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NX_COMP_LZW, array_dims) !=
-              NXstatus::NX_OK)
+          if (NXcompmakedata64(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NXcompression::LZW,
+                               array_dims) != NXstatus::NX_OK)
             ON_ERROR("NXcompmakedata failed!")
 
           if (NXopendata(fileid, PSZ(oss3.str())) != NXstatus::NX_OK)
@@ -91,7 +91,7 @@ int main() {
       ON_ERROR("NXclose failed!")
 
     // Delete file
-    remove(szFile);
+    remove(szFile.c_str());
   }
 
   return 0;

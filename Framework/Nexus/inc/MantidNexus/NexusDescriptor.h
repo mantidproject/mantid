@@ -15,7 +15,7 @@
 #include <vector>
 
 // from NexusFile_fwd.h
-typedef int NXaccess;
+enum class NXaccess : unsigned int;
 
 namespace Mantid {
 namespace Nexus {
