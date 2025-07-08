@@ -286,6 +286,17 @@ def get_numerical_integ(ws: str, ispec: int):
     return np.trapezoid(diffy, np.convolve(diffx, np.ones(2) / 2, "valid"))
 
 
+def get_spectrum_indices(wsname: str, xmin: float, xmax: float):
+    ws = ADS.retrieve(wsname)
+    det_table = CreateDetectorTable(ws)
+    monitor_list = np.asarray(det_table.column("Monitor"))
+    spec_nums = np.asarray(list(range(ws.getNumberHistograms())))
+    # ignore monitors
+    spec_nums = spec_nums[np.where(monitor_list == "no")]
+    # ignore spectra if outside peak range
+    return [int(ispec) for ispec in spec_nums if ws.readX(int(ispec)).min() < xmin and ws.readX(int(ispec)).max() > xmax]
+
+
 def fit_all_peaks(
     wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, do_numeric_integ: bool = True, override_dir: bool = False
 ):
@@ -332,15 +343,7 @@ def fit_all_peaks(
             xmin, xmax = peak - peak_window, peak + peak_window
 
             crop_ws = CropWorkspace(InputWorkspace=ws, XMin=xmin, XMax=xmax, OutputWorkspace="crop_ws")
-            # ignore monitors
-            det_table = CreateDetectorTable(crop_ws)
-            monitor_list = np.asarray(det_table.column("Monitor"))
-            spec_nums = np.asarray(list(range(crop_ws.getNumberHistograms())))
-            spec_nums = spec_nums[np.where(monitor_list == "no")]
-            # ignore spectra if outside peak range
-            spec_nums = [
-                int(ispec) for ispec in spec_nums if crop_ws.readX(int(ispec)).min() < xmin and crop_ws.readX(int(ispec)).max() > xmax
-            ]
+            spec_nums = get_spectrum_indices("crop_ws", xmin, xmax)
             for ispec in spec_nums:
                 Fit(
                     Function=func,

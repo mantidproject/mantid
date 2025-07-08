@@ -83,11 +83,14 @@ class TextureUtilsTest(unittest.TestCase):
         self.assertEqual(make_iterable((1, 2)), (1, 2))
 
     @patch(f"{texture_utils_path}.ADS")
+    @patch(f"{texture_utils_path}.get_spectrum_indices")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
     @patch(f"{texture_utils_path}.CropWorkspace")
     @patch(f"{texture_utils_path}.Fit")
     @patch(f"{texture_utils_path}.SaveNexus")
-    def test_fit_all_peaks_runs_fit_for_each_peak_and_spectrum(self, mock_save, mock_fit, mock_crop, mock_create_table, mock_ads):
+    def test_fit_all_peaks_runs_fit_for_each_peak_and_spectrum(
+        self, mock_save, mock_fit, mock_crop, mock_create_table, mock_spec_ind, mock_ads
+    ):
         ws_mock = MagicMock()
         ws_mock.getNumberHistograms.return_value = 2
         run_prop = MagicMock()
@@ -95,31 +98,26 @@ class TextureUtilsTest(unittest.TestCase):
         ws_mock.getRun().getLogData.side_effect = lambda key: run_prop if key == "run_number" else MagicMock(value="GroupA")
         mock_ads.retrieve.side_effect = [ws_mock, MagicMock(), MagicMock()]
         mock_create_table.return_value = MagicMock()
+        mock_spec_ind.return_value = [0]
 
         fit_all_peaks(["ws123456"], [1.54], 0.02, "/tmp/save", do_numeric_integ=False)
         self.assertTrue(mock_fit.called)
         self.assertTrue(mock_save.called)
 
     @patch(f"{texture_utils_path}.create_pf")
-    @patch(f"{texture_utils_path}.Load")
-    @patch(f"{texture_utils_path}.find_all_files")
-    def test_create_pf_loop_loads_and_calls_create_pf(self, mock_find, mock_load, mock_create):
-        ws_files = ["/dir/ws1.nxs", "/dir/ws2.nxs"]
-        fit_files = ["/dir/p1.nxs", "/dir/p2.nxs"]
-        mock_find.side_effect = [ws_files, fit_files]
+    def test_create_pf_loop_loads_and_calls_create_pf(self, mock_create):
         with patch(f"{texture_utils_path}.ADS.doesExist", return_value=False):
             create_pf_loop(
-                root_dir="/root",
-                ws_folder="ws",
-                fit_folder="fit",
-                peaks=1.54,
-                grouping="bank",
+                wss=["ws1", "ws2"],
+                param_wss=[
+                    ["p1", "p2"],
+                ],
                 include_scatt_power=False,
                 cif=None,
                 lattice="2.8665  2.8665  2.8665",
                 space_group="P1",
                 basis="Fe 0 0 0 1.0 0.05",
-                hkls=[[1, 1, 1]],
+                hkls=[[1, 1, 1], [1, 0, 0]],
                 readout_columns="X0",
                 dir1=[1, 0, 0],
                 dir2=[0, 1, 0],
@@ -134,7 +132,6 @@ class TextureUtilsTest(unittest.TestCase):
                 exp_name="exp",
                 projection_method="Azimuthal",
             )
-        self.assertEqual(mock_load.call_count, 4)  # 2 ws + 2 param
         mock_create.assert_called_once()
 
     def test_validate_abs_corr_inputs_when_orientation_file_given_requires_is_euler_flag(self):
