@@ -260,9 +260,9 @@ class TextureCorrectionModel:
         self.set_reference_ws(f"{rb_num}_reference_workspace")
         LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
 
-    def save_reference_file(self, rb_num, calibration, root_dir):
+    def save_reference_file(self, rb_num, group, root_dir):
         if self.reference_ws and ADS.doesExist(self.reference_ws):
-            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, calibration.group)
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, group)
 
     def set_reference_ws(self, ws_name):
         self.reference_ws = ws_name
