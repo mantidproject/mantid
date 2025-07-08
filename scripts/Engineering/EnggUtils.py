@@ -48,7 +48,7 @@ class GROUP(Enum):
     TEXTURE30 = "Texture30", [1, 2]
 
 
-TEXTURE_GROUPS = (GROUP.TEXTURE20, GROUP.TEXTURE30)  # lookup table for some texture specific behaviour
+TEXTURE_GROUPS = (GROUP.TEXTURE20, GROUP.TEXTURE30, GROUP.CUSTOM)  # lookup table for some texture specific behaviour
 
 
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
