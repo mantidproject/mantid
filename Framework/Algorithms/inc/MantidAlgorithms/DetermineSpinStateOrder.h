@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** DetermineSpinStateOrder : Takes a workspace group of Polarised SANS run periods and returns
-a string (e.g '11, 10, 01, 00') of thier corresponding flipper/analyser states.
+a string (e.g '11, 10, 01, 00') of their corresponding flipper/analyser states.
  */
 class MANTID_ALGORITHMS_DLL DetermineSpinStateOrder : public API::Algorithm {
 public:
