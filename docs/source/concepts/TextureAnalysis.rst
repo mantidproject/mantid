@@ -425,6 +425,248 @@ These cal files can be provided as a `grouping_filepath` if desired, or used to 
 
 If using a standard grouping, no grouping_filepath or prm_filepath is required, and simply the string (e.g. `"Texture30"`) is needed.
 
+.. code::python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   from mantid.api import AnalysisDataService as ADS
+   import numpy as np
+   from Engineering.texture.TextureUtils import find_all_files, run_focus_script
+
+   ############### ENGINEERING DIFFRACTION INTERFACE FOCUS ANALOGUE #######################
+
+   ######################### EXPERIMENTAL INFORMATION ########################################
+
+   # First, you need to specify your file directories, If you are happy to use the same root, from experiment
+   # to experiment, you can just change this experiment name.
+
+   exp_name = "Example"
+
+   # otherwise set root directory here:
+   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+
+   # next, specify the folder with the files you would like to focus
+   # (if you are using the standard scripts this might not need to change)
+   data_dir = fr"{root_dir}\AbsorptionCorrection"
+
+   # fill in the file paths for the vanadium and ceria runs (just run numbers might work if you are setup into the file system)
+   van_run = r"C:\Users\Name\DataFiles\ENGINX00361838.nxs"
+   ceria_run = "305738"
+
+   # set the path to the grouping file created by calibration
+   prm_path = None # fr"{root}\Calibration\ENGINX_305738_Texture30.prm"
+   grouping = "Texture30" # use "Custom" if you want to provide custom grouping
+   groupingfile_path = None # r"C:\Users\Name\block.cal" # if a custom cal/xml grouping file is desired
+
+   # Define some file paths, can be found in the interface settings
+   full_instr_calib = r"C:\mantid\scripts\Engineering\calib\ENGINX_full_instrument_calibration_193749.nxs"
+
+   ######################### RUN SCRIPT ########################################
+
+   run_files = find_all_files(data_dir)
+
+   run_focus_script(wss = run_files,
+                  focus_dir = root_dir,
+                  van_run = van_run,
+                  ceria_run = ceria_run,
+                  full_instr_calib = full_instr_calib,
+                  grouping = grouping,
+                  prm_path = prm_path,
+                  groupingfile_path = groupingfile_path)
+
+Fitting
+#######
+
+Once the data has been focused, it is most likely that the desire is to extract some fitted parameters from these focused spectra. The following script can be used to
+do this. This script will fit a BackToBackExponential to each peak provided in the `peaks` list and save the associated parameters into individual table workspaces.
+Additionally to fitting the peak, the table will also contain a numerical integration of the peak window after subtraction of a linear background (`I_est`).
+
+.. code::python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from mantid.api import AnalysisDataService as ADS
+   from os import path, makedirs, scandir
+   from Engineering.texture.TextureUtils import find_all_files, fit_all_peaks
+
+   ############### ENGINEERING DIFFRACTION INTERFACE FITTING ANALOGUE #######################
+
+   ######################### EXPERIMENTAL INFORMATION ########################################
+
+   # First, you need to specify your file directories, If you are happy to use the same root, from experiment
+   # to experiment, you can just change this experiment name.
+   exp_name = "Example"
+
+   # otherwise set root directory here:
+   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+
+   # Next the folder contraining the workspaces you want to fit
+   file_folder = "Focus"
+   # These are likely within a sub-folder specified by the detector grouping
+   grouping = "Texture30"
+   prm_path = None
+   groupingfile_path = None
+
+   # You also need to specify a name for the folder the fit parameters will be saved in
+   fit_save_folder = "ScriptFitParameters"
+
+   # Finally, provide a list of peaks that you want to be fit within the spectra
+   #peaks = [2.03,1.44, 1.17, 0.91] # steel
+   peaks = [2.8, 2.575, 2.455, 1.89, 1.62, 1.46] # zr
+
+   ######################### RUN SCRIPT ########################################
+
+   # create output directory
+   fit_save_dir = path.join(root_dir, fit_save_folder)
+   mk(fit_save_dir)
+
+   # find and load peaks
+
+   # get grouping directory name
+   calib_info = CalibrationInfo(group = GROUP(grouping))
+   if groupingfile_path:
+      calib_info.set_grouping_file(groupingfile_path)
+   elif prm_path:
+      calib_info.set_prm_filepath(prm_path)
+   group_folder = calib_info.get_group_suffix()
+   focussed_data_dir = path.join(root_dir, file_folder, group_folder, "CombinedFiles")
+   focus_ws_paths = find_all_files(focussed_data_dir)
+   focus_wss = [path.splitext(path.basename(fp))[0] for fp in focus_ws_paths]
+   for iws, ws in enumerate(focus_wss):
+      if not ADS.doesExist(ws):
+         Load(Filename = focus_ws_paths[iws], OutputWorkspace= ws)
+
+   # execute the fitting
+   fit_all_peaks(focus_wss, peaks, 0.02, fit_save_dir)
+
+Pole Figure creation
+####################
+
+Finally, the focused workspaces and the parameter workspaces can be combined to create the pole figures of interest. The below script can be used to produce a collection
+of pole figures over a set of different peaks and parameters.
+
+.. code::python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from mantid.api import AnalysisDataService as ADS
+   from Engineering.texture.TextureUtils import find_all_files, create_pf_loop
+
+   ############### ENGINEERING DIFFRACTION INTERFACE POLE FIGURE ANALOGUE #######################
+
+   ######################### EXPERIMENTAL INFORMATION ########################################
+   # First, you need to specify your file directories, If you are happy to use the same root, from experiment
+   # to experiment, you can just change this experiment name.
+   exp_name = "PostExp-ZrRingDiagScript"
+
+   # otherwise set root directory here:
+   save_root = r"C:\Users\Name\Engineering_Mantid"
+   root_dir = fr"{save_root}\User\{exp_name}"
+
+
+   ws_folder = "Focus"
+   fit_folder = "ScriptFitParameters"
+   # define the peaks of interest, NOTE these must correspond to sub folders in the fit directory
+   peaks = [2.8, 2.575, 2.455, 1.89, 1.62, 1.46]
+   # define the columns you would like to create pole figures for
+   readout_columns = ["I", "I_est", "X0"]
+   # you need to specify the detector grouping
+   grouping = "Texture30"
+   # and some grouping path if not using a standard
+   prm_path = None
+   groupingfile_path = None
+   # and the type of projection to plot
+   projection_method = "Azimuthal"
+
+   # you need to define the orientation of the intrinsic sample directions when the sample orientation matrix == I (no rotation)
+   # this should be the same as the reference state used in the absorption correction
+   r2 = np.sqrt(2)/2
+   dir1 = np.array((0,0,1))
+   dir2 = np.array((r2,r2,0)) # projection axis
+   dir3 = np.array((r2,-r2,0))
+   # you can also supply names for these three directions
+   dir_names = ["AD", "HD", "RD"]
+
+   # set whether you would like the plotted pole figure to be a scatter of experimental points or whether you would like to apply gaussian smoothing and
+   # plot a contour representation
+   scatter = True
+   # if contour, what should the kernel size of the gaussian be
+   kernel = 6.0
+
+   # do you want to include a scattering power correction
+   include_scatt_power = False
+   # if so what is the crystal structure, defined either by giving a cif file or supplying the lattice, space group and basis
+   cif = None
+   lattice = None #"2.8665  2.8665  2.8665"
+   space_group = None #"I m -3 m"
+   basis = None # "Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05"
+   # if you have set a crystal, you can also provide a set of hkls, the hkl_peaks dictionary is a useful way of assigning the peaks
+   hkl_peaks = {1.17: (1,1,2),1.43: (2,0,0),2.03: (1,1,0)} #Fe
+
+   chi2_thresh = 0.4   # max value of Chi^2 to be included as a point in the table
+   peak_thresh = 0.01   # max difference from either the HKL specified or the mean X0
+   scat_vol_pos = (0.0,0.0,0.0) # for now, can assume the gauge vol will be centred on origin
+
+   ######################### RUN SCRIPT ########################################
+
+
+   # get grouping directory name
+   calib_info = CalibrationInfo(group = GROUP(grouping))
+   if groupingfile_path:
+      calib_info.set_grouping_file(groupingfile_path)
+   elif prm_path:
+      calib_info.set_prm_filepath(prm_path)
+   group_folder = calib_info.get_group_suffix()
+   focussed_data_dir = path.join(root_dir, file_folder, group_folder, "CombinedFiles")
+   focus_ws_paths = find_all_files(focussed_data_dir)
+   focus_wss = [path.splitext(path.basename(fp))[0] for fp in focus_ws_paths]
+   for iws, ws in enumerate(focus_wss):
+      if not ADS.doesExist(ws):
+         Load(Filename = focus_ws_paths[iws], OutputWorkspace= ws)
+
+   fit_load_dirs = [path.join(root_dir, fit_save_folder, group_folder, str(peak)) for peak in peaks]
+
+   hkls = [hkl_peaks[peak] if include_scatt_power else None for peak in peaks]
+
+   fit_param_wss = []
+   for ifit, fit_folder in enumerate(fit_load_dirs):
+      # get fit params
+      fit_dir = path.join(root_dir, fit_folder)
+      fit_wss = find_all_files(fit_dir)
+      param_wss = [path.splitext(path.basename(fp))[0] for fp in fit_wss]
+      fit_param_wss.append(param_wss)
+      for iparam, param in enumerate(param_wss):
+         if not ADS.doesExist(param):
+               Load(Filename=fit_wss[iparam], OutputWorkspace=param)
+
+   create_pf_loop(wss = focus_wss,
+                  param_wss = fit_param_wss,
+                  include_scatt_power = include_scatt_power,
+                  cif = cif,
+                  lattice = lattice,
+                  space_group = space_group,
+                  basis = basis,
+                  hkls = hkls,
+                  readout_columns = readout_columns,
+                  dir1 = dir1,
+                  dir2 = dir2,
+                  dir3 = dir3,
+                  dir_names = dir_names,
+                  scatter = scatter,
+                  kernel = kernel,
+                  scat_vol_pos = scat_vol_pos,
+                  chi2_thresh = chi2_thresh,
+                  peak_thresh = peak_thresh,
+                  save_root = save_root,
+                  exp_name = exp_name,
+                  projection_method = projection_method)
+
+
+
 
 References
 ----------
