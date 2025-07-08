@@ -3,7 +3,7 @@ import numpy as np
 from os import path, scandir
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
-from mantid.simpleapi import SaveNexus, Load, logger, CreateEmptyTableWorkspace, CropWorkspace, LoadCIF, Fit
+from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, CropWorkspace, LoadCIF, Fit, CreateDetectorTable
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
@@ -68,6 +68,7 @@ def run_focus_script(
     full_instr_calib: str,
     grouping: Optional[str] = None,
     prm_path: Optional[str] = None,
+    spectrum_num: Optional[str] = None,
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
@@ -81,6 +82,7 @@ def run_focus_script(
     grouping: key for desired detector grouping, if standard, otherwise use the prm path
     prm_path: optional path to the grouping prm file (produced during calibration), if using a standard detector grouping,
               just use the grouping argument
+    spectrum_num: optional string of spectra numbers if desired to define custom grouping by specifying the spectra
     """
     group = GROUP(grouping) if grouping else None
     model = TextureInstrument(
@@ -91,6 +93,7 @@ def run_focus_script(
         prm_path=prm_path,
         full_inst_calib_path=full_instr_calib,
         group=group,
+        spectrum_num=spectrum_num,
     )
 
     mk(focus_dir)
@@ -283,7 +286,9 @@ def get_numerical_integ(ws: str, ispec: int):
     return np.trapezoid(diffy, np.convolve(diffx, np.ones(2) / 2, "valid"))
 
 
-def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, do_numeric_integ: bool = True):
+def fit_all_peaks(
+    wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, do_numeric_integ: bool = True, override_dir: bool = False
+):
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
 
@@ -293,6 +298,7 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
     save_dir: directory to save the results in
     do_numeric_integ: flag for whether a results column should be added which performs a linear background subtraction
                       followed by a numerical integration of the peak window
+    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     for wsname in wss:
         ws = ADS.retrieve(wsname)
@@ -305,12 +311,12 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
         try:
             grouping = str(ws.getRun().getLogData("Grouping").value)
         except RuntimeError:
-            grouping = ""
+            grouping = "GROUP"
         for peak in peaks:
             # change peak window to fraction
             out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
             out_file = out_ws + ".nxs"
-            out_path = path.join(save_dir, grouping, str(peak), out_file)
+            out_path = path.join(save_dir, out_file) if override_dir else path.join(save_dir, grouping, str(peak), out_file)
 
             fit_range_min = peak - peak_window
             fit_range_max = peak + peak_window
@@ -323,11 +329,19 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
                     """
             out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
 
-            num_spec = ws.getNumberHistograms()
+            xmin, xmax = peak - peak_window, peak + peak_window
 
-            crop_ws = CropWorkspace(InputWorkspace=ws, XMin=peak - peak_window, XMax=peak + peak_window, OutputWorkspace="crop_ws")
-
-            for ispec in range(num_spec):
+            crop_ws = CropWorkspace(InputWorkspace=ws, XMin=xmin, XMax=xmax, OutputWorkspace="crop_ws")
+            # ignore monitors
+            det_table = CreateDetectorTable(crop_ws)
+            monitor_list = np.asarray(det_table.column("Monitor"))
+            spec_nums = np.asarray(list(range(crop_ws.getNumberHistograms())))
+            spec_nums = spec_nums[np.where(monitor_list == "no")]
+            # ignore spectra if outside peak range
+            spec_nums = [
+                int(ispec) for ispec in spec_nums if crop_ws.readX(int(ispec)).min() < xmin and crop_ws.readX(int(ispec)).max() > xmax
+            ]
+            for ispec in spec_nums:
                 Fit(
                     Function=func,
                     InputWorkspace=ws,
@@ -359,7 +373,7 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
                 else:
                     out_tab.addRow([ispec] + spec_fit.column("Value"))
 
-                SaveNexus(InputWorkspace=out_ws, Filename=out_path)
+            SaveNexus(InputWorkspace=out_ws, Filename=out_path)
 
 
 # -------- Pole Figure Script Logic--------------------------------
@@ -387,6 +401,7 @@ def create_pf(
     kernel: Optional[float] = None,
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
+    override_dir: bool = False,
 ):
     """
     Create a single pole figure, for use in texture analysis workflow
@@ -413,6 +428,7 @@ def create_pf(
     root_dir: root of the directory to which the data should be saved
     exp_name: experiment name, which provides the overarching folder within the root directory
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
+    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     model = TextureProjection()
     if include_scatt_power:
@@ -429,7 +445,9 @@ def create_pf(
     ax_transform = np.concatenate((dir1[:, None], dir2[:, None], dir3[:, None]), axis=1)
     ax_labels = dir_names
 
-    save_dirs = model.get_save_dirs(root_dir, "PoleFigureTables", exp_name, grouping)
+    save_dirs = (
+        [path.join(root_dir, "PoleFigureTables")] if override_dir else model.get_save_dirs(root_dir, "PoleFigureTables", exp_name, grouping)
+    )
     chi2_thresh = chi2_thresh if chi2_thresh else 0.0
     peak_thresh = peak_thresh if peak_thresh else 0.0
     model.make_pole_figure_tables(
@@ -469,9 +487,8 @@ def make_iterable(param):
 
 
 def create_pf_loop(
-    root_dir: str,
-    ws_folder: str,
-    grouping: str,
+    wss: Sequence[str],
+    param_wss: Sequence[Sequence[str]],
     include_scatt_power: bool,
     dir1: Sequence[float],
     dir2: Sequence[float],
@@ -482,8 +499,6 @@ def create_pf_loop(
     save_root: str,
     exp_name: str,
     projection_method: str,
-    fit_folder: Optional[str] = None,
-    peaks: Optional[Union[float, Sequence[float]]] = None,
     cif: Optional[str] = None,
     lattice: Optional[str] = None,
     space_group: Optional[str] = None,
@@ -497,12 +512,8 @@ def create_pf_loop(
     """
     Create a series of pole figures, for use in texture analysis workflow
 
-    root_dir: root of the directory to which the data should be loaded from
-    ws_folder: folder name, within which the workspaces will be found
-    fit_folder: folder name, within which the fit parameters will be found
-    peaks: either a single peak or sequence of peaks which should be fit
-           (must correspond exactly to a sub folder in the fit folder directory)
-    grouping: name of the detector grouping used
+    wss: Workspace names of the ws with the orientation information present as a goniometer matrix
+    param_wss: Sequence of Parameter Workspaces if you want to read a column of each table to each point in the pole figure
     include_scatt_power: flag for whether to adjust the value by a scattering power calculation
     cif: path to CIF file for the crystal structure
     lattice: String representation of Lattice for CrystalStructure
@@ -526,23 +537,9 @@ def create_pf_loop(
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
     """
     # get ws paths
-    focus_dir = path.join(root_dir, ws_folder, grouping, "CombinedFiles")
-    focus_wss = find_all_files(focus_dir)
-    wss = [path.splitext(path.basename(fp))[0] for fp in focus_wss]
-    peaks = make_iterable(peaks)
-    for ipeak, peak in enumerate(peaks):
-        # get fit params
-        fit_dir = path.join(root_dir, fit_folder, grouping, str(peak))
-        fit_wss = find_all_files(fit_dir)
-        params = [path.splitext(path.basename(fp))[0] for fp in fit_wss]
-        for iws, ws in enumerate(wss):
-            if not ADS.doesExist(ws):
-                Load(Filename=focus_wss[iws], OutputWorkspace=ws)
-            if not ADS.doesExist(params[iws]):
-                Load(Filename=fit_wss[iws], OutputWorkspace=params[iws])
-
+    for iparam, params in enumerate(param_wss):
         # if multiple peaks are provided, multiple hkls should also be provided
-        hkl = hkls if len(peaks) == 1 else hkls[ipeak]
+        hkl = hkls if len(param_wss) == 1 else hkls[iparam]
 
         for readout_column in make_iterable(readout_columns):
             if scatter == "both":
