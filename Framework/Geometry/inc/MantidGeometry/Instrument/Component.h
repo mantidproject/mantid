@@ -280,6 +280,9 @@ public:
     }
   }
 
+  /// Get fitting parameter
+  double getFittingParameter(const std::string &pname, double xvalue) const;
+
   void printSelf(std::ostream &) const override;
 
   /// Returns the address of the base component

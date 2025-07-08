@@ -58,6 +58,14 @@ public:
   Goniometer();
   // Constructor from a rotation matrix
   Goniometer(const Kernel::DblMatrix &rot);
+  // Copy Constructor
+  Goniometer(const Goniometer &other);
+  // Copy assignment Constructor
+  Goniometer &operator=(const Goniometer &other);
+  // Move constructor
+  Goniometer(Goniometer &&other) noexcept;
+  // Move assignment Constructor
+  Goniometer &operator=(Goniometer &&other) noexcept;
   // Default destructor
   virtual ~Goniometer() = default;
   // Return rotation matrix
@@ -102,12 +110,12 @@ public:
 
 private:
   /// Global rotation matrix of the goniometer
-  Kernel::DblMatrix R;
+  Kernel::DblMatrix m_R;
   /// Motors vector contains GoniometerAxis objects, the last one is the closest
   /// to the sample
-  std::vector<GoniometerAxis> motors;
+  std::vector<GoniometerAxis> m_motors;
   /// Flag to specify if the goniometer is initialized from a rotation matrix
-  bool initFromR;
+  bool m_initFromR;
   /// Private function to recalculate R when setRotationAngle is called
   void recalculateR();
 };

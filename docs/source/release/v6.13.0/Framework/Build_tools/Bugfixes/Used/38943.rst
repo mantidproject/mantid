@@ -1,1 +1,0 @@
-- CMake now successfully builds with ``-DUSE_SANITIZER=address``. For more details see :doc:`RunningSanitizers <mantid-dev:RunningSanitizers>`.

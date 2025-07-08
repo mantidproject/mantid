@@ -193,4 +193,9 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(EigenMatrix &covar, double 
   }
 }
 
+/**
+ * Validates current fit weights and raise errors when necessary
+ */
+void CostFuncLeastSquares::updateValidateFitWeights() { validateNegativeFitWeights(); }
+
 } // namespace Mantid::CurveFitting::CostFunctions

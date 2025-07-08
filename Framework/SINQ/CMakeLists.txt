@@ -38,7 +38,6 @@ set(SRC_FILES
     src/PoldiUtilities/UncertainValue.cpp
     src/ProjectMD.cpp
     src/SINQHMListener.cpp
-    src/SINQTranspose3D.cpp
     src/SliceMDHisto.cpp
 )
 
@@ -86,7 +85,6 @@ set(INC_FILES
     inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
     inc/MantidSINQ/ProjectMD.h
     inc/MantidSINQ/SINQHMListener.h
-    inc/MantidSINQ/SINQTranspose3D.h
     inc/MantidSINQ/SliceMDHisto.h
 )
 

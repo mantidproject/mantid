@@ -88,8 +88,9 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     36); // 34 logs in file + 1 synthetic nperiods log
+                     37); // 34 logs in file + 1 synthetic nperiods log
                           // + 1 proton_charge_by_period log
+                          // + 1 gd_prtn_chrg_unfiltered log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(run.getLogData("icp_event"));
@@ -186,6 +187,34 @@ public:
     std::vector<double> protonChargeByPeriod =
         run.getPropertyValueAsType<std::vector<double>>("proton_charge_by_period");
     TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
+  }
+
+  void test_gd_prtn_chrg_unfiltered_added_for_period_dataset() {
+
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    TSM_ASSERT("Should not have gd_prtn_chrg_unfiltered until we run LoadNexusLogs",
+               !run.hasProperty("gd_prtn_chrg_unfiltered"));
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+
+    run = testWS->run();
+    run.addProperty("current_period", 1, true);
+    const bool hasGdPrtnChrgUnfiltered = run.hasProperty("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasGdPrtnChrgUnfiltered);
+
+    int gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered true until getProtonCharge called", gdPrtnChrgUnfiltered);
+
+    run.getProtonCharge();
+    gdPrtnChrgUnfiltered = run.getPropertyValueAsType<int>("gd_prtn_chrg_unfiltered");
+    TSM_ASSERT("Value of gd_prtn_chrg_unfiltered false following getProtonCharge call", !gdPrtnChrgUnfiltered);
   }
 
   void test_extract_run_title_from_event_nexus() {
@@ -359,6 +388,7 @@ public:
     allowed.push_back("gd_prtn_chrg");
     allowed.push_back("proton_charge_by_period");
     allowed.push_back("nperiods");
+    allowed.push_back("gd_prtn_chrg_unfiltered");
 
     // The default logs that are always present:
     allowed.push_back("start_time");
@@ -406,7 +436,7 @@ public:
     auto properties = run.getProperties();
 
     // add 2 to account for selog_ versions of properties
-    TS_ASSERT_EQUALS(properties.size(), 94 - blocked.size() - 2);
+    TS_ASSERT_EQUALS(properties.size(), 95 - blocked.size() - 2);
 
     // Lookup each name in the workspace property list
     for (const auto &name : blocked) {
@@ -440,7 +470,7 @@ public:
     auto run = testWS->run();
     auto properties = run.getProperties();
 
-    TS_ASSERT_EQUALS(properties.size(), 94);
+    TS_ASSERT_EQUALS(properties.size(), 95);
   }
 
 private:

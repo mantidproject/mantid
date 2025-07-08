@@ -18,7 +18,7 @@ developer.mantidproject.org/BatchWidget/index.html
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <QTreeView>
 
@@ -74,8 +74,8 @@ public:
 
   QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const override;
-  boost::optional<std::vector<Subtree>> selectedSubtrees() const override;
-  boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const override;
+  std::optional<std::vector<Subtree>> selectedSubtrees() const override;
+  std::optional<std::vector<RowLocation>> selectedSubtreeRoots() const override;
 
   bool hasNoSelectedDescendants(QModelIndex const &index) const;
   void appendAllUnselectedDescendants(QModelIndexList &selectedRows, QModelIndex const &index) const;

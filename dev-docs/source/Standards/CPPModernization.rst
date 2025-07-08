@@ -1,4 +1,4 @@
-.. _CppMordernization:
+.. _CppModernization:
 
 =================================
 C++ Code Modernization Guidelines

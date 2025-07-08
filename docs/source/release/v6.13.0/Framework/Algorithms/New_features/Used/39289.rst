@@ -1,1 +1,0 @@
-- :ref:`DiffractionFocussing <algm-DiffractionFocussing-v2>` has a new optional boolean parameter ``FullBinsOnly``.  When set, final bins of width less than the step-size are omitted from the output spectra.

@@ -1,1 +1,0 @@
-- New algorithm :ref:`algm-CombineTableWorkspaces` allows combination of a pair of :ref:`Table Workspaces`, provided they have matching column names and data types.

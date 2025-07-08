@@ -6,7 +6,7 @@ Properties File
 The ``*.properties`` Files
 --------------------------
 
-The Mantid framework is configured using up to three simple text ``*.properties`` files that are read an interpreted every time the framework is started. These properties are not the same as the properties of algorithms. All three have the same format. The three files are read from first to last, with the values in subsequent ``*.properties`` overriding those in previous ones.
+The Mantid framework is configured using up to three simple text ``*.properties`` files that are read and interpreted every time the framework is started. These properties are not the same as the properties of algorithms. All three have the same format. The three files are read from first to last, with the values in subsequent ``*.properties`` overriding those in previous ones.
 
 1. Install directory ``Mantid.properties`` defines the default configuration that the development team suggest as sensible defaults. This file should not be altered by users as it will be replaced with every new install or upgrade of Mantid.
 2. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
@@ -100,6 +100,14 @@ Directory Properties
 | ``defaultsave.directory``            | A default directory to use for saving files.      | ``../data``                         |
 |                                      | the data archive                                  |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``errorreports.core_dumps``          | *Linux only*                                      | ``/var/lib/apport/coredump``        |
+|                                      | Set this variable to your system's core file      |                                     |
+|                                      | location and the error reporter will automatically|                                     |
+|                                      | extract C++ stacktraces after a crash.            |                                     |
+|                                      | You may find this location listed in              |                                     |
+|                                      | ``/proc/sys/kernel/core_pattern`` (See            |                                     |
+|                                      | `the kernel docs`_ for more info).                |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``framework.plugins.directory``      | The path to the directory that contains the       | ``../plugins``                      |
 |                                      | Mantid plugin libraries                           |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
@@ -137,6 +145,7 @@ Directory Properties
 |                                      | within an algorithm.                              |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 
+.. _the kernel docs: https://www.kernel.org/doc/Documentation/sysctl/kernel.txt
 
 Logging Properties
 ******************

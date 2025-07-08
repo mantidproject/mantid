@@ -37,11 +37,13 @@ public:
     auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
 
     m_runView = std::make_unique<NiceMock<MockRunView>>();
+    m_outputNameView = std::make_unique<NiceMock<MockOutputNameView>>();
     m_outputOptionsView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
     m_instrumentConfig = std::make_unique<NiceMock<MockInstrumentConfig>>();
 
     m_view = std::make_unique<NiceMock<MockIETView>>();
     ON_CALL(*m_view, getRunView()).WillByDefault(Return(m_runView.get()));
+    ON_CALL(*m_view, getOutputName()).WillByDefault(Return(m_outputNameView.get()));
     ON_CALL(*m_view, getPlotOptionsView()).WillByDefault(Return(m_outputOptionsView.get()));
 
     m_model = model.get();
@@ -129,6 +131,7 @@ private:
   std::unique_ptr<NiceMock<MockDataReduction>> m_idrUI;
 
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
+  std::unique_ptr<NiceMock<MockOutputNameView>> m_outputNameView;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputOptionsView;
   std::unique_ptr<NiceMock<MockInstrumentConfig>> m_instrumentConfig;
 };

@@ -1,5 +1,0 @@
-- Introduced a new python algorithm `RefineSingleCrystalGoniometer` that refines the UB-matrix and goniometer offsets simultaneously.
-- Improvements:
-    - Improves the indexing of the peaks for those cases when there is sample misorientation and `FindUBUsingIndexedPeaks` is insufficient.
-- Key benefits:
-    - Improved indexing of peaks in special cases.

@@ -260,13 +260,21 @@ class ResultsTabModelTest(unittest.TestCase):
     def test_create_results_table_with_logs_selected(self):
         workspace = CreateWorkspace([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])
         workspace.mutableRun().addProperty("run_start", "1970-01-01T00:00:01 to 1970-01-01T00:00:01", True)
+        # Float Time Series
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:30:00", Value=65)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:50:00", Value=100.2)
+        # Integer Time Series
+        AddTimeSeriesLog(workspace, Name="periods", Time="2010-01-01T00:00:00", Type="int", Value=1)
+        AddTimeSeriesLog(workspace, Name="periods", Time="2010-01-01T00:30:00", Type="int", Value=2)
+        AddTimeSeriesLog(workspace, Name="periods", Time="2010-01-01T00:50:00", Type="int", Value=3)
+
         workspace.mutableRun().addProperty("sample_magn_field", 2, True)
-        _, model = create_test_model(("ws1",), "func1", self.parameters, [StaticWorkspaceWrapper("ws1", workspace)], self.logs)
+
+        log_names = [*self.log_names, "periods"]
+        _, model = create_test_model(("ws1",), "func1", self.parameters, [StaticWorkspaceWrapper("ws1", workspace)])
         selected_results = [("ws1", 0)]
-        table = model.create_results_table(self.log_names, selected_results)
+        table = model.create_results_table(log_names, selected_results)
 
         # workspace_name => no error col as its a string
         # sample_temp => time series and will have non-zero error
@@ -279,6 +287,8 @@ class ResultsTabModelTest(unittest.TestCase):
             "sample_tempError",
             "sample_magn_field",
             "sample_magn_fieldError",
+            "periods",
+            "periodsError",
             "f0.Height",
             "f0.HeightError",
             "f0.PeakCentre",
@@ -301,6 +311,8 @@ class ResultsTabModelTest(unittest.TestCase):
             TableColumnType.XErr,
             TableColumnType.X,
             TableColumnType.XErr,
+            TableColumnType.X,
+            TableColumnType.XErr,
             TableColumnType.Y,
             TableColumnType.YErr,
             TableColumnType.Y,
@@ -315,7 +327,7 @@ class ResultsTabModelTest(unittest.TestCase):
             TableColumnType.YErr,
             TableColumnType.Y,
         )
-        avg_log_values = "1970-01-01T00:00:01 to 1970-01-01T00:00:01", 1, 90.057, 2.0
+        avg_log_values = "1970-01-01T00:00:01 to 1970-01-01T00:00:01", 1, 90.057, 2.0, 1.857
         expected_content = [
             (
                 "ws1_Parameters",
@@ -325,6 +337,8 @@ class ResultsTabModelTest(unittest.TestCase):
                 15.848,
                 avg_log_values[3],
                 0.0,
+                avg_log_values[4],
+                0.8329,
                 self.f0_height[0],
                 self.f0_height[1],
                 self.f0_centre[0],

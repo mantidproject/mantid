@@ -106,12 +106,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:579
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:313
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:325
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1159
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1607
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:1650
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:92
@@ -158,8 +152,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEffici
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing.cpp:116
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:830
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:351
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:367
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:71
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:81
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EstimateResolutionDiffraction.cpp:188
@@ -219,9 +213,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/OptimizeCrystal
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntegration.cpp:105
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntensityVsRadius.cpp:184
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:109
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:124
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels.cpp:189
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1385
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1483
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158

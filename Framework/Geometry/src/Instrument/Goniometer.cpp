@@ -59,59 +59,86 @@ void GoniometerAxis::loadNexus(Nexus::File *file, const std::string &group) {
 
 /// Default constructor
 /// The rotation matrix is initialized to identity
-Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
+Goniometer::Goniometer() : m_R(3, 3, true), m_initFromR(false) {}
 
 /// Constructor from a rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
 Goniometer::Goniometer(const DblMatrix &rot) {
-  DblMatrix ide(3, 3), rtr(3, 3);
-  rtr = rot.Tprime() * rot;
-  ide.identityMatrix();
-  if (rtr == ide) {
-    R = rot;
-    initFromR = true;
-  } else
-    throw std::invalid_argument("rot is not a rotation matrix");
+  bool isRot = rot.isRotation(); // this can also throw if matrix is invalid rotation, but that is fine
+  if (!isRot) {
+    // constructor should fail if the matrix is invalid
+    throw std::invalid_argument("rot has not been evaluated to be a valid rotation matrix");
+  }
+  m_R = rot;
+  m_initFromR = true;
+}
+
+/// Add an explicit copy constructor
+Goniometer::Goniometer(const Goniometer &other)
+    : m_R(other.m_R), m_motors(other.m_motors), m_initFromR(other.m_initFromR) {}
+
+/// Copy assigment constructor
+Goniometer &Goniometer::operator=(const Goniometer &other) {
+  if (this != &other) {
+    m_R = other.m_R;
+    m_motors = other.m_motors;
+    m_initFromR = other.m_initFromR;
+  }
+  return *this;
+}
+
+// Move constructor
+Goniometer::Goniometer(Goniometer &&other) noexcept
+    : m_R(std::move(other.m_R)), m_motors(std::move(other.m_motors)), m_initFromR(other.m_initFromR) {}
+
+// Move assignment operator
+Goniometer &Goniometer::operator=(Goniometer &&other) noexcept {
+  if (this != &other) {
+    m_R = std::move(other.m_R);
+    m_motors = std::move(other.m_motors);
+    m_initFromR = other.m_initFromR;
+  }
+  return *this;
 }
 
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix
-const Kernel::DblMatrix &Goniometer::getR() const { return R; }
+const Kernel::DblMatrix &Goniometer::getR() const { return m_R; }
 
 /// Set the new rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
 void Goniometer::setR(Kernel::DblMatrix rot) {
-  R = std::move(rot);
-  initFromR = true;
+  m_R = std::move(rot);
+  m_initFromR = true;
 }
 
 /// Function reports if the goniometer is defined
-bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
+bool Goniometer::isDefined() const { return m_initFromR || (!m_motors.empty()); }
 
-bool Goniometer::operator==(const Goniometer &other) const { return this->R == other.R; }
+bool Goniometer::operator==(const Goniometer &other) const { return this->m_R == other.m_R; }
 
-bool Goniometer::operator!=(const Goniometer &other) const { return this->R != other.R; }
+bool Goniometer::operator!=(const Goniometer &other) const { return this->m_R != other.m_R; }
 
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
 /// name, direction, sense, angle)
 /// The angle units shown is degrees
 std::string Goniometer::axesInfo() {
-  if (initFromR) {
+  if (m_initFromR) {
     return std::string("Goniometer was initialized from a rotation matrix. No "
                        "information about axis is available.\n");
   } else {
     std::stringstream info;
     std::vector<GoniometerAxis>::iterator it;
 
-    if (motors.empty()) {
+    if (m_motors.empty()) {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";
       std::string strCW("CW"), strCCW("CCW");
-      for (it = motors.begin(); it < motors.end(); ++it) {
+      for (it = m_motors.begin(); it < m_motors.end(); ++it) {
         std::string sense = ((*it).sense == CCW) ? strCCW : strCW;
         double angle = ((*it).angleunit == angDegrees) ? ((*it).angle) : ((*it).angle * rad2deg);
         info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense << "\t" << angle << '\n';
@@ -132,7 +159,7 @@ std::string Goniometer::axesInfo() {
 */
 void Goniometer::pushAxis(const std::string &name, double axisx, double axisy, double axisz, double angle, int sense,
                           int angUnit) {
-  if (initFromR) {
+  if (m_initFromR) {
     throw std::runtime_error("Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
     if (!std::isfinite(axisx) || !std::isfinite(axisy) || !std::isfinite(axisz) || !std::isfinite(angle)) {
@@ -144,12 +171,12 @@ void Goniometer::pushAxis(const std::string &name, double axisx, double axisy, d
     }
     // check if such axis is already defined
     const auto it =
-        std::find_if(motors.cbegin(), motors.cend(), [&name](const auto &axis) { return axis.name == name; });
-    if (it != motors.cend()) {
+        std::find_if(m_motors.cbegin(), m_motors.cend(), [&name](const auto &axis) { return axis.name == name; });
+    if (it != m_motors.cend()) {
       throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
-    motors.emplace_back(a);
+    m_motors.emplace_back(a);
   }
   recalculateR();
 }
@@ -161,7 +188,7 @@ void Goniometer::pushAxis(const std::string &name, double axisx, double axisy, d
 void Goniometer::setRotationAngle(const std::string &name, double value) {
   bool changed = false;
   std::vector<GoniometerAxis>::iterator it;
-  for (it = motors.begin(); it < motors.end(); ++it) {
+  for (it = m_motors.begin(); it < m_motors.end(); ++it) {
     if (name == it->name) {
       it->angle = value;
       changed = true;
@@ -178,10 +205,10 @@ void Goniometer::setRotationAngle(const std::string &name, double value) {
   @param value :: value in the units that the axis is set
 */
 void Goniometer::setRotationAngle(size_t axisnumber, double value) {
-  if (axisnumber >= motors.size())
+  if (axisnumber >= m_motors.size())
     throw std::out_of_range("Goniometer::setRotationAngle(): axis number specified is too large.");
-  (motors.at(axisnumber)).angle = value; // it will throw out of range exception
-                                         // if axisnumber is not in range
+  (m_motors.at(axisnumber)).angle = value; // it will throw out of range exception
+                                           // if axisnumber is not in range
   recalculateR();
 }
 
@@ -243,23 +270,23 @@ void Goniometer::calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &positio
 /// Get GoniometerAxis obfject using motor number
 /// @param axisnumber :: axis number (from 0)
 const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
-  return motors.at(axisnumber); // it will throw out of range exception if
-                                // axisnumber is not in range
+  return m_motors.at(axisnumber); // it will throw out of range exception if
+                                  // axisnumber is not in range
 }
 
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
 const GoniometerAxis &Goniometer::getAxis(const std::string &axisname) const {
   const auto it =
-      std::find_if(motors.cbegin(), motors.cend(), [&axisname](const auto &axis) { return axis.name == axisname; });
-  if (it != motors.cend()) {
+      std::find_if(m_motors.cbegin(), m_motors.cend(), [&axisname](const auto &axis) { return axis.name == axisname; });
+  if (it != m_motors.cend()) {
     return *it;
   }
   throw std::invalid_argument("Motor name " + axisname + " not found");
 }
 
 /// @return the number of axes
-size_t Goniometer::getNumberAxes() const { return motors.size(); }
+size_t Goniometer::getNumberAxes() const { return m_motors.size(); }
 
 /** Make a default universal goniometer with phi,chi,omega angles
  * according to SNS convention.
@@ -269,7 +296,7 @@ size_t Goniometer::getNumberAxes() const { return motors.size(); }
  *  3. Omega, around the +Y (vertical) axis
  */
 void Goniometer::makeUniversalGoniometer() {
-  motors.clear();
+  m_motors.clear();
   this->pushAxis("omega", 0., 1., 0., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
   this->pushAxis("chi", 0., 0., 1., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
   this->pushAxis("phi", 0., 1., 0., 0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
@@ -288,14 +315,14 @@ std::vector<double> Goniometer::getEulerAngles(const std::string &convention) {
  * @returns string with the convention
  */
 std::string Goniometer::getConventionFromMotorAxes() const {
-  if (motors.size() != 3) {
+  if (m_motors.size() != 3) {
     g_log.warning() << "Goniometerdoes not have 3 axes. Cannot determine "
                        "convention.\n";
     return "";
   }
 
   std::string convention;
-  for (const auto &motor : motors) {
+  for (const auto &motor : m_motors) {
     switch (std::abs(motor.rotationaxis.masterDir())) {
     case 1:
       convention += "X";
@@ -317,7 +344,7 @@ std::string Goniometer::getConventionFromMotorAxes() const {
 
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR() {
-  if (initFromR) {
+  if (m_initFromR) {
     g_log.warning() << "Goniometer was initialized from a rotation matrix. No "
                     << "recalculation from motors will be done.\n";
     return;
@@ -327,7 +354,7 @@ void Goniometer::recalculateR() {
   std::vector<double> elements;
   Quat QGlobal, QCurrent;
 
-  for (it = motors.begin(); it < motors.end(); ++it) {
+  for (it = m_motors.begin(); it < m_motors.end(); ++it) {
     double ang = (*it).angle * (*it).sense;
     if ((*it).angleunit == angRadians)
       ang *= rad2deg;
@@ -335,7 +362,7 @@ void Goniometer::recalculateR() {
     QGlobal *= QCurrent;
   }
   elements = QGlobal.getRotation();
-  R = DblMatrix(elements);
+  m_R = DblMatrix(elements);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -348,9 +375,13 @@ void Goniometer::saveNexus(Nexus::File *file, const std::string &group) const {
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written
   // and read out in the same order
-  file->writeData("num_axes", int(motors.size()));
-  for (size_t i = 0; i < motors.size(); i++)
-    motors[i].saveNexus(file, "axis" + Strings::toString(i));
+  file->writeData("num_axes", int(m_motors.size()));
+  for (size_t i = 0; i < m_motors.size(); i++)
+    m_motors[i].saveNexus(file, "axis" + Strings::toString(i));
+  DblMatrix rMatrix = getR();
+  // Flatten DblMatrix for saving
+  std::vector<double> matrixData = rMatrix.getVector();
+  file->writeData("rotation_matrix", matrixData);
   file->closeGroup();
 }
 
@@ -363,12 +394,21 @@ void Goniometer::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXpositioner");
   int num_axes;
   file->readData("num_axes", num_axes);
-  motors.clear();
-  motors.reserve(num_axes);
-  for (int i = 0; i < num_axes; i++) {
-    GoniometerAxis newAxis;
-    newAxis.loadNexus(file, "axis" + Strings::toString(i));
-    motors.emplace_back(newAxis);
+  m_motors.clear();
+  m_motors.reserve(num_axes);
+  // If a rotation matrix is available and no rotation axes are provided load should behave like initFromR
+  if (file->hasData("rotation_matrix") && (num_axes < 1)) {
+    std::vector<double> matrixData;
+    file->readData("rotation_matrix", matrixData);
+    DblMatrix rotMat(matrixData);
+    setR(std::move(rotMat));
+    m_initFromR = true; // set as initFromR to prevent overwrite on R recalc
+  } else {
+    for (int i = 0; i < num_axes; i++) {
+      GoniometerAxis newAxis;
+      newAxis.loadNexus(file, "axis" + Strings::toString(i));
+      m_motors.emplace_back(newAxis);
+    }
   }
   file->closeGroup();
   // Refresh cached values

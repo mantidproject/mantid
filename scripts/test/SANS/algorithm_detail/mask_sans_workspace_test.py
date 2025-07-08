@@ -19,6 +19,7 @@ from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.test_director import TestDirector
+from copy import deepcopy
 
 
 def get_masked_spectrum_numbers(workspace):
@@ -53,8 +54,11 @@ def elements_in_range(range_start, range_stop, collection):
 class MaskSansWorkspaceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        sans2d_mask_ws = LoadEmptyInstrument(InstrumentName="SANS2D")
-        loq_empty = LoadEmptyInstrument(InstrumentName="LOQ")
+        cls._loq_data_info = cls._build_data_info("LOQ74044")
+        cls._sans2d_data_info = cls._build_data_info("SANS2D00028827")
+
+        sans2d_mask_ws = LoadEmptyInstrument(Filename=cls._sans2d_data_info.idf_file_path)
+        loq_empty = LoadEmptyInstrument(Filename=cls._loq_data_info.idf_file_path)
 
         cls._sans_original = sans2d_mask_ws
         cls._loq_original = loq_empty
@@ -102,18 +106,15 @@ class MaskSansWorkspaceTest(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     @staticmethod
-    def _build_data_info():
-        ws_name = "SANS2D00028827"
-
+    def _build_data_info(file_name):
         file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(ws_name)
+        file_information = file_information_factory.create_sans_file_information(file_name)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter(ws_name)
-        data_info = data_builder.build()
-        return data_info
+        data_builder.set_sample_scatter(file_name)
+        return data_builder.build()
 
     def test_that_spectra_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
 
         mask_builder = get_mask_builder(data_info)
 
@@ -179,7 +180,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         self._do_assert(workspace, expected_spectra)
 
     def test_that_block_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
 
         mask_builder = get_mask_builder(data_info)
 
@@ -220,7 +221,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         self._do_assert(workspace, expected_spectra)
 
     def test_that_cross_block_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
 
         mask_builder = get_mask_builder(data_info)
 
@@ -262,7 +263,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         file_name = create_shape_xml_file(shape_xml)
 
         # Arrange
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
         mask_builder = get_mask_builder(data_info)
 
         # Mask file
@@ -290,7 +291,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
             os.remove(file_name)
 
     def test_that_general_time_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
         mask_builder = get_mask_builder(data_info)
 
         # Expected_spectra
@@ -330,7 +331,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
             self.assertFalse(any(elements_in_range(start, stop, tof_spectra_11_masked)))
 
     def test_that_detector_specific_time_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
         mask_builder = get_mask_builder(data_info)
 
         # Expected_spectra
@@ -425,7 +426,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         self._do_assert_non_masked(workspace, expected_spectra)
 
     def test_that_beam_stop_masking_is_applied(self):
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
         mask_builder = get_mask_builder(data_info)
 
         beam_stop_arm_width = 0.01
@@ -457,11 +458,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
     def test_that_beam_stop_masking_is_applied_for_LOQ(self):
         # Arrange
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("LOQ74044")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("LOQ74044")
-        data_info = data_builder.build()
+        data_info = deepcopy(self._loq_data_info)
         mask_builder = get_mask_builder(data_info)
 
         beam_stop_arm_width = 0.01
@@ -499,7 +496,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
     def test_that_cylinder_masking_is_applied(self):
         # Arrange
-        data_info = self._build_data_info()
+        data_info = deepcopy(self._sans2d_data_info)
         mask_builder = get_mask_builder(data_info)
 
         # Radius Mask

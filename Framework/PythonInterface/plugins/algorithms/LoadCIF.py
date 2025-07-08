@@ -90,6 +90,17 @@ class SpaceGroupBuilder(object):
         mappings = {":[1Hh]": "", " S$": "", " H$": "", " Z$": " :2", " R$": " :r"}
         for k, v in mappings.items():
             rawSpaceGroupSymbol = re.sub(k, v, rawSpaceGroupSymbol)
+
+        # Allow short forms for Hermann-Mauguin symbols.
+        # The short form can either contain one space or none.
+        # In both cases the short form is translated into the long form.
+        if rawSpaceGroupSymbol.startswith("P") or rawSpaceGroupSymbol.startswith("C"):
+            tmpSpaceGroupSymbol = rawSpaceGroupSymbol.split(" ")
+            if len(tmpSpaceGroupSymbol) == 1:
+                rawSpaceGroupSymbol = tmpSpaceGroupSymbol[0][0] + " 1 " + tmpSpaceGroupSymbol[0][1:] + " 1"
+            elif len(tmpSpaceGroupSymbol) == 2:
+                rawSpaceGroupSymbol = tmpSpaceGroupSymbol[0] + " 1 " + tmpSpaceGroupSymbol[1] + " 1"
+
         return rawSpaceGroupSymbol.strip()
 
     def _getSpaceGroupFromNumber(self, cifData):

@@ -1,4 +1,0 @@
-- Several bugs fixed in :ref:`algm-PEARLTransfit`:
-
-  - Fixed bug in binning which produced empty bins that caused fits to Ta10 resonance to fail with default ``Ediv``
-  - Corrected error propagation for effective and sample temperature

@@ -68,6 +68,7 @@ class FittingPlotModel(object):
                 fnames = [fit_functions.name()]
                 nparams = [fit_functions.nParams()]
             params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
+            ws_is_tof = self._ws_is_tof(wsname)
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
             for ifunc, fname in enumerate(fnames):
@@ -75,9 +76,9 @@ class FittingPlotModel(object):
                     irow = istart + iparam
                     key = "_".join([fname, params_dict["Name"][irow].split(".")[-1]])  # funcname_param
                     self._fit_results[wsname]["results"][key].append([params_dict["Value"][irow], params_dict["Error"][irow]])
-                    if key in fit_prop["peak_centre_params"]:
-                        # param corresponds to a peak centre in TOF which we also need in dspacing
-                        # add another entry into the results dictionary
+                    if key in fit_prop["peak_centre_params"] and ws_is_tof:
+                        # param corresponds to a peak centre check if units are TOF
+                        # if so add another entry into the results dictionary in dSpacing
                         key_d = key + "_dSpacing"
                         try:
                             dcen = self._convert_TOF_to_d(params_dict["Value"][irow], wsname)
@@ -245,3 +246,6 @@ class FittingPlotModel(object):
             table_dict.pop("SpecIndex", None)
             return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
         return None
+
+    def _ws_is_tof(self, wsname):
+        return ADS.retrieve(wsname).getXDimension().getUnits() == "microsecond"

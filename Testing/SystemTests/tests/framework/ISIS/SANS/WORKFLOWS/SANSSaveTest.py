@@ -13,6 +13,7 @@ import systemtesting
 
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
+from mantid.simpleapi import GroupWorkspaces, SANSSave, ConvertSpectrumAxis, CreateSimulationWorkspace
 
 
 # -----------------------------------------------
@@ -47,6 +48,16 @@ class SANSSaveTest(unittest.TestCase):
             errors[45] = 0.0
         return workspace
 
+    @staticmethod
+    def _get_sample_group_workspace(convert_spectrum=False):
+        workspace_0 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_1 = CreateSimulationWorkspace(Instrument="LARMOR", BinParams="1,10,1000", UnitX="MomentumTransfer")
+        workspace_list = [workspace_0, workspace_1]
+        workspace = GroupWorkspaces(workspace_list)
+        if convert_spectrum:
+            workspace = ConvertSpectrumAxis(InputWorkspace=workspace, Target="ElasticQ", EFixed=1)
+        return workspace
+
     def _assert_that_file_exists(self, file_name):
         self.assertTrue(os.path.exists(file_name))
 
@@ -65,7 +76,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": False,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": True,
+            "NXcanSAS": True,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -91,7 +102,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": True,
             "CanSAS": True,
-            "NXCanSAS": True,
+            "NXcanSAS": True,
             "NistQxy": True,
             "RKH": True,
             "CSV": True,
@@ -131,7 +142,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": True,
             "RKH": False,
             "CSV": False,
@@ -158,7 +169,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": False,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -185,7 +196,7 @@ class SANSSaveTest(unittest.TestCase):
             "UseZeroErrorFree": use_zero_errors_free,
             "Nexus": True,
             "CanSAS": False,
-            "NXCanSAS": False,
+            "NXcanSAS": False,
             "NistQxy": False,
             "RKH": False,
             "CSV": False,
@@ -210,6 +221,102 @@ class SANSSaveTest(unittest.TestCase):
 
         # Clean up
         self._remove_file(file_name)
+
+    def test_polarization_props_must_be_set_when_polarized_nx_can_sas_set(self):
+        # Arrange
+        workspace = self._get_sample_group_workspace(False)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        save_name = "SANSSave"
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "PolarizedNXcanSAS": True,
+        }
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.setRethrows(True)
+        # Act
+        self.assertRaisesRegex(RuntimeError, "PolarizationProps must be set to use SavePolarizedNXcanSAS.", save_alg.execute)
+
+    def test_workspace_must_be_group_to_use_polarized_nx_can_sas(self):
+        # Arrange
+        workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        save_name = "SANSSave"
+        save_options = {
+            "InputWorkspace": workspace,
+            "Filename": file_name,
+            "PolarizedNXcanSAS": True,
+        }
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.setRethrows(True)
+        # Act
+        self.assertRaisesRegex(RuntimeError, "Must be a workspace group to save using PolarizedNXcanSAS", save_alg.execute)
+
+    def test_polarization_props_throws_when_any_mandatory_properties_unset(self):
+        # Arrange
+        workspace = self._get_sample_group_workspace(False)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        pol_props = {
+            "InvalidPropName": "0,1",
+        }
+        with self.assertRaisesRegex(
+            RuntimeError,
+            ".*PolarizationProps: Missing property for SavePolarizedNXcanSAS. These properties are missing: InputSpinStates",
+        ):
+            # Act
+            SANSSave(
+                InputWorkspace=workspace,
+                Filename=file_name,
+                PolarizedNXcanSAS=True,
+                PolarizationProps=pol_props,
+            )
+
+    def test_polarizer_algorithm_executed(self):
+        # Arrange
+        workspace = self._get_sample_group_workspace(True)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+        pol_props = {
+            "InputSpinStates": "+10,-10",
+            "PolarizerComponentName": "a",
+            "AnalyzerComponentName": "b",
+            "FlipperComponentNames": "c,d,e",
+            "MagneticFieldStrengthLogName": "f",
+            "MagneticFieldDirection": "1,2,3",
+        }
+
+        # Act
+        SANSSave(workspace, file_name, PolarizedNXcanSAS=True, PolarizationProps=pol_props)
+
+        expected_files = [
+            file_name + "00.h5",
+            file_name + "01.h5",
+        ]
+        for pol_file in expected_files:
+            self._assert_that_file_exists(pol_file)
+            self._remove_file(pol_file)
+
+    def test_group_workspaces_handled_by_non_pol_alg(self):
+        # Arrange
+        workspace = self._get_sample_group_workspace(True)
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+
+        # Act
+        SANSSave(workspace, file_name, Nexus=True, NXcanSAS=True)
+
+    def test_group_workspaces_throw_for_incompatible_alg(self):
+        # Arrange
+        workspace = self._get_sample_group_workspace(True)
+
+        file_name = os.path.join(mantid.config.getString("defaultsave.directory"), "sample_sans_save_file")
+
+        algs = ["CanSAS", "NistQxy", "RKH", "CSV"]
+        # Act
+        for alg in algs:
+            with self.assertRaisesRegex(
+                RuntimeError, ".*InputWorkspace: Cannot be a workspace group when saving using CanSAS, NistQxy, RKH, or CSV"
+            ):
+                SANSSave(workspace, file_name, **{alg: True})
 
 
 class SANSSaveRunnerTest(systemtesting.MantidSystemTest):

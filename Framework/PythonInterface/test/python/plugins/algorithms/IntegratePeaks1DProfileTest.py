@@ -5,6 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
+from unittest.mock import patch
+
 from mantid.simpleapi import (
     IntegratePeaks1DProfile,
     CreatePeaksWorkspace,
@@ -20,6 +23,7 @@ import numpy as np
 import tempfile
 import shutil
 from os import path
+import json
 
 
 class IntegratePeaks1DProfileTest(unittest.TestCase):
@@ -86,6 +90,35 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], self.default_intens_over_sigma, delta=1e-1)
         self.assertAlmostEqual(out.column("Intens/SigInt")[1], self.default_intens_over_sigma, delta=1e-1)
 
+    def test_peak_shapes_when_fit_successful(self):
+        out = IntegratePeaks1DProfile(
+            InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_1", **self.profile_kwargs
+        )
+        self.assertEqual(len(out), 2)
+        for pk in out:
+            self.assertEqual(pk.getPeakShape().shapeName(), "detectorbin")
+            self.assertEqual(pk.getPeakShape().algorithmName(), "IntegratePeaks1DProfile")
+            self.assertEqual(pk.getPeakShape().algorithmVersion(), 1)
+            pk_shape_dict = json.loads(pk.getPeakShape().toJSON())
+            self.assertEqual(len(pk_shape_dict["detectors"]), 2)
+            for det in pk_shape_dict["detectors"]:
+                self.assertTrue(det["startX"] < det["endX"])
+
+    @patch("plugins.algorithms.IntegratePeaks1DProfile.IntegratePeaks1DProfile.delete_fit_result_workspaces")
+    @patch(
+        "plugins.algorithms.IntegratePeaks1DProfile.IntegratePeaks1DProfile.exec_fit",
+    )
+    def test_peak_shapes_when_fit_failed(self, mock_fit, mock_fit_result_workspaces):
+        mock_fit_return = {"success": False}
+        mock_fit.return_value = mock_fit_return
+        out = IntegratePeaks1DProfile(
+            InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_1", **self.profile_kwargs
+        )
+        self.assertEqual(len(out), 2)
+        for pk in out:
+            self.assertEqual(pk.getPeakShape().shapeName(), "none")
+        mock_fit_result_workspaces.assert_has_calls([mock.call(mock_fit_return), mock.call(mock_fit_return)])
+
     def test_exec_IntegrateIfOnEdge_False(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["IntegrateIfOnEdge"] = False
@@ -124,7 +157,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 62502470, delta=5)  # not realistic fit - no noise!
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 25894672, delta=5)  # not realistic fit - no noise!
 
     def test_exec_IOverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
@@ -137,7 +170,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["PeakFunction"] = "Gaussian"
         kwargs["FixPeakParameters"] = ""
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.04, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.97, delta=1e-2)
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")
@@ -152,7 +185,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["FractionalChangeDSpacing"] = 1e-10
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
         # I/sigma different now d-spacing constrained
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.16, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.18, delta=1e-2)
 
     def test_exec_fix_peak_params(self):
         kwargs = self.profile_kwargs.copy()

@@ -284,7 +284,7 @@ void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shar
     } else if (!std::isfinite(error)) {
       // nan or inf error
       if (!m_ignoreInvalidData)
-        throw std::runtime_error("Infinte number or NaN found in input data.");
+        throw std::runtime_error("Infinte number or NaN found in input error.");
     } else if (error <= 0) {
       if (!m_ignoreInvalidData)
         weight = 1.0;

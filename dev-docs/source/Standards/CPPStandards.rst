@@ -375,3 +375,77 @@ of the following should take into account the use of the code.
    -  No further action is required.
    -  Check the XYZ input data and then repeat the process.
    -  Contact the system administrator.
+
+Cppcheck
+^^^^^^^^
+
+Cppcheck analyses all C++ code in the project to locate undefined behavior
+and poor coding practices. Updates to Cppcheck result in such a large number of
+these potential problems being found that it is impractical to solve them all
+in the Pull Request where the update takes place.
+
+Suppressions File
+-----------------
+
+When Cppcheck is updated, a suppressions file will be created using the
+suppressions file generator script, ``generate_cppcheck_suppressions_list.py``.
+
+This file, ``CppCheck_Suppressions.txt.in``, contains a list of all the problems
+that Cppcheck found in the codebase. It has two functions:
+
+- Suppress all errors for problems that are known to be entirely or
+  almost-entirely false positives.
+- Act as a to-do list for any remaining problems that should be fixed when found
+  during normal development.
+
+When modifying a ``.cpp`` file, it is likely that changes in line numbers will
+cause once-suppressed errors to trigger again. Similar to the rules in
+:ref:`CppModernization`, these issues should be fixed as part of the same unit
+of work that revealed them.
+
+Suppressing False Positives
+---------------------------
+
+Occasionally Cppcheck will incorrectly identify problems that cannot or should
+not be fixed.
+
+In order to allow the suppressions file to function as a to-do list of fixes and
+to reduce developer time spent looking for solutions that have already been
+considered, false positives should be suppressed inline.
+
+Inline suppressions must be accompanied by a comment explaining why the problem
+was suppressed rather than fixed. This comment also allows future developers to
+determine if the suppressions can be removed when the code around them changes.
+
+Reviewers and gatekeepers should give these comments additional attention.
+
+.. attention::
+
+   Inline suppressions are a last resort. You should be sure that a suppression
+   cannot be fixed by modifying the code before suppressing it using the
+   techniques below.
+
+**Suppressing a single line of code:**
+
+.. code-block:: c++
+
+   // cppcheck-suppress arrayIndexOutOfBounds
+   sizeFourArray[5] = 0;
+
+
+**Suppressing multiple errors on a single line:**
+
+.. code-block:: c++
+
+   // cppcheck-suppress [arrayIndexOutOfBounds,zeroDiv]
+   sizeFourArray[5] = 1 / 0;
+
+
+**Suppressing multiple lines:**
+
+.. code-block:: c++
+
+   // cppcheck-suppress-begin arrayIndexOutOfBounds
+   sizeFourArray[5] = 0;
+   sizeFiveArray[5] = 1;
+   // cppcheck-suppress-end arrayIndexOutOfBounds
