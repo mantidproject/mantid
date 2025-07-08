@@ -69,6 +69,7 @@ def run_focus_script(
     grouping: Optional[str] = None,
     prm_path: Optional[str] = None,
     spectrum_num: Optional[str] = None,
+    groupingfile_path: Optional[str] = None,
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
@@ -83,6 +84,7 @@ def run_focus_script(
     prm_path: optional path to the grouping prm file (produced during calibration), if using a standard detector grouping,
               just use the grouping argument
     spectrum_num: optional string of spectra numbers if desired to define custom grouping by specifying the spectra
+    groupingfile_path: optional path to a grouping ".cal" or ".xml" file, alternative to prm_path
     """
     group = GROUP(grouping) if grouping else None
     model = TextureInstrument(
@@ -94,6 +96,7 @@ def run_focus_script(
         full_inst_calib_path=full_instr_calib,
         group=group,
         spectrum_num=spectrum_num,
+        groupingfile_path=groupingfile_path,
     )
 
     mk(focus_dir)
