@@ -158,6 +158,7 @@ class AxisEditor(PropertiesEditorBase):
             self.ui.scaleBox.hide()
             self.ui.scaleLabel.hide()
             self.ui.gridBox.hide()
+            self.ui.gridLabel.hide()
         else:
             for mode in SCALE_MODES:
                 self.ui.scaleBox.addItem(mode)
@@ -248,6 +249,7 @@ class ColorbarAxisEditor(AxisEditor):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, "y")
 
         self.ui.gridBox.hide()
+        self.ui.gridLabel.hide()
 
         self.images = []
 
