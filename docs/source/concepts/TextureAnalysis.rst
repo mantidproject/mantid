@@ -1,20 +1,20 @@
 .. _TextureAnalysis:
 
-Texture Analysis
-================
+Texture Analysis Theory
+=======================
 
 .. contents::
 
 Introduction to Texture Analysis
 ################################
 
-For argument sake, lets say you have a sample and you are interested to know what the crystallographic texture is -- that is to say, you want to know what
-the relationship is between the macroscopic structure of your sample and some given crystallographic plane e.g. :math:`(100)`?
+For argument sake, lets say you have some sample and you are interested to know what the crystallographic texture is -- that is to say, you want to know what
+the relationship is between the macroscopic dimensions of your sample and some given crystallographic plane e.g. :math:`(100)`?
 
 .. figure:: /images/texture-example-sample.png
    :alt: An example cuboid sample and a corresponding mantid representation
 
-Taking this sample as an example, you can see that, by merit of being a cuboid, the sample has unique height, width and length.
+Taking this sample as an example, you can see that, by merit of being a cuboid, the sample has a unique height, width and length.
 These directions may or may not also be correlated with some processing procedure (e.g. in this case: the length is the Rolling Direction;
 The width is the Traverse Direction and the height is the Normal Direction).
 
@@ -94,7 +94,7 @@ The bottom images show these integrated intensity values on the actual detector 
 Pole Figure Resolution and Coverage
 ###################################
 
-A few factors will effect the final quality of the pole figure data, with the two main considerations being how the detector banks are grouped and
+A few factors will affect the final quality of the pole figure data, with the two main considerations being how the detector banks are grouped and
 for what sample orientations data is collected.
 
 In mantid, the first of these -- the detector groupings, can be decided in post, after the experiment has been run.
@@ -107,11 +107,260 @@ The second factor -- sample orientations, is something which perhaps requires mo
 optimising your balance of time vs uncertainty. If you are quite confident in some aspect of your texture (such as a known symmetry), you may be able to target data
 collection to obtain datasets with the detectors covering only a few key sectors in the pole figure, saving time on fewer experimental runs. In contrast, if the texture
 is unknown, the optimal strategy is likely to be obtaining even coverage across the entire figure, and aiming to do this in a time efficient manner. The other trade off
-of this exploratory coverage, compared to a more targetted approach is that one will likely end up with fewer data points around the actual regions of interest. A discussion
+of this exploratory coverage, compared to a more targeted approach is that one will likely end up with fewer data points around the actual regions of interest. A discussion
 of possible exploratory coverage schemes is given by Malamud [#detBanks]_.
 
-As such, again time permitting, a dual approach may prove advantageous for unknown textures, where a preliminary full coverage dataset is collect and, unpon subsequent
+As such, again time permitting, a dual approach may prove advantageous for unknown textures, where a preliminary full coverage dataset is collect and, upon subsequent
 inspection, addition runs are collected targeting the identified regions of interest.
+
+Texture Analysis within Mantid
+==============================
+
+The creation of pole figures within mantid can be achieved in two distinct workflows: either using scripts within the python interface or
+through the Engineering Diffraction user interface. The application of the latter will be discussed separately in :ref:`_Engineering_Diffraction-ref`,
+here we will focus on the scripting approach. It is worth noting that for practical application, the scripts offer the most time efficient workflow and, as such,
+are probably the preferable approach for creating pole figures post-experiment, with the user interface offering a more interactive approach which lends itself to
+processing and guiding the evolution of the experiment, as it happens.
+
+Introduction to Sample Shape, Material, and Orientation
+#######################################################
+
+A critical aspect to performing texture analysis is having the correct representation of the sample, its shape, and its intrinsic directions for each dataset you process.
+This is because these are the factors which will determine where points end up within the pole figure. Getting these things right within mantid, should hopefully, not be
+too onerous, but care should be taken to make good records of the physical layouts during the experiment to check your recreation in mantid.
+
+The way the texture analysis has been designed in Mantid, is that each run's workspace should contain the information about the sample shape and its orientation relative
+to an initial reference position. It is then required, at the point of pole figure creation, to provide the intrinsic sample directions, in lab coordinates, for this
+initial reference position. Typically this is achieved by having the initial reference position as the sample mounted upon the goniometer of choice in its default "home" position.
+The sample would ideally be aligned on the homed goniometer to have intrinsic directions aligned with identifiable directions in the lab coordinates, which is often
+intuatively done in practice (intrinsic directions are typically aligned with some topological features and these are oft aligned to be parallel or perpendicular to the beam).
+If the sample is not so straightforwardly positioned in the reference state, some more care should be taken to get the definition of these initial directions correct.
+
+From here, the transformation to each run's sample orientation is exactly the same as the transformation defined by the goniometer state for that run. On ENGINX, there are
+two main goniometers used - the Eulerian Cradle and the Cybaman. Extracting the state transformations for these two goniometers setups require different approaches, but
+should provide coverage for a broad range of additional setups.
+
+The general procedure for transfering these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
+sample shape and orientation can be saved (along with any information on material which might be used for absorption correction). Next, load in all the run workspaces
+corresponding to this experiment. Load an orientation file to set the goniometer transformation on the individual workspaces. Copy the sample definition across from the
+reference workspace to each of the run workspaces. This is applied as part of the absorption script provided below. We also provide some additional notes and scripts
+to aid in the setup of reference workspaces and orientation files
+
+Reference Workspace
+###################
+
+The following script will allow the setup of the reference workspace, alternatively this functionality is available interactively within the Absorption Correction Tab
+of the user interface.
+.. code::python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from Engineering.texture.correction.correction_model import TextureCorrectionModel
+
+   # Create an example Reference Workspace
+
+   exp_name = "Example"
+   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+   instr = "ENGINX"
+
+
+   model = TextureCorrectionModel()
+   LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace="")
+
+   model.create_reference_ws(exp_name)
+
+   # either set or load sample shape
+   #set:
+   shape_xml = ""
+   SetSampleShape(model.reference_ws, shape_xml)
+
+   #load:
+   shape_file = ""
+   LoadSampleShape(model.reference_ws, shape_file)
+
+   # Now set the sample material
+   # set material
+   SetSampleMaterial(model.reference_ws, "Fe")
+
+   # save reference file
+   model.save_reference_file(exp_name, None, root_dir) # just set group as None here
+
+Orientation Files
+#################
+
+As discussed previously, the orientation information is expected to come from either the Eulerian Cradle or the Cybaman, but these two goniometers are handled broadly
+by providing either a series of fixed rotations around known axes (cradle) or by providing a flattened transformation matrix corresponding to a more complicated
+transformation (cybaman). The flag which controls this behaviour is `orient_file_is_euler`.
+
+If this is `True`, the orientation file is expect to be a text file with a row for each run and, within each row, a rotation angle for each axis.
+These axes are then defined by `euler_scheme`, taking a string of lab directions for the initial
+axes of each goniometer axis. The sense of the rotation around these axes are then defined by `euler_axes_sense`, where the string given should be comma separated +/-1,
+one for each axis, where rotations are counter-clockwise (1) or clockwise (-1).
+
+If `orient_file_is_euler` is `False`, the orientation file is expected to be a text file with a row for each run and, within each row the first 9 values are expected to
+be a flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the SscansS2 software, and a script is provided below for converted
+the transformation matrices from SscansS2 reference frame into mantid. In principle, a flattened matrix from any sample positioner could be given here instead.
+
+.. code:: python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+
+   txt_file = r"path\to\sscanss_output_matrices.txt"
+   NUM_POINTS = 3 # sscanss allows matrices to be calculated at multiple points for the same desired orientation
+   # for mantid, we want these as separate experiments so we separate them out into different orientation files
+
+   with open(txt_file, "r") as f:
+      goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
+
+   transformed_strings = []
+
+
+   for gs in goniometer_strings:
+      or_vals = gs.split(",")
+      trans_vals = or_vals[9:]
+      run_mat = np.asarray(or_vals[:9], dtype=float).reshape((3, 3)).T
+      mantid_mat = run_mat[[1, 2, 0], :][:, [1, 2, 0]]
+      new_string = ",".join([str(x) for x in mantid_mat.reshape(-1)]+trans_vals)
+      transformed_strings.append(new_string)
+
+   num_scans = len(goniometer_strings)//NUM_POINTS
+
+   # saves the output in the same location as the initial file, just with _mantid_point_{point index} on the end of each file name
+
+   for scan_ind in range(NUM_POINTS):
+      save_file = txt_file.replace(".txt", f"_mantid_point_{scan_ind}.txt")
+
+      with open(save_file, "w") as f:
+         f.writelines(transformed_strings[scan_ind*num_scans:(scan_ind+1)*num_scans])
+
+
+Absorption Correction
+#####################
+
+A consideration when performing texture analysis is to decide how to deal with attenuation and absorption. Depending upon the material being used,
+the accuracy required, and the amount of time available, you may or may not want to apply a correction to the raw data to correct for neutron attenuation.
+Mantid offers a suite of approaches to tackle this (:ref:`_Sample Corrections`), so to a certain extent this can be tailored to the use case, but here we
+will discuss the methodology designed to replicate the functionality available within the user interface, making use of :ref:`algm-MonteCarloAbsorption`.
+
+Below is a script that can be used to this end, along with some additional helper scripts for making the reference workspace and dealing with orientation files.
+The main script is split into three sections - imports, experiment information, and execution. For most use cases
+the only section needing attention is the experimental information. This section should be sufficiently annotated to explain how to use it, but should mirror
+the user interface while providing more repeatable processing.
+
+.. code:: python
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from mantid.api import AnalysisDataService as ADS
+   from os import path, makedirs, scandir
+   from Engineering.texture.TextureUtils import find_all_files, run_abs_corr
+
+   ############### ENGINEERING DIFFRACTION INTERFACE ABSORPTION CORRECTION ANALOGUE #######################
+
+   ######################### EXPERIMENTAL INFORMATION ########################################
+
+   # First, you need to specify your file directories, If you are happy to use the same root, from experiment
+   # to experiment, you can just change this experiment name.
+   exp_name = "ExampleExperiment"
+
+   # otherwise set root directory here:
+   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+
+   # next, specify the folder with the files you would like to apply the absorption correction to
+   corr_dir = fr"C:\Users\Name\Documents\Example\DataFiles"
+
+   # For texture, it is expected that you have a single sample shape, that is reorientated between runs.
+   # this is handled by having a reference workspace with the shape in its neutral position
+   # (position in the beamline when the goniometer is home)
+   # This reference workspace probably requires you to do some interacting and validating, so should be setup in the UI
+   # (Interfaces/Diffraction/Engineering Diffraction/Absorption Correction)
+
+   # if this is the case copy ref should be True and the ref_ws_path should be given
+   # otherwise, if set ref is true, it is assumed that the sample shapes are already present on the workspaces
+   copy_ref = True
+   ref_ws_path = path.join(root_dir, "ReferenceWorkspaces", f"{exp_name}_reference_workspace.nxs")
+
+   # if using the reference you now need to reorientate the sample, this can be done using orientation files
+   # two standard types
+
+   # Euler Orientation (orient_file_is_euler = True)
+   # for this, euler_scheme and euler_axes_sense must be given to say which lab frame directions the goniometer axes are pointing along
+   # and where the rotations are counter-clockwise (1) or clockwise (-1)
+
+   # Matrix Orientation (orient_file_is_euler = False)
+   # for this the first 9 values in each row of the files are assumed to be flattened rotation matrix.
+   # These are used to directly reorientate the samples
+   orientation_file = r"C:\Users\Name\Documents\Example\DataFiles\pose_matrices_mantid.txt"
+   orient_file_is_euler = False
+   euler_scheme = "YXY"
+   euler_axes_sense = "1,-1,1"
+
+   # Now you can specify information about the correction
+   include_abs_corr = True # whether to perform the correction based on absorption
+   monte_carlo_args = "SparseInstrument:True" # what arguments to pass to MonteCarloAbsorption alg
+   clear_ads_after = True # whether to remove the produced files from the ADS to free up RAM
+   gauge_vol_preset = "4mmCube" # or "Custom" # the gauge volume being used
+   gauge_vol_shape_file = None # or "path/to/xml" # a custom gauge volume shape file
+
+   # There is also the option to output an attenuation table alongside correcting the data
+   # This will return a table of the attenuation coefficient at the point specified
+   include_atten_table = False
+   eval_point = "2.00"
+   eval_units = "dSpacing" #must be a valid argument for ConvertUnits
+
+   # Finally, you can add a divergence correction to the data, this is still a work in progress, so keep False for now
+   include_div_corr = False
+   div_hoz = 0.02
+   div_vert = 0.02
+   det_hoz = 0.02
+
+   ######################### RUN SCRIPT ########################################
+
+   # load the ref workspace
+   ref_ws_str = path.splitext(path.basename(ref_ws_path))[0]
+   Load(Filename = ref_ws_path, OutputWorkspace = ref_ws_str)
+
+   # load data workspaces
+   corr_wss = find_all_files(corr_dir)
+   wss = [path.splitext(path.basename(fp))[0] for fp in corr_wss]
+   for iws, ws in enumerate(wss):
+      if not ADS.doesExist(ws):
+         Load(Filename = corr_wss[iws], OutputWorkspace= ws)
+
+   # run script
+   run_abs_corr(wss = wss,
+               ref_ws = ref_ws_str,
+               orientation_file = orientation_file,
+               orient_file_is_euler = orient_file_is_euler,
+               euler_scheme = euler_scheme,
+               euler_axes_sense = euler_axes_sense,
+               copy_ref = copy_ref,
+               include_abs_corr = include_abs_corr,
+               monte_carlo_args = monte_carlo_args,
+               gauge_vol_preset = gauge_vol_preset,
+               gauge_vol_shape_file = gauge_vol_shape_file,
+               include_atten_table = include_atten_table,
+               eval_point = eval_point,
+               eval_units = eval_units,
+               exp_name = exp_name,
+               root_dir = root_dir,
+               include_div_corr = include_div_corr,
+               div_hoz = div_hoz,
+               div_vert = div_vert,
+               det_hoz = det_hoz,
+               clear_ads_after = clear_ads_after)
+
+
+
+
+
 
 References
 ----------
