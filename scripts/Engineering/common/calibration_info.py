@@ -132,7 +132,8 @@ class CalibrationInfo:
         if self.group == GROUP.CUSTOM:
             self.set_grouping_filepath_from_prm_filepath()
             filename = path.basename(self.grouping_filepath)
-            self.extra_group_suffix = f"_{path.splitext(filename)[0]}"
+            self.extra_group_suffix = f"_{path.splitext(filename)[0].split('_')[-1]}"
+            # to prevent really long suffixes, will use the last text after the _ in the prm filename
         elif self.group == GROUP.CROPPED and self.spectra_list_str:
             self.extra_group_suffix = f"_{self.spectra_list_str}"
 
