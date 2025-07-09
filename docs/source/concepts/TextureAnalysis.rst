@@ -13,7 +13,8 @@ the relationship is between the macroscopic dimensions of your sample and some g
 
 .. figure:: /images/texture-example-sample.png
    :alt: An example cuboid sample and a corresponding mantid representation
-   Figure 1\: An example cuboid sample and a corresponding mantid representation, the intrinsic directions corresponding to\: the Rolling Direction (RD);
+
+   Figure 1 - An example cuboid sample and a corresponding mantid representation, the intrinsic directions corresponding to: the Rolling Direction (RD);
    the Traverse Direction (TD); and the Normal Direction (ND), are shown with the red, blue and green arrows.
 
 Taking this sample as an example, you can see that, by virtue of being a cuboid, the sample has a unique height, width and length.
@@ -62,18 +63,21 @@ which gives another spatial representation of the intensity of the bragg reflect
 
 .. figure:: /images/texture-direction-sphere.gif
    :alt: GIF showing how the set of direction vectors trace out the surface of a sphere
-   Figure 2: Animation showing how the complete set of direction vectors around a sample trace out the surface of a sphere.
+
+   Figure 2 - Animation showing how the complete set of direction vectors around a sample trace out the surface of a sphere.
 
 .. figure:: /images/texture-direction-peaks.gif
    :alt: GIF showing how the set of direction vectors trace out the surface of a sphere, with intensity convolved into position
-   Figure 3: Animation showing the complete set of direction vectors convolved with the intensity of a bragg reflection.
+
+   Figure 3 - Animation showing the complete set of direction vectors convolved with the intensity of a bragg reflection.
 
 Much like how maps of the world provide 2D representations of the 3D globe, we can do the same thing by projecting this 3D pole figure down into a 2D pole figure.
 The below graphic shows the relationship between the 2D pole figure which are commonly encountered and that 3D sphere which defines all unique directions around a sample.
 
 .. figure:: /images/texture-pole-figure-interpretation.gif
    :alt: GIF showing the relationship between the 3D and 2D representations of the pole figure
-   Figure 4: Animation showing how the relationship between the 3D and 2D representations of the pole figure.
+
+   Figure 4 - Animation showing how the relationship between the 3D and 2D representations of the pole figure.
 
 The surface of this sphere is again coloured by the intensity of a selected bragg peak, giving a 3D pole figure.
 Additionally, the graphic shows the distortion between this spherical representation and the intensity convolved representation.
@@ -88,7 +92,8 @@ worth stressing that this does not provide an suitable replacement for a robust 
 
 .. figure:: /images/texture-pole-figure-displays.png
    :alt: Image comparing the scatter plot pole figure and the contour interpolation
-   Figure 5: Image comparing the scatter plot pole figure and the contour interpolation
+
+   Figure 5 - Image comparing the scatter plot pole figure and the contour interpolation
 
 
 Generating Pole Figures
@@ -105,7 +110,8 @@ The bottom right graphic shows how the scattering vectors (corresponding to all 
 
 .. figure:: /images/texture-pole-figure-lookup.gif
    :alt: GIF showing the relationship between the experimental geometry and the pole figure
-   Figure 6: Animation showing the relationship between the experimental geometry and the pole figure
+
+   Figure 6 - Animation showing the relationship between the experimental geometry and the pole figure
 
 
 The second of these graphics, again below, shows how the intensities are determined for the points in the experimental pole figure.
@@ -115,7 +121,8 @@ The bottom plots show these integrated intensity values on the actual detector b
 
 .. figure:: /images/texture-pole-figure-detectors.gif
    :alt: GIF showing how intensities are calculated for each detector in the pole figure
-   Figure 7: Animation showing how intensities are calculated for each detector in the pole figure
+
+   Figure 7 - Animation showing how intensities are calculated for each detector in the pole figure
 
 Pole Figure Resolution and Coverage
 ###################################
@@ -132,7 +139,8 @@ different detector groupings, and the effect this has on the pole figure coverag
 
 .. figure:: /images/texture-pole-figure-groupings.png
    :alt: Image showing pole figures using different detector groupings
-   Figure 8: Image showing pole figures using different detector groupings.
+
+   Figure 8 - Image showing pole figures using different detector groupings.
 
 The second factor -- sample orientations, is something which perhaps requires more consideration before hitting go on data collection. The factors to weigh up here are
 optimising your balance of time vs uncertainty. If you are quite confident in some aspect of your texture (such as a known symmetry), you may be able to target your data
