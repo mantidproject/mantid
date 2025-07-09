@@ -281,11 +281,11 @@ class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin
         )
 
     def validate(self):
-        param_table1 = ADS.retrieve("ENGINX_280625_1.8__Fit_Parameters")
-        param_table2 = ADS.retrieve("ENGINX_280625_1.44__Fit_Parameters")
+        param_table1 = ADS.retrieve("ENGINX_280625_1.8_GROUP_Fit_Parameters")
+        param_table2 = ADS.retrieve("ENGINX_280625_1.44_GROUP_Fit_Parameters")
         expected_files = [
-            os.path.join(CWDIR, "FitParameters", "1.8", "ENGINX_280625_1.8__Fit_Parameters.nxs"),
-            os.path.join(CWDIR, "FitParameters", "1.44", "ENGINX_280625_1.44__Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "1.8", "ENGINX_280625_1.8_GROUP_Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "1.44", "ENGINX_280625_1.44_GROUP_Fit_Parameters.nxs"),
         ]
         # ignore the estimated intensity reference data (last column of reference)
         self.validate_table(param_table1, dict(zip(self.reference_columns[:-1], self.peak_1_vals[:-1])))
@@ -305,11 +305,11 @@ class TestFittingPeaksOfFocusedDataWithNumericalIntegration(systemtesting.Mantid
         )
 
     def validate(self):
-        param_table1 = ADS.retrieve("ENGINX_280625_1.8__Fit_Parameters")
-        param_table2 = ADS.retrieve("ENGINX_280625_1.44__Fit_Parameters")
+        param_table1 = ADS.retrieve("ENGINX_280625_1.8_GROUP_Fit_Parameters")
+        param_table2 = ADS.retrieve("ENGINX_280625_1.44_GROUP_Fit_Parameters")
         expected_files = [
-            os.path.join(CWDIR, "FitParameters", "1.8", "ENGINX_280625_1.8__Fit_Parameters.nxs"),
-            os.path.join(CWDIR, "FitParameters", "1.44", "ENGINX_280625_1.44__Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "1.8", "ENGINX_280625_1.8_GROUP_Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "1.44", "ENGINX_280625_1.44_GROUP_Fit_Parameters.nxs"),
         ]
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
         self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
