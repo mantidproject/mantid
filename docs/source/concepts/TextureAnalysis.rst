@@ -8,13 +8,15 @@ Texture Analysis Theory
 Introduction to Texture Analysis
 ################################
 
-For argument sake, lets say you have some sample and you are interested to know what the crystallographic texture is -- that is to say, you want to know what
+For argument's sake, lets say you have some sample and you are interested in knowing the crystallographic texture -- that is to say, you want to know what
 the relationship is between the macroscopic dimensions of your sample and some given crystallographic plane e.g. :math:`(100)`?
 
 .. figure:: /images/texture-example-sample.png
    :alt: An example cuboid sample and a corresponding mantid representation
+   Figure 1\: An example cuboid sample and a corresponding mantid representation, the intrinsic directions corresponding to\: the Rolling Direction (RD);
+   the Traverse Direction (TD); and the Normal Direction (ND), are shown with the red, blue and green arrows.
 
-Taking this sample as an example, you can see that, by merit of being a cuboid, the sample has a unique height, width and length.
+Taking this sample as an example, you can see that, by virtue of being a cuboid, the sample has a unique height, width and length.
 These directions may or may not also be correlated with some processing procedure (e.g. in this case: the length is the Rolling Direction;
 The width is the Traverse Direction and the height is the Normal Direction).
 
@@ -55,20 +57,23 @@ Each unique direction relative to your sample will intercept the sphere at a uni
 If we imagine being able to sample the intensity of your given reflection peak in every possible direction, this would correspond to sampling the surface of the sphere.
 Plotting the intensity associated with a bragg peak in each of these direction onto this sphere, we would get a complete 3D representation of how the intensity changes along all macroscopic sample directions.
 This is shown in the first of the two graphics below.
-The second graphic then shows the same intensithy plot, but with the intensity values convolved into the radial coordinate,
+The second graphic then shows the same intensity plot, but with the intensity values convolved into the radial coordinate,
 which gives another spatial representation of the intensity of the bragg reflection as a function of direction around the sample.
 
 .. figure:: /images/texture-direction-sphere.gif
    :alt: GIF showing how the set of direction vectors trace out the surface of a sphere
+   Figure 2: Animation showing how the complete set of direction vectors around a sample trace out the surface of a sphere.
 
 .. figure:: /images/texture-direction-peaks.gif
    :alt: GIF showing how the set of direction vectors trace out the surface of a sphere, with intensity convolved into position
+   Figure 3: Animation showing the complete set of direction vectors convolved with the intensity of a bragg reflection.
 
-Much like how maps of the world provide 2D representations of the 3D globe, we can do the same thing by projecting this 3D pole figures down into a 2D pole figure.
+Much like how maps of the world provide 2D representations of the 3D globe, we can do the same thing by projecting this 3D pole figure down into a 2D pole figure.
 The below graphic shows the relationship between the 2D pole figure which are commonly encountered and that 3D sphere which defines all unique directions around a sample.
 
 .. figure:: /images/texture-pole-figure-interpretation.gif
    :alt: GIF showing the relationship between the 3D and 2D representations of the pole figure
+   Figure 4: Animation showing how the relationship between the 3D and 2D representations of the pole figure.
 
 The surface of this sphere is again coloured by the intensity of a selected bragg peak, giving a 3D pole figure.
 Additionally, the graphic shows the distortion between this spherical representation and the intensity convolved representation.
@@ -83,6 +88,7 @@ worth stressing that this does not provide an suitable replacement for a robust 
 
 .. figure:: /images/texture-pole-figure-displays.png
    :alt: Image comparing the scatter plot pole figure and the contour interpolation
+   Figure 5: Image comparing the scatter plot pole figure and the contour interpolation
 
 
 Generating Pole Figures
@@ -99,6 +105,7 @@ The bottom right graphic shows how the scattering vectors (corresponding to all 
 
 .. figure:: /images/texture-pole-figure-lookup.gif
    :alt: GIF showing the relationship between the experimental geometry and the pole figure
+   Figure 6: Animation showing the relationship between the experimental geometry and the pole figure
 
 
 The second of these graphics, again below, shows how the intensities are determined for the points in the experimental pole figure.
@@ -108,6 +115,7 @@ The bottom plots show these integrated intensity values on the actual detector b
 
 .. figure:: /images/texture-pole-figure-detectors.gif
    :alt: GIF showing how intensities are calculated for each detector in the pole figure
+   Figure 7: Animation showing how intensities are calculated for each detector in the pole figure
 
 Pole Figure Resolution and Coverage
 ###################################
@@ -116,7 +124,7 @@ A few factors will affect the final quality of the experimental pole figure data
 for what sample orientations data is collected.
 
 In mantid, the first of these -- the detector groupings, can be decided after the experiment has been run.
-The reality here (at least for ENGIN-X), is that despite it being possible to generate an experimental pole figure using each individual detector pixel as a unique point,
+The reality here (at least for ENGIN-X), is that although it is possible to generate an experimental pole figure using each individual detector pixel as a unique point,
 the confidence in the metric being extracted from peak fit will be a product of the signal-to-noise-ratio of those individual signals. This signal-to-noise-ratio can be improved by
 grouping neighbouring pixels together, thus obtaining cleaner spectra to fit, at the trade off of spatial resolution. Alternatively, beam access permitting, longer collection times
 can be used, allowing finer pixel groupings to be accessible and improve the spatial resolution. The below figure shows the same runs processed using
@@ -124,6 +132,7 @@ different detector groupings, and the effect this has on the pole figure coverag
 
 .. figure:: /images/texture-pole-figure-groupings.png
    :alt: Image showing pole figures using different detector groupings
+   Figure 8: Image showing pole figures using different detector groupings.
 
 The second factor -- sample orientations, is something which perhaps requires more consideration before hitting go on data collection. The factors to weigh up here are
 optimising your balance of time vs uncertainty. If you are quite confident in some aspect of your texture (such as a known symmetry), you may be able to target your data
@@ -156,7 +165,7 @@ The way the texture analysis has been designed in Mantid, is that each run's wor
 to an initial reference position. It is then required, at the point of pole figure creation, to provide the intrinsic sample directions, in lab coordinates, for this
 initial reference position. Typically, this is achieved by having the initial reference position as the sample mounted upon the goniometer of choice in its default "home" position.
 The sample would ideally be aligned on the homed goniometer to have intrinsic directions aligned with simple, identifiable directions in the lab coordinates, which is often
-intuatively done in practice (intrinsic directions are typically aligned with some topological features and these are oft aligned to be parallel or perpendicular to the beam).
+intuitively done in practice (intrinsic directions are typically aligned with some topological features and these are oft aligned to be parallel or perpendicular to the beam).
 If the sample is not so straightforwardly positioned in the reference state, some more care should be taken to get the definition of these initial directions correct.
 
 From here, the transformation to each run's sample orientation is exactly the same as the transformation defined by the moving the goniometer from its home state for that run.
@@ -165,7 +174,7 @@ setups is done with different approaches, but should provide coverage for a broa
 
 The general procedure for transfering these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
 sample shape and orientation can be saved (along with any information on material which might be used for absorption correction). Next, load in all the run workspaces
-corresponding to this experiment. Load an orientation file to set the goniometer transformation on the individual workspaces. Fianlly, copy the sample definition across from the
+corresponding to this experiment. Load an orientation file to set the goniometer transformation on the individual workspaces. Finally, copy the sample definition across from the
 reference workspace to each of the run workspaces.
 
 This procedure is applied as part of the absorption script provided in the :ref:`section below<AbsorptionCorrectionSection>`. We also provide some additional notes and scripts
