@@ -903,7 +903,7 @@ const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t deti
 
 const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
 detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
-  return m_detid_offset + static_cast<detid_t>(m_calibration.size());
+  return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1;
 }
 
 } // namespace Mantid::DataHandling
