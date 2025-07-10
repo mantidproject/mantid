@@ -1392,6 +1392,48 @@ public:
 
     // also test root level name
     TS_ASSERT_EQUALS("/entry1", file.getTopLevelEntryName());
+
+    // Empty Group
+    file.openAddress("/entry1");
+    file.makeGroup("emptyGroup", "NXentry", true);
+    file.openAddress("/entry1/emptyGroup");
+    actual = file.getEntries();
+    TS_ASSERT_EQUALS(actual.size(), 0);
+
+    // Dataset with zero size
+    file.makeData("zeroData", NXnumtype::CHAR, 0, true); // 0-length CHAR
+    file.closeData();
+    actual = file.getEntries();
+    TS_ASSERT_EQUALS(actual.count("zeroData"), 1);
+    TS_ASSERT_EQUALS(actual["zeroData"], "SDS");
+  }
+
+  void test_getEntries_edgeCases() {
+    std::cout << "\ntest getEntries with missing NX_class and soft link\n";
+
+    std::string filename = "test_missing_nxclass.h5";
+    hid_t file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    TS_ASSERT(file_id >= 0);
+
+    hid_t group_id = H5Gcreate(file_id, "/nogroupclass", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    TS_ASSERT(group_id >= 0);
+    H5Gclose(group_id);
+
+    herr_t status = H5Lcreate_soft("/nogroupclass", file_id, "/soft_link", H5P_DEFAULT, H5P_DEFAULT);
+    TS_ASSERT(status >= 0);
+
+    H5Fclose(file_id);
+
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+
+    file.openAddress("/");
+    Mantid::Nexus::Entries entries = file.getEntries();
+
+    TS_ASSERT_EQUALS(entries.count("nogroupclass"), 1);
+    TS_ASSERT_EQUALS(entries["nogroupclass"], "NX_UNKNOWN_GROUP");
+
+    TS_ASSERT_EQUALS(entries.count("soft_link"), 1);
+    TS_ASSERT_EQUALS(entries["soft_link"], "NX_UNKNOWN_GROUP");
   }
 
   // ##################################################################################################################
