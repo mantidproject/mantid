@@ -37,6 +37,9 @@ class AssertSpinStateOrder(PythonAlgorithm):
     def summary(self):
         return "Assert that the given Polarized SANS data has the given spin state order using DetermineSpinStateOrder."
 
+    def seeAlso(self):
+        return ["DetermineSpinStateOrder"]
+
     def PyInit(self):
         self.declareProperty(
             WorkspaceGroupProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),

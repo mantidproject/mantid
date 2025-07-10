@@ -45,6 +45,8 @@ const std::string DetermineSpinStateOrder::summary() const {
          "corresponding spin states in Wildes notation.";
 }
 
+const std::vector<std::string> DetermineSpinStateOrder::seeAlso() const { return {"AssertSpinStateOrder"}; }
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
