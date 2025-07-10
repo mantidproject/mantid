@@ -86,6 +86,28 @@ public:
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 4744.);
 
     // do not need to cleanup because workspace did not go into the ADS
+
+    // The default chunk size will load VULCAN_218062.nxs.h5 in 1 chunk so try loading with ReadSizeFromDisk=1000000
+    // which will load the banks in 9 to 27 chunks. The output should be the same as with the default chunk size.
+    AlignAndFocusPowderSlim alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+
+    MatrixWorkspace_sptr outputWS2 = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS2);
+
+    // Run CompareWorkspaces algorithm to verify the output
+    auto compareAlg = alg.createChildAlgorithm("CompareWorkspaces");
+    compareAlg->setProperty("Workspace1", outputWS);
+    compareAlg->setProperty("Workspace2", outputWS2);
+    compareAlg->execute();
+    bool result = compareAlg->getProperty("Result");
+    TS_ASSERT(result);
   }
 
   void test_common_x() {
