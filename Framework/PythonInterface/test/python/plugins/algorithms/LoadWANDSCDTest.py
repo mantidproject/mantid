@@ -64,6 +64,26 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(duration[0], 40.05, 5)
         self.assertAlmostEqual(duration[1], 40.05, 5)
 
+        # check the sample environment logs
+        SE_logs = [log for log in run.keys() if log.startswith("HB2C:SE")]
+        self.assertEqual(len(SE_logs), 17)
+
+        # for this test data all log values are 0 except for "HB2C:SE:LS:SETP1" which is 300
+        for log in SE_logs:
+            prop = run.getProperty(log)
+            if log == "HB2C:SE:LS:SETP1":
+                np.testing.assert_array_equal(prop.value, [300, 300])
+            else:
+                np.testing.assert_array_equal(prop.value, [0, 0])
+
+            # check the units of the sample environment logs
+            if "MAGB" in log:
+                self.assertEqual(prop.units, "T")
+            elif "ND1" in log or "Select" in log:
+                self.assertEqual(prop.units, "")
+            else:
+                self.assertEqual(prop.units, "K")
+
         # test that the goniometer has been set correctly
         self.assertEqual(run.getNumGoniometers(), 2)
         self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YXZ")[0], -142.6)  # s1 from HB2C_7000
