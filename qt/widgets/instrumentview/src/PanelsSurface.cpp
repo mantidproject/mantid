@@ -35,22 +35,6 @@ namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PanelsSurface");
 
-void initialisePolygonWithTransformedBoundingBoxPoints(QPolygonF &panelPolygon, const ComponentInfo &componentInfo,
-                                                       size_t detectorIndex, const V3D &refPos, const Quat &rotation,
-                                                       const V3D &xaxis, const V3D &yaxis) {
-  auto bb = componentInfo.boundingBox(detectorIndex);
-  auto bbMinPoint = bb.minPoint() - refPos;
-  auto bbMaxPoint = bb.maxPoint() - refPos;
-  rotation.rotate(bbMinPoint);
-  rotation.rotate(bbMaxPoint);
-  bbMinPoint += refPos;
-  bbMaxPoint += refPos;
-  QPointF bb0(xaxis.scalar_prod(bbMinPoint), yaxis.scalar_prod(bbMinPoint));
-  QPointF bb1(xaxis.scalar_prod(bbMaxPoint), yaxis.scalar_prod(bbMaxPoint));
-  panelPolygon << bb0;
-  panelPolygon << bb1;
-}
-
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -424,10 +408,13 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     QVector<QPointF> vert;
     vert << p1 << p0;
     info->polygon = QPolygonF(vert);
-
     // initialise bank polygon with sensible bounding box points
-    initialisePolygonWithTransformedBoundingBoxPoints(info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
-                                                      info->rotation, m_xaxis, m_yaxis);
+    const auto boundingBoxPoints = this->m_calculator.transformedBoundingBoxPoints(
+        m_instrActor->componentInfo(), detectors[0], pos0, info->rotation, m_xaxis, m_yaxis);
+    QPointF bb0(boundingBoxPoints[0].X(), boundingBoxPoints[0].Y());
+    QPointF bb1(boundingBoxPoints[1].X(), boundingBoxPoints[1].Y());
+    info->polygon << bb0;
+    info->polygon << bb1;
 
 #pragma omp parallel for ordered
     for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT

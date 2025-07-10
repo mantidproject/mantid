@@ -73,6 +73,17 @@ class PanelsSurfaceCalculatorTest(unittest.TestCase):
         expected_rotation = [angle, angle, 0, 0]
         np.testing.assert_allclose(expected_rotation, rotation, atol=1e-9)
 
+    def test_transformedBoundingBoxPoints(self):
+        rotation = [45, 1, 0, 0]
+        bounding_box_points = self._calculator.transformedBoundingBoxPoints(
+            self._ws.componentInfo(), 25, [0, 0, 0], rotation, [1, 0, 0], [0, 1, 0]
+        )
+        point_a = bounding_box_points[0]
+        point_b = bounding_box_points[1]
+        tol = 1e-3
+        np.testing.assert_allclose([-0.004, -0.222], point_a, atol=tol)
+        np.testing.assert_allclose([0.004, -0.190], point_b, atol=tol)
+
 
 if __name__ == "__main__":
     unittest.main()

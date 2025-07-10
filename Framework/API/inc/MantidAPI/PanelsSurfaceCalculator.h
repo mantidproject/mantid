@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
 using Mantid::Geometry::ComponentInfo;
@@ -29,6 +30,10 @@ public:
   size_t findNumDetectors(const ComponentInfo &componentInfo, const std::vector<size_t> &components) const;
   Mantid::Kernel::Quat calcBankRotation(const V3D &detPos, V3D normal, const V3D &zAxis, const V3D &yAxis,
                                         const V3D &samplePosition) const;
+  std::vector<Mantid::Kernel::V2D> transformedBoundingBoxPoints(const ComponentInfo &componentInfo,
+                                                                size_t detectorIndex, const V3D &refPos,
+                                                                const Mantid::Kernel::Quat &rotation, const V3D &xaxis,
+                                                                const V3D &yaxis) const;
 
 private:
   Mantid::Kernel::Logger g_log = Mantid::Kernel::Logger("PanelsSurfaceCalculator");

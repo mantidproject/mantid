@@ -123,6 +123,27 @@ list calcBankRotation(PanelsSurfaceCalculator &self, const list &detPos, list no
   return quat;
 }
 
+list transformedBoundingBoxPoints(PanelsSurfaceCalculator &self, const object &componentInfo, size_t detectorIndex,
+                                  const list &refPos, const list &rotation, const list &xaxis, const list &yaxis) {
+  const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
+  Mantid::Kernel::Quat quatRotation{extract<double>(rotation[0]), extract<double>(rotation[1]),
+                                    extract<double>(rotation[2]), extract<double>(rotation[3])};
+  const auto referencePosition = pythonListToV3D(refPos);
+  const auto xAxisVec = pythonListToV3D(xaxis);
+  const auto yAxisVec = pythonListToV3D(yaxis);
+  const auto boundingBoxPoints = self.transformedBoundingBoxPoints(*(cInfoSharedPtr.get()), detectorIndex,
+                                                                   referencePosition, quatRotation, xAxisVec, yAxisVec);
+  list pointA, pointB;
+  pointA.append(boundingBoxPoints[0].X());
+  pointA.append(boundingBoxPoints[0].Y());
+  pointB.append(boundingBoxPoints[1].X());
+  pointB.append(boundingBoxPoints[1].Y());
+  list result;
+  result.append(pointA);
+  result.append(pointB);
+  return result;
+}
+
 } // namespace
 
 void export_PanelsSurfaceCalculator() {
@@ -149,5 +170,10 @@ void export_PanelsSurfaceCalculator() {
            "Finds the number of detectors in a component.")
       .def("calcBankRotation", &calcBankRotation,
            (arg("self"), arg("detPos"), arg("normal"), arg("zAxis"), arg("yAxis"), arg("samplePosition")),
-           "Calculates the rotation quaternion for a bank based on its position and normal vector.");
+           "Calculates the rotation quaternion for a bank based on its position and normal vector.")
+      .def("transformedBoundingBoxPoints", &transformedBoundingBoxPoints,
+           (arg("self"), arg("componentInfo"), arg("detectorIndex"), arg("refPos"), arg("rotation"), arg("xaxis"),
+            arg("yaxis")),
+           "Transforms a component's bounding box based on reference position and rotation. The rotation should be "
+           "provided as a list containing the real and imaginary parts of a quarternion (length 4).");
 }

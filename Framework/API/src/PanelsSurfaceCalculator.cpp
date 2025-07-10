@@ -213,4 +213,20 @@ Mantid::Kernel::Quat PanelsSurfaceCalculator::calcBankRotation(const V3D &detPos
   return requiredRotation;
 }
 
+std::vector<Mantid::Kernel::V2D>
+PanelsSurfaceCalculator::transformedBoundingBoxPoints(const ComponentInfo &componentInfo, size_t detectorIndex,
+                                                      const V3D &refPos, const Mantid::Kernel::Quat &rotation,
+                                                      const V3D &xaxis, const V3D &yaxis) const {
+  auto bb = componentInfo.boundingBox(detectorIndex);
+  auto bbMinPoint = bb.minPoint() - refPos;
+  auto bbMaxPoint = bb.maxPoint() - refPos;
+  rotation.rotate(bbMinPoint);
+  rotation.rotate(bbMaxPoint);
+  bbMinPoint += refPos;
+  bbMaxPoint += refPos;
+  Mantid::Kernel::V2D bb0(xaxis.scalar_prod(bbMinPoint), yaxis.scalar_prod(bbMinPoint));
+  Mantid::Kernel::V2D bb1(xaxis.scalar_prod(bbMaxPoint), yaxis.scalar_prod(bbMaxPoint));
+  return {bb0, bb1};
+}
+
 } // namespace Mantid::API

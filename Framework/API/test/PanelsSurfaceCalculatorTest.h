@@ -107,6 +107,19 @@ public:
     TS_ASSERT_DELTA(0, rotation.imagK(), tol);
   }
 
+  void testTransformedBoundingBoxPoints() {
+    const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 5, 10);
+    const auto p = PanelsSurfaceCalculator();
+    Mantid::Kernel::Quat rotation(45, {1, 0, 0});
+    const auto boundingBoxPoints =
+        p.transformedBoundingBoxPoints(ws->componentInfo(), 9, {0, 0, 0}, rotation, {1, 0, 0}, {0, 1, 0});
+    const double tol = 1e-3;
+    TS_ASSERT_DELTA(0.004, boundingBoxPoints[0].X(), tol);
+    TS_ASSERT_DELTA(-3.510, boundingBoxPoints[0].Y(), tol);
+    TS_ASSERT_DELTA(0.012, boundingBoxPoints[1].X(), tol);
+    TS_ASSERT_DELTA(-3.516, boundingBoxPoints[1].Y(), tol);
+  }
+
 private:
   void compareTwoV3Ds(const V3D &a, const V3D &b, const double tol) {
     for (size_t i = 0; i < 3; i++) {
