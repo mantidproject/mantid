@@ -197,7 +197,7 @@ class LoadWANDSCD(PythonAlgorithm):
             va_filename = None
         return va_filename
 
-    def load_and_group(self, runs: List[str]) -> IMDHistoWorkspace:
+    def load_and_group(self, runs: List[str]) -> IMDHistoWorkspace:  # noqa: C901
         """
         Load the data with given grouping
         """
@@ -222,6 +222,10 @@ class LoadWANDSCD(PythonAlgorithm):
         monitor_count_array = []
 
         progress = Progress(self, 0.0, 1.0, number_of_runs + 3)
+
+        # Sample environment logs and units
+        SE_logs = None
+        SE_units = {}
 
         for n, run in enumerate(runs):
             progress.report("Loading: " + run)
@@ -258,6 +262,24 @@ class LoadWANDSCD(PythonAlgorithm):
                 duration_array.append(float(f["/entry/duration"][0]))
                 run_number_array.append(float(f["/entry/run_number"][0]))
                 monitor_count_array.append(float(f["/entry/monitor1/total_counts"][0]))
+
+                if SE_logs is None:
+                    # Get the SE logs from the first file, must start with 'HB2C:SE' and have an average_value to be included
+                    SE_logs = {
+                        log: []
+                        for log in f["/entry/DASlogs/"].keys()
+                        if log.startswith("HB2C:SE") and "/entry/DASlogs/" + log + "/average_value" in f
+                    }
+                    for log in SE_logs.keys():
+                        # Get the units for the logs if available
+                        if unit := f["/entry/DASlogs/" + log + "/average_value"].attrs.get("units"):
+                            SE_units[log] = unit
+
+                for log in SE_logs:
+                    if log in f["/entry/DASlogs/"]:
+                        SE_logs[log].append(f["/entry/DASlogs/" + log + "/average_value"][0])
+                    else:
+                        SE_logs[log].append(np.nan)
 
         progress.report("Creating MDHistoWorkspace")
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
@@ -328,19 +350,26 @@ class LoadWANDSCD(PythonAlgorithm):
         DeleteWorkspace("__PreprocessedDetectorsWS", EnableLogging=False)
         # end Hack
 
-        add_time_series_property("HB2C:Mot:s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
-        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:s1").units = "deg"
-        add_time_series_property("HB2C:Mot:sgl", outWS.getExperimentInfo(0).run(), time_ns_array, sgl_array)
-        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:sgl").units = "deg"
-        add_time_series_property("HB2C:Mot:sgu", outWS.getExperimentInfo(0).run(), time_ns_array, sgu_array)
-        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:sgu").units = "deg"
+        run = outWS.getExperimentInfo(0).run()
+        add_time_series_property("HB2C:Mot:s1", run, time_ns_array, s1_array)
+        run.getProperty("HB2C:Mot:s1").units = "deg"
+        add_time_series_property("HB2C:Mot:sgl", run, time_ns_array, sgl_array)
+        run.getProperty("HB2C:Mot:sgl").units = "deg"
+        add_time_series_property("HB2C:Mot:sgu", run, time_ns_array, sgu_array)
+        run.getProperty("HB2C:Mot:sgu").units = "deg"
 
-        add_time_series_property("duration", outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
-        outWS.getExperimentInfo(0).run().getProperty("duration").units = "second"
-        outWS.getExperimentInfo(0).run().addProperty("run_number", run_number_array, True)
-        add_time_series_property("monitor_count", outWS.getExperimentInfo(0).run(), time_ns_array, monitor_count_array)
-        outWS.getExperimentInfo(0).run().addProperty("twotheta", twotheta, True)
-        outWS.getExperimentInfo(0).run().addProperty("azimuthal", azimuthal, True)
+        add_time_series_property("duration", run, time_ns_array, duration_array)
+        run.getProperty("duration").units = "second"
+        run.addProperty("run_number", run_number_array, True)
+        add_time_series_property("monitor_count", run, time_ns_array, monitor_count_array)
+        run.addProperty("twotheta", twotheta, True)
+        run.addProperty("azimuthal", azimuthal, True)
+
+        # Add SE logs to the output workspace
+        for log_name, log_values in SE_logs.items():
+            add_time_series_property(log_name, run, time_ns_array, log_values)
+            if log_name in SE_units:
+                run.getProperty(log_name).units = SE_units[log_name]
 
         setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
         setGoniometer_alg.setProperty("Workspace", outWS)
