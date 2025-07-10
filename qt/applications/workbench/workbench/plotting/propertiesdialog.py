@@ -14,7 +14,7 @@ from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_fi
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
@@ -25,6 +25,8 @@ TREAT_LOG_NEGATIVE_VALUES = "clip"
 DECIMAL_FORMAT = "Decimal Format"
 SCIENTIFIC_FORMAT = "Scientific Format"
 SCALE_MODES = ["linear", "log", "symlog"]
+STR_TO_COLOR_NORMALIZATION = {"linear": Normalize, "log": LogNorm, "symlog": SymLogNorm}
+COLOR_NORMALIZATION_TO_STR = {v: k for k, v in STR_TO_COLOR_NORMALIZATION.items()}
 
 
 class PropertiesEditorBase(QDialog):
@@ -274,22 +276,22 @@ class ColorbarAxisEditor(AxisEditor):
             raise RuntimeError("Cannot find any plot linked to this colorbar")
 
         limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-
-        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
-
-        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
-            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
-
         self.lim_setter(limit_min, limit_max)
+
+        scale = STR_TO_COLOR_NORMALIZATION[self.ui.scaleBox.currentText()]
+        update_args = {"figure": self.canvas.figure, "scale": scale, "vmin": limit_min, "vmax": limit_max}
+        if scale == SymLogNorm:
+            update_args["linthresh"] = 2.0  # Set to default mpl linthresh
+
         for img in self.images:
-            update_colorbar_scale(self.canvas.figure, img, scale, limit_min, limit_max)
+            update_colorbar_scale(image=img, **update_args)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
         if len(self.images) > 0:
             memento.min, memento.max = self.images[0].get_clim()
-            memento.log = isinstance(self.images[0].norm, LogNorm)
+            memento.scale_mode = COLOR_NORMALIZATION_TO_STR[self.images[0].norm.__class__]
         else:
             memento.log = False
         memento.grid = False
