@@ -18,7 +18,7 @@ from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_st
 BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
 BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title({})"
-BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
+BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}{}')"
 BASE_SET_FACECOLOR_COMMAND = "set_facecolor('{}')"
 
 TICK_FORMATTER_CLASSES = {
@@ -71,7 +71,8 @@ def generate_axis_scale_commands(ax):
     for axis in ["x", "y"]:
         scale = getattr(ax, "get_{}scale".format(axis))()
         if scale != "linear":
-            commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
+            linthresh_str = ", linthresh: 2" if scale == "symlog" else ""
+            commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale, linthresh_str))
     return commands
 
 

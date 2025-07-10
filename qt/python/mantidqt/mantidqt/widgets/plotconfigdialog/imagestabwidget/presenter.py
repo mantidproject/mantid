@@ -44,8 +44,8 @@ class ImagesTabWidgetPresenter:
             image.set_cmap(props.colormap)
             if props.interpolation and not (isinstance(image, QuadMesh) or isinstance(image, Poly3DCollection)):
                 image.set_interpolation(props.interpolation)
-
-            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
+            kwargs = {"linthresh": 2} if props.scale == "SymLog" else {}
+            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax, **kwargs)
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)
