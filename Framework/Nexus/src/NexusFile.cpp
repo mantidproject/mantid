@@ -1357,7 +1357,6 @@ namespace {
 herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data) {
   UNUSED_ARG(info);
   Entries *entryData = static_cast<Entries *>(op_data);
-  // std::string full_path = entryData->group_path + "/" + name;
   std::string type_str;
 
   H5O_info_t obj_info;
