@@ -52,7 +52,7 @@ public:
   void exportReducedWsToAds() const override;
 
 private:
-  std::unique_ptr<PreviewRow> m_runDetails{nullptr};
+  std::optional<PreviewRow> m_runDetails;
 
   void createRunDetails(std::string const &workspaceName);
 
