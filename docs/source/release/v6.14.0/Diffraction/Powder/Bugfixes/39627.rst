@@ -1,0 +1,1 @@
+- Fixes bug in :ref:`DiffractionFocussing <algm-DiffractionFocussing>` where NaN data values were introduced when explicit binning domains were requested that exceeded the actual input-data domains.  This bug only occurred when `PreserveEvents=False`.

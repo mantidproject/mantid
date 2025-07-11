@@ -380,6 +380,13 @@ void DiffractionFocussing2::exec() {
       prog.report();
     } // end of loop for input spectra
 
+    // Finalize the group weights:
+    //   in the case that the requested output domain interval contains all of the input intervals,
+    //   there may be zero-weighted sections at the boundaries.
+    //   (Note that the corresponding y-values should also be zero, but 0.0 / 0.0 is still NaN.)
+    std::transform(groupWgt.cbegin(), groupWgt.cend(), groupWgt.begin(),
+                   [](double w) { return std::fabs(w) < std::numeric_limits<double>::epsilon() ? 1.0 : w; });
+
     // Calculate the bin widths
     std::vector<double> widths(Xout.size());
     std::adjacent_difference(Xout.begin(), Xout.end(), widths.begin());
@@ -393,9 +400,10 @@ void DiffractionFocussing2::exec() {
     std::transform(Yout.begin(), Yout.end(), widths.begin() + 1, Yout.begin(), std::multiplies<double>());
     std::transform(Eout.begin(), Eout.end(), widths.begin() + 1, Eout.begin(), std::multiplies<double>());
 
-    // Now need to normalise the data (and errors) by the weights
+    // Now need to normalise the data (and errors) by the weights.
     std::transform(Yout.begin(), Yout.end(), groupWgt.begin(), Yout.begin(), std::divides<double>());
     std::transform(Eout.begin(), Eout.end(), groupWgt.begin(), Eout.begin(), std::divides<double>());
+
     // Now multiply by the number of spectra in the group
     std::for_each(Yout.begin(), Yout.end(), [groupSize](double &val) { val *= static_cast<double>(groupSize); });
     std::for_each(Eout.begin(), Eout.end(), [groupSize](double &val) { val *= static_cast<double>(groupSize); });
@@ -827,7 +835,7 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   for (const auto &item : group2xvector) {
     const auto group = item.first;
     m_validGroups.emplace_back(group);
-    totalHistProcess += wsIndices[group].size();
+    totalHistProcess += wsIndices[group].size(); // cppcheck-suppress containerOutOfBounds
   }
 
   std::transform(m_validGroups.cbegin(), m_validGroups.cend(), std::back_inserter(m_wsIndices),
