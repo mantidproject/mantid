@@ -238,6 +238,9 @@ class AxesTabWidgetPresenter:
         new_ax = self.view.get_axis()
         self.current_axis = new_ax
 
+        plot_is_3d = isinstance(self.fig.axes[0], Axes3D)
+        self.view.ui.set_scale_combo_box_enabled(not plot_is_3d)
+
         if f"{new_ax}lim" in self.current_view_props:
             self.view.set_autoscale_enabled(self.current_view_props[f"{new_ax}autoscale"])
             self.view.set_limit_input_enabled(not self.current_view_props[f"{new_ax}autoscale"])
