@@ -13,7 +13,7 @@ import numpy as np
 from matplotlib import path
 from matplotlib import tri
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
-from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q, get_hkl_float_array
 
 
 def _get_mesh(omega, two_theta, z_mesh):
@@ -115,3 +115,25 @@ class DNSScMap(ObjectDict):
         maxi = dns_path.contains_points(x_y_triangles)
         self.triangulation.set_mask(np.invert(maxi))
         return self.triangulation
+
+    def return_changing_indexes(self):
+        hkl1 = get_hkl_float_array(self.hkl1)
+        hkl2 = get_hkl_float_array(self.hkl2)
+        hkl = np.add(np.outer(self.hklx_mesh.flatten()[0:10], hkl1), np.outer(self.hkly_mesh.flatten()[0:10], hkl2))
+        mylist = [len(np.unique(hkl[:, 0])), len(np.unique(hkl[:, 1])), len(np.unique(hkl[:, 2]))]
+        new_list = list(range(len(mylist)))
+        del new_list[mylist.index(min(mylist))]
+        return new_list
+
+    def get_changing_hkl_components(self):
+        index = self.return_changing_indexes()
+        hkl1 = get_hkl_float_array(self.hkl1)
+        hkl2 = get_hkl_float_array(self.hkl2)
+        # transformation to crystal axis following
+        # hkl_comp1 = a * x + b * y
+        # hkl_comp2 = c * x + d * y
+        a = hkl1[index[0]]
+        b = hkl2[index[0]]
+        c = hkl1[index[1]]
+        d = hkl2[index[1]]
+        return a, b, c, d
