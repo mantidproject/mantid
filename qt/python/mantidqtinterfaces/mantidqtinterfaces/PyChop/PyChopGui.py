@@ -22,6 +22,7 @@ import os
 import warnings
 import copy
 from pychop.Instruments import Instrument
+from pychop.PyChop_presenter import PyChopPresenter
 from qtpy.QtCore import QEventLoop, Qt, QProcess
 from qtpy.QtWidgets import (
     QAction,
@@ -83,104 +84,114 @@ class PyChopGui(QMainWindow):
     hyspecS2 = 35.0
 
     def __init__(self, parent=None, window_flags=None):
-        super(PyChopGui, self).__init__(parent)
+        super().__init__()
+        self._presenter = None
+
         if window_flags:
             self.setWindowFlags(window_flags)
+
+        self.presenter = presenter
+        # self.presenter.attach_view(self)  # Subscribing the View to the Presenter
+
+        # unchanged code
         self.folder = os.path.dirname(sys.modules["pychop"].__file__)
-        for fname in os.listdir(self.folder):
-            if fname.endswith(".yaml"):
-                instobj = Instrument(os.path.join(self.folder, fname))
-                self.instruments[instobj.name] = instobj
-                self.choppers[instobj.name] = instobj.getChopperNames()
-                self.minE[instobj.name] = max([instobj.emin, 0.01])
-                self.maxE[instobj.name] = instobj.emax
+        self.presenter.load_instruments(self.folder)
+
         self.drawLayout()
-        self.setInstrument(list(self.instruments.keys())[0])
+        first_instrument = self.presenter.get_instrument_names()[0]
+        self.setInstrument(first_instrument)
+
+        # unchanged code
         self.resaxes_xlim = 0
         self.qeaxes_xlim = 0
         self.isFramePlotted = 0
-        # help
         self.assistant_process = QProcess(self)
-        # pylint: disable=protected-access
         self.mantidplot_name = "PyChop"
 
-    def closeEvent(self, event):
-        self.assistant_process.close()
-        self.assistant_process.waitForFinished()
-        event.accept()
+    def subscribe_presenter(self, presenter) -> None:
+        self._presenter = presenter
+
+    def set_label(self, text: str) -> None:
+        self.lbCount.setText(text)
 
     def setInstrument(self, instname):
-        """
-        Defines the instrument parameters by the name of the instrument.
-        """
-        self.engine = self.instruments[str(instname)]
-        self.tabs.setTabEnabled(self.tdtabID, False)
+        data = self.presenter.set_instrument(instname)
+
         self.widgets["ChopperCombo"]["Combo"].clear()
         self.widgets["FrequencyCombo"]["Combo"].clear()
-        self.widgets["FrequencyCombo"]["Label"].setText("Frequency")
         self.widgets["PulseRemoverCombo"]["Combo"].clear()
-        for item in self.choppers[str(instname)]:
+        self.widgets["FrequencyCombo"]["Label"].setText("Frequency")
+
+        for item in data["choppers"]:
             self.widgets["ChopperCombo"]["Combo"].addItem(item)
-        rep = self.engine.moderator.source_rep
-        maxfreq = self.engine.chopper_system.max_frequencies
-        # At the moment, the GUI only supports up to two independent frequencies
+
+        rep = data["rep"]
+        maxfreq = data["maxfreq"]
+
         if not hasattr(maxfreq, "__len__") or len(maxfreq) == 1:
             self.widgets["PulseRemoverCombo"]["Combo"].hide()
             self.widgets["PulseRemoverCombo"]["Label"].hide()
-            for fq in range(rep, (maxfreq[0] if hasattr(maxfreq, "__len__") else maxfreq) + 1, rep):
+            limit = maxfreq[0] if hasattr(maxfreq, "__len__") else maxfreq
+            for fq in range(rep, limit + 1, rep):
                 self.widgets["FrequencyCombo"]["Combo"].addItem(str(fq))
-            if hasattr(self.engine.chopper_system, "frequency_names"):
-                self.widgets["FrequencyCombo"]["Label"].setText(self.engine.chopper_system.frequency_names[0])
+            self.widgets["FrequencyCombo"]["Label"].setText(data["freq_names"][0])
         else:
             self.widgets["PulseRemoverCombo"]["Combo"].show()
             self.widgets["PulseRemoverCombo"]["Label"].show()
-            if hasattr(self.engine.chopper_system, "frequency_names"):
-                for idx, chp in enumerate([self.widgets["FrequencyCombo"]["Label"], self.widgets["PulseRemoverCombo"]["Label"]]):
-                    chp.setText(self.engine.chopper_system.frequency_names[idx])
+            for idx, chp in enumerate([self.widgets["FrequencyCombo"]["Label"], self.widgets["PulseRemoverCombo"]["Label"]]):
+                chp.setText(data["freq_names"][idx])
             for fq in range(rep, maxfreq[0] + 1, rep):
                 self.widgets["FrequencyCombo"]["Combo"].addItem(str(fq))
             for fq in range(rep, maxfreq[1] + 1, rep):
                 self.widgets["PulseRemoverCombo"]["Combo"].addItem(str(fq))
-        if len(self.engine.chopper_system.choppers) > 1:
+
+        if data["multi_chopper"]:
             self.widgets["MultiRepCheck"].setEnabled(True)
             self.tabs.setTabEnabled(self.tdtabID, True)
         else:
             self.widgets["MultiRepCheck"].setEnabled(False)
             self.widgets["MultiRepCheck"].setChecked(False)
+            self.tabs.setTabEnabled(self.tdtabID, False)
+
         self._hide_phases()
-        if self.engine.chopper_system.isPhaseIndependent:
-            for idx in range(len(self.engine.chopper_system.isPhaseIndependent)):
-                if idx > self.n_indep_phase:
-                    phase_label = QLabel("")
-                    phase_edit = QLineEdit(self)
-                    phase_edit.returnPressed.connect(self.setFreq)
-                    self.leftPanel.insertWidget(self.phase_index, phase_edit)
-                    self.leftPanel.insertWidget(self.phase_index, phase_label)
-                    self.widgets[f"Chopper{idx}Phase"] = {"Edit": phase_edit, "Label": phase_label}
-                    self.n_indep_phase += 1
-                    self.phase_index += 2
-                else:
-                    self.widgets[f"Chopper{idx}Phase"]["Edit"].show()
-                    self.widgets[f"Chopper{idx}Phase"]["Label"].show()
-                self.widgets[f"Chopper{idx}Phase"]["Edit"].setText(str(self.engine.chopper_system.defaultPhase[idx]))
-                self.widgets[f"Chopper{idx}Phase"]["Label"].setText(self.engine.chopper_system.phaseNames[idx])
+
+        for idx, phase_indep in enumerate(data["phase_indep"]):
+            if idx > self.n_indep_phase:
+                phase_label = QLabel("")
+                phase_edit = QLineEdit(self)
+                phase_edit.returnPressed.connect(self.setFreq)
+                self.leftPanel.insertWidget(self.phase_index, phase_edit)
+                self.leftPanel.insertWidget(self.phase_index, phase_label)
+                self.widgets[f"Chopper{idx}Phase"] = {"Edit": phase_edit, "Label": phase_label}
+                self.n_indep_phase += 1
+                self.phase_index += 2
+            else:
+                self.widgets[f"Chopper{idx}Phase"]["Edit"].show()
+                self.widgets[f"Chopper{idx}Phase"]["Label"].show()
+
+            self.widgets[f"Chopper{idx}Phase"]["Edit"].setText(str(data["default_phases"][idx]))
+            self.widgets[f"Chopper{idx}Phase"]["Label"].setText(data["phase_names"][idx])
+
         self.setChopper(str(self.widgets["ChopperCombo"]["Combo"].currentText()))
-        val = self.flxslder.val * self.maxE[self.engine.instname] / 100
-        self.flxedt.setText("%3.2f" % (val))
-        nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, "n_frame") else 1
-        self.repfig_nframe_edit.setText(str(nframe))
+
+        val = self.flxslder.val * data["maxE"] / 100
+        self.flxedt.setText("%3.2f" % val)
+
+        self.repfig_nframe_edit.setText(str(data["nframe"]))
         self.repfig_nframe_rep1only.setChecked(False)
-        self.flux_units = self.engine.moderator.flux_units
-        if hasattr(self.engine.chopper_system, "default_frequencies"):
-            cb = [self.widgets["FrequencyCombo"]["Combo"], self.widgets["PulseRemoverCombo"]["Combo"]]
-            for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
-                cb[idx].setCurrentIndex([i for i in range(cb[idx].count()) if str(freq) in cb[idx].itemText(i)][0])
-                if idx > 1:
+        self.flux_units = data["flux_units"]
+
+        cb = [self.widgets["FrequencyCombo"]["Combo"], self.widgets["PulseRemoverCombo"]["Combo"]]
+        for idx, freq in enumerate(data["default_freqs"]):
+            for i in range(cb[idx].count()):
+                if str(freq) in cb[idx].itemText(i):
+                    cb[idx].setCurrentIndex(i)
                     break
-        self.tabs.setTabEnabled(self.qetabID, False)
-        if self.engine.has_detector and hasattr(self.engine.detector, "tthlims"):
-            self.tabs.setTabEnabled(self.qetabID, True)
-        # show s2 for HYSPEC only
+            if idx > 1:
+                break
+
+        self.tabs.setTabEnabled(self.qetabID, data["has_qe_tab"])
+
         if "HYSPEC" in str(instname):
             self.widgets["S2Edit"]["Edit"].show()
             self.widgets["S2Edit"]["Edit"].setText(str(self.hyspecS2))
@@ -188,27 +199,21 @@ class PyChopGui(QMainWindow):
         else:
             self.widgets["S2Edit"]["Edit"].hide()
             self.widgets["S2Edit"]["Label"].hide()
+
         self.setFreq()
 
     def setChopper(self, choppername):
-        """
-        Defines the Fermi chopper slit package type by name, or the disk chopper arrangement variant.
-        """
-        self.engine.setChopper(str(choppername))
-        self.engine.setFrequency(float(self.widgets["FrequencyCombo"]["Combo"].currentText()))
-        # Special case for MERLIN - only enable multirep for 'G' chopper
+        frequency = self.widgets["FrequencyCombo"]["Combo"].currentText()
+        self.presenter.setChopper(choppername, frequency)
         self._merlin_chopper()
 
     def _get_phase(self, choppernumber, widget):
-        phase = widget["Edit"].text()
-        if isinstance(self.engine.chopper_system.defaultPhase[choppernumber], str):
-            phase = str(phase)
-        else:
-            try:
-                phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
-            except ValueError:
-                raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
-        return phase
+        raw_text = widget["Edit"].text()
+        try:
+            return self.presenter.get_phase(choppernumber, raw_text)
+        except ValueError as e:
+            label_text = widget["Label"].text()
+            raise ValueError(f'Incorrect phase value "{raw_text}" for {label_text}') from e
 
     def setFreq(self, freqtext=None, **kwargs):
         """
@@ -216,52 +221,61 @@ class PyChopGui(QMainWindow):
         """
         freq_gui = float(self.widgets["FrequencyCombo"]["Combo"].currentText())
         freq_in = kwargs["manual_freq"] if ("manual_freq" in kwargs.keys()) else freq_gui
-        if len(self.engine.getFrequency()) > 1 and (not hasattr(freq_in, "__len__") or len(freq_in) == 1):
+
+        # Get current frequencies count from model via presenter instead
+        current_freq = self.presenter.current_instrument.getFrequency()
+        if len(current_freq) > 1 and (not hasattr(freq_in, "__len__") or len(freq_in) == 1):
             freqpr = float(self.widgets["PulseRemoverCombo"]["Combo"].currentText())
             freq_in = [freq_in, freqpr]
-        # Checks for independent phases
+
+        # checks for independent phases
         phases = []
         # Special case for MERLIN
         # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
-        if "MERLIN" in str(self.engine.instname) and not self.widgets["Chopper0Phase"]["Label"].isVisible():
+        if "MERLIN" in str(self.presenter.current_instrument.instname) and not self.widgets["Chopper0Phase"]["Label"].isVisible():
             phases.append(self._get_phase(0, self.widgets["Chopper0Phase"]))
         else:
             for key, widget in self.widgets.items():
                 if key.endswith("Phase") and not widget["Label"].isHidden():
                     phases.append(self._get_phase(int(key[7]), widget))
-        if phases:
-            self.engine.setFrequency(freq_in, phase=phases)
-        else:
-            self.engine.setFrequency(freq_in)
 
+        # call to presenter to set frequency based on phases present
+        self.presenter.setFreq(freq_in, phases)
+
+    # unchanged method:
     def _hide_phases(self):
         for widget in [wdg for key, wdg in self.widgets.items() if key.endswith("Phase")]:
             widget["Edit"].hide()
             widget["Label"].hide()
 
     def _merlin_chopper(self):
-        if "MERLIN" in self.engine.instname:
-            try:
-                if self.engine.getChopper() is None:
-                    self.setChopper(self.widgets["ChopperCombo"]["Combo"].currentText())
-            except ValueError as err:
-                self.errormessage(err)
-            if "G" in self.engine.getChopper():
-                self.widgets["MultiRepCheck"].setEnabled(True)
-                self.tabs.setTabEnabled(self.tdtabID, True)
-                self.widgets["Chopper0Phase"]["Edit"].setText("12400")
-                self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
-                if self.instSciAct.isChecked():
-                    self.widgets["Chopper0Phase"]["Edit"].show()
-                    self.widgets["Chopper0Phase"]["Label"].show()
-                else:
-                    self.widgets["Chopper0Phase"]["Edit"].hide()
-                    self.widgets["Chopper0Phase"]["Label"].hide()
+        if "MERLIN" not in self.presenter.current_instrument.instname:
+            return
+
+        try:
+            state = self.presenter.get_merlin_chopper_state()
+            if state["needs_setting"]:
+                self.setChopper(self.widgets["ChopperCombo"]["Combo"].currentText())
+        except ValueError as err:
+            self.errormessage(err)
+
+        # most of the code left unchanged, but Presenter now checks for the "G" and returns the state
+        if state["contains_G"]:
+            self.widgets["MultiRepCheck"].setEnabled(True)
+            self.tabs.setTabEnabled(self.tdtabID, True)
+            self.widgets["Chopper0Phase"]["Edit"].setText("12400")
+            self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
+            if self.instSciAct.isChecked():
+                self.widgets["Chopper0Phase"]["Edit"].show()
+                self.widgets["Chopper0Phase"]["Label"].show()
             else:
-                self.widgets["MultiRepCheck"].setEnabled(False)
-                self.widgets["MultiRepCheck"].setChecked(False)
-                self.tabs.setTabEnabled(self.tdtabID, False)
-                self._hide_phases()
+                self.widgets["Chopper0Phase"]["Edit"].hide()
+                self.widgets["Chopper0Phase"]["Label"].hide()
+        else:
+            self.widgets["MultiRepCheck"].setEnabled(False)
+            self.widgets["MultiRepCheck"].setChecked(False)
+            self.tabs.setTabEnabled(self.tdtabID, False)
+            self._hide_phases()
 
     def setEi(self):
         """
@@ -272,7 +286,8 @@ class PyChopGui(QMainWindow):
         except ValueError:
             raise ValueError("No Ei specified, or Ei string not understood")
         else:
-            self.engine.setEi(eitxt)
+            # calling presenter to set EI instead
+            self.presenter.setEi(eitxt)
             if self.eiPlots.isChecked():
                 self.calc_callback()
 
@@ -280,36 +295,49 @@ class PyChopGui(QMainWindow):
         """
         Sets the S2 tank rotation for HYSPEC instrument
         """
+        # unchanged code
         try:
             S2txt = float(self.widgets["S2Edit"]["Edit"].text())
         except:
             raise ValueError("No S2 specified, or S2 string not understood")
         if np.abs(S2txt) > 150:
             raise ValueError("S2 must be between -150 and 150 degrees")
-        self.hyspecS2 = S2txt
+        # calling Presenter to set hyspecS2 instead
+        self.presenter.setS2(S2txt)
 
     def calc_callback(self):
         """
         Calls routines to calculate the resolution / flux and to update the Matplotlib graphs.
         """
+        # unchanged code
         try:
-            if self.engine.getChopper() is None:
+            if self.presenter.current_instrument.getChopper() is None:
                 self.setChopper(self.widgets["ChopperCombo"]["Combo"].currentText())
+
             if not self.eiPlots.isChecked():
                 self.setEi()
-            if self.engine.name == "HYSPEC":
+
+            if self.presenter.current_instrument.name == "HYSPEC":
                 self.setS2()
+
             self.setFreq()
-            self.calculate()
+
+            # calculate() method now changed to Presenter
+            self.presenter.current_instrument.calculate()
+
             if self.errormess:
-                idx = [i for i, ei in enumerate(self.eis) if np.abs(ei - self.engine.getEi()) < 1.0e-4]
+                idx = [i for i, ei in enumerate(self.eis) if np.abs(ei - self.presenter.current_instrument.getEi()) < 1.0e-4]
                 if idx and self.flux[idx[0]] == 0:
                     raise ValueError(self.errormess)  # No rep has any flux, skips plot
                 self.errormessage(self.errormess)  # Some rep have flux, still plot
+
+            # unchanged code
             self.plot_res()
             self.plot_frame()
+
             if self.instSciAct.isChecked():
                 self.update_script()
+
         except ValueError as err:
             self.errormessage(err)
         else:
@@ -317,32 +345,21 @@ class PyChopGui(QMainWindow):
             self.plot_flux_hz()
 
     def calculate(self):
-        """
-        Performs the resolution and flux calculations.
-        """
         self.errormess = None
-        if self.engine.getEi() is None:
+        if self.presenter.current_instrument.getEi() is None:
             self.setEi()
-        if self.widgets["MultiRepCheck"].isChecked():
-            en = np.linspace(0, 0.95, 200)
-            self.eis = self.engine.getAllowedEi()
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always", UserWarning)
-                self.res = self.engine.getMultiRepResolution(en)
-                self.flux = self.engine.getMultiRepFlux()
-                if len(w) > 0:
-                    mess = [str(w[i].message) for i in range(len(w))]
-                    self.errormess = "\n".join([m for m in mess if "tchop" in m])
-        else:
-            en = np.linspace(0, 0.95 * self.engine.getEi(), 200)
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always", UserWarning)
-                self.res = self.engine.getResolution(en)
-                self.flux = self.engine.getFlux()
-                if len(w) > 0:
-                    raise ValueError(w[0].message)
-                    # will be caught by calc_callback()
 
+        multirep_enabled = self.widgets["MultiRepCheck"].isChecked()
+
+        # now getting result from Presenter
+        result = self.presenter.calculate(multirep_enabled)
+
+        self.eis = result["eis"]
+        self.res = result["res"]
+        self.flux = result["flux"]
+        self.errormess = result["errormess"]
+
+    # unchanged method
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
         if not overplot:
@@ -350,6 +367,7 @@ class PyChopGui(QMainWindow):
             axis.clear()
             axis.axhline(color="k")
 
+    ### Plotting functions -------------------
     def plot_res(self):
         """
         Plots the resolution in the resolution tab
@@ -358,10 +376,13 @@ class PyChopGui(QMainWindow):
         multiplot = self.widgets["MultiRepCheck"].isChecked()
         self._set_overplot(overplot, "resaxes")
         self._set_overplot(overplot, "qeaxes")
-        inst = self.engine.instname
-        freq = self.engine.getFrequency()
+
+        # get the following from Presenter instead
+        inst = self.presenter.current_instrument.instname
+        freq = self.presenter.current_instrument.getFrequency()
         if hasattr(freq, "__len__"):
             freq = freq[0]
+
         if multiplot:
             for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95 * Ei, 200)
@@ -375,10 +396,10 @@ class PyChopGui(QMainWindow):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
         else:
-            ei = self.engine.getEi()
+            ei = self.presenter.current_instrument.getEi()
             en = np.linspace(0, 0.95 * ei, 200)
             (line,) = self.resaxes.plot(en, self.res)
-            chopper = self.engine.getChopper()
+            chopper = self.presenter.current_instrument.getChopper()
             label_text = "%s_%s_%3.2fmeV_%dHz_Flux=%f%s" % (inst, chopper, ei, freq, self.flux, self.flux_units)
             line.set_label(label_text)
             if self.tabs.isTabEnabled(self.qetabID):
@@ -397,8 +418,10 @@ class PyChopGui(QMainWindow):
         E2q, meV2J = (2.0 * constants.m_n / (constants.hbar**2), constants.e / 1000.0)
         en = np.linspace(-Ei / 5.0, Ei, 100)
         q2 = []
-        if self.engine.name == "HYSPEC":
+        # gettting name from Presenter
+        if self.presenter.current_instrument.instname == "HYSPEC":
             if abs(self.hyspecS2) <= 30:
+                # needs helper function for the tthlims
                 self.engine.detector.tthlims = [0, abs(self.hyspecS2) + 30]
             else:
                 self.engine.detector.tthlims = [abs(self.hyspecS2) - 30, abs(self.hyspecS2) + 30]
@@ -420,9 +443,9 @@ class PyChopGui(QMainWindow):
         """
         Plots the flux vs Ei in the middle tab
         """
-        inst = self.engine.instname
-        chop = self.engine.getChopper()
-        freq = self.engine.getFrequency()
+        inst = self.presenter.current_instrument.instname
+        chop = self.presenter.current_instrument.getChopper()
+        freq = self.presenter.current_instrument.instnamegetFrequency()
         overplot = self.widgets["HoldCheck"].isChecked()
         if hasattr(freq, "__len__"):
             freq = freq[0]
@@ -461,8 +484,10 @@ class PyChopGui(QMainWindow):
             for ie, ei in enumerate(eis):
                 with warnings.catch_warnings(record=True):
                     warnings.simplefilter("always", UserWarning)
-                    flux[ie] = self.engine.getFlux(ei)
-                    elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                    # flux[ie] = self.engine.getFlux(ei)
+                    # elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                    flux[ie] = self.presenter.current_instrument.getFlux(ei)
+                    elres[ie] = self.presenter.current_instrument.getResolution(0.0, ei)[0]
             if not overplot:
                 self.flxaxes1.clear()
                 self.flxaxes2.clear()
@@ -483,14 +508,17 @@ class PyChopGui(QMainWindow):
         """
         Callback function for the x-axis slider of the flux tab
         """
+
+        instname = self.presenter.current_instrument.instname
+
         if val is None:
-            val = float(self.flxedt.text()) / self.maxE[self.engine.instname] * 100
-            if val < self.minE[self.engine.instname]:
-                self.errormessage("Max Ei must be greater than %2.1f" % (self.minE[self.engine.instname]))
-                val = (self.minE[self.engine.instname] + 0.1) / self.maxE[self.engine.instname] * 100
+            val = float(self.flxedt.text()) / self.maxE[instname] * 100
+            if val < self.minE[instname]:
+                self.errormessage("Max Ei must be greater than %2.1f" % (self.minE[instname]))
+                val = (self.minE[instname] + 0.1) / self.maxE[instname] * 100
             self.flxslder.set_val(val)
         else:
-            val = self.flxslder.val * self.maxE[self.engine.instname] / 100
+            val = self.flxslder.val * self.maxE[instname] / 100
             self.flxedt.setText("%3.2f" % (val))
         self.plot_flux_ei(update=True)
         self.flxcanvas.draw()
@@ -499,8 +527,8 @@ class PyChopGui(QMainWindow):
         """
         Plots the flux vs freq in the middle tab
         """
-        inst = self.engine.instname
-        chop = self.engine.getChopper()
+        inst = self.presenter.current_instrument.instname
+        chop = self.presenter.current_instrument.getChopper()
         ei = float(self.widgets["EiEdit"]["Edit"].text())
         overplot = self.widgets["HoldCheck"].isChecked()
         # Do not recalculate if one of the plots has the same parametersc
@@ -511,9 +539,12 @@ class PyChopGui(QMainWindow):
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
                 if inst == prevInst and chop == prevChop and abs(ei - float(prevEi)) < 0.01:
                     return
-        freq0 = self.engine.getFrequency()
-        rep = self.engine.moderator.source_rep
-        maxfreq = self.engine.chopper_system.max_frequencies
+        # freq0 = self.engine.getFrequency()
+        # rep = self.engine.moderator.source_rep
+        # maxfreq = self.engine.chopper_system.max_frequencies
+        freq0 = self.presenter.current_instrument.getFrequency()
+        rep = self.presenter.current_instrument.moderator.source_rep
+        maxfreq = self.presenter.current_instrument.chopper_system.max_frequencies
         freqs = range(rep, (maxfreq[0] if hasattr(maxfreq, "__len__") else maxfreq) + 1, rep)
         flux = np.zeros(len(freqs))
         elres = np.zeros(len(freqs))
@@ -524,8 +555,8 @@ class PyChopGui(QMainWindow):
                 self.setFreq(manual_freq=freq)
             with warnings.catch_warnings(record=True):
                 warnings.simplefilter("always", UserWarning)
-                flux[ie] = self.engine.getFlux(ei)
-                elres[ie] = self.engine.getResolution(0.0, ei)[0]
+                flux[ie] = self.presenter.current_instrument.getFlux(ei)
+                elres[ie] = self.presenter.current_instrument.getResolution(0.0, ei)[0]
         if not overplot:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
@@ -543,6 +574,7 @@ class PyChopGui(QMainWindow):
         self.frqaxes2.set_xlim([0, np.max(freqs)])
         self.frqcanvas.draw()
 
+    # unchanged
     def instSciCB(self):
         """
         Callback function for the "Instrument Scientist Mode" menu option
@@ -556,6 +588,7 @@ class PyChopGui(QMainWindow):
             self.tabs.removeTab(self.scrtabID)
             self.scrtab.hide()
 
+    # unchanged
     def errormessage(self, message):
         msg = QMessageBox()
         msg.setText(str(message))
@@ -1057,3 +1090,9 @@ class PyChopGui(QMainWindow):
         self.setCentralWidget(self.mainWidget)
         self.setWindowTitle("PyChopGUI")
         self.show()
+
+
+# attach the presenter
+presenter = PyChopPresenter(model=Instrument)
+view = PyChopGui(presenter)
+presenter.attach_view(view)
