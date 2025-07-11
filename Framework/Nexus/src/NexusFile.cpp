@@ -612,11 +612,109 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
-template <typename NumT> void File::getData(NumT *data) {
-  if (data == NULL) {
+template <> void File::getData<char>(char *data) {
+  if (!data) {
     throw NXEXCEPTION("Supplied null pointer to write data to");
   }
-  NAPI_CALL(NXgetdata(m_pfile_id.get(), data), "NXgetdata failed");
+
+  auto info = this->getInfo();
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
+
+  if (info.type != NXnumtype::CHAR) {
+    throw NXEXCEPTION("Dataset is not CHAR type");
+  }
+
+  if (H5Tis_variable_str(pFile->iCurrentT)) {
+    // Handle 1D variable-length string
+    char *cdata = nullptr;
+    herr_t ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
+    if (ret < 0 || !cdata) {
+      throw NXEXCEPTION("Failed to read variable-length character data");
+    }
+    std::memcpy(data, cdata, std::strlen(cdata));
+    H5free_memory(cdata);
+    return;
+  }
+
+  if (info.dims.empty()) {
+    throw NXEXCEPTION("CHAR dataset has no dimension info");
+  }
+
+  if (info.dims.size() == 1) {
+    // 1D fixed-length string
+    size_t size = info.dims[0] + 1;
+    std::string buffer(size, '\0');
+
+    hid_t memType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memType, size); // Match trimmed size from getInfo()
+
+    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+    H5Tclose(memType);
+    if (ret < 0) {
+      throw NXEXCEPTION("Failed to read 1D fixed-length CHAR array");
+    }
+
+    std::memcpy(data, buffer.data(), size);
+    return;
+  }
+
+  if (info.dims.size() == 2) {
+    // 2D fixed-length char array
+    hsize_t rows = info.dims[0];
+    hsize_t cols = info.dims[1];
+
+    std::vector<char> buffer(rows * cols, '\0');
+
+    // Define a memory type: fixed-length string of size `cols`
+    hid_t memType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memType, cols);
+
+    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+    H5Tclose(memType);
+    if (ret < 0) {
+      throw NXEXCEPTION("Failed to read 2D fixed-length CHAR array");
+    }
+
+    std::memcpy(data, buffer.data(), rows * cols);
+    return;
+  }
+
+  throw NXEXCEPTION("Unsupported CHAR dataset rank (only 1D and 2D are supported)");
+}
+
+template <typename NumT> void File::getData(NumT *data) {
+  if (!data) {
+    throw NXEXCEPTION("Supplied null pointer to write data to");
+  }
+
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getData ERROR: no dataset open");
+  }
+
+  herr_t ret = -1;
+  hsize_t dims[H5S_MAX_RANK];
+  H5Sget_simple_extent_dims(pFile->iCurrentS, dims, nullptr);
+  hsize_t ndims = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+
+  if (ndims == 0) {
+    hid_t datatype = H5Dget_type(pFile->iCurrentD);
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
+    hid_t memtype_id = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace);
+    ret = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+    H5Sclose(memtype_id);
+    H5Sclose(filespace);
+    H5Tclose(datatype);
+  } else {
+    hid_t memtype_id = h5MemType(pFile->iCurrentT);
+    ret = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+  }
+
+  if (ret < 0) {
+    NXReportError("ERROR: failed to transfer dataset");
+    throw NXEXCEPTION("getData ERROR: failed to transfer dataset");
+  }
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -1290,8 +1388,66 @@ void File::readData(std::string const &dataName, std::string &data) {
 
 Info File::getInfo() {
   Info info;
-  std::size_t rank;
-  NAPI_CALL(NXgetinfo64(m_pfile_id.get(), rank, info.dims, info.type), "NXgetinfo failed");
+
+  pNexusFile5 pFile;
+  std::size_t iRank;
+  NXnumtype mType;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  hid_t memType;
+  char *vlData = NULL;
+
+  pFile = assertNXID(m_pfile_id);
+  /* check if there is an Dataset open */
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getInfo Error: no dataset open");
+  }
+
+  /* read information */
+  tclass = H5Tget_class(pFile->iCurrentT);
+  mType = hdf5ToNXType(tclass, pFile->iCurrentT);
+  iRank = H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+  if (iRank == 0) {
+    iRank = 1; /* we pretend */
+    myDim[0] = 1;
+  }
+  /* conversion to proper ints for the platform */
+  info.type = mType;
+  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+    if (H5Tis_variable_str(pFile->iCurrentT)) {
+      /* this will not work for arrays of strings */
+      memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        myDim[iRank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, pFile->iCurrentS, H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
+    } else {
+      myDim[iRank - 1] = H5Tget_size(pFile->iCurrentT);
+    }
+  }
+
+  info.dims.resize(iRank);
+  for (std::size_t i = 0; i < iRank; i++) {
+    info.dims[i] = myDim[i];
+  }
+  // Trim 1D CHAR arrays to the actual string length
+  if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
+    hsize_t len = myDim[0]; // original dataset length
+    std::vector<char> buffer(len + 1, '\0');
+
+    hid_t memType = H5Tcopy(H5T_C_S1);
+    H5Tset_size(memType, len);
+    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+    H5Tclose(memType);
+
+    if (ret >= 0) {
+      char *trimmed = nxitrim(buffer.data());
+      info.dims[0] = static_cast<int64_t>(strlen(trimmed));
+    }
+  }
   return info;
 }
 

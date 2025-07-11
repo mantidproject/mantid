@@ -139,6 +139,10 @@ NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(pare
 
 void NXClass::readAllInfo() {
   clear();
+  auto entries = m_fileID->getEntries();
+  for (const auto &entry : entries) {
+    printf("Entry %s: %s\n", entry.first.c_str(), entry.second.c_str());
+  }
   for (auto const &entry : m_fileID->getEntries()) {
     if (entry.second == "SDS") {
       m_fileID->openData(entry.first);
