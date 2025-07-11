@@ -279,7 +279,7 @@ std::map<std::string, std::string> SaveNXcanSASBase::validatePolarizedMetadata()
   if (!magneticFieldDirection.empty()) {
     const auto direction = VectorHelper::splitStringIntoVector<std::string>(magneticFieldDirection);
     try {
-      std::for_each(direction.cbegin(), direction.cend(), [](const std::string &val) { std::stod(val); });
+      std::for_each(direction.cbegin(), direction.cend(), [](const std::string &val) { (void)std::stod(val); });
     } catch (const std::invalid_argument &) {
       result.emplace(PolProperties::MAG_FIELD_DIR, "Some value of the magnetic field direction vector is not a number");
     }
