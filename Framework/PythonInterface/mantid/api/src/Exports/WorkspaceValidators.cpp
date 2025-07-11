@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDFrameValidator.h"
 #include "MantidAPI/NumericAxisValidator.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -72,4 +73,13 @@ void export_WorkspaceValidators() {
                                                               "currently: `HKL`, `QLab`, `QSample`, `Time of "
                                                               "Flight`, `Distance`, `General frame`, `Unknown "
                                                               "frame` "));
+
+  class_<PolSANSWorkspaceValidator, bases<TypedValidator<WorkspaceGroup_sptr>>, boost::noncopyable>(
+      "PolSANSWorkspaceValidator",
+      init<bool, bool>((arg("expectHistogramData") = true, arg("allowMultiPeriodData") = false),
+                       "Checks that the workspace group is a valid Polarised SANS transmission run. It should have 4 "
+                       "group entries which are of type MatrixWorkspace, "
+                       "have X axis unit Wavelength, have a single spectrum per workspace (depending on the value of "
+                       "allowMultiPeriodData), and are histogram data "
+                       "(depending on expectHistogramData)."));
 }
