@@ -164,7 +164,7 @@ std::optional<IPreviewModel::Selection> const PreviewModel::getSelectedRegion(RO
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
-  m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
+  m_runDetails = std::make_optional<PreviewRow>(std::vector<std::string>{workspaceName});
 }
 
 void PreviewModel::exportSummedWsToAds() const {
