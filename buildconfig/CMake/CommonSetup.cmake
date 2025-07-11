@@ -150,11 +150,9 @@ endif()
 include(ClangTidy)
 
 # ######################################################################################################################
-# Setup cppcheck - temporarily exclude from Windows because 2.16 isn't available yet
+# Setup cppcheck
 # ######################################################################################################################
-if(NOT WIN32)
-  include(CppCheckSetup)
-endif()
+include(CppCheckSetup)
 
 # ######################################################################################################################
 # Set up the unit tests target
