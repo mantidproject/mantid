@@ -1358,7 +1358,6 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
   UNUSED_ARG(info);
   Entries *entryData = static_cast<Entries *>(op_data);
   std::string type_str;
-  hid_t type, atype;
 
   H5O_info_t obj_info;
   H5Oget_info_by_name(loc_id, name, &obj_info, H5O_INFO_ALL, H5P_DEFAULT);
@@ -1367,8 +1366,7 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
     if (grp >= 0) {
       hid_t attr = H5Aopen_by_name(grp, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
       if (attr >= 0) {
-        type = H5T_C_S1;
-        atype = H5Tcopy(type);
+        hid_t atype = H5Tcopy(H5T_C_S1);
         char buf[128] = "";
         H5Tset_size(atype, 128);
         readStringAttributeN(attr, buf, 128);
