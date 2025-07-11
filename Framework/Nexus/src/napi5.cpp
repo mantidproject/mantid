@@ -288,7 +288,9 @@ NXstatus NX5getchardata(NXhandle fid, void *data) {
     if (ret < 0 || cdata == nullptr) {
       status = NXstatus::NX_ERROR;
     } else {
-      memcpy(data, cdata, strlen(cdata) * sizeof(char));
+      hsize_t len = strlen(cdata);
+      cdata[len] = '\0';
+      memcpy(data, cdata, (len + 1) * sizeof(char));
       H5free_memory(cdata); // NOTE must free cdata within hdf5
       status = NXstatus::NX_OK;
     }
