@@ -25,6 +25,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
@@ -174,6 +175,23 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost:
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
+std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
+                                                           const boost::python::object &workspaceIndices,
+                                                           const size_t numberOfWorkspaces, const double minX,
+                                                           const double maxX, const bool entireRange) {
+
+  std::vector<size_t> sWorkspaceIndices(numberOfWorkspaces);
+  if (NDArray::check(workspaceIndices)) {
+    NDArrayToVector<size_t> converter(workspaceIndices);
+    converter.copyTo(sWorkspaceIndices);
+  } else {
+    PySequenceToVector<size_t> converter(workspaceIndices);
+    converter.copyTo(sWorkspaceIndices);
+  }
+
+  return self.getIntegratedCountsForWorkspaceIndices(sWorkspaceIndices, minX, maxX, entireRange);
+}
+
 /**
  * Adds a deprecation warning to the getSampleDetails call to warn about using
  * getRun instead
@@ -307,6 +325,17 @@ std::vector<size_t> getIndicesFromDetectorIDs(MatrixWorkspace &self, const boost
   return self.getIndicesFromDetectorIDs(Converters::PySequenceToVector<int>(detIDs)());
 }
 
+boost::python::dict getDetectorIDToWorkspaceIndexMap(MatrixWorkspace &self, bool throwIfMultipleDets,
+                                                     bool ignoreIfNoValidDets) {
+  const auto unorderedMap = self.getDetectorIDToWorkspaceIndexMap(throwIfMultipleDets, ignoreIfNoValidDets);
+  boost::python::dict pythonDict;
+  for (const auto &[key, value] : unorderedMap) {
+    pythonDict[key] = value;
+  }
+
+  return pythonDict;
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -356,6 +385,10 @@ void export_MatrixWorkspace() {
       .def("getIndicesFromDetectorIDs", &getIndicesFromDetectorIDs, (arg("self"), arg("detID_list")),
            "Returns a list of workspace indices from the corrresponding "
            "detector IDs.")
+      .def("getDetectorIDToWorkspaceIndexMap", &getDetectorIDToWorkspaceIndexMap,
+           (arg("self"), arg("throwIfMultipleDets"), arg("ignoreIfNoValidDets")),
+           " Return a map where the key is detector ID (pixel ID), and the value at that index = the corresponding "
+           "workspace index")
       .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
            "Return the :class:`~mantid.geometry.Detector` or "
@@ -500,6 +533,9 @@ void export_MatrixWorkspace() {
            "of memory free that will fit all of the data.")
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
+      .def("getIntegratedCountsForWorkspaceIndices", &getIntegratedCountsForWorkspaceIndices,
+           args("self", "workspaceIndices", "numberOfWorkspaces", "minX", "maxX", "entireRange"),
+           "Return a vector with the integrated counts within the given range for the given workspace indices")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
