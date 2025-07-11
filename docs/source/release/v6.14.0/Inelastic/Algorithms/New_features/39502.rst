@@ -1,0 +1,3 @@
+- Support is added to Abins/Abins2D to import .mol data files for
+  Molden. These can be output by CP2K calculations, but do not include
+  mass/isotope information.

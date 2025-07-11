@@ -9,6 +9,7 @@ from .dmol3loader import DMOL3Loader
 from .euphonicloader import EuphonicLoader
 from .gaussianloader import GAUSSIANLoader
 from .jsonloader import JSONLoader
+from .moldenloader import MoldenLoader
 from .vasploader import VASPLoader
 
 from .tester import Tester
@@ -19,6 +20,7 @@ all_loaders = {
     "DMOL3": DMOL3Loader,
     "GAUSSIAN": GAUSSIANLoader,
     "JSON": JSONLoader,
+    "MOLDEN": MoldenLoader,
     "VASP": VASPLoader,
     "FORCECONSTANTS": EuphonicLoader,
 }

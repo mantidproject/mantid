@@ -34,6 +34,7 @@ class VASPLoader(AbInitioLoader):
     def _ab_initio_program(self) -> str:
         return "VASP"
 
+    @AbInitioLoader.abinsdata_saver
     def read_vibrational_or_phonon_data(self, logger: Optional[Logger] = None) -> AbinsData:
         input_filename = self._clerk.get_input_filename()
 
@@ -58,8 +59,8 @@ class VASPLoader(AbInitioLoader):
         else:
             raise ValueError('Cannot guess format from filename "{}". Expected *.xml or *OUTCAR*'.format(input_filename))
 
-        self.save_ab_initio_data(data=data)
-        return self._rearrange_data(data=data)
+        abins_data = self._rearrange_data(data=data)
+        return abins_data
 
     @classmethod
     def _read_outcar(cls, filename) -> Dict[str, Any]:

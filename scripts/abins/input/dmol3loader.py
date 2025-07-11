@@ -13,6 +13,7 @@ from .textparser import TextParser
 from .abinitioloader import AbInitioLoader
 from abins.constants import FLOAT_TYPE, COMPLEX_TYPE
 from abins.constants import ATOMIC_LENGTH_2_ANGSTROM as BOHR_TO_ANGSTROM
+from abins.abinsdata import AbinsData
 from mantid.kernel import Atom
 
 # This regular expression matches a row of displacement data, formatted
@@ -41,11 +42,10 @@ class DMOL3Loader(AbInitioLoader):
     def _ab_initio_program(self) -> str:
         return "DMOL3"
 
-    def read_vibrational_or_phonon_data(self):
+    @AbInitioLoader.abinsdata_saver
+    def read_vibrational_or_phonon_data(self) -> AbinsData:
         """
-        Reads vibrational data from DMOL3 output files. Saves frequencies, weights of k-point vectors,
-        k-point vectors, amplitudes of atomic displacements, hash of file  with vibrational data to <>.hdf5
-        :returns: object of type AbinsData.
+        Read vibrational data from DMOL3 output files.
         """
         data = {}  # container to store read data
 
@@ -80,10 +80,6 @@ class DMOL3Loader(AbInitioLoader):
             frequencies, raw_modes = self._read_modes(dmol3_file)
             data.update(self._assemble_mode_data(frequencies, raw_modes, masses))
 
-            # save data to hdf file
-            self.save_ab_initio_data(data=data)
-
-            # return AbinsData object
             return self._rearrange_data(data=data)
 
     @classmethod

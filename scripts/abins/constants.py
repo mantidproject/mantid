@@ -225,6 +225,9 @@ HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 # Conversion factor from VASP internal units
 VASP_FREQ_TO_THZ = 15.633302
 
+# Bohr conversion for Molden import
+BOHR_TO_ANGSTROM = 0.5291772109039775
+
 # Energy units
 MILLI_EV_TO_WAVENUMBER = 8.06554465
 
@@ -267,7 +270,8 @@ T_THRESHOLD = 1e-12
 MAX_ORDER = 4  # max quantum order event
 
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
-AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml", "yaml", "castep_bin", "hdf5", "json"]
+AB_INITIO_FILE_EXTENSIONS = ["castep_bin", "hdf5", "json", "out", "outmol", "phonon", "log", "LOG", "mol", "yaml", "xml"]
+
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
 TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS = ["MAPS", "MARI", "MERLIN"]
