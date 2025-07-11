@@ -514,14 +514,6 @@ public:
    */
   void initGroupDir();
 
-private:
-  /**
-   * \return A pair of the next entry available in a listing.
-   * NOTE: this is to be deleted in 6.14.  do NOT make public
-   */
-  Entry getNextEntry();
-
-public:
   /**
    * Return the entries available in the current place in the file.
    */

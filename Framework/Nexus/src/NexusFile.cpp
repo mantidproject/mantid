@@ -1353,22 +1353,41 @@ Info File::getInfo() {
 
 void File::initGroupDir() { m_pfile_id->iStack5.back().iCurrentIDX = 0; }
 
-Entry File::getNextEntry() {
-  // set up temporary variables to get the information
-  std::string name, class_name;
-  NXnumtype datatype;
+namespace {
+herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data) {
+  UNUSED_ARG(info);
+  Entries *entryData = static_cast<Entries *>(op_data);
+  std::string type_str;
 
-  NXstatus status = NXgetnextentry(m_pfile_id.get(), name, class_name, datatype);
-  if (status == NXstatus::NX_OK) {
-    string str_name(name);
-    string str_class(class_name);
-    return Entry(str_name, str_class);
-  } else if (status == NXstatus::NX_EOD) {
-    return EOD_ENTRY;
+  H5O_info_t obj_info;
+  H5Oget_info_by_name(loc_id, name, &obj_info, H5O_INFO_ALL, H5P_DEFAULT);
+  if (obj_info.type == H5O_TYPE_GROUP) {
+    hid_t grp = H5Gopen(loc_id, name, H5P_DEFAULT);
+    if (grp >= 0) {
+      hid_t attr = H5Aopen_by_name(grp, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+      if (attr >= 0) {
+        hid_t atype = H5Tcopy(H5T_C_S1);
+        char buf[128] = "";
+        H5Tset_size(atype, 128);
+        readStringAttributeN(attr, buf, 128);
+        type_str = buf;
+        H5Tclose(atype);
+        H5Aclose(attr);
+      } else {
+        type_str = "NX_UNKNOWN_GROUP";
+      }
+      H5Gclose(grp);
+    }
+  } else if (obj_info.type == H5O_TYPE_DATASET) {
+    type_str = "SDS";
   } else {
-    throw NXEXCEPTION("NXgetnextentry failed");
+    type_str = "unknown";
   }
+
+  (*entryData)[name] = type_str;
+  return 0;
 }
+} // namespace
 
 Entries File::getEntries() {
   Entries result;
@@ -1378,15 +1397,16 @@ Entries File::getEntries() {
 
 void File::getEntries(Entries &result) {
   result.clear();
-  this->initGroupDir();
-  Entry temp;
-  while (true) {
-    temp = this->getNextEntry();
-    if (temp == EOD_ENTRY) {
-      break;
-    } else {
-      result.insert(temp);
-    }
+
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
+  if (pFile->name_ref.empty()) {
+    pFile->name_ref = "/"; // Ensure we start at the root
+  }
+
+  int iRet = H5Literate_by_name(pFile->iFID, pFile->name_ref.c_str(), H5_INDEX_NAME, H5_ITER_NATIVE, nullptr,
+                                gr_iterate_cb, &result, H5P_DEFAULT);
+  if (iRet < 0) {
+    throw NXEXCEPTION("H5Literate failed on group: " + pFile->name_ref);
   }
 }
 
