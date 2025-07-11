@@ -9,12 +9,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
-#include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+
+#include "Eigen/Dense"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -238,7 +239,7 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
   }
   std::vector<bool> emptySpectrum;
   emptySpectrum.reserve(nspec);
-  std::vector<CurveFitting::EigenVector> n0Vectors(nspec);
+  std::vector<Eigen::Vector2d> n0Vectors(nspec);
 
   // Calculate coefficients aj, bj
 
@@ -254,21 +255,20 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
       const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
-      n0Vectors[h] = CurveFitting::EigenVector({X, Y});
+      Eigen::Vector2d n0vec;
+      n0vec << X, Y;
+      n0Vectors[h] = n0vec;
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
     } else {
-      n0Vectors[h] = CurveFitting::EigenVector({0.0, 0.0});
+      n0Vectors[h] = Eigen::Vector2d::Zero();
     }
   }
 
-  CurveFitting::EigenMatrix muLamMatrix(2, 2);
-  muLamMatrix.set(0, 0, sxx);
-  muLamMatrix.set(0, 1, sxy);
-  muLamMatrix.set(1, 0, sxy);
-  muLamMatrix.set(1, 1, syy);
-  muLamMatrix.invert();
+  Eigen::Matrix<double, 2, 2> muLamMatrix;
+  muLamMatrix << sxx, sxy, sxy, syy;
+  muLamMatrix = muLamMatrix.inverse().eval();
 
   std::vector<double> aj(nspec), bj(nspec);
   for (size_t h = 0; h < nspec; h++) {
