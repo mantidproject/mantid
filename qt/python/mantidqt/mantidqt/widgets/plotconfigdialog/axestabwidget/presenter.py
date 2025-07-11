@@ -120,7 +120,7 @@ class AxesTabWidgetPresenter:
 
         if isinstance(ax, Axes3D) and "zlabel" in self.current_view_props:
             ax.set_zlabel(self.current_view_props["zlabel"])
-            ax.set_zscale(self.current_view_props["zscale"].lower(), **self._get_scale_kwargs("z"))
+            ax.set_zscale(self.current_view_props["zscale"].lower())
             if self.current_view_props["zautoscale"]:
                 ax.autoscale(True, axis="z")
             else:
@@ -182,6 +182,10 @@ class AxesTabWidgetPresenter:
         # For tiled plots
         if not plot_is_3d and self.view.get_z_axis_selector_checked():
             self.view.set_x_axis_selector_click()
+
+        # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue (#209),
+        # so the scale option is disabled.
+        self.view.set_scale_combo_box_enabled(not plot_is_3d)
 
         # Minor ticks/gridlines are currently not supported for 3D plots.
         self.view.set_minor_grid_tick_controls_visible(not plot_is_3d)
