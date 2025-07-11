@@ -1,0 +1,1 @@
+- New algorithm :ref:`algm-AssertSpinStateOrder` which uses :ref:`algm-DetermineSpinStateOrder` to assert the spin state order of a Polarised SANS transmission run. The algorithm can reorder the workspace if the order is does not match the user-provided spin state string.
