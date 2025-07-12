@@ -395,25 +395,3 @@ herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string c
 
   return 0;
 }
-
-#define NUL '\0'
-
-char *nxitrim(char *str) {
-  // Trap NULL
-  if (str) {
-    //  Remove leading spaces (from RMLEAD.C)
-    char *ibuf;
-    for (ibuf = str; *ibuf && isspace(*ibuf); ++ibuf)
-      ;
-    str = ibuf;
-
-    // Remove trailing spaces (from RMTRAIL.C)
-    int i = (int)strlen(str);
-    while (--i >= 0) {
-      if (!isspace(str[i]))
-        break;
-    }
-    str[++i] = NUL;
-  }
-  return str;
-}

@@ -25,6 +25,8 @@ using std::vector;
 #endif
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
+#define NX_UNKNOWN_GROUP ""
+#define NUL '\0'
 
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
@@ -1435,7 +1437,7 @@ Info File::getInfo() {
   }
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
-    hsize_t len = myDim[0]; // original dataset length
+    hsize_t len = myDim[0];
     std::vector<char> buffer(len + 1, '\0');
 
     hid_t memType = H5Tcopy(H5T_C_S1);
@@ -1444,8 +1446,17 @@ Info File::getInfo() {
     H5Tclose(memType);
 
     if (ret >= 0) {
-      char *trimmed = nxitrim(buffer.data());
-      info.dims[0] = static_cast<int64_t>(strlen(trimmed));
+      char *start = buffer.data();
+      while (*start && isspace(*start)) {
+        ++start;
+      }
+      size_t trimmedLen = strlen(start);
+      while (trimmedLen > 0 && isspace(start[trimmedLen - 1])) {
+        --trimmedLen;
+      }
+      start[trimmedLen] = '\0';
+
+      info.dims[0] = static_cast<int64_t>(trimmedLen);
     }
   }
   return info;
