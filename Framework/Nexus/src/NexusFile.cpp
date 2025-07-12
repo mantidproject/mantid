@@ -615,73 +615,60 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 }
 
 template <> void File::getData<char>(char *data) {
-  if (!data) {
-    throw NXEXCEPTION("Supplied null pointer to write data to");
-  }
-
-  auto info = this->getInfo();
   pNexusFile5 pFile = assertNXID(m_pfile_id);
 
-  if (info.type != NXnumtype::CHAR) {
-    throw NXEXCEPTION("Dataset is not CHAR type");
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getData ERROR: no dataset open");
   }
+
+  hsize_t dims[H5S_MAX_RANK] = {0};
+  int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, nullptr);
+  herr_t ret = -1;
+  std::size_t size = 0;
+  std::vector<char> buffer;
 
   if (H5Tis_variable_str(pFile->iCurrentT)) {
-    // Handle 1D variable-length string
     char *cdata = nullptr;
-    herr_t ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
-    if (ret < 0 || !cdata) {
-      throw NXEXCEPTION("Failed to read variable-length character data");
-    }
-    std::memcpy(data, cdata, std::strlen(cdata));
+    ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
+    if (ret < 0 || cdata == nullptr)
+      throw NXEXCEPTION("getData ERROR: failed to read variable length string dataset");
+
+    size = strlen(cdata);
+    buffer.assign(cdata, cdata + size + 1);
     H5free_memory(cdata);
-    return;
-  }
-
-  if (info.dims.empty()) {
-    throw NXEXCEPTION("CHAR dataset has no dimension info");
-  }
-
-  if (info.dims.size() == 1) {
-    // 1D fixed-length string
-    size_t size = info.dims[0] + 1;
-    std::string buffer(size, '\0');
-
-    hid_t memType = H5Tcopy(H5T_C_S1);
-    H5Tset_size(memType, size); // Match trimmed size from getInfo()
-
-    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
-    H5Tclose(memType);
-    if (ret < 0) {
-      throw NXEXCEPTION("Failed to read 1D fixed-length CHAR array");
+  } else {
+    hsize_t len = H5Tget_size(pFile->iCurrentT);
+    for (int i = 0; i < rank - 1; i++) {
+      len *= (dims[i] > 1 ? dims[i] : 1);
     }
 
+    buffer.resize(len + 1, '\0');
+    ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+    if (ret < 0)
+      throw NXEXCEPTION("getData ERROR: failed to read string\n");
+
+    buffer[len] = '\0';
+    size = len;
+  }
+
+  if (rank == 0 || rank == 1) {
+    char *start = buffer.data();
+    while (*start && isspace(*start))
+      ++start;
+
+    int i = (int)strlen(start);
+    while (--i >= 0) {
+      if (!isspace(start[i])) {
+        break;
+      }
+    }
+    start[++i] = '\0';
+
+    std::memcpy(data, start, i);
+    data[i] = '\0';
+  } else {
     std::memcpy(data, buffer.data(), size);
-    return;
   }
-
-  if (info.dims.size() == 2) {
-    // 2D fixed-length char array
-    hsize_t rows = info.dims[0];
-    hsize_t cols = info.dims[1];
-
-    std::vector<char> buffer(rows * cols, '\0');
-
-    // Define a memory type: fixed-length string of size `cols`
-    hid_t memType = H5Tcopy(H5T_C_S1);
-    H5Tset_size(memType, cols);
-
-    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
-    H5Tclose(memType);
-    if (ret < 0) {
-      throw NXEXCEPTION("Failed to read 2D fixed-length CHAR array");
-    }
-
-    std::memcpy(data, buffer.data(), rows * cols);
-    return;
-  }
-
-  throw NXEXCEPTION("Unsupported CHAR dataset rank (only 1D and 2D are supported)");
 }
 
 template <typename NumT> void File::getData(NumT *data) {
@@ -709,12 +696,15 @@ template <typename NumT> void File::getData(NumT *data) {
     H5Sclose(filespace);
     H5Tclose(datatype);
   } else {
+    if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
+      this->getData<char>((char *)data);
+      return;
+    }
     hid_t memtype_id = h5MemType(pFile->iCurrentT);
     ret = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   }
 
   if (ret < 0) {
-    NXReportError("ERROR: failed to transfer dataset");
     throw NXEXCEPTION("getData ERROR: failed to transfer dataset");
   }
 }
@@ -752,15 +742,9 @@ string File::getStrData() {
     msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
     throw NXEXCEPTION(msg.str());
   }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
-  try {
-    this->getData(value);
-  } catch (const Exception &) {
-    delete[] value;
-    throw; // rethrow the original exception
-  }
-  std::string res(value, static_cast<size_t>(info.dims[0]));
-  delete[] value;
+  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  this->getData(value.data());
+  std::string res(value.data(), strlen(value.data()));
   return res;
 }
 
@@ -1435,29 +1419,14 @@ Info File::getInfo() {
   for (std::size_t i = 0; i < iRank; i++) {
     info.dims[i] = myDim[i];
   }
+
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
-    hsize_t len = myDim[0];
-    std::vector<char> buffer(len + 1, '\0');
-
-    hid_t memType = H5Tcopy(H5T_C_S1);
-    H5Tset_size(memType, len);
-    herr_t ret = H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
-    H5Tclose(memType);
-
-    if (ret >= 0) {
-      char *start = buffer.data();
-      while (*start && isspace(*start)) {
-        ++start;
-      }
-      size_t trimmedLen = strlen(start);
-      while (trimmedLen > 0 && isspace(start[trimmedLen - 1])) {
-        --trimmedLen;
-      }
-      start[trimmedLen] = '\0';
-
-      info.dims[0] = static_cast<int64_t>(trimmedLen);
-    }
+    char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
+    memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
+    this->getData<char>(buf);
+    info.dims[0] = static_cast<int64_t>(strlen(buf));
+    free(buf);
   }
   return info;
 }
