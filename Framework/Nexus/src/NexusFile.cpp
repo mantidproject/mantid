@@ -26,7 +26,6 @@ using std::vector;
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
 #define NX_UNKNOWN_GROUP ""
-#define NUL '\0'
 
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
