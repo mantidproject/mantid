@@ -1357,7 +1357,8 @@ template <typename NumT> void File::readData(std::string const &dataName, NumT &
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  data = dataVector[0];
+  if (!dataVector.empty())
+    data = dataVector[0];
   this->closeData();
 }
 
