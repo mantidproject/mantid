@@ -697,7 +697,7 @@ template <typename NumT> void File::getData(NumT *data) {
     H5Tclose(datatype);
   } else {
     if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
-      this->getData<char>((char *)data);
+      this->getData<char>(reinterpret_cast<char *>(data));
       return;
     }
     hid_t memtype_id = h5MemType(pFile->iCurrentT);
@@ -1357,8 +1357,7 @@ template <typename NumT> void File::readData(std::string const &dataName, NumT &
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (!dataVector.empty())
-    data = dataVector[0];
+  data = dataVector[0];
   this->closeData();
 }
 
