@@ -187,7 +187,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         self.assertTrue(1, len(presenter.image_names_dict))
         presenter.view.populate_select_image_combo_box.assert_called_once_with([img_name])
 
-    def test_apply_properties_applies_to_all_images_if_multiple_colorfill_plots_and_one_colorbar(self):
+    def test_apply_properties_applies_to_all_images_if_multiple_colorfill_plots_and_one_colorbar_with_toolbar(self):
         fig_with_toolbar = figure()
         fig_with_toolbar.canvas.manager.toolbar = MagicMock()
         fig = pcolormesh([self.ws, self.ws], fig=fig_with_toolbar)
@@ -208,7 +208,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
             self.assertEqual(2, image.norm.vmax)
             self.assertTrue(isinstance(image.norm, Normalize))
 
-    def test_apply_properties_applies_to_all_images_if_mixed_colorfill_plots_and_one_colorbar(self):
+    def test_apply_properties_applies_to_all_images_if_mixed_colorfill_plots_and_one_colorbar_with_toolbar(self):
         # self.ws does not have common bins and has evenly spaced values on spectrum axis (gives Image)
         # Also create ws with common bins, evenly spaced bin edges and uneven values on spectrum axis (gives QuadMesh)
         ws = CreateWorkspace(
