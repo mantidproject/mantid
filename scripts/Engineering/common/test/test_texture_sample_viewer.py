@@ -149,7 +149,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         expected_mesh = self.get_cube_mesh(2) + np.array((0, 1, 0))
         permuted_mesh_verts = get_mesh_vertices_in_intrinsic_sample_axes(ax_transform, shape_mesh)
         # the order that the vertices appear changes, so we just check that each of the expected vertices are present
-        self.assertTrue(np.all([v in permuted_mesh_verts.T for v in get_mesh_vertices(expected_mesh)]))
+        self.assertTrue(np.all([v in permuted_mesh_verts for v in get_mesh_vertices(expected_mesh)]))
 
     def test_get_scaled_intrinsic_sample_directions_in_lab_frame(self):
         # set up the same sample as test_get_mesh_vertices_in_intrinsic_sample_axes but rotate it about x
