@@ -35,7 +35,7 @@ def get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_m
     # transform the mesh vertices into new axes frame
     rot_vert = get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform, sample_mesh)
     # find the furthest vertex projected along each axis
-    arrow_lens = np.dot(rotated_ax_transform, rot_vert).max(axis=1) * scale
+    arrow_lens = rot_vert.max(axis=0) * scale
     rd = rotated_ax_transform[:, 0]
     nd = rotated_ax_transform[:, 1]
     td = rotated_ax_transform[:, 2]
@@ -48,9 +48,9 @@ def get_mesh_vertices(mesh):
 
 
 def get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform, sample_mesh):
-    # change of coordinate basis: S.T@v@S where S is the transformation matrix and v is a vector
+    # change of coordinate basis: S@v where S is the transformation matrix and v is a vector
     verts = get_mesh_vertices(sample_mesh)
-    return np.asarray([rotated_ax_transform.T @ v @ rotated_ax_transform for v in verts]).T
+    return np.asarray([rotated_ax_transform.T @ v for v in verts])
 
 
 def plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample=True):
