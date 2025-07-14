@@ -170,14 +170,14 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         #                  filename=(data_path / f"{name}_S.txt"))
 
         good_data = self._get_good_data(test_name=test_name, abinsdata_filename=abinsdata_name)
-        self._check_data(good_data=good_data, data=calculated_data)
+        self._check_data(good_data=good_data, data=calculated_data.extract())
 
         # This time the data should be loaded from cache. Check this is consistent with calculation
         if calc_kwargs["instrument"].get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             new_tester = abins.SCalculatorFactory.init(filename=abinsdata_file, abins_data=abins_data, **calc_kwargs)
             loaded_data = new_tester.load_formatted_data()
 
-            self._check_data(good_data=good_data, data=loaded_data)
+            self._check_data(good_data=good_data, data=loaded_data.extract())
 
     @staticmethod
     @functools.lru_cache(maxsize=4)
@@ -223,23 +223,16 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         return correct_data
 
     def _check_data(self, good_data=None, data=None):
-        from operator import attrgetter
-        from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
-
-        if isinstance(data, Spectrum1DCollection):
-            assert_almost_equal(good_data["frequencies"], data.x_data.to("1/cm").magnitude)
-            get_s = attrgetter("y_data")
-        elif isinstance(data, Spectrum2DCollection):
-            assert_almost_equal(good_data["q_bins"], data.x_data.to("1/angstrom").magnitude)
-            assert_almost_equal(good_data["frequencies"], data.y_data.to("1/cm").magnitude)
-            get_s = attrgetter("z_data")
+        for array_key in ("frequencies", "q_bins"):
+            if good_data.get(array_key) is not None:
+                assert_almost_equal(good_data[array_key], data[array_key])
 
         n_atoms = len([True for key in good_data if "atom" in key])
         for i in range(n_atoms):
             for order_key in good_data[f"atom_{i}"]["s"]:
                 ref = good_data[f"atom_{i}"]["s"][order_key]
-                calculated = data.select(atom_index=i, quantum_order=int(order_key.split("_")[-1])).sum()
-                assert_almost_equal(ref, get_s(calculated).magnitude)
+                calculated = data[f"atom_{i}"]["s"].get(order_key)
+                assert_almost_equal(ref, calculated)
 
 
 if __name__ == "__main__":
