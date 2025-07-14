@@ -266,9 +266,9 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
     }
   }
 
-  Eigen::Matrix2d muLamMatrix;
+  Eigen::MatrixXd muLamMatrix(2, 2);
   muLamMatrix << sxx, sxy, sxy, syy;
-  muLamMatrix = Eigen::PartialPivLU<Eigen::Matrix2d>(muLamMatrix).inverse();
+  muLamMatrix = muLamMatrix.inverse();
 
   std::vector<double> aj(nspec), bj(nspec);
   for (size_t h = 0; h < nspec; h++) {
