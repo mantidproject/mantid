@@ -30,6 +30,10 @@ class FullInstrumentViewPresenter:
 
         self._view.subscribe_presenter(self)
 
+        self._view.add_projection_combo_options(self.projection_combo_options())
+
+        self._view.setup_connections_to_presenter()
+
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
         self._view.add_simple_shape(origin, colour="orange", pickable=False)
@@ -109,9 +113,9 @@ class FullInstrumentViewPresenter:
         point_index = picker.GetPointId()
         self.update_picked_detectors([point_index])
 
-    def set_multi_select_enabled(self, is_enabled: bool) -> None:
+    def multi_select_checkbox_clicked(self, state: int) -> None:
         """Change between single and multi point picking"""
-        if is_enabled:
+        if state == 2:
             self._view.enable_rectangle_picking(callback=self.rectangle_picked)
         else:
             self._view.enable_point_picking(callback=self.point_picked)

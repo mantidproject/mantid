@@ -107,11 +107,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
     def test_set_multi_select_enabled(self):
-        self._presenter.set_multi_select_enabled(True)
+        self._presenter.multi_select_checkbox_clicked(2)
         self._mock_view.enable_rectangle_picking.assert_called_once()
         self._mock_view.enable_point_picking.assert_not_called()
 
     def test_set_multi_select_disabled(self):
-        self._presenter.set_multi_select_enabled(False)
+        self._presenter.multi_select_checkbox_clicked(1)
         self._mock_view.enable_rectangle_picking.assert_not_called()
         self._mock_view.enable_point_picking.assert_called_once()

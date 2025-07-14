@@ -68,24 +68,18 @@ class FullInstrumentViewWindow(QMainWindow):
         detector_group_box.setLayout(detector_vbox)
 
         time_of_flight_group_box = QGroupBox("Time of Flight")
-        self._tof_min_edit, self._tof_max_edit = self._add_min_max_group_box(
-            time_of_flight_group_box, self._on_tof_limits_updated, self._on_tof_limits_updated
-        )
+        self._tof_min_edit, self._tof_max_edit = self._add_min_max_group_box(time_of_flight_group_box)
         contour_range_group_box = QGroupBox("Contour Range")
-        self._contour_range_min_edit, self._contour_range_max_edit = self._add_min_max_group_box(
-            contour_range_group_box, self._on_contour_limits_updated, self._on_contour_limits_updated
-        )
+        self._contour_range_min_edit, self._contour_range_max_edit = self._add_min_max_group_box(contour_range_group_box)
 
         multi_select_group_box = QGroupBox("Multi-Select")
         multi_select_h_layout = QHBoxLayout()
-        self._multi_Select_Check = QCheckBox()
-        self._multi_Select_Check.setText("Select multiple detectors")
-        self._multi_Select_Check.stateChanged.connect(self._on_multi_select_check_box_clicked)
-        multi_select_h_layout.addWidget(self._multi_Select_Check)
-        clear_selection_button = QPushButton("Clear Selection")
-        clear_selection_button.setToolTip("Clear the current selection of detectors")
-        clear_selection_button.clicked.connect(self._on_clear_selection_button_clicked)
-        multi_select_h_layout.addWidget(clear_selection_button)
+        self._multi_select_check = QCheckBox()
+        self._multi_select_check.setText("Select multiple detectors")
+        multi_select_h_layout.addWidget(self._multi_select_check)
+        self._clear_selection_button = QPushButton("Clear Selection")
+        self._clear_selection_button.setToolTip("Clear the current selection of detectors")
+        multi_select_h_layout.addWidget(self._clear_selection_button)
         multi_select_group_box.setLayout(multi_select_h_layout)
 
         options_vertical_layout.addWidget(detector_group_box)
@@ -94,8 +88,10 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(multi_select_group_box)
 
         projection_group_box = QGroupBox("Projection")
-        self._projection_vbox = QVBoxLayout()
-        projection_group_box.setLayout(self._projection_vbox)
+        projection_vbox = QVBoxLayout()
+        self._projection_combo_box = QComboBox(self)
+        projection_vbox.addWidget(self._projection_combo_box)
+        projection_group_box.setLayout(projection_vbox)
         options_vertical_layout.addWidget(projection_group_box)
 
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
@@ -111,21 +107,19 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.reset_camera()
             self.projection_plotter.reset_camera()
 
-    def _add_min_max_group_box(self, parent_box: QGroupBox, min_callback, max_callback) -> tuple[QLineEdit, QLineEdit]:
+    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
         signal of the boxes"""
         root_vbox = QVBoxLayout()
         min_hbox = QHBoxLayout()
         min_hbox.addWidget(QLabel("Min"))
         min_edit = QLineEdit()
-        min_edit.textEdited.connect(min_callback)
         max_int_32 = np.iinfo(np.int32).max
         min_edit.setValidator(QIntValidator(0, max_int_32, self))
         min_hbox.addWidget(min_edit)
         max_hbox = QHBoxLayout()
         max_hbox.addWidget(QLabel("Max"))
         max_edit = QLineEdit()
-        max_edit.textEdited.connect(max_callback)
         max_edit.setValidator(QIntValidator(0, max_int_32, self))
         max_hbox.addWidget(max_edit)
         root_vbox.addLayout(min_hbox)
@@ -151,36 +145,18 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def subscribe_presenter(self, presenter):
         self._presenter = presenter
-        self._setup_projection_options(self._projection_vbox)
 
-    def _setup_projection_options(self, parent: QVBoxLayout):
-        """Add widgets for the projection options"""
-        projection_combo_box = QComboBox(self)
-        projection_combo_box.addItems(self._presenter.projection_combo_options())
-        projection_combo_box.currentIndexChanged.connect(self._on_projection_combo_box_changed)
-        parent.addWidget(projection_combo_box)
+    def add_projection_combo_options(self, options):
+        self._projection_combo_box.addItems(options)
 
-    def _on_projection_combo_box_changed(self, value):
-        """If the projection type is changed, then tell the presenter to do something"""
-        if type(value) is int:
-            self._presenter.projection_option_selected(value)
-
-    def _on_multi_select_check_box_clicked(self, state):
-        """Tell the presenter if either single or multi select is enabled"""
-        self._presenter.set_multi_select_enabled(state == 2)
-
-    def _on_clear_selection_button_clicked(self):
-        self._presenter.clear_all_picked_detectors()
-
-    def set_contour_range_limits(self, contour_limits: list) -> None:
-        """Update the contour range edit boxes with formatted text"""
-        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
-        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
-
-    def set_tof_range_limits(self, tof_limits: list) -> None:
-        """Update the TOF edit boxes with formatted text"""
-        self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
-        self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
+    def setup_connections_to_presenter(self):
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.projection_option_selected)
+        self._multi_select_check.stateChanged.connect(self._presenter.multi_select_checkbox_clicked)
+        self._clear_selection_button.clicked.connect(self._presenter.clear_all_picked_detectors)
+        self._contour_range_min_edit.textEdited.connect(self._on_contour_limits_updated)
+        self._contour_range_max_edit.textEdited.connect(self._on_contour_limits_updated)
+        self._tof_min_edit.textEdited.connect(self._on_tof_limits_updated)
+        self._tof_max_edit.textEdited.connect(self._on_tof_limits_updated)
 
     def _on_tof_limits_updated(self):
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -204,6 +180,16 @@ class FullInstrumentViewWindow(QMainWindow):
         if max <= min:
             return (False, min, max)
         return (True, min, max)
+
+    def set_contour_range_limits(self, contour_limits: list) -> None:
+        """Update the contour range edit boxes with formatted text"""
+        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
+        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
+
+    def set_tof_range_limits(self, tof_limits: list) -> None:
+        """Update the TOF edit boxes with formatted text"""
+        self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
+        self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
 
     def update_scalar_range(self, clim: list[float], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
