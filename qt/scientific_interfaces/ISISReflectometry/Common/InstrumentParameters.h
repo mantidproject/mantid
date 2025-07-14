@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/First.h"
-#include "Common/ValueOr.h"
 #include "GetInstrumentParameter.h"
 #include <optional>
 #include <vector>
@@ -41,16 +40,6 @@ private:
 class InstrumentParameters {
 public:
   explicit InstrumentParameters(Mantid::Geometry::Instrument_const_sptr instrument);
-
-  template <typename T> T valueOrEmpty(std::string const &parameterName) {
-    static_assert(!std::is_arithmetic<T>::value, "Use valueOrZero instead.");
-    return fromFileOrDefaultConstruct<T>(parameterName);
-  }
-
-  template <typename T> T valueOrZero(std::string const &parameterName) {
-    static_assert(std::is_arithmetic<T>::value, "Use valueOrEmpty instead.");
-    return fromFileOrDefaultConstruct<T>(parameterName);
-  }
 
   template <typename T> std::optional<T> optional(std::string const &parameterName) {
     return fromFile<T>(parameterName);
@@ -102,10 +91,6 @@ public:
   bool hasMissingValues() const;
 
 private:
-  template <typename T> T fromFileOrDefaultConstruct(std::string const &parameterName) {
-    return value_or(fromFile<T>(parameterName), T());
-  }
-
   template <typename T> std::optional<T> fromFile(std::string const &parameterName) {
     try {
       return firstFromParameterFile<T>(m_instrument, parameterName);
