@@ -1107,7 +1107,6 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
-  char *tmp_data = NULL;
   int iRank;
 
   pFile = assertNXID(m_pfile_id);
@@ -1149,17 +1148,9 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
-      if (mySize[0] > 0) {
-        tmp_data = static_cast<char *>(calloc(mySize[0], sizeof(char)));
-      } else {
-        tmp_data = static_cast<char *>(calloc(1, sizeof(char)));
-      }
-      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
-    } else {
-      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
     }
-    /* define slab */
-    /* deal with HDF errors */
+
+    iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
@@ -1171,11 +1162,11 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     }
     /* read slab */
     if (mtype == NXnumtype::CHAR) {
-      iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
+      std::vector<char> tmp_data(mySize[0] + 1, '\0');
+      iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
-      data1 = tmp_data + myStart[0];
+      data1 = tmp_data.data() + myStart[0];
       strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
-      free(tmp_data);
     } else {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, pFile->iCurrentS, H5P_DEFAULT, data);
     }
@@ -1422,6 +1413,9 @@ Info File::getInfo() {
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
+    if (buf == NULL) {
+      throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
+    }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
     this->getData<char>(buf);
     info.dims[0] = static_cast<int64_t>(strlen(buf));
