@@ -115,7 +115,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void testReorderMembersWithIndicies() {
+  void testReorderMembersWithIndices() {
     WorkspaceGroup_sptr group = makeGroup();
 
     group->reorderMembersWithIndicies({2, 1, 0});

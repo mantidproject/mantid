@@ -57,8 +57,7 @@ class AssertSpinStateOrder(PythonAlgorithm):
             name="Reorder",
             defaultValue=False,
             direction=Direction.Input,
-            doc="If set to true, if the workspace is has it's periods in a different order, "
-            "reorder the workspace to match ExpectedSpinStates.",
+            doc="If set to true, if the workspace has its periods in a different order, reorder the workspace to match ExpectedSpinStates.",
         )
 
         self.declareProperty(

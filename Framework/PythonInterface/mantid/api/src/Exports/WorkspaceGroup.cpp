@@ -100,7 +100,7 @@ void reorder(WorkspaceGroup &self, const boost::python::object &pythonIndicies) 
     converter.copyTo(indicies);
   }
 
-  self.reorderMembersWithIndicies(indicies);
+  self.reorderMembersWithIndices(indicies);
 }
 
 void export_WorkspaceGroup() {

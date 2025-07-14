@@ -50,7 +50,7 @@ public:
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Reorder the group members using a list of indicies (e.g the list 4,3,2,1 would reverse the order)
-  void reorderMembersWithIndicies(const std::vector<int> &indicies);
+  void reorderMembersWithIndices(const std::vector<int> &indices);
   /// Adds a workspace to the group.
   void addWorkspace(const Workspace_sptr &workspace);
   /// Return the number of entries within the group

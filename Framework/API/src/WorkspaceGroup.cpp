@@ -99,19 +99,19 @@ void WorkspaceGroup::sortMembersByName() {
 /**
  *  Reorder the group members using a list of indicies (e.g the list 3,2,1,0 would reverse the order)
  */
-void WorkspaceGroup::reorderMembersWithIndicies(const std::vector<int> &indicies) {
-  if (indicies.size() != this->size()) {
+void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) {
+  if (indices.size() != this->size()) {
     g_log.warning("Number of indicies must match the number of workspace members\n");
     return;
   }
 
-  if (!std::all_of(indicies.cbegin(), indicies.cend(), [&](int i) { return i >= 0 && i < m_workspaces.size(); })) {
+  if (!std::all_of(indices.cbegin(), indices.cend(), [&](int i) { return i >= 0 && i < m_workspaces.size(); })) {
     g_log.warning("All indicies must be >= 0 and < the number of workspaces in the group\n");
     return;
   }
 
   std::vector<Mantid::API::Workspace_sptr> reordered;
-  std::transform(indicies.cbegin(), indicies.cend(), std::back_inserter(reordered),
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(reordered),
                  [&](const auto &i) { return m_workspaces[i]; });
   m_workspaces = reordered;
 }
