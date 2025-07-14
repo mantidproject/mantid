@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import numpy as np
 import pyvista as pv
 
@@ -20,14 +19,16 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
-    def __init__(self, view, workspace):
+    def __init__(self, view, presenter):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         pv.global_theme.color_cycler = "default"
         pv.global_theme.allow_empty_mesh = True
 
         self._view = view
-        self._model = FullInstrumentViewModel(workspace)
+        self._model = presenter
+
+        self._view.subscribe_presenter(self)
 
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
@@ -59,6 +60,7 @@ class FullInstrumentViewPresenter:
 
         self.projection_option_selected(0)
         self._view.enable_point_picking(callback=self.point_picked)
+        self._view.reset_camera()
 
     def projection_combo_options(self) -> list[str]:
         return self._PROJECTION_OPTIONS

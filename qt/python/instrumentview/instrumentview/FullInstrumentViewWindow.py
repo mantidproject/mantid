@@ -24,7 +24,6 @@ from qtpy.QtCore import Qt
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.Detectors import DetectorInfo
 from typing import Callable
 import numpy as np
@@ -36,11 +35,13 @@ class FullInstrumentViewWindow(QMainWindow):
 
     _detector_spectrum_fig = None
 
-    def __init__(self, workspace, parent=None, off_screen=False):
+    def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
         e.g. in a script."""
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
+
+        self._off_screen = off_screen
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -92,12 +93,9 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(contour_range_group_box)
         options_vertical_layout.addWidget(multi_select_group_box)
 
-        self._presenter = FullInstrumentViewPresenter(self, workspace)
-
         projection_group_box = QGroupBox("Projection")
-        projection_vbox = QVBoxLayout()
-        self._setup_projection_options(projection_vbox)
-        projection_group_box.setLayout(projection_vbox)
+        self._projection_vbox = QVBoxLayout()
+        projection_group_box.setLayout(self._projection_vbox)
         options_vertical_layout.addWidget(projection_group_box)
 
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
@@ -107,8 +105,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
         options_vertical_layout.addStretch()
         central_widget.setLayout(parent_horizontal_layout)
-        if not off_screen:
-            self.resize(1300, 1000)
+
+    def reset_camera(self):
+        if not self._off_screen:
             self.main_plotter.reset_camera()
             self.projection_plotter.reset_camera()
 
@@ -149,6 +148,10 @@ class FullInstrumentViewWindow(QMainWindow):
         palette.setColor(QPalette.Base, palette.color(QPalette.Window))
         line_edit.setPalette(palette)
         return line_edit
+
+    def subscribe_presenter(self, presenter):
+        self._presenter = presenter
+        self._setup_projection_options(self._projection_vbox)
 
     def _setup_projection_options(self, parent: QVBoxLayout):
         """Add widgets for the projection options"""
