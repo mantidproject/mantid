@@ -5,42 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from functools import cached_property, partial
-import json
-from multiprocessing import Pool
-from operator import attrgetter
 from pathlib import Path
-from typing import Dict, Tuple, Union
-
-from euphonic import ureg
-from euphonic.spectra import (
-    Spectrum1D,
-    Spectrum2D,
-    Spectrum1DCollection,
-    Spectrum2DCollection,
-)
+from typing import Optional, Union
 
 import numpy as np
 from pydantic import Field, validate_call
 from pydantic.types import PositiveFloat
 from scipy.special import factorial
 
-from abins import AbinsData, FrequencyPowderGenerator
+from abins import FrequencyPowderGenerator, SData, SDataByAngle
 from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
-from abins.sdata import (
-    add_autoconvolution_spectra,
-    apply_kinematic_constraints,
-    check_thresholds,
-)
-
 from mantid.api import Progress
-
-SpectrumCollection = Spectrum1DCollection | Spectrum2DCollection
-
-# Raw S contributions as a dict keyed by (atom_index, quantum_order)
-SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
 
 
 class SPowderSemiEmpiricalCalculator:
@@ -48,17 +25,13 @@ class SPowderSemiEmpiricalCalculator:
     Class for calculating S(Q, omega)
     """
 
-    q_unit = ureg("1 / angstrom")
-    freq_unit = ureg("1 / cm")
-    s_unit = ureg("barn") / freq_unit
-
     @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(
         self,
         *,
         filename: str = Field(min_length=1),
         temperature: PositiveFloat,
-        abins_data: AbinsData,
+        abins_data: abins.AbinsData,
         instrument: Instrument,
         quantum_order_num: int = Field(ge=1, le=2),
         autoconvolution_max: int = 0,
@@ -68,12 +41,14 @@ class SPowderSemiEmpiricalCalculator:
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.
         :param temperature: temperature in K for which calculation of S should be done
         :param abins_data: object of type AbinsData with data from phonon file
-        :param instrument: simulated INS instrument
+        :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
         :param autoconvolution_max:
             approximate spectra up to this order using auto-convolution
         :param cache_directory: location for .hdf5
         """
+        from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
+
         # Expose input parameters
         self._input_filename = filename
         self._temperature = float(temperature)
@@ -134,7 +109,7 @@ class SPowderSemiEmpiricalCalculator:
             self._fine_bin_centres = None
 
         # If operating in 2-D mode, there is also an explicit set of q bins
-        if self.is_2d:
+        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
             params = abins.parameters.instruments[self._instrument.get_name()]
             q_min, q_max = self._instrument.get_q_bounds()
             self._q_bins = np.linspace(q_min, q_max, params.get("q_size") + 1)
@@ -143,101 +118,91 @@ class SPowderSemiEmpiricalCalculator:
             self._q_bins = None
             self._q_bin_centres = None
 
-    @cached_property
-    def is_2d(self) -> bool:
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
-
-        """Validate instrument name and get dimensionality from known instruments"""
-        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            return False
-        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-            return True
-
-        raise ValueError(
-            'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
-        )
-
-    @staticmethod
-    def _get_s(spectrum: Spectrum1D | Spectrum2D) -> np.ndarray:
-        if isinstance(spectrum, Spectrum1D):
-            return spectrum.y_data.magnitude
-        else:
-            return spectrum.z_data.magnitude
-
-    def get_formatted_data(self) -> SpectrumCollection:
+    def get_formatted_data(self) -> SData:
         """
         Get structure factor, from cache or calculated as necessary
         :returns: obtained data
         """
         try:
             self._clerk.check_previous_data()
-            spectra = self.load_formatted_data()
-            self._report_progress("Spectrum data has been loaded from the HDF file.", reporter=self.progress_reporter)
+            data = self.load_formatted_data()
+            self._report_progress(f"{data} has been loaded from the HDF file.", reporter=self.progress_reporter)
 
         except (IOError, ValueError):
             self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
-            spectra = self.calculate_data()
+            data = self.calculate_data()
 
-            self._report_progress("Spectrum data has been calculated.", reporter=self.progress_reporter)
+            self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
 
-            check_thresholds(
-                ((spectrum.metadata["atom_index"], spectrum.metadata["quantum_order"], self._get_s(spectrum)) for spectrum in spectra),
-                logging_level="information",
-            )
+        data.check_thresholds(logging_level="information")
+        return data
 
-        return spectra
-
-    def load_formatted_data(self) -> SpectrumCollection:
+    def load_formatted_data(self) -> SData:
         """
         Loads S from an hdf file.
+        :returns: object of type SData.
         """
         data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
+        frequencies = data["datasets"]["data"]["frequencies"]
 
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError(
                 "User requested a larger number of quantum events to be included in the simulation "
                 "than in the previous calculations. S cannot be loaded from the hdf file."
             )
+        if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
+            self._report_progress(
+                """
+                         User requested a smaller number of quantum events than in the previous calculations.
+                         S Data from hdf file which corresponds only to requested quantum order events will be
+                         loaded."""
+            )
 
-        data_dict = data["datasets"]["data"]
-        data_dict["metadata"] = json.loads(data_dict["metadata"])
+            atoms_s = {}
 
-        def _stringify(key: str | bytes) -> str:
-            if isinstance(key, bytes):
-                return key.decode("utf8")
-            else:
-                return key
+            # load atoms_data
+            n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
+            for i in range(n_atom):
+                atoms_s[f"atom_{i}"] = {"s": dict()}
+                for j in range(1, self._quantum_order_num + 1):
+                    temp_val = data["datasets"]["data"][f"atom_{i}"]["s"][f"order_{j}"]
+                    atoms_s[f"atom_{i}"]["s"].update({f"order_{j}": temp_val})
 
-        # Some of the strings get stored as bytes, safer to just parse strings
-        data_dict = {key: _stringify(value) for key, value in data_dict.items()}
+            # reduce the data which is loaded to only this data which is required by the user
+            data["datasets"]["data"] = atoms_s
 
-        if self.is_2d:
-            spectra = Spectrum2DCollection.from_dict(data_dict)
         else:
-            spectra = Spectrum1DCollection.from_dict(data_dict)
+            atoms_s = {key: value for key, value in data["datasets"]["data"].items() if key not in ("frequencies", "q_bins")}
 
-        return spectra
+        q_bins = data["datasets"]["data"].get("q_bins", None)
 
-    def calculate_data(self) -> SpectrumCollection:
+        s_data = abins.SData(
+            temperature=self._temperature, sample_form=self._sample_form, data=atoms_s, frequencies=frequencies, q_bins=q_bins
+        )
+
+        if s_data.get_bin_width is None:
+            raise Exception("Loaded data does not have consistent frequency spacing")
+
+        return s_data
+
+    def calculate_data(self) -> SData:
         """
         Calculates dynamical structure factor S.
 
         2-D writing is currently slow compared to 2-D calculation, so only 1-D
         results will be cached.
+
+        :returns: object of type SData and dictionary with total S.
         """
-        spectra = self._calculate_s()
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
-        spectra_dict = spectra.to_dict()
-        # Metadata dict is not very HDF5-friendly, dump to string
-        spectra_dict["metadata"] = json.dumps(spectra_dict["metadata"])
-
-        if not self.is_2d:
+        data = self._calculate_s()
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             self._clerk.add_file_attributes()
             self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
-            self._clerk.add_data("data", spectra_dict)
+            self._clerk.add_data("data", data.extract())
             self._clerk.save()
-
-        return spectra
+        return data
 
     @property
     def progress_reporter(self) -> Union[None, Progress]:
@@ -275,12 +240,14 @@ class SPowderSemiEmpiricalCalculator:
         else:
             logger.information(msg)
 
-    def _calculate_s(self) -> SpectrumCollection:
+    def _calculate_s(self) -> SData:
         """Calculate structure factor by dispatching to appropriate 1d or 2d workflow
 
         If self._isotropic_fundamentals is True, order-1 will use the same Debye-Waller approximation
         as higher orders.
         """
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
+
         # Compute tensors and traces, write to cache for access during atomic s calculations
         powder_calculator = abins.PowderCalculator(
             filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature, cache_directory=self._cache_directory
@@ -288,30 +255,28 @@ class SPowderSemiEmpiricalCalculator:
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
-        if self.is_2d:
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            return self._calculate_s_powder_1d()
+        elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
             return self._calculate_s_powder_2d()
+        else:
+            raise ValueError(
+                'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
+            )
 
-        return self._calculate_s_powder_1d()
+    def _calculate_s_powder_2d(self) -> SData:
+        s_data = self._calculate_s_powder_over_k_and_q()
 
-    def _calculate_s_powder_2d(self) -> Spectrum2DCollection:
-        spectra = self._calculate_s_powder_over_k_and_q()
-        apply_kinematic_constraints(spectra, self._instrument)
+        s_data.apply_kinematic_constraints(self._instrument)
 
-        return spectra
+        return s_data
 
-    def _calculate_s_powder_1d(self) -> Spectrum1DCollection:
+    def _calculate_s_powder_1d(self) -> SData:
         """
         Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
 
-        Includes sum over scattering angles if appropriate.
-
-        Returns:
-            Spectrum1DCollection populated with spectrum contributions,
-            separated by atom and quantum order (as indicated in metadata).
-
+        :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
-        broadening_scheme = abins.parameters.sampling["broadening_scheme"]
-
         if self.progress_reporter:
             self.progress_reporter.setNumSteps(
                 len(self._instrument.get_angles()) * (self._num_k * self._num_atoms + 1)
@@ -321,23 +286,21 @@ class SPowderSemiEmpiricalCalculator:
                 + (1 if (self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution) else 0)
             )
 
-        spectra_by_angle = []
+        sdata_by_angle = []
         for angle in self._instrument.get_angles():
             self._report_progress(msg=f"Calculating S for angle: {angle:} degrees", reporter=self.progress_reporter)
-            one_angle_spectra = self._calculate_s_powder_over_k(angle=angle)
-            one_angle_spectra.metadata["angle"] = f"{angle:.16f}"
-            spectra_by_angle.append(one_angle_spectra)
+            sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle))
+
+        # Complete set of scattering intensity data including Debye-Waller factors and autocorrelation orders
+        sdata_by_angle = SDataByAngle.from_sdata_series(sdata_by_angle, angles=self._instrument.get_angles())
 
         # Sum and broaden to single set of s_data with instrumental corrections
-        _iter_spectra_by_angle = iter(spectra_by_angle)
-        spectra = sum(_iter_spectra_by_angle, start=next(_iter_spectra_by_angle))
-        spectra = spectra.group_by("atom_index", "quantum_order")
+        s_data = sdata_by_angle.sum_over_angles(average=True)
+        broadening_scheme = abins.parameters.sampling["broadening_scheme"]
+        s_data = self._broaden_sdata(s_data, broadening_scheme=broadening_scheme)
+        return s_data
 
-        spectra = self._broaden_spectra(spectra, broadening_scheme=broadening_scheme)
-
-        return spectra
-
-    def _calculate_s_isotropic(self, q2: np.ndarray, broaden: bool = False) -> SpectrumCollection:
+    def _calculate_s_isotropic(self, q2: np.ndarray, broaden: bool = False) -> SData:
         """Calculate S(q,ω) components that use isotropic Debye-Waller term
 
         This is:
@@ -363,8 +326,6 @@ class SPowderSemiEmpiricalCalculator:
             Debye-Waller corrected scattering intensities at the calculated
             orders, for all atoms.
         """
-        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
-        from collections import defaultdict
 
         # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
         if self._quantum_order_num == 1 or self._use_autoconvolution:
@@ -372,104 +333,56 @@ class SPowderSemiEmpiricalCalculator:
         else:
             min_order = 2  # Skip fundamentals to be calculated separately
 
-        # Get numpy broadcasting right: we need to convert an array from (order,)
-        # to (order, energy) or (order, q, energy) format.
-        if self.is_2d:
-            order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
-        else:
-            order_expansion_slice = np.s_[:, np.newaxis]
-
-        # Collect S(w) at q = 1/Å without DW factors
-        bins = self._fine_bins if self._use_autoconvolution else self._bins
-        bin_centres = self._fine_bin_centres if self._use_autoconvolution else self._bin_centres
-        s_by_atom_and_order: SByAtomAndOrder = defaultdict(lambda: np.zeros_like(bin_centres, dtype=FLOAT_TYPE))
-
-        atoms_data = self._abins_data.get_atoms_data()
+        # Collect SData at q = 1/Å without DW factors
+        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num, shape="1d")
 
         if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._use_autoconvolution:
             for k_index in range(self._num_k):
-                s_by_atom_and_order = self._add_s_contributions(
-                    self._calculate_s_powder_over_atoms(
-                        k_index=k_index,
-                        q2=1.0,
-                        bins=bins,
-                        min_order=min_order,
-                    ),
-                    s_by_atom_and_order,
+                _ = self._calculate_s_powder_over_atoms(
+                    k_index=k_index,
+                    q2=1.0,
+                    bins=(self._fine_bins if self._use_autoconvolution else self._bins),
+                    sdata=sdata,
+                    min_order=min_order,
                 )
 
-            spectra = Spectrum1DCollection(
-                x_data=(bin_centres * self.freq_unit),
-                y_data=np.array([value for value in s_by_atom_and_order.values()]) * self.s_unit,
-                metadata={
-                    "scattering": "incoherent",
-                    "line_data": [
-                        {
-                            "atom_index": atom_index,
-                            "quantum_order": order,
-                            "symbol": atoms_data[atom_index]["symbol"],
-                            "mass": MASS_STR_FORMAT.format(atoms_data[atom_index]["mass"]),
-                        }
-                        for atom_index, order in s_by_atom_and_order.keys()
-                    ],
-                },
-            )
-        # Otherwise there is nothing to calculate, return suitable empty-ish data structure
-        elif self.is_2d:
-            return Spectrum2DCollection(
-                x_data=(self._q_bins * self.q_unit),
-                y_data=(bin_centres * self.freq_unit),
-                z_data=np.zeros((1, len(self._q_bin_centres), len(bin_centres))) * self.s_unit,
-                metadata={"quantum_order": 1},
-            )
+        # Get numpy broadcasting right: we need to convert an array from (order,)
+        # to (order, energy) or (order, q, energy) format.
+        if len(q2.shape) == 1:
+            order_expansion_slice = np.s_[:, np.newaxis]
+        elif len(q2.shape) == 2:
+            order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
         else:
-            return Spectrum1DCollection(
-                x_data=(bin_centres * self.freq_unit), y_data=np.zeros((1, len(bin_centres))) * self.s_unit, metadata={"quantum_order": 1}
-            )
+            raise IndexError("q2 should be 1-D or 2-D array")
 
         if self._use_autoconvolution:
             max_dw_order = self._autoconvolution_max
             self._report_progress(
-                f"Finished calculating S(q,ω) to order {self._quantum_order_num} by "
+                f"Finished calculating SData to order {self._quantum_order_num} by "
                 f"analytic powder-averaging. "
                 f"Adding autoconvolution data up to order {max_dw_order}.",
                 reporter=self.progress_reporter,
             )
-            spectra = add_autoconvolution_spectra(spectra, max_order=self._autoconvolution_max, output_bins=(self._bins * self.freq_unit))
-            # Tweak x-axis definition for compatibility with other objects
-            spectra.x_data = self._bin_centres * self.freq_unit
+
+            sdata.add_autoconvolution_spectra(max_order=self._autoconvolution_max)
+            sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
         else:
             # (order, q, energy)
             max_dw_order = self._quantum_order_num
 
-        # Compute appropriate q-dependence for each order, along with 1/(n!) term
+        # # Compute appropriate q-dependence for each order, along with 1/(n!) term
         factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
         q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[order_expansion_slice] / factorials
 
         if broaden:
             self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
             broadening_scheme = abins.parameters.sampling["broadening_scheme"]
-            spectra = self._broaden_spectra(spectra, broadening_scheme=broadening_scheme)
+            sdata = self._broaden_sdata(sdata, broadening_scheme=broadening_scheme)
 
         self._report_progress("Applying q^2n / n! q-dependence")
-        if self.is_2d:
-            # convert 1-D spectra sampled at q=1 to 2-D spectra by applying q-dependent factor
-            z_data = np.empty((spectra.y_data.shape[0], q2.shape[0], spectra.y_data.shape[1]), dtype=FLOAT_TYPE) * ureg(spectra.y_data_unit)
-            for i, (y_data_1d, metadata) in enumerate(zip(spectra.y_data, spectra.iter_metadata())):
-                z_data[i] = y_data_1d * q2_order_corrections[metadata["quantum_order"] - 1]
-
-            spectra = Spectrum2DCollection(
-                x_data=(self._q_bins * self.q_unit), y_data=spectra.x_data, z_data=z_data, metadata=spectra.metadata
-            )
-        else:
-            for i, metadata in enumerate(spectra.iter_metadata()):
-                spectra._y_data[i] *= q2_order_corrections[metadata["quantum_order"] - 1]
-
-        if isinstance(spectra, Spectrum1DCollection):
-            get_raw_s = attrgetter("_y_data")
-        else:
-            get_raw_s = attrgetter("_z_data")
+        sdata *= q2_order_corrections
+        sdata.set_q_bins(self._q_bins)
 
         if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._use_autoconvolution:
             self._report_progress(
@@ -477,16 +390,11 @@ class SPowderSemiEmpiricalCalculator:
             )
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
 
-            for i, metadata in enumerate(spectra.iter_metadata()):
-                if metadata["quantum_order"] < min_order:
-                    continue
+            sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
-                atom_index = metadata["atom_index"]
-                get_raw_s(spectra)[i] *= iso_dw[atom_index]
+        return sdata
 
-        return spectra
-
-    def _calculate_s_powder_over_k_and_q(self) -> Spectrum2DCollection:
+    def _calculate_s_powder_over_k_and_q(self):
         """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -496,28 +404,26 @@ class SPowderSemiEmpiricalCalculator:
         broadening is applied in 1D before q-dependence is applied. For fundamentals with
         mode-dependent Debye-Waller factor, broadening must be calculated for each q bin.
 
-        The resulting spectra have the shape (n_qpts, n_ebins)
+        In the resulting SData, spectra have the shape (n_qpts, n_ebins)
+
+        Returns:
+            SData
         """
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
-        isotropic_spectra = self._calculate_s_isotropic(q2, broaden=True)
+        sdata = self._calculate_s_isotropic(q2, broaden=True)
 
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor", reporter=self.progress_reporter)
 
-        fundamentals_spectra_with_dw = self._calculate_fundamentals_over_k(q2=q2)
-
+        fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
         self._report_progress("Broadening fundamentals", reporter=self.progress_reporter)
         broadening_scheme = abins.parameters.sampling["broadening_scheme"]
+        fundamentals_sdata_with_dw = self._broaden_sdata(fundamentals_sdata_with_dw, broadening_scheme=broadening_scheme)
 
-        fundamentals_spectra_with_dw = self._broaden_spectra(fundamentals_spectra_with_dw, broadening_scheme=broadening_scheme)
+        sdata.update(fundamentals_sdata_with_dw)
+        return sdata
 
-        if multiphonon_indices := [i for i, metadata in enumerate(isotropic_spectra.iter_metadata()) if metadata["quantum_order"] > 1]:
-            return isotropic_spectra[multiphonon_indices] + fundamentals_spectra_with_dw
-
-        else:
-            return fundamentals_spectra_with_dw
-
-    def _calculate_s_powder_over_k(self, *, angle: float) -> SpectrumCollection:
+    def _calculate_s_powder_over_k(self, *, angle: float) -> SData:
         """Calculate S for a given angle in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -525,22 +431,25 @@ class SPowderSemiEmpiricalCalculator:
 
         Args:
             angle: Scattering angle used to determine energy-q relationship
+
+        Returns:
+            SData
         """
+        # Initialize the main data container
+        sdata = self._get_empty_sdata(use_fine_bins=self._use_autoconvolution, max_order=self._quantum_order_num)
+        sdata.set_q_bins(self._q_bins)
+
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
 
-        spectra = self._calculate_s_isotropic(q2, broaden=False)
+        sdata = self._calculate_s_isotropic(q2, broaden=False)
 
         # Finally we (re)calculate the first-order spectrum with more accurate DW method
         if not self._isotropic_fundamentals:
-            fundamentals_spectra_with_dw = self._calculate_fundamentals_over_k(angle=angle)
-            isotropic_multiphonon_indices = [i for i, metadata in enumerate(spectra.iter_metadata()) if metadata["quantum_order"] > 1]
-            if isotropic_multiphonon_indices:
-                spectra = spectra[isotropic_multiphonon_indices] + fundamentals_spectra_with_dw
-            else:
-                spectra = fundamentals_spectra_with_dw
+            fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(angle=angle)
+            sdata.update(fundamentals_sdata_with_dw)
 
-        return spectra
+        return sdata
 
     def calculate_isotropic_dw(self, *, q2: np.ndarray) -> np.ndarray:
         """Compute Debye-Waller factor in isotropic approximation for current system
@@ -570,20 +479,41 @@ class SPowderSemiEmpiricalCalculator:
         """Compute Debye-Waller factor in isotropic approximation"""
         return np.exp(-q2 * a_trace / 3)
 
-    @staticmethod
-    def _apply_resolution(frequencies: np.ndarray, bins: np.ndarray, s_dft: np.ndarray, scheme: str, instrument: Instrument) -> np.ndarray:
-        """Apply instrument resolution function to a row of data
+    def _get_empty_sdata(self, use_fine_bins: bool = False, max_order: Optional[int] = None, shape=None) -> SData:
+        """
+        Initialise an appropriate SData object for this calculation
 
-        This is a pure function for use with multiprocessing Pool.map;
-        otherwise we have to pickle self and that fails when hitting the
-        logger.  (In principle the problem could also be avoided by
-        composition; a simpler class with the calculation state/parameters
-        could be stored.)
+        Args:
+            shape:
+                '1d', '2d', or None. If '1d', spectra are 1-D (corresponding to
+                energy). If '2d', spectra have rows corresponding to q bin
+                centres. If None, detect dimensions based on presence of
+                self._q_bin_centres.
 
         """
-        return instrument.convolve_with_resolution_function(frequencies=frequencies, bins=bins, s_dft=s_dft, scheme=scheme)[1]
+        bin_centres = self._fine_bin_centres if use_fine_bins else self._bin_centres
 
-    def _broaden_spectra(self, spectra: SpectrumCollection, broadening_scheme: str = "auto") -> SpectrumCollection:
+        if max_order is None:
+            max_order = self._quantum_order_num
+
+        if (shape and shape.lower() == "1d") or (shape is None and self._q_bin_centres is None):
+            n_rows = None
+            q_bins = None
+        else:
+            n_rows = len(self._q_bin_centres)
+            q_bins = self._q_bins
+
+        return SData.get_empty(
+            frequencies=bin_centres,
+            atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
+            order_keys=[f"order_{n}" for n in range(1, max_order + 1)],
+            n_rows=n_rows,
+            temperature=self._temperature,
+            sample_form=self._sample_form,
+            q_bins=q_bins,
+        )
+
+    def _broaden_sdata(self, sdata: SData, broadening_scheme: str = "auto") -> SData:
         """
         Apply instrumental broadening to scattering data
 
@@ -591,57 +521,33 @@ class SPowderSemiEmpiricalCalculator:
         (There is room for improvement, by reworking all the broadening
         implementations to accept 2-D input.)
         """
-        n_threads = abins.parameters.performance.get("threads")
-        chunksize = abins.parameters.performance.get("broadening_chunksize")
+        sdata_dict = sdata.extract()
+        frequencies = sdata_dict["frequencies"]
+        del sdata_dict["frequencies"]
+        if "q_bins" in sdata_dict:
+            del sdata_dict["q_bins"]
 
-        if isinstance(spectra, Spectrum1DCollection):
-            frequencies = spectra.x_data.to(self.freq_unit).magnitude
+        for atom_key in sdata_dict:
+            for order_key, s_dft in sdata_dict[atom_key]["s"].items():
+                if len(s_dft.shape) == 1:
+                    _, sdata_dict[atom_key]["s"][order_key] = self._instrument.convolve_with_resolution_function(
+                        frequencies=frequencies, bins=self._bins, s_dft=s_dft, scheme=broadening_scheme
+                    )
+                else:  # 2-D data, broaden one line at a time
+                    for q_i, s_dft_row in enumerate(sdata_dict[atom_key]["s"][order_key]):
+                        _, sdata_dict[atom_key]["s"][order_key][q_i] = self._instrument.convolve_with_resolution_function(
+                            frequencies=frequencies, bins=self._bins, s_dft=s_dft_row, scheme=broadening_scheme
+                        )
 
-            with Pool(n_threads) as p:
-                broadened_spectra = p.map(
-                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
-                    spectra._y_data,
-                    chunksize=chunksize,
-                )
-            broadened_spectra = list(broadened_spectra)
+        return SData(
+            data=sdata_dict,
+            frequencies=self._bin_centres,
+            temperature=sdata.get_temperature(),
+            sample_form=sdata.get_sample_form(),
+            q_bins=sdata.get_q_bins(),
+        )
 
-            return Spectrum1DCollection(
-                x_data=spectra.x_data,
-                y_data=(np.asarray(broadened_spectra, dtype=FLOAT_TYPE) * spectra.y_data.units),
-                metadata=spectra.metadata,
-            )
-
-        else:  # 2-D data, parallelize over columns
-            broadened_spectra = []
-
-            frequencies = spectra.get_bin_centres(bin_ax="y").to(self.freq_unit).magnitude
-
-            # For efficient parallel map() operation, we view the 3-D
-            # (contributions, q_rows, frequencies) as a 2-D (contributions*q_rows, frequencies)
-            # sequence of spectra, and reshape afterwards
-
-            # Perform resolution precomputations (if appropriate) before parallel map
-            self._instrument.prepare_resolution()
-
-            z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
-            s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
-
-            with Pool(n_threads) as p:
-                broadened_spectra = p.map(
-                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
-                    s_rows,
-                    chunksize=chunksize,
-                )
-                broadened_spectra = list(broadened_spectra)
-
-            return Spectrum2DCollection(
-                x_data=spectra.x_data,
-                y_data=spectra.y_data,
-                z_data=ureg.Quantity(np.asarray(broadened_spectra).reshape(z_data_magnitude.shape), self.s_unit),
-                metadata=spectra.metadata,
-            )
-
-    def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SpectrumCollection:
+    def _calculate_fundamentals_over_k(self, angle: float = None, q2: np.ndarray = None) -> SData:
         """
         Calculate order-1 incoherent S with mode-dependent DW correction
 
@@ -662,25 +568,15 @@ class SPowderSemiEmpiricalCalculator:
                 energies, column vector adds q-sampling dimension).
 
         returns:
-            SpectrumCollection for fundamentals including mode-dependent Debye-Waller factor
+            SData for fundamentals including mode-dependent Debye-Waller factor
 
         """
-        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
-
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor.", reporter=self.progress_reporter)
 
         if (angle is None) == (q2 is None):  # XNOR
             raise ValueError("Exactly one should be set: angle or q2")
 
-        atoms_data = self._abins_data.get_atoms_data()
-
-        if angle is not None:
-            s_array = np.zeros((len(atoms_data), len(self._bin_centres)))
-        elif len(q2.shape) == 2:
-            n_q, _ = q2.shape
-            s_array = np.zeros((len(atoms_data), n_q, len(self._bin_centres)), dtype=FLOAT_TYPE)
-        else:
-            raise Exception("Expected a scattering angle or 2-D q array")
+        fundamentals_sdata_with_dw = self._get_empty_sdata(use_fine_bins=False, max_order=1)
 
         for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data()):
             frequencies = self._powder_data.get_frequencies()[k_index]
@@ -721,41 +617,11 @@ class SPowderSemiEmpiricalCalculator:
                 if len(rebinned_s_with_dw) == 1:
                     rebinned_s_with_dw = rebinned_s_with_dw[0]
 
-                s_array[atom_index] += rebinned_s_with_dw
+                fundamentals_sdata_with_dw.add_dict({atom_label: {"s": {"order_1": rebinned_s_with_dw}}})
 
-        atoms_data = self._abins_data.get_atoms_data()
-        metadata = {
-            "scattering": "incoherent",
-            "quantum_order": 1,
-            "line_data": [
-                {"atom_index": atom_index, "symbol": atom_data["symbol"], "mass": MASS_STR_FORMAT.format(atom_data["mass"])}
-                for atom_index, atom_data in enumerate(atoms_data)
-            ],
-        }
+        return fundamentals_sdata_with_dw
 
-        match q2.shape:
-            case (n_q, 1):
-                return Spectrum2DCollection(
-                    x_data=(self._q_bins * self.q_unit),
-                    y_data=(self._bin_centres * self.freq_unit),
-                    z_data=(s_array * self.s_unit),
-                    metadata=metadata,
-                )
-
-            case (n_q,):
-                return Spectrum1DCollection(x_data=(self._bin_centres * self.freq_unit), y_data=(s_array * self.s_unit), metadata=metadata)
-            case _:
-                raise ValueError("Unexpected shape of q2 array")
-
-    @staticmethod
-    def _add_s_contributions(a: SByAtomAndOrder, b: SByAtomAndOrder) -> SByAtomAndOrder:
-        """Combine contributions to S(atom, order) from different calculations
-
-        a and b are assumed to have the same set of keys: this is not checked
-        """
-        return {key: a[key] + b[key] for key in a}
-
-    def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, bins: np.ndarray, min_order: int = 1) -> SByAtomAndOrder:
+    def _calculate_s_powder_over_atoms(self, *, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1) -> None:
         """
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
 
@@ -765,32 +631,29 @@ class SPowderSemiEmpiricalCalculator:
 
         :param k_index: Index of k-point from calculated phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :param bins: Frequency bins
+        :param sdata: Data container to which results will be summed in-place
+        :param bins: Frequency bins consistent with sdata
         :param min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
         assert min_order in (1, 2)  # Cannot start higher than 2; need information about combinations
 
-        results: SByAtomAndOrder = {}
-
         for atom_index in range(self._num_atoms):
             self._report_progress(msg=f"Calculating S for atom {atom_index}, k-point {k_index}", reporter=self.progress_reporter)
-            results.update(self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, q2=q2, bins=bins, min_order=min_order))
-
-        return results
+            self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, q2=q2, sdata=sdata, bins=bins, min_order=min_order)
 
     def _calculate_s_powder_one_atom(
-        self, *, atom_index: int, k_index: int, q2: np.ndarray, bins: np.ndarray, min_order: int = 1
-    ) -> SByAtomAndOrder:
+        self, *, atom_index: int, k_index: int, q2: np.ndarray, sdata: SData, bins: np.ndarray, min_order: int = 1
+    ) -> None:
         """
         :param atom_index: number of atom
         :param k_index: Index of k-point in phonon data
         :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
-        :bins: Frequency bins
+        :sdata: Data container to which results will be summed in-place
+        :bins: Frequency bins consistent with sdata
         :min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
 
         """
-        results: SByAtomAndOrder = {}
         kpoint_weight = self._abins_data.get_kpoints_data()[k_index].weight
 
         fundamentals = self._powder_data.get_frequencies()[k_index]
@@ -821,13 +684,10 @@ class SPowderSemiEmpiricalCalculator:
                 q2=q2, frequencies=frequencies, indices=coefficients, a_tensor=a_tensor, a_trace=a_trace, b_tensor=b_tensor, b_trace=b_trace
             )
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
-
-            results[(atom_index, order)] = rebinned_spectrum
+            sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
 
             # Prune modes with low intensity; these are assumed not to contribute to higher orders
             frequencies, coefficients = self._calculate_s_over_threshold(scattering_intensities, freq=frequencies, coeff=coefficients)
-
-        return results
 
     @staticmethod
     def _calculate_s_over_threshold(s=None, freq=None, coeff=None):
