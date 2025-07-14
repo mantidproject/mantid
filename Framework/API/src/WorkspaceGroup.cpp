@@ -461,7 +461,7 @@ bool WorkspaceGroup::isMultiperiod() const {
   for (const auto &workspace : m_workspaces) {
     if (MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       try {
-        Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
+        const Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
         int num = -1;
         Kernel::Strings::convert(nPeriodsProp->value(), num);
         if (num < 1) {
