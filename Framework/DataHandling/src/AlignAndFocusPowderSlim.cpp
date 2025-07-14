@@ -383,9 +383,8 @@ public:
         // H5Cpp will truncate correctly
         // H5Util resizes the vector
         const size_t offset = event_index_start;
-        const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
-                                    ? std::numeric_limits<size_t>::max()
-                                    : m_events_per_chunk;
+        const size_t slabsize =
+            std::min(m_events_per_chunk, static_cast<size_t>(eventRangeFull.second) - event_index_start);
 
         // load detid and tof at the same time
         tbb::parallel_invoke(
