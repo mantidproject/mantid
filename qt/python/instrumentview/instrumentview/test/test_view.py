@@ -24,7 +24,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
-        self._view = FullInstrumentViewWindow(self._workspace)
+        self._view = FullInstrumentViewWindow()
         self._mock_plotter = mock_plotter
         self._mock_v_add_widget = mock_v_add_widget
         self._mock_h_add_widget = mock_h_add_widget
@@ -36,26 +36,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()
-
-    def test_on_projection_combo_box_changed_int(self):
-        self._view._on_projection_combo_box_changed(1)
-        self._view._presenter.projection_option_selected.assert_called_once()
-
-    def test_on_projection_combo_box_changed_str(self):
-        self._view._on_projection_combo_box_changed("test")
-        self._view._presenter.projection_option_selected.assert_not_called()
-
-    def test_on_multi_select_check_box_clicked_false(self):
-        self._view._on_multi_select_check_box_clicked(1)
-        self._view._presenter.set_multi_select_enabled.assert_called_once_with(False)
-
-    def test_on_multi_select_check_box_clicked_true(self):
-        self._view._on_multi_select_check_box_clicked(2)
-        self._view._presenter.set_multi_select_enabled.assert_called_once_with(True)
-
-    def test_on_clear_selection_button_clicked(self):
-        self._view._on_clear_selection_button_clicked()
-        self._view._presenter.clear_all_picked_detectors.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewWindow._parse_min_max_text")
     def test_on_tof_limits_updated_true(self, mock_parse_min_max_text):

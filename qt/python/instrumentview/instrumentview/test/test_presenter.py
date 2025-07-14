@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
@@ -15,11 +16,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def setUp(self):
         self._mock_view = MagicMock()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter")
-        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._ws)
+        self._model = FullInstrumentViewModel(self._ws)
+        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
         self._mock_view.reset_mock()
 
     def tearDown(self):
         self._ws.delete()
+        pass
 
     def test_projection_combo_options(self):
         projections = self._presenter.projection_combo_options()
