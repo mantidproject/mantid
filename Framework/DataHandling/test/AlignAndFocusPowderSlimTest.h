@@ -235,6 +235,41 @@ public:
     }
   }
 
+  void test_start_stop_time_filtering() {
+    AlignAndFocusPowderSlim alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "VULCAN_218062.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", 200.));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStop", 300.));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningUnits", "TOF"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningMode", "Linear"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", std::vector<double>{0.}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", std::vector<double>{50000.}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", std::vector<double>{50000.}));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStart=200, FilterByTimeStop=300, NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 3742475);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 3735653);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 4295302);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4244796);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1435593);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2734113);
+  }
+
   // ==================================
   // TODO things below this point are for benchmarking and will be removed later
   // ==================================
