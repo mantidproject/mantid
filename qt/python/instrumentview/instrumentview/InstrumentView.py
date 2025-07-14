@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from mantid.simpleapi import Load
 from pathlib import Path
 from qtpy.QtWidgets import QApplication
@@ -23,7 +25,9 @@ class InstrumentView:
         """Load the given file, then open the Instrument View in a separate window with that workspace displayed"""
         app = QApplication(sys.argv)
         ws = Load(str(file_path), StoreInADS=False)
-        window = FullInstrumentViewWindow(ws)
+        model = FullInstrumentViewModel(ws)
+        window = FullInstrumentViewWindow()
+        FullInstrumentViewPresenter(window, model)
         current_dir = os.path.dirname(__file__)
         app.setWindowIcon(QIcon(f"{current_dir}/mantidplot.png"))
         window.show()
