@@ -167,7 +167,7 @@ libopenblas:
 # which does not require future https://github.com/conda-forge/seekpath-feedstock/pull/15/
 # please remove this comment and the pins in those recipes when euphonic and seekpath release new versions
 euphonic:
-  - '>=1.4.3,<2.0'
+  - '>=1.2.1,<2.0'
 
 librdkafka:
   - '>=1.6.0'
