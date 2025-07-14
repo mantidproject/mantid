@@ -41,7 +41,8 @@
       "hidden": true,
       "cacheVariables": {
         "CMAKE_FIND_FRAMEWORK": "LAST",
-        "USE_PYTHON_DYNAMIC_LIB": "OFF"
+        "USE_PYTHON_DYNAMIC_LIB": "OFF",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "0"
       }
     },
     {
