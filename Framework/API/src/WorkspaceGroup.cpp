@@ -101,12 +101,18 @@ void WorkspaceGroup::sortMembersByName() {
  */
 void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) {
   if (indices.size() != this->size()) {
-    g_log.warning("Number of indicies must match the number of workspace members\n");
+    g_log.warning("Number of indices must match the number of workspace members\n");
     return;
   }
 
   if (!std::all_of(indices.cbegin(), indices.cend(), [&](int i) { return i >= 0 && i < m_workspaces.size(); })) {
-    g_log.warning("All indicies must be >= 0 and < the number of workspaces in the group\n");
+    g_log.warning("All indices must be >= 0 and < the number of workspaces in the group\n");
+    return;
+  }
+
+  // check all elements are unique by adding to a set and checking size
+  if (std::unordered_set<int>(indices.cbegin(), indices.cend()).size() != indices.size()) {
+    g_log.warning("All indices must be unique\n");
     return;
   }
 
