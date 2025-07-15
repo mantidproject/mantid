@@ -26,5 +26,6 @@ cmake \
   -GNinja \
   ../
 
-ninja
+ninja all AllTests
+ctest -j 12 -R KernelTest
 ninja install
