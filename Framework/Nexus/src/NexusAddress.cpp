@@ -38,21 +38,21 @@ NexusAddress::NexusAddress() : m_path(nxroot), m_resolved_path(m_path.generic_st
 
 NexusAddress &NexusAddress::operator=(std::string const &s) {
   m_path = cleanup(s);
-  m_resolved_path = m_path.generic_string();
+  m_resolved_path = std::string(m_path.generic_string());
   return *this;
 }
 
 bool NexusAddress::operator==(NexusAddress const &p) const { return m_path == p.m_path; }
 
-bool NexusAddress::operator==(std::string const &s) const { return m_path.string() == s; }
+bool NexusAddress::operator==(std::string const &s) const { return m_resolved_path == s; }
 
-bool NexusAddress::operator==(char const *const s) const { return m_path.string() == std::string(s); }
+bool NexusAddress::operator==(char const *const s) const { return m_resolved_path == std::string(s); }
 
 bool NexusAddress::operator!=(NexusAddress const &p) const { return m_path != p.m_path; }
 
-bool NexusAddress::operator!=(std::string const &s) const { return m_path.string() != s; }
+bool NexusAddress::operator!=(std::string const &s) const { return m_resolved_path != s; }
 
-bool NexusAddress::operator!=(char const *const s) const { return m_path.string() != std::string(s); }
+bool NexusAddress::operator!=(char const *const s) const { return m_resolved_path != std::string(s); }
 
 NexusAddress NexusAddress::operator/(std::string const &s) const { return NexusAddress(m_path / s); }
 
@@ -99,13 +99,13 @@ std::vector<std::string> NexusAddress::parts() const {
 }
 } // namespace Mantid::Nexus
 
-bool operator==(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s == std::string(p); }
+bool operator==(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s == p.string(); }
 
-bool operator!=(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s != std::string(p); }
+bool operator!=(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s != p.string(); }
 
-std::string operator+(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s + std::string(p); }
+std::string operator+(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s + p.string(); }
 
 std::ostream &operator<<(std::ostream &os, Mantid::Nexus::NexusAddress const &p) {
-  os << std::string(p);
+  os << p.string();
   return os;
 }

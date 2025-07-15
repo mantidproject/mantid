@@ -86,9 +86,9 @@ public:
 
   std::string operator+(std::string const &s) const;
 
-  operator std::string() const { return m_path.generic_string(); }
+  operator std::string() const { return m_resolved_path; }
 
-  std::string string() const { return m_path.generic_string(); }
+  std::string string() const { return m_resolved_path; }
 
   char const *c_str() const { return m_resolved_path.c_str(); }
 
