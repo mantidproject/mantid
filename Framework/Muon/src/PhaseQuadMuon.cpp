@@ -239,7 +239,7 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
   }
   std::vector<bool> emptySpectrum;
   emptySpectrum.reserve(nspec);
-  std::vector<Eigen::Vector2d> n0Vectors(nspec);
+  std::vector<Eigen::Vector<long double, 2>> n0Vectors(nspec);
 
   // Calculate coefficients aj, bj
 
@@ -255,22 +255,21 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
       const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
-      Eigen::Vector2d n0vec;
-      n0vec << X, Y;
-      n0Vectors[h] = n0vec;
+      Eigen::Vector<long double, 2> n0vec;
+      n0Vectors[h] = {X, Y};
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
     } else {
-      n0Vectors[h] = Eigen::Vector2d::Zero();
+      n0Vectors[h] = Eigen::Vector<long double, 2>::Zero();
     }
   }
 
-  std::array<double, 4> muLamVec{sxx, sxy, sxy, syy};
-  Eigen::Map<Eigen::MatrixXd, 0, Eigen::Stride<2, 1>> muLamMatrix(muLamVec.data(), 2, 2);
-  muLamMatrix = muLamMatrix.inverse();
+  Eigen::Matrix<long double, 2, 2> muLamMatrix;
+  muLamMatrix << sxx, sxy, sxy, syy;
+  muLamMatrix = Eigen::PartialPivLU<Eigen::Matrix<long double, 2, 2>>(muLamMatrix).inverse();
 
-  std::vector<double> aj(nspec), bj(nspec);
+  std::vector<long double> aj(nspec), bj(nspec);
   for (size_t h = 0; h < nspec; h++) {
     aj[h] = bj[h] = 0;
     if (!emptySpectrum[h]) {
