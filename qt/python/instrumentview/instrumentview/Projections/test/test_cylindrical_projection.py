@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest.mock
-from instrumentview.Projections.cylindrical_projection import cylindrical_projection
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 import unittest
 import numpy as np
 
@@ -52,7 +52,7 @@ class TestCylindricalProjection(unittest.TestCase):
         )
 
     def _run_test(self, projection_axis, expected_x_axis, expected_y_axis, expected_projections, mock_apply_x_correction=None):
-        cylinder = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
+        cylinder = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
         np.testing.assert_allclose(cylinder._projection_axis, projection_axis, atol=self.abs_tol)
         np.testing.assert_allclose(cylinder._x_axis, expected_x_axis, atol=self.abs_tol)
         np.testing.assert_allclose(cylinder._y_axis, expected_y_axis, atol=self.abs_tol)

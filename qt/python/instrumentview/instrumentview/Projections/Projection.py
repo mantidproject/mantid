@@ -9,7 +9,7 @@ import numpy as np
 from instrumentview.Detectors import DetectorPosition
 
 
-class projection(ABC):
+class Projection(ABC):
     """Base class for calculating a 2D projection with a specified axis"""
 
     def __init__(
