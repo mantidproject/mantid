@@ -118,7 +118,6 @@ class FullInstrumentViewModel:
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
-        # TODO: Sort out this ugliness
         picked_ws_indices = self._workspace_indices[self._is_valid][self._detector_is_picked]
         picked_ids = self._detector_ids[self._is_valid][self._detector_is_picked]
         picked_xyz_positions = self._detector_positions[self._is_valid][self._detector_is_picked]
